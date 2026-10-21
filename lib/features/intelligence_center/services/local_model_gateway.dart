@@ -1,7 +1,10 @@
 import '../domain/coach_context_snapshot.dart';
+import 'coach_cloud_request.dart';
 import 'local_model_gateway_stub.dart'
     if (dart.library.io) 'local_model_gateway_io.dart'
     as implementation;
+
+export 'coach_cloud_request.dart';
 
 enum CoachServiceStatus {
   ready,
@@ -104,6 +107,18 @@ abstract interface class LocalModelGateway {
     List<CoachConversationTurn> conversation = const [],
   });
 }
+
+/// Optional capability: existing on-device/test gateways keep their contract.
+abstract interface class RequestScopedLocalModelGateway {
+  LocalModelGateway forCloudRequest(CoachCloudRequest request);
+}
+
+LocalModelGateway bindCoachCloudRequest(
+  LocalModelGateway gateway,
+  CoachCloudRequest request,
+) => gateway is RequestScopedLocalModelGateway
+    ? (gateway as RequestScopedLocalModelGateway).forCloudRequest(request)
+    : gateway;
 
 LocalModelGateway createLocalModelGateway() =>
     implementation.createLocalModelGateway();

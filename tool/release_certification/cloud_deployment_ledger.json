@@ -238,7 +238,8 @@
     "20261019073511_community_circle_owner_deletion_cleanup_v1.sql": "f8c0c8b5d626d3883e17e5f9a93d873584309dfb6a5749bf62976fc37c2c81e0",
     "20261019075549_community_circle_storage_preflight_contract_v1.sql": "ff1d50c6facbe2151a3a10e336d1ac343e2da097e01533e26cc79d94f8abc70f",
     "20261019075856_community_circle_multipart_preflight_contract_v1.sql": "c91a97ac4d9a90c5c4a8e39d453fa6f7532862e1ae42c27491cf8fd7c73c5205",
-    "20261019083913_community_profile_consent_guard_20261019.sql": "8787b6ce99ecadebc4e94bada2fb3bdde7ff765d1af55c310f499cbf5cdb8ec0"
+    "20261019083913_community_profile_consent_guard_20261019.sql": "8787b6ce99ecadebc4e94bada2fb3bdde7ff765d1af55c310f499cbf5cdb8ec0",
+    "20261020210400_community_circle_visibility_legacy_projection_guard_v1.sql": "10927e0267e5f90a6c7fa3150a87efd993313badac30d966ff5d6561d1beaad8"
   },
   "deployed_ledger": [
     {
@@ -1480,6 +1481,11 @@
       "version": "20261019083913",
       "name": "community_profile_consent_guard_20261019",
       "statements_md5": "175f6c1cfd7c38e6a5752d7eb5531faa"
+    },
+    {
+      "version": "20261020210400",
+      "name": "community_circle_visibility_legacy_projection_guard_v1",
+      "statements_md5": "a8ffe522b3a691787b13958023895637"
     }
   ],
   "verified_bugfix_migration": {
@@ -1500,5 +1506,12 @@
     ],
     "source_match": "LF normalized body comparison; six app and two independent admin migrations",
     "evidence_scope": "DDL and ledger only; historical source IDs above remain historical, not current uncommitted candidate certification"
+  },
+  "last_reviewed_change": {
+    "migration_version": "20261020210400",
+    "name": "community_circle_visibility_legacy_projection_guard_v1",
+    "readback": "Three function definitions differ only by the reviewed visibility predicate; unchanged RPC ACL/owner/signature and unchanged private helper.",
+    "local_evidence": "18 isolated SQL tests and 7 privacy steps PASS; hosted readonly nonexistent-owner denial and private-helper direct-access denial PASS.",
+    "verified_utc": "2026-10-20T21:05:14.869662+00:00"
   }
 }

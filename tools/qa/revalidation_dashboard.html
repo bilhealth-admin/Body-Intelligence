@@ -1,0 +1,22 @@
+<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>جولة التحقق الحالية — BIL</title>
+<style>body{font:17px Segoe UI,Tahoma,sans-serif;color:#172a3a;background:#edf3f9;margin:0;padding:20px;max-width:1100px;margin-inline:auto}section{background:white;padding:18px;border-radius:16px;margin:12px 0}pre{white-space:pre-wrap;overflow-wrap:anywhere;direction:ltr;text-align:left}a{color:#1769d2}.bad{color:#b42234}</style>
+<h1>جولة التحقق الحالية</h1><p id="stamp">تحميل الحالة…</p>
+<section><strong id="phase"></strong><p id="counts"></p><p id="source"></p><a href="original-full-dashboard/">تفاصيل الشاملة الأصلية عند بدئها</a></section>
+<section><h2>المراحل</h2><div id="stages"></div></section>
+<section><h2>GitHub</h2><div id="github"></div></section>
+<section><h2>أدلة خارج الاختبارات الآلية</h2><pre id="manual"></pre></section>
+<p>هذه الجولة مرتبطة ببصمة المصدر. نجاح الاختبارات لا يعني توقيع نسخة أو إرسالها للمتجر.</p>
+<script>
+async function refresh(){try{const s=await(await fetch('state',{cache:'no-store'})).json(), c=s.counts||{};
+document.getElementById('stamp').textContent=`الجولة ${s.label} · ${s.updated_utc}`;
+document.getElementById('phase').textContent=s.phase;
+document.getElementById('counts').textContent=`المكتملة في المرحلة: ${s.tests_completed||0} · نجاح ${c.success||0} · فشل ${c.failure||0} · أخطاء ${c.error||0} · متخطاة ${c.skip||0}`;
+document.getElementById('source').textContent=`المصدر ${s.published_head||s.expected_head} · البصمة ${s.source_fingerprint}`;
+document.getElementById('stages').replaceChildren(...s.stages.map(v=>{const p=document.createElement('p');p.textContent=`${v.name}: ${v.accepted?'PASS':'FAIL'} · exit ${v.exit_code}`;return p}));
+document.getElementById('manual').textContent=JSON.stringify(s.manual_physical,null,2);
+const g=await(await fetch('github-state',{cache:'no-store'})).json();document.getElementById('github').replaceChildren(...g.runs.map(v=>{const p=document.createElement('p');p.textContent=`${v.lane.workflow||v.lane.workflow_id}: ${v.status} ${v.conclusion||''} `;if(v.url){const a=document.createElement('a');a.href=v.url;a.textContent='فتح النتيجة';p.append(a)}return p}));
+}catch(e){document.getElementById('stamp').textContent='تعذر تحديث العرض؛ لا يُستنتج توقف الاختبارات من ذلك.'}}
+refresh();setInterval(refresh,5000);
+</script></html>

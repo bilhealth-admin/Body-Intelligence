@@ -138,69 +138,82 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
     if (_saving) return;
     if (granted && !current.canEnable) return;
     if (!granted && !current.canDisable) return;
+    final ownerId = current.ownerId;
+    if (ownerId == null) return;
 
-    if (granted) {
-      final confirmed =
-          await showDialog<bool>(
-            context: context,
-            builder: (dialogContext) => BilPearlMaterialAlertDialog(
-              title: Text(
-                dialogContext.strings.text(CloudSyncConsentCopy.title),
-              ),
-              content: const SingleChildScrollView(
-                child: CloudSyncConsentSummary(showDeletionControl: true),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: Text(
-                    dialogContext.strings.text(
-                      CloudSyncConsentCopy.localAction,
-                    ),
-                  ),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(true),
-                  child: Text(
-                    dialogContext.strings.text(
-                      CloudSyncConsentCopy.primaryAction,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ) ??
-          false;
-      if (!confirmed || !mounted) return;
-    }
-
-    setState(() => _saving = true);
     try {
-      await ref.read(cloudSyncConsentRepositoryProvider).setGranted(granted);
-      ref.invalidate(cloudSyncConsentStateProvider);
-      ref.invalidate(cloudRuntimePreparationProvider);
-      await ref.read(cloudSyncConsentStateProvider.future);
-      CloudManualSyncResult? syncResult;
-      if (granted) {
-        syncResult = await ref
-            .read(cloudManualSyncStatusProvider.notifier)
-            .runOnce();
-      }
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            !granted
-                ? _privacyText(context, 'Cloud sync preference updated.')
-                : cloudManualSyncOutcomeText(
-                    context,
-                    syncResult ??
-                        const CloudManualSyncResult(
-                          disposition: CloudManualSyncDisposition.unavailable,
+      final repository = ref.read(cloudSyncConsentRepositoryProvider);
+      await repository.runForOwner(
+        ownerId: ownerId,
+        isCurrentOwner: () => mounted,
+        action: (operation) async {
+          if (granted) {
+            final confirmed =
+                await showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => BilPearlMaterialAlertDialog(
+                    title: Text(
+                      dialogContext.strings.text(CloudSyncConsentCopy.title),
+                    ),
+                    content: const SingleChildScrollView(
+                      child: CloudSyncConsentSummary(showDeletionControl: true),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: Text(
+                          dialogContext.strings.text(
+                            CloudSyncConsentCopy.localAction,
+                          ),
                         ),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: Text(
+                          dialogContext.strings.text(
+                            CloudSyncConsentCopy.primaryAction,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-          ),
-        ),
+                ) ??
+                false;
+            operation.check();
+            if (!confirmed) return;
+          }
+          setState(() => _saving = true);
+          await repository.setGranted(granted);
+          operation.check();
+          ref.invalidate(cloudSyncConsentStateProvider);
+          ref.invalidate(cloudRuntimePreparationProvider);
+          await ref.read(cloudSyncConsentStateProvider.future);
+          operation.check();
+          CloudManualSyncResult? syncResult;
+          if (granted) {
+            syncResult = await ref
+                .read(cloudManualSyncStatusProvider.notifier)
+                .runOnce();
+          }
+          operation.check();
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                !granted
+                    ? _privacyText(context, 'Cloud sync preference updated.')
+                    : cloudManualSyncOutcomeText(
+                        context,
+                        syncResult ??
+                            const CloudManualSyncResult(
+                              disposition:
+                                  CloudManualSyncDisposition.unavailable,
+                            ),
+                      ),
+              ),
+            ),
+          );
+        },
       );
     } on Object {
       if (!mounted) return;

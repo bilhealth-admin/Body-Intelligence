@@ -52,6 +52,9 @@ if report.get('success', report.get('translated')) is not True:
 for key in ('cleanup', 'user_deleted', 'session_revoked', 'cascade_clean'):
     if key in report and report[key] is not True:
         raise SystemExit('Disposable fixture cleanup failed: ' + key)
+for key, value in report.items():
+    if key.startswith('cleanup_') and value is not True:
+        raise SystemExit('Disposable fixture cleanup failed: ' + key)
 PY
   fi
   return "$result"
@@ -61,6 +64,7 @@ run_pinned_ps1 tool/ai_coach/run_live_text_e2e.ps1 -ProjectRef "$BIL_SUPABASE_PR
 run_pinned_ps1 tool/ai_coach/run_live_voice_metering_db.ps1 -ProjectRef "$BIL_SUPABASE_PROJECT_REF" 2>&1 | tee "$OUT/ai-voice-metering.log"
 run_pinned_ps1 tool/meal_vision_benchmark/run_live_supabase_e2e.ps1 -ProjectRef "$BIL_SUPABASE_PROJECT_REF" 2>&1 | tee "$OUT/meal-vision.log"
 run_pinned_ps1 tool/nutrition/run_live_barcode_gate_e2e.ps1 -ProjectRef "$BIL_SUPABASE_PROJECT_REF" 2>&1 | tee "$OUT/barcode.log"
+run_pinned_ps1 tool/nutrition/run_live_barcode_resolved_fixture_e2e.ps1 -ProjectRef "$BIL_SUPABASE_PROJECT_REF" 2>&1 | tee "$OUT/barcode-resolved-fixture.log"
 run_pinned_ps1 tool/account_deletion/run_live_disposable_e2e.ps1 -ProjectRef "$BIL_SUPABASE_PROJECT_REF" -OwnerEmail "release-certification@bilhealth.invalid" 2>&1 | tee "$OUT/account-deletion.log"
 
 run_pinned_ps1 tool/community_translation/run_live_synthetic_e2e.ps1 2>&1 | tee "$OUT/community-translation.log"

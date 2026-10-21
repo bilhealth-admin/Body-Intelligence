@@ -86,3 +86,197 @@ jobs:
           if-no-files-found: error
           compression-level: 1
           retention-days: 30
+
+  supplemental-source-audits:
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    name: Supplemental source and dependency audits
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    services:
+      attention_postgres:
+        image: postgres:17.11@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3
+        env:
+          POSTGRES_PASSWORD: isolated-fixture-only
+          POSTGRES_DB: community_qa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d community_qa"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PYTHONUTF8: '1'
+      CLOUDFLARE_SEND_METRICS: 'false'
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check out exact source for supplemental audits
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Initialize actual source evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/qa/bil_release_supplemental_receipt.py \
+            --initialize --source-sha "$GITHUB_SHA" --output "$RUNNER_TEMP/bil-supplemental-source"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11.15'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Record toolchains and require the existing isolated runner tools
+        id: toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          for secret_name in SUPABASE_ACCESS_TOKEN SUPABASE_SERVICE_ROLE_KEY GOOGLE_GENERATIVE_AI_API_KEY CLOUDFLARE_API_TOKEN APP_STORE_CONNECT_PRIVATE_KEY_BASE64 GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64; do
+            test -z "${!secret_name:-}"
+          done
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -n "${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          command -v pwsh >/dev/null
+          command -v psql >/dev/null
+          {
+            python3 --version
+            node --version
+            npm --version
+            java -version 2>&1
+            flutter --version
+            pwsh -NoProfile -Command '$PSVersionTable.PSVersion.ToString()'
+          } > "$RUNNER_TEMP/bil-supplemental-source/toolchain.txt"
+      - name: Resolve the frozen Dart package graph without tests or builds
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get --enforce-lockfile 2>&1 | tee "$RUNNER_TEMP/bil-supplemental-source/resolve.log"
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Execute non-Dart audit and QA runner self-tests
+        id: python_checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-supplemental-source"
+          python3 -m unittest discover -s tool/prebuild -p 'test_*.py' -v 2>&1 | tee "$OUT/python-prebuild.log"
+          python3 -m unittest discover -s tools/qa -p 'test_*.py' -v 2>&1 | tee "$OUT/python-qa.log"
+          python3 -m unittest discover -s tool/release_certification -p 'test_*.py' -v 2>&1 | tee "$OUT/python-certification.log"
+      - name: Run remaining source audits without repeating Flutter suites
+        id: source_audits
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-supplemental-source"
+          dart run tool/epic11_localization_audit.dart 2>&1 | tee "$OUT/epic11.log"
+          dart run tool/epic12_security_audit.dart 2>&1 | tee "$OUT/epic12.log"
+          dart run tool/epic13_commerce_audit.dart 2>&1 | tee "$OUT/epic13.log"
+          dart run tool/epic14_release_audit.dart 2>&1 | tee "$OUT/epic14.log"
+          dart run tool/epic16_release_audit.dart 2>&1 | tee "$OUT/epic16.log"
+          python3 tool/prebuild/audit_repository.py 2>&1 | tee "$OUT/repository-audit.log"
+          cp build/diagnostics/prebuild_code_audit_20260910/repository_inventory.json "$OUT/repository_inventory.json"
+      - name: Verify advisory parsers and public site/admin workers with isolated fixtures
+        id: node_checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tool/prebuild/dependency_advisories.test.mjs \
+            tool/release/bilhealth_site_worker.test.mjs \
+            cloudflare/admin_site/tests/*.test.mjs \
+            tool/admin_web/ops_v1/ops_server.test.mjs \
+            tool/admin_web/review_v1/*.test.mjs \
+            tool/admin_web/backend_v4/audit_context_v2.test.mjs \
+            2>&1 | tee "$RUNNER_TEMP/bil-supplemental-source/node-source-tests.log"
+      - name: Verify community attention SQL on a fresh native PostgreSQL fixture
+        id: native_attention_sql
+        shell: bash
+        env:
+          PGPASSWORD: isolated-fixture-only
+        run: |
+          set -euo pipefail
+          psql -h 127.0.0.1 -U postgres -d community_qa -X -v ON_ERROR_STOP=1 \
+            -f tool/release/test_community_attention_isolated.sql \
+            2>&1 | tee "$RUNNER_TEMP/bil-supplemental-source/community-attention-native-postgres.log"
+      - name: Verify locked Cloudflare runtime types, tests and dependency audit
+        id: cloudflare
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-supplemental-source"
+          npm ci --prefix cloudflare/workout-runtime --ignore-scripts --no-audit --no-fund 2>&1 | tee "$OUT/cloudflare-install.log"
+          npm --prefix cloudflare/workout-runtime run check 2>&1 | tee "$OUT/cloudflare-check.log"
+          npm --prefix cloudflare/workout-runtime test 2>&1 | tee "$OUT/cloudflare-tests.log"
+          npm --prefix cloudflare/workout-runtime audit --audit-level=low --json > "$OUT/cloudflare-npm-audit.json"
+      - name: Query public Pub and Deno npm coordinates against OSV
+        id: pub_advisories
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-supplemental-source"
+          dart pub deps --json > "$OUT/pub-deps.json"
+          node tool/prebuild/audit_pub_advisories.mjs "$OUT/pub-deps.json" | tee "$OUT/pub-osv.json"
+          node tool/prebuild/audit_locked_advisories.mjs npm supabase/functions/deno.lock | tee "$OUT/deno-npm-osv.json"
+      - name: Resolve Android release dependencies for Maven OSV without building an app
+        id: maven_advisories
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-supplemental-source"
+          GRADLE_BOOTSTRAP="$RUNNER_TEMP/bil-supplemental-gradle"
+          mkdir -p "$GRADLE_BOOTSTRAP/gradle/wrapper"
+          cp tool/vendor_app_links/example/android/gradlew "$GRADLE_BOOTSTRAP/gradlew"
+          cp tool/vendor_app_links/example/android/gradle/wrapper/gradle-wrapper.jar "$GRADLE_BOOTSTRAP/gradle/wrapper/gradle-wrapper.jar"
+          cp android/gradle/wrapper/gradle-wrapper.properties "$GRADLE_BOOTSTRAP/gradle/wrapper/gradle-wrapper.properties"
+          chmod +x "$GRADLE_BOOTSTRAP/gradlew"
+          LOCAL_PROPERTIES_CREATED=0
+          if [[ ! -f android/local.properties ]]; then
+            {
+              printf 'flutter.sdk=%s\n' "${FLUTTER_ROOT:?FLUTTER_ROOT required}"
+              printf 'sdk.dir=%s\n' "${ANDROID_HOME:-${ANDROID_SDK_ROOT:?Android SDK required}}"
+            } > android/local.properties
+            LOCAL_PROPERTIES_CREATED=1
+          fi
+          cleanup_local_properties() {
+            if [[ "$LOCAL_PROPERTIES_CREATED" = 1 ]]; then rm -f android/local.properties; fi
+          }
+          trap cleanup_local_properties EXIT
+          "$GRADLE_BOOTSTRAP/gradlew" --no-daemon --console=plain -p "$PWD/android" \
+            app:dependencies --configuration releaseRuntimeClasspath > "$OUT/android-release-dependencies.txt" 2>&1
+          node tool/prebuild/audit_locked_advisories.mjs Maven "$OUT/android-release-dependencies.txt" | tee "$OUT/android-maven-osv.json"
+      - name: Require exact source and unchanged tracked inputs after all audits
+        id: source_guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+            git diff --exit-code
+            test -z "$(git status --porcelain=v1 --untracked-files=no)"
+            printf '%s\n' 'EXACT_SOURCE_UNCHANGED=PASS' 'NO_APP_BUILD_SIGNING_DEPLOYMENT_OR_RELEASE_CERTIFICATION'
+          } 2>&1 | tee "$RUNNER_TEMP/bil-supplemental-source/source-guard.log"
+      - name: Preserve strict actual supplemental outcome
+        if: always()
+        shell: bash
+        env:
+          PRIOR_JOB_STATUS: ${{ job.status }}
+          STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          python3 tools/qa/bil_release_supplemental_receipt.py \
+            --source-sha "$GITHUB_SHA" --output "$RUNNER_TEMP/bil-supplemental-source" \
+            --prior-status "$PRIOR_JOB_STATUS" --outcomes "$STEP_OUTCOMES"
+      - name: Preserve supplemental source and dependency evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-supplemental-source-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/bil-supplemental-source/
+          if-no-files-found: error
+          compression-level: 1
+          retention-days: 30

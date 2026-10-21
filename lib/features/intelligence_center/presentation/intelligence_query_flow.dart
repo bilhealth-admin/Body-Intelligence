@@ -7,6 +7,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     String? textOverride,
     bool addUserMessage = true,
     bool autoSpeakReply = false,
+    CoachCloudRequest? cloudRequest,
   }) async {
     if (!mounted) return;
     final submittedText = textOverride ?? question.text;
@@ -57,6 +58,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     }
     final speechPlan = _IntelligenceCenterPageState._speechPolicy.planFor(text);
     final generation = ++requestGeneration;
+    final request = cloudRequest ?? _newCoachCloudRequest();
     replyDelayTimer?.cancel();
     _updateState(() {
       sending = true;
@@ -210,7 +212,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                 !isTransliteratedArabicGreeting(text.trim().toLowerCase())
             ? IntelligenceCenterEngine(
                 localApi: ModelBackedLocalCoachApi(
-                  gateway: ref.read(intelligenceCenterModelGatewayProvider),
+                  gateway: bindCoachCloudRequest(
+                    ref.read(intelligenceCenterModelGatewayProvider),
+                    request,
+                  ),
                   context: CoachContextSnapshot.empty(),
                 ),
               )
@@ -263,7 +268,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         if (!mounted || generation != requestGeneration) return;
         final activeEngine = IntelligenceCenterEngine(
           localApi: ModelBackedLocalCoachApi(
-            gateway: ref.read(intelligenceCenterModelGatewayProvider),
+            gateway: bindCoachCloudRequest(
+              ref.read(intelligenceCenterModelGatewayProvider),
+              request,
+            ),
             context: coachContext,
           ),
         );
@@ -360,6 +368,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               detectedLanguageTag: effectiveLanguageHint,
               autoSpeak: autoSpeakReply,
               channel: inputChannel,
+              cloudRequest: request,
             );
           });
         }
@@ -437,6 +446,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             detectedLanguageTag: effectiveLanguageHint,
             autoSpeak: autoSpeakReply,
             channel: inputChannel,
+            cloudRequest: request,
           );
           if (!repeatedServiceNotice) {
             retryableErrorMessageIds.add(presented.id);
@@ -501,6 +511,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           detectedLanguageTag: effectiveLanguageHint,
           autoSpeak: autoSpeakReply,
           channel: inputChannel,
+          cloudRequest: request,
         );
         final errorMessage = IntelligenceMessage(
           id: 'coach-error-${DateTime.now().microsecondsSinceEpoch}',
@@ -608,22 +619,6 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       liveCallPaused = true;
     }
     unawaited(const BilTextToSpeech().stop());
-  }
-
-  Future<void> _retryFailedCoachRequest() async {
-    final failed = failedRequest;
-    if (failed == null || sending) return;
-    _updateState(() {
-      replyPhase = _CoachReplyPhase.idle;
-      failedRequest = null;
-    });
-    await ask(
-      inputChannel: failed.channel,
-      detectedLanguageTag: failed.detectedLanguageTag,
-      textOverride: failed.text,
-      addUserMessage: false,
-      autoSpeakReply: failed.autoSpeak,
-    );
   }
 
   Future<_RemoteAiConsentChoice> _offerPersonalIntelligence() {

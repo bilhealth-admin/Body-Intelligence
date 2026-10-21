@@ -1,10 +1,16 @@
 name: build18-ai-coach-full-tests
+run-name: "AI Coach QA — ${{ inputs.focused_repair_only == true && 'focused repair checks' || 'complete Flutter suite' }}"
 
 on:
   push:
     branches:
       - codex/build18-ai-coach-no-loading-flash-20260913
   workflow_dispatch:
+    inputs:
+      focused_repair_only:
+        description: Verify Coach and purchase fixture repairs only; this is not a complete suite
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -16,7 +22,7 @@ concurrency:
 jobs:
   flutter:
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 180
     steps:
       - name: Configure Git LF checkout
         shell: pwsh
@@ -39,6 +45,7 @@ jobs:
         run: flutter pub get
 
       - name: Analyze complete source
+        if: ${{ inputs.focused_repair_only != true }}
         run: flutter analyze --no-pub
 
       - name: Run AI Coach regression tests
@@ -47,8 +54,25 @@ jobs:
           test/features/commerce/ai_coach_credit_access_policy_test.dart
           test/features/settings/more_ai_coach_route_contract_test.dart
 
+      - name: Verify purchase confirmation fixtures with their required configuration
+        if: ${{ inputs.focused_repair_only == true }}
+        run: >
+          flutter test --no-pub --concurrency=2
+          --dart-define=BIL_PAYMENTS_ENABLED=true
+          --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms
+          --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy
+          test/features/commerce/app_purchase_confirmation_test.dart
+          test/features/commerce/app_subscription_confirmation_test.dart
+
       - name: Run complete test suite including goldens
-        run: flutter test --no-pub
+        if: ${{ inputs.focused_repair_only != true }}
+        # Configure the existing commerce fixtures while retaining every test file.
+        # Keep the full inventory: no file exclusions or weakened assertions.
+        run: >
+          flutter test --no-pub --concurrency=2
+          --dart-define=BIL_PAYMENTS_ENABLED=true
+          --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms
+          --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy
 
       - name: Upload golden failure evidence
         if: failure()

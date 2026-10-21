@@ -209,6 +209,7 @@ extension on _IntelligenceCenterPageState {
         onRetry: retryableErrorMessageIds.contains(message.id)
             ? () => unawaited(_retryFailedCoachRequest())
             : null,
+        retryLabel: _coachRetryLabel,
         onUndo: undoOperations.containsKey(message.id)
             ? () => unawaited(_undoCoachAction(message.id))
             : null,

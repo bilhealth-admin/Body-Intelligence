@@ -27,6 +27,121 @@ void main() {
     await backend.owners.close();
   });
 
+  test(
+    'unchanged status refresh preserves active sync and confirmation leases',
+    () async {
+      backend.grants['owner-a'] = {CloudRestoreScope.nutrition: true};
+      final first = await repository.read();
+      final lease = repository.captureLease(first);
+      final refreshed = await repository.read();
+      expect(identical(first, refreshed), isTrue);
+      expect(repository.isCurrent(lease, CloudRestoreScope.nutrition), isTrue);
+      expect(() => repository.captureLease(first), returnsNormally);
+      expect(backend.writes, isEmpty);
+    },
+  );
+
+  test(
+    'concurrent settings and sync reads share one current authority',
+    () async {
+      backend.grants['owner-a'] = {CloudRestoreScope.nutrition: true};
+      backend.readBarrier = Completer<void>();
+      backend.readStarted = Completer<void>();
+      final first = repository.read();
+      final second = repository.read();
+      await backend.readStarted!.future;
+      expect(identical(first, second), isTrue);
+      backend.readBarrier!.complete();
+      final states = await Future.wait([first, second]);
+      expect(
+        states.every((s) => s.allows(CloudRestoreScope.nutrition)),
+        isTrue,
+      );
+      expect(identical(states[0], states[1]), isTrue);
+    },
+  );
+
+  test(
+    'a fresh server denial retires the previously granted sync lease',
+    () async {
+      backend.grants['owner-a'] = {CloudRestoreScope.nutrition: true};
+      final lease = repository.captureLease(await repository.read());
+      backend.grants['owner-a'] = {CloudRestoreScope.nutrition: false};
+      backend.receiptTime = '2026-10-21T00:00:00Z';
+      final refreshed = await repository.read();
+      expect(refreshed.allows(CloudRestoreScope.nutrition), isFalse);
+      expect(repository.isCurrent(lease, CloudRestoreScope.nutrition), isFalse);
+    },
+  );
+
+  test(
+    'a newer receipt with the same grant retires an earlier remote visit',
+    () async {
+      backend.grants['owner-a'] = {CloudRestoreScope.nutrition: true};
+      final lease = repository.captureLease(await repository.read());
+      backend.receiptTime = '2026-10-21T00:00:00Z';
+      final refreshed = await repository.read();
+      expect(refreshed.allows(CloudRestoreScope.nutrition), isTrue);
+      expect(repository.isCurrent(lease, CloudRestoreScope.nutrition), isFalse);
+      expect(
+        repository.isCurrent(
+          repository.captureLease(refreshed),
+          CloudRestoreScope.nutrition,
+        ),
+        isTrue,
+      );
+    },
+  );
+
+  test(
+    'a failed status refresh remains fail closed for the active lease',
+    () async {
+      backend.grants['owner-a'] = {CloudRestoreScope.nutrition: true};
+      final lease = repository.captureLease(await repository.read());
+      backend.failRead = true;
+      final failed = await repository.read();
+      expect(failed.availability, CloudRestoreConsentAvailability.unavailable);
+      expect(failed.grantedScopes, isEmpty);
+      expect(repository.isCurrent(lease, CloudRestoreScope.nutrition), isFalse);
+      backend.failRead = false;
+      final recovered = await repository.read();
+      expect(recovered.allows(CloudRestoreScope.nutrition), isTrue);
+      expect(repository.isCurrent(lease, CloudRestoreScope.nutrition), isFalse);
+    },
+  );
+
+  test('loss of server capability retires an earlier granted lease', () async {
+    backend.grants['owner-a'] = {CloudRestoreScope.nutrition: true};
+    final lease = repository.captureLease(await repository.read());
+    backend.unsupported = true;
+    expect(
+      (await repository.read()).availability,
+      CloudRestoreConsentAvailability.unavailable,
+    );
+    expect(repository.isCurrent(lease, CloudRestoreScope.nutrition), isFalse);
+  });
+
+  test(
+    'an old read cannot replace the authority of a new A B A visit',
+    () async {
+      backend.grants['owner-a'] = {CloudRestoreScope.nutrition: true};
+      final delayed = Completer<void>();
+      backend.readBarrier = delayed;
+      backend.readStarted = Completer<void>();
+      final oldRead = repository.read();
+      await backend.readStarted!.future;
+      backend.switchOwner('owner-b');
+      backend.switchOwner('owner-a');
+      backend.readBarrier = null;
+      final fresh = await repository.read();
+      final lease = repository.captureLease(fresh);
+      delayed.complete();
+      expect((await oldRead).grantedScopes, isEmpty);
+      expect(repository.isCurrent(lease, CloudRestoreScope.nutrition), isTrue);
+      expect(() => repository.captureLease(fresh), returnsNormally);
+    },
+  );
+
   test('existing base grant never opts in either additional scope', () async {
     final state = await repository.read();
     expect(state.availability, CloudRestoreConsentAvailability.available);

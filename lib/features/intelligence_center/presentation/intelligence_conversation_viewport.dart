@@ -74,6 +74,7 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
           return _CoachReplyFailure(
             onDismiss: _cancelCurrentCoachRequest,
             onRetry: failedRequest == null ? null : _retryFailedCoachRequest,
+            retryLabel: _coachRetryLabel,
           );
         }
         return _buildMessage(

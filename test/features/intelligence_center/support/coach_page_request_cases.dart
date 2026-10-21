@@ -1,5 +1,51 @@
 part of '../coach_page_lifecycle_regression_test.dart';
 
+class _ReceiptStatusGateway extends _HeldGateway
+    implements RequestScopedLocalModelGateway {
+  final boundRequests = <CoachCloudRequest>[];
+  final receiptRequestIds = <String>[];
+  String receiptState = 'reserved';
+  late CoachCloudRequest _request;
+
+  @override
+  LocalModelGateway forCloudRequest(CoachCloudRequest request) {
+    boundRequests.add(request);
+    _request = request;
+    return this;
+  }
+
+  @override
+  Future<LocalModelResult> answer({
+    required String question,
+    required String locale,
+    required CoachContextSnapshot context,
+    bool languageDetected = false,
+    List<CoachConversationTurn> conversation = const [],
+  }) async {
+    final request = _request;
+    if (request.beginSubmission(
+      readReceipt: () async {
+        receiptRequestIds.add(request.requestId);
+        final settled = receiptState == 'succeeded';
+        return {
+          'request_id': request.requestId,
+          'capability': 'text',
+          'state': receiptState,
+          'credit_actual': settled ? 3 : 0,
+          'credit_included_actual': settled ? 3 : 0,
+          'credit_paid_actual': 0,
+          'completed_at': settled ? '2026-10-20T12:00:00Z' : null,
+        };
+      },
+    )) {
+      calls++;
+    }
+    return const LocalModelResult(
+      status: CoachServiceStatus.temporarilyUnavailable,
+    );
+  }
+}
+
 void _expectCoachPearlAction(
   WidgetTester tester,
   Finder action, {
@@ -62,6 +108,129 @@ void _expectCoachPearlSemantics(
 }
 
 void registerCoachRequestCases() {
+  for (final arabic in [false, true]) {
+    testWidgets(
+      'cloud request status retry keeps one generation at 320px 2x Arabic=$arabic',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        final gateway = _ReceiptStatusGateway();
+        try {
+          await _mount(
+            tester,
+            database: database,
+            gateway: gateway,
+            arabic: arabic,
+            size: const Size(320, 700),
+            textScale: 2,
+            evidenceFonts: true,
+          );
+          await _send(tester, gateway, question: 'Explain balanced nutrition');
+          await tester.pumpAndSettle();
+          final retry = find.byKey(const Key('ai-coach-retry'));
+          final retryLabel = arabic
+              ? 'التحقق من حالة الطلب'
+              : 'Check request status';
+          expect(find.text(retryLabel), findsOneWidget);
+          void traceRetry(String phase) {
+            final dynamic state = tester.state(
+              find.byType(IntelligenceCenterPage),
+            );
+            final controller = state.conversationScroll as ScrollController;
+            final rect = tester.getRect(retry);
+            final viewport = tester.getRect(find.byType(CoachAnchoredHistory));
+            final media = MediaQuery.of(tester.element(retry));
+            debugPrint(
+              'BIL_STATUS_RETRY_VIEWPORT ${jsonEncode({
+                'phase': phase,
+                'arabic': arabic,
+                'button': [rect.left, rect.top, rect.right, rect.bottom],
+                'viewport': [viewport.left, viewport.top, viewport.right, viewport.bottom],
+                'composer': tester.getRect(find.byKey(const Key('ai-coach-composer-surface'))).toString(),
+                'keyboard': media.viewInsets.bottom,
+                'textScale': media.textScaler.scale(1),
+                'scroll': controller.positions.map((p) => {'pixels': p.pixels, 'min': p.minScrollExtent, 'max': p.maxScrollExtent, 'viewport': p.viewportDimension}).toList(),
+                'hitTestable': retry.hitTestable().evaluate().length,
+                'jumpButton': find.byKey(const ValueKey('chat-jump-to-latest')).evaluate().isEmpty ? null : tester.getRect(find.byKey(const ValueKey('chat-jump-to-latest'))).toString(),
+                'hitPath': tester.hitTestOnBinding(rect.center).path.take(12).map((entry) => {'type': entry.target.runtimeType.toString(), if (entry.target is RenderParagraph) 'text': (entry.target as RenderParagraph).text.toPlainText()}).toList(),
+              })}',
+            );
+          }
+
+          traceRetry('before-ensureVisible');
+          await tester.ensureVisible(retry);
+          await tester.pumpAndSettle();
+          traceRetry('after-ensureVisible');
+          // ensureVisible can align this long turn's action beneath the
+          // floating latest-message shortcut. Read further with a real drag;
+          // retain the center hit-test and actual tap rather than bypassing it.
+          await tester.drag(
+            find.byType(CoachAnchoredHistory),
+            const Offset(0, -110),
+          );
+          await tester.pumpAndSettle();
+          traceRetry('after-real-reading-drag');
+          expect(retry.hitTestable(), findsOneWidget);
+          final bounds = tester.getRect(retry);
+          expect(bounds.left, greaterThanOrEqualTo(0));
+          expect(bounds.right, lessThanOrEqualTo(320));
+          expect(
+            tester.getSemantics(retry).getSemanticsData().label,
+            contains(retryLabel),
+          );
+          expect(tester.takeException(), isNull);
+          expect(gateway.calls, 1);
+          expect(gateway.boundRequests, hasLength(1));
+          final originalId = gateway.boundRequests.single.requestId;
+
+          await tester.tap(retry);
+          await tester.pumpAndSettle();
+          expect(
+            find.textContaining(
+              arabic
+                  ? 'ما زال هذا الطلب قيد المعالجة'
+                  : 'This request is still being processed',
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+          expect(find.text(retryLabel), findsOneWidget);
+          expect(gateway.calls, 1);
+          expect(gateway.boundRequests, hasLength(1));
+          expect(gateway.receiptRequestIds, [originalId]);
+          expect(tester.takeException(), isNull);
+
+          gateway.receiptState = 'succeeded';
+          await tester.ensureVisible(retry);
+          await tester.pumpAndSettle();
+          await tester.tap(retry);
+          await tester.pumpAndSettle();
+          expect(
+            find.textContaining(
+              arabic
+                  ? 'اكتمل هذا الطلب، لكن لم يصل رده'
+                  : 'This request completed, but its reply was not received',
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+          expect(retry, findsNothing);
+          expect(gateway.calls, 1);
+          expect(gateway.boundRequests, hasLength(1));
+          expect(gateway.receiptRequestIds, [originalId, originalId]);
+          expect(tester.takeException(), isNull);
+        } finally {
+          try {
+            await _unmount(tester);
+          } finally {
+            semantics.dispose();
+            await tester.runAsync(database.close);
+          }
+        }
+      },
+    );
+  }
+
   for (final dark in [false, true]) {
     for (final arabic in [false, true]) {
       testWidgets(

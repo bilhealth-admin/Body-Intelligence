@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/body_measurement_repository.dart';
@@ -20,13 +23,17 @@ import 'package:body_intelligence_log/features/onboarding/services/onboarding_pe
 import 'package:body_intelligence_log/features/nutrition/repositories/dietary_preferences_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../visual_closure/visual_evidence_font.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadVisualEvidenceFont);
 
   late AppDatabase database;
   late PreferencesRepository preferences;
@@ -140,8 +147,11 @@ void main() {
 
   Future<void> mountAiConsent(
     WidgetTester tester,
-    _BlockingRemoteAiGateway remote,
-  ) async {
+    _BlockingRemoteAiGateway remote, {
+    Locale? locale,
+    double? textScale,
+    TargetPlatform? platform,
+  }) async {
     await drafts.save(
       canonicalDraft(
         stepId: 'ai',
@@ -160,6 +170,31 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          locale: locale,
+          theme: textScale == null
+              ? ThemeData(platform: platform)
+              : visualEvidenceTheme(
+                  BilFlagshipTheme.light(
+                    isArabic: locale?.languageCode == 'ar',
+                  ).copyWith(platform: platform),
+                  fontFamily: locale?.languageCode == 'ar'
+                      ? 'NotoArabicEvidence'
+                      : 'RobotoEvidence',
+                ),
+          builder: textScale == null
+              ? null
+              : (context, child) => MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(textScale),
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    viewPadding: const EdgeInsets.symmetric(vertical: 24),
+                    disableAnimations: true,
+                  ),
+                  child: RepaintBoundary(
+                    key: const Key('onboarding-consent-review-boundary'),
+                    child: child!,
+                  ),
+                ),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -206,6 +241,113 @@ void main() {
       find.descendant(of: next, matching: find.text('Continue')),
       findsOneWidget,
     );
+  }
+
+  for (final language in ['en', 'ar']) {
+    for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets(
+          'actual initial onboarding consent $language '
+          '${platform.name} ${scale}x keeps both choices reachable and explicit',
+          (tester) async {
+            final size = scale == 1
+                ? const Size(430, 932)
+                : const Size(320, 568);
+            tester.view.physicalSize = size;
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.resetPhysicalSize);
+            addTearDown(tester.view.resetDevicePixelRatio);
+            final remote = _BlockingRemoteAiGateway();
+            await mountAiConsent(
+              tester,
+              remote,
+              locale: Locale(language),
+              textScale: scale,
+              platform: platform,
+            );
+            final toggle = find.byKey(const Key('onboarding-cloud-ai-toggle'));
+            final allow = find.byKey(const Key('onboarding-ai-consent-accept'));
+            final decline = find.byKey(
+              const Key('onboarding-ai-consent-decline'),
+            );
+            await revealAiButton(
+              tester,
+              const Key('onboarding-cloud-ai-toggle'),
+            );
+            await tester.tap(toggle);
+            await tester.pumpAndSettle();
+            expect(remote.setGrantedCalls, 0);
+            expect(
+              Directionality.of(tester.element(allow)),
+              language == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+            );
+            final disclosure = find
+                .ancestor(
+                  of: allow,
+                  matching: find.byType(SingleChildScrollView),
+                )
+                .first;
+            expect(
+              find.descendant(
+                of: disclosure,
+                matching: find.textContaining('Google Gemini'),
+              ),
+              findsNWidgets(2),
+            );
+            if (scale == 1 &&
+                platform == TargetPlatform.iOS &&
+                const bool.fromEnvironment('BIL_CAPTURE_CONSENT_REVIEW')) {
+              final boundary = tester.renderObject<RenderRepaintBoundary>(
+                find.byKey(const Key('onboarding-consent-review-boundary')),
+              );
+              await tester.runAsync(() async {
+                final image = await boundary.toImage();
+                final bytes = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                final file = File(
+                  'build/consent-layout-review/onboarding-$language.png',
+                );
+                await file.parent.create(recursive: true);
+                await file.writeAsBytes(bytes!.buffer.asUint8List());
+                image.dispose();
+              });
+            }
+            for (final action in [allow, decline]) {
+              await tester.ensureVisible(action);
+              await tester.pumpAndSettle();
+              expect(action.hitTestable(), findsOneWidget);
+              final rect = tester.getRect(action);
+              expect(rect.width, greaterThan(240));
+              expect(rect.height, greaterThanOrEqualTo(48));
+              expect(rect.left, greaterThanOrEqualTo(0));
+              expect(rect.right, lessThanOrEqualTo(size.width));
+              expect(rect.top, greaterThanOrEqualTo(24));
+              expect(rect.bottom, lessThanOrEqualTo(size.height - 24));
+              expect(tester.takeException(), isNull);
+            }
+            await tester.tap(decline);
+            await tester.pumpAndSettle();
+            expect(
+              remote.setGrantedCalls,
+              0,
+              reason: 'Declining a disclosure cannot activate Remote AI.',
+            );
+            await tester.tap(toggle);
+            await tester.pumpAndSettle();
+            await tester.ensureVisible(allow);
+            await tester.pumpAndSettle();
+            expect(remote.setGrantedCalls, 0);
+            await tester.tap(allow);
+            await tester.pump();
+            expect(remote.setGrantedCalls, 1);
+            remote.complete(OnboardingRemoteAiResult.granted);
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
   }
 
   testWidgets(

@@ -70,7 +70,7 @@ class _CloudSyncRow extends ConsumerWidget {
         SnackBar(
           content: Text(
             context.strings.text(
-              'Cloud sync could not run. Check Premium, consent, and internet.',
+              'Cloud sync could not run. Check consent and internet.',
             ),
           ),
         ),

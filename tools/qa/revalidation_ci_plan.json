@@ -1,0 +1,588 @@
+{
+  "schema": "bil.affected-unproven-ci-plan.v1",
+  "created_utc": "2026-10-20T20:48:54.106095+00:00",
+  "source_policy": "Only final committed source SHA after focused, all goldens, full analysis and original local full suite accepted; invalidate if tracked/untracked source changes. Reuse matching fresh auto-push runs rather than duplicate dispatch when exact SHA and required job scope match. After accepted exact-source push, independent CI profiles may run concurrently; no invented cross-workflow dependency.",
+  "branch": "integration/bil-qa-media-policy-20261011",
+  "workflows": [
+    {
+      "workflow": "bil_owner_comprehensive_validation.yml",
+      "inputs": {},
+      "reason": "One exact-source remote full root inventory after local acceptance; app commerce, consent and Coach runtime changed. Do not also dispatch verify/Sapphire full merely to repeat the same Flutter suite. Existing owner workflow now also runs distinct release/source/OSV/dependency audits; require that job separately.",
+      "required_jobs": [
+        "Full analysis then one unsharded root suite",
+        "Supplemental source and dependency audits"
+      ],
+      "allowed_skipped_jobs": [],
+      "workflow_id": 386117761,
+      "registered_workflow_name": "BIL owner full analysis and comprehensive tests",
+      "lane_id": "bil_owner_comprehensive_validation",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate.",
+      "reuse_push_run": true,
+      "expect_push_for_this_run": true
+    },
+    {
+      "workflow": "build18_ai_coach_full_tests.yml",
+      "inputs": {
+        "focused_repair_only": "true"
+      },
+      "reason": "Exercise repaired legacy workflow commerce fixture configuration plus its two Coach regressions; this scoped run is not full-suite proof.",
+      "required_jobs": [
+        "flutter"
+      ],
+      "allowed_skipped_jobs": [],
+      "workflow_id": 357323507,
+      "registered_workflow_name": "build18-ai-coach-full-tests",
+      "lane_id": "focused_repair",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
+    },
+    {
+      "workflow": "bil_codeql_security_extended.yml",
+      "inputs": {
+        "source_audit_only": "true"
+      },
+      "reason": "New runtime/helper/workflow and SQL source require fresh source security; existing selector also executes bounded macro checks.",
+      "required_jobs": [
+        "CodeQL (actions)",
+        "CodeQL (javascript-typescript)",
+        "CodeQL (python)",
+        "Isolated Semgrep source audit",
+        "Bounded macro editor generated checks, mutants and VM coverage"
+      ],
+      "allowed_skipped_jobs": [
+        "Local Supabase migrations, SQL, Auth and RLS",
+        "Android API 33 native integration without CodeQL tracing",
+        "iPhone and iPad native tests from exact simulator bundles",
+        "Offline MobSF static debug APK audit"
+      ],
+      "workflow_id": 384948928,
+      "registered_workflow_name": "BIL CodeQL security-extended",
+      "lane_id": "source_audit",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate.",
+      "reuse_push_run": true,
+      "expect_push_for_this_run": true
+    },
+    {
+      "workflow": "bil_codeql_security_extended.yml",
+      "inputs": {
+        "supabase_only": "true"
+      },
+      "reason": "New community visibility migration needs actual local PostgreSQL, Auth/RLS and complete isolated Edge/SQL suites; no Production deployment is implied.",
+      "required_jobs": [
+        "Local Supabase migrations, SQL, Auth and RLS"
+      ],
+      "allowed_skipped_jobs": [
+        "CodeQL (${{ matrix.language }})",
+        "Isolated Semgrep source audit",
+        "Bounded macro editor generated checks, mutants and VM coverage",
+        "Android API 33 native integration without CodeQL tracing",
+        "iPhone and iPad native tests from exact simulator bundles",
+        "Offline MobSF static debug APK audit"
+      ],
+      "workflow_id": 384948928,
+      "registered_workflow_name": "BIL CodeQL security-extended",
+      "lane_id": "supabase",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
+    },
+    {
+      "workflow": "bil_codeql_security_extended.yml",
+      "inputs": {
+        "android_native_only": "true",
+        "android_native_target": "all"
+      },
+      "reason": "Changed Coach/consent/purchase runtime needs fresh native journey proof; previous successful native source was 1484, not the repaired runtime.",
+      "required_jobs": [
+        "Android API 33 native integration without CodeQL tracing"
+      ],
+      "allowed_skipped_jobs": [
+        "CodeQL (${{ matrix.language }})",
+        "Local Supabase migrations, SQL, Auth and RLS",
+        "Isolated Semgrep source audit",
+        "Bounded macro editor generated checks, mutants and VM coverage",
+        "iPhone and iPad native tests from exact simulator bundles",
+        "Offline MobSF static debug APK audit"
+      ],
+      "workflow_id": 384948928,
+      "registered_workflow_name": "BIL CodeQL security-extended",
+      "lane_id": "android_native",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
+    },
+    {
+      "workflow": "bil_codeql_security_extended.yml",
+      "inputs": {
+        "ios_native_only": "true",
+        "native_target": "all"
+      },
+      "reason": "Current latest lane fails at simulator launch after XCTest5PASS; require repaired script and all entrypoints on both iPhone and iPad, not only build/XCTest.",
+      "required_jobs": [
+        "iPhone and iPad native tests from exact simulator bundles"
+      ],
+      "allowed_skipped_jobs": [
+        "CodeQL (${{ matrix.language }})",
+        "Local Supabase migrations, SQL, Auth and RLS",
+        "Isolated Semgrep source audit",
+        "Bounded macro editor generated checks, mutants and VM coverage",
+        "Android API 33 native integration without CodeQL tracing",
+        "Offline MobSF static debug APK audit"
+      ],
+      "workflow_id": 384948928,
+      "registered_workflow_name": "BIL CodeQL security-extended",
+      "lane_id": "ios_native",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
+    },
+    {
+      "workflow": "bil_rc_mobile_test_build.yml",
+      "inputs": {
+        "notification_api33_only": "false"
+      },
+      "reason": "Changed Dart runtime requires new Android and iOS candidate binaries; default scope also executes both notification API33/36 cases and must not be mislabeled from an API33-only receipt.",
+      "required_jobs": [
+        "Android APK/AAB + emulator evidence",
+        "iOS simulator + unsigned IPA evidence",
+        "Android API 33 local notification permission states",
+        "Android API 36 local notification permission states"
+      ],
+      "allowed_skipped_jobs": [],
+      "workflow_id": 371818189,
+      "registered_workflow_name": "BIL RC mobile test builds",
+      "lane_id": "bil_rc_mobile_test_build",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate.",
+      "required_log_markers": [
+        "ANDROID_REAL_BARCODE_PHOTO=PASS",
+        "ANDROID_TWO_ACCOUNT_CLOUD=PASS"
+      ]
+    },
+    {
+      "workflow": "bil_apple_google_policy_gate.yml",
+      "inputs": {
+        "evidence_scope": "full-with-android-lint",
+        "certify_release": "false"
+      },
+      "reason": "Fresh consent/commerce/AI/SQL source policy regressions, Android lint and seven Windows-reference goldens; CI result is not App Store/Play approval.",
+      "required_jobs": [
+        "Source and affected regressions; certification remains separate",
+        "Seven exact plan goldens on their Windows reference platform"
+      ],
+      "allowed_skipped_jobs": [
+        "Verify final documentation commit against the tested source and live CI"
+      ],
+      "workflow_id": 385995260,
+      "registered_workflow_name": "BIL APPLE & GOOGLE POLICY COMPLIANCE GATE",
+      "lane_id": "bil_apple_google_policy_gate",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
+    },
+    {
+      "workflow": "bil_live_service_contracts.yml",
+      "inputs": {},
+      "reason": "Current deployed schema is verified and publication ledger refreshed; execute real disposable service roundtrips and the fixed transactional SQL with post-ROLLBACK zero-row readback.",
+      "required_jobs": [
+        "live-contracts",
+        "Transactional live cloud roundtrip",
+        "Guarded policy and cloud SQL E2E with independent residue"
+      ],
+      "allowed_skipped_jobs": [],
+      "workflow_id": 390900526,
+      "registered_workflow_name": "BIL current cloud and independent admin live contracts",
+      "lane_id": "bil_live_service_contracts",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate.",
+      "required_log_markers": [
+        "LIVE_BACKEND_CORE=PASS",
+        "TRANSACTIONAL_LIVE_CLOUD_ROUNDTRIP=PASS;ROLLBACK_READBACK=PASS",
+        "GUARDED_POLICY_CLOUD_E2E=PASS;INDEPENDENT_RESIDUE=PASS"
+      ]
+    },
+    {
+      "workflow": "bil_store_lifecycle_adversarial_contracts.yml",
+      "inputs": {},
+      "reason": "Preserve refund/revoke/replay authority after the native receipt retry and confirmation lifetime repairs.",
+      "required_jobs": [
+        "remaining-store-contracts"
+      ],
+      "allowed_skipped_jobs": [],
+      "workflow_id": 374438846,
+      "registered_workflow_name": "BIL store lifecycle adversarial contracts",
+      "lane_id": "bil_store_lifecycle_adversarial_contracts",
+      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
+    },
+    {
+      "lane_id": "native_codeql",
+      "workflow_id": 384948928,
+      "workflow": "bil_codeql_security_extended.yml",
+      "inputs": {
+        "android_only": "true",
+        "ios_only": "true"
+      },
+      "required_jobs": [
+        "CodeQL (java-kotlin)",
+        "CodeQL (swift)"
+      ],
+      "allowed_skipped_jobs": [],
+      "reason": "Native compiler tracing is distinct from untraced simulator integration and completes all five CodeQL languages.",
+      "source_binding": "Exact final published headSha and required-job receipts; no skipped required jobs."
+    },
+    {
+      "lane_id": "offline_mobsf",
+      "workflow_id": 384948928,
+      "workflow": "bil_codeql_security_extended.yml",
+      "inputs": {
+        "mobsf_only": "true",
+        "android_artifact_run": ""
+      },
+      "required_jobs": [
+        "Offline MobSF static debug APK audit"
+      ],
+      "allowed_skipped_jobs": [],
+      "reason": "Inspect only the exact-source APK produced by successful native CodeQL; sanitized findings require separate strict review.",
+      "source_binding": "Exact final published headSha and required-job receipts; no skipped required jobs.",
+      "depends_on": [
+        "native_codeql"
+      ],
+      "input_from_run": {
+        "android_artifact_run": "native_codeql"
+      }
+    },
+    {
+      "lane_id": "healthkit_cloud_simulator",
+      "workflow_id": 334769308,
+      "workflow": "bil_healthkit_cloud_simulator.yml",
+      "inputs": {},
+      "required_jobs": [
+        "healthkit-native-sheet"
+      ],
+      "allowed_skipped_jobs": [],
+      "reason": "Fresh native HealthKit authorization sheet and clean simulator startup evidence; no physical-device claim.",
+      "source_binding": "Exact final published headSha and required-job receipts; no skipped required jobs."
+    },
+    {
+      "lane_id": "independent_admin_e2e",
+      "workflow_id": 390900524,
+      "workflow": "bil_independent_admin_compatibility.yml",
+      "inputs": {},
+      "required_jobs": [
+        "isolated-web-contracts",
+        "Approved admin synthetic browser E2E"
+      ],
+      "allowed_skipped_jobs": [],
+      "reason": "Run independent administration contracts and responsive browser E2E on approved web source 097dda710b2c8f3a98a413052b5d078863aac90c; this distinct web source is never mislabeled as mobile source.",
+      "source_binding": "Exact final published headSha and required-job receipts; no skipped required jobs."
+    }
+  ],
+  "superseded_failures": [
+    {
+      "failed_run": 39478167825,
+      "replacement_run": 39480907412,
+      "closed_scope": "live-contracts job including the formerly failing offline diagnostics/artifact capture",
+      "proof": "replacement metadata live-contracts success; source932ad, no claim for uncommitted new SQL deployment"
+    },
+    {
+      "failed_run": 39476297607,
+      "replacement_run": 39480895962,
+      "closed_scope": "Native Watch/privacy exact reviewed blob guard only",
+      "proof": "replacement Native Watch guard only success; prepare/focused/full/visual-cloud all skipped, not full Sapphire PASS"
+    },
+    {
+      "failed_run": 39460361860,
+      "replacement_run": 39480883007,
+      "closed_scope": "Android API33 local notification permission states only",
+      "proof": "replacement API33 job success; Android APK/AAB and iOS bundle jobs skipped; API36 absent in targeted matrix"
+    }
+  ],
+  "not_automatically_repeated": [
+    {
+      "workflow": "verify.yml",
+      "reason": "Avoid a second overlapping full Flutter CI inventory if owner-full selected; if push starts verify, retain actual evidence and choose one full authority before dispatching duplicates."
+    },
+    {
+      "workflow": "bil_sapphire_history_qa.yml",
+      "reason": "Old guard failure already repaired with guard-only proof; do not relabel it full PASS. Re-run full Sapphire only if its distinct visual/cloud contract execution is not covered by accepted local/full SQL/policy evidence."
+    },
+    {
+      "workflow": "bil_android_isolated_emulator_smoke.yml",
+      "reason": "All startup APIs previously proven for unchanged native startup harness; changed app runtime is rebuilt and tested in RC/native. Physical final artifact launch remains separately required."
+    },
+    {
+      "workflow": "bil_healthkit_cloud_simulator.yml",
+      "reason": "Now required explicitly by expanded owner-requested E2E plan; see healthkit_cloud_simulator lane."
+    }
+  ],
+  "local_command_assessment": [
+    {
+      "command": "bash tool/release_certification/run_static_gate.sh 1",
+      "run_unchanged_before_local_commit": false,
+      "reason": "Requires GITHUB_SHA==HEAD and clean tracked+untracked worktree immediately. Includes external OSV/advisory lookups, npm installs and Android Maven dependency resolution; it is not offline. Execute distinct source/dependency checks in the Supplemental source and dependency audits owner job after final commit, without duplicating its Flutter full inventory."
+    },
+    {
+      "command": "bash tool/release_certification/run_pre_final_automated_gate.sh",
+      "run_unchanged_before_local_commit": false,
+      "reason": "Same clean-source precondition prevents execution on the frozen dirty candidate. All listed Flutter test files are included by original root full; Deno AI/store/fault cases are included by the complete isolated Supabase/Edge job. Keep device-only limits listed by its status output; do not duplicate this script just to obtain another PASS label."
+    },
+    {
+      "command": "bash tool/release_certification/run_visual_gate.sh 1",
+      "run_unchanged_before_local_commit": false,
+      "reason": "Requires clean exact committed SHA, PostgreSQL fixture and Deno2.5.1 install. Local all-goldens cover listed Flutter visuals; ensure native PostgreSQL attention SQL and push contract suites are included in isolated cloud scope before treating this overlapping script as covered."
+    }
+  ],
+  "post_ci_native_evidence_required": {
+    "source": "Bind every downloaded artifact and embedded receipt to final Git head/tree; preserve artifact id/name/SHA256 and avoid a PASS from a skipped lane.",
+    "ios": [
+      "All6 iPhone/iPad target drives process exit0 + actual native summaries (system-crypto/native-settings/feature-splashes)",
+      "RunnerTests xcresult summary total5/passed5/failed0/skipped0 + each actual test name",
+      "Per-target Xcode build bounded receipts, main Mach-O hash, vtool platform readback, generated simulated/signature xcent hashes, actual signed entitlement readback",
+      "Feature splash timing/strict metadata and screenshots from exact drives, with no nearest-frame or timeout relaxation"
+    ],
+    "android": [
+      "Default RC APK/AAB emulator job and both API33+36 notification cases, not API33-only lane",
+      "Native API33 integration actual journey summaries and strict frame metadata",
+      "APK/AAB checksums/build source/SDK privacy manifest evidence; unsigned/debug app proof is separate from final release signing"
+    ],
+    "not_proven": [
+      "Physical device behavior",
+      "StoreKit/Play genuine sandbox lifecycle",
+      "Signed IPA37/AAB33 production artifact",
+      "ATT/privacy actual SDK network behavior",
+      "App Store/Play acceptance or TestFlight processing"
+    ]
+  },
+  "required_workflow_ids": [
+    334769308,
+    357323507,
+    371818189,
+    374438846,
+    384948928,
+    385995260,
+    386117761,
+    390900524,
+    390900526
+  ],
+  "manual_physical": [
+    {
+      "name": "ios_launch_repair_before_dispatch",
+      "status": "PENDING",
+      "reason": "Confirmed QA signing defect repaired: Xcode owns local signature and separate simulated capability section; the actual spawn162 causal closure still requires a successful exact-source native run.",
+      "evidence_required": "All three native entrypoints on both iPhone+iPad, six actual drive receipts with effective exit0 and expected test summaries, plus five actual XCTest passes. Signature helper PASS alone does not close the launch failure."
+    },
+    {
+      "name": "production_migration_publication",
+      "status": "PASS",
+      "reason": "The reviewed privacy migration is deployed with exact guard-only function and ACL readback.",
+      "evidence_required": "Keep root exact deployment/readback proof and source-bound ledger; require final-source Supabase isolated lane plus both jobs in bil_live_service_contracts.yml. This plan does not itself certify deployment.",
+      "evidence": "docs/release/community-circle-visibility-20261021.json"
+    },
+    {
+      "name": "store_console_access_and_disclosures",
+      "status": "PENDING",
+      "reason": "Prior Final Certification store audit Google403 and Play suspension remain external blockers, not repaired by app code.",
+      "evidence_required": "Authorized Play Console/service account permissions; exact current Apple App Privacy/Google Data safety, reviewer access and suspension/appeal state checked by owner; no submission/appeal automation here."
+    },
+    {
+      "name": "final_release_certification_after_store_prerequisites",
+      "status": "PENDING",
+      "reason": "Do not dispatch two-pass Final Certification merely to repeat two root suites and rediscover known Google403. Retain exact unproven store/live boundaries; accepted owner/source audit plus local full, all goldens and isolated PostgreSQL/Deno receipts cover overlapping automated checks.",
+      "evidence_required": "Store read-only access must be repaired separately. Transactional cloud proof is now required in the existing live-service workflow job on the final source with actual rollback readback. No final two-pass store certification is claimed."
+    },
+    {
+      "name": "signed_final_artifact",
+      "status": "PENDING",
+      "reason": "Unsigned RC simulator bundles are not signed iOS37/Android33 release artifacts.",
+      "evidence_required": "Existing signed workflows at accepted exact source with correct build number; IPA/AAB checksums, embedded entitlements, SDK privacy/ATT manifests, 16KB checks and actual signing receipts."
+    },
+    {
+      "name": "physical_devices_and_testflight",
+      "status": "PENDING",
+      "reason": "Simulator/CI cannot prove physical Apple Health/Health Connect/BLE, sandbox purchase/restore/refund, push delivery, background/resume or store processing.",
+      "evidence_required": "Clean installation of exact final artifact on physical supported iPhone/iPad/Android, relevant live OS permissions and store sandbox journeys; TestFlight processing and reviewer journey separately. No store-approval guarantee."
+    }
+  ],
+  "local_only_evidence": {
+    "qa_python_tests_passed": 136,
+    "isolated_sql_files": 10,
+    "isolated_sql_tests_passed": 18,
+    "privacy_steps_passed": 7,
+    "actual_cli_transactional_probe": "Six assertions and post-ROLLBACK zero records/operations verified through the cached actual CLI with a conservative test-transport receipt; not a GitHub job PASS."
+  },
+  "generated_utc": "2026-10-20T21:14:56.755080+00:00",
+  "delivery": {
+    "lane_id": "signed_ios37_testflight",
+    "workflow_id": 346770575,
+    "workflow": "bil_ios_signed_release.yml",
+    "inputs": {
+      "upload_to_testflight": "true",
+      "build_number": "37",
+      "run_native_crypto_checks": "true"
+    },
+    "required_jobs": [
+      "signed-ios-release"
+    ],
+    "required_log_markers": [
+      "EXACT_SOURCE_CI_AND_STRICT_SECURITY=PASS",
+      "SIGNED_IOS37_TESTFLIGHT_UPLOAD=ACCEPTED;PROCESSING=NOT_VERIFIED"
+    ],
+    "reason": "Explicit owner-authorized signed build37 and TestFlight upload, only after all current local and CI scopes and strict scanner evidence pass. Final App Store submission is excluded."
+  },
+  "e2e_coverage": {
+    "integration_test/admob_native_banner_integration_test.dart": {
+      "lanes": [
+        "bil_rc_mobile_test_build"
+      ],
+      "mode": "direct",
+      "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
+    },
+    "integration_test/android_notification_permission_integration_test.dart": {
+      "lanes": [
+        "bil_rc_mobile_test_build"
+      ],
+      "mode": "direct",
+      "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
+    },
+    "integration_test/epic9_two_account_cloud_test.dart": {
+      "lanes": [
+        "bil_rc_mobile_test_build"
+      ],
+      "mode": "direct",
+      "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
+    },
+    "integration_test/native_feature_splashes_test.dart": {
+      "lanes": [
+        "android_native",
+        "ios_native"
+      ],
+      "mode": "direct",
+      "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
+    },
+    "integration_test/native_settings_polish_test.dart": {
+      "lanes": [
+        "android_native",
+        "ios_native"
+      ],
+      "mode": "direct",
+      "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
+    },
+    "integration_test/real_barcode_photo_integration_test.dart": {
+      "lanes": [
+        "bil_rc_mobile_test_build"
+      ],
+      "mode": "direct",
+      "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
+    },
+    "integration_test/system_crypto_bridge_integration_test.dart": {
+      "lanes": [
+        "android_native",
+        "ios_native"
+      ],
+      "mode": "direct",
+      "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
+    },
+    "supabase/tests/local_supabase_auth_rls_e2e_test.mjs": {
+      "lanes": [
+        "supabase"
+      ],
+      "mode": "direct",
+      "reason": "Actual disposable local Supabase Auth/PostgREST/Storage/Realtime requests, including foreign-owner denial."
+    },
+    "supabase/tests/local_supabase_product_rpc_e2e_test.mjs": {
+      "lanes": [
+        "supabase"
+      ],
+      "mode": "direct",
+      "reason": "Actual disposable local Supabase Auth/PostgREST/Storage/Realtime requests, including foreign-owner denial."
+    },
+    "supabase/tests/local_supabase_storage_realtime_e2e_test.mjs": {
+      "lanes": [
+        "supabase"
+      ],
+      "mode": "direct",
+      "reason": "Actual disposable local Supabase Auth/PostgREST/Storage/Realtime requests, including foreign-owner denial."
+    },
+    "supabase/tests/bil07_real_postgrest_http_e2e.py": {
+      "lanes": [
+        "supabase"
+      ],
+      "mode": "retired_fixture_replaced",
+      "reason": "Historical BIL07-only fixture requires removed isolated migrations. Current migration stack and real Auth/RPC/RLS suites replace this obsolete fixture, not a claim that its Python program ran."
+    },
+    "tool/account_deletion/run_live_disposable_e2e.ps1": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Real deployed service roundtrip through pinned run_live_gate.sh with explicit result and cleanup checks."
+    },
+    "tool/ai_coach/run_live_text_e2e.ps1": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Real deployed service roundtrip through pinned run_live_gate.sh with explicit result and cleanup checks."
+    },
+    "tool/community_translation/run_live_synthetic_e2e.ps1": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Real deployed service roundtrip through pinned run_live_gate.sh with explicit result and cleanup checks."
+    },
+    "tool/meal_vision_benchmark/run_live_supabase_e2e.ps1": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Real deployed service roundtrip through pinned run_live_gate.sh with explicit result and cleanup checks."
+    },
+    "tool/nutrition/run_live_barcode_gate_e2e.ps1": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Real deployed service roundtrip through pinned run_live_gate.sh with explicit result and cleanup checks."
+    },
+    "tool/nutrition/run_live_barcode_resolved_fixture_e2e.ps1": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Real deployed service roundtrip through pinned run_live_gate.sh with explicit result and cleanup checks."
+    },
+    "tool/nutrition/run_live_real_barcode_photo_product_e2e.ps1": {
+      "lanes": [
+        "bil_rc_mobile_test_build"
+      ],
+      "mode": "equivalent_wrapper",
+      "reason": "Same real_barcode_photo_integration_test.dart runs through the current disposable native_cloud_fixture and emulator gate; avoid rerunning the legacy Windows-only wrapper."
+    },
+    "tool/release/ai_consent_receipt_production_rollback_e2e.sql": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Exact existing guarded SQL PRECHECK, TRANSACTION, and independent RESIDUE; any source/body/ACL prerequisite mismatch blocks release."
+    },
+    "tool/release/cloud_sync_consent_production_rollback_e2e.sql": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Exact existing guarded SQL PRECHECK, TRANSACTION, and independent RESIDUE; any source/body/ACL prerequisite mismatch blocks release."
+    },
+    "tool/release/community_collaborator_privacy_production_rollback_e2e.sql": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Exact existing guarded SQL PRECHECK, TRANSACTION, and independent RESIDUE; any source/body/ACL prerequisite mismatch blocks release."
+    },
+    "tool/release/community_policy_20261019_production_rollback_e2e.sql": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Exact existing guarded SQL PRECHECK, TRANSACTION, and independent RESIDUE; any source/body/ACL prerequisite mismatch blocks release."
+    },
+    "tool/release/community_prebuild_production_rollback_e2e.sql": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Exact existing guarded SQL PRECHECK, TRANSACTION, and independent RESIDUE; any source/body/ACL prerequisite mismatch blocks release."
+    }
+  },
+  "expanded_e2e_scope": "All current runnable E2E entrypoints inventoried. Historical removed-fixture diagnostics and equivalent platform wrappers are explicitly mapped; physical store/OS/device journeys remain separately unproven."
+}

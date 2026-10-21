@@ -643,6 +643,12 @@ jobs:
         run: |
           set -euo pipefail
           npm test --prefix supabase/tests
+          # Include the checked-in isolated SQL/owner/privacy TypeScript suites.
+          # The npm script and functions/ discovery do not include this directory.
+          shopt -s nullglob
+          isolated_sql_tests=(supabase/tests/*_test.ts)
+          test "${#isolated_sql_tests[@]}" -gt 0
+          deno test --no-lock --allow-env --allow-read --allow-net "${isolated_sql_tests[@]}"
           deno test --allow-env --allow-read --allow-net supabase/functions
 
   isolated-source-audit:

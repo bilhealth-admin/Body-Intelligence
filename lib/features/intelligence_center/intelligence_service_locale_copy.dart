@@ -260,13 +260,42 @@ const _serviceAuthored = <String, Map<String, String>>{
     'tr':
         'Bu dönem için yapay zekâ koçu hakkınız tükendi. Mesajdan ücret düşülmedi ve bu yanıt Gemini yanıtı gibi gösterilmiyor.',
   },
-  'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.': {
-    'fr':
-        'Le coach IA personnalisé est temporairement indisponible. Aucun message n’a été débité ; réessayez bientôt.',
-    'es':
-        'El coach de IA personalizado no está disponible temporalmente. No se cobró ningún mensaje; vuelve a intentarlo pronto.',
-    'tr':
-        'Kişiselleştirilmiş yapay zekâ koçu geçici olarak kullanılamıyor. Mesajdan ücret düşülmedi; kısa süre sonra tekrar deneyin.',
+  "The personalized AI Coach is temporarily unavailable. If this request was sent, check its status before trying again.": {
+    "fr":
+        "Le coach IA personnalisé est temporairement indisponible. Si cette demande a été envoyée, vérifiez son état avant de réessayer.",
+    "es":
+        "El coach de IA personalizado no está disponible temporalmente. Si esta solicitud se envió, comprueba su estado antes de volver a intentarlo.",
+    "tr":
+        "Kişiselleştirilmiş AI Coach geçici olarak kullanılamıyor. Bu istek gönderildiyse yeniden denemeden önce durumunu kontrol edin.",
+  },
+  "This request completed, but its reply was not received. It will not be sent again.": {
+    "fr":
+        "Cette demande est terminée, mais sa réponse n’a pas été reçue. Elle ne sera pas renvoyée.",
+    "es":
+        "Esta solicitud se completó, pero no se recibió la respuesta. No se enviará de nuevo.",
+    "tr":
+        "Bu istek tamamlandı ancak yanıtı alınamadı. Yeniden gönderilmeyecek.",
+  },
+  "This request is still being processed. Check its status again shortly.": {
+    "fr":
+        "Cette demande est toujours en cours de traitement. Vérifiez à nouveau son état dans quelques instants.",
+    "es":
+        "Esta solicitud sigue en proceso. Comprueba su estado de nuevo dentro de poco.",
+    "tr":
+        "Bu istek hâlâ işleniyor. Kısa bir süre sonra durumunu yeniden kontrol edin.",
+  },
+  "The request status could not be verified. It will not be sent again to avoid duplicate charges.": {
+    "fr":
+        "L’état de la demande n’a pas pu être vérifié. Elle ne sera pas renvoyée afin d’éviter un double débit.",
+    "es":
+        "No se pudo verificar el estado de la solicitud. No se enviará de nuevo para evitar cargos duplicados.",
+    "tr":
+        "İstek durumu doğrulanamadı. Çift kesintiyi önlemek için yeniden gönderilmeyecek.",
+  },
+  "Check request status": {
+    "fr": "Vérifier l’état de la demande",
+    "es": "Comprobar estado de la solicitud",
+    "tr": "İstek durumunu kontrol et",
   },
   'Take action': {'fr': 'Agir', 'es': 'Realizar la acción', 'tr': 'İşlemi yap'},
   'Enter your question first.': {

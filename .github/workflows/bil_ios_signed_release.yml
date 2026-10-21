@@ -6,6 +6,14 @@ name: BIL iOS signed release candidate (build 37)
 on:
   workflow_dispatch:
     inputs:
+      expected_source_sha:
+        description: Exact source that passed the complete release revalidation plan
+        required: true
+        type: string
+      qa_run_ids:
+        description: Complete lane-id to successful GitHub run-id JSON from the revalidation controller
+        required: true
+        type: string
       upload_to_testflight:
         description: Upload the validated build to TestFlight (owner-controlled; leave false for artifact-only QA)
         required: true
@@ -23,6 +31,8 @@ on:
 
 permissions:
   contents: read
+  actions: read
+  security-events: read
 
 jobs:
   signed-ios-release:
@@ -34,17 +44,28 @@ jobs:
         env:
           IOS_AUDITED_SOURCE: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
           ANDROID_AUDITED_SOURCE: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
+          EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
         run: |
           set -euo pipefail
           [[ "$IOS_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_IOS_V37_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
           [[ "$ANDROID_AUDITED_SOURCE" =~ ^[0-9a-f]{40}$ ]] || { echo 'BIL_ANDROID_V33_AUDITED_SOURCE_SHA must be a full commit SHA.' >&2; exit 1; }
           test "$IOS_AUDITED_SOURCE" = "$ANDROID_AUDITED_SOURCE" || { echo 'iOS 37 and Android 33 must use the same audited source SHA.' >&2; exit 1; }
+          test "$IOS_AUDITED_SOURCE" = "$EXPECTED_SOURCE_SHA"
+          test "$EXPECTED_SOURCE_SHA" = "$GITHUB_SHA" || { echo 'Signing another source than the tested dispatch is forbidden.' >&2; exit 1; }
 
       - name: Checkout accepted source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
           persist-credentials: false
           ref: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
+
+      - name: Require all exact-source CI jobs and strict security evidence before signing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+          QA_RUN_IDS: ${{ inputs.qa_run_ids }}
+        run: python3 tools/qa/bil_release_delivery.py --verify-ci
 
       - name: Verify frozen iOS manifest digest binding
         shell: bash
@@ -597,6 +618,7 @@ jobs:
             > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
+        id: validate_candidate
         if: ${{ inputs.upload_to_testflight }}
         shell: bash
         env:
@@ -628,6 +650,7 @@ jobs:
           xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
       - name: Upload validated build to TestFlight
+        id: testflight_upload
         if: ${{ inputs.upload_to_testflight }}
         shell: bash
         env:
@@ -638,6 +661,31 @@ jobs:
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           xcrun altool --upload-app -f "$IPA" -t ios \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
+      - name: Record exact IPA upload acceptance, separate from Apple processing
+        if: ${{ inputs.upload_to_testflight }}
+        shell: bash
+        env:
+          VALIDATE_OUTCOME: ${{ steps.validate_candidate.outcome }}
+          UPLOAD_OUTCOME: ${{ steps.testflight_upload.outcome }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          files = list(pathlib.Path('build/ios/ipa').glob('*.ipa'))
+          if len(files) != 1 or os.environ['VALIDATE_OUTCOME'] != 'success' or os.environ['UPLOAD_OUTCOME'] != 'success':
+              raise SystemExit('Actual validation and upload success are required')
+          with files[0].open('rb') as handle:
+              digest = hashlib.file_digest(handle, 'sha256').hexdigest()
+          source = subprocess.check_output(['git','rev-parse','HEAD'], text=True).strip()
+          if source != os.environ['GITHUB_SHA']:
+              raise SystemExit('Built source differs from tested dispatch')
+          receipt = dict(status='UPLOAD_ACCEPTED', source_sha=source, build_number='37',
+                         ipa_sha256=digest, validate_outcome=os.environ['VALIDATE_OUTCOME'],
+                         upload_outcome=os.environ['UPLOAD_OUTCOME'], processing_verified=False)
+          pathlib.Path('BIL-testflight-upload-receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
+          print('SIGNED_IOS37_TESTFLIGHT_UPLOAD=ACCEPTED;PROCESSING=NOT_VERIFIED')
+          PY
 
       - name: Upload signed IPA and validation evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -662,6 +710,7 @@ jobs:
             BIL-ios-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt
+            BIL-testflight-upload-receipt.json
             BIL-apple-release-toolchain.txt
             BIL-apple-release-toolchain.json
 

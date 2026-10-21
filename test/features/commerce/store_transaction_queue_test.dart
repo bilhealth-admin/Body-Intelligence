@@ -34,6 +34,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   bool failCompletion = false;
   Future<void> Function()? finish;
   int completionCalls = 0;
+  final completionChanges = ChangeNotifier();
   int restoreCalls = 0;
   int appleSyncCalls = 0;
   final completionAttempted = Completer<void>();
@@ -52,6 +53,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   @override
   Future<void> completePurchase(PurchaseDetails purchase) async {
     completionCalls++;
+    completionChanges.notifyListeners();
     if (!completionAttempted.isCompleted) completionAttempted.complete();
     if (failCompletion) throw StateError('local acknowledgement failed');
     await finish?.call();
@@ -236,6 +238,7 @@ void main() {
       verification.complete(http.Response('{"verified":false}', 200));
     }
     await native.updates.close();
+    native.completionChanges.dispose();
     await Supabase.instance.dispose();
     debugDefaultTargetPlatformOverride = null;
     VerifiedStorePurchaseService.resetTransactionReplayProtectionForTesting();
@@ -249,6 +252,23 @@ void main() {
   Future<void> drain() async {
     for (var i = 0; i < 15; i++) {
       await Future<void>.delayed(Duration.zero);
+    }
+  }
+
+  Future<void> waitForStoreCondition(bool Function() condition) async {
+    final reached = Completer<void>();
+    void changed() {
+      if (!reached.isCompleted && condition()) reached.complete();
+    }
+
+    store.addListener(changed);
+    native.completionChanges.addListener(changed);
+    try {
+      changed();
+      await reached.future.timeout(const Duration(seconds: 2));
+    } finally {
+      store.removeListener(changed);
+      native.completionChanges.removeListener(changed);
     }
   }
 
@@ -524,17 +544,19 @@ void main() {
           purchaseId: 'new-native-success',
         ),
       ]);
-      await native.completionAttempted.future.timeout(
-        const Duration(seconds: 2),
+      await waitForStoreCondition(
+        () =>
+            native.completionCalls == 2 &&
+            store.lastVerifiedProductId ==
+                StoreCatalogConfiguration.premiumAnnual,
       );
-      await drain();
       expect(verificationCalls, 2);
       expect(
         store.lastVerifiedProductId,
         StoreCatalogConfiguration.premiumAnnual,
       );
       oldFinish.completeError(StateError('fixture delayed native failure'));
-      await drain();
+      await waitForStoreCondition(() => store.hasPendingVerifiedFinish);
       expect(store.state, VerifiedStoreState.verified);
       expect(store.messageCode, 'subscription_verified');
       expect(store.hasPendingVerifiedFinish, isTrue);
@@ -600,6 +622,84 @@ void main() {
         await Future.wait([first, second]);
       }
       expect(store.hasPendingVerifiedFinish, isFalse);
+    },
+  );
+
+  test(
+    'commerce race regression: retired retry does not acknowledge another queued receipt',
+    () async {
+      await ready();
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now.toIso8601String(),
+          'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      verificationResponse = (_) => _verifiedSubscriptionResponse();
+      native.failCompletion = true;
+      final receipts = [
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'retired-retry-first',
+        ),
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumAnnual,
+          purchaseId: 'retired-retry-second',
+        ),
+      ];
+      // Await each actual pending acknowledgement, rather than assuming a
+      // fixed number of event-loop turns finishes asynchronous verification.
+      for (var index = 0; index < receipts.length; index++) {
+        final pending = Completer<void>();
+        void changed() {
+          if (!pending.isCompleted &&
+              native.completionCalls == index + 1 &&
+              store.lastVerifiedProductId == receipts[index].productID &&
+              store.messageCode == 'store_finish_pending' &&
+              store.hasPendingVerifiedFinish) {
+            pending.complete();
+          }
+        }
+
+        store.addListener(changed);
+        try {
+          native.updates.add([receipts[index]]);
+          await pending.future.timeout(const Duration(seconds: 2));
+        } finally {
+          store.removeListener(changed);
+        }
+      }
+      expect(verificationCalls, 2);
+      expect(native.completionCalls, 2);
+      expect(store.hasPendingVerifiedFinish, isTrue);
+
+      final entered = Completer<void>();
+      final held = Completer<void>();
+      native.failCompletion = false;
+      native.finish = () {
+        if (!entered.isCompleted) entered.complete();
+        return held.future;
+      };
+      final retry = store.continueVerification();
+      await entered.future.timeout(const Duration(seconds: 2));
+      expect(native.completionCalls, 3);
+      store.dispose();
+      held.completeError(StateError('fixture failure after retired visit'));
+      await retry;
+      expect(
+        native.completionCalls,
+        3,
+        reason:
+            'A failed old retry must stop before the next native call after disposal.',
+      );
+      expect(verificationCalls, 2);
+      expect(native.launches, 0);
     },
   );
 

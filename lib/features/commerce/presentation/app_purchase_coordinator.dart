@@ -200,11 +200,16 @@ class _AppPurchaseCoordinatorState extends ConsumerState<AppPurchaseCoordinator>
     final release = BilExperiencePresentation.tryClaim();
     if (release == null) return;
     _presenting = true;
+    var deferred = false;
     try {
-      if (!await item.journal.reserve(item.event) ||
-          !item.current() ||
-          !context.mounted ||
-          !_foreground) {
+      if (!item.reservationHeld) {
+        if (!await item.journal.reserve(item.event)) return;
+        item.reservationHeld = true;
+      }
+      if (!item.current() || !context.mounted) return;
+      if (!_foreground || bilStorePresentationRouteObserver.blocked) {
+        // Keep this owner-bound reservation until presentation is available.
+        deferred = true;
         return;
       }
       late DialogRoute<void> route;
@@ -242,7 +247,7 @@ class _AppPurchaseCoordinatorState extends ConsumerState<AppPurchaseCoordinator>
       // Decorations never fail a financial transaction or reset a draft.
     } finally {
       _activeRoute = null;
-      if (_pending.isNotEmpty && identical(_pending.first, item)) {
+      if (!deferred && _pending.isNotEmpty && identical(_pending.first, item)) {
         _pending.removeAt(0);
       }
       _presenting = false;
@@ -277,7 +282,7 @@ class _AppPurchaseCoordinatorState extends ConsumerState<AppPurchaseCoordinator>
 }
 
 final class _PendingConfirmation {
-  const _PendingConfirmation(
+  _PendingConfirmation(
     this.event,
     this.journal,
     this.current,
@@ -287,4 +292,5 @@ final class _PendingConfirmation {
   final StoreConfirmationJournal journal;
   final bool Function() current;
   final String? Function()? subscriptionLifecycle;
+  bool reservationHeld = false;
 }

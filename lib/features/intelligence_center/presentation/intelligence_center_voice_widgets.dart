@@ -73,11 +73,13 @@ class _CoachReplyFailure extends StatelessWidget {
     required this.onDismiss,
     required this.onRetry,
     this.labelOverride,
+    this.retryLabel,
   });
 
   final VoidCallback onDismiss;
   final VoidCallback? onRetry;
   final String? labelOverride;
+  final String? retryLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -118,11 +120,17 @@ class _CoachReplyFailure extends StatelessWidget {
                 ),
               ),
               if (onRetry != null)
-                TextButton(
-                  key: const Key('ai-coach-retry'),
-                  onPressed: onRetry,
-                  child: Text(
-                    intelligenceText(context, 'Retry', 'إعادة المحاولة'),
+                Flexible(
+                  child: TextButton(
+                    key: const Key('ai-coach-retry'),
+                    onPressed: onRetry,
+                    child: Text(
+                      retryLabel ??
+                          intelligenceText(context, 'Retry', 'إعادة المحاولة'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 )
               else

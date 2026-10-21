@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../community/services/community_owner_operation.dart';
 import 'cloud_runtime_access_gate.dart';
 
 enum CloudSyncConsentAvailability { unavailable, signedOut, available }
@@ -36,6 +37,27 @@ final class CloudSyncConsentRepository {
   CloudSyncConsentRepository({required this._client});
 
   final SupabaseClient _client;
+
+  /// The choice and its continuations belong to the visit that opened it.
+  /// A cancelled visit returns false without reporting a save failure to its
+  /// replacement account. Other failures retain their existing error handling.
+  Future<bool> runForOwner({
+    required String ownerId,
+    required Future<void> Function(CommunityOwnerOperation operation) action,
+    bool Function()? isCurrentOwner,
+  }) async {
+    try {
+      await CommunityOwnerOperation.run<void>(
+        client: _client,
+        ownerId: ownerId,
+        isCurrentOwner: isCurrentOwner,
+        action: action,
+      );
+      return true;
+    } on CommunityOwnerOperationCancelled {
+      return false;
+    }
+  }
 
   Future<CloudSyncConsentState> read() async {
     final user = _client.auth.currentUser;
@@ -88,12 +110,20 @@ final class CloudSyncConsentRepository {
       throw StateError('Authentication is required before cloud consent.');
     }
 
-    await _client.rpc(
-      'bil_record_consent',
-      params: <String, Object?>{
-        'p_purpose': CloudRuntimeAccessGate.consentPurpose,
-        'p_policy_version': CloudRuntimeAccessGate.consentPolicyVersion,
-        'p_granted': granted,
+    await CommunityOwnerOperation.run<void>(
+      client: _client,
+      ownerId: user.id,
+      action: (operation) async {
+        operation.check();
+        await _client.rpc(
+          'bil_record_consent',
+          params: <String, Object?>{
+            'p_purpose': CloudRuntimeAccessGate.consentPurpose,
+            'p_policy_version': CloudRuntimeAccessGate.consentPolicyVersion,
+            'p_granted': granted,
+          },
+        );
+        operation.check();
       },
     );
   }

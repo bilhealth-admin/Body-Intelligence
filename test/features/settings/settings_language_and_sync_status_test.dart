@@ -101,6 +101,7 @@ const _privacySources = <String>{
   'Run a one-time encrypted sync now.',
   'Encrypted cloud sync completed.',
   'Cloud sync could not run. Check Premium, consent, and internet.',
+  'Cloud sync could not run. Check consent and internet.',
   'Could not sign out. Check your connection and retry.',
   'Sign in to manage community privacy.',
 };
@@ -114,6 +115,17 @@ const _syncStatusSources = <String>{
 };
 
 void main() {
+  test(
+    'unexpected sync failure guidance is localized in every shipped locale',
+    () {
+      const source = 'Cloud sync could not run. Check consent and internet.';
+      for (final locale in AppLocalizations.supportedLocales) {
+        final tag = BilLocalePolicy.canonicalTag(locale);
+        expect(RuntimeCopy.resolve(source, tag), isNotNull, reason: tag);
+      }
+    },
+  );
+
   test('short cloud sync copy is translated in every shipped locale', () {
     for (final locale in AppLocalizations.supportedLocales) {
       final tag = BilLocalePolicy.canonicalTag(locale);

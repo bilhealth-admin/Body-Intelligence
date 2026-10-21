@@ -302,8 +302,8 @@ class IntelligenceCenterEngine {
     }
     return _plain(
       tr(
-        'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.',
-        'المدرب الذكي المخصص غير متاح مؤقتًا. لم يتم احتساب أي رسالة؛ أعد المحاولة بعد قليل.',
+        'The personalized AI Coach is temporarily unavailable. If this request was sent, check its status before trying again.',
+        'المدرب الذكي المخصص غير متاح مؤقتًا. إذا أُرسل هذا الطلب، تحقّق من حالته قبل المحاولة مجددًا.',
       ),
     );
   }
@@ -621,8 +621,8 @@ class IntelligenceCenterEngine {
       ),
       CoachServiceStatus.safetyBlocked => AiCoachSafetyCopy.resolve(locale),
       CoachServiceStatus.temporarilyUnavailable => tr(
-        'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.',
-        'المدرب الذكي المخصص غير متاح مؤقتًا. لم تُحتسب الرسالة؛ حاول مجددًا بعد قليل.',
+        'The personalized AI Coach is temporarily unavailable. If this request was sent, check its status before trying again.',
+        'المدرب الذكي المخصص غير متاح مؤقتًا. إذا أُرسل هذا الطلب، تحقّق من حالته قبل المحاولة مجددًا.',
       ),
       CoachServiceStatus.ready => '',
     };

@@ -57,6 +57,13 @@ if [[ "$PHASE" != "ui" && "$PHASE" != "all" ]]; then
   exit 2
 fi
 
+if [[ "${BIL_REQUIRE_LIVE_E2E:-false}" == true ]]; then
+  for key in SUPABASE_URL SUPABASE_ANON_KEY BIL_BARCODE_GATE_EMAIL BIL_BARCODE_GATE_PASSWORD \
+             BIL_EPIC9_ACCOUNT_A_EMAIL BIL_EPIC9_ACCOUNT_A_PASSWORD BIL_EPIC9_ACCOUNT_B_EMAIL BIL_EPIC9_ACCOUNT_B_PASSWORD; do
+    test -n "${!key:-}" || { echo "Required disposable E2E fixture is absent: $key" >&2; exit 1; }
+  done
+fi
+
 flutter test --no-pub \
   integration_test/native_settings_polish_test.dart \
   -d emulator-5554 --timeout 10m
@@ -98,6 +105,12 @@ if [[ -n "${BIL_EPIC9_ACCOUNT_A_EMAIL:-}" && -n "${BIL_EPIC9_ACCOUNT_A_PASSWORD:
     --dart-define=BIL_EPIC9_ACCOUNT_B_EMAIL="${BIL_EPIC9_ACCOUNT_B_EMAIL}" \
     --dart-define=BIL_EPIC9_ACCOUNT_B_PASSWORD="${BIL_EPIC9_ACCOUNT_B_PASSWORD}"
   TWO_ACCOUNT_GATE='PASS'
+fi
+if [[ "${BIL_REQUIRE_LIVE_E2E:-false}" == true ]]; then
+  test "$BARCODE_GATE" = PASS
+  test "$TWO_ACCOUNT_GATE" = PASS
+  echo 'ANDROID_REAL_BARCODE_PHOTO=PASS'
+  echo 'ANDROID_TWO_ACCOUNT_CLOUD=PASS'
 fi
 
 # Integration tests replace Runner with their harness. Rebuild lib/main.dart

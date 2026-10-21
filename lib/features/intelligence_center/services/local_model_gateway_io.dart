@@ -55,7 +55,12 @@ abstract interface class CoachCloudAccess {
   Future<CoachCloudFunctionResponse> invokeCoach(Map<String, Object?> body);
 }
 
-class _SupabaseCoachCloudAccess implements CoachCloudAccess {
+abstract interface class CoachCloudRequestStatusAccess {
+  Future<Object?> readCoachUsageEvent(String requestId);
+}
+
+class _SupabaseCoachCloudAccess
+    implements CoachCloudAccess, CoachCloudRequestStatusAccess {
   _SupabaseCoachCloudAccess(this.client, {this.mobileIntegrityService})
     : _ownerId = client.auth.currentUser?.id;
 
@@ -68,6 +73,30 @@ class _SupabaseCoachCloudAccess implements CoachCloudAccess {
       client.auth.currentSession != null &&
       _ownerId != null &&
       client.auth.currentUser?.id == _ownerId;
+
+  @override
+  Future<Object?> readCoachUsageEvent(String requestId) =>
+      CommunityOwnerOperation.run(
+        client: client,
+        ownerId: _ownerId,
+        isCurrentOwner: () => hasAuthenticatedSession,
+        action: (operation) async {
+          await _refreshIfExpired();
+          operation.check();
+          final receipt = await client
+              .from('bil_ai_usage_events')
+              .select(
+                'request_id,capability,state,credit_actual,'
+                'credit_included_actual,credit_paid_actual,completed_at',
+              )
+              .eq('owner_id', _ownerId!)
+              .eq('request_id', requestId)
+              .eq('capability', 'text')
+              .maybeSingle();
+          operation.check();
+          return receipt;
+        },
+      );
 
   @override
   Future<Object?> readRemoteAiConsent() async {
@@ -155,7 +184,8 @@ class _SupabaseCoachCloudAccess implements CoachCloudAccess {
       error.code == 'PGRST301' || error.code == '401';
 }
 
-class LlamaCppLocalGateway implements LocalModelGateway {
+class LlamaCppLocalGateway
+    implements LocalModelGateway, RequestScopedLocalModelGateway {
   const LlamaCppLocalGateway({
     this.endpoint = const String.fromEnvironment(
       'BIL_LOCAL_AI_URL',
@@ -164,6 +194,7 @@ class LlamaCppLocalGateway implements LocalModelGateway {
     this.apiKey = const String.fromEnvironment('BIL_LOCAL_AI_API_KEY'),
     this.cloudAccess,
     this.mobileIntegrityService,
+    this.cloudRequest,
     this.cloudContextProjector =
         const QuestionScopedCoachCloudContextProjector(),
   });
@@ -172,7 +203,19 @@ class LlamaCppLocalGateway implements LocalModelGateway {
   final String apiKey;
   final CoachCloudAccess? cloudAccess;
   final BilMobileIntegrityService? mobileIntegrityService;
+  final CoachCloudRequest? cloudRequest;
   final CoachCloudContextProjector cloudContextProjector;
+
+  @override
+  LocalModelGateway forCloudRequest(CoachCloudRequest request) =>
+      LlamaCppLocalGateway(
+        endpoint: endpoint,
+        apiKey: apiKey,
+        cloudAccess: cloudAccess,
+        mobileIntegrityService: mobileIntegrityService,
+        cloudContextProjector: cloudContextProjector,
+        cloudRequest: request,
+      );
 
   @override
   Future<LocalModelResult> answer({
@@ -320,6 +363,7 @@ class LlamaCppLocalGateway implements LocalModelGateway {
 
     try {
       final requestId =
+          cloudRequest?.requestId ??
           'coach-${DateTime.now().toUtc().microsecondsSinceEpoch}';
       // Client preflight above prevents context projection and any Edge call
       // before explicit consent. The server repeats its own authoritative gate
@@ -342,6 +386,19 @@ class LlamaCppLocalGateway implements LocalModelGateway {
         'included_prior_turn_count': cloudMessages.length - 1,
         'sent_message_count': cloudMessages.length,
       };
+      if (cloudRequest != null &&
+          !cloudRequest!.beginSubmission(
+            readReceipt: () => access is CoachCloudRequestStatusAccess
+                ? (access as CoachCloudRequestStatusAccess).readCoachUsageEvent(
+                    requestId,
+                  )
+                : Future<Object?>.value(),
+          )) {
+        return const LocalModelResult(
+          status: CoachServiceStatus.temporarilyUnavailable,
+          diagnosticCode: 'request_reconciliation_required',
+        );
+      }
       final response = await access
           .invokeCoach(<String, Object?>{
             'request_id': requestId,

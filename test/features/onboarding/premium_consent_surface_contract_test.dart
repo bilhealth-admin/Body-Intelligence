@@ -27,7 +27,7 @@ void main() {
     expect(onboarding, contains("Key('onboarding-ai-consent-decline')"));
     expect(onboarding, contains("Key('onboarding-ai-consent-accept')"));
     expect(coach, contains('showBilPremiumAiConsentSheet('));
-    expect(vision, contains('BilPremiumTrustSurface('));
+    expect(vision, contains('BilPearlAlertDialog('));
     expect(vision, contains("Key('meal-vision-consent-decline')"));
     expect(vision, contains("Key('meal-vision-consent-accept')"));
     expect(privacy, contains('BilPremiumConsentToggle('));

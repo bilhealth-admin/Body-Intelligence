@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Give an existing QA Simulator bundle a local signature, never store signing.
+"""Build and verify Xcode's local QA Simulator signature, never store signing.
 
-No provisioning lookup, certificate, shared Keychain, app data, or account is
-used. The real integration test must still prove that Keychain works afterward.
+Xcode keeps simulated iOS capabilities in its linked __entitlements section.
+Do not inject those restricted capabilities into the host code signature.
+Only the actual native journeys can prove launch and Keychain correctness.
 """
 import argparse
+import base64
 import hashlib
 import json
 from pathlib import Path
@@ -12,6 +14,8 @@ import plistlib
 import re
 import subprocess
 import sys
+
+from bil_native_bounded_command import run_bounded
 
 
 BUNDLE_ID = "com.bilhealth.bodyintelligencelog"
@@ -25,6 +29,8 @@ SETTING_KEYS = (
     "DEVELOPMENT_TEAM", "AppIdentifierPrefix", "APP_IDENTIFIER_PREFIX",
     "CODE_SIGN_ENTITLEMENTS", "CODE_SIGN_IDENTITY", "CODE_SIGNING_ALLOWED",
     "CODE_SIGNING_REQUIRED", "PROVISIONING_PROFILE", "PROVISIONING_PROFILE_SPECIFIER",
+    "TARGET_BUILD_DIR", "FULL_PRODUCT_NAME", "LD_ENTITLEMENTS_SECTION",
+    "FLUTTER_TARGET", "FLUTTER_BUILD_NUMBER",
 )
 
 
@@ -57,27 +63,31 @@ def runner_settings(raw):
         raise ValueError("A certificate signing identity is forbidden")
     if any(settings.get(key) for key in ("PROVISIONING_PROFILE", "PROVISIONING_PROFILE_SPECIFIER")):
         raise ValueError("A provisioning profile is forbidden")
+    if any(settings.get(key) != "YES" for key in ("CODE_SIGNING_ALLOWED", "CODE_SIGNING_REQUIRED")):
+        raise ValueError("Xcode must produce the local Simulator signature")
+    defines = dict(base64.b64decode(value).decode().split("=", 1)
+                   for value in settings.get("DART_DEFINES", "").split(",") if value)
+    if any(defines.get(key) != value for key, value in {
+        "BIL_ENVIRONMENT": "testing", "BIL_USE_SUPABASE": "false",
+        "BIL_PAYMENTS_ENABLED": "false", "BIL_ADS_ENABLED": "false",
+        "BIL_QA_IOS_SIMULATOR": "true",
+    }.items()):
+        raise ValueError("Only the existing offline Simulator QA defines are permitted")
     return {key: settings.get(key) for key in SETTING_KEYS}
 
 
-def simulator_entitlements(settings, source):
-    team = settings.get("DEVELOPMENT_TEAM")
+def verify_simulated_entitlements(settings, source, simulated):
+    if not isinstance(source, dict) or not isinstance(simulated, dict):
+        raise ValueError("Source and Xcode simulated entitlements must be dictionaries")
+    app_id = simulated.get("application-identifier")
+    if not isinstance(app_id, str) or not re.fullmatch(r"[A-Z0-9]{10}\." + re.escape(BUNDLE_ID), app_id):
+        raise ValueError("Xcode must resolve the actual simulated application identifier")
+    prefix, team = app_id[:-len(BUNDLE_ID)], settings.get("DEVELOPMENT_TEAM")
     if not isinstance(team, str) or not re.fullmatch(r"[A-Z0-9]{10}", team):
-        raise ValueError("A real resolved project team value is required, never guessed")
-    prefixes = {settings[key] for key in ("AppIdentifierPrefix", "APP_IDENTIFIER_PREFIX")
-                if settings.get(key)}
-    if len(prefixes) > 1:
-        raise ValueError("Conflicting resolved AppIdentifierPrefix values")
-    prefix = next(iter(prefixes), None)
-    basis = "Xcode.AppIdentifierPrefix"
-    if prefix is None:
-        prefix = team + "."
-        basis = "Xcode.DEVELOPMENT_TEAM_simulator_local_fallback"
-    if not isinstance(prefix, str) or not re.fullmatch(r"[A-Z0-9]{10}\.", prefix):
-        raise ValueError("The resolved AppIdentifierPrefix is invalid or unexpanded")
-    app_id = prefix + BUNDLE_ID
-    if not isinstance(source, dict):
-        raise ValueError("Source entitlements must be a dictionary")
+        raise ValueError("The resolved project team must not be guessed")
+    prefixes = {settings[key] for key in ("AppIdentifierPrefix", "APP_IDENTIFIER_PREFIX") if settings.get(key)}
+    if len(prefixes) > 1 or (prefixes and prefixes != {prefix}):
+        raise ValueError("Conflicting Xcode simulated application prefix")
 
     def expand(value):
         if isinstance(value, dict):
@@ -86,54 +96,76 @@ def simulator_entitlements(settings, source):
             return [expand(item) for item in value]
         if isinstance(value, str):
             for key, replacement in (("AppIdentifierPrefix", prefix),
-                                     ("PRODUCT_BUNDLE_IDENTIFIER", BUNDLE_ID),
-                                     ("DEVELOPMENT_TEAM", team)):
+                                     ("PRODUCT_BUNDLE_IDENTIFIER", BUNDLE_ID), ("DEVELOPMENT_TEAM", team)):
                 value = value.replace("$(" + key + ")", replacement)
             if "$" in value:
                 raise ValueError("Unresolved source entitlement variable")
         return value
 
-    entitlements = expand(source)
-    if entitlements.get("application-identifier", app_id) != app_id:
-        raise ValueError("Source application identifier does not match resolved Simulator identity")
-    if entitlements.get("com.apple.developer.team-identifier", team) != team:
-        raise ValueError("Source team entitlement does not match the actual resolved project team")
-    if entitlements.get("keychain-access-groups") not in (None, [], [app_id]):
+    expected = expand(source)
+    if any(simulated.get(key) != value for key, value in expected.items()):
+        raise ValueError("Xcode simulated capabilities differ from the project source")
+    if simulated.get("com.apple.developer.team-identifier", team) != team:
+        raise ValueError("Simulated team differs from the resolved project team")
+    if simulated.get("keychain-access-groups") not in (None, [], [app_id]):
         raise ValueError("Only the QA app's private Keychain group is permitted")
-    if entitlements.get("com.apple.security.application-groups"):
+    if simulated.get("com.apple.security.application-groups"):
         raise ValueError("This fixture must not grant shared app-group access")
-    entitlements.update({"application-identifier": app_id,
-                         "keychain-access-groups": [app_id], "get-task-allow": True})
-    return entitlements, basis
+    return simulated
 
 
 def verify_readback(raw, details, expected):
-    entitlements = plistlib.loads(raw)
-    if entitlements != expected:
-        raise ValueError("Signed entitlements differ from the exact requested set")
+    entitlements = plistlib.loads(raw) if raw.strip() else {}
+    if not isinstance(expected, dict) or entitlements != expected:
+        raise ValueError("Signed entitlements differ from Xcode's signature entitlements")
     if "Signature=adhoc" not in details or any(
             line.strip().startswith("Authority=") for line in details.splitlines()):
         raise ValueError("The Simulator signature must be ad-hoc without a certificate")
     if f"Identifier={BUNDLE_ID}" not in details.splitlines():
         raise ValueError("Signed bundle identifier does not match")
-    if entitlements["keychain-access-groups"] != [entitlements["application-identifier"]]:
-        raise ValueError("The app identifier must match its private Keychain group")
+    return entitlements
 
 
-def sign_simulator(args, *, run=subprocess.run, host=sys.platform):
+def verify_simulated_sections(raw, expected, architecture_count):
+    sections = []
+    current = None
+    for line in raw.decode("utf-8").splitlines():
+        if line.strip() == "Contents of (__TEXT,__entitlements) section":
+            current = bytearray()
+            sections.append(current)
+            continue
+        match = re.fullmatch(r"\s*[0-9a-fA-F]{8,16}\s+([0-9a-fA-F ]+)\s*", line)
+        if match is not None and current is not None:
+            current.extend(bytes.fromhex(match.group(1)))
+        elif line.strip():
+            current = None
+    if len(sections) != architecture_count or any(
+            plistlib.loads(bytes(section).rstrip(b"\0")) != expected for section in sections):
+        raise ValueError("Every Mach-O architecture must embed Xcode's simulated entitlements")
+    return len(sections)
+
+
+def sign_simulator(args, *, run=subprocess.run, run_build=run_bounded, host=sys.platform):
     workspace = Path(args.workspace).resolve()
     output = checked_path(args.output, workspace)
     if not any(output.resolve().is_relative_to(workspace / name) for name in ("artifacts/qa", "build/qa")):
         raise ValueError("Receipt must stay in the workspace QA evidence directories")
     output.parent.mkdir(parents=True, exist_ok=True)
-    receipt = {"schema": "bil.qa.simulator-adhoc-sign.v1", "status": "FAIL",
+    receipt = {"schema": "bil.qa.simulator-adhoc-sign.v2", "status": "FAIL",
                "source_head": args.source_head, "source_tree": args.source_tree,
-               "scope": "QA Debug iPhoneSimulator only; not a store signature",
+               "scope": "Xcode QA Debug iPhoneSimulator local signature only; not a store signature or launch proof",
                "release_app_identifier_prefix_verified": False,
                "native_keychain_test_status": "NOT_RUN_BY_HELPER", "commands": []}
 
-    def command(argv, *, allow_failure=False, public_readback=False, timeout=30):
-        result = run(argv, capture_output=True, timeout=timeout, check=False)
+    def command(argv, *, public_readback=False, timeout=30, log_path=None, allow_failure=False):
+        try:
+            result = run(argv, capture_output=True, timeout=timeout, check=False)
+        except subprocess.TimeoutExpired as failure:
+            if log_path is not None:
+                log_path.write_bytes((failure.stdout or b"") + (failure.stderr or b""))
+            raise
+        if log_path is not None:
+            log_path.write_bytes(result.stdout + result.stderr)
         row = {"argv": argv, "returncode": result.returncode,
                "stdout_sha256": digest(result.stdout), "stderr_sha256": digest(result.stderr)}
         if public_readback:
@@ -150,8 +182,48 @@ def sign_simulator(args, *, run=subprocess.run, host=sys.platform):
         if not all(re.fullmatch(r"[0-9a-f]{40}", value) for value in (args.source_head, args.source_tree)):
             raise ValueError("Source HEAD and tree hashes are required")
         app = checked_path(args.app, workspace)
-        if app.resolve() != workspace / "build/ios/iphonesimulator/Runner.app" or not app.is_dir():
-            raise ValueError("Only the existing generic QA Simulator app may be signed")
+        if app.resolve() != workspace / "build/ios/Debug-iphonesimulator/Runner.app":
+            raise ValueError("Only Xcode's exact QA Simulator output may be used")
+        if app.exists():
+            if any(path.name in {"embedded.mobileprovision", "embedded.provisionprofile"}
+                   for path in app.rglob("*")):
+                raise ValueError("A provisioned device/distribution bundle is forbidden")
+            before = command(["codesign", "--display", "--verbose=4", str(app)],
+                             public_readback=True, allow_failure=True)
+            if any(line.strip().startswith("Authority=") for line in
+                   before.stderr.decode("utf-8", errors="replace").splitlines()):
+                raise ValueError("Refusing to replace an existing certificate signature")
+        xcode = ["xcodebuild", "-workspace", str(workspace / "ios/Runner.xcworkspace"),
+                 "-scheme", "Runner", "-configuration", "Debug", "-sdk", "iphonesimulator",
+                 "-destination", "generic/platform=iOS Simulator",
+                 "-clonedSourcePackagesDirPath", str(workspace / "build/ios/SourcePackages"),
+                 "-disableAutomaticPackageResolution", "-skipPackageUpdates",
+                 f"BUILD_DIR={workspace / 'build/ios'}", "CODE_SIGN_IDENTITY=-",
+                 "CODE_SIGNING_ALLOWED=YES", "CODE_SIGNING_REQUIRED=YES",
+                 "PROVISIONING_PROFILE=", "PROVISIONING_PROFILE_SPECIFIER=",
+                 f"FLUTTER_TARGET={args.target}", "FLUTTER_BUILD_NUMBER=37"]
+        settings = runner_settings(command(xcode + ["-showBuildSettings", "-json"], timeout=120).stdout)
+        if settings["FLUTTER_TARGET"] != args.target or settings["FLUTTER_BUILD_NUMBER"] != "37":
+            raise ValueError("Xcode must build the exact requested entrypoint and build 37")
+        if (Path(settings["TARGET_BUILD_DIR"]).resolve() / settings["FULL_PRODUCT_NAME"]) != app.resolve():
+            raise ValueError("Resolved Xcode output does not match the exact Simulator app")
+        receipt["resolved_settings_allowlist"] = settings
+        source = checked_path(workspace / "ios" / str(settings["CODE_SIGN_ENTITLEMENTS"]), workspace / "ios/Runner")
+        if source.name != "RunnerDebug.entitlements":
+            raise ValueError("Only the resolved RunnerDebug source entitlements may be used")
+        source_bytes = source.read_bytes()
+        build_command = xcode + ["build"]
+        build_log = output.with_suffix(".xcode-build.log")
+        build_code = run_build(
+            build_command, label="xcode-simulator-local-build", log_path=build_log,
+            receipt_path=output.with_suffix(".xcode-build-result.json"), timeout_seconds=1500,
+        )
+        receipt["commands"].append({"argv": build_command, "returncode": build_code,
+                                    "log_sha256": digest(build_log.read_bytes())})
+        if build_code != 0:
+            raise RuntimeError(f"QA command failed ({build_code}): xcodebuild")
+        if not app.is_dir():
+            raise ValueError("Xcode did not produce the exact Simulator app")
         for path in app.rglob("*"):
             if path.is_symlink():
                 path.resolve().relative_to(app.resolve())
@@ -166,46 +238,43 @@ def sign_simulator(args, *, run=subprocess.run, host=sys.platform):
                 or info.get("CFBundleExecutable") != "Runner"):
             raise ValueError("Bundle identity, build 37 and Simulator platform must match")
         binary = checked_path(app / "Runner", app)
-        receipt["binary_sha256_before"] = digest(binary.read_bytes())
+        receipt["binary_sha256_after"] = digest(binary.read_bytes())
         platform_result = command(["xcrun", "vtool", "-show-build", str(binary)], public_readback=True)
         platforms = re.findall(r"^\s*platform\s+(\S+)\s*$", platform_result.stdout.decode("utf-8"), re.MULTILINE)
         if not platforms or any(value != "IOSSIMULATOR" for value in platforms):
             raise ValueError("Every executable architecture must be an actual iOS Simulator Mach-O")
-        receipt["executable_platforms"] = platforms
-        before = command(["codesign", "--display", "--verbose=4", "--entitlements", "-", "--xml", str(app)],
-                         allow_failure=True, public_readback=True)
-        receipt["before_readback_returncode"] = before.returncode
-        if any(line.strip().startswith("Authority=") for line in before.stderr.decode("utf-8", errors="replace").splitlines()):
-            raise ValueError("Refusing to replace an existing certificate signature")
-        settings_result = command([
-            "xcodebuild", "-showBuildSettings", "-json", "-workspace", str(workspace / "ios/Runner.xcworkspace"),
-            "-scheme", "Runner", "-configuration", "Debug", "-sdk", "iphonesimulator",
-            "-disableAutomaticPackageResolution", "-skipPackageUpdates",
-            "-destination", "generic/platform=iOS Simulator", f"BUILD_DIR={workspace / 'build/ios'}",
-            "CODE_SIGNING_ALLOWED=NO", "CODE_SIGNING_REQUIRED=NO", "CODE_SIGN_IDENTITY=-",
-            "PROVISIONING_PROFILE=", "PROVISIONING_PROFILE_SPECIFIER=",
-        ], timeout=120)
-        settings = runner_settings(settings_result.stdout)
-        receipt["resolved_settings_allowlist"] = settings
-        source = checked_path(workspace / "ios" / str(settings["CODE_SIGN_ENTITLEMENTS"]), workspace / "ios/Runner")
-        if source.name != "RunnerDebug.entitlements":
-            raise ValueError("Only the resolved RunnerDebug source entitlements may be used")
-        source_bytes = source.read_bytes()
-        entitlements, basis = simulator_entitlements(settings, plistlib.loads(source_bytes))
-        receipt.update(source_entitlements_sha256=digest(source_bytes), simulator_local_prefix_source=basis,
-                       requested_entitlements=entitlements)
-        entitlements_path = checked_path(output.with_suffix(".entitlements.plist"), workspace)
-        entitlements_path.write_bytes(plistlib.dumps(entitlements, fmt=plistlib.FMT_XML, sort_keys=True))
-        command(["codesign", "--force", "--sign", "-", "--timestamp=none", "--generate-entitlement-der",
-                 "--entitlements", str(entitlements_path), str(app)], public_readback=True)
-        command(["codesign", "--verify", "--strict", "--verbose=4", str(app)], public_readback=True)
+        simulated_path = Path(settings["LD_ENTITLEMENTS_SECTION"])
+        # Xcode's generated build intermediates may live in DerivedData. Read
+        # only its resolved xcent siblings; never create or rewrite either file.
+        if not simulated_path.is_absolute() or not simulated_path.name.endswith("-Simulated.xcent"):
+            raise ValueError("Xcode must identify its generated simulated entitlements")
+        signature_path = simulated_path.with_name(simulated_path.name.replace("-Simulated.xcent", ".xcent"))
+        if simulated_path.is_symlink() or signature_path.is_symlink():
+            raise ValueError("Generated Xcode entitlements may not be symlinks")
+        simulated = verify_simulated_entitlements(settings, plistlib.loads(source_bytes),
+                                                  plistlib.loads(simulated_path.read_bytes()))
+        linked_sections = command(["xcrun", "otool", "-s", "__TEXT", "__entitlements", str(binary)],
+                                  public_readback=True)
+        section_count = verify_simulated_sections(linked_sections.stdout, simulated, len(platforms))
+        expected_signature = plistlib.loads(signature_path.read_bytes())
+        # The restricted iOS capabilities belong to the simulated section,
+        # not to the host's code signature. In this QA profile Xcode emits {}.
+        if expected_signature != {}:
+            raise ValueError("Unexpected nonempty Xcode Simulator host-signature entitlements")
+        command(["codesign", "--verify", "--deep", "--strict", "--verbose=4", str(app)], public_readback=True)
         after = command(["codesign", "--display", "--verbose=4", "--entitlements", "-", "--xml", str(app)],
                         public_readback=True)
-        verify_readback(after.stdout, after.stderr.decode("utf-8", errors="replace"), entitlements)
+        signed = verify_readback(after.stdout, after.stderr.decode("utf-8", errors="replace"), expected_signature)
         if info_path.read_bytes() != info_bytes or source.read_bytes() != source_bytes:
-            raise ValueError("Signing must not change Info.plist or the project entitlements")
-        receipt.update(status="PASS_SIMULATOR_SIGNATURE_CHECK", matching_identifier_keychain_group=True,
-                       binary_sha256_after=digest(binary.read_bytes()), signed_entitlements=plistlib.loads(after.stdout))
+            raise ValueError("Verification must not change Info.plist or the project entitlements")
+        receipt.update(status="PASS_SIMULATOR_SIGNATURE_CHECK", executable_platforms=platforms,
+                       source_entitlements_sha256=digest(source_bytes),
+                       xcode_simulated_entitlements_sha256=digest(simulated_path.read_bytes()),
+                       xcode_signature_entitlements_sha256=digest(signature_path.read_bytes()),
+                       simulated_entitlement_sections_verified=section_count,
+                       simulated_entitlements=simulated, signed_entitlements=signed,
+                       signing_basis="Xcode Sign to Run Locally; separate simulated iOS capabilities",
+                       simulated_launch_proven=False)
     except Exception as error:
         receipt["error"] = f"{type(error).__name__}: {error}"
         raise
@@ -225,7 +294,7 @@ def main():
     except Exception as error:
         print(f"QA Simulator signing failed: {error}", file=sys.stderr)
         return 1
-    print(receipt["status"] + "; native Keychain validation still required")
+    print(receipt["status"] + "; native launch and Keychain validation still required")
     return 0
 
 

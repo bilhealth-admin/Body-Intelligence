@@ -112,3 +112,112 @@ jobs:
           path: ${{ runner.temp }}/bil-cert-live-1/
           if-no-files-found: error
           retention-days: 14
+
+  transactional-cloud-roundtrip:
+    name: Transactional live cloud roundtrip
+    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Initialize controlled transactional cloud evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, re
+          source = os.environ['GITHUB_SHA']
+          if not re.fullmatch('[0-9a-f]{40}', source):
+              raise SystemExit('Invalid transactional cloud source SHA')
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bil-transactional-cloud'
+          output.mkdir(parents=True, exist_ok=True)
+          (output / 'transactional-cloud-receipt.json').write_text(json.dumps({
+              'schema': 'bil.qa.transactional-cloud-roundtrip.v1', 'source_sha': source,
+              'status': 'STARTED', 'stage': 'workflow_setup',
+              'actual_live_cloud_roundtrip': False, 'rollback_readback_verified': False,
+          }, indent=2) + '\n', encoding='utf-8')
+          PY
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Reject false CLI success and unproved rollback using offline fixtures
+        shell: pwsh
+        run: ./tool/release_certification/test_transactional_cloud_roundtrip.ps1
+      - name: Execute the exact rollback-only SQL and require actual cleanup readback
+        id: transaction
+        shell: pwsh
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: ./tool/release_certification/run_transactional_cloud_roundtrip.ps1 -OutputDir "$env:RUNNER_TEMP/bil-transactional-cloud"
+      - name: Preserve actual transactional cloud outcome
+        if: always()
+        shell: bash
+        env:
+          PRIOR_JOB_STATUS: ${{ job.status }}
+          TRANSACTION_OUTCOME: ${{ steps.transaction.outcome }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bil-transactional-cloud'
+          output.mkdir(parents=True, exist_ok=True)
+          path = output / 'transactional-cloud-receipt.json'
+          try:
+              report = json.loads(path.read_text(encoding='utf-8-sig'))
+          except (OSError, ValueError):
+              report = {'stage': 'workflow_setup', 'status': 'FAIL'}
+          prior, outcome = os.environ['PRIOR_JOB_STATUS'], os.environ['TRANSACTION_OUTCOME']
+          passed = (prior == 'success' and outcome == 'success'
+                    and report.get('source_sha') == os.environ['GITHUB_SHA']
+                    and report.get('status') == 'PASS' and report.get('stage') == 'completed'
+                    and report.get('actual_live_cloud_roundtrip') is True
+                    and report.get('rollback_readback_verified') is True)
+          if not passed:
+              report.update(status='FAIL', actual_live_cloud_roundtrip=False)
+          report.update(job_prior_status=prior, transaction_step_outcome=outcome)
+          path.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          if prior == 'success' and not passed:
+              raise SystemExit('Transactional cloud outcome is not an actual completed PASS')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-transactional-cloud-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-transactional-cloud/
+          if-no-files-found: error
+          retention-days: 14
+
+  guarded-policy-cloud-e2e:
+    name: Guarded policy and cloud SQL E2E with independent residue
+    needs: live-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Exercise SQL outcome and cleanup failure handling without network
+        run: python3 -m unittest discover -s tools/qa -p test_bil_release_cloud_e2e.py -v
+      - name: Execute all existing synthetic rollback audits, preserving body and ACL guards
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p supabase/.temp
+          printf '%s' tgmanzhqulksykhslrzb > supabase/.temp/project-ref
+          python3 tools/qa/bil_release_cloud_e2e.py --output "$RUNNER_TEMP/bil-policy-cloud-e2e"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: bil-policy-cloud-e2e-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-policy-cloud-e2e/
+          if-no-files-found: error
+          retention-days: 14

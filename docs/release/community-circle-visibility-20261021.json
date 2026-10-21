@@ -1,0 +1,60 @@
+{
+  "status": "DEPLOYED_AND_EXACT_SCHEMA_READBACK_VERIFIED",
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "migration": {
+    "name": "community_circle_visibility_legacy_projection_guard_v1",
+    "version": "20261020210400",
+    "statements_md5": "a8ffe522b3a691787b13958023895637"
+  },
+  "migration_source": "supabase/migrations/20261020210400_community_circle_visibility_legacy_projection_guard_v1.sql",
+  "source_sha256": "10927e0267e5f90a6c7fa3150a87efd993313badac30d966ff5d6561d1beaad8",
+  "function_guard_only_diff": true,
+  "rpc_acls_owners_unchanged": true,
+  "private_helper_unchanged": true,
+  "hosted_read_only_denial_checks": "PASS",
+  "real_user_data_written": false,
+  "existing_ledger_rows_changed": false,
+  "limits": [
+    "No synthetic hosted member/post records inserted; member/block scenarios are isolated SQL proof.",
+    "Existing security advisor warnings remain; no zero-warning claim."
+  ],
+  "functions": [
+    {
+      "signature": "bil_list_community_circles_v1()",
+      "definition_sha256_lf": "c889c67409493e2cce29311f2b1b69a78caae5c9dc11b5047531331c29be2824",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "security_definer": true,
+      "owner": "postgres"
+    },
+    {
+      "signature": "bil_community_circle_post_refs_v1(text,timestamp with time zone,uuid,integer)",
+      "definition_sha256_lf": "5f8fd4e1a109a7eb5dad2b878a2bbda2a8d28c3e27cce05d6efe41734b1552c5",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "security_definer": true,
+      "owner": "postgres"
+    },
+    {
+      "signature": "bil_community_post_reference_metadata_v1(uuid[])",
+      "definition_sha256_lf": "e839f8c79129c6d8f27e83a1c3da6059ba7adff682bc5b0d580700a41a0f65ae",
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "security_definer": true,
+      "owner": "postgres"
+    },
+    {
+      "signature": "private.bil_circle_visible_v1(uuid)",
+      "definition_sha256_lf": "ce84a3694c895fa954bed87a8561740b0f3b9dcc80c8fa347e249bc21f865307",
+      "acl": "{postgres=X/postgres}",
+      "security_definer": true,
+      "owner": "postgres"
+    }
+  ],
+  "recorded_utc": "2026-10-20T21:09:26.621217+00:00",
+  "tests": {
+    "isolated_sql_files": 10,
+    "isolated_sql_tests_passed": 18,
+    "privacy_steps_passed": 7,
+    "post_rename_affected_test_passed": true,
+    "source_ledger_guard_negative_controls_passed": true
+  },
+  "security_advisors": "Same four advisor types before/after; existing INFO/WARN findings were not removed or claimed clean."
+}

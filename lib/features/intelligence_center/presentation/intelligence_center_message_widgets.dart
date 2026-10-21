@@ -9,6 +9,7 @@ class _MessageBubble extends StatelessWidget {
     this.onReport,
     this.onSpeak,
     this.onRetry,
+    this.retryLabel,
     this.onUndo,
     this.undoInProgress = false,
     this.onAction,
@@ -28,6 +29,7 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<AiCoachAnswerReportDraft>? onReport;
   final VoidCallback? onSpeak;
   final VoidCallback? onRetry;
+  final String? retryLabel;
   final VoidCallback? onUndo;
   final bool undoInProgress;
   final ValueChanged<IntelligenceAction>? onAction;
@@ -333,7 +335,12 @@ class _MessageBubble extends StatelessWidget {
                           child: Icon(Icons.refresh_rounded, size: 18),
                         ),
                         label: Text(
-                          intelligenceText(context, 'Retry', 'إعادة المحاولة'),
+                          retryLabel ??
+                              intelligenceText(
+                                context,
+                                'Retry',
+                                'إعادة المحاولة',
+                              ),
                         ),
                       ),
                     ),

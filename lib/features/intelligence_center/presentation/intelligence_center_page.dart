@@ -155,6 +155,7 @@ part 'intelligence_conversation_voice_transcript.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_media_confirmation.dart';
 part 'intelligence_query_flow.dart';
+part 'intelligence_query_retry.dart';
 part 'intelligence_query_decision.dart';
 part 'intelligence_action_flow.dart';
 part 'intelligence_meal_action_flow.dart';
@@ -248,6 +249,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     String? detectedLanguageTag,
     bool autoSpeak,
     CoachInputChannel channel,
+    CoachCloudRequest cloudRequest,
   })?
   failedRequest;
   bool sending = false;

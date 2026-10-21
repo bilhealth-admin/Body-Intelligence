@@ -55161,45 +55161,179 @@ abstract final class ExtendedRuntimeCopy {
       "uk":
           "Ваша надбавка AI Coach вичерпана за цей період. Жодне повідомлення не стягувалося, і я не буду прикидатися, що це відповідь Близнюків.",
     },
-    "The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.": {
+    "The personalized AI Coach is temporarily unavailable. If this request was sent, check its status before trying again.": {
       "de":
-          "Das personalisierte AI Coach ist vorübergehend nicht verfügbar. Es wurde keine Nachricht berechnet; Versuchen Sie es in Kürze noch einmal.",
+          "Der personalisierte AI Coach ist vorübergehend nicht verfügbar. Falls diese Anfrage gesendet wurde, prüfen Sie vor einem erneuten Versuch ihren Status.",
       "it":
-          "Il AI Coach personalizzato è temporaneamente non disponibile. Nessun messaggio è stato addebitato; riprovare a breve.",
+          "Il AI Coach personalizzato è temporaneamente non disponibile. Se questa richiesta è stata inviata, verificane lo stato prima di riprovare.",
       "pt-BR":
-          "O AI Coach personalizado está temporariamente indisponível. Nenhuma mensagem foi cobrada; tente novamente em breve.",
+          "O AI Coach personalizado está temporariamente indisponível. Se esta solicitação foi enviada, verifique o status antes de tentar novamente.",
       "pt-PT":
-          "O AI Coach personalizado está temporariamente indisponível. Nenhuma mensagem foi cobrada; tente novamente em breve.",
+          "O AI Coach personalizado está temporariamente indisponível. Se este pedido foi enviado, verifique o estado antes de tentar novamente.",
       "ur":
-          "ذاتی نوعیت کا AI Coach عارضی طور پر دستیاب نہیں ہے۔ کوئی پیغام چارج نہیں کیا گیا تھا؛ تھوڑی دیر میں دوبارہ کوشش کریں.",
+          "ذاتی AI Coach عارضی طور پر دستیاب نہیں ہے۔ اگر یہ درخواست بھیجی گئی تھی تو دوبارہ کوشش کرنے سے پہلے اس کی حیثیت چیک کریں۔",
       "fa":
-          "AI Coach شخصی شده به طور موقت در دسترس نیست. هیچ پیامی شارژ نشد. به زودی دوباره امتحان کنید",
+          "AI Coach شخصی موقتاً در دسترس نیست. اگر این درخواست ارسال شده است، پیش از تلاش مجدد وضعیت آن را بررسی کنید.",
       "hi":
-          "वैयक्तिकृत AI Coach अस्थायी रूप से अनुपलब्ध है। किसी संदेश का शुल्क नहीं लिया गया; शीघ्र ही पुनः प्रयास करें.",
+          "व्यक्तिगत AI Coach अस्थायी रूप से उपलब्ध नहीं है। यदि यह अनुरोध भेजा गया था, तो फिर कोशिश करने से पहले उसकी स्थिति जाँचें।",
       "id":
-          "AI Coach yang dipersonalisasi untuk sementara tidak tersedia. Tidak ada pesan yang dikenakan biaya; coba lagi sebentar lagi.",
+          "AI Coach personal sementara tidak tersedia. Jika permintaan ini telah dikirim, periksa statusnya sebelum mencoba lagi.",
       "ms":
-          "AI Coach yang diperibadikan tidak tersedia buat sementara waktu. Tiada mesej dicaj; cuba lagi sebentar lagi.",
+          "AI Coach peribadi tidak tersedia buat sementara waktu. Jika permintaan ini telah dihantar, semak statusnya sebelum mencuba lagi.",
       "ja":
-          "パーソナライズされた AI Coach は一時的に利用できなくなります。メッセージには料金はかかりませんでした。すぐにもう一度試してください。",
+          "パーソナライズされた AI Coach は一時的に利用できません。このリクエストが送信済みの場合は、再試行する前に状態を確認してください。",
       "ko":
-          "맞춤형 AI Coach를 일시적으로 사용할 수 없습니다. 요금이 부과된 메시지가 없습니다. 잠시 후 다시 시도해 보세요.",
-      "zh-Hans": "个性化的AI Coach暂时不可用。未收取任何消息费用；稍后再试。",
-      "zh-Hant": "個性化的AI Coach暫時不可用。未收取任何消息費用；稍後再試。",
+          "맞춤형 AI Coach를 일시적으로 사용할 수 없습니다. 이 요청이 전송되었다면 다시 시도하기 전에 상태를 확인하세요.",
+      "zh-Hans": "个性化AI Coach暂时不可用。如果此请求已发送，请先检查状态再重试。",
+      "zh-Hant": "個人化AI Coach暫時無法使用。如果此請求已傳送，請先檢查狀態再重試。",
       "ru":
-          "Персонализированный AI Coach временно недоступен. Плата за сообщение не взималась; попробуйте еще раз в ближайшее время.",
+          "Персональный AI Coach временно недоступен. Если этот запрос был отправлен, проверьте его статус перед повторной попыткой.",
       "bn":
-          "ব্যক্তিগতকৃত AI Coach সাময়িকভাবে অনুপলব্ধ৷ কোন বার্তা চার্জ করা হয়নি; শীঘ্রই আবার চেষ্টা করুন",
+          "ব্যক্তিগত AI Coach সাময়িকভাবে অনুপলব্ধ। এই অনুরোধ পাঠানো হয়ে থাকলে আবার চেষ্টা করার আগে তার অবস্থা যাচাই করুন।",
       "vi":
-          "AI Coach được cá nhân hóa tạm thời không khả dụng. Không có tin nhắn nào bị tính phí; hãy thử lại ngay.",
+          "AI Coach cá nhân tạm thời không khả dụng. Nếu yêu cầu này đã được gửi, hãy kiểm tra trạng thái trước khi thử lại.",
       "th":
-          "AI Coach ส่วนบุคคลไม่พร้อมใช้งานชั่วคราว ไม่มีการเรียกเก็บเงินจากข้อความ โปรดลองอีกครั้งเร็วๆ นี้",
+          "AI Coach ส่วนบุคคลไม่พร้อมใช้งานชั่วคราว หากส่งคำขอนี้แล้ว ให้ตรวจสอบสถานะก่อนลองอีกครั้ง",
       "pl":
-          "Spersonalizowany AI Coach jest chwilowo niedostępny. Żadna wiadomość nie została obciążona; spróbuj ponownie wkrótce.",
+          "Spersonalizowany AI Coach jest chwilowo niedostępny. Jeśli ten wniosek został wysłany, sprawdź jego status przed kolejną próbą.",
       "nl":
-          "De gepersonaliseerde AI Coach is tijdelijk niet beschikbaar. Er is geen bericht in rekening gebracht; probeer het binnenkort opnieuw.",
+          "De persoonlijke AI Coach is tijdelijk niet beschikbaar. Als dit verzoek is verzonden, controleer dan eerst de status voordat u het opnieuw probeert.",
       "uk":
-          "Персоналізований AI Coach тимчасово недоступний. Плата за повідомлення не стягувалася; спробуйте ще раз незабаром.",
+          "Персоналізований AI Coach тимчасово недоступний. Якщо цей запит надіслано, перевірте його стан перед повторною спробою.",
+    },
+    "This request completed, but its reply was not received. It will not be sent again.": {
+      "de":
+          "Diese Anfrage wurde abgeschlossen, aber die Antwort wurde nicht empfangen. Sie wird nicht erneut gesendet.",
+      "it":
+          "Questa richiesta è stata completata, ma la risposta non è stata ricevuta. Non verrà inviata di nuovo.",
+      "pt-BR":
+          "Esta solicitação foi concluída, mas a resposta não foi recebida. Ela não será enviada novamente.",
+      "pt-PT":
+          "Este pedido foi concluído, mas a resposta não foi recebida. Não será enviado novamente.",
+      "ur":
+          "یہ درخواست مکمل ہو گئی، لیکن اس کا جواب موصول نہیں ہوا۔ اسے دوبارہ نہیں بھیجا جائے گا۔",
+      "fa":
+          "این درخواست تکمیل شد، اما پاسخ آن دریافت نشد. دوباره ارسال نخواهد شد.",
+      "hi":
+          "यह अनुरोध पूरा हुआ, लेकिन उसका उत्तर प्राप्त नहीं हुआ। इसे दोबारा नहीं भेजा जाएगा।",
+      "id":
+          "Permintaan ini selesai, tetapi balasannya tidak diterima. Permintaan tidak akan dikirim ulang.",
+      "ms":
+          "Permintaan ini telah selesai, tetapi balasannya tidak diterima. Ia tidak akan dihantar semula.",
+      "ja": "このリクエストは完了しましたが、返信を受信できませんでした。再送信は行いません。",
+      "ko": "이 요청은 완료되었지만 응답을 받지 못했습니다. 다시 전송하지 않습니다.",
+      "zh-Hans": "此请求已完成，但未收到回复。不会再次发送。",
+      "zh-Hant": "此請求已完成，但未收到回覆。不會再次傳送。",
+      "ru":
+          "Этот запрос выполнен, но ответ не получен. Повторно отправлять его не будем.",
+      "bn":
+          "এই অনুরোধ সম্পন্ন হয়েছে, কিন্তু উত্তর পাওয়া যায়নি। এটি আবার পাঠানো হবে না।",
+      "vi":
+          "Yêu cầu này đã hoàn tất nhưng chưa nhận được phản hồi. Yêu cầu sẽ không được gửi lại.",
+      "th": "คำขอนี้เสร็จสิ้นแล้ว แต่ไม่ได้รับคำตอบ ระบบจะไม่ส่งซ้ำ",
+      "pl":
+          "Ten wniosek został wykonany, ale odpowiedź nie dotarła. Nie zostanie wysłany ponownie.",
+      "nl":
+          "Dit verzoek is voltooid, maar het antwoord is niet ontvangen. Het wordt niet opnieuw verzonden.",
+      "uk":
+          "Цей запит виконано, але відповідь не отримано. Його не буде надіслано повторно.",
+    },
+    "This request is still being processed. Check its status again shortly.": {
+      "de":
+          "Diese Anfrage wird noch bearbeitet. Prüfen Sie ihren Status in Kürze erneut.",
+      "it":
+          "Questa richiesta è ancora in elaborazione. Verificane nuovamente lo stato tra poco.",
+      "pt-BR":
+          "Esta solicitação ainda está sendo processada. Verifique o status novamente em breve.",
+      "pt-PT":
+          "Este pedido ainda está a ser processado. Verifique o estado novamente em breve.",
+      "ur":
+          "اس درخواست پر ابھی کام ہو رہا ہے۔ کچھ دیر بعد اس کی حیثیت دوبارہ چیک کریں۔",
+      "fa":
+          "این درخواست هنوز در حال پردازش است. کمی بعد وضعیت آن را دوباره بررسی کنید.",
+      "hi":
+          "इस अनुरोध पर अभी काम चल रहा है। थोड़ी देर बाद उसकी स्थिति फिर जाँचें।",
+      "id":
+          "Permintaan ini masih diproses. Periksa kembali statusnya sebentar lagi.",
+      "ms":
+          "Permintaan ini masih diproses. Semak statusnya semula sebentar lagi.",
+      "ja": "このリクエストはまだ処理中です。しばらくしてから状態を再確認してください。",
+      "ko": "이 요청은 아직 처리 중입니다. 잠시 후 상태를 다시 확인하세요.",
+      "zh-Hans": "此请求仍在处理中。请稍后再次检查状态。",
+      "zh-Hant": "此請求仍在處理中。請稍後再次檢查狀態。",
+      "ru":
+          "Этот запрос ещё обрабатывается. Проверьте его статус немного позже.",
+      "bn":
+          "এই অনুরোধ এখনও প্রক্রিয়াধীন। কিছুক্ষণ পরে আবার তার অবস্থা যাচাই করুন।",
+      "vi":
+          "Yêu cầu này vẫn đang được xử lý. Hãy kiểm tra lại trạng thái sau ít phút.",
+      "th":
+          "คำขอนี้ยังอยู่ระหว่างดำเนินการ โปรดตรวจสอบสถานะอีกครั้งในอีกสักครู่",
+      "pl":
+          "Ten wniosek jest nadal przetwarzany. Sprawdź jego status za chwilę.",
+      "nl":
+          "Dit verzoek wordt nog verwerkt. Controleer de status over een ogenblik opnieuw.",
+      "uk": "Цей запит ще обробляється. Перевірте його стан трохи пізніше.",
+    },
+    "The request status could not be verified. It will not be sent again to avoid duplicate charges.": {
+      "de":
+          "Der Anfragestatus konnte nicht überprüft werden. Die Anfrage wird nicht erneut gesendet, um doppelte Abbuchungen zu vermeiden.",
+      "it":
+          "Impossibile verificare lo stato della richiesta. Non verrà inviata di nuovo per evitare doppi addebiti.",
+      "pt-BR":
+          "Não foi possível verificar o status da solicitação. Ela não será enviada novamente para evitar cobranças duplicadas.",
+      "pt-PT":
+          "Não foi possível verificar o estado do pedido. Não será enviado novamente para evitar cobranças duplicadas.",
+      "ur":
+          "درخواست کی حیثیت کی تصدیق نہیں ہو سکی۔ دوہری کٹوتی سے بچنے کے لیے اسے دوبارہ نہیں بھیجا جائے گا۔",
+      "fa":
+          "وضعیت درخواست تأیید نشد. برای جلوگیری از کسر دوباره اعتبار، مجدداً ارسال نخواهد شد.",
+      "hi":
+          "अनुरोध की स्थिति सत्यापित नहीं हो सकी। दोहरी कटौती से बचने के लिए इसे दोबारा नहीं भेजा जाएगा।",
+      "id":
+          "Status permintaan tidak dapat diverifikasi. Permintaan tidak akan dikirim ulang untuk menghindari pemotongan ganda.",
+      "ms":
+          "Status permintaan tidak dapat disahkan. Ia tidak akan dihantar semula untuk mengelakkan potongan berganda.",
+      "ja": "リクエストの状態を確認できませんでした。二重の残高消費を防ぐため、再送信は行いません。",
+      "ko": "요청 상태를 확인할 수 없습니다. 중복 차감을 방지하기 위해 다시 전송하지 않습니다.",
+      "zh-Hans": "无法核实请求状态。为避免重复扣除额度，不会再次发送。",
+      "zh-Hant": "無法核實請求狀態。為避免重複扣除額度，不會再次傳送。",
+      "ru":
+          "Не удалось проверить статус запроса. Он не будет отправлен повторно во избежание двойного списания.",
+      "bn":
+          "অনুরোধের অবস্থা যাচাই করা যায়নি। দ্বিগুণ কাটা এড়াতে এটি আবার পাঠানো হবে না।",
+      "vi":
+          "Không thể xác minh trạng thái yêu cầu. Yêu cầu sẽ không được gửi lại để tránh trừ số dư hai lần.",
+      "th":
+          "ไม่สามารถยืนยันสถานะคำขอได้ ระบบจะไม่ส่งซ้ำเพื่อป้องกันการหักยอดซ้ำ",
+      "pl":
+          "Nie udało się potwierdzić statusu wniosku. Nie zostanie wysłany ponownie, aby uniknąć podwójnego obciążenia.",
+      "nl":
+          "De verzoekstatus kon niet worden gecontroleerd. Het wordt niet opnieuw verzonden om dubbele afschrijving te voorkomen.",
+      "uk":
+          "Не вдалося перевірити стан запиту. Його не буде надіслано повторно, щоб уникнути подвійного списання.",
+    },
+    "Check request status": {
+      "de": "Anfragestatus prüfen",
+      "it": "Verifica stato richiesta",
+      "pt-BR": "Verificar status da solicitação",
+      "pt-PT": "Verificar estado do pedido",
+      "ur": "درخواست کی حیثیت چیک کریں",
+      "fa": "بررسی وضعیت درخواست",
+      "hi": "अनुरोध की स्थिति जाँचें",
+      "id": "Periksa status permintaan",
+      "ms": "Semak status permintaan",
+      "ja": "リクエストの状態を確認",
+      "ko": "요청 상태 확인",
+      "zh-Hans": "检查请求状态",
+      "zh-Hant": "檢查請求狀態",
+      "ru": "Проверить статус запроса",
+      "bn": "অনুরোধের অবস্থা যাচাই করুন",
+      "vi": "Kiểm tra trạng thái yêu cầu",
+      "th": "ตรวจสอบสถานะคำขอ",
+      "pl": "Sprawdź status wniosku",
+      "nl": "Verzoekstatus controleren",
+      "uk": "Перевірити стан запиту",
     },
     "Thanks — your feedback was saved.": {
       "de": "Vielen Dank – Ihr Feedback wurde gespeichert.",

@@ -49,3 +49,35 @@ jobs:
           path: ${{ runner.temp }}/admin-compatibility/
           if-no-files-found: error
           retention-days: 14
+
+  browser:
+    name: Approved admin synthetic browser E2E
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 097dda710b2c8f3a98a413052b5d078863aac90c
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Install isolated browser test requirements
+        shell: bash
+        run: |
+          python3 -m venv /tmp/bil-e2e
+          /tmp/bil-e2e/bin/pip install --quiet playwright==1.56.0
+          if ! command -v google-chrome >/dev/null && ! command -v chromium >/dev/null; then
+            /tmp/bil-e2e/bin/python -m playwright install chromium
+          fi
+      - name: Synthetic responsive browser E2E, no Production calls
+        run: |
+          mkdir -p /tmp/bil-admin-screenshots
+          BIL_ADMIN_E2E_ARTIFACTS=/tmp/bil-admin-screenshots \
+            /tmp/bil-e2e/bin/python tool/admin_web/browser_e2e/browser_e2e.py
+      - name: Save synthetic screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-admin-synthetic-mobile-proof-097dda71-${{ github.sha }}
+          path: /tmp/bil-admin-screenshots/*.png
+          if-no-files-found: error
+          retention-days: 7

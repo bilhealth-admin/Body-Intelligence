@@ -37,7 +37,7 @@ IPAD_UDID=''
 ACTIVE_DEVICE=''
 BOOTED_DEVICE=''
 cleanup() {
-  local original_status=$? label device
+  local original_status=$? label device installed
   trap - EXIT
   set +e
   for pair in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do
@@ -50,9 +50,23 @@ cleanup() {
         # diagnostics before deletion so a SpringBoard denial is actionable.
         stage "$label-launch-diagnostics" 45 "$OUT/$label-launch-diagnostics.log" \
           xcrun simctl spawn "$device" log show --last 3m --style compact \
-          --predicate 'process == "Runner" OR (process == "SpringBoard" AND (eventMessage CONTAINS "com.bilhealth.bodyintelligencelog"))'
+          --predicate 'process IN {"Runner", "runningboardd", "launchd_sim", "amfid", "installd"} OR (process == "SpringBoard" AND eventMessage CONTAINS "com.bilhealth.bodyintelligencelog")'
+        stage "$label-host-launch-diagnostics" 45 "$OUT/$label-host-launch-diagnostics.log" \
+          /usr/bin/log show --last 3m --style compact \
+          --predicate 'eventMessage CONTAINS "com.bilhealth.bodyintelligencelog" OR (process IN {"launchd_sim", "amfid", "taskgated-helper"} AND (eventMessage CONTAINS "Runner" OR eventMessage CONTAINS "spawn failed"))'
         stage "$label-bundle-signature-verification" 30 "$OUT/$label-bundle-signature-verification.log" \
-          codesign --verify --deep --strict --verbose=4 "$GITHUB_WORKSPACE/build/ios/iphonesimulator/Runner.app"
+          codesign --verify --deep --strict --verbose=4 "$GITHUB_WORKSPACE/build/ios/Debug-iphonesimulator/Runner.app"
+        if stage "$label-installed-bundle" 30 "$OUT/$label-installed-bundle.log" \
+            xcrun simctl get_app_container "$device" com.bilhealth.bodyintelligencelog app; then
+          installed="$(tr -d '\r\n' < "$OUT/$label-installed-bundle.log")"
+          case "$installed" in
+            "$HOME/Library/Developer/CoreSimulator/Devices/$device/data/Containers/Bundle/Application/"*/Runner.app)
+              stage "$label-installed-binary-hash" 30 "$OUT/$label-installed-binary-hash.log" \
+                shasum -a 256 "$installed/Runner"
+              stage "$label-installed-signature" 30 "$OUT/$label-installed-signature.log" \
+                codesign --display --verbose=4 --entitlements - --xml "$installed" ;;
+          esac
+        fi
       fi
       stage "$label-failure-screen" 30 "$OUT/$label-failure-screen.log" \
         xcrun simctl io "$device" screenshot "$OUT/$label-failure.png"
@@ -159,19 +173,20 @@ for KIND in "${KINDS[@]}"; do
       TARGET=integration_test/native_feature_splashes_test.dart
       DRIVER=test_driver/native_feature_splashes_driver.dart ;;
   esac
-  stage "$KIND-generic-build" 1800 "$OUT/$KIND-generic-build.log" \
-    flutter --verbose build ios --simulator --debug --no-codesign --no-pub \
+  stage "$KIND-generic-config" 900 "$OUT/$KIND-generic-config.log" \
+    flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub \
     --build-number 37 --target "$TARGET" "${DEFINES[@]}"
-  APP="$GITHUB_WORKSPACE/build/ios/iphonesimulator/Runner.app"
-  test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '37'
-  test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
-  # Local pseudo-identity '-' only: no certificate, provisioning or store signing.
-  # The real Keychain integration test below still decides native correctness.
-  stage "$KIND-simulator-adhoc-sign" 240 "$OUT/$KIND-simulator-adhoc-sign.log" \
+  APP="$GITHUB_WORKSPACE/build/ios/Debug-iphonesimulator/Runner.app"
+  # Xcode signs its actual output with the local '-' pseudo-identity. Keep
+  # simulated iOS capabilities separate from the host code signature, as in
+  # the successful XCTest bundle. No certificate or provisioning is requested.
+  stage "$KIND-xcode-simulator-build" 1800 "$OUT/$KIND-xcode-simulator-build.log" \
     python3 .github/scripts/bil_ios_simulator_adhoc_sign.py \
     --qa-simulator-only --workspace "$GITHUB_WORKSPACE" --app "$APP" \
     --output "$GITHUB_WORKSPACE/$OUT/$KIND-simulator-signature.json" \
     --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE"
+  test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '37'
+  test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
   shasum -a 256 "$APP/Runner" > "$OUT/$KIND-binary.sha256"
   # Export only compiled SDK declarations/versions; no app data or secrets.
   # This reuses the existing generic QA bundle, not another build or signing.

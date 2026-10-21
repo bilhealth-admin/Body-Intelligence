@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/runtime_copy.dart';
-import '../../../shared/widgets/bil_premium_trust_surface.dart';
 import '../../../shared/widgets/bil_pearl_alert_dialog.dart';
 import '../../community/services/community_owner_operation.dart';
 
@@ -24,6 +23,57 @@ String mealVisionConsentText(BuildContext context, String english) =>
       Localizations.localeOf(context).toLanguageTag(),
     ) ??
     english;
+
+/// Presentation only: opening or dismissing this disclosure never saves a grant.
+/// The shared dialog scrolls its disclosure while keeping both actions outside
+/// the scroll area. Avoid nesting another padded card inside its narrow body.
+Future<bool?> showMealVisionConsentDisclosure(
+  BuildContext context,
+) => showDialog<bool>(
+  context: context,
+  barrierDismissible: false,
+  builder: (dialogContext) => BilPearlAlertDialog(
+    title: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          Icons.image_search_rounded,
+          color: Theme.of(dialogContext).colorScheme.primary,
+          size: 24,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            mealVisionConsentText(
+              dialogContext,
+              'Send this meal photo to Google Gemini?',
+            ),
+          ),
+        ),
+      ],
+    ),
+    content: Text(
+      mealVisionConsentText(
+        dialogContext,
+        'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.',
+      ),
+    ),
+    actions: [
+      OutlinedButton(
+        key: const Key('meal-vision-consent-decline'),
+        style: OutlinedButton.styleFrom(minimumSize: const Size(136, 48)),
+        onPressed: () => Navigator.pop(dialogContext, false),
+        child: Text(mealVisionConsentText(dialogContext, "Don't Allow")),
+      ),
+      FilledButton(
+        key: const Key('meal-vision-consent-accept'),
+        style: FilledButton.styleFrom(minimumSize: const Size(136, 48)),
+        onPressed: () => Navigator.pop(dialogContext, true),
+        child: Text(mealVisionConsentText(dialogContext, 'Allow & Continue')),
+      ),
+    ],
+  ),
+);
 
 Future<bool> loadMealVisionConsent() async {
   final client = mealVisionConsentClient();
@@ -128,38 +178,7 @@ Future<bool> _ensureMealVisionConsent(
   }
   operation.check();
   if (!context.mounted) return false;
-  final granted = await showDialog<bool>(
-    context: context,
-    barrierDismissible: false,
-    builder: (dialogContext) => BilPearlAlertDialog(
-      title: Text(mealVisionConsentText(dialogContext, 'Meal photo analysis')),
-      content: SingleChildScrollView(
-        child: BilPremiumTrustSurface(
-          icon: Icons.image_search_rounded,
-          title: mealVisionConsentText(
-            dialogContext,
-            'Send this meal photo to Google Gemini?',
-          ),
-          body: mealVisionConsentText(
-            dialogContext,
-            'If you agree, BIL sends the photo you select, your app language, and necessary technical request metadata to Google Gemini, a third-party AI service operated by Google. It is used to suggest foods and portions for your review. Nothing is logged until you confirm the results.\n\nYou can decline and continue with manual food entry. You can withdraw consent later in Privacy settings.',
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          key: const Key('meal-vision-consent-decline'),
-          onPressed: () => Navigator.pop(dialogContext, false),
-          child: Text(mealVisionConsentText(dialogContext, "Don't Allow")),
-        ),
-        FilledButton(
-          key: const Key('meal-vision-consent-accept'),
-          onPressed: () => Navigator.pop(dialogContext, true),
-          child: Text(mealVisionConsentText(dialogContext, 'Allow & Continue')),
-        ),
-      ],
-    ),
-  );
+  final granted = await showMealVisionConsentDisclosure(context);
   operation.check();
   if (granted == null || !context.mounted) return false;
   try {

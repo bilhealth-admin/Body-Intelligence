@@ -2,8 +2,10 @@
 // Native SDK and authenticated delivery boundary are controlled fixtures;
 // not a financial ledger, device, StoreKit, Play or Production test.
 import 'dart:async';
+import 'dart:convert';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
+import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_benefit_delivery.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/app_purchase_coordinator.dart';
@@ -12,6 +14,7 @@ import 'package:body_intelligence_log/features/commerce/providers/app_purchase_p
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/ai_boost_purchase_service.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_experience_presentation.dart';
 import 'package:body_intelligence_log/app/environment/app_environment.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
@@ -74,15 +77,50 @@ class _QuietSubscriptionLane extends VerifiedStorePurchaseService {
   Future<void> initialize() async {}
 }
 
+class _HeldReservationPreferences extends PreferencesRepository {
+  _HeldReservationPreferences(super.database);
+  final reserved = Completer<void>();
+  final releaseReservation = Completer<void>();
+
+  @override
+  Future<bool> mutateIfUnchanged({
+    required Map<String, String?> expected,
+    Map<String, String> set = const {},
+    Iterable<String> remove = const [],
+    bool Function()? isCurrent,
+  }) async {
+    final committed = await super.mutateIfUnchanged(
+      expected: expected,
+      set: set,
+      remove: remove,
+      isCurrent: isCurrent,
+    );
+    if (committed &&
+        !reserved.isCompleted &&
+        set.entries.any(
+          (entry) =>
+              entry.key.startsWith('experience.store_confirmation.v1.') &&
+              (jsonDecode(entry.value) as Map)['state'] == 'reserved',
+        )) {
+      reserved.complete();
+      await releaseReservation.future;
+    }
+    return committed;
+  }
+}
+
 void main() {
   setUpAll(loadVisualEvidenceFont);
-  for (final (width, refundAtFinish) in [
-    (390.0, false),
-    (320.0, false),
-    (390.0, true),
+  for (final (width, refundAtFinish, pauseAtReservation) in [
+    (390.0, false, false),
+    (320.0, false, false),
+    (390.0, true, false),
+    (390.0, false, true),
   ]) {
     testWidgets(
-      refundAtFinish
+      pauseAtReservation
+          ? 'commerce race regression: confirmation survives background during journal reservation'
+          : refundAtFinish
           ? 'trusted Google refund during finish cancels queued confirmation and preserves draft'
           : 'Boost confirmation after route exit before native finish at $width',
       (tester) async {
@@ -126,6 +164,7 @@ void main() {
           localOwnerId: 'fixture-A',
         );
         await tester.runAsync(() => db.customSelect('SELECT 1').get());
+        final heldPreferences = _HeldReservationPreferences(db);
         final delivery = StoreBenefitDelivery(
           ownerId: 'fixture-A',
           store: refundAtFinish ? 'google_play' : 'app_store',
@@ -150,6 +189,8 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             databaseProvider.overrideWithValue(db),
+            if (pauseAtReservation)
+              preferencesRepositoryProvider.overrideWithValue(heldPreferences),
             verifiedEntitlementOwnerIdProvider.overrideWithValue('fixture-A'),
             appBoostPurchaseFactoryProvider.overrideWithValue(() => boost),
             appSubscriptionPurchaseFactoryProvider.overrideWithValue(
@@ -290,6 +331,26 @@ void main() {
           }
           release!();
           release = null;
+          if (pauseAtReservation) {
+            await _until(tester, () => heldPreferences.reserved.isCompleted);
+            for (final state in [
+              AppLifecycleState.inactive,
+              AppLifecycleState.hidden,
+              AppLifecycleState.paused,
+            ]) {
+              tester.binding.handleAppLifecycleStateChanged(state);
+            }
+            heldPreferences.releaseReservation.complete();
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 30)),
+            );
+            await tester.pump();
+            expect(
+              find.byKey(const Key('store-benefit-confirmation')),
+              findsNothing,
+            );
+            _resumeApp(tester);
+          }
           await _until(
             tester,
             () => find
@@ -306,6 +367,28 @@ void main() {
             findsOneWidget,
           );
           expect(draft.text, 'مسودة محفوظة');
+          if (pauseAtReservation) {
+            expect(
+              find.byKey(const Key('store-benefit-confirmation')),
+              findsOneWidget,
+            );
+            expect(boost.verifiedCreditsRevision, 1);
+            expect(native.launches, 1);
+            expect(native.finishes, 1);
+            await tester.tap(
+              find.byKey(const Key('store-confirmation-continue')),
+            );
+            await tester.pumpAndSettle();
+            native.finish.complete();
+            await _until(tester, () => boost.canPurchase);
+            expect(
+              find.byKey(const Key('store-benefit-confirmation')),
+              findsNothing,
+            );
+            expect(draft.text, 'مسودة محفوظة');
+            expect(tester.takeException(), isNull);
+            return;
+          }
           await captureClosureFrames(
             tester,
             find.byKey(const Key('purchase-root-capture')),
@@ -369,6 +452,10 @@ void main() {
           expect(continued, isTrue);
           expect(tester.takeException(), isNull);
         } finally {
+          if (!heldPreferences.releaseReservation.isCompleted) {
+            heldPreferences.releaseReservation.complete();
+          }
+          _resumeApp(tester);
           release?.call();
           if (!native.finish.isCompleted) native.finish.complete();
           await tester.pumpWidget(const SizedBox.shrink());
@@ -398,4 +485,16 @@ Future<void> _until(WidgetTester tester, bool Function() condition) async {
     await tester.pump(const Duration(milliseconds: 10));
   }
   expect(condition(), isTrue);
+}
+
+void _resumeApp(WidgetTester tester) {
+  if (tester.binding.lifecycleState == AppLifecycleState.paused) {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+  }
+  if (tester.binding.lifecycleState == AppLifecycleState.hidden) {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+  }
+  if (tester.binding.lifecycleState != AppLifecycleState.resumed) {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  }
 }

@@ -32,18 +32,21 @@ extension VerifiedStorePurchasePending on VerifiedStorePurchaseService {
     }
     final visit = _storeVisit.capture();
     for (final entry in _pendingVerifiedFinishes.entries.toList()) {
+      if (_disposed || !_storeVisit.isCurrent(visit)) return;
       try {
         await completeVerifiedNativePurchase(
           _purchase,
           entry.value,
         ).timeout(const Duration(seconds: 12));
-        if (!_storeVisit.isCurrent(visit)) return;
+        if (_disposed || !_storeVisit.isCurrent(visit)) return;
         _pendingVerifiedFinishes.remove(entry.key);
       } on Object {
+        if (_disposed || !_storeVisit.isCurrent(visit)) return;
         /* Keep this native acknowledgement available for retry. */
       }
     }
     if (!_disposed &&
+        _storeVisit.isCurrent(visit) &&
         _pendingVerifiedFinishes.isEmpty &&
         state == VerifiedStoreState.verified) {
       messageCode = lastVerifiedProductId == StoreCatalogConfiguration.aiBoost

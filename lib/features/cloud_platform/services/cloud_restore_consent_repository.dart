@@ -81,8 +81,7 @@ final class CloudRestoreConsentRepository {
     _auth = backend.ownerChanges.listen((owner) {
       if (owner == _owner) return;
       _owner = owner;
-      _epoch++;
-      _lastState = null;
+      invalidate();
       _denied.clear();
     }, onError: (Object _, StackTrace _) => invalidate());
   }
@@ -96,11 +95,13 @@ final class CloudRestoreConsentRepository {
   bool _disposed = false;
   bool _writing = false;
   CloudRestoreConsentState? _lastState;
+  Future<CloudRestoreConsentState>? _reading;
   final Set<CloudRestoreScope> _denied = {};
 
   void invalidate() {
     _epoch++;
     _lastState = null;
+    _reading = null;
   }
 
   CloudRestoreConsentLease captureLease(CloudRestoreConsentState state) {
@@ -129,11 +130,29 @@ final class CloudRestoreConsentRepository {
       lease.scopes.contains(scope) &&
       !_denied.contains(scope);
 
-  Future<CloudRestoreConsentState> read() async {
-    invalidate();
+  Future<CloudRestoreConsentState> read() {
+    if (_disposed) {
+      return Future.value(
+        const CloudRestoreConsentState(
+          availability: CloudRestoreConsentAvailability.unavailable,
+        ),
+      );
+    }
+    final pending = _reading;
+    if (pending != null) return pending;
+    late final Future<CloudRestoreConsentState> operation;
+    operation = _readCurrent().whenComplete(() {
+      if (identical(_reading, operation)) _reading = null;
+    });
+    _reading = operation;
+    return operation;
+  }
+
+  Future<CloudRestoreConsentState> _readCurrent() async {
     final owner = _backend.ownerId;
     final epoch = _epoch;
     if (owner == null) {
+      invalidate();
       return const CloudRestoreConsentState(
         availability: CloudRestoreConsentAvailability.signedOut,
       );
@@ -154,10 +173,12 @@ final class CloudRestoreConsentRepository {
       final capability = await _backend.capabilities();
       _check(owner, epoch);
       if (!_supports(capability)) {
-        return CloudRestoreConsentState(
-          availability: CloudRestoreConsentAvailability.unavailable,
-          ownerId: owner,
-          requestedScopes: requested,
+        return _rememberRead(
+          CloudRestoreConsentState(
+            availability: CloudRestoreConsentAvailability.unavailable,
+            ownerId: owner,
+            requestedScopes: requested,
+          ),
         );
       }
       final baseGranted = await _backend.baseConsentGranted();
@@ -197,15 +218,41 @@ final class CloudRestoreConsentRepository {
         requestedScopes: Set.unmodifiable(requested),
         recordedAt: Map.unmodifiable(recorded),
       );
-      _lastState = state;
-      return state;
+      return _rememberRead(state);
     } on Object {
+      final current = _backend.ownerId == owner && _epoch == epoch;
+      if (current) invalidate();
       return CloudRestoreConsentState(
         availability: CloudRestoreConsentAvailability.unavailable,
-        ownerId: _backend.ownerId == owner && _epoch == epoch ? owner : null,
-        requestedScopes: _epoch == epoch ? requested : const {},
+        ownerId: current ? owner : null,
+        requestedScopes: current ? requested : const {},
       );
     }
+  }
+
+  CloudRestoreConsentState _rememberRead(CloudRestoreConsentState state) {
+    final previous = _lastState;
+    // A status refresh is not a withdrawal. Reuse the authority object when
+    // every choice and receipt is unchanged, so settings reads cannot retire
+    // a running sync or an already-open confirmation. Changed receipts also
+    // fence a remote grant -> revoke -> grant cycle with the same final value.
+    if (previous != null &&
+        previous.ownerId == state.ownerId &&
+        previous.availability == state.availability &&
+        CloudRestoreScope.values.every(
+          (scope) =>
+              previous.grantedScopes.contains(scope) ==
+                  state.grantedScopes.contains(scope) &&
+              previous.requestedScopes.contains(scope) ==
+                  state.requestedScopes.contains(scope) &&
+              previous.recordedAt[scope]?.toUtc() ==
+                  state.recordedAt[scope]?.toUtc(),
+        )) {
+      return previous;
+    }
+    if (previous != null) invalidate();
+    _lastState = state;
+    return state;
   }
 
   Future<void> setGranted(

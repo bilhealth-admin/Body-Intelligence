@@ -161,8 +161,15 @@ void main() {
       'Remote AI consent is off': 'موافقة الذكاء البعيد متوقفة',
       'Why this answer?': 'لماذا هذا الرد؟',
       'Personalized Remote AI': 'الذكاء البعيد المخصص',
-      'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.':
-          'المدرب الذكي المخصص غير متاح مؤقتًا. لم تُحتسب الرسالة؛ حاول مجددًا بعد قليل.',
+      'The personalized AI Coach is temporarily unavailable. If this request was sent, check its status before trying again.':
+          'المدرب الذكي المخصص غير متاح مؤقتًا. إذا أُرسل هذا الطلب، تحقّق من حالته قبل المحاولة مجددًا.',
+      "This request completed, but its reply was not received. It will not be sent again.":
+          "اكتمل هذا الطلب، لكن لم يصل رده. لن يُرسل مرة أخرى.",
+      "This request is still being processed. Check its status again shortly.":
+          "ما زال هذا الطلب قيد المعالجة. تحقّق من حالته مجددًا بعد قليل.",
+      "The request status could not be verified. It will not be sent again to avoid duplicate charges.":
+          "تعذّر التحقق من حالة الطلب. لن يُرسل مرة أخرى لتجنب احتساب الرصيد مرتين.",
+      "Check request status": "التحقق من حالة الطلب",
       'Hello, I’m BIL Coach.': 'مرحبًا، أنا بيل كوتش.',
       'Please wait while I check your recorded data. I’ll write the answer on screen.':
           'من فضلك انتظر بينما أراجع بياناتك المسجلة. سأكتب الإجابة على الشاشة.',

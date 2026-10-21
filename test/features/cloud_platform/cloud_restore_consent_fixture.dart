@@ -11,10 +11,13 @@ final class RestoreConsentFixture implements CloudRestoreConsentBackend {
   bool baseGranted = true;
   bool unsupported = false;
   bool failWrite = false;
+  bool failRead = false;
+  String receiptTime = '2026-10-12T12:00:00Z';
   bool invalidReceipt = false;
   final grants = <String, Map<CloudRestoreScope, bool>>{};
   final writes = <(String, CloudRestoreScope, bool)>[];
   Completer<void>? readBarrier;
+  Completer<void>? readStarted;
   Completer<void>? writeBarrier;
 
   void switchOwner(String? value) {
@@ -35,13 +38,15 @@ final class RestoreConsentFixture implements CloudRestoreConsentBackend {
   @override
   Future<Object?> readConsent() async {
     final owner = ownerId;
+    if (readStarted?.isCompleted == false) readStarted!.complete();
     await readBarrier?.future;
+    if (failRead) throw StateError('fixture read failure');
     return {
       for (final scope in CloudRestoreScope.values)
         scope.name: {
           'granted': grants[owner]?[scope] ?? false,
           'policy_version': '1',
-          'recorded_at': '2026-10-12T12:00:00Z',
+          'recorded_at': receiptTime,
         },
     };
   }

@@ -134,7 +134,7 @@ jobs:
             adb start-server
             adb version
             adb devices
-          script: BIL_ANDROID_EMULATOR_PHASE=ui bash tool/release/rc_android_emulator_gate.sh
+          script: BIL_REQUIRE_LIVE_E2E=true BIL_ANDROID_EMULATOR_PHASE=ui bash tool/release/rc_android_emulator_gate.sh
 
       - name: Run Android API 26 minimum-supported install/launch smoke
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
