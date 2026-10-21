@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 /// Gives a newly received Coach reply a short, stable, cloud-soft entrance.
@@ -32,6 +34,8 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   String? _awaitingLayoutFor;
   int _layoutGeneration = 0;
   bool _awaitingFirstPaint = false;
+  String? _lastMetricsSignature;
+  Timer? _metricLayoutDebounce;
 
   bool get _reduceMotion =>
       MediaQuery.disableAnimationsOf(context) ||
@@ -56,6 +60,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _lastMetricsSignature ??= _metricsSignature();
     _syncMotionPreference();
   }
 
@@ -64,6 +69,8 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.messageId != widget.messageId ||
         oldWidget.animate != widget.animate) {
+      _metricLayoutDebounce?.cancel();
+      _metricLayoutDebounce = null;
       _handledMessageId = null;
       _awaitingLayoutFor = null;
       _awaitingFirstPaint = false;
@@ -78,17 +85,77 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
 
   @override
   void didChangeMetrics() {
-    if (!mounted || !_awaitingFirstPaint) return;
-    // Repeated IME metrics can arrive before the first visible frame. Do not
-    // cancel an active entrance or enqueue the same reading-layout gate again;
-    // doing either on every frame can keep the complete reply transparent.
-    if (_controller.isAnimating || _awaitingLayoutFor == widget.messageId) {
+    if (!mounted) return;
+    final signature = _metricsSignature();
+    final previousSignature = _lastMetricsSignature;
+    _lastMetricsSignature = signature;
+    if (previousSignature == null ||
+        previousSignature == signature ||
+        !_awaitingFirstPaint) {
       return;
     }
-    _waitForReadingLayout();
+
+    // Only real viewport changes restart the entrance. Duplicate native
+    // notifications are ignored; changing IME metrics are coalesced until the
+    // viewport has been quiet long enough to lay out the reading anchor.
+    _scheduleMetricLayoutGate();
+  }
+
+  String _metricsSignature() {
+    final view = View.of(context);
+    final size = view.physicalSize;
+    final insets = view.viewInsets;
+    final padding = view.padding;
+    return <double>[
+      view.devicePixelRatio,
+      size.width,
+      size.height,
+      insets.left,
+      insets.top,
+      insets.right,
+      insets.bottom,
+      padding.left,
+      padding.top,
+      padding.right,
+      padding.bottom,
+    ].join('|');
+  }
+
+  void _scheduleMetricLayoutGate() {
+    final messageId = widget.messageId;
+    final generation = ++_layoutGeneration;
+    _awaitingLayoutFor = messageId;
+    _awaitingFirstPaint = true;
+    _controller.stop();
+    _controller.value = 0;
+    _metricLayoutDebounce?.cancel();
+    _metricLayoutDebounce = Timer(const Duration(milliseconds: 64), () {
+      _metricLayoutDebounce = null;
+      if (!mounted ||
+          generation != _layoutGeneration ||
+          _awaitingLayoutFor != messageId) {
+        return;
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted ||
+            generation != _layoutGeneration ||
+            _awaitingLayoutFor != messageId) {
+          return;
+        }
+        _awaitingLayoutFor = null;
+        if (_reduceMotion) {
+          _controller.value = 1;
+        } else {
+          _controller.forward(from: 0);
+        }
+        _observeFirstPaint(generation);
+      });
+    });
   }
 
   void _waitForReadingLayout() {
+    _metricLayoutDebounce?.cancel();
+    _metricLayoutDebounce = null;
     final messageId = widget.messageId;
     final generation = ++_layoutGeneration;
     _awaitingLayoutFor = messageId;
@@ -156,6 +223,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
 
   @override
   void dispose() {
+    _metricLayoutDebounce?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();

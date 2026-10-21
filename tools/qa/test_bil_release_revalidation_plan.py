@@ -183,6 +183,19 @@ class ManifestTests(unittest.TestCase):
         self.assertFalse(lane.get('expect_push_for_this_run', False))
         self.assertIn('workflow_dispatch', lane['source_binding'])
 
+    def test_owner_full_falls_back_to_dispatch_when_its_push_path_filter_misses(self):
+        source = json.loads(
+            Path(__file__).with_name("revalidation_ci_plan.json").read_text(encoding="utf-8")
+        )
+        lane = next(
+            row for row in source["workflows"]
+            if row.get("lane_id") == "bil_owner_comprehensive_validation"
+        )
+        self.assertTrue(lane["reuse_push_run"])
+        self.assertFalse(lane["expect_push_for_this_run"])
+        self.assertIn("only matches its own workflow file", lane["source_binding"])
+        self.assertIn("workflow_dispatch", lane["source_binding"])
+
     def test_pending_physical_allows_plan_but_never_readiness(self):
         source = manifest()
         result = self.validate(source)

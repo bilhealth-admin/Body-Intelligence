@@ -16,9 +16,9 @@
       "workflow_id": 386117761,
       "registered_workflow_name": "BIL owner full analysis and comprehensive tests",
       "lane_id": "bil_owner_comprehensive_validation",
-      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate.",
+      "source_binding": "Reuse an exact-source push run if observed. This workflow's push path filter only matches its own workflow file, so dispatch workflow_dispatch when this app/test-only commit does not trigger it.",
       "reuse_push_run": true,
-      "expect_push_for_this_run": true
+      "expect_push_for_this_run": false
     },
     {
       "workflow": "build18_ai_coach_full_tests.yml",
