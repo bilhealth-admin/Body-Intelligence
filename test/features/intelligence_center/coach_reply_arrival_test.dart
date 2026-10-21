@@ -48,6 +48,33 @@ void main() {
     },
   );
 
+  testWidgets(
+    'repeated native metric notifications cannot keep the first reply hidden',
+    (tester) async {
+      const messageId = 'qa-cloud-arrival-metric-churn';
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: _MetricChurner(
+              child: CoachReplyArrival(
+                messageId: messageId,
+                animate: true,
+                child: const Text('The complete reply remains readable.'),
+              ),
+            ),
+          ),
+        ),
+      );
+      final fade = find.byKey(
+        const ValueKey('coach-reply-arrival-fade-$messageId'),
+      );
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(tester.widget<FadeTransition>(fade).opacity.value, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('reduced motion skips the reply entrance', (tester) async {
     const messageId = 'qa-cloud-arrival-reduced-motion';
     await tester.pumpWidget(
@@ -109,6 +136,41 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
     expect(tester.takeException(), isNull);
   });
+}
+
+class _MetricChurner extends StatefulWidget {
+  const _MetricChurner({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_MetricChurner> createState() => _MetricChurnerState();
+}
+
+class _MetricChurnerState extends State<_MetricChurner>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 16),
+          )
+          ..addListener(WidgetsBinding.instance.handleMetricsChanged)
+          ..repeat();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 }
 
 Widget _reducedMotionBuilder(BuildContext context, Widget? child) => MediaQuery(

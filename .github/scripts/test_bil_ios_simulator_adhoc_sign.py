@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import plistlib
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -48,7 +49,7 @@ class SimulatorSigningFixtures(unittest.TestCase):
                          "CODE_SIGN_ENTITLEMENTS": "Runner/RunnerDebug.entitlements",
                          "PROVISIONING_PROFILE": "", "PROVISIONING_PROFILE_SPECIFIER": "",
                          "TARGET_BUILD_DIR": str(self.app.parent), "FULL_PRODUCT_NAME": "Runner.app",
-                         "LD_ENTITLEMENTS_SECTION": str(self.xcent),
+                         "LD_ENTITLEMENTS_SECTION": None,
                          "FLUTTER_TARGET": "integration_test/system_crypto_bridge_integration_test.dart",
                          "FLUTTER_BUILD_NUMBER": "37",
                          "DART_DEFINES": ",".join(base64.b64encode(f"{k}={v}".encode()).decode()
@@ -65,6 +66,7 @@ class SimulatorSigningFixtures(unittest.TestCase):
         self.before_certificate = False
         self.after_certificate = False
         self.missing_linked_section = False
+        self.include_entitlements_export = True
 
     def write_info(self):
         (self.app / "Info.plist").write_bytes(plistlib.dumps(self.info))
@@ -89,7 +91,9 @@ class SimulatorSigningFixtures(unittest.TestCase):
             self.built = True
             self.xcent.write_bytes(plistlib.dumps(self.simulated))
             self.xcent.with_name("Runner.app.xcent").write_bytes(plistlib.dumps(self.signature))
-            return subprocess.CompletedProcess(argv, 0, b"synthetic Xcode build succeeded", b"")
+            stdout = (f"export LD_ENTITLEMENTS_SECTION={shlex.quote(self.xcent.as_posix())}\n".encode()
+                      if self.include_entitlements_export else b"synthetic Xcode build succeeded")
+            return subprocess.CompletedProcess(argv, 0, stdout, b"")
         if operation == "platform":
             if argv[1] == "otool":
                 content = plistlib.dumps(self.simulated)
@@ -142,6 +146,22 @@ class SimulatorSigningFixtures(unittest.TestCase):
         self.assertEqual(receipt["native_keychain_test_status"], "NOT_RUN_BY_HELPER")
         self.assertFalse(any(arg == "--sign" or "allowProvisioning" in arg
                              for cmd in self.commands for arg in cmd))
+
+    def test_missing_setting_and_build_export_fail_closed(self):
+        self.include_entitlements_export = False
+        self.fails('identify exactly one generated simulated entitlements file')
+
+    def test_conflicting_build_setting_and_build_log_paths_are_refused(self):
+        self.settings['LD_ENTITLEMENTS_SECTION'] = str(
+            self.workspace / 'other/Runner.app-Simulated.xcent'
+        )
+        self.fails('Conflicting Xcode simulated entitlements paths')
+
+    def test_resolved_build_setting_remains_a_fallback_when_log_has_no_export(self):
+        self.settings['LD_ENTITLEMENTS_SECTION'] = str(self.xcent)
+        self.include_entitlements_export = False
+        receipt = self.invoke()
+        self.assertEqual(receipt['status'], 'PASS_SIMULATOR_SIGNATURE_CHECK')
 
     def test_actual_generated_prefix_is_read_not_invented_when_setting_absent(self):
         del self.settings["AppIdentifierPrefix"]

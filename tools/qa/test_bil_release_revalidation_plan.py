@@ -1,6 +1,7 @@
 """Pure temporary-source/CI-receipt tests; no Flutter, GitHub or shell calls."""
 from copy import deepcopy
 from datetime import datetime, timezone
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -172,6 +173,15 @@ class ManifestTests(unittest.TestCase):
     def validate(self, value=None, **kwargs):
         return plan.validate_ci_manifest(manifest() if value is None else value,
                                          required_workflow_ids=[101, 102], **kwargs)
+
+    def test_source_audit_lane_requires_its_manual_profile_dispatch(self):
+        path = Path(__file__).with_name('revalidation_ci_plan.json')
+        source = json.loads(path.read_text(encoding='utf-8'))
+        lane = next(row for row in source['workflows'] if row.get('lane_id') == 'source_audit')
+        self.assertEqual(lane['inputs'].get('source_audit_only'), 'true')
+        self.assertFalse(lane.get('reuse_push_run', False))
+        self.assertFalse(lane.get('expect_push_for_this_run', False))
+        self.assertIn('workflow_dispatch', lane['source_binding'])
 
     def test_pending_physical_allows_plan_but_never_readiness(self):
         source = manifest()

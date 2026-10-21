@@ -791,3 +791,16 @@ class PureControllerTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class LiveBarcodeFixtureSafetyTests(unittest.TestCase):
+    def test_live_fixture_is_project_scoped_unique_and_independently_cleaned(self):
+        source = Path(__file__).resolve().parents[2] / "tool/nutrition/run_live_barcode_resolved_fixture_e2e.ps1"
+        script = source.read_text(encoding="utf-8")
+        self.assertIn("--project-ref $ProjectRef", script)
+        self.assertIn("$gtin=New-TestGtin13", script)
+        self.assertIn("p_gtin=$gtin", script)
+        self.assertNotIn("p_gtin='4006381333931'", script)
+        self.assertIn("RemoveOwnedCacheEntry", script)
+        self.assertIn("Prefer='return=representation'", script)
+        self.assertIn("cleanup_legacy_fixture", script)
+        self.assertNotIn('Db "delete from public.bil_barcode_shared_cache', script)

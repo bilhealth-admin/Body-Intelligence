@@ -471,6 +471,7 @@ class StatusPublicationTests(unittest.TestCase):
             self.assertEqual(json.loads(path.read_text(encoding='utf-8')), {'value': 2})
             self.assertFalse(any(folder.glob('*.tmp')))
 
+    @unittest.skipUnless(os.name == 'nt', 'Requires real Windows file-sharing semantics; covered by the Windows owner suite')
     def test_real_windows_replace_lock_releases_within_retry_budget(self):
         with tempfile.TemporaryDirectory() as name:
             folder = Path(name)
@@ -500,6 +501,7 @@ class StatusPublicationTests(unittest.TestCase):
             self.assertEqual(json.loads(path.read_text(encoding='utf-8')), new)
             self.assertFalse(any(folder.glob('*.tmp')))
 
+    @unittest.skipUnless(os.name == 'nt', 'Requires real Windows file-sharing semantics; covered by the Windows owner suite')
     def test_real_windows_replace_lock_outlasts_bounded_retry_then_recovers(self):
         with tempfile.TemporaryDirectory() as name:
             folder = Path(name)
@@ -519,6 +521,7 @@ class StatusPublicationTests(unittest.TestCase):
             runner.atomic_json(path, new)
             self.assertEqual(json.loads(path.read_text(encoding='utf-8')), new)
 
+    @unittest.skipUnless(os.name == 'nt', 'Requires real Windows file-sharing semantics; covered by the Windows owner suite')
     def test_live_progress_keeps_ledger_and_os_lock_after_real_windows_status_contention(self):
         with tempfile.TemporaryDirectory() as name:
             folder = Path(name)
@@ -565,6 +568,7 @@ class StatusPublicationTests(unittest.TestCase):
             self.assertIn('status_publication_degraded',
                           (folder / 'progress.log').read_text(encoding='utf-8'))
 
+    @unittest.skipUnless(os.name == 'nt', 'Requires real Windows file-sharing semantics; covered by the Windows owner suite')
     def test_final_status_remains_strict_with_real_windows_lock_and_preserves_results(self):
         with tempfile.TemporaryDirectory() as name:
             folder = Path(name)

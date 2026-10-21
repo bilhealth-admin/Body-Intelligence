@@ -144,6 +144,9 @@ class _NativeEntryWarmupTrace {
     // measured visit; never invent a missing release-frame raster duration.
     final delivery = Stopwatch()..start();
     while (!absentFrameTimingReceived && delivery.elapsedMilliseconds < 1000) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
       await tester.pump(const Duration(milliseconds: 20));
     }
     expect(

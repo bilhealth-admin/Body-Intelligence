@@ -57,9 +57,9 @@
       "workflow_id": 384948928,
       "registered_workflow_name": "BIL CodeQL security-extended",
       "lane_id": "source_audit",
-      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate.",
-      "reuse_push_run": true,
-      "expect_push_for_this_run": true
+      "source_binding": "Dispatch workflow_dispatch with source_audit_only=true; push runs skip the required bounded macro editor checks.",
+      "reuse_push_run": false,
+      "expect_push_for_this_run": false
     },
     {
       "workflow": "bil_codeql_security_extended.yml",

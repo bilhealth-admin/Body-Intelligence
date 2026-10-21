@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import plistlib
 import re
+import shlex
 import subprocess
 import sys
 
@@ -74,6 +75,41 @@ def runner_settings(raw):
     }.items()):
         raise ValueError("Only the existing offline Simulator QA defines are permitted")
     return {key: settings.get(key) for key in SETTING_KEYS}
+
+
+def resolve_simulated_entitlements_path(settings, build_log):
+    candidates = []
+    configured = settings.get("LD_ENTITLEMENTS_SECTION")
+    if configured is not None:
+        if not isinstance(configured, str):
+            raise ValueError("Xcode simulated entitlements path must be text")
+        if configured.strip():
+            candidates.append(configured.strip())
+
+    log_text = build_log.decode("utf-8", errors="replace") if isinstance(build_log, bytes) else str(build_log)
+    for line in log_text.splitlines():
+        match = re.fullmatch(
+            r"\s*export\s+LD_ENTITLEMENTS_SECTION(?:\\=|=)(.*?)\s*", line
+        )
+        if match is None:
+            continue
+        try:
+            values = shlex.split(match.group(1), posix=True)
+        except ValueError as error:
+            raise ValueError("Xcode emitted an invalid simulated entitlements path") from error
+        if len(values) != 1 or not values[0]:
+            raise ValueError("Xcode must emit one simulated entitlements path")
+        candidates.append(values[0])
+
+    unique = list(dict.fromkeys(candidates))
+    if not unique:
+        raise ValueError("Xcode must identify exactly one generated simulated entitlements file")
+    if len(unique) != 1:
+        raise ValueError("Conflicting Xcode simulated entitlements paths")
+    path = Path(unique[0])
+    if not path.is_absolute() or path.name != "Runner.app-Simulated.xcent":
+        raise ValueError("Xcode must identify the exact Runner simulated entitlements file")
+    return path
 
 
 def verify_simulated_entitlements(settings, source, simulated):
@@ -243,7 +279,7 @@ def sign_simulator(args, *, run=subprocess.run, run_build=run_bounded, host=sys.
         platforms = re.findall(r"^\s*platform\s+(\S+)\s*$", platform_result.stdout.decode("utf-8"), re.MULTILINE)
         if not platforms or any(value != "IOSSIMULATOR" for value in platforms):
             raise ValueError("Every executable architecture must be an actual iOS Simulator Mach-O")
-        simulated_path = Path(settings["LD_ENTITLEMENTS_SECTION"])
+        simulated_path = resolve_simulated_entitlements_path(settings, build_log.read_bytes())
         # Xcode's generated build intermediates may live in DerivedData. Read
         # only its resolved xcent siblings; never create or rewrite either file.
         if not simulated_path.is_absolute() or not simulated_path.name.endswith("-Simulated.xcent"):

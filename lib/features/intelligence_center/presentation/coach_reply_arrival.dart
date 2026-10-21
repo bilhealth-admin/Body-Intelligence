@@ -79,10 +79,12 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   @override
   void didChangeMetrics() {
     if (!mounted || !_awaitingFirstPaint) return;
-    // IME metrics can arrive after the old reading offset was measured but
-    // before the first positive-opacity frame. Keep that frame transparent
-    // until the viewport's post-layout pin has been laid out at the new size.
-    // Once any entrance frame has painted, never restart or hide the reply.
+    // Repeated IME metrics can arrive before the first visible frame. Do not
+    // cancel an active entrance or enqueue the same reading-layout gate again;
+    // doing either on every frame can keep the complete reply transparent.
+    if (_controller.isAnimating || _awaitingLayoutFor == widget.messageId) {
+      return;
+    }
     _waitForReadingLayout();
   }
 
