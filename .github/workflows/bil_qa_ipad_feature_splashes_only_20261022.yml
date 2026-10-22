@@ -1,0 +1,104 @@
+name: Frozen 31554 isolated iPad splash recovery
+run-name: "Frozen 31554 - ONLY unfinished iPad feature-splashes; no store upload"
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths:
+      - .github/workflows/bil_qa_ipad_feature_splashes_only_20261022.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frozen31554-ipad-splashes-only
+  cancel-in-progress: false
+
+env:
+  BIL_FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+  BIL_QA_HARNESS_SHA: ${{ github.sha }}
+  BIL_NATIVE_TARGET: feature-splashes
+
+jobs:
+  isolated-ipad-feature-splashes:
+    name: iPad ONLY - previously unfinished original 13 splash cases
+    runs-on: macos-26
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_FROZEN_SHA }}
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_QA_HARNESS_SHA }}
+          path: harness
+          sparse-checkout: tools/qa/frozen_ios_sign_repair_20261022.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Preserve frozen source and prepare original isolated CocoaPods
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          python3 .github/scripts/install_isolated_cocoapods.py --output artifacts/qa/text18/ios37-simulators/cocoapods-installation.json
+          flutter pub get --enforce-lockfile
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          pod install --project-directory=ios
+          git diff --name-only HEAD > "$RUNNER_TEMP/pre-native-tracked-diff.txt"
+      - name: Assemble temporary ONLY-iPad original runner, refusing unknown changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/frozen-ios-sign-qa"
+          python3 harness/tools/qa/frozen_ios_sign_repair_20261022.py --source . --output "$out"
+          python3 - "$out/bil_ios37_native_integration.sh" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1])
+          body=p.read_text(encoding='utf-8')
+          start='ACTIVE_DEVICE="$IPHONE_UDID"\nstage runner-tests-boot'
+          end='for KIND in "${KINDS[@]}"; do'
+          pair='for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do'
+          assert body.count(start)==1 and body.count(end)==1 and body.count(pair)==1
+          a=body.index(start)
+          b=body.index(end,a)
+          # The five XCTest cases already passed on the preceding frozen run.
+          # Skip only their invocation, not any native/splash assertion.
+          body=body[:a]+body[b:]
+          body=body.replace(pair,'for PAIR in "ipad:$IPAD_UDID"; do',1)
+          # A failed iPad bootstrap should not occupy a runner for 30 minutes.
+          old='--timeout-seconds 1800 --running-timeout-seconds 1200'
+          assert body.count(old)==1
+          body=body.replace(old,'--timeout-seconds 900 --running-timeout-seconds 600',1)
+          assert 'feature-splashes) KINDS=(feature-splashes) ;;' in body
+          p.write_text(body,encoding='utf-8')
+          PY
+          bash -n "$out/bil_ios37_native_integration.sh"
+          echo "BIL_SIGN_QA_HELPER=$out/bil_ios_simulator_adhoc_sign.py" >> "$GITHUB_ENV"
+          echo "SCOPED=IPAD_FEATURE_SPLASHES_ONLY; SOURCE_FROZEN; NO_TESTFLIGHT"
+      - name: Run the sole missing original iPad feature-splash integration suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          bash "$RUNNER_TEMP/frozen-ios-sign-qa/bil_ios37_native_integration.sh"
+          git diff --name-only HEAD > "$RUNNER_TEMP/post-native-tracked-diff.txt"
+          diff -u "$RUNNER_TEMP/pre-native-tracked-diff.txt" "$RUNNER_TEMP/post-native-tracked-diff.txt"
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          echo "IPAD_ONLY_SPLASH_NATIVE_PASS; ALL_ORIGINAL_ASSERTIONS_PRESERVED; NO_TESTFLIGHT"
+      - name: Preserve exact iPad results, native signature, source and diff evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen31554-unfinished-ipad-splashes-${{ github.run_id }}
+          path: |
+            artifacts/qa/text18/ios37-simulators/
+            ${{ runner.temp }}/frozen-ios-sign-qa/manifest.json
+            ${{ runner.temp }}/pre-native-tracked-diff.txt
+            ${{ runner.temp }}/post-native-tracked-diff.txt
+          if-no-files-found: warn
+          retention-days: 30
