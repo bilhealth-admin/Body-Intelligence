@@ -1,0 +1,226 @@
+name: BIL frozen-source independent QA
+run-name: "Independent checks for frozen 31554 - workflow ${{ github.run_id }}"
+
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths:
+      - .github/workflows/bil_independent_frozen_qa_20261022.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frozen-31554-independent-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+  FROZEN_BRANCH: integration/bil-qa-media-policy-20261011
+
+jobs:
+  verify-original-source:
+    name: Verify original commit unchanged
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify frozen remote branch and excluded upload workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACTUAL="$(gh api "repos/$GITHUB_REPOSITORY/branches/$FROZEN_BRANCH" --jq .commit.sha)"
+          test "$ACTUAL" = "$FROZEN_SHA"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          grep -Fq 'FORBIDDEN_IDS' tools/qa/independent_frozen_dispatch_20261022.py
+          grep -Fq '346770575' tools/qa/independent_frozen_dispatch_20261022.py
+          python3 -m py_compile tools/qa/independent_frozen_dispatch_20261022.py
+          printf 'FROZEN_SOURCE=%s\nHARNESS_SOURCE=%s\nTESTFLIGHT_DISPATCH=FORBIDDEN\n' "$FROZEN_SHA" "$GITHUB_SHA"
+
+  independent-original-phases:
+    name: Original frozen source - ${{ matrix.scope }}
+    needs: verify-original-source
+    runs-on: windows-2025
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        scope: [bootstrap, focused, goldens, full-analysis]
+    env:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: '1'
+    steps:
+      - name: Preserve LF source
+        shell: pwsh
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.FROZEN_SHA }}
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Verify exact original source and locked dependencies
+        shell: pwsh
+        run: |
+          if ((git rev-parse HEAD) -ne "$env:FROZEN_SHA") { throw 'Frozen SHA changed' }
+          flutter pub get --enforce-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git diff --exit-code -- pubspec.yaml pubspec.lock
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Execute complete original scoped inventory, no test filters or automatic retries
+        shell: pwsh
+        env:
+          QA_SCOPE: ${{ matrix.scope }}
+        run: |
+          @'
+          import json, os, pathlib, subprocess, sys
+          root = pathlib.Path.cwd()
+          expected = os.environ['FROZEN_SHA']
+          assert subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip() == expected
+          sys.path.insert(0,str(root / 'tools/qa'))
+          import bil_release_revalidation as checker
+          import bil_release_revalidation_plan as plan
+          output = pathlib.Path(os.environ['RUNNER_TEMP']) / ('bil-original-' + os.environ['QA_SCOPE'])
+          output.mkdir(parents=True,exist_ok=True)
+          results = []
+          def execute(name,args,files=None):
+              path = output / (name+'.log')
+              with path.open('w',encoding='utf8') as stream:
+                  code = subprocess.run(args,stdout=stream,stderr=subprocess.STDOUT,check=False).returncode
+              result={'name':name,'exit_code':code,'log':str(path)}
+              if files is not None:
+                  result.update(checker.test_result(path,files,code))
+              else:
+                  result['accepted'] = code == 0
+              results.append(result)
+              (output/'result.json').write_text(json.dumps({'source_sha':expected,'scope':os.environ['QA_SCOPE'],
+                  'accepted':all(x['accepted'] for x in results),'steps':results},indent=2))
+              if not result['accepted']:
+                  print('FAILED',name,str(path),flush=True)
+              else:
+                  print('PASS',name,flush=True)
+              return result['accepted']
+          scope=os.environ['QA_SCOPE']
+          if scope=='bootstrap':
+              checker.validate_package_discovery(root,required_entrypoints={'simple_barcode_scanner':'simple_barcode_scanner.dart'})
+              execute('release-controller-regressions',[sys.executable,'-m','unittest','discover','-s','tools/qa','-p','test_bil_release*.py','-v'])
+              # A frozen, clean source has no reviewed uncommitted Dart files to format.
+          elif scope=='full-analysis':
+              execute('full-analysis',['flutter','analyze','--no-pub','--fatal-infos','--fatal-warnings'])
+          else:
+              files = plan.focused_inventory(root) if scope=='focused' else plan.golden_inventory(root)
+              if not files or len(files)!=len(set(files)):raise RuntimeError('Invalid complete test inventory')
+              (output/'inventory.json').write_text(json.dumps(files,indent=2))
+              base=['flutter','test','--no-pub','--reporter=json','--concurrency=1','--timeout=3m',
+                '--dart-define=BIL_PAYMENTS_ENABLED=true',
+                '--dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms',
+                '--dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy']
+              groups=checker.batches(base,files)
+              if [path for group in groups for path in group]!=files:raise RuntimeError('Test scope mismatch')
+              for i,group in enumerate(groups,1):
+                  execute(f'{scope}-{i:02}',base+group,group)
+          if subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()!=expected:
+              raise RuntimeError('Frozen SHA moved')
+          if subprocess.check_output(['git','diff','--name-only','HEAD'],text=True).strip():
+              raise RuntimeError('Application source modified during test')
+          if not results or any(not x['accepted'] for x in results):
+              sys.exit(1)
+          '@ | Set-Content -LiteralPath "$env:RUNNER_TEMP\bil_original_scope.py" -Encoding utf8
+          python "$env:RUNNER_TEMP\bil_original_scope.py"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload actual scoped results and failure evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen31554-${{ matrix.scope }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/bil-original-${{ matrix.scope }}/
+            test/**/failures/*.png
+          if-no-files-found: warn
+          retention-days: 30
+
+  verify-patched-dev-test-tools:
+    name: QA-only patched Cloudflare test dependencies and low-threshold security audit
+    needs: verify-original-source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.FROZEN_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Test corrected development dependencies without changing a Git branch or runtime graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cloudflare/workout-runtime
+          cp package.json "$RUNNER_TEMP/original-dev-package.json"
+          cp package-lock.json "$RUNNER_TEMP/original-dev-lock.json"
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund \
+            --save-dev --save-exact vite@8.2.4 vitest@4.1.12
+          python3 - <<'PY'
+          import json,os,pathlib
+          root=pathlib.Path('.')
+          old=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'original-dev-package.json').read_text())
+          new=json.loads((root/'package.json').read_text())
+          assert old['dependencies']==new['dependencies'], 'Production dependencies changed'
+          prev=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'original-dev-lock.json').read_text())
+          curr=json.loads((root/'package-lock.json').read_text())
+          original={k:v for k,v in prev['packages'].items() if k and not v.get('dev',False)}
+          updated={k:v for k,v in curr['packages'].items() if k and not v.get('dev',False)}
+          assert original==updated, 'Runtime dependency graph changed'
+          PY
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npm test
+          npm audit --audit-level=low
+          printf '%s\n' 'QA_PATCHED_DEV_DEPENDENCIES=PASS' 'ORIGINAL_GIT_SHA_NOT_MODIFIED=PASS'
+      - name: Preserve patched development test-tool metadata
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen31554-dev-tools-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/original-dev-package.json
+            ${{ runner.temp }}/original-dev-lock.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  dispatch-all-original-ci-profiles:
+    name: Dispatch and independently monitor all required original CI profiles, never TestFlight
+    needs: verify-original-source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: One dispatch per required profile; collect exact-SHA, job and error receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -u tools/qa/independent_frozen_dispatch_20261022.py
+      - name: Preserve real results even on partial failure or timeout
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen31554-ci-results-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-frozen-ci/
+          if-no-files-found: warn
+          retention-days: 30
