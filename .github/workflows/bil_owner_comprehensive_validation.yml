@@ -2,7 +2,7 @@ name: BIL owner full analysis and comprehensive tests
 
 on:
   push:
-    branches: [integration/bil-qa-media-policy-20261011]
+    branches: [integration/bil-qa-media-policy-20261011, work/bil-ios37-release-security-20261022]
     paths: [.github/workflows/bil_owner_comprehensive_validation.yml]
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   analyze-then-comprehensive:
-    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/work/bil-ios37-release-security-20261022')
     name: Full analysis then one unsharded root suite
     runs-on: windows-2025
     timeout-minutes: 360
@@ -30,9 +30,15 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Record source identity without changing remote branches
+      - name: Record exact dispatched source SHA with original runner-compatible local identity
         shell: pwsh
         run: |
+          if ($env:GITHUB_REF -notin @('refs/heads/integration/bil-qa-media-policy-20261011', 'refs/heads/work/bil-ios37-release-security-20261022')) {
+            throw 'Unauthorized release-source branch'
+          }
+          if ((git rev-parse HEAD) -ne $env:GITHUB_SHA) { throw 'Unexpected source SHA before local branch compatibility alias' }
+          # Original unmodified unsharded runner requires this local alias only.
+          # It does not move any remote branch or substitute a different tree.
           git switch -c integration/bil-qa-media-policy-20261011
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if ((git rev-parse HEAD) -ne $env:GITHUB_SHA) { throw 'Unexpected source SHA' }
@@ -88,7 +94,7 @@ jobs:
           retention-days: 30
 
   supplemental-source-audits:
-    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/work/bil-ios37-release-security-20261022')
     name: Supplemental source and dependency audits
     runs-on: ubuntu-24.04
     timeout-minutes: 75
