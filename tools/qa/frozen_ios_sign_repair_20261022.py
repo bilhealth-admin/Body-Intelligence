@@ -42,7 +42,7 @@ def run(source, out):
     original_text=original.read_text(encoding="utf-8")
     assert original_text.count(NEEDLE)==1, "Expected one strict parser clause"
     modified=original_text.replace(NEEDLE, REPLACE)
-    assert modified.count(NEEDLE)==0
+    assert modified.count(REPLACE)==1, "Unexpected temporary signing-parser patch"
     sign_out=out / "bil_ios_simulator_adhoc_sign.py"
     sign_out.write_text(modified, encoding="utf-8")
     for name in ("bil_native_bounded_command.py", "test_bil_ios_simulator_adhoc_sign.py"):
