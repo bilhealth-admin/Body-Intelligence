@@ -71,6 +71,7 @@ import '../../features/nutrition_plans/presentation/nutrition_pathway_access_gat
 import '../../features/meal_planner/presentation/meal_planner_page.dart';
 import '../../features/notifications/presentation/notification_settings_page.dart';
 import '../../features/notifications/domain/community_deep_link.dart';
+import '../../features/smart_plan/presentation/bil_smart_plan_page.dart';
 import '../../features/wellness/presentation/wellness_library_page.dart';
 import '../../features/wellness/presentation/wellness_content_packs_page.dart';
 import '../../features/wellness/presentation/bil_workout_routines_page.dart';

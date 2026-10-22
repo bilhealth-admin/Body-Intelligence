@@ -2,6 +2,13 @@ part of 'app_router.dart';
 
 List<RouteBase> _wellnessRoutes() => <RouteBase>[
   GoRoute(
+    path: '/smart-plan',
+    builder: (_, _) => const PremiumRouteGlassGate(
+      feature: PremiumGateFeature.personalPlan,
+      child: BilSmartPlanPage(),
+    ),
+  ),
+  GoRoute(
     path: '/wellness-library',
     builder: (_, _) => const WellnessLibraryPage(),
   ),
