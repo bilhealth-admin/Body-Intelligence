@@ -5,6 +5,13 @@ on:
     branches: [qa/bil-independent-31554-20261022]
     paths:
       - .github/workflows/bil_qa_ipad_feature_splashes_only_20261022.yml
+  workflow_dispatch:
+    inputs:
+      run_native:
+        description: "Explicit opt-in for ONLY iPad native splashes; default is offline QA checks"
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: read
@@ -19,7 +26,58 @@ env:
   BIL_NATIVE_TARGET: feature-splashes
 
 jobs:
+  offline-frozen-qa-verification:
+    name: Strict original sign+runner QA checks ONLY (no native tests)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_FROZEN_SHA }}
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_QA_HARNESS_SHA }}
+          path: harness
+          sparse-checkout: tools/qa/frozen_ios_sign_repair_20261022.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Validate frozen signing parser and exact iPad-only native runner assembly without native execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          out="$RUNNER_TEMP/frozen-ios-sign-qa"
+          python3 harness/tools/qa/frozen_ios_sign_repair_20261022.py --source . --output "$out"
+          python3 - "$out/bil_ios37_native_integration.sh" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          s = p.read_text(encoding='utf-8')
+          start='ACTIVE_DEVICE="$IPHONE_UDID"\nstage runner-tests-boot'
+          end='for KIND in "${KINDS[@]}"; do'
+          pair='for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do'
+          old='--timeout-seconds 1800 --running-timeout-seconds 1200'
+          assert s.count(start)==1 and s.count(end)==1 and s.count(pair)==1
+          assert s.count(old)==1
+          a=s.index(start); b=s.index(end,a)
+          s=s[:a]+s[b:]
+          s=s.replace(pair,'for PAIR in "ipad:$IPAD_UDID"; do',1)
+          s=s.replace(old,'--timeout-seconds 900 --running-timeout-seconds 600',1)
+          assert s.count('for PAIR in "ipad:$IPAD_UDID"; do')==1
+          assert s.count('feature-splashes) KINDS=(feature-splashes) ;;')==1
+          p.write_text(s,encoding='utf-8')
+          PY
+          bash -n "$out/bil_ios37_native_integration.sh"
+          PYTHONPATH="$out" python3 -m unittest discover -s "$out" -p 'test*.py' -v
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          test -z "$(git diff --name-only HEAD)"
+          echo 'OFFLINE_QA_GUARD_PASS; NO_NATIVE_RETEST; NO_TESTFLIGHT'
   isolated-ipad-feature-splashes:
+    # 13/13 original cases already succeeded in run 39769902887.
+    # Push must never replay this successful suite.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_native == true }}
+    needs: offline-frozen-qa-verification
     name: iPad ONLY - previously unfinished original 13 splash cases
     runs-on: macos-26
     timeout-minutes: 75
@@ -44,17 +102,35 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          # Build QA helper BEFORE Flutter and Pods mutate tracked generated
+          # project configuration in this disposable simulator checkout.
+          out="$RUNNER_TEMP/frozen-ios-sign-qa"
+          python3 harness/tools/qa/frozen_ios_sign_repair_20261022.py --source . --output "$out"
           python3 .github/scripts/install_isolated_cocoapods.py --output artifacts/qa/text18/ios37-simulators/cocoapods-installation.json
           flutter pub get --enforce-lockfile
           dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
           pod install --project-directory=ios
-          git diff --name-only HEAD > "$RUNNER_TEMP/pre-native-tracked-diff.txt"
+          LC_ALL=C git diff --name-only HEAD | LC_ALL=C sort > "$RUNNER_TEMP/pre-native-tracked-diff.txt"
+          python3 - "$RUNNER_TEMP/pre-native-tracked-diff.txt" <<'PY'
+          from pathlib import Path
+          import sys
+          expected = [
+            'ios/Flutter/Debug.xcconfig',
+            'ios/Flutter/Release.xcconfig',
+            'ios/Runner.xcodeproj/project.pbxproj',
+            'ios/Runner.xcworkspace/contents.xcworkspacedata',
+          ]
+          actual = Path(sys.argv[1]).read_text(encoding='utf-8').splitlines()
+          if actual != expected:
+            raise SystemExit('Unexpected preflight tracked changes: '+repr(actual))
+          PY
+          git diff --binary HEAD > "$RUNNER_TEMP/pre-native-tracked.patch"
+          shasum -a 256 "$RUNNER_TEMP/pre-native-tracked.patch" > "$RUNNER_TEMP/pre-native-patch.sha256"
       - name: Assemble temporary ONLY-iPad original runner, refusing unknown changes
         shell: bash
         run: |
           set -euo pipefail
           out="$RUNNER_TEMP/frozen-ios-sign-qa"
-          python3 harness/tools/qa/frozen_ios_sign_repair_20261022.py --source . --output "$out"
           python3 - "$out/bil_ios37_native_integration.sh" <<'PY'
           from pathlib import Path
           import sys
@@ -86,10 +162,16 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
           bash "$RUNNER_TEMP/frozen-ios-sign-qa/bil_ios37_native_integration.sh"
-          git diff --name-only HEAD > "$RUNNER_TEMP/post-native-tracked-diff.txt"
+          LC_ALL=C git diff --name-only HEAD | LC_ALL=C sort > "$RUNNER_TEMP/post-native-tracked-diff.txt"
+          git diff --binary HEAD > "$RUNNER_TEMP/post-native-tracked.patch"
+          shasum -a 256 "$RUNNER_TEMP/post-native-tracked.patch" > "$RUNNER_TEMP/post-native-patch.sha256"
           diff -u "$RUNNER_TEMP/pre-native-tracked-diff.txt" "$RUNNER_TEMP/post-native-tracked-diff.txt"
+          if ! cmp -s "$RUNNER_TEMP/pre-native-tracked.patch" "$RUNNER_TEMP/post-native-tracked.patch"; then
+            echo '::error::Native toolchain introduced additional tracked changes after the pinned preflight snapshot'
+            exit 93
+          fi
           test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
-          echo "IPAD_ONLY_SPLASH_NATIVE_PASS; ALL_ORIGINAL_ASSERTIONS_PRESERVED; NO_TESTFLIGHT"
+          echo "IPAD_ONLY_SPLASH_NATIVE_PASS; IDENTICAL_PRE_POST_TRACKED_PATCH; NO_TESTFLIGHT"
       - name: Preserve exact iPad results, native signature, source and diff evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
@@ -100,5 +182,7 @@ jobs:
             ${{ runner.temp }}/frozen-ios-sign-qa/manifest.json
             ${{ runner.temp }}/pre-native-tracked-diff.txt
             ${{ runner.temp }}/post-native-tracked-diff.txt
+            ${{ runner.temp }}/pre-native-patch.sha256
+            ${{ runner.temp }}/post-native-patch.sha256
           if-no-files-found: warn
           retention-days: 30
