@@ -1,0 +1,121 @@
+name: BIL frozen remaining dependency advisories
+run-name: "Frozen 31554 - only previously blocked Pub Deno Maven audits"
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths: [.github/workflows/bil_qa_remaining_advisories_20261022.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-frozen-remaining-advisories
+  cancel-in-progress: false
+env:
+  FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+  QA_HARNESS_SHA: ${{ github.sha }}
+jobs:
+  dependency-audit:
+    name: "Frozen source advisory audit - ${{ matrix.ecosystem }}"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        ecosystem: [Pub, Deno-npm, Maven]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.FROZEN_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
+        if: matrix.ecosystem == 'Maven'
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        if: matrix.ecosystem != 'Deno-npm'
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Execute unchanged original advisory commands and prove source unchanged
+        id: audit
+        shell: bash
+        env:
+          QA_ECOSYSTEM: ${{ matrix.ecosystem }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          export OUT="$RUNNER_TEMP/bil-advisory-recovery/$QA_ECOSYSTEM"
+          mkdir -p "$OUT"
+          LOCAL_PROPERTIES_CREATED=0
+          finish() {
+            code=$?
+            trap - EXIT
+            if test "$LOCAL_PROPERTIES_CREATED" = 1; then rm -f android/local.properties; fi
+            if ! git diff --quiet HEAD; then code=97; fi
+            if test "$(git rev-parse HEAD)" != "$FROZEN_SHA"; then code=98; fi
+            export QA_EXIT_CODE="$code"
+            python3 - <<'PY'
+          import json,os,pathlib
+          code=int(os.environ['QA_EXIT_CODE'])
+          out=pathlib.Path(os.environ['OUT'])
+          (out/'receipt.json').write_text(json.dumps({
+            'source_sha':os.environ['FROZEN_SHA'], 'harness_sha':os.environ['QA_HARNESS_SHA'],
+            'ecosystem':os.environ['QA_ECOSYSTEM'], 'exit_code':code,
+            'status':'PASS' if code==0 else 'FAIL',
+            'original_run':39701825576, 'original_job':119572616385,
+            'app_build_or_deployment':False, 'release_certification':False,
+          },indent=2)+'\n')
+          PY
+            exit "$code"
+          }
+          trap finish EXIT
+          test "$(git rev-parse HEAD)" = "$FROZEN_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=no)"
+          ACTUAL="$(gh api "repos/$GITHUB_REPOSITORY/branches/integration/bil-qa-media-policy-20261011" --jq .commit.sha)"
+          test "$ACTUAL" = "$FROZEN_SHA"
+          node --version | tee "$OUT/node-version.txt"
+          if test "$QA_ECOSYSTEM" != Deno-npm; then
+            flutter pub get --enforce-lockfile 2>&1 | tee "$OUT/resolve.log"
+            git diff --exit-code -- pubspec.yaml pubspec.lock
+          fi
+          case "$QA_ECOSYSTEM" in
+            Pub)
+              dart pub deps --json > "$OUT/pub-deps.json"
+              node tool/prebuild/audit_pub_advisories.mjs "$OUT/pub-deps.json" | tee "$OUT/pub-osv.json"
+              ;;
+            Deno-npm)
+              node tool/prebuild/audit_locked_advisories.mjs npm supabase/functions/deno.lock | tee "$OUT/deno-npm-osv.json"
+              ;;
+            Maven)
+              GRADLE_BOOTSTRAP="$RUNNER_TEMP/bil-supplemental-gradle"
+              mkdir -p "$GRADLE_BOOTSTRAP/gradle/wrapper"
+              cp tool/vendor_app_links/example/android/gradlew "$GRADLE_BOOTSTRAP/gradlew"
+              cp tool/vendor_app_links/example/android/gradle/wrapper/gradle-wrapper.jar "$GRADLE_BOOTSTRAP/gradle/wrapper/gradle-wrapper.jar"
+              cp android/gradle/wrapper/gradle-wrapper.properties "$GRADLE_BOOTSTRAP/gradle/wrapper/gradle-wrapper.properties"
+              chmod +x "$GRADLE_BOOTSTRAP/gradlew"
+              if [[ ! -f android/local.properties ]]; then
+                {
+                  printf 'flutter.sdk=%s\n' "${FLUTTER_ROOT:?FLUTTER_ROOT required}"
+                  printf 'sdk.dir=%s\n' "${ANDROID_HOME:-${ANDROID_SDK_ROOT:?Android SDK required}}"
+                } > android/local.properties
+                LOCAL_PROPERTIES_CREATED=1
+              fi
+              "$GRADLE_BOOTSTRAP/gradlew" --no-daemon --console=plain -p "$PWD/android" \
+                app:dependencies --configuration releaseRuntimeClasspath > "$OUT/android-release-dependencies.txt" 2>&1
+              node tool/prebuild/audit_locked_advisories.mjs Maven "$OUT/android-release-dependencies.txt" | tee "$OUT/android-maven-osv.json"
+              ;;
+            *) echo 'Unsupported advisory scope'; exit 2 ;;
+          esac
+          printf '%s\n' 'EXACT_SOURCE_UNCHANGED=PASS' 'NO_APP_BUILD_SIGNING_DEPLOYMENT_OR_RELEASE_CERTIFICATION' | tee "$OUT/source-guard.log"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: frozen-advisory-${{ matrix.ecosystem }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-advisory-recovery/${{ matrix.ecosystem }}/
+          if-no-files-found: error
+          retention-days: 30
