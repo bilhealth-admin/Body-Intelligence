@@ -1,0 +1,209 @@
+name: BIL frozen live-service QA recovery
+run-name: "Frozen 31554 - live fixture repair and previously blocked checks"
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths:
+      - .github/workflows/bil_qa_live_recovery_20261022.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil-frozen-live-recovery
+  cancel-in-progress: false
+env:
+  FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+  BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
+  QA_HARNESS_SHA: ${{ github.sha }}
+jobs:
+  offline-safety:
+    name: Verify barcode QA repair without network or credentials
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.FROZEN_SHA }}
+          path: source
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: harness
+          sparse-checkout: tools/qa/frozen_live_repair
+          persist-credentials: false
+      - name: Prepare exact-source adapter and exercise fixture isolation guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-barcode-offline"
+          python3 harness/tools/qa/frozen_live_repair/prepare_barcode_fixture_qa.py --source-root source --evidence "$OUT"
+          pwsh -NoProfile -File harness/tools/qa/frozen_live_repair/test_barcode_fixture_qa.ps1 \
+            -FunctionsPath "$OUT/fixture-functions.ps1" \
+            -PatchedScript "$GITHUB_WORKSPACE/source/tool/nutrition/.ci-barcode-fixture-qa-20261022.ps1" | tee "$OUT/offline-tests.log"
+          cd source
+          pwsh -NoProfile -File tool/release/test_supabase_query_result.ps1
+          python3 -m unittest discover -s tools/qa -p test_bil_release_cloud_e2e.py -v
+          git diff --exit-code
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: barcode-qa-offline-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-barcode-offline/
+          if-no-files-found: error
+  live-recovery:
+    name: "Frozen live recovery - ${{ matrix.scope }}"
+    needs: offline-safety
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        scope: [barcode-resolved, account-deletion, community-translation, public-endpoints, guarded-sql]
+    defaults:
+      run:
+        working-directory: source
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.FROZEN_SHA }}
+          path: source
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: harness
+          sparse-checkout: tools/qa/frozen_live_repair
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        if: matrix.scope == 'public-endpoints'
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Verify unchanged release source and exact deployed ledger without DDL
+        id: preflight
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          QA_SCOPE: ${{ matrix.scope }}
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-live-recovery/$QA_SCOPE"
+          mkdir -p "$OUT"
+          test "$(git rev-parse HEAD)" = "$FROZEN_SHA"
+          ACTUAL="$(gh api "repos/$GITHUB_REPOSITORY/branches/integration/bil-qa-media-policy-20261011" --jq .commit.sha)"
+          test "$ACTUAL" = "$FROZEN_SHA"
+          test -n "${SUPABASE_ACCESS_TOKEN:-}"
+          mkdir -p supabase/.temp
+          printf '%s' "$BIL_SUPABASE_PROJECT_REF" > supabase/.temp/project-ref
+          npx --yes supabase@2.121.0 --version | tee "$OUT/cli-version.txt"
+          npx --yes supabase@2.121.0 db query --linked --project-ref "$BIL_SUPABASE_PROJECT_REF" \
+            "select version,name,md5(array_to_string(statements,E'\\n')) as statements_md5 from supabase_migrations.schema_migrations order by version" \
+            --output json > "$OUT/deployed-migration-ledger.json"
+          python3 tool/release_certification/check_cloud_deployment_ledger.py "$OUT/deployed-migration-ledger.json" | tee "$OUT/ledger-check.json"
+      - name: Execute only the failed or previously unrun scope, preserving all assertions
+        id: check
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          QA_SCOPE: ${{ matrix.scope }}
+        run: |
+          set -euo pipefail
+          export OUT="$RUNNER_TEMP/bil-live-recovery/$QA_SCOPE"
+          export GITHUB_SHA="$FROZEN_SHA"
+          finish() {
+            code=$?
+            trap - EXIT
+            if ! git diff --quiet HEAD; then code=97; fi
+            if test "$(git rev-parse HEAD)" != "$FROZEN_SHA"; then code=98; fi
+            export QA_EXIT_CODE="$code"
+            python3 - <<'PY'
+          import json,os,pathlib
+          out=pathlib.Path(os.environ['OUT'])
+          code=int(os.environ['QA_EXIT_CODE'])
+          (out/'receipt.json').write_text(json.dumps({
+            'source_sha':os.environ['FROZEN_SHA'], 'harness_sha':os.environ['QA_HARNESS_SHA'],
+            'scope':os.environ['QA_SCOPE'], 'exit_code':code,
+            'status':'PASS' if code==0 else 'FAIL',
+            'original_failed_run':39701915665, 'release_certification':False,
+            'testflight_invoked':False,
+          },indent=2)+'\n')
+          PY
+            exit "$code"
+          }
+          trap finish EXIT
+          case "$QA_SCOPE" in
+            barcode-resolved)
+              python3 "$GITHUB_WORKSPACE/harness/tools/qa/frozen_live_repair/prepare_barcode_fixture_qa.py" --source-root . --evidence "$OUT"
+              SCRIPT=tool/nutrition/.ci-barcode-fixture-qa-20261022.ps1
+              ARGS=(-ProjectRef "$BIL_SUPABASE_PROJECT_REF")
+              ;;
+            account-deletion)
+              ORIGINAL=tool/account_deletion/run_live_disposable_e2e.ps1
+              ARGS=(-ProjectRef "$BIL_SUPABASE_PROJECT_REF" -OwnerEmail release-certification@bilhealth.invalid)
+              ;;
+            community-translation)
+              ORIGINAL=tool/community_translation/run_live_synthetic_e2e.ps1
+              ARGS=()
+              ;;
+            guarded-sql)
+              python3 tools/qa/bil_release_cloud_e2e.py --output "$OUT/sql" 2>&1 | tee "$OUT/guarded-sql.log"
+              exit 0
+              ;;
+            public-endpoints)
+              flutter pub get --enforce-lockfile
+              flutter test --no-pub --dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true test/features/wellness/wellness_video_stream_live_test.dart 2>&1 | tee "$OUT/live-workout-range.log"
+              curl --fail --silent --show-error --location https://www.bilhealth.com/.well-known/apple-app-site-association --output "$OUT/apple-app-site-association.json"
+              curl --fail --silent --show-error --location https://www.bilhealth.com/.well-known/assetlinks.json --output "$OUT/assetlinks.json"
+              curl --fail --silent --show-error --location https://www.bilhealth.com/app-ads.txt --output "$OUT/app-ads.txt"
+              curl --fail --silent --show-error --location https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json --output "$OUT/workout-manifest.json"
+              node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$OUT/apple-app-site-association.json"
+              node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$OUT/assetlinks.json"
+              node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$OUT/workout-manifest.json"
+              test -s "$OUT/app-ads.txt"
+              node tool/release_certification/admin_web_boundary_smoke.mjs | tee "$OUT/admin-web-boundary.json"
+              exit 0
+              ;;
+            *) echo 'Unknown scope'; exit 2 ;;
+          esac
+          if test -n "${ORIGINAL:-}"; then
+            SCRIPT="$(dirname "$ORIGINAL")/.ci-qa-recovery-20261022.ps1"
+            python3 - "$ORIGINAL" "$SCRIPT" <<'PY'
+          import pathlib,sys
+          text=pathlib.Path(sys.argv[1]).read_text(encoding='utf-8-sig')
+          if 'supabase@latest' not in text:raise SystemExit('Expected original CLI marker absent')
+          pathlib.Path(sys.argv[2]).write_text(text.replace('supabase@latest','supabase@2.121.0'),encoding='utf-8')
+          PY
+          fi
+          set +e
+          pwsh -NoProfile -File "$SCRIPT" "${ARGS[@]}" > "$OUT/result.json" 2> "$OUT/error.log"
+          code=$?
+          set -e
+          rm -f "$SCRIPT"
+          cat "$OUT/result.json"
+          cat "$OUT/error.log"
+          test "$code" = 0
+          python3 - <<'PY'
+          import json,os,pathlib
+          r=json.loads((pathlib.Path(os.environ['OUT'])/'result.json').read_text(encoding='utf-8-sig'))
+          if r.get('success',r.get('translated')) is not True:raise SystemExit('No actual live success')
+          for key,value in r.items():
+            if (key in ('cleanup','user_deleted','session_revoked','cascade_clean') or key.startswith('cleanup_')) and value is not True:
+              raise SystemExit('Unproved disposable fixture cleanup: '+key)
+          if os.environ['QA_SCOPE']=='barcode-resolved':
+            for key in ('gtin_match','fixture_name_match','cleanup_user','cleanup_fixture','cleanup_legacy_fixture'):
+              if r.get(key) is not True:raise SystemExit('Barcode identity or cleanup failed: '+key)
+          PY
+      - name: Preserve exact source, harness and per-scope result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: live-recovery-${{ matrix.scope }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-live-recovery/${{ matrix.scope }}/
+          if-no-files-found: error
+          retention-days: 30
