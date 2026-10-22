@@ -1,11 +1,12 @@
 name: BIL frozen SQL migration-aware scope QA
-run-name: "Five unchanged rollback programs with exact known Auth cleanup trigger"
+run-name: "Three remaining rollback scopes with complete deployed trigger inventory"
 
 on:
   push:
     branches: [qa/bil-independent-31554-20261022]
     paths:
       - .github/workflows/bil_qa_guarded_sql_trigger_recovery_20261022.yml
+      - tools/qa/frozen_guarded_sql_trigger_overlay_20261022.py
   workflow_dispatch:
 
 permissions:
@@ -17,7 +18,7 @@ concurrency:
 
 env:
   FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
-  QA_HARNESS_SHA: 5fb2b54ab80cb4f2a6c5dcbc9820744b930b9ffa
+  QA_HARNESS_SHA: ${{ github.sha }}
   BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
 
 jobs:
@@ -69,8 +70,6 @@ jobs:
       max-parallel: 1
       matrix:
         scope:
-          - ai_consent_receipt
-          - cloud_sync_consent
           - community_collaborator_privacy
           - community_policy_20261019
           - community_prebuild

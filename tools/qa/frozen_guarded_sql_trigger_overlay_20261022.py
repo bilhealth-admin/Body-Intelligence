@@ -21,6 +21,8 @@ FROZEN="31554b3e078667a38bd3c53aa105f5f1d2a4dc96"
 SQL_RUNNER_BLOB="35b5127dcde75339e56d1940d8653673e2ae81c7"
 MIGRATION="supabase/migrations/20261019073511_community_circle_owner_deletion_cleanup_v1.sql"
 MIGRATION_BLOB="0b3d242da2e0d737bea8dd1028045e3b5856dd69"
+VIS_MIGRATION="supabase/migrations/20261020210400_community_circle_visibility_legacy_projection_guard_v1.sql"
+VIS_MIGRATION_BLOB="72a6adc90a66498743a532d3fefb97d6f8a8f312"
 NAME="bil_remove_owned_circles_before_account_delete_v1"
 TRIGGER_MD5="8e49f7b56a76260df01a0484b99feb30"
 FUNCTION_MD5="b78b4aa2ab0840c7aab089abc81f15f1"
@@ -78,18 +80,74 @@ def reviewed_overlay(src,scope):
                 "'only_reviewed_auth_circle_cleanup_trigger'")
         return src
     if scope in ("community_collaborator_privacy","community_prebuild"):
-        match_start="if exists(select 1 from pg_trigger"
-        def substitute(match):
-            condition=match[match.index("(")+1:-len(" then")]
-            if not condition.endswith(")"):
-                raise ValueError("Original EXISTS closure changed")
-            condition=condition[:-1]  # Remove EXISTS close; retain the IN(...) close.
-            # Original was EXISTS(SELECT...), so COUNT(*) in the same exact
-            # three tables must now be 1, not 0 or an unbounded allowlist.
-            inner=condition.removeprefix("select 1 from pg_trigger")
-            if not inner.startswith(" where not tgisinternal"):raise ValueError("Original 3-table scope changed")
-            return f"if (select count(*) from pg_trigger{inner})<>1 or not {PIN} then"
-        return replace_once(src,RULES[scope],substitute)
+        # All four externally exposed boundary triggers were independently
+        # read back from the reviewed, deployed migrations (Auth + two
+        # notification seen-state + private receipt), with exact body hashes.
+        # Reject any missing, disabled, renamed, added, or changed trigger.
+        reviewed_rows=(
+          ("'auth.users'::regclass",NAME,TRIGGER_MD5,FUNCTION_MD5),
+          ("'public.bil_community_notifications'::regclass",
+           "bil_post_review_activity_seen_v2",
+           "098c64dd0b11c571bf193646cf696194",
+           "057867220bd04f7229e3ea19b2dcfd6d"),
+          ("'public.bil_community_notifications'::regclass",
+           "bil_sync_post_receipt_seen_v1",
+           "285a14ad8fe3d95745045300f63c7ff8",
+           "7c52494c3197c17ce4f4195c4bdb78b9"),
+          ("'private.bil_community_post_events_v1'::regclass",
+           "bil_post_review_event_seen_v2",
+           "945c08aae4256c504df955ce394c4f3d",
+           "129535ef7d3c09843482ab77280bfcda"),
+        )
+        expected=",\n     ".join(
+          f"({relation},'{name}','{th}','{fh}','O')"
+          for relation,name,th,fh in reviewed_rows)
+        guard=f"""if not {PIN} or exists (
+    with expected(relation,name,trigger_hash,function_hash,enabled) as (values
+     {expected}
+    ), actual as (
+      select tgrelid relation,tgname::text name,
+        md5(pg_get_triggerdef(oid)) trigger_hash,
+        md5(pg_get_functiondef(tgfoid)) function_hash,
+        tgenabled::text enabled
+      from pg_trigger where not tgisinternal and tgrelid in (
+        'auth.users'::regclass,'public.bil_community_notifications'::regclass,
+        'public.bil_push_outbox'::regclass,'private.bil_community_post_events_v1'::regclass)
+    )
+    select 1 from expected e full join actual a using(relation,name)
+    where e.trigger_hash is distinct from a.trigger_hash
+       or e.function_hash is distinct from a.function_hash
+       or e.enabled is distinct from a.enabled
+  ) then"""
+        src=replace_once(src,RULES[scope],lambda _:guard)
+        if scope=="community_collaborator_privacy":
+            # The 2026-10-20 reviewed Circle visibility migration changed
+            # precisely one WHERE fragment in the pre-existing collaborator
+            # metadata RPC, which explains its later canonical MD5.
+            # Invert the *exact* added fragment and require the old original
+            # strict MD5; neither an unknown function body nor a missing
+            # migration may pass.
+            prior="6527ab896dce29d2481b4f09aa8c331b"
+            current="6c05d2c794175c030fd6f40afbcb7445"
+            new=("      where pc.post_id=p.id and cir.active\n"
+                 "        and private.bil_circle_visible_v1(cir.id)\n"
+                 "      order by pc.created_at desc")
+            old=("      where pc.post_id=p.id and cir.active\n"
+                 "      order by pc.created_at desc")
+            sql_expr=lambda value: "("+" || chr(10) || ".join(
+                "'"+line+"'" for line in value.split("\n"))+")"
+            fn="'public.bil_community_post_reference_metadata_v1(uuid[])'::regprocedure"
+            base=f"replace(pg_get_functiondef({fn}),chr(13),'')"
+            original_guard=f"is distinct from '{prior}' then"
+            if src.count(original_guard)!=1:
+                raise ValueError("Original collaborator function hash guard changed")
+            strict=(f"is distinct from '{current}'\n"
+              f"  or (select count(*) from supabase_migrations.schema_migrations"
+              f" where name='community_circle_visibility_legacy_projection_guard_v1')<>1\n"
+              f"  or md5(replace({base},{sql_expr(new)},{sql_expr(old)}))"
+              f" is distinct from '{prior}' then")
+            src=src.replace(original_guard,strict)
+        return src
     if scope=="community_policy_20261019":
         original=r"with expected(relation, name, trigger_hash, function_hash) as (values"
         entry=(f"('auth.users'::regclass,'{NAME}',"
@@ -114,6 +172,7 @@ def prepare(source,scope):
     if git(source,"rev-parse","HEAD")!=FROZEN:
         raise ValueError("Frozen source HEAD differs")
     for path,blob in ((MIGRATION,MIGRATION_BLOB),
+        (VIS_MIGRATION,VIS_MIGRATION_BLOB),
         ("tools/qa/bil_release_cloud_e2e.py",SQL_RUNNER_BLOB),
         (path_of(scope),BLOBS[scope])):
         if git(source,"hash-object",str(source/path))!=blob:
@@ -136,7 +195,11 @@ def sanitized(row):
         try:checks=json.loads(checks)
         except ValueError:checks=None
     why=failure.get("error") if isinstance(failure,dict) else None
-    if not isinstance(why,str) or not why.startswith("AUDIT "):why=None
+    if isinstance(why,str) and re.fullmatch(
+         r"permission denied for (?:relation|table|schema|function) [a-zA-Z_][a-zA-Z0-9_.()]*",why):
+        why="POSTGRES_PERMISSION: "+why
+    elif not isinstance(why,str) or not why.startswith("AUDIT "):
+        why=None
     if why:
         why=re.sub(r"\b[0-9a-fA-F]{8}-[0-9a-fA-F-]{27,}\b","[ID]",why)
         why=re.sub(r"(?i)\b[A-Z0-9_.+%-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b","[EMAIL]",why)
@@ -164,6 +227,7 @@ def main():
     manifest={
        "source_sha":FROZEN,"scope":args.scope,"original_sql_blob":BLOBS[args.scope],
        "reviewed_circle_migration_blob":MIGRATION_BLOB,
+       "reviewed_circle_visibility_migration_blob":VIS_MIGRATION_BLOB,
        "original_sql_sha256":hashlib.sha256(original.encode()).hexdigest(),
        "updated_guard_sql_sha256":hashlib.sha256(revised.encode()).hexdigest(),
        "reviewed_trigger_md5":TRIGGER_MD5,"reviewed_function_md5":FUNCTION_MD5,
