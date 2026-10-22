@@ -1,0 +1,93 @@
+name: BIL frozen MobSF isolated producer recovery
+run-name: "Dispatch only missing offline MobSF on original verified Android APK"
+
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths:
+      - .github/workflows/bil_qa_dispatch_missing_mobsf_20261022.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: bil-frozen-mobsf-one-shot
+  cancel-in-progress: false
+
+env:
+  FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+  FROZEN_REF: integration/bil-qa-media-policy-20261011
+  ANDROID_ARTIFACT_RUN: "39701926911"
+  ORIGINAL_WORKFLOW_ID: "384948928"
+
+jobs:
+  dispatch-only-original-offline-mobsf:
+    name: Confirm producer, original APK and immutable SHA before one MobSF dispatch
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Verify producer and submit exactly one harmless offline static scan
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/bil-mobsf-dispatch"
+          mkdir -p "$OUT"
+          REPO="$GITHUB_REPOSITORY"
+          sha="$(gh api "repos/$REPO/branches/$FROZEN_REF" --jq .commit.sha)"
+          test "$sha" = "$FROZEN_SHA"
+          gh api "repos/$REPO/actions/runs/$ANDROID_ARTIFACT_RUN" > "$OUT/producer.json"
+          jq -e --arg branch "$FROZEN_REF" --arg sha "$FROZEN_SHA" '
+            .head_branch==$branch and .head_sha==$sha and .status=="completed"' \
+            "$OUT/producer.json" > /dev/null
+          gh api "repos/$REPO/actions/runs/$ANDROID_ARTIFACT_RUN/jobs?per_page=100" > "$OUT/producer-jobs.json"
+          jq -e '([.jobs[].steps[]? | select(.conclusion=="success") | .name] | unique) as $passed |
+            ["Build Android plugin sources for CodeQL",
+             "Preserve the isolated Android debug APK for static inspection",
+             "Upload Android API 33 native integration evidence"] | all(. as $need | $passed | index($need)!=null)' \
+             "$OUT/producer-jobs.json" > /dev/null
+          gh api "repos/$REPO/actions/runs/$ANDROID_ARTIFACT_RUN/artifacts?per_page=100" > "$OUT/producer-artifacts.json"
+          jq -e --arg name "bil-android33-native-integration-$FROZEN_SHA" \
+            '([.artifacts[] | select(.name==$name and (.expired|not))] | length)==1' \
+            "$OUT/producer-artifacts.json" > /dev/null
+          workflow="$(gh api "repos/$REPO/actions/workflows/$ORIGINAL_WORKFLOW_ID" --jq .path)"
+          test "$workflow" = ".github/workflows/bil_codeql_security_extended.yml"
+          gh api "repos/$REPO/actions/workflows/$ORIGINAL_WORKFLOW_ID/runs?per_page=100" > "$OUT/before.json"
+          floor="$(jq -r '[.workflow_runs[].id] | max // 0' "$OUT/before.json")"
+          printf '{"source_sha":"%s","producer_run":%s,"original_workflow":%s,"before_max_run_id":%s,"testflight_invoked":false,"store_deployment":false,"status":"DISPATCH_INTENT"}\n' "$FROZEN_SHA" "$ANDROID_ARTIFACT_RUN" "$ORIGINAL_WORKFLOW_ID" "$floor" > "$OUT/intent.json"
+          # Never send TestFlight or artifact builds. Original workflow's one MobSF job
+          # performs a network-disabled static scan on the already captured debug APK.
+          jq -n --arg ref "$FROZEN_REF" --arg producer "$ANDROID_ARTIFACT_RUN" \
+             '{ref:$ref,inputs:{mobsf_only:"true",android_artifact_run:$producer}}' > "$OUT/request.json"
+          gh api "repos/$REPO/actions/workflows/$ORIGINAL_WORKFLOW_ID/dispatches" --method POST \
+            --input "$OUT/request.json"
+          python3 - "$OUT" <<'PY'
+          import json, pathlib,sys
+          out=pathlib.Path(sys.argv[1])
+          (out/'result.json').write_text(json.dumps({'status':'POST_ACCEPTED_NOT_PROOF_OF_RUN',
+             'producer_run':39701926911,'source_sha':'31554b3e078667a38bd3c53aa105f5f1d2a4dc96',
+             'mobsf_only':True,'testflight_invoked':False},indent=2))
+          PY
+          for n in $(seq 1 18); do
+            gh api "repos/$REPO/actions/workflows/$ORIGINAL_WORKFLOW_ID/runs?per_page=100" > "$OUT/after.json"
+            jq -r --argjson floor "$floor" --arg sha "$FROZEN_SHA" --arg branch "$FROZEN_REF" '
+              [.workflow_runs[]|select(.id>$floor and .head_sha==$sha and .head_branch==$branch and .event=="workflow_dispatch")|.id]|join(" ")' \
+              "$OUT/after.json" > "$OUT/new-runs.txt"
+            if test -s "$OUT/new-runs.txt"; then
+              echo "New original workflow run(s) requiring result verification: $(cat "$OUT/new-runs.txt")"
+              break
+            fi
+            sleep 10
+          done
+          echo "Static scan dispatched; final scan job must report its own success before acceptance"
+      - name: Retain exact-source MobSF dispatch receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen31554-only-mobsf-dispatch-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-mobsf-dispatch/
+          if-no-files-found: warn
+          retention-days: 21
