@@ -1,0 +1,47 @@
+name: BIL candidate iOS simulator signing regression
+run-name: "BIL candidate: strict Xcode26 entitlements regression, no signing/production"
+on:
+  push:
+    branches: [work/bil-ios37-release-security-20261022]
+    paths:
+      - .github/scripts/bil_ios_simulator_adhoc_sign.py
+      - .github/scripts/test_bil_ios_xcode26_otool_regression_20261022.py
+      - .github/workflows/bil_ios37_candidate_ios_signing_harness_20261022.yml
+permissions:
+  contents: read
+jobs:
+  strict-qa-parser-unit-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Prove original source identity, changed paths and strict simulator parser tests
+        shell: bash
+        env:
+          FROZEN: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$FROZEN" HEAD
+          test "$(git ls-remote origin refs/heads/integration/bil-qa-media-policy-20261011 | awk '{print $1}')" = "$FROZEN"
+          git diff --name-only "$FROZEN" HEAD > "$RUNNER_TEMP/candidate-diff.txt"
+          python3 - "$RUNNER_TEMP/candidate-diff.txt" <<'PY'
+          from pathlib import Path
+          import sys
+          allowed={
+            '.github/workflows/bil_ios37_release_dev_dependency_remediation_20261022.yml',
+            '.github/workflows/bil_ios37_candidate_ios_signing_harness_20261022.yml',
+            '.github/scripts/bil_ios_simulator_adhoc_sign.py',
+            '.github/scripts/test_bil_ios_xcode26_otool_regression_20261022.py',
+            'cloudflare/workout-runtime/package.json',
+            'cloudflare/workout-runtime/package-lock.json',
+          }
+          actual=set(Path(sys.argv[1]).read_text().splitlines())
+          if actual!=allowed:
+            raise SystemExit('Unexpected candidate source path set: '+repr(sorted(actual)))
+          PY
+          python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
+          test -z "$(git diff --name-only HEAD)"
+          echo 'STRICT_IOS26_SIMULATOR_SIGNING_REGRESSION_PASS; NO_STORE_SIGNING'

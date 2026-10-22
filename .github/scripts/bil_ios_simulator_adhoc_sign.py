@@ -97,6 +97,11 @@ def resolve_simulated_entitlements_path(settings, build_log):
             values = shlex.split(match.group(1), posix=True)
         except ValueError as error:
             raise ValueError("Xcode emitted an invalid simulated entitlements path") from error
+        if not values:
+            # Xcode emits an empty value while building unrelated targets.
+            # Only the final nonempty Runner-generated path may be selected;
+            # strict unique path, file, Mach-O and signature checks still apply.
+            continue
         if len(values) != 1 or not values[0]:
             raise ValueError("Xcode must emit one simulated entitlements path")
         candidates.append(values[0])
@@ -165,14 +170,35 @@ def verify_readback(raw, details, expected):
 def verify_simulated_sections(raw, expected, architecture_count):
     sections = []
     current = None
+    section_format = None
     for line in raw.decode("utf-8").splitlines():
         if line.strip() == "Contents of (__TEXT,__entitlements) section":
             current = bytearray()
+            section_format = None
             sections.append(current)
             continue
         match = re.fullmatch(r"\s*[0-9a-fA-F]{8,16}\s+([0-9a-fA-F ]+)\s*", line)
         if match is not None and current is not None:
-            current.extend(bytes.fromhex(match.group(1)))
+            tokens = match.group(1).split()
+            if section_format is None:
+                if len(tokens)>1 and all(re.fullmatch(r"[0-9a-fA-F]{2}", t) for t in tokens):
+                    section_format = "byte-pairs"
+                elif len(tokens)>1 and all(re.fullmatch(r"[0-9a-fA-F]{8}", t) for t in tokens):
+                    section_format = "little-endian-words"
+                elif len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2})+",tokens[0]):
+                    # Existing fixture format is a single contiguous hexadecimal row.
+                    section_format = "continuous-bytes"
+                else:
+                    raise ValueError("Unrecognized otool entitlement hex representation")
+            if section_format=="byte-pairs" and tokens and all(re.fullmatch(r"[0-9a-fA-F]{2}",t) for t in tokens):
+                payload = bytes.fromhex("".join(tokens))
+            elif section_format=="little-endian-words" and tokens and all(re.fullmatch(r"[0-9a-fA-F]{8}",t) for t in tokens):
+                payload = b"".join(bytes.fromhex(t)[::-1] for t in tokens)
+            elif section_format=="continuous-bytes" and len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2})+",tokens[0]):
+                payload = bytes.fromhex(tokens[0])
+            else:
+                raise ValueError("Mixed or malformed otool entitlement rows")
+            current.extend(payload)
         elif line.strip():
             current = None
     if len(sections) != architecture_count or any(
