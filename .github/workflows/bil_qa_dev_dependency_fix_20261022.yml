@@ -1,0 +1,78 @@
+name: BIL QA-only dev dependency security verification
+run-name: "QA dev dependency audit on frozen 31554"
+
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths:
+      - .github/workflows/bil_qa_dev_dependency_fix_20261022.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-dev-supply-chain:
+    name: Verify patched Vite/Vitest with unchanged mobile and production dependencies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exactly the original BIL commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Test only the corrected dev tool versions; do not modify any remote commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+          mkdir -p "$RUNNER_TEMP/bil-qa-dev-audit"
+          node --version | tee "$RUNNER_TEMP/bil-qa-dev-audit/node-version.txt"
+          npm --version | tee "$RUNNER_TEMP/bil-qa-dev-audit/npm-version.txt"
+          cd cloudflare/workout-runtime
+          cp package.json "$RUNNER_TEMP/bil-qa-dev-audit/original-package.json"
+          cp package-lock.json "$RUNNER_TEMP/bil-qa-dev-audit/original-package-lock.json"
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee "$RUNNER_TEMP/bil-qa-dev-audit/original-deps-install.log"
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund \
+            --save-dev --save-exact vite@8.2.4 vitest@4.1.12 2>&1 | tee "$RUNNER_TEMP/bil-qa-dev-audit/dev-lock-update.log"
+          python3 - <<'PY'
+          import json, os, pathlib
+          a=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-qa-dev-audit'
+          old=json.loads((a/'original-package.json').read_text())
+          new=json.loads(pathlib.Path('package.json').read_text())
+          assert old['dependencies']==new['dependencies'], 'Runtime deps unexpectedly changed'
+          previous=json.loads((a/'original-package-lock.json').read_text())
+          patched=json.loads(pathlib.Path('package-lock.json').read_text())
+          def production(packages):
+              return {k:v for k,v in packages.items() if k and not v.get('dev',False)}
+          assert production(previous['packages']) == production(patched['packages']), 'Production lock graph changed'
+          assert new['devDependencies']['vite']=='8.2.4'
+          assert new['devDependencies']['vitest']=='4.1.12'
+          (a/'dev-diff.json').write_text(json.dumps({'original_vite':'8.2.2',
+            'patched_vite':'8.2.4','original_vitest':'4.1.11','patched_vitest':'4.1.12',
+            'runtime_graph_unchanged':True},indent=2))
+          PY
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee "$RUNNER_TEMP/bil-qa-dev-audit/patched-install.log"
+          npm run check 2>&1 | tee "$RUNNER_TEMP/bil-qa-dev-audit/check.log"
+          npm test 2>&1 | tee "$RUNNER_TEMP/bil-qa-dev-audit/tests.log"
+          npm audit --audit-level=low --json > "$RUNNER_TEMP/bil-qa-dev-audit/audit.json"
+          python3 - <<'PY'
+          import json,os,pathlib
+          data=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-qa-dev-audit/audit.json').read_text())
+          assert data.get('metadata',{}).get('vulnerabilities',{}).get('total') == 0, 'Advisory findings remain'
+          print('PATCHED_QA_DEV_SECURITY_PASS=1')
+          PY
+          test "$(git rev-parse HEAD)" = 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+          printf '%s\n' 'ORIGINAL_RELEASE_COMMIT_UNCHANGED=PASS' 'TESTFLIGHT_NOT_TOUCHED=PASS'
+      - name: Upload actual audit and failure logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-dev-tool-security-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-qa-dev-audit/
+          if-no-files-found: warn
+          retention-days: 30
