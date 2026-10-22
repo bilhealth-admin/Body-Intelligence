@@ -1,5 +1,5 @@
-name: BIL frozen iOS remaining native settings and splashes
-run-name: "Frozen 31554 iPhone iPad settings and splashes only (no TestFlight)"
+name: BIL frozen iPad-only feature splashes native closure
+run-name: "Frozen 31554 sole missing iPad feature-splashes (no TestFlight)"
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: bil-frozen-ios-only-remaining-native-qa
+  group: bil-frozen-ios-ipad-feature-recovery
   cancel-in-progress: false
 
 env:
@@ -58,6 +58,21 @@ jobs:
           assert body.count('python3 "$BIL_SIGN_QA_HELPER"')==1
           p.write_text(body.replace(old,new),encoding='utf-8')
           BIL_QA_REMAINING
+          python3 - "$out/bil_ios37_native_integration.sh" <<'BIL_QA_IPAD_ONLY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text(encoding='utf-8')
+          pair='  for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do'
+          assert t.count(pair)==1
+          begin=t.index('ACTIVE_DEVICE="$IPHONE_UDID"\nstage runner-tests-boot 120')
+          end=t.index('for KIND in "${KINDS[@]}"; do',begin)
+          assert t.count('python3 "$BIL_SIGN_QA_HELPER"')==1
+          assert t.count('feature-splashes) KINDS=(feature-splashes) ;;')==1
+          t=t[:begin]+'# Archived exact-source XCTest5 PASS: 39727128571, 39728742077.\n'+t[end:]
+          t=t.replace(pair, '  for PAIR in "ipad:$IPAD_UDID"; do')
+          assert t.count('  for PAIR in "ipad:$IPAD_UDID"; do')==1
+          p.write_text(t,encoding='utf-8')
+          BIL_QA_IPAD_ONLY
           bash -n "$out/bil_ios37_native_integration.sh"
           python3 -m compileall -q "$out"
           PYTHONPATH="$out" python3 -m unittest discover -s "$out" -p "test*.py" -v
@@ -73,7 +88,7 @@ jobs:
           retention-days: 30
 
   native-remaining-native-only:
-    name: iPhone and iPad remaining native settings and splashes integration after QA-only parser repair
+    name: The one missing iPad feature-splashes native integration
     needs: prove-scoped-qa-patch
     runs-on: macos-26
     timeout-minutes: 120
@@ -116,6 +131,21 @@ jobs:
           assert body.count('python3 "$BIL_SIGN_QA_HELPER"')==1
           p.write_text(body.replace(old,new),encoding='utf-8')
           BIL_QA_REMAINING
+          python3 - "$out/bil_ios37_native_integration.sh" <<'BIL_QA_IPAD_ONLY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text(encoding='utf-8')
+          pair='  for PAIR in "iphone:$IPHONE_UDID" "ipad:$IPAD_UDID"; do'
+          assert t.count(pair)==1
+          begin=t.index('ACTIVE_DEVICE="$IPHONE_UDID"\nstage runner-tests-boot 120')
+          end=t.index('for KIND in "${KINDS[@]}"; do',begin)
+          assert t.count('python3 "$BIL_SIGN_QA_HELPER"')==1
+          assert t.count('feature-splashes) KINDS=(feature-splashes) ;;')==1
+          t=t[:begin]+'# Archived exact-source XCTest5 PASS: 39727128571, 39728742077.\n'+t[end:]
+          t=t.replace(pair, '  for PAIR in "ipad:$IPAD_UDID"; do')
+          assert t.count('  for PAIR in "ipad:$IPAD_UDID"; do')==1
+          p.write_text(t,encoding='utf-8')
+          BIL_QA_IPAD_ONLY
           bash -n "$out/bil_ios37_native_integration.sh"
           PYTHONPATH="$out" python3 -m unittest discover -s "$out" -p 'test*.py' -v
       - name: Resolve original exact pinned native dependencies
@@ -128,14 +158,18 @@ jobs:
       - name: Drive actual original iPhone and iPad remaining native settings and splashes tests using temporary QA sign reader
         shell: bash
         env:
-          BIL_NATIVE_TARGET: remaining-native
+          BIL_NATIVE_TARGET: feature-splashes
           BIL_SIGN_QA_HELPER: ${{ runner.temp }}/frozen-ios-sign-qa/bil_ios_simulator_adhoc_sign.py
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
           bash "$RUNNER_TEMP/frozen-ios-sign-qa/bil_ios37_native_integration.sh"
           test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
-          test -z "$(git diff --name-only HEAD)"
+          if test -n "$(git diff --name-only HEAD)"; then
+            echo '::error::Frozen tracked source unexpectedly changed by native toolchain'
+            git diff --name-only HEAD
+            exit 93
+          fi
       - name: Preserve actual native, original bundle and signing failure evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
