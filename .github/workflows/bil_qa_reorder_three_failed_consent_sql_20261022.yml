@@ -56,6 +56,7 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$SUPABASE_ACCESS_TOKEN"
+          mkdir -p supabase/.temp
           printf '%s' "$BIL_SUPABASE_PROJECT_REF" > supabase/.temp/project-ref
           export GITHUB_SHA="$BIL_FROZEN_SHA"
           python3 qa-harness/tools/qa/frozen_guarded_sql_consent_fixture_order_20261022.py --source . --scope community_prebuild --output "$RUNNER_TEMP/frozen-consent-sql/community_prebuild"
