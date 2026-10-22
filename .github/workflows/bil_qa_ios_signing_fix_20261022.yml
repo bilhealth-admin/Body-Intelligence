@@ -1,0 +1,126 @@
+name: BIL frozen iOS Simulator signing QA recovery
+run-name: "Frozen 31554 native iOS system-crypto (no TestFlight)"
+
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths:
+      - .github/workflows/bil_qa_ios_signing_fix_20261022.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil-frozen-ios-signing-qa-recovery
+  cancel-in-progress: false
+
+env:
+  BIL_FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+  BIL_HARNESS_SHA: 614e904641eafbae7bc2bc4eb46b6e978de63fd7
+
+jobs:
+  prove-scoped-qa-patch:
+    name: Verify source unchanged and enforce simulator signing fail-closed
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_FROZEN_SHA }}
+          path: source
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_HARNESS_SHA }}
+          path: harness
+          sparse-checkout: tools/qa/frozen_ios_sign_repair_20261022.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Run original and new isolated regression tests, no device or store build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C source rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          test "$(git -C harness rev-parse HEAD)" = "$BIL_HARNESS_SHA"
+          out="$RUNNER_TEMP/frozen-ios-sign-qa"
+          python3 harness/tools/qa/frozen_ios_sign_repair_20261022.py --source source --output "$out"
+          python3 -m compileall -q "$out"
+          PYTHONPATH="$out" python3 -m unittest discover -s "$out" -p "test*.py" -v
+          test "$(git -C source rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          test -z "$(git -C source diff --name-only HEAD)"
+          echo "QA_IOS_PARSER_REGRESSION_PASS; FROZEN_APP_UNCHANGED; TESTFLIGHT_EXCLUDED"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: frozen31554-ios-sign-qa-offline-${{ github.run_id }}
+          path: ${{ runner.temp }}/frozen-ios-sign-qa/manifest.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  native-system-crypto-only:
+    name: iPhone and iPad System Crypto native integration after QA-only parser repair
+    needs: prove-scoped-qa-patch
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_FROZEN_SHA }}
+          path: source
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_HARNESS_SHA }}
+          path: harness
+          sparse-checkout: tools/qa/frozen_ios_sign_repair_20261022.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Select original isolated CocoaPods
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/install_isolated_cocoapods.py --output artifacts/qa/text18/ios37-simulators/cocoapods-installation.json
+      - name: Prove original source and all strict signature fixture tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C source rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          out="$RUNNER_TEMP/frozen-ios-sign-qa"
+          python3 harness/tools/qa/frozen_ios_sign_repair_20261022.py --source source --output "$out"
+          PYTHONPATH="$out" python3 -m unittest discover -s "$out" -p 'test*.py' -v
+      - name: Resolve original exact pinned native dependencies
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get --enforce-lockfile
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          pod install --project-directory=ios
+      - name: Drive actual original iPhone and iPad System Crypto tests using temporary QA sign reader
+        working-directory: source
+        shell: bash
+        env:
+          BIL_NATIVE_TARGET: system-crypto
+          BIL_SIGN_QA_HELPER: ${{ runner.temp }}/frozen-ios-sign-qa/bil_ios_simulator_adhoc_sign.py
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          bash "$RUNNER_TEMP/frozen-ios-sign-qa/bil_ios37_native_integration.sh"
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          test -z "$(git diff --name-only HEAD)"
+      - name: Preserve actual native, original bundle and signing failure evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen31554-ios-system-crypto-${{ github.run_id }}
+          path: |
+            source/artifacts/qa/text18/ios37-simulators/
+            ${{ runner.temp }}/frozen-ios-sign-qa/manifest.json
+          if-no-files-found: warn
+          retention-days: 21
