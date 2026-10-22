@@ -124,6 +124,15 @@ jobs:
             const response=await client.request('GET',`/v1/builds?filter[app]=${APP}&filter[version]=${version}&include=preReleaseVersion&limit=100`);
             return response.data.filter(b=>response.included?.some(v=>v.id===b.relationships.preReleaseVersion.data?.id&&v.attributes.version==='1.0.0'&&v.attributes.platform==='IOS'));
           };
+          const internalGroupsForBuild=async buildId=>{
+            const result=[];
+            for(const group of await client.all(`/v1/apps/${APP}/betaGroups?limit=200`)){
+              if(group.attributes.isInternalGroup!==true) continue;
+              const builds=await client.all(`/v1/betaGroups/${group.id}/builds?limit=200`);
+              if(builds.some(b=>b.id===buildId)) result.push(group);
+            }
+            return result;
+          };
           if(mode==='preflight'){
             const app=await client.request('GET',`/v1/apps/${APP}`);
             if(app.data.attributes.bundleId!=='com.bilhealth.bodyintelligencelog') throw Error('ASC app identity mismatch');
@@ -131,7 +140,7 @@ jobs:
             const previous=await matching('36');
             const internal=new Map();
             for(const build of previous){
-              for(const group of await client.all(`/v1/builds/${build.id}/betaGroups?limit=200`)){
+              for(const group of await internalGroupsForBuild(build.id)){
                 if(group.attributes.isInternalGroup===true) internal.set(group.id,{id:group.id,name:group.attributes.name});
               }
             }
@@ -159,12 +168,12 @@ jobs:
               await client.request('PATCH',`/v1/builds/${build.id}`,{data:{type:'builds',id:build.id,attributes:{usesNonExemptEncryption:false}}});
             }
             const preflight=JSON.parse(fs.readFileSync('evidence/asc-preflight.json'));
-            const current=await client.all(`/v1/builds/${build.id}/betaGroups?limit=200`);
+            const current=await internalGroupsForBuild(build.id);
             const known=new Set(current.map(g=>g.id));
             for(const group of preflight.previous_internal_groups){
               if(!known.has(group.id)) await client.request('POST',`/v1/betaGroups/${group.id}/relationships/builds`,{data:[{type:'builds',id:build.id}]});
             }
-            const groups=await client.all(`/v1/builds/${build.id}/betaGroups?limit=200`);
+            const groups=await internalGroupsForBuild(build.id);
             const detail=await client.request('GET',`/v1/builds/${build.id}/buildBetaDetail`);
             const internal=groups.filter(g=>g.attributes.isInternalGroup===true);
             write('testflight-ready',{build_id:build.id,version:'1.0.0',build:37,processing_state:'VALID',
