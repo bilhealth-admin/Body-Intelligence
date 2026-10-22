@@ -81,6 +81,9 @@ def reviewed_overlay(src,scope):
         match_start="if exists(select 1 from pg_trigger"
         def substitute(match):
             condition=match[match.index("(")+1:-len(" then")]
+            if not condition.endswith(")"):
+                raise ValueError("Original EXISTS closure changed")
+            condition=condition[:-1]  # Remove EXISTS close; retain the IN(...) close.
             # Original was EXISTS(SELECT...), so COUNT(*) in the same exact
             # three tables must now be 1, not 0 or an unbounded allowlist.
             inner=condition.removeprefix("select 1 from pg_trigger")
