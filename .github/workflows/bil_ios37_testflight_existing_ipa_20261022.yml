@@ -1,0 +1,230 @@
+name: BIL iOS37 upload exact signed artifact to TestFlight
+run-name: Upload already signed IPA 37 from run 39815453479 to TestFlight
+on:
+  push:
+    branches: [codex/ios37-testflight-existing-ipa-20261022]
+    paths: [.github/workflows/bil_ios37_testflight_existing_ipa_20261022.yml]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: bil-ios37-existing-ipa-testflight-upload
+  cancel-in-progress: false
+env:
+  BIL_TESTED_SOURCE: 937aea673c2e9c0bec15ef988131d58f96bf5afe
+  BIL_SIGNED_RUN: '39815453479'
+  BIL_SIGNED_ARTIFACT: '12443365005'
+  BIL_IPA_SHA256: 986ee0dd3d529f235a73e82e4c31e42e40fdd097d725709f78ca27adb1fcd583
+jobs:
+  promote-existing-ipa:
+    name: Validate exact IPA, upload once, verify Apple processing and internal access
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - name: Checkout the tested source without rebuilding
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 937aea673c2e9c0bec15ef988131d58f96bf5afe
+          persist-credentials: false
+      - name: Verify original signed run and complete tests before downloading
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p delivery evidence
+          python3 - <<'PY'
+          import json, os, subprocess
+          def api(endpoint):
+              return json.loads(subprocess.check_output(['gh','api','repos/bilhealth-admin/Body-Intelligence/'+endpoint],text=True))
+          run=api('actions/runs/39815453479')
+          assert run['conclusion']=='success' and run['head_sha']=='9bc7dd971da59040214e88057aa7724eee02e930', 'Signed run identity mismatch'
+          artifact=api('actions/artifacts/12443365005')
+          assert not artifact['expired'] and artifact['workflow_run']['id']==39815453479
+          assert artifact['name']=='bil-ios37-signed-only-39815453479'
+          tests=api('actions/runs/39797161745')
+          assert tests['head_sha']==os.environ['BIL_TESTED_SOURCE'] and tests['conclusion']=='success'
+          jobs=api('actions/runs/39797161745/jobs?per_page=100')['jobs']
+          required={'Full analysis then one unsharded root suite','Supplemental source and dependency audits'}
+          assert {j['name'] for j in jobs}==required and all(j['conclusion']=='success' for j in jobs)
+          print('ORIGINAL_SIGNED_ARTIFACT_AND_EXACT_SOURCE_TESTS=PASS')
+          PY
+          gh run download 39815453479 --repo bilhealth-admin/Body-Intelligence \
+            --name bil-ios37-signed-only-39815453479 --dir delivery
+      - name: Verify exact bytes, IPA identity and original signing receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, plistlib, zipfile
+          root=pathlib.Path('delivery')
+          def unique(name):
+              matches=list(root.rglob(name))
+              assert len(matches)==1, 'Missing or ambiguous evidence: '+name
+              return matches[0]
+          ipa=unique('*.ipa')
+          digest=hashlib.sha256(ipa.read_bytes()).hexdigest()
+          assert digest==os.environ['BIL_IPA_SHA256'], 'IPA bytes differ from signed run'
+          receipt=json.loads(unique('BIL-ios-build-only-receipt.json').read_text())
+          assert receipt['status']=='SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED'
+          assert receipt['source_sha']==os.environ['BIL_TESTED_SOURCE'] and receipt['build']==37
+          assert receipt['ipa_sha256']==digest and receipt['ipa_bytes']==ipa.stat().st_size
+          assert unique('BIL-source-head.txt').read_text().strip()==os.environ['BIL_TESTED_SOURCE']
+          assert 'SIGNED_IPA_CODESIGN_GATE=PASS' in unique('BIL-ios-codesign-verify.txt').read_text()
+          assert 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' in unique('BIL-ios-crypto-scan.txt').read_text()
+          inventory=json.loads(unique('BIL-ios-final-artifact-inventory.json').read_text())
+          assert inventory['status']=='FINAL_ARTIFACT_IDENTITY_PASS' and inventory['build']=='37'
+          assert inventory['package']=='com.bilhealth.bodyintelligencelog' and inventory['version']=='1.0.0'
+          with zipfile.ZipFile(ipa) as archive:
+              infos=[n for n in archive.namelist() if n.startswith('Payload/') and n.endswith('.app/Info.plist') and len(n.split('/'))==3]
+              assert len(infos)==1
+              info=plistlib.loads(archive.read(infos[0]))
+          assert info['CFBundleIdentifier']=='com.bilhealth.bodyintelligencelog'
+          assert info['CFBundleVersion']=='37' and info['CFBundleShortVersionString']=='1.0.0'
+          identity={'source_sha':os.environ['BIL_TESTED_SOURCE'],'build':37,'ipa_sha256':digest,
+                    'uses_non_exempt_encryption':info.get('ITSAppUsesNonExemptEncryption'),
+                    'physical_device_verified':False,'release_approved':False}
+          pathlib.Path('evidence/identity.json').write_text(json.dumps(identity,indent=2)+'\n')
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('BIL_IPA_PATH='+str(ipa.resolve())+'\n')
+          print('EXACT_SIGNED_IPA_37_BYTES_AND_SOURCE=PASS')
+          PY
+          BIL_IPA_PATH="$(find delivery -type f -name '*.ipa' -print -quit)"
+          python3 tool/release/verify_final_artifact_identity.py \
+            --ipa "$BIL_IPA_PATH" --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build 37 --output evidence/final-artifact-inventory.json
+      - name: Prepare ephemeral Apple API key and processing verifier
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, os, pathlib
+          assert all(os.environ.get(k) for k in ('ASC_KEY_ID','ASC_ISSUER_ID','ASC_PRIVATE_KEY_BASE64'))
+          folder=pathlib.Path.home()/'.appstoreconnect/private_keys'
+          folder.mkdir(parents=True,exist_ok=True)
+          key=folder/('AuthKey_'+os.environ['ASC_KEY_ID']+'.p8')
+          raw=base64.b64decode(os.environ['ASC_PRIVATE_KEY_BASE64'],validate=True)
+          assert b'-----BEGIN PRIVATE KEY-----' in raw
+          key.write_bytes(raw); key.chmod(0o600)
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('ASC_PRIVATE_KEY_PATH='+str(key)+'\n')
+          PY
+          cat > evidence/asc-processing.mjs <<'JS'
+          import fs from 'node:fs';
+          import { clientFromEnvironment } from '../tool/apple_store_connect/asc_catalog_sync.mjs';
+          const client=clientFromEnvironment();
+          const APP='6805349703';
+          const mode=process.argv[2];
+          const write=(name,data)=>fs.writeFileSync(`evidence/${name}.json`,JSON.stringify(data,null,2)+'\n');
+          const matching=async version=>{
+            const response=await client.request('GET',`/v1/builds?filter[app]=${APP}&filter[version]=${version}&include=preReleaseVersion&limit=100`);
+            return response.data.filter(b=>response.included?.some(v=>v.id===b.relationships.preReleaseVersion.data?.id&&v.attributes.version==='1.0.0'&&v.attributes.platform==='IOS'));
+          };
+          if(mode==='preflight'){
+            const app=await client.request('GET',`/v1/apps/${APP}`);
+            if(app.data.attributes.bundleId!=='com.bilhealth.bodyintelligencelog') throw Error('ASC app identity mismatch');
+            if((await matching('37')).length) throw Error('Build 37 already exists: upload is blocked to prevent duplication; inspect its identity before proceeding');
+            const previous=await matching('36');
+            const internal=new Map();
+            for(const build of previous){
+              for(const group of await client.all(`/v1/builds/${build.id}/betaGroups?limit=200`)){
+                if(group.attributes.isInternalGroup===true) internal.set(group.id,{id:group.id,name:group.attributes.name});
+              }
+            }
+            write('asc-preflight',{app_id:APP,build37_absent:true,previous_internal_groups:[...internal.values()]});
+            console.log(`ASC_PREFLIGHT=PASS; BUILD37_ABSENT; EXISTING_INTERNAL_GROUPS=${internal.size}`);
+          }else if(mode==='processing'){
+            const identity=JSON.parse(fs.readFileSync('evidence/identity.json'));
+            let build;
+            for(let attempt=0;attempt<31;attempt++){
+              const matches=await matching('37');
+              if(matches.length>1) throw Error('Ambiguous build 37 records');
+              build=matches[0];
+              const state=build?.attributes.processingState??'NOT_VISIBLE_YET';
+              write('apple-processing',{build_id:build?.id??null,processing_state:state,attempt,source_sha:identity.source_sha,ipa_sha256:identity.ipa_sha256});
+              console.log(`APPLE_PROCESSING=${state}; CHECK=${attempt+1}`);
+              if(['FAILED','INVALID'].includes(state)) throw Error('Apple rejected binary processing; preserve upload receipt and do not re-upload');
+              if(state==='VALID') break;
+              if(attempt<30) await new Promise(resolve=>setTimeout(resolve,30000));
+            }
+            if(build?.attributes.processingState!=='VALID'){
+              console.log('TESTFLIGHT_UPLOAD_ACCEPTED; APPLE_PROCESSING_PENDING; DO_NOT_REUPLOAD');
+              process.exit(0);
+            }
+            if(build.attributes.usesNonExemptEncryption==null&&identity.uses_non_exempt_encryption===false){
+              await client.request('PATCH',`/v1/builds/${build.id}`,{data:{type:'builds',id:build.id,attributes:{usesNonExemptEncryption:false}}});
+            }
+            const preflight=JSON.parse(fs.readFileSync('evidence/asc-preflight.json'));
+            const current=await client.all(`/v1/builds/${build.id}/betaGroups?limit=200`);
+            const known=new Set(current.map(g=>g.id));
+            for(const group of preflight.previous_internal_groups){
+              if(!known.has(group.id)) await client.request('POST',`/v1/betaGroups/${group.id}/relationships/builds`,{data:[{type:'builds',id:build.id}]});
+            }
+            const groups=await client.all(`/v1/builds/${build.id}/betaGroups?limit=200`);
+            const detail=await client.request('GET',`/v1/builds/${build.id}/buildBetaDetail`);
+            const internal=groups.filter(g=>g.attributes.isInternalGroup===true);
+            write('testflight-ready',{build_id:build.id,version:'1.0.0',build:37,processing_state:'VALID',
+              internal_build_state:detail.data?.attributes.internalBuildState,internal_groups:internal.map(g=>({id:g.id,name:g.attributes.name})),
+              source_sha:identity.source_sha,ipa_sha256:identity.ipa_sha256,physical_device_verified:false,release_approved:false});
+            console.log(`TESTFLIGHT_BUILD37_PROCESSING=VALID; INTERNAL_STATE=${detail.data?.attributes.internalBuildState}; INTERNAL_GROUPS=${internal.length}; DEVICE_ACCEPTANCE=PENDING`);
+          }else throw Error('Unknown ASC operation');
+          JS
+          node --check evidence/asc-processing.mjs
+      - name: Verify Apple access and prevent an accidental duplicate upload
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: node evidence/asc-processing.mjs preflight
+      - name: Validate this exact IPA with Apple
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcrun altool --validate-app -f "$BIL_IPA_PATH" -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee evidence/apple-validation.log
+      - name: Upload the original signed IPA to TestFlight once
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = '1'
+          xcrun altool --upload-app -f "$BIL_IPA_PATH" -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee evidence/apple-upload.log
+          python3 - <<'PY'
+          import datetime,json,pathlib
+          identity=json.loads(pathlib.Path('evidence/identity.json').read_text())
+          identity.update(status='UPLOAD_ACCEPTED',processing_verified=False,
+                          uploaded_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),signed_run=39815453479,signed_artifact=12443365005)
+          pathlib.Path('evidence/upload-receipt.json').write_text(json.dumps(identity,indent=2)+'\n')
+          print('EXACT_ORIGINAL_IPA37_UPLOAD=ACCEPTED')
+          PY
+      - name: Verify Apple processing and reuse existing internal testing groups
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: node evidence/asc-processing.mjs processing
+      - name: Preserve upload, processing and artifact identity evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-ios37-testflight-promotion-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 21
+      - name: Remove ephemeral Apple private key
+        if: always()
+        shell: bash
+        run: |
+          if [[ -n "${ASC_PRIVATE_KEY_PATH:-}" && "$ASC_PRIVATE_KEY_PATH" == "$HOME/.appstoreconnect/private_keys/"* ]]; then
+            rm -f "$ASC_PRIVATE_KEY_PATH"
+          fi
