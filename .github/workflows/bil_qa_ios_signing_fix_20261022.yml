@@ -6,6 +6,7 @@ on:
     branches: [qa/bil-independent-31554-20261022]
     paths:
       - .github/workflows/bil_qa_ios_signing_fix_20261022.yml
+      - tools/qa/frozen_ios_sign_repair_20261022.py
   workflow_dispatch:
 
 permissions:
@@ -17,7 +18,7 @@ concurrency:
 
 env:
   BIL_FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
-  BIL_HARNESS_SHA: 614e904641eafbae7bc2bc4eb46b6e978de63fd7
+  BIL_HARNESS_SHA: ${{ github.sha }}
 
 jobs:
   prove-scoped-qa-patch:

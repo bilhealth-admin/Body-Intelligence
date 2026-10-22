@@ -43,6 +43,23 @@ def run(source, out):
     assert original_text.count(NEEDLE)==1, "Expected one strict parser clause"
     modified=original_text.replace(NEEDLE, REPLACE)
     assert modified.count(REPLACE)==1, "Unexpected temporary signing-parser patch"
+    # Actual Xcode 26.6 emits single-byte x86_64 dumps and little-endian
+    # 32-bit arm64 dump words for the same Mach-O entitlement plist.
+    # Keep the strict full-plist comparison, platform and section count.
+    word_reader='''            current.extend(bytes.fromhex(match.group(1)))'''
+    strict_reader='''            tokens = match.group(1).split()
+            if tokens and all(re.fullmatch(r"[0-9a-fA-F]{2}", t) for t in tokens):
+                payload = bytes.fromhex("".join(tokens))
+            elif tokens and all(re.fullmatch(r"[0-9a-fA-F]{8}", t) for t in tokens):
+                payload = b"".join(bytes.fromhex(t)[::-1] for t in tokens)
+            else:
+                raise ValueError("Unexpected or mixed otool entitlement hex format")
+            current.extend(payload)'''
+    if modified.count(word_reader)!=1:
+        raise ValueError("Frozen otool reader changed; no QA patch")
+    modified=modified.replace(word_reader,strict_reader)
+    if modified.count(strict_reader)!=1:
+        raise ValueError("Only one architecture-aware reader is permitted")
     sign_out=out / "bil_ios_simulator_adhoc_sign.py"
     sign_out.write_text(modified, encoding="utf-8")
     for name in ("bil_native_bounded_command.py", "test_bil_ios_simulator_adhoc_sign.py"):
@@ -72,6 +89,61 @@ class RealBuildLogRegression(unittest.TestCase):
         b="/tmp/B/Runner.app-Simulated.xcent"
         with self.assertRaises(ValueError):
             resolve_simulated_entitlements_path({}, "export LD_ENTITLEMENTS_SECTION="+a+"\nexport LD_ENTITLEMENTS_SECTION="+b)
+''',encoding="utf-8")
+    (out / "test_qa_otool_arm64_word_hex.py").write_text(r'''
+import plistlib
+import unittest
+from bil_ios_simulator_adhoc_sign import verify_simulated_sections
+
+class ActualOtoolHexRegression(unittest.TestCase):
+    def setUp(self):
+        self.expected = {
+            "application-identifier": "43F9Y5Y96K.com.bilhealth.bodyintelligencelog",
+            "com.apple.developer.healthkit": True,
+        }
+        raw = plistlib.dumps(self.expected, fmt=plistlib.FMT_XML)
+        self.blob = raw + b"\0" * ((-len(raw)) % 4)
+
+    def section(self, arch, style, blob=None):
+        raw = self.blob if blob is None else blob
+        lines = ["Runner (architecture %s):" % arch,
+                 "Contents of (__TEXT,__entitlements) section"]
+        for offset in range(0, len(raw), 16):
+            chunk = raw[offset:offset+16]
+            if style == "bytes":
+                hex_words = " ".join("%02x" % b for b in chunk)
+            elif style == "le32":
+                if len(chunk) % 4:
+                    raise AssertionError("Fixture must be 4-byte padded")
+                hex_words = " ".join(chunk[n:n+4][::-1].hex()
+                                     for n in range(0,len(chunk),4))
+            else:
+                raise AssertionError("Unsupported fixture")
+            lines.append("%016x  %s" % (0x100003000+offset,hex_words))
+        return "\n".join(lines)
+
+    def test_real_xcode26_two_architecture_formats(self):
+        raw = (self.section("x86_64","bytes") + "\n"
+               + self.section("arm64","le32") + "\n").encode()
+        self.assertEqual(verify_simulated_sections(raw,self.expected,2),2)
+
+    def test_absent_architecture_still_fails(self):
+        with self.assertRaises(ValueError):
+            verify_simulated_sections(
+                self.section("arm64","le32").encode(),self.expected,2)
+
+    def test_mismatched_arm64_entitlements_still_fail(self):
+        wrong = plistlib.dumps({"different":True},fmt=plistlib.FMT_XML)
+        wrong += b"\0"*((-len(wrong))%4)
+        raw = (self.section("x86_64","bytes")+"\n"
+               +self.section("arm64","le32",wrong)).encode()
+        with self.assertRaises(ValueError):
+            verify_simulated_sections(raw,self.expected,2)
+
+    def test_malformed_word_tokens_still_fail(self):
+        raw = b"Contents of (__TEXT,__entitlements) section\n0000000100003000 abcd12\n"
+        with self.assertRaises(ValueError):
+            verify_simulated_sections(raw,self.expected,1)
 ''',encoding="utf-8")
     summary={"source_sha":SOURCE_SHA,"original_sign_blob":SIGN_SHA,
         "original_runner_blob":NATIVE_SHA,"patched_sign_sha256":sha(modified),
