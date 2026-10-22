@@ -38,7 +38,7 @@ jobs:
           ACTUAL="$(gh api "repos/$GITHUB_REPOSITORY/branches/$FROZEN_BRANCH" --jq .commit.sha)"
           test "$ACTUAL" = "$FROZEN_SHA"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          grep -Fq 'FORBIDDEN_IDS' tools/qa/independent_frozen_dispatch_20261022.py
+          grep -Fq 'assert all(x[1] != 346770575' tools/qa/independent_frozen_dispatch_20261022.py
           grep -Fq '346770575' tools/qa/independent_frozen_dispatch_20261022.py
           python3 -m py_compile tools/qa/independent_frozen_dispatch_20261022.py
           printf 'FROZEN_SOURCE=%s\nHARNESS_SOURCE=%s\nTESTFLIGHT_DISPATCH=FORBIDDEN\n' "$FROZEN_SHA" "$GITHUB_SHA"
