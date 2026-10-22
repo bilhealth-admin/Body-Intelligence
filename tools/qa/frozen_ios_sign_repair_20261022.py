@@ -48,18 +48,47 @@ def run(source, out):
     # Keep the strict full-plist comparison, platform and section count.
     word_reader='''            current.extend(bytes.fromhex(match.group(1)))'''
     strict_reader='''            tokens = match.group(1).split()
-            if tokens and all(re.fullmatch(r"[0-9a-fA-F]{2}", t) for t in tokens):
+            if section_format is None:
+                if len(tokens)>1 and all(re.fullmatch(r"[0-9a-fA-F]{2}", t) for t in tokens):
+                    section_format = "byte-pairs"
+                elif len(tokens)>1 and all(re.fullmatch(r"[0-9a-fA-F]{8}", t) for t in tokens):
+                    section_format = "little-endian-words"
+                elif len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2}){1,16}",tokens[0]):
+                    # Existing fixture form: one continuous 1..16-byte hex row.
+                    section_format = "continuous-bytes"
+                else:
+                    raise ValueError("Unrecognized otool entitlement hex representation")
+            if section_format=="byte-pairs" and tokens and all(re.fullmatch(r"[0-9a-fA-F]{2}",t) for t in tokens):
                 payload = bytes.fromhex("".join(tokens))
-            elif tokens and all(re.fullmatch(r"[0-9a-fA-F]{8}", t) for t in tokens):
+            elif section_format=="little-endian-words" and tokens and all(re.fullmatch(r"[0-9a-fA-F]{8}",t) for t in tokens):
                 payload = b"".join(bytes.fromhex(t)[::-1] for t in tokens)
+            elif section_format=="continuous-bytes" and len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2}){1,16}",tokens[0]):
+                payload = bytes.fromhex(tokens[0])
             else:
-                raise ValueError("Unexpected or mixed otool entitlement hex format")
+                raise ValueError("Mixed or malformed otool entitlement rows")
             current.extend(payload)'''
     if modified.count(word_reader)!=1:
         raise ValueError("Frozen otool reader changed; no QA patch")
     modified=modified.replace(word_reader,strict_reader)
     if modified.count(strict_reader)!=1:
         raise ValueError("Only one architecture-aware reader is permitted")
+    start='''    sections = []
+    current = None
+    for line in raw.decode("utf-8").splitlines():'''
+    revised_start='''    sections = []
+    current = None
+    section_format = None
+    for line in raw.decode("utf-8").splitlines():'''
+    marker='''            current = bytearray()
+            sections.append(current)
+            continue'''
+    revised_marker='''            current = bytearray()
+            section_format = None
+            sections.append(current)
+            continue'''
+    if modified.count(start)!=1 or modified.count(marker)!=1:
+        raise ValueError("Original architecture section initialization drifted")
+    modified=modified.replace(start,revised_start).replace(marker,revised_marker)
     sign_out=out / "bil_ios_simulator_adhoc_sign.py"
     sign_out.write_text(modified, encoding="utf-8")
     for name in ("bil_native_bounded_command.py", "test_bil_ios_simulator_adhoc_sign.py"):
@@ -126,6 +155,14 @@ class ActualOtoolHexRegression(unittest.TestCase):
         raw = (self.section("x86_64","bytes") + "\n"
                + self.section("arm64","le32") + "\n").encode()
         self.assertEqual(verify_simulated_sections(raw,self.expected,2),2)
+
+    def test_original_contiguous_mock_hex_still_passes(self):
+        lines=["Runner (architecture arm64):",
+               "Contents of (__TEXT,__entitlements) section"]
+        for offset in range(0,len(self.blob),16):
+            lines.append("%016x %s" % (4096+offset,self.blob[offset:offset+16].hex()))
+        self.assertEqual(verify_simulated_sections(
+            "\n".join(lines).encode(),self.expected,1),1)
 
     def test_absent_architecture_still_fails(self):
         with self.assertRaises(ValueError):
