@@ -1,0 +1,91 @@
+name: BIL candidate signing credential and source binding preflight
+run-name: "BIL iOS37: verify signing availability without building or uploading"
+on:
+  push:
+    branches: [work/bil-ios37-release-security-20261022]
+    paths: [.github/workflows/bil_ios37_candidate_apple_signing_preflight_20261022.yml]
+permissions:
+  contents: read
+jobs:
+  safe-signing-config-preflight:
+    name: Verify signing prerequisites without revealing any credentials
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      FROZEN_ORIGINAL: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+      REQUIRED_BUILD: '37'
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
+      APPLE_CERT_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      APPLE_PROFILE: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+      ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      ASC_ISSUER: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+      BIL_INTEGRITY_BACKEND_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+      IOS_AUDITED_SHA: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}
+      ANDROID_AUDITED_SHA: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}
+      IOS_MANIFEST_HASH: ${{ vars.BIL_IOS_V37_STAGING_MANIFEST_SHA256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Produce minimal nonsecret signing readiness receipt and fail closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$FROZEN_ORIGINAL" HEAD
+          test "$(git ls-remote origin refs/heads/integration/bil-qa-media-policy-20261011 | awk '{print $1}')" = "$FROZEN_ORIGINAL"
+          python3 - "$RUNNER_TEMP/bil-signing-preflight.json" <<'PY'
+          import hashlib, json, os, pathlib, sys
+          names={
+            'APPLE_TEAM_ID':'APPLE_TEAM_ID',
+            'APPLE_DISTRIBUTION_CERTIFICATE_BASE64':'APPLE_CERTIFICATE',
+            'APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD':'APPLE_CERT_PASSWORD',
+            'APPLE_PROVISIONING_PROFILE_BASE64':'APPLE_PROFILE',
+            'APP_STORE_CONNECT_KEY_ID':'ASC_KEY_ID',
+            'APP_STORE_CONNECT_ISSUER_ID':'ASC_ISSUER',
+            'APP_STORE_CONNECT_PRIVATE_KEY_BASE64':'ASC_PRIVATE_KEY',
+            'BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID':'BIL_INTEGRITY_BACKEND_ID',
+          }
+          missing=sorted(k for k,v in names.items() if not os.environ.get(v,'').strip())
+          expected=os.environ['GITHUB_SHA']
+          mf=pathlib.Path('docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md')
+          manifest_digest=hashlib.sha256(mf.read_bytes()).hexdigest()
+          binding={
+            'ios_source_matches':os.environ.get('IOS_AUDITED_SHA')==expected,
+            'android_source_matches':os.environ.get('ANDROID_AUDITED_SHA')==expected,
+            'ios_manifest_matches':os.environ.get('IOS_MANIFEST_HASH')==manifest_digest,
+          }
+          manifest=mf.read_text()
+          manifest_markers={
+            'staging_complete':'STAGING_MANIFEST_COMPLETE: YES' in manifest,
+            'accepted_candidate':'CANDIDATE_FROZEN_OR_ACCEPTED: YES' in manifest,
+            'version_37':'RELEASE_BUILD_NUMBER: 37' in manifest,
+          }
+          data={
+            'candidate_sha':expected,
+            'protected_sha':os.environ['FROZEN_ORIGINAL'],
+            'scope':'READ_ONLY_SIGNING_INPUT_PRESENCE',
+            'missing_required_secret_names':missing,
+            'source_variables_binding':binding,
+            'manifest_markers':manifest_markers,
+            'signed_build':'NOT_RUN',
+            'testflight_upload':'NOT_RUN',
+            'production_deployment':'NOT_RUN',
+          }
+          pathlib.Path(sys.argv[1]).write_text(json.dumps(data,indent=2)+'\n')
+          print(json.dumps(data,indent=2))
+          if missing or not all(manifest_markers.values()) or not all(binding.values()):
+              raise SystemExit('SIGNING_PREFLIGHT_BLOCKED: missing signing input or mismatched accepted-source binding; no signing attempted')
+          print('SIGNING_READONLY_PREFLIGHT_PASS')
+          PY
+      - name: Preserve nonsecret only validation summary
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-ios37-signing-config-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-signing-preflight.json
+          if-no-files-found: warn
+          retention-days: 14
