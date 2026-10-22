@@ -53,7 +53,7 @@ def run(source, out):
                     section_format = "byte-pairs"
                 elif len(tokens)>1 and all(re.fullmatch(r"[0-9a-fA-F]{8}", t) for t in tokens):
                     section_format = "little-endian-words"
-                elif len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2}){1,16}",tokens[0]):
+                elif len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2})+",tokens[0]):
                     # Existing fixture form: one continuous 1..16-byte hex row.
                     section_format = "continuous-bytes"
                 else:
@@ -62,7 +62,7 @@ def run(source, out):
                 payload = bytes.fromhex("".join(tokens))
             elif section_format=="little-endian-words" and tokens and all(re.fullmatch(r"[0-9a-fA-F]{8}",t) for t in tokens):
                 payload = b"".join(bytes.fromhex(t)[::-1] for t in tokens)
-            elif section_format=="continuous-bytes" and len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2}){1,16}",tokens[0]):
+            elif section_format=="continuous-bytes" and len(tokens)==1 and re.fullmatch(r"(?:[0-9a-fA-F]{2})+",tokens[0]):
                 payload = bytes.fromhex(tokens[0])
             else:
                 raise ValueError("Mixed or malformed otool entitlement rows")
@@ -163,6 +163,11 @@ class ActualOtoolHexRegression(unittest.TestCase):
             lines.append("%016x %s" % (4096+offset,self.blob[offset:offset+16].hex()))
         self.assertEqual(verify_simulated_sections(
             "\n".join(lines).encode(),self.expected,1),1)
+
+    def test_legacy_single_hex_row_for_complete_plist(self):
+        raw=("Contents of (__TEXT,__entitlements) section"+"\n"
+             +"0000000100003000 "+self.blob.hex()+"\n").encode()
+        self.assertEqual(verify_simulated_sections(raw,self.expected,1),1)
 
     def test_absent_architecture_still_fails(self):
         with self.assertRaises(ValueError):
