@@ -1,0 +1,116 @@
+name: BIL candidate iOS37 security dependency remediation
+run-name: "BIL security candidate: audited Vite and Vitest update, no deployment"
+on:
+  push:
+    branches: [work/bil-ios37-release-security-20261022]
+    paths: [.github/workflows/bil_ios37_release_dev_dependency_remediation_20261022.yml]
+permissions:
+  contents: write
+concurrency:
+  group: bil-ios37-candidate-deps-once
+  cancel-in-progress: false
+jobs:
+  patch-and-verify:
+    name: Validate and commit dev-only dependency remediation
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && github.ref == 'refs/heads/work/bil-ios37-release-security-20261022'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      FROZEN_ORIGINAL: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+      RELEASE_BRANCH: work/bil-ios37-release-security-20261022
+      WORKFLOW_PATH: .github/workflows/bil_ios37_release_dev_dependency_remediation_20261022.yml
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Prove immutable original and exact isolated workflow commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git ls-remote origin refs/heads/integration/bil-qa-media-policy-20261011 | awk '{print $1}')" = "$FROZEN_ORIGINAL"
+          git merge-base --is-ancestor "$FROZEN_ORIGINAL" HEAD
+          git diff --name-only "$FROZEN_ORIGINAL" HEAD > "$RUNNER_TEMP/initial-candidate-files.txt"
+          test "$(cat "$RUNNER_TEMP/initial-candidate-files.txt")" = "$WORKFLOW_PATH"
+          test -z "$(git status --porcelain --untracked-files=no)"
+      - name: Patch and validate ONLY Cloudflare dev dependency lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cloudflare/workout-runtime
+          cp package.json "$RUNNER_TEMP/original-package.json"
+          cp package-lock.json "$RUNNER_TEMP/original-package-lock.json"
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund --save-dev --save-exact vite@8.2.4 vitest@4.1.12
+          python3 - "$RUNNER_TEMP/original-package.json" "$RUNNER_TEMP/original-package-lock.json" <<'PY'
+          import json, pathlib, sys
+          old=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          new=json.loads(pathlib.Path('package.json').read_text())
+          before=json.loads(pathlib.Path(sys.argv[2]).read_text())
+          after=json.loads(pathlib.Path('package-lock.json').read_text())
+          assert new['dependencies']==old['dependencies'], 'Runtime dependencies changed'
+          assert new.get('overrides')==old.get('overrides'), 'Runtime overrides changed'
+          assert new['devDependencies']['vite']=='8.2.4'
+          assert new['devDependencies']['vitest']=='4.1.12'
+          for k,v in old['devDependencies'].items():
+              if k!='vitest': assert new['devDependencies'][k]==v, k
+          def runtime(rows):
+              return {k:v for k,v in rows.items() if k and not v.get('dev',False)}
+          assert runtime(before['packages'])==runtime(after['packages']), 'Production lock graph changed'
+          assert after['packages']['node_modules/vite']['version']=='8.2.4'
+          assert after['packages']['node_modules/vitest']['version']=='4.1.12'
+          print('PRODUCTION_DEPENDENCY_GRAPH_UNCHANGED=PASS')
+          PY
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run check
+          npm test
+          set +e
+          npm audit --audit-level=low --json > "$RUNNER_TEMP/verified-npm-audit.json"
+          audit_exit=$?
+          set -e
+          python3 - "$RUNNER_TEMP/verified-npm-audit.json" "$audit_exit" <<'PY'
+          import json,pathlib,sys
+          data=json.loads(pathlib.Path(sys.argv[1]).read_text())
+          counts=data.get('metadata',{}).get('vulnerabilities',{})
+          if int(sys.argv[2])!=0 or not counts or counts.get('total')!=0:
+              raise SystemExit('DEPENDENCY_SECURITY_BLOCKER: audit not zero; refuse commit')
+          print('NPM_AUDIT_ZERO_ADVISORIES=PASS')
+          PY
+      - name: Commit two allowed dependency files without force or merge
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git ls-remote origin refs/heads/integration/bil-qa-media-policy-20261011 | awk '{print $1}')" = "$FROZEN_ORIGINAL"
+          git diff --check
+          LC_ALL=C git diff --name-only | LC_ALL=C sort > "$RUNNER_TEMP/changed-files.txt"
+          expected="$(printf 'cloudflare/workout-runtime/package-lock.json\ncloudflare/workout-runtime/package.json')"
+          test "$(cat "$RUNNER_TEMP/changed-files.txt")" = "$expected" || {
+            echo 'SECURITY_BLOCKER: unexpected modified source files'
+            cat "$RUNNER_TEMP/changed-files.txt"
+            exit 1
+          }
+          git add -- cloudflare/workout-runtime/package.json cloudflare/workout-runtime/package-lock.json
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "fix(security): upgrade Vite and Vitest dev locks after zero-advisory audit"
+          test "$(git rev-parse HEAD^)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=no)"
+          git push origin "HEAD:refs/heads/$RELEASE_BRANCH"
+          echo "CANDIDATE_DEV_DEPENDENCY_FIX_COMMIT=$(git rev-parse HEAD)"
+          echo 'NO_TESTFLIGHT_OR_PRODUCTION_DEPLOYMENT=PASS'
+      - name: Preserve sanitized audit and exact tracked-file scope
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-ios37-dev-dependency-evidence-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/verified-npm-audit.json
+            ${{ runner.temp }}/initial-candidate-files.txt
+            ${{ runner.temp }}/changed-files.txt
