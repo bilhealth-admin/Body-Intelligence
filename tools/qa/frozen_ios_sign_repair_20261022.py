@@ -56,23 +56,23 @@ def run(source, out):
     native_out.chmod(0o755)
     # Regression reproduces the observed Xcode build log: empty export in an
     # unrelated target followed by the actual Runner path.
-    (out / "test_qa_empty_unrelated_export.py").write_text('''
+    (out / "test_qa_empty_unrelated_export.py").write_text(r'''
 import unittest
 from bil_ios_simulator_adhoc_sign import resolve_simulated_entitlements_path
 class RealBuildLogRegression(unittest.TestCase):
     def test_unrelated_empty_export_before_runner_is_allowed(self):
         path="/tmp/DerivedData/Runner.build/Runner.app-Simulated.xcent"
-        log="    export LD_ENTITLEMENTS_SECTION=\\\\n    export LD_ENTITLEMENTS_SECTION\\\\\\\\="+path+"\\\\n"
+        log="    export LD_ENTITLEMENTS_SECTION=\n    export LD_ENTITLEMENTS_SECTION\\="+path+"\n"
         self.assertEqual(str(resolve_simulated_entitlements_path({},log)),path)
     def test_empty_only_still_fails(self):
         with self.assertRaises(ValueError):
-            resolve_simulated_entitlements_path({}, "export LD_ENTITLEMENTS_SECTION=\\\\n")
+            resolve_simulated_entitlements_path({}, "export LD_ENTITLEMENTS_SECTION=\n")
     def test_conflicting_nonempty_paths_still_fail(self):
         a="/tmp/A/Runner.app-Simulated.xcent"
         b="/tmp/B/Runner.app-Simulated.xcent"
         with self.assertRaises(ValueError):
-            resolve_simulated_entitlements_path({}, "export LD_ENTITLEMENTS_SECTION="+a+"\\\\nexport LD_ENTITLEMENTS_SECTION="+b)
-'''.replace('\\\\n','\\n'),encoding="utf-8")
+            resolve_simulated_entitlements_path({}, "export LD_ENTITLEMENTS_SECTION="+a+"\nexport LD_ENTITLEMENTS_SECTION="+b)
+''',encoding="utf-8")
     summary={"source_sha":SOURCE_SHA,"original_sign_blob":SIGN_SHA,
         "original_runner_blob":NATIVE_SHA,"patched_sign_sha256":sha(modified),
         "source_unmodified":True,"scope":"QA temporary parser only; no signed store build",
