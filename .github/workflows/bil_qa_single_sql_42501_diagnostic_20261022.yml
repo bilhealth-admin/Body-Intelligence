@@ -1,0 +1,114 @@
+name: Frozen 31554 one-scope SQL 42501 diagnostics
+run-name: "Frozen source unchanged - ONE failed community prebuild SQL diagnostic only"
+on:
+  push:
+    branches: [qa/bil-independent-31554-20261022]
+    paths:
+      - .github/workflows/bil_qa_single_sql_42501_diagnostic_20261022.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frozen-31554-one-failed-sql-diagnostic
+  cancel-in-progress: false
+
+env:
+  BIL_FROZEN_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
+  BIL_HARNESS_SHA: ${{ github.sha }}
+  BIL_SUPABASE_PROJECT_REF: tgmanzhqulksykhslrzb
+
+jobs:
+  failed-community-prebuild-only:
+    name: Exact original rollback E2E, independent residue and narrow 42501 location
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_FROZEN_SHA }}
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ env.BIL_HARNESS_SHA }}
+          path: qa-harness
+          sparse-checkout: tools/qa/frozen_guarded_sql_trigger_overlay_20261022.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Run only ONE original failed SQL program with real strict assertion and residue verification
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          mkdir -p supabase/.temp
+          printf '%s' "$BIL_SUPABASE_PROJECT_REF" > supabase/.temp/project-ref
+          export GITHUB_SHA="$BIL_FROZEN_SHA"
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          import os
+          import re
+          import sys
+
+          sys.path.insert(0, str(Path("qa-harness/tools/qa").resolve()))
+          import frozen_guarded_sql_trigger_overlay_20261022 as qa
+          original_sanitized = qa.sanitized
+
+          def safe_failure_summary(row):
+              result = original_sanitized(row)
+              value = row.get("exact_failure")
+              if isinstance(value, str):
+                  try:
+                      value = json.loads(value)
+                  except (ValueError, TypeError):
+                      value = None
+              if not isinstance(value, dict):
+                  return result
+              message = value.get("error")
+              if isinstance(message, str):
+                  # Extract ONLY predefined PostgreSQL permission diagnostic forms.
+                  # No arbitrary SQL, row content, UUIDs, email, credential or JWT text.
+                  checks = (
+                      r"permission denied for (?:relation|table|schema|sequence) [a-zA-Z0-9_.]+",
+                      r"permission denied for function [a-zA-Z0-9_.()]+",
+                      r"new row violates row-level security policy for table \"[a-zA-Z0-9_]+\"",
+                      r"must be owner of (?:relation|table|function) [a-zA-Z0-9_.()]+",
+                      r"permission denied to set role \"?[a-zA-Z0-9_]+\"?",
+                  )
+                  match = next((p for p in checks if re.fullmatch(p, message)), None)
+                  result["safe_permission_error"] = message[:150] if match else "REDACTED_UNRECOGNIZED_PERMISSION_ERROR"
+              stack = value.get("stack_context")
+              if isinstance(stack, str):
+                  frames = re.findall(
+                      r"PL/pgSQL function ([a-zA-Z0-9_.]+)\([^\n\"']{0,150}\) line ([0-9]{1,5}) at ([a-zA-Z ]{1,45})",
+                      stack
+                  )
+                  result["safe_plpgsql_frames"] = [
+                      {"function": f, "line": int(line), "stage": stage.strip()}
+                      for f, line, stage in frames[:8]
+                  ]
+              return result
+
+          qa.sanitized = safe_failure_summary
+          out = Path(os.environ["RUNNER_TEMP"]) / "bil-one-sql-42501-diagnostic"
+          sys.argv = ["frozen-qa-one-scope", "--source", ".", "--scope",
+                      "community_prebuild", "--output", str(out)]
+          raise SystemExit(qa.main())
+          PY
+          test "$(git rev-parse HEAD)" = "$BIL_FROZEN_SHA"
+          test -z "$(git diff --name-only HEAD)"
+          echo "FROZEN_SHA_UNCHANGED; ONE_FAILED_SCOPE_ONLY; INDEPENDENT_RESIDUE; TESTFLIGHT_EXCLUDED"
+      - name: Preserve frozen hashes, SQLSTATE and allowlisted permission reason only
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: frozen31554-one-sql-42501-safe-diagnostic-${{ github.run_id }}
+          path: ${{ runner.temp }}/bil-one-sql-42501-diagnostic/
+          if-no-files-found: warn
+          retention-days: 30
