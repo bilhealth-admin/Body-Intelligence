@@ -87,6 +87,16 @@ jobs:
         env:
           BIL_NATIVE_PG_QA_PASSWORD: isolated-native-circle-fixture-only
         run: node tools/qa/bil_circle_review_native_fixture.mjs "$GITHUB_WORKSPACE" "$RUNNER_TEMP/bil-native-circle-review" "$GITHUB_WORKSPACE/tools/qa/native_pg_fixture/package.json" "$GITHUB_SHA"
+      - name: Verify bounded delete-message ownership and ACL behavior
+        env:
+          BIL_NATIVE_PG_QA_PASSWORD: isolated-native-circle-fixture-only
+        run: node tools/qa/security_delete_message/bil_delete_message_defensive_fixture.mjs "$GITHUB_WORKSPACE" "$RUNNER_TEMP/bil-delete-message-defensive" "$GITHUB_WORKSPACE/tools/qa/native_pg_fixture/package.json" "$GITHUB_SHA"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: bil-delete-message-defensive-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-delete-message-defensive/
+          if-no-files-found: error
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: always()
         with:
