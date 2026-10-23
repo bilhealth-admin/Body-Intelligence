@@ -88,11 +88,9 @@ jobs:
           from native_capture import validate_manifest
           validate_manifest((p/'verified-apk-manifest.xml').read_text())
           PY
-      - name: Install video probe and decoder for recording finalization
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends ffmpeg
-          command -v ffprobe
+      - name: Install SHA512-pinned static native-video probe
+        timeout-minutes: 3
+        run: python3 tools/qa/google_native_capture/install_capture_probe.py
       - name: Enable disposable hosted KVM only
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
