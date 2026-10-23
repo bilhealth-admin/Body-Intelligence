@@ -1,7 +1,7 @@
 {
   "schema": "bil.cloud.deployment-ledger.v1",
   "project_ref": "tgmanzhqulksykhslrzb",
-  "recorded_date": "2026-10-19",
+  "recorded_date": "2026-10-23",
   "application_source": "8ec83ed81066c324cfd7119363ab31d73a8d4b97",
   "admin_source": "96adfe96ae18ace7a799c8ed54448f4d5ef5077b",
   "scope": "Exact source and deployed ledger drift detection; historical timestamp aliases are not raw migration parity or proof of runtime correctness. Live behavior is tested separately. No DDL is applied.",
@@ -239,7 +239,10 @@
     "20261019075549_community_circle_storage_preflight_contract_v1.sql": "ff1d50c6facbe2151a3a10e336d1ac343e2da097e01533e26cc79d94f8abc70f",
     "20261019075856_community_circle_multipart_preflight_contract_v1.sql": "c91a97ac4d9a90c5c4a8e39d453fa6f7532862e1ae42c27491cf8fd7c73c5205",
     "20261019083913_community_profile_consent_guard_20261019.sql": "8787b6ce99ecadebc4e94bada2fb3bdde7ff765d1af55c310f499cbf5cdb8ec0",
-    "20261020210400_community_circle_visibility_legacy_projection_guard_v1.sql": "10927e0267e5f90a6c7fa3150a87efd993313badac30d966ff5d6561d1beaad8"
+    "20261020210400_community_circle_visibility_legacy_projection_guard_v1.sql": "10927e0267e5f90a6c7fa3150a87efd993313badac30d966ff5d6561d1beaad8",
+    "20261022213149_bil_smart_plan_sync_v1.sql": "d97ab654dee3d5440c2e0ea440df64f078b0c6e1bada856f020d7e15ec526cea",
+    "20261023030934_bil_smart_plan_revision_history.sql": "2cb63174818b1c731462b4590124edc11f4d90b59c02fa257b1c8b4766b57e14",
+    "20261023042955_bil_smart_plan_conflict_http409.sql": "7b0f2317a451bc338a8f2e3b7032f6e3ef132ebf56985a919ebddd8943fe1266"
   },
   "deployed_ledger": [
     {
@@ -1486,6 +1489,21 @@
       "version": "20261020210400",
       "name": "community_circle_visibility_legacy_projection_guard_v1",
       "statements_md5": "a8ffe522b3a691787b13958023895637"
+    },
+    {
+      "version": "20261022213149",
+      "name": "bil_smart_plan_sync_v1",
+      "statements_md5": "ef0adc242623d64cf3c1fdb91b8a20a5"
+    },
+    {
+      "version": "20261023030934",
+      "name": "bil_smart_plan_revision_history",
+      "statements_md5": "3a55d266b6624b7f4d6d551b692bc237"
+    },
+    {
+      "version": "20261023042955",
+      "name": "bil_smart_plan_conflict_http409",
+      "statements_md5": "663ccb36121c633c6e01907e9e56a1f0"
     }
   ],
   "verified_bugfix_migration": {
@@ -1513,5 +1531,28 @@
     "readback": "Three function definitions differ only by the reviewed visibility predicate; unchanged RPC ACL/owner/signature and unchanged private helper.",
     "local_evidence": "18 isolated SQL tests and 7 privacy steps PASS; hosted readonly nonexistent-owner denial and private-helper direct-access denial PASS.",
     "verified_utc": "2026-10-20T21:05:14.869662+00:00"
+  },
+  "coach_smart_plan_extension_review": {
+    "source_base": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
+    "source_state": "uncommitted isolated candidate",
+    "migration_versions": [
+      "20261022213149",
+      "20261023030934",
+      "20261023042955"
+    ],
+    "runtime_scope": "20 actual plan RPC/RLS assertions and 12 memory RLS/CAS assertions, all rolled back with independent zero-residue verification; not device or release certification"
+  },
+  "coach_conflict_http409_review": {
+    "migration": {
+      "version": "20261023042955",
+      "name": "bil_smart_plan_conflict_http409",
+      "statements_md5": "663ccb36121c633c6e01907e9e56a1f0"
+    },
+    "reason": "Observed real RPC stale-writer timeout caused by custom serialization_failure retry; now terminal HTTP409, same CAS and ACL.",
+    "old_body_md5": "2ab15681ac3d406a4245ea012bbf4da1",
+    "new_body_md5": "a161fcef0c6d370c9f14c5047da6b548",
+    "historical_remote_rows_preserved": 251,
+    "historical_local_hashes_preserved": 236,
+    "live_rpc_evidence": "build/release-ios38-android33/smart-plan-live-rpc-http409.json"
   }
 }

@@ -8,6 +8,11 @@ import 'package:body_intelligence_log/features/community/services/community_owne
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_memory_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:body_intelligence_log/features/life_context/coach_memory_sync_review_panel.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -98,6 +103,9 @@ class _MemorySyncStore {
   Completer<void>? readBlock;
   bool expireAfterConsent = false;
   bool failDataWrite = false;
+  bool persistWrites = false;
+  bool raceBeforePatch = false;
+  bool tamperReadbackOwner = false;
   bool currentOperation = true;
   int refreshCount = 0;
   List<Map<String, Object?>> remoteRows = const [];
@@ -172,12 +180,69 @@ class _MemorySyncStore {
         reads.add(request);
         if (!readEntered.isCompleted) readEntered.complete();
         await readBlock?.future;
-        body = remoteRows;
+        final rows = remoteRows
+            .where((row) {
+              final id = request.url.queryParameters['id'];
+              if (id != null &&
+                  id.startsWith('eq.') &&
+                  row['id'] != id.substring(3)) {
+                return false;
+              }
+              if (request.url.queryParameters['deleted_at'] == 'is.null' &&
+                  row['deleted_at'] != null) {
+                return false;
+              }
+              return true;
+            })
+            .map((row) => <String, Object?>{'owner_id': _ownerA, ...row})
+            .toList(growable: false);
+        body = tamperReadbackOwner && writes.isNotEmpty
+            ? rows.map((row) => {...row, 'owner_id': _ownerB}).toList()
+            : rows;
       } else {
         writes.add(request);
         if (failDataWrite) {
           status = 503;
           body = {'message': 'Synthetic optional memory sync failure'};
+        } else if (persistWrites) {
+          final payload = Map<String, Object?>.from(
+            jsonDecode(request.body) as Map,
+          );
+          if (request.method == 'POST') {
+            remoteRows = [...remoteRows, payload];
+            body = [payload];
+          } else if (request.method == 'PATCH') {
+            if (raceBeforePatch) {
+              remoteRows = remoteRows
+                  .map(
+                    (row) => {
+                      ...row,
+                      'memory_text': 'Concurrent other-device fact',
+                      'updated_at': '2026-10-23T12:00:00Z',
+                    },
+                  )
+                  .toList();
+              raceBeforePatch = false;
+            }
+            final id = request.url.queryParameters['id']!.substring(3);
+            final version = request.url.queryParameters['updated_at'];
+            final matches = remoteRows
+                .where(
+                  (row) =>
+                      row['id'] == id &&
+                      (version == null ||
+                          row['updated_at'] == version.substring(3)),
+                )
+                .toList();
+            remoteRows = remoteRows
+                .map(
+                  (row) => matches.contains(row) ? {...row, ...payload} : row,
+                )
+                .toList();
+            body = matches
+                .map((row) => {'owner_id': _ownerA, ...row, ...payload})
+                .toList();
+          }
         }
       }
     } else {

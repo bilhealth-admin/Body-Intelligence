@@ -42,10 +42,18 @@ void main() {
         'save_memory',
       };
       const foodV2 = <String>{'log_foods', 'replace_meal_item'};
+      const smartPlan = <String>{
+        'read_active_smart_plan',
+        'preview_smart_plan_day',
+        'create_smart_plan_draft',
+        'request_smart_plan_revision',
+        'record_smart_plan_workout',
+      };
       expect(
         BilToolRegistry.tools.keys.toSet(),
         originalCanonical
             .union(foodV2)
+            .union(smartPlan)
             .union(coachHealthToolsByName.keys.toSet()),
       );
       expect(BilToolRegistry.tools.keys, containsAll(originalCanonical));

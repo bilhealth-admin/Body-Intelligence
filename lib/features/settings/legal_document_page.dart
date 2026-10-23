@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/localization/bil_locale_policy.dart';
+import '../smart_plan/domain/bil_smart_plan_privacy_copy.dart';
 import 'food_search_privacy_disclosure.dart';
 import '../community/presentation/community_translation_copy.dart'
     show cloudTranslationDisclosure, translationCopy;
@@ -38,6 +40,8 @@ class LegalDocumentPage extends StatelessWidget {
       ...copy.sections[document]!,
       if (document == BilLegalDocument.privacy)
         _facebookLoginPrivacySection(locale),
+      if (document == BilLegalDocument.privacy)
+        _smartPlanBackupPrivacySection(context),
       if (document == BilLegalDocument.privacy)
         (translationCopy(context, 6), cloudTranslationDisclosure(context)),
       if (document == BilLegalDocument.privacy)
@@ -96,6 +100,29 @@ class LegalDocumentPage extends StatelessWidget {
       ),
     );
   }
+}
+
+(String, String) _smartPlanBackupPrivacySection(BuildContext context) {
+  final tag = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
+  if (tag == 'ar') {
+    return (
+      '$bilSmartPlanBackupPrivacyArabicTitle · 2026-10-23',
+      bilSmartPlanBackupPrivacyArabic,
+    );
+  }
+  String resolve(String english) {
+    if (tag == 'en') return english;
+    final translated = RuntimeCopy.resolve(english, tag);
+    if (translated == null || translated.trim().isEmpty) {
+      throw StateError('Missing plan backup legal copy for $tag');
+    }
+    return translated;
+  }
+
+  return (
+    '${resolve(bilSmartPlanBackupPrivacyTitle)} · 2026-10-23',
+    resolve(bilSmartPlanBackupPrivacyEnglish),
+  );
 }
 
 (String, String) _facebookLoginPrivacySection(String locale) {

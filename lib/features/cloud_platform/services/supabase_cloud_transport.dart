@@ -64,6 +64,10 @@ final class SupabaseCloudTransport implements CloudTransport {
     }
 
     final submitted = operations.map((value) => value.operationId).toSet();
+    final requestedCursor = cursor == null ? 0 : int.tryParse(cursor);
+    if (requestedCursor == null || requestedCursor < 0) {
+      throw const FormatException('Invalid BIL local cloud cursor.');
+    }
     final activeUser = client.auth.currentUser;
     if (activeUser == null || activeUser.id != ownerId) {
       throw StateError('Cloud owner changed during synchronization.');
@@ -78,7 +82,7 @@ final class SupabaseCloudTransport implements CloudTransport {
           'bil_sync_records',
           params: <String, Object?>{
             'p_device_id': deviceId,
-            'p_cursor': int.tryParse(cursor ?? '') ?? 0,
+            'p_cursor': requestedCursor,
             'p_operations': operations
                 .map(_operationJson)
                 .toList(growable: false),
@@ -110,10 +114,11 @@ final class SupabaseCloudTransport implements CloudTransport {
       throw const FormatException('Cross-account BIL cloud response.');
     }
     final nextCursor = (body['cursor'] ?? cursor)?.toString();
-    if (nextCursor != null && int.tryParse(nextCursor) == null) {
+    final parsedCursor = int.tryParse(nextCursor ?? '');
+    if (parsedCursor == null || parsedCursor < requestedCursor) {
       throw const FormatException('Invalid BIL cloud cursor.');
     }
-    if (body['has_more'] == true && nextCursor == cursor) {
+    if (body['has_more'] == true && parsedCursor <= requestedCursor) {
       throw const FormatException('BIL cloud cursor did not advance.');
     }
     return CloudSyncBatchResult(

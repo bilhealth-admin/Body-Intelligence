@@ -50,9 +50,14 @@ for separately classified source, SDK, console and unresolved evidence.
   supplied through an earlier registration flow may remain in existing account
   metadata under the retention and account-deletion controls; keep the Phone
   Number disclosure while that historical data is still managed.
-- The current selective cloud-sync policy uploads only profile/body settings,
-  weight records and hydration records after the signed-in user enables sync.
-  It does not make the entire local meal diary a general cloud replica.
+- Selective profile/body, weight and hydration sync follows the enabled scope.
+  Supported builds expose separate choices for nutrition and goal backup.
+  Smart Plan backup is separately enabled and sends saved plan settings,
+  schedules, meal suggestions, confirmed completion state and revisions to the
+  owner's access-controlled Supabase store. Suggested meals and planned sessions
+  are not logged observations. Export, deletion and stopping backup remain
+  reachable without buying access; tombstones prevent deleted-plan resurrection.
+  Plan backup does not automatically copy HealthKit or Health Connect records.
 - Remote AI sends a bounded, ephemeral context only after the user asks the AI
   Coach. That context can include remotely processed dietary preferences,
   recent nutrition/weight/activity/sleep summaries and connected-health

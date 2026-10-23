@@ -180,6 +180,11 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
         all_tests, ordinary = policy.discover()
         _, portable = runner.discover_tests()
         expected = {
+            "test/features/community/community_report_visual_test.dart",
+            "test/features/smart_plan/bil_smart_plan_page_test.dart",
+            "test/features/smart_plan/bil_smart_plan_session_test.dart",
+            "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
+            "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
             "test/dashboard_polish/dashboard_current_preview_test.dart",
             "test/dashboard_polish/dashboard_polish_layout_review_test.dart",
             "test/dashboard_polish/icon_label_layout_review_test.dart",

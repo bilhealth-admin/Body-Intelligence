@@ -189,7 +189,16 @@ final class _PagedTransport implements CloudTransport {
     required String? cursor,
   }) async => CloudSyncBatchResult(
     acknowledgedOperationIds: operations.map((e) => e.operationId),
-    remoteRecords: const [],
+    remoteRecords: [
+      CloudRecordEnvelope(
+        entityKind: CloudEntityKind.weight,
+        recordId: 'page-record',
+        ownerId: ownerId,
+        revision: CloudRevision(deviceId: deviceId, sequence: 1),
+        updatedAt: DateTime.utc(2026, 7, 24),
+        payload: const {'kg': 95},
+      ),
+    ],
     serverCursor: '100',
     hasMore: true,
   );

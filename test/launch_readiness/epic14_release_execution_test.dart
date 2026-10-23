@@ -52,10 +52,15 @@ void main() {
     expect(unsigned, contains('UNSIGNED_VALIDATION_ONLY'));
     expect(signed, contains('APPLE_TEAM_ID'));
     expect(signed, contains('APPLE_PROVISIONING_PROFILE_BASE64'));
-    expect(signed, contains('APP_STORE_CONNECT_PRIVATE_KEY_BASE64'));
+    final promotion = read(
+      '.github/workflows/bil_ios_upload_existing_testflight.yml',
+    );
+    expect(signed, isNot(contains('APP_STORE_CONNECT_PRIVATE_KEY_BASE64')));
+    expect(promotion, contains('APP_STORE_CONNECT_PRIVATE_KEY_BASE64'));
     expect(signed, contains('flutter build ipa --release'));
     expect(signed, contains('codesign -dv --verbose=4'));
-    expect(signed, contains('altool --validate-app'));
+    expect(promotion, contains('altool --validate-app'));
+    expect(promotion, contains('EXACT_SIGNED_IPA_38_BYTES_AND_SOURCE=PASS'));
   });
 
   test('release permissions and external boundaries remain honest', () {

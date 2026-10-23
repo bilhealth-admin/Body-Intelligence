@@ -199,9 +199,6 @@ class _CommunityGoldBalanceActionState
     if (!widget.showBalance) {
       return widget.showEarn ? _earnAction(context) : const SizedBox.shrink();
     }
-    if (_repository == null) {
-      return widget.showEarn ? _earnAction(context) : const SizedBox.shrink();
-    }
     final scheme = Theme.of(context).colorScheme;
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
@@ -228,6 +225,7 @@ class _CommunityGoldBalanceActionState
                         constraints: BoxConstraints(
                           minHeight: widget.compact ? 36 : 48,
                           minWidth: widget.compact ? 48 : 56,
+                          maxWidth: widget.compact ? 64 : double.infinity,
                         ),
                         padding: EdgeInsets.symmetric(
                           horizontal: widget.compact ? 6 : 8,
@@ -243,12 +241,16 @@ class _CommunityGoldBalanceActionState
                           children: [
                             BilGoldCoin(size: widget.compact ? 16 : 18),
                             SizedBox(width: widget.compact ? 4 : 5),
-                            Text(
-                              balance?.toString() ?? '—',
-                              style: TextStyle(
-                                color: scheme.onSurface,
-                                fontWeight: FontWeight.w700,
-                                fontSize: widget.compact ? 14 : null,
+                            Flexible(
+                              child: Text(
+                                balance?.toString() ?? '—',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: scheme.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: widget.compact ? 14 : null,
+                                ),
                               ),
                             ),
                           ],

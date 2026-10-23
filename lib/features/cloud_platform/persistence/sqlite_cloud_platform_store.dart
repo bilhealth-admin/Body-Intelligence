@@ -190,6 +190,7 @@ CREATE TABLE IF NOT EXISTS cloud_audit(
       .select(
         '''SELECT payload FROM cloud_outbox
            WHERE next_attempt_at <= ?
+             AND disposition != 'blocked'
              AND json_extract(payload, '\$.record.ownerId') = ?
            ORDER BY next_attempt_at LIMIT ?''',
         [now.toUtc().toIso8601String(), ownerId, limit],
@@ -216,15 +217,25 @@ CREATE TABLE IF NOT EXISTS cloud_audit(
 
   @override
   Future<void> moveToDeadLetter(CloudDeadLetter deadLetter) async {
-    _db.execute('DELETE FROM cloud_outbox WHERE operation_id = ?', [
-      deadLetter.operationId,
-    ]);
-    _db.execute('INSERT OR REPLACE INTO cloud_dead_letters VALUES(?,?,?,?)', [
-      deadLetter.operationId,
-      deadLetter.reason,
-      deadLetter.attempts,
-      deadLetter.failedAt.toIso8601String(),
-    ]);
+    // Retain the encrypted operation for diagnosis/recovery. Exhausting a
+    // network retry budget must not discard its only durable payload.
+    _db.execute('BEGIN IMMEDIATE');
+    try {
+      _db.execute(
+        "UPDATE cloud_outbox SET disposition = 'blocked' WHERE operation_id = ?",
+        [deadLetter.operationId],
+      );
+      _db.execute('INSERT OR REPLACE INTO cloud_dead_letters VALUES(?,?,?,?)', [
+        deadLetter.operationId,
+        deadLetter.reason,
+        deadLetter.attempts,
+        deadLetter.failedAt.toIso8601String(),
+      ]);
+      _db.execute('COMMIT');
+    } catch (_) {
+      _db.execute('ROLLBACK');
+      rethrow;
+    }
   }
 
   @override

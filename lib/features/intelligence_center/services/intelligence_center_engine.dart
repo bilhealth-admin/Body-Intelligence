@@ -25,6 +25,13 @@ class IntelligenceCenterEngine {
   final ExternalKnowledgeProvider externalProvider;
   final LocalCoachApi localApi;
 
+  /// Reused by local action hosts so navigation cannot bypass urgent care or
+  /// diagnosis safeguards already owned by Coach.
+  bool requiresSafetyResponse(String question) {
+    final normalized = question.trim().toLowerCase();
+    return _looksUrgent(normalized) || _looksLikeDiagnosis(normalized);
+  }
+
   bool canAnswerWithoutPersonalContext(String question) {
     final normalized = question.trim().toLowerCase();
     return normalized.isEmpty ||

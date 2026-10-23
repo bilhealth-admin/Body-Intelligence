@@ -41,6 +41,31 @@ extension CoachMemoryCommittedSync on CoachMemoryRepository {
   }) async {
     final client = cloud;
     final ownerId = preferences.localOwnerId;
+    if (expectedLocal == null && ownerId != null) {
+      try {
+        await _runForMemoryOwner(() async {
+          await preferences.update(CoachMemoryRepository.storageKey, (raw) {
+            CommunityOwnerOperation.checkCurrent();
+            final entries = _strictMemoryEntries(raw);
+            if (entries.any((entry) => entry['id'] == id)) return raw ?? '[]';
+            return jsonEncode(
+              _retainMemoryState([
+                ...entries,
+                {
+                  'id': id,
+                  'text': '',
+                  'status': 'deleted',
+                  'source': 'local_privacy_deletion',
+                  'updatedAt': DateTime.now().toUtc().toIso8601String(),
+                },
+              ]),
+            );
+          });
+        }, isCurrentOwner: isCurrentOwner);
+      } on Object {
+        return;
+      }
+    }
     if (client == null || ownerId == null) return;
     try {
       await _runForMemoryOwner(
@@ -52,31 +77,20 @@ extension CoachMemoryCommittedSync on CoachMemoryRepository {
           );
           CommunityOwnerOperation.checkCurrent();
           final matching = entries.where((entry) => entry['id'] == id);
-          final current = matching.isEmpty ? null : matching.single;
+          final current =
+              matching.isEmpty || matching.single['status'] == 'deleted'
+              ? null
+              : matching.single;
           if (!_sameMemoryJson(current, expectedLocal)) return;
-          if (expectedLocal == null) {
-            await client
-                .from('bil_coach_memories')
-                .update({
-                  'deleted_at': DateTime.now().toUtc().toIso8601String(),
-                  'updated_at': DateTime.now().toUtc().toIso8601String(),
-                })
-                .eq('id', id)
-                .eq('owner_id', ownerId);
-          } else {
-            await client.from('bil_coach_memories').upsert({
-              'id': id,
-              'owner_id': ownerId,
-              'kind': expectedLocal['kind'],
-              'memory_text': expectedLocal['text'],
-              'status': expectedLocal['status'],
-              'source': expectedLocal['source'],
-              'confidence': expectedLocal['confidence'],
-              'learned_at': expectedLocal['savedAt'],
-              'updated_at': expectedLocal['updatedAt'],
-              'deleted_at': null,
-            });
-          }
+          await _syncMemoryWithReadback(
+            owner: ownerId,
+            id: id,
+            local: expectedLocal,
+            tombstone:
+                matching.isNotEmpty && matching.single['status'] == 'deleted'
+                ? matching.single
+                : null,
+          );
           CommunityOwnerOperation.checkCurrent();
         },
         isCurrentOwner: isCurrentOwner,
@@ -85,7 +99,10 @@ extension CoachMemoryCommittedSync on CoachMemoryRepository {
             await preferences.get(CoachMemoryRepository.storageKey),
           );
           final matching = entries.where((entry) => entry['id'] == id);
-          final current = matching.isEmpty ? null : matching.single;
+          final current =
+              matching.isEmpty || matching.single['status'] == 'deleted'
+              ? null
+              : matching.single;
           if (!_sameMemoryJson(current, expectedLocal)) {
             throw const CommunityOwnerOperationCancelled();
           }
@@ -125,4 +142,30 @@ bool _sameMemoryJson(Object? a, Object? b) {
   }
 
   return jsonEncode(canonical(a)) == jsonEncode(canonical(b));
+}
+
+Map<String, Object?> _memoryDeletionTombstone(Map<String, Object?> entry) => {
+  'id': entry['id'],
+  'text': '',
+  'status': 'deleted',
+  'source': 'local_privacy_deletion',
+  'updatedAt': DateTime.now().toUtc().toIso8601String(),
+  if (entry['updatedAt'] != null) 'expectedCloudUpdatedAt': entry['updatedAt'],
+  'deletedDigest': coachMemoryFactDigest(entry),
+};
+
+List<Map<String, Object?>> _retainMemoryState(
+  List<Map<String, Object?>> entries,
+) {
+  final pending = entries
+      .where((entry) => entry['status'] == 'deleted')
+      .toList(growable: false);
+  if (pending.length > 1000) {
+    throw StateError('coach_memory_deletion_queue_full');
+  }
+  final active = entries
+      .where((entry) => entry['status'] != 'deleted')
+      .toList(growable: false);
+  if (active.length > 1000) throw StateError('coach_memory_storage_full');
+  return [...active, ...pending];
 }

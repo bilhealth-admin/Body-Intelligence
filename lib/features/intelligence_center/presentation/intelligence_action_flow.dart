@@ -81,7 +81,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             );
           }
         }
-      } else if (requiresConfirmation &&
+      } else if (action.type != IntelligenceActionType.smartPlan &&
+          requiresConfirmation &&
           !acceptsTypedConfirmation &&
           !await _confirmAction(action)) {
         return false;
@@ -449,6 +450,8 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           )) {
             return false;
           }
+        case IntelligenceActionType.smartPlan:
+          if (!await _executeSmartPlanAction(action)) return false;
         case IntelligenceActionType.readHealthData:
           if (!await _executeCoachHealthRead(action)) return false;
       }

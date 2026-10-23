@@ -1,6 +1,8 @@
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_rewards.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_rewards_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_gold_balance_action.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -121,6 +123,76 @@ void main() {
       expect(repository.claimCalls, 1);
       expect(find.text('75'), findsOneWidget);
       expect(find.text('Claimed'), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'Coach coin opens balance and history before explicit post action',
+    (tester) async {
+      final repository = _RewardsRepository(client);
+      var composerVisits = 0;
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => Scaffold(
+              body: CommunityGoldBalanceAction(
+                compact: true,
+                showEarn: false,
+                repository: repository,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/community/rewards',
+            builder: (_, _) => CommunityRewardsPage(repository: repository),
+          ),
+          GoRoute(
+            path: '/community/compose',
+            builder: (_, state) {
+              composerVisits++;
+              expect(state.uri.queryParameters['origin'], 'earn');
+              return const Scaffold(body: Text('Explicit post composer'));
+            },
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('ai-coach-earn-post')), findsNothing);
+      await tester.tap(find.byKey(const Key('ai-coach-bil-gold')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('community-gold-balance')), findsOneWidget);
+      expect(find.text('50'), findsOneWidget);
+      expect(find.text('History'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('community-ai-reward-notice')),
+        250,
+        scrollable: find
+            .descendant(
+              of: find.byType(ListView).first,
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(
+        find.byKey(const Key('community-ai-reward-notice')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('AI tokens are not BIL Gold'), findsOneWidget);
+      expect(composerVisits, 0);
+      expect(repository.claimCalls, 0);
+      await tester.ensureVisible(
+        find.byKey(const Key('community-earn-create-post')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-earn-create-post')));
+      await tester.pumpAndSettle();
+      expect(find.text('Explicit post composer'), findsOneWidget);
+      expect(composerVisits, 1);
+      expect(repository.claimCalls, 0);
+      expect(repository.balance, 50);
+      await tester.pumpWidget(const SizedBox.shrink());
     },
   );
 }

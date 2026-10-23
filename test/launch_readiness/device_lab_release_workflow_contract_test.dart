@@ -12,11 +12,20 @@ void main() {
     ]) {
       final source = _read(path);
       expect(source, contains('flutter-version: 3.44.6'), reason: path);
-      expect(source, contains('build_number:'), reason: path);
+      expect(source, contains('expected_source_sha:'), reason: path);
+      expect(source, contains('qa_run_ids:'), reason: path);
       expect(source, contains('required: true'), reason: path);
       expect(source, contains('--build-number "\$BUILD_NUMBER"'), reason: path);
       expect(source, contains('BIL-build-number.txt'), reason: path);
-      expect(source, contains('CODE_GATE=PASS'), reason: path);
+      expect(
+        source,
+        contains(
+          path.contains('ios')
+              ? 'CODE_GATE=SIGNED_IPA_ARTIFACT_ONLY'
+              : 'CODE_GATE=PASS',
+        ),
+        reason: path,
+      );
       expect(source, contains('PHYSICAL_DEVICE_GATE=REQUIRED'), reason: path);
     }
   });
@@ -29,38 +38,16 @@ void main() {
     expect(source, contains('ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH'));
   });
 
-  test('Android native crypto runtime gate is explicit and owner-waivable', () {
+  test('Android native crypto runtime gate cannot be waived', () {
     final source = _read('.github/workflows/bil_android_release_candidate.yml');
-    final inputStart = source.indexOf('      run_native_crypto_checks:');
-    final permissionsStart = source.indexOf('\npermissions:', inputStart);
-    expect(inputStart, greaterThanOrEqualTo(0));
-    expect(permissionsStart, greaterThan(inputStart));
-    final input = source.substring(inputStart, permissionsStart);
-
-    expect(input, contains('type: boolean'));
-    expect(input, contains('default: false'));
-    expect(
-      RegExp(
-        r'^\s*if: \$\{\{ inputs\.run_native_crypto_checks \}\}\s*$',
-        multiLine: true,
-      ).allMatches(source),
-      hasLength(2),
-    );
+    expect(source, isNot(contains('run_native_crypto_checks:')));
     expect(
       source,
-      contains(
-        r'RUN_NATIVE_CRYPTO_CHECKS: ${{ inputs.run_native_crypto_checks }}',
-      ),
+      contains('integration_test/system_crypto_bridge_integration_test.dart'),
     );
-    expect(
-      source,
-      contains("if [[ \"\$RUN_NATIVE_CRYPTO_CHECKS\" == 'true' ]]"),
-    );
+    expect(source, contains('reactivecircus/android-emulator-runner@'));
     expect(source, contains("NATIVE_CRYPTO_GATE_STATUS='PASS'"));
-    expect(
-      source,
-      contains("NATIVE_CRYPTO_GATE_STATUS='NOT_RUN_OWNER_WAIVED'"),
-    );
+    expect(source, isNot(contains('NOT_RUN_OWNER_WAIVED')));
     expect(
       source,
       contains('"NATIVE_CRYPTO_GATE=\$NATIVE_CRYPTO_GATE_STATUS"'),
@@ -82,8 +69,13 @@ void main() {
           "base64.b64decode(os.environ['PROFILE_BASE64'], validate=True)",
         ),
       );
-      expect(source, contains("os.environ['ASC_PRIVATE_KEY_BASE64']"));
-      expect(source, contains(r'chmod 600 "$ASC_KEY_PATH"'));
+      // Upload credentials belong only to the separately dispatched promotion.
+      expect(source, isNot(contains('APP_STORE_CONNECT_PRIVATE_KEY_BASE64')));
+      final promotion = _read(
+        '.github/workflows/bil_ios_upload_existing_testflight.yml',
+      );
+      expect(promotion, contains("os.environ['ASC_PRIVATE_KEY_BASE64']"));
+      expect(promotion, contains('key.chmod(0o600)'));
       expect(
         source,
         contains("entitlements.get('com.apple.developer.healthkit')"),

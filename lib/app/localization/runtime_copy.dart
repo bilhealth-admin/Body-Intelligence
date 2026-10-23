@@ -51,6 +51,7 @@ import 'runtime_copy_reference_delta.dart';
 import 'runtime_copy_coach_quick_prompts.dart';
 import 'runtime_copy_invalid_route.dart';
 import 'runtime_copy_quality_feedback.dart';
+import 'runtime_copy_smart_plan.dart';
 
 /// Reviewed runtime copy used by legacy call-sites that still pass an English
 /// sentence instead of a typed key. Every entry is complete in the five
@@ -66,6 +67,7 @@ abstract final class RuntimeCopy {
   };
 
   static const values = <String, Map<String, String>>{
+    ...SmartPlanRuntimeCopy.values,
     ...RuntimeCopyPrimary.values,
     ...RuntimeCopySecondary.values,
     ...RuntimeCopyWorkouts.values,

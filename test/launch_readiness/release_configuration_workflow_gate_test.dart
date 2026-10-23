@@ -44,17 +44,14 @@ void main() {
         contains('dart run tool/release/validate_release_configuration.dart'),
         reason: path,
       );
-      final expectedSourceBinding = path.contains('ios')
-          ? r'BIL_SOURCE_COMMIT: ${{ vars.BIL_IOS_V37_AUDITED_SOURCE_SHA }}'
-          : r'BIL_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V33_AUDITED_SOURCE_SHA }}';
-      expect(source, contains(expectedSourceBinding), reason: path);
-      expect(source, contains('BIL_RELEASE_EXPECTED_BUILD_NUMBER:'));
+      expect(source, contains(r'BIL_SOURCE_COMMIT: ${{ github.sha }}'));
+      expect(source, contains(r'BIL_AUDITED_SOURCE_COMMIT: ${{ github.sha }}'));
+      final build = path.contains('ios') ? '38' : '33';
+      expect(source, contains("BIL_RELEASE_EXPECTED_BUILD_NUMBER: '$build'"));
+      expect(source, contains('--verify-ci --platform'));
       expect(
-        source,
-        contains(
-          r'BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}',
-        ),
-        reason: 'Signing uses only the explicitly dispatched build number.',
+        source.indexOf('bil_candidate_release.py --verify-ci'),
+        lessThan(source.indexOf('secrets.')),
       );
       expect(
         source,
@@ -81,37 +78,40 @@ void main() {
       );
     }
 
-    final android = _read(workflows.first);
-    final ios = _read(workflows.last);
-    expect(android, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_IOS_V37_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_ANDROID_V33_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V37_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V37_STAGING_MANIFEST_SHA256'));
-    expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
-    expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
+    final guard = _read('tools/qa/bil_candidate_release.py');
+    expect(guard, contains("os.environ.get('GITHUB_SHA') != head"));
+    expect(guard, contains("os.environ.get('GITHUB_REF_NAME') != BRANCH"));
+    expect(guard, contains("git', 'status', '--porcelain'"));
+    expect(guard, contains('delivery.validate_prerequisites'));
+    expect(guard, contains('delivery.verify_security'));
+    expect(
+      guard,
+      contains('Protected original branch changed; signing is blocked'),
+    );
   });
 
   test('signed build workflows require complete frozen candidate records', () {
     final androidWorkflow = _read(workflows.first);
     final iosWorkflow = _read(workflows.last);
     final androidManifest = _read(
-      'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
+      'docs/release/BIL_ANDROID_V33_REVISED_CANDIDATE_2026-10-22.md',
     );
     final iosManifest = _read(
-      'docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
+      'docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md',
     );
 
-    expect(androidManifest, contains('STAGING_MANIFEST_COMPLETE: YES'));
-    expect(androidManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
-    expect(iosManifest, contains('STAGING_MANIFEST_COMPLETE: YES'));
-    expect(iosManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+    expect(androidManifest, contains('RELEASE_BUILD_NUMBER: 33'));
+    expect(androidManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED:'));
+    expect(iosManifest, contains('RELEASE_BUILD_NUMBER: 38'));
+    expect(iosManifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED:'));
     for (final workflow in <String>[androidWorkflow, iosWorkflow]) {
-      expect(workflow, contains('grep -Fqx'));
-      expect(workflow, contains('STAGING_MANIFEST_COMPLETE: YES'));
-      expect(workflow, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+      expect(workflow, contains('bil_candidate_release.py --verify-ci'));
     }
+    final guard = _read('tools/qa/bil_candidate_release.py');
+    expect(guard, contains('STAGING_MANIFEST_COMPLETE: YES'));
+    expect(guard, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+    expect(guard, contains('UNRESOLVED_REVIEW_COUNT: 0'));
+    expect(guard, contains('text.splitlines().count(line) != 1'));
   });
 
   test('Android validator consumes the current frozen-source manifest', () {
@@ -120,7 +120,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
+        'docs/release/BIL_ANDROID_V33_REVISED_CANDIDATE_2026-10-22.md',
       ),
     );
     expect(
@@ -134,13 +134,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 37 release manifest', () {
+  test('iOS validator consumes only the build 38 candidate manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
+        'docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md',
       ),
     );
     expect(
@@ -152,7 +152,7 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 37 ))'));
+    expect(source, contains('(( BUILD_NUMBER == 38 ))'));
     expect(source, isNot(contains('(( BUILD_NUMBER == 35 ))')));
   });
 
@@ -160,7 +160,7 @@ void main() {
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
     const checkout =
-        'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803';
+        'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1';
     const flutter =
         'subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2';
     const artifact =

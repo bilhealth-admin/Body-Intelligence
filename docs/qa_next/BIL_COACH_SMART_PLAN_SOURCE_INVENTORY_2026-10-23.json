@@ -1,0 +1,1615 @@
+{
+  "schema": "bil.coach-smart-plan.source-inventory.v1",
+  "recorded_at_utc": "2026-10-23T08:55:10.491904+00:00",
+  "candidate_branch": "codex/bil-release-ios38-android33-20261022",
+  "source_base": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
+  "protected_base": "31554b3e078667a38bd3c53aa105f5f1d2a4dc96",
+  "handoff_sha": "4f9b1025b041cb3530a304480ad5a7f1592b51bc",
+  "handoff_changes": [
+    "A\tdocs/qa_next/BIL_20261022_SMART_PLAN_CLOUD_PROPOSAL.sql",
+    "A\tdocs/qa_next/BIL_20261022_SMART_PLAN_CODEX_HANDOFF_AR.md",
+    "A\tdocs/qa_next/BIL_20261022_SMART_PLAN_POLICY_GATES.md",
+    "A\tdocs/qa_next/BIL_20261022_SMART_PLAN_RELEASE_QA.md",
+    "M\tlib/app/router/app_router.dart",
+    "M\tlib/app/router/app_wellness_routes.dart",
+    "M\tlib/features/intelligence_center/presentation/intelligence_coach_menu.dart",
+    "M\tlib/features/intelligence_center/presentation/intelligence_reference_workspace_flow.dart",
+    "M\tlib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart",
+    "A\tlib/features/smart_plan/data/bil_smart_plan_repository.dart",
+    "A\tlib/features/smart_plan/domain/bil_smart_plan.dart",
+    "A\tlib/features/smart_plan/domain/bil_smart_plan_engine.dart",
+    "A\tlib/features/smart_plan/presentation/bil_smart_plan_page.dart",
+    "A\tlib/features/smart_plan/services/bil_smart_plan_catalog.dart",
+    "A\ttest/features/smart_plan/bil_smart_plan_engine_test.dart"
+  ],
+  "frozen_manifest": "build/release-ios38-android33/frozen-20261023-115252/source-manifest.json",
+  "changed_input_count": 263,
+  "files": [
+    {
+      "file": ".github/scripts/bil_ios_simulator_adhoc_sign.py",
+      "status": "inherited_candidate_change",
+      "area": "preserved_authorized_release_work",
+      "sha256": "8b0ed435a69ec99fa1b30cb7add2049759d2b908aeaf5c3bdaad27b8109ab208"
+    },
+    {
+      "file": ".github/scripts/test_bil_ios_xcode26_otool_regression_20261022.py",
+      "status": "inherited_candidate_change",
+      "area": "preserved_authorized_release_work",
+      "sha256": "be9ce9b632fd1d6e94e7838c65aff0c681e4ecc6d9d4fbb415a3617a474ae263"
+    },
+    {
+      "file": ".github/workflows/bil_android_release_candidate.yml",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "4b1add565a8bc5cf96ff0077364c70fc0461b921eb471fc561eb95a368f7968d"
+    },
+    {
+      "file": ".github/workflows/bil_apple_google_policy_gate.yml",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "d30f3aee23b6eb147a241909833018d20e461a964cc85406c2ad690640f37894"
+    },
+    {
+      "file": ".github/workflows/bil_ios37_candidate_apple_signing_preflight_20261022.yml",
+      "status": "inherited_candidate_change",
+      "area": "preserved_authorized_release_work",
+      "sha256": "4a29c055e2f5a2c88d2b6e49d2372fc1897c43103f2a5f5fd7c3d54f555ef160"
+    },
+    {
+      "file": ".github/workflows/bil_ios37_candidate_ios_signing_harness_20261022.yml",
+      "status": "inherited_candidate_change",
+      "area": "preserved_authorized_release_work",
+      "sha256": "f292a3f2510f3ed2829913770f133cd8d8c3023313f8a21e86b57391068507be"
+    },
+    {
+      "file": ".github/workflows/bil_ios37_release_dev_dependency_remediation_20261022.yml",
+      "status": "inherited_candidate_change",
+      "area": "preserved_authorized_release_work",
+      "sha256": "23897a79bf087b8cdfcfa8a195391d5ab7db5667411002a4c5c8a9ce709a9fdc"
+    },
+    {
+      "file": ".github/workflows/bil_ios_signed_release.yml",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "75cd52c37e61a7725ba38cfee8b4ae32ddb0cdb8f2cfbb842c6ad87cdc9b1ebd"
+    },
+    {
+      "file": ".github/workflows/bil_ios_upload_existing_testflight.yml",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "ceec3b08705e37bbe75f2e102a8c366236e869a69ea147bc2164cf31e198bace"
+    },
+    {
+      "file": ".github/workflows/bil_live_service_contracts.yml",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "0254b571bda21e2558c6a9ec818ceb245362733703dbee2de390c45b35d42685"
+    },
+    {
+      "file": ".github/workflows/bil_owner_comprehensive_validation.yml",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "1106b33cb8190eb5e538fbc619baf8d659a50ca75e68c3d2daeb3557df3257d2"
+    },
+    {
+      "file": "artifacts/workout_media/gym_training_plan_source_v1.json",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "24264d0c26ece4398f85954c1e02e52dbd8748479f42ef784d9f1ea742894d14"
+    },
+    {
+      "file": "artifacts/workout_media/smart_plan_prescriptions_v1.json",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "cd2d3c9ab280116c3a0b13f8c9271426cb414c9429d6f20a7e30af012b38dae3"
+    },
+    {
+      "file": "docs/qa_next/BIL_20261022_SMART_PLAN_CLOUD_LOCAL_CANDIDATE.sql",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "8dc8152eac817eb3f3ad9a0364e0b2ba344f033a899c83ff4fb2508aeb9d892c"
+    },
+    {
+      "file": "docs/qa_next/BIL_20261022_SMART_PLAN_CLOUD_PROPOSAL.sql",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "ca353be694c27db4aeacedb3e87c0d97c662208a4d64bb970f6f471183b027b0"
+    },
+    {
+      "file": "docs/qa_next/BIL_20261022_SMART_PLAN_CODEX_HANDOFF_AR.md",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c90c5d9e5bcd855798c5d0c06fa52e111b6125a11110aa08f42a0da4293491f7"
+    },
+    {
+      "file": "docs/qa_next/BIL_20261022_SMART_PLAN_POLICY_GATES.md",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "72486cfb8428d277276a686e254c3888307dfd4b344a4fcfe1822a0b9057bbda"
+    },
+    {
+      "file": "docs/qa_next/BIL_20261022_SMART_PLAN_RELEASE_QA.md",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "a5151f196bb32efe5b2cddf49d47fbb3442477efa63e21edabfa3688b6518335"
+    },
+    {
+      "file": "docs/release/BIL_ANDROID_V33_REVISED_CANDIDATE_2026-10-22.md",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "5e023ac25ab151143ef50ec32b81faa7921562a050c17bb1531a5bd1fe175f11"
+    },
+    {
+      "file": "docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-10-19.json",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "14eeaba8072c7b4de887a7891bdd95b0a02bbeda6761be1f8b2ba610b88bcb8b"
+    },
+    {
+      "file": "docs/release/BIL_IOS38_ANDROID33_CLOUD_VERIFICATION_2026-10-23.json",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "ea201e862a7848fbae194d833d5e5c679762e2c298141f345a635c74d87563ed"
+    },
+    {
+      "file": "docs/release/BIL_IOS38_ANDROID33_EXPANDED_QA_2026-10-23.md",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "bbe3cebb519a1c782ad4a6bb2521c3bb7e17b037ab0655cdfa51bf82c68e6175"
+    },
+    {
+      "file": "docs/release/BIL_IOS38_ANDROID33_PREPARATION_2026-10-22_AR.md",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "b5c97f888c739b4903cddcd4a29d60ee170e66811462b32326f3becc4587891b"
+    },
+    {
+      "file": "docs/release/BIL_IOS38_STORE_PREPARATION_2026-10-23.json",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "e0b8f5efa05eb361a157da3337f6224ab3c62bb6a1d5572eeb9faf5b6853d38f"
+    },
+    {
+      "file": "docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "7b9d1197e6fd4b7012bcd72ed09ab805ee690b213b360d624b1d33613f187e98"
+    },
+    {
+      "file": "integration_test/system_crypto_bridge_integration_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "5cbcc835a16c7468dbd0a9720a885012d335d4abab7e7b23a23e0e397ce94fd0"
+    },
+    {
+      "file": "lib/app/analytics/bil_launch_deep_link.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "7bb40c358143bacd215b4c8c6408a27c81b8ba1085124ae9cd994de1d4d9e005"
+    },
+    {
+      "file": "lib/app/localization/runtime_copy.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "35763831c1526af1381519092c2f9f1d6d09ac3bf794be5a70c5d12e0109153c"
+    },
+    {
+      "file": "lib/app/localization/runtime_copy_extended.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "83c4974e944543da01caea1c3b672489dfe516cf9b30db5dea46e57336140292"
+    },
+    {
+      "file": "lib/app/localization/runtime_copy_smart_plan.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "bdca5d2a83c203e84b31d191bf9fd647a3e09a8b60f4d637c0089f2419a9624b"
+    },
+    {
+      "file": "lib/app/router/app_router.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "3b3938110beb6eb57f559a8cb22c3d24d10d59c8d14c45f375a59536b5bcf827"
+    },
+    {
+      "file": "lib/app/router/app_wellness_routes.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "d4fe635ec711c3cb3e983dc7e5d7dd4a9637557301e5a1ee3739350f26abdfef"
+    },
+    {
+      "file": "lib/data/database/database_provider.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "55a5b165dd0104f7ec497ab4b95423e48136a3f49e1cbd4f9232003381652d77"
+    },
+    {
+      "file": "lib/features/auth/auth_five_locale_copy.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "fd83e8c361e1265d63e7e8739eab0b81fa00faa5cb275cafb34cc74a6dc38705"
+    },
+    {
+      "file": "lib/features/cloud_platform/domain/cloud_sync_models.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "416fd95a8ed0964b7144b5d09742de6cad2ed42bea6d9d5e631f5a0ad21693ff"
+    },
+    {
+      "file": "lib/features/cloud_platform/persistence/sqlite_cloud_platform_store.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c9666aa4daf7c4d99316ea492d71926da7064f3d3823efb021ad4f5de732ffa0"
+    },
+    {
+      "file": "lib/features/cloud_platform/services/cloud_manual_sync_service.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "31bd72d4ae3564c823a270745b6c22ff5e677591bdc8b3c0e60077183833ddb0"
+    },
+    {
+      "file": "lib/features/cloud_platform/services/durable_offline_first_cloud_platform.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "46e2cf9b1b19053c784033509d07d805a12a52e49154b8927256c59af3429108"
+    },
+    {
+      "file": "lib/features/cloud_platform/services/supabase_cloud_transport.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "e7831a1086dbe2b2eab136d8c66879869fa87b86cc154081d9b238a5bc168a5a"
+    },
+    {
+      "file": "lib/features/community/presentation/community_gold_balance_action.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "d1bf204561bd3f6f2dcbc12dba9b310f8701995451843c3b36f04af1dc5dfdbb"
+    },
+    {
+      "file": "lib/features/intelligence_center/domain/bil_tool_registry.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "1a867357d5398ca84d3f2c85060b328a0a1527d06f83be53dbb476a43b1f0594"
+    },
+    {
+      "file": "lib/features/intelligence_center/domain/coach_action_admission.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "d44a3c726bd2cd2aad6c41d6fd95ab947cba25c5cda876f314b0f470561d10ac"
+    },
+    {
+      "file": "lib/features/intelligence_center/domain/coach_context_snapshot.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "81d3383f5c756333e127507d39a22f7a20c3181c5bc15df08b7e98f967d07faa"
+    },
+    {
+      "file": "lib/features/intelligence_center/domain/intelligence_action.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "4918fd35b8155a9fb9dacae7f5d9da5854abcce353f39860607a8308dd3b4fb0"
+    },
+    {
+      "file": "lib/features/intelligence_center/domain/intelligence_message.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "41291a0ddabec251407861bc82308af74614cb42685d6a1c1ea377ad427dbd80"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/ai_coach_report_confirmation_sheet.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "cacec5a081234980ed73e22d2a86fb6e0c4e7d18afc4d0a66026c1d36294a0a0"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "0f03ac0992d07318cb5ee5acb0bf5f69e6133861bc32777ac7ca1cf41d51dbd1"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_center_message_widgets.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "431ac31872844acaf651bf76c2afd1ed2b88cb2562a6f38544b1464ebf50e656"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "a471c9344b44eeacdbf250d287381a079f786f088e8ac98bb6d4e69bda7dfea6"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_coach_menu.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "5ffb9639ad93c8092c42dd7691f3a054d3cb54a2682ebaabe741e117d6b72b52"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_coach_reference_header.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "5ab43bc20e40b3946e860d1e3961c9fe6ea46712a026b33641c8417c94443c84"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "f622b464eed3b0ab6d4aa96662e901b5ea1f44e22bba62dcb6a123d8a11bf660"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_reference_workspace_flow.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "02a64513385f809b012e8a88fd46aed4f35c2e37a391af6e462c6b5e63890bb1"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/intelligence_smart_plan_flow.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "5f3cb8d9478c013467efd97ba0d271abb3fc79126838ed246c3f66f47b48960f"
+    },
+    {
+      "file": "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "dbfbc3b42cf502563ff7cd9b86bdd7dc651e1b5ea7a54141a33c603ba46c7ca4"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_action_truth.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "985e524f64a5326f85c34e005e69f02ba6d6c610f56bb3231b2076b629918c1d"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "72675f641a21647be81e8843f4cdb97e7711e5b5ec0258f7cf85ab630691c668"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_cloud_smart_plan_projection.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "495fad5c08a83137526ed7a3e9bf81423535bafd3566e8aed856ba438f6a8b47"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_context_assembly.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "5041f78521de7d7ccef2e783bdee04764f5021aa893f9b2d1a96a73cd07f223b"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_context_provider.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "b4bcd3e146b0fdb9610e828ff17d278d19655adc4b8b303d84bb0fbd0f0e0f5e"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_context_smart_plan.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "124ea9956e8398a727735ed3192b5c9da9b7389b3aa78e955d5af82709199551"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_memory_owner_sync.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "68a2acb0b90eb6df902e4409700abff04eee72a282260bc0936a01147d444e90"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_memory_repository.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "46b6a8fdd10a5d2778875acfdc72a3c15b63e8181557e0d6d4220559c0d6b048"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_memory_sync_merge.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "af39b8e009042b6bfba8c6f2274b027de975e2a626578a539011f0ee37bfb8ec"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_memory_sync_protocol.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "2be71d1e3dcbc27a600e718352f77116ef2724dacf63509fa5ff52679b4bf33b"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_memory_sync_readback.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "c47b6e332ed7e97b25b57f68dd0aa4af9436a2c8196fda5ea437080ba5c14f14"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_memory_sync_review.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "10c932205751099fe2a0ac800559a57bd1b35a2ddc7ad17fbeed3d23df0836b8"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/coach_request_intent.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "65e5473ac98f3e3a3d995985cef9442b19183975728bf427ebafcd3ef7d539c6"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/intelligence_center_engine.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "083538b2ca40b49b3e39cba1be12db1750977171454ec1de5c9c9f78708ed02b"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/local_coach_api.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "4406eb1bb812fae3812989a003edc14c8a6ce13648d1a42c7074bb3da29d5b27"
+    },
+    {
+      "file": "lib/features/intelligence_center/services/local_model_gateway_io.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "92544f84bf80e0c1d4a9055bb73fc5c5ba19dca91f0e356e80f04c42b15a6622"
+    },
+    {
+      "file": "lib/features/life_context/coach_memory_sync_review_panel.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "ee860cc153e0ab4043b8fbf3a4457c02787e677e6f91fa9de6bd64e943dad7ff"
+    },
+    {
+      "file": "lib/features/life_context/decision_memory_page.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "feb9567ab313d732add9b0b2162d0efb8e23ff91f428b14dccd930ede5e36f40"
+    },
+    {
+      "file": "lib/features/notifications/domain/community_deep_link.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "3025cc9dd9095c1efee034bff7b8d1be6f0e9527596021b70adc42370786ebbd"
+    },
+    {
+      "file": "lib/features/settings/cloud_sync_status_presentation.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "572acd20ab812aebde84a04e4d3c87e7b72ff9e385813b335e8242bba6e50656"
+    },
+    {
+      "file": "lib/features/settings/legal_document_page.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "d80c67c01b322914ecb0daa3d73c7188a39a10ac56aef7afc5c0ff50e56f85a0"
+    },
+    {
+      "file": "lib/features/settings/sharing_privacy_settings_page.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "9cac852dbadb8af840d04ee0fabd6cc75aa131af01d5ae94d2107f02ed700090"
+    },
+    {
+      "file": "lib/features/smart_plan/data/bil_smart_plan_draft_repository.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "42d57bb939f2e87d85183eae7f9127e327f3688401e807a7ad0453a4f32fb484"
+    },
+    {
+      "file": "lib/features/smart_plan/data/bil_smart_plan_repository.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "994ea53f7224fcac9028120349206e9b31e11a1532853c2d9fbfa090bb6d2d6a"
+    },
+    {
+      "file": "lib/features/smart_plan/data/bil_smart_plan_sync.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "b5ced63ae73f2c133d101305709259f2c7e5982a582437fca1fe15a7d36abab1"
+    },
+    {
+      "file": "lib/features/smart_plan/data/bil_smart_plan_sync_conflict.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "0561144da76616b8248ec6ee372504a67d7c742250668d3352e701be64dac059"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "8bed778a124483d700c630736ceff222941ad7f69592fb0963d79464f57ca3b3"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_adaptation.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "0a69881996f65a699ff58336f718be9ef9fe04cc4b3072908e6227a191bfd57e"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_change.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "a6fa02202e39106bb24c0b9dc1fcf8c79caac244fcdc7f08480ddb4e6e158784"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_engine.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "16943a959785e07278f1df364bae8c85c10b742db150e279b6691e82608dd475"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_nutrition.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "d23059b733e3fbfb38fd2416e12afae0371034d993e40ea0d99f16b72d82c830"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_privacy_copy.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "db8d38c33869be89d927998e2d4f8ab5f5286db1fde666811cdf7b6c79bfcaae"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_review.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "ac5969fc8d1d5f888795416da195df16195d9ae1d72563fd87afaca1eeb55d86"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_setup.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "8bed596944997cdb308a6850817fb2246336334b5aa8f0a8222090611e5d4dbe"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_actions.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "381f19a5080e211da42c9e48d3e217b069cbc9c7fdad185613705b1e807f9bd8"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_adaptation.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "e4084cef14ccb281cc321c03cbc1016d45ac4da55dadf03291d869c746baf1fc"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "919b09d38fc17a1b182757abeccf95c283ebc35957da3374f0307beec1e92e88"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_context_consent.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "6e2369a569807afd16064cd1de57aad5508609dca10f65af697706970421aff6"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "7a9993972ede1379b47d1c6a6c6d0d286331f113cddcd9f6411b4a5874f22561"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_drafts.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "6bab6ce9399f7449553d5d7513a2afba5de4167bed78e6b6721bce466c4bc75e"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_history.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "6946685c23ad72acc13fa244ed21f5fd4d353d7c3323716bc091a5598e32b49a"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_meal_flow.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "b41cdc8c1dcf99f2313a706e6aa7fd21c885ab997095075319dc74ff4e9d3226"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "91035710dbc0aa5dbce34553f89bff733500c0c1180d8f6ab4fc7595785aa1c2"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_privacy_surface.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "017362f5b620be83d0031c8b308263c87b0091344a5e84244ea5ac8729ff3b40"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "ef583d0459932a302bc2d82ec1f187b05ba9f47d79755e0f270e55ab58d67fba"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_session.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "899af8ab21f8a39ee8e1065259bd1419f990c3721170556bb4b11efa9e6e7dba"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_sync_review.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "996d20d74cdc82bc036759c55ff097c886e7395c305ed5c6ab7578998914d43e"
+    },
+    {
+      "file": "lib/features/smart_plan/services/bil_smart_plan_catalog.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "92eb7ffb176dc0f2d95476e1509d18d0e56e49ad18d020bd643af9703f16dd12"
+    },
+    {
+      "file": "lib/features/smart_plan/services/bil_smart_plan_clock.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "0351443ac03b803e5f8ae3fc343a816cb6ea03378021fe125bf7823b66a3e7e3"
+    },
+    {
+      "file": "lib/features/smart_plan/services/bil_smart_plan_coach.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "1850abc8c25be9a86f7bef5a7979e6c10ddef82c6d8d76ad9ad2795272d880b2"
+    },
+    {
+      "file": "lib/features/smart_plan/services/bil_smart_plan_nutrition_goals.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "d86e7210ab117fb0f1fab6d180dc0f6bc2b9b25ed19c9ac612e6e2eeb1c8a5ab"
+    },
+    {
+      "file": "lib/features/smart_plan/services/bil_smart_plan_phase_copy.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "b645be61cf4ee81120d19f32d7df6c2261ff03239f7098024be8514df3ab6977"
+    },
+    {
+      "file": "lib/features/smart_plan/services/bil_smart_plan_prescriptions.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "1bf82586e2ef8cf6adbaf92218ac5933686d85357253cf4a8664a649e7dc1c15"
+    },
+    {
+      "file": "lib/features/smart_plan/services/bil_smart_plan_workout.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "9838c102140fb51d8d9513bf069554f8d0df2238aa09d268475b640f6484b7a7"
+    },
+    {
+      "file": "lib/features/startup/startup_page.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "41adcf0946980e85a85960141d6bb4b4d866e3ea273d6cf21ad26d54d06357dd"
+    },
+    {
+      "file": "lib/features/wellness/presentation/bil_workout_routines_page.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "41456000341f41c40a69a9c44cbd99783063a68b92b3284a2c7e75d5781f0815"
+    },
+    {
+      "file": "lib/features/wellness/repositories/recipe_release_repository.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "0f6414f6568b787c0d4bc6a710e667fed02751387834f58d05924b7fa1c5c211"
+    },
+    {
+      "file": "public_site/app.js",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "47c3e2733420526d1664203faf8877a73648f08ee1d4f05799e207b66f642d56"
+    },
+    {
+      "file": "public_site/policy-pages/privacy.ar.html",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "32e8ceeb3910c1cb6a79fed19b6de6451d9e4563a0cefecefe365213507f467c"
+    },
+    {
+      "file": "public_site/policy-pages/privacy.en.html",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "1348ecefc55b428512f6e404e42360fd28a86e11c2eb2bd0f0d4aff566ed7b03"
+    },
+    {
+      "file": "pubspec.yaml",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "a993ecf712726507653681154279b14669e39f7cdd10f6f6442df52d0e164709"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_answer_quality.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "9f0206d38079a6fc43ab751f9263845d9caa5de6c8c001c0733e2a25e97585ef"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_answer_quality_test.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "f61b192327b6f0083a0502dad35f71064d9dc720532248561cba8975f22885df"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_food_safety.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "8c83d1039655ef2684a713314e777ea4f95543e861b6889f49f6ecffec9b24f0"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_food_safety_test.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "7a3c506d7e3b5a37fac8a4f8c4cc64cb2a0877769abe2a484b1ba06e6b6c5e96"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_health_safety.ts",
+      "status": "??",
+      "area": "coach_or_smart_plan",
+      "sha256": "804825cbf7e7071f13ce884620481634c2728fd7d6bb7d0ec53fd03b689b6a0f"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_health_safety_test.ts",
+      "status": "??",
+      "area": "coach_or_smart_plan",
+      "sha256": "a513619e8d62e6c950360d718382408341be726303c68f94e06e3ecd929b80b1"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_procedural_reply_test.ts",
+      "status": "??",
+      "area": "coach_or_smart_plan",
+      "sha256": "68362838fc098c6f5ed19dbf779f78e7ae3af828a6ccc8bad106bf14cfc118b7"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_reasoning.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_reasoning_test.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "a4b6fbca3fad3efd7054ea62d9de577e538a9e6cf89409b64ed6b7e19d24c73a"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_tool_arguments.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_tool_arguments_test.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "f0af6f3ec4708b3ad14861843321d0c49f4bdc8f3d1f814117a39df83bb15ef8"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_verified_weight_proposal.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_verified_weight_proposal_test.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "cde3a2f562b34de591e3e337e6898d6d285ffd2125b99bd1ae15941f0f27910a"
+    },
+    {
+      "file": "supabase/functions/ai-coach/server.ts",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "8067399b7450f249c7dc7232254b48632f316e77b12c49f253381a117b6ee5fa"
+    },
+    {
+      "file": "supabase/functions/ai-coach/server_test.ts",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "920bb03b0ea8bf51ae2e24898c0fd967a65afaf41972758ea3a7b50ff6b33ed1"
+    },
+    {
+      "file": "supabase/functions/ai-coach/smart_plan_tools_test.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "ef67ad3a1b5699b3121e41008cd00db9d5d71833708ab3bbe2fc2c0e3d278032"
+    },
+    {
+      "file": "supabase/migrations/20261022213149_bil_smart_plan_sync_v1.sql",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "d97ab654dee3d5440c2e0ea440df64f078b0c6e1bada856f020d7e15ec526cea"
+    },
+    {
+      "file": "supabase/migrations/20261023030934_bil_smart_plan_revision_history.sql",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "3644b60fc52ca4df58ebf23a64cf2b25e8368ab26e77dbe56b6af0a9bd095c4b"
+    },
+    {
+      "file": "supabase/migrations/20261023042955_bil_smart_plan_conflict_http409.sql",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "7b0f2317a451bc338a8f2e3b7032f6e3ef132ebf56985a919ebddd8943fe1266"
+    },
+    {
+      "file": "supabase/tests/smart_plan_sync_local_test.ts",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "8d2a09ccd6a9d468a52c2b3b4e0dc7d40d5283654565e774c1b7aac8453f1117"
+    },
+    {
+      "file": "test/epic3_scope_coverage_audit_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "5c7eb696ed1fafb84c7e0025e74f30c1c269f8ad04f877c5fdbb1aeb5b8b757b"
+    },
+    {
+      "file": "test/features/cloud_platform/cloud_auto_sync_behavior_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c446fd674bdfb939a39c7d8c074980e877ba6a0738e1bf2e43a9b558724f3340"
+    },
+    {
+      "file": "test/features/cloud_platform/cloud_page_drain_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "886a33788431babcf244226076c5144d5bb9e820e7c1c098e1968174e9929cfb"
+    },
+    {
+      "file": "test/features/cloud_platform/cloud_sync_failure_recovery_test.dart",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "65c64c669deda7b8e03ac9603e7f2bd6ea257efee00ff913f15b692ab01bb16a"
+    },
+    {
+      "file": "test/features/cloud_platform/durable_cloud_runtime_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "95f1067e687e27dd3885567e2d32150edbc453dbc263e982d240e052ce3575be"
+    },
+    {
+      "file": "test/features/community/community_report_visual_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "81817f427f8b749bedb8b199b4ac1387c235a780bb64701bc402db35ed355611"
+    },
+    {
+      "file": "test/features/community/community_rewards_center_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "b270bc9c7664a4da0f175c5da03c2ea9a649e02c80b31384c9e97a494a7024c7"
+    },
+    {
+      "file": "test/features/intelligence_center/bil_tool_registry_test.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "55b596ce97d6d2d49f2fdd9a7a6337714d83a9aea4d10c0400e88ea9a9658059"
+    },
+    {
+      "file": "test/features/intelligence_center/coach_decision_memory_retention_test.dart",
+      "status": "??",
+      "area": "coach_or_smart_plan",
+      "sha256": "d2428a7ff57fe2d1033ad877e5e897f5178e6f29a87af6845c8142fd983ae954"
+    },
+    {
+      "file": "test/features/intelligence_center/coach_memory_owner_sync_cases.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "ab42f89a91b308efb34f14c8f95e529c897f472f9ed899e83d6ac112e9bf41ca"
+    },
+    {
+      "file": "test/features/intelligence_center/coach_memory_owner_sync_test.dart",
+      "status": " M",
+      "area": "coach_smart_plan",
+      "sha256": "38d1622b113b950d913933d823a15b50d87c10317bfc8e66de063971cc7f8fa2"
+    },
+    {
+      "file": "test/features/intelligence_center/coach_memory_sync_protocol_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "4b25ff096ba7bd20e407a27f73a195f7e069ca93a0cc7fda4c99c57570eab748"
+    },
+    {
+      "file": "test/features/intelligence_center/coach_remote_consent_preflight_test.dart",
+      "status": "??",
+      "area": "coach_or_smart_plan",
+      "sha256": "b9eae882d9a7b2da1bf795a80a829ebbad7ab82f133530278abdb14767d7b510"
+    },
+    {
+      "file": "test/features/settings/legal_25_locale_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "db0d31f923096cd273c71797e87a0c265a9f17f5dd35a80a2e6335628aa42ab8"
+    },
+    {
+      "file": "test/features/settings/settings_language_and_sync_status_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "b5358429df360b346ed2cd0b45e3195a4af68833ba556c93f20b5526f2607278"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_catalog_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "524b6482971c5bf26442ef89b12d83653d0e7e8eabf08ee9cb0730cd70295f40"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_coach_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "739d5b666fcf63628775c2adfa16dad5243fd28d6296036adfd321db492b07ba"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "6d91cbea2986996a4ad3d9f1151bc83deacb0d44bcbebaa011a44a0fd466768d"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_drafts_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "e8fc864aaf397c1bdcf0db75a2ccb6bb4f63116c71159998263496033be489a6"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_engine_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "cdfcebcd656da804ffd8e9292ef61e2b01ce363eab6fab56d90436b6aa752e15"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_live_fixtures_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "cb6cd4a793d4f737c5af0ef8bb9ada4e441a7ece4c38187ed6a394f30782c06e"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_nutrition_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "be59fa33899de368f371476dcda0d82e9eef15cd96a6a3352173369af7622b8d"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_page_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "65a2afcb5bf7cccf3b4dcdec64c9bf5b858ee1a87f6ad7b83efb17e68414e8d8"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_prescriptions_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "a833b694e3b4bd161caf177694eb63a0293c678901709c27a99d548922b70799"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_repository_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "aa8941208f6a0a73ec44f99db1a3f559fee0df477f9b15ccd36e388c2a86b19d"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_revision_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "3955a29bd3a15d639ccc534ee714082fc8f2c2d17648da156a670dd38b39ad4a"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_session_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "2c11c384f209f934bcfa482708bb4fb4c10c514aefa943b3f32071d6ff255324"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_setup_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "3272cfda78042610597f16bbc089aaf8527992a8c6ff313df48db5d266d35450"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "28d657d5d88c250f9c3df15672fec2a7f7e401a4160ce71074cbea57e90c1b96"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_sync_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "705321102e74417508dc3249e4cffe87e873550b031cbfdf3067adfd207f1e4e"
+    },
+    {
+      "file": "test/features/smart_plan/coach_request_intent_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "b2877c9fd91b82d8326580f777daf2d0363e221b7247d208ad4b13d54d8c217d"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_390.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "f541e9b67e0c6303279e0c6cf8f842aada4c33100fd7d4ec88c76ee7d82396e2"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_memory.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "cb11d72d983366219f2bfcf031c5f43223c174118bb7cd703a36bcd4fe250287"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_report.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "a9fabfbfa788004aeab6a658d94903a3207ad5faf7f7c980cd0e5cc313ef1001"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "c913ab7dfd25fee9692a933e549fe73eaf139f60895dabece69314f46f07e0a6"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "21b55fcb1a101957f5094ac7e3f1accc85c811406c568420df04bf212f35e4bd"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "e77fbbd43a1e1349546a806c26bc1bcd8ceeef55fe8a167bf342a97584c4d063"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "4786e29306a193e6e4194542ace3256866c3821172349b176e83f1c9eafb5175"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "a7f292d23550bada840ef4ffdaaff17c5cdfcfa018a437c70b21ef8a19feee8e"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "3c0c9a9e7bcefc577c841c6e97be37e89f6ce50d2258ad0a8889bf9cb4db5a7e"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "1ec5de56ff010c30dc76af24e1a6229409fc0c5124b3d20e9700c8ce62376f93"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "3c52e62b2975426a90f098f3bdb1f221db86c46bef901e5940cdd78485b10319"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "28da1813844693eb23432cbc52e47c1a13731964d35fb91b63b3bbd694dcc275"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "e9c715a640c42c578953065b221cdc52b863d837f124ff86bb48c21ee689e6fd"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "4badf69c304f82ee6f85785acf1ab67e5d8d8abe7ba41a85284f4170ae2a0de1"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "83711ec140b1370a841b7b74b2b42de15a2bb371d6ff8e3e796b340c18af2c17"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_390.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "400c2c95df79cbb2039b96a63e960d211746a9776f6148f07e78cc333d6b9292"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_memory.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "98f7b1ec86de57d60ac92dcbdb112d57d8793b66306e0f2cc215a15635d64dee"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_report.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "4f2571db093ba69422be388570ea7d10a7a544f2464d4ec4421842975871a5e7"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "d7dc32a4bacd19b0a39b11e3b31c29219ad48ca5e81616d91837da314645d73a"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "fc9732cee8fc08116dfd42a0d8f5f314dcdeb5a80f3470dba0ba4f6e279d3a50"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "7839b9a871e5870a6fa6645a4a3058ad9216940265cb90ff47e6ac798158c2b4"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "f912a69cb5d4192c9ad10614d7b6061f423c9392a0fd39645308f98cc87d1ac9"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "ffa2b81e4fac07f57f0186fa477b76b928ad4a287f3ac17d84f0a53e18d1fb5c"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "c8849d5055c322a448629cc703eac524cb096bb50a11ba1c6413b1d45be1c94f"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "b1c5caa61544d6410542fdd2a9e4e98c47130ab73ed30e6878b7e8725cd68732"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "e64a5f7bcafee686eba42a9c4b00b106261de03628fa6911cdbaea606317948d"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_ar.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "4114ff6fe0d345cc9321a8359c5641d27ffff97f48c19e519749aafa8f7348db"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_en.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "27299fc34330147caac30eb23c94ec24435a4bff6bb774c3efa748470596d835"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "8befc18a0afa30e76aa3fcdbc7ba2c22be95f8148ac1b4ee5c6a500745a18482"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "ec2e619f66769d748232898c203d399413d54635a1d50568822b13dc35441516"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "863396a53cbb1e9dbf5ea8abd92a8d580b8f06777ee4dcc8c6a5b3537ebabdeb"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "a4124b7a6c83e1b9da6a89cf25dee5f2f4f87907ee931bcad9b56cfd28e8ed3d"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "9041faab393e365135abb5c08fd8b7389ed86baf7356edf4e7d7f4fdf4bca456"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "1382becba8fde8c4f7f85b5dbb7cd9eca08c3cf14a7af6254d93d24d031dd0fc"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "f0a7b9a319d753759c6303cf2157f53b0147ef9aad2d2b567ed1404f4f1dc3db"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "0cc80221cd76370b6ee9952194382d60f80e9422f81500684379d855efdb3242"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "0f1e4c105ac9f5effa2b208ed23a772df8395ce812b9de6f557aac84f27a8bcd"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "39f500a5a76c3cfb34a1e3af143364adf59bcc06cc95721e69d141f6926679a0"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_dark.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "d47b12a9118ca44bb8b1f56377b57c92871b5e21aa5aabb6b8c3e50b6e954c79"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_light.png",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "67f96fae9be4da52d63f362c41e32285600f7159f9367cf929304e88ea5a9eca"
+    },
+    {
+      "file": "test/features/smart_plan/smart_plan_contrast_review.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "5e30939f0699dd58a85c65212ac1f0805c663478957286166398a44bbc59807e"
+    },
+    {
+      "file": "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "444ae3e89c86046b9fbce519f75ae590ea9b6966a68d25bb228f591c8cc1a70d"
+    },
+    {
+      "file": "test/features/startup/startup_cloud_restore_routing_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "a346e4808c138773221ea1aac0443d3322f1fd181db19bec804526fd97158016"
+    },
+    {
+      "file": "test/features/startup/startup_native_database_retry_test.dart",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c1e7bc6b40b7b5fc126f283e651b0ea24d3508056e0951f9ce8b1190d9564bf0"
+    },
+    {
+      "file": "test/features/wellness/bil_workout_routines_page_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "e2dc18ccec908f50725ccd45cd644f4d62afdf6dd42a01929efcc9ff29262721"
+    },
+    {
+      "file": "test/launch_readiness/ai_coach_tool_parity_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c00647f465761cc41b89099cf978666c82f004504227bdf27f41a667699e9009"
+    },
+    {
+      "file": "test/launch_readiness/apple_privacy_closure_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "22b75ec412a17cfc9a1f7a5a07cf17a86502f42c384d42aab0b87075561c269f"
+    },
+    {
+      "file": "test/launch_readiness/deep_link_adversarial_decode_test.dart",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "3ff26d17e12f17b71d41ed16748fedfeae7d575136adbb3f146f5095b2c71443"
+    },
+    {
+      "file": "test/launch_readiness/device_lab_release_workflow_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "dab565c16832b4eecd7a52fc97dd00afb77d6e00f0501ceb391030c462acc34e"
+    },
+    {
+      "file": "test/launch_readiness/epic14_release_execution_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "43c271cc2230db67555437c541da675bfaaccf5086718fd91ddf534f01a0bf8b"
+    },
+    {
+      "file": "test/launch_readiness/release_candidate_gate_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "f167673504897febc19ab31bdb454ca04aa6f194a9cf07a98b69faca2f110a39"
+    },
+    {
+      "file": "test/launch_readiness/release_configuration_workflow_gate_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "729386ec4cd02881ca811faea412fa1a15dfabe168225974a704c538678865e5"
+    },
+    {
+      "file": "test/launch_readiness/release_platform_evidence_gate_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c96836bdd8a4dde96029339f8238d1914deb7db057684be2027d25b3e8bc671b"
+    },
+    {
+      "file": "test/launch_readiness/release_requires_explicit_dispatch_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "b6efcf0cb6f0e145d0251191f454eb3abbd0852f92e42fece8edd8935200b26e"
+    },
+    {
+      "file": "test/launch_readiness/release_tool_truth_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "6978af688211b4d31dd9393e8400c88dd8abe9b52e6df9e1ec0849e4c83cea55"
+    },
+    {
+      "file": "test/launch_readiness/system_crypto_export_compliance_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "2868e9c846ac934c7a861d1768b6dc908dcf0c99934326224c280b5d4fdd026b"
+    },
+    {
+      "file": "test/localization/smart_plan_25_locale_test.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "b726b0b4b7537a92a1d842cce128ed0a04593c4486bd8dd277156fb50560064f"
+    },
+    {
+      "file": "test/parallel/bil03/integration_overlay_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "68c7745e44af265220132775da2ee5de25cfac77fef8262c430dfd905922c7ca"
+    },
+    {
+      "file": "test/platform_readiness/android15_review_readiness_contract_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c537f2b3a7e2d61dff3e147a9b5efe89bf85aebf2c0ec09c117db3662e171414"
+    },
+    {
+      "file": "test/visual_closure/actual_data_pages_golden_test.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "509bdde703692852b705a8272ab2a8786eeb5a4a2df844619a71cd92a94669a7"
+    },
+    {
+      "file": "test/visual_closure/goldens/visual_closure_ai_coach_conversation_phone.png",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "6d93da08e8a68339d0703a0d9e7a7a72c7cf8e20b50505497d01d5877e45f3c4"
+    },
+    {
+      "file": "tool/localization/generate_extended_runtime_copy.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c2dddd0d77be61e6913a65dbb2dea304c51b65de1f4c420819264c8595e6ce2e"
+    },
+    {
+      "file": "tool/localization/locale_fallback_closure.dart",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "2c7e6d18b8a24294b3f77c2d2fd9bb9a8e37276ae738678fc50bbcd9c635cce4"
+    },
+    {
+      "file": "tool/localization/smart_plan_copy_sources.dart",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "cfcf07b01b33866b5cc44b4c03108245543b03eff59fc56f135b1c0326ae99d6"
+    },
+    {
+      "file": "tool/prebuild/run_code_tests.py",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "c4756c1ecac8587121fa8eb487737bba1d73290e756dfae728936f9c046f5941"
+    },
+    {
+      "file": "tool/release/ai_consent_receipt_production_rollback_e2e.sql",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "f5e0ad203c72cad136155ffe3ae68b0c8294638a8dd7d7e43244153f611e388d"
+    },
+    {
+      "file": "tool/release/cloud_sync_consent_production_rollback_e2e.sql",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "2282f6d398d3206957d716b69b30a3752ce42ef1cd6fc685b5d6af392d5594a5"
+    },
+    {
+      "file": "tool/release/coach_memory_sync_production_rollback_e2e.sql",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "648c8b68d014adb84242a1ce326145c45062d7366ec1e41e7a39183170d6b4b9"
+    },
+    {
+      "file": "tool/release/community_collaborator_privacy_production_rollback_e2e.sql",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "46245535c22f9dcd917fa8433c1be8334f9924bbad67a14fecb8008ff10a69d8"
+    },
+    {
+      "file": "tool/release/community_policy_20261019_production_rollback_e2e.sql",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "3224d6b393106e6102768da40e2c129798ade2bd568d5504afd5290d5babc744"
+    },
+    {
+      "file": "tool/release/community_prebuild_production_rollback_e2e.sql",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "862ad39c1aab9e6b5c6ccf3679a2d991281600ee2b9760a6e1e088ff562778e6"
+    },
+    {
+      "file": "tool/release/public_policy_pages.test.mjs",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "9949ba76517bd2a3c07d1307996662c392d4690fdaaa8d6e82f5c84af9500882"
+    },
+    {
+      "file": "tool/release/smart_plan_live_rpc_body.ps1",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "cbeaeb755a3b44c9a54744743337e21dc11dec737e5675f37e71e51f6d01407d"
+    },
+    {
+      "file": "tool/release/smart_plan_sync_production_rollback_e2e.sql",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "4e9f2000d84fdf91dfe1698ead74ca413279fd5ab5aecf9d72e93d2cf3bf7b3c"
+    },
+    {
+      "file": "tool/release/test_run_portable_release_tests.py",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "a7c026f9e47db0c4fe39ee028dbcc8e0eeee49db34c3c4e8c93b291d967848d6"
+    },
+    {
+      "file": "tool/release/test_verify_ios_app_icon.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "2a08bba43f4d0aac7747143dddc2e6ce8c7c6429e235af7109b6bb80b22f225d"
+    },
+    {
+      "file": "tool/release/verify_ios_app_icon.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "65b52694f8ef5087054b6d28b6b32b50fcc06eb4259a0aea5566905294d0965a"
+    },
+    {
+      "file": "tool/release_certification/cloud_deployment_ledger.json",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "85458da5177d808ae9525f4468dd57cb29daa51b07f4d722cd368b41c8ceee85"
+    },
+    {
+      "file": "tools/qa/bil_candidate_owner_runner.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "2b2a868814407446d28dc7fec1534b14093642ac6017069e74cc58a1ef290019"
+    },
+    {
+      "file": "tools/qa/bil_candidate_release.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "8c9937faad5931835b347b147cddb72a07df888eb6ada443855bdd0c92f45e04"
+    },
+    {
+      "file": "tools/qa/bil_release_candidate_validate.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "ba4a08aa1b382e32a8e1c7000d35cea198103ab969aa8de62dfafcf99cca54e9"
+    },
+    {
+      "file": "tools/qa/bil_release_cloud_e2e.py",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "1a2719f29cba96d9782af98393941ff532ef8c6a3b8341ead20b1b5a7bbc9821"
+    },
+    {
+      "file": "tools/qa/bil_release_coach_live_probe.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "1ee5e470b63c8c84c9c232b7cbd78a234fbd72c95b2953d83990f299d86d210c"
+    },
+    {
+      "file": "tools/qa/bil_release_delivery.py",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "f6ec5764cf535ec96dec59c2cb06c4f68167ff560c53b63214fe5728abe68071"
+    },
+    {
+      "file": "tools/qa/bil_smart_plan_live_rpc_probe.py",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "8a9ae29569eb8684977addf2025bdf8eb19396d0362ebe3419d290426bde7dde"
+    },
+    {
+      "file": "tools/qa/bil_smart_plan_validate.py",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "0b7d6f8517d141fd93b40d93d493c419a854fddc70f2156bb8431cdc53be3317"
+    },
+    {
+      "file": "tools/qa/revalidation_ci_plan.json",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "a6e02523d919e31b58ef0de92433f6eddc05a4fafa9a0ae591fc4a2d54a79ad4"
+    },
+    {
+      "file": "tools/qa/test_bil_candidate_owner_runner.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "36e05d2366936d1054d44a96f310d9a08896123da8adb3b85872e5b4d90d9eb8"
+    },
+    {
+      "file": "tools/qa/test_bil_candidate_promotion_receipt.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "bd76e21407827809bb23eadb8b880cde9d4d17c65bdfd996d4e63c757426087a"
+    },
+    {
+      "file": "tools/qa/test_bil_candidate_release.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "5e96a4b1023bbeacc13e311f73860752a3f20755f87d8065ab71fcf693547d17"
+    },
+    {
+      "file": "tools/qa/test_bil_candidate_workflows.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "b35061817b135de9584fabbe22285898804a454917e4f97c3fca5e2c32fd33c8"
+    },
+    {
+      "file": "tools/qa/test_bil_release_candidate_validate.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "ee61fc51e3e57bc7ed13d91e6288118d2de7be9a7fffa9bf5d94d744bdb931f8"
+    },
+    {
+      "file": "tools/qa/test_bil_release_cloud_e2e.py",
+      "status": " M",
+      "area": "preserved_authorized_release_work",
+      "sha256": "d9362479a97a6a420582d97774e2f4a1a38a6989a50b5382289ee209ff23ea9d"
+    },
+    {
+      "file": "tools/qa/test_bil_release_coach_live_probe.py",
+      "status": "??",
+      "area": "preserved_authorized_release_work",
+      "sha256": "609e7db1cb644bbb1f2d313f65259ef85e06e1397f190d6c276676c2d0d3d5aa"
+    },
+    {
+      "file": "tools/qa/test_bil_release_smart_plan_live_rpc_probe.py",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "f1c6f58981638db587af899cd4cbfbbd9f92b4395fcfe5e7d097c255990f7064"
+    },
+    {
+      "file": "tools/qa/test_bil_smart_plan_validate.py",
+      "status": "??",
+      "area": "coach_smart_plan",
+      "sha256": "232236e6341adef14956573ccebc5408a5310518321aa666669a52eea1dcd4c6"
+    }
+  ],
+  "self_and_mutable_evidence_excluded": true,
+  "source_fingerprint": "1f2015201d125f56f260f8be4bdc0e7c336d666b1ac6c8932a18e713c99c0da8",
+  "inventory_scope": "All changed runtime inputs relative to protected/inherited candidate source, plus dirty and nonignored new runtime files. Other preexisting authorized release repairs are preserved and labeled separately.",
+  "area_counts": {
+    "preserved_authorized_release_work": 104,
+    "coach_smart_plan": 154,
+    "coach_or_smart_plan": 5
+  }
+}

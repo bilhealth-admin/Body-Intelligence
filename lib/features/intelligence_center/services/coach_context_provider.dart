@@ -1,4 +1,10 @@
+import '../../smart_plan/services/bil_smart_plan_catalog.dart';
+import '../../smart_plan/data/bil_smart_plan_repository.dart';
+import '../../smart_plan/services/bil_smart_plan_coach.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import 'dart:convert';
+import 'coach_memory_sync_protocol.dart';
+import '../../../data/repositories/preferences_repository.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,6 +40,7 @@ import '../../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import 'coach_health_tools.dart';
 
 part 'coach_context_assembly.dart';
+part 'coach_context_smart_plan.dart';
 
 // A voice turn starts reading this snapshot only after recording has stopped.
 // Keep the provider alive while its asynchronous repository reads complete;
@@ -47,6 +54,7 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   // changes. Repository reads below remain best-effort and failure tolerant.
   ref.watch(latestDailyLogProvider);
   ref.watch(insightLifeContextProvider);
+  final planOwner = ref.watch(verifiedEntitlementOwnerIdProvider);
   final connectedHealth = ref.watch(connectedHealthProvider).value;
   final preferences = ref.read(preferencesRepositoryProvider);
 
@@ -166,12 +174,8 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
       return (jsonDecode(raw) as List<Object?>)
           .whereType<Map>()
           .map((item) => Map<String, Object?>.from(item))
-          .where(
-            (item) =>
-                item['source'] == 'explicit_user_confirmation' &&
-                item['text']?.toString().trim().isNotEmpty == true,
-          )
-          .take(20)
+          .where((item) => isCurrentConfirmedCoachMemory(item, DateTime.now()))
+          .take(1000)
           .toList(growable: false);
     } on Object {
       return <Map<String, Object?>>[];
@@ -522,7 +526,16 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
     includeAnalytics: includeAnalytics,
   );
 
+  final savedPlanContext = await _readSavedSmartPlanContext(
+    ref: ref,
+    preferences: preferences,
+    planOwner: planOwner,
+    dietaryPreferences: dietaryPreferences,
+    includeNutrition: includeNutrition,
+    includeTraining: includeTraining,
+  );
   return CoachContextSnapshot(
+    smartPlan: savedPlanContext,
     generatedAt: DateTime.now(),
     profile: profile == null
         ? <String, Object?>{
@@ -637,22 +650,7 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
           },
     decisionMemory: !includeAnalytics
         ? const <Map<String, Object?>>[]
-        : decisionMemories
-              .take(10)
-              .map(
-                (memory) => <String, Object?>{
-                  'recommendationKey': memory.recommendationKey,
-                  'title': memory.title,
-                  'reason': memory.reason,
-                  'confidence': memory.confidence,
-                  'response': memory.response,
-                  if (memory.outcome != null) 'outcome': memory.outcome,
-                  if (memory.helpfulness != null)
-                    'helpfulness': memory.helpfulness,
-                  'surfacedAt': memory.surfacedAt.toUtc().toIso8601String(),
-                },
-              )
-              .toList(growable: false),
+        : compactCoachDecisionMemories(decisionMemories),
     explicitMemories: explicitMemories,
     activityHistory: includeTraining || includeHabits
         ? activityHistory.take(14).toList(growable: false)

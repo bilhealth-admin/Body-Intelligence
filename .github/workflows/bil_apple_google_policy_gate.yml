@@ -81,7 +81,7 @@ env:
 jobs:
   automatic-policy-evidence:
     name: Source and affected regressions; certification remains separate
-    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' && !(github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation')
+    if: (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/codex/bil-release-ios38-android33-20261022') && !(github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation')
     runs-on: ubuntu-24.04
     timeout-minutes: 100
     services:
@@ -104,7 +104,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$GITHUB_REF" = refs/heads/integration/bil-qa-media-policy-20261011
+          case "$GITHUB_REF" in
+            refs/heads/integration/bil-qa-media-policy-20261011|refs/heads/codex/bil-release-ios38-android33-20261022) ;;
+            *) echo 'Unapproved policy validation branch' >&2; exit 1 ;;
+          esac
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           mkdir -p "$POLICY_OUT"
           git status --short > "$POLICY_OUT/git-status-before.txt"
@@ -389,7 +392,7 @@ jobs:
 
   approved-windows-goldens:
     name: Seven exact plan goldens on their Windows reference platform
-    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' && !(github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation')
+    if: (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/codex/bil-release-ios38-android33-20261022') && !(github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation')
     runs-on: windows-2025
     timeout-minutes: 20
     steps:
@@ -431,7 +434,7 @@ jobs:
 
   evidence-attestation:
     name: Verify final documentation commit against the tested source and live CI
-    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' && github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation'
+    if: (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/codex/bil-release-ios38-android33-20261022') && github.event_name == 'workflow_dispatch' && inputs.evidence_scope == 'evidence-attestation'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:

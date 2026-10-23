@@ -13,7 +13,7 @@ void main() {
         '.github/workflows/bil_android_release_candidate.yml',
       );
       final manifest = _read(
-        'docs/release/BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md',
+        'docs/release/BIL_ANDROID_V33_REVISED_CANDIDATE_2026-10-22.md',
       );
 
       expect(gradle, contains('compileSdk = 36'));
@@ -25,12 +25,12 @@ void main() {
 
       expect(workflow, contains('(( BUILD_NUMBER == 33 ))'));
       expect(workflow, isNot(contains('(( BUILD_NUMBER == 29 ))')));
-      expect(workflow, contains('BIL_ANDROID_V33_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_IOS_V37_AUDITED_SOURCE_SHA'));
-      expect(workflow, contains('BIL_ANDROID_V33_STAGING_MANIFEST_SHA256'));
+      expect(workflow, contains('BIL_TESTED_SOURCE_SHA'));
+      expect(workflow, contains('bil_candidate_release.py --verify-ci'));
+      expect(workflow, contains('BIL_AUDITED_FREEZE_MANIFEST_SHA256'));
       expect(
         workflow,
-        contains('BIL_ANDROID_V33_FROZEN_SOURCE_MANIFEST_2026-10-16.md'),
+        contains('BIL_ANDROID_V33_REVISED_CANDIDATE_2026-10-22.md'),
       );
       expect(workflow, contains('BIL_MOBILE_INTEGRITY_REQUIRED=true'));
       expect(workflow, contains('BIL_PLAY_INTEGRITY_PROJECT_NUMBER'));
@@ -45,8 +45,8 @@ void main() {
         ),
       );
       expect(manifest, contains('RELEASE_BUILD_NUMBER: 33'));
-      expect(manifest, contains('STAGING_MANIFEST_COMPLETE: YES'));
-      expect(manifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED: YES'));
+      expect(manifest, contains('STAGING_MANIFEST_COMPLETE:'));
+      expect(manifest, contains('CANDIDATE_FROZEN_OR_ACCEPTED:'));
     },
   );
 

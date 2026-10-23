@@ -23,7 +23,7 @@ void main() {
     expect(workflow, contains('verify_apple_release_toolchain.py'));
     expect(workflow, contains('BIL-apple-release-toolchain.txt'));
     expect(workflow, contains('BIL-apple-release-toolchain.json'));
-    expect(workflow, contains('bil-ios-toolchain-evidence-'));
+    expect(workflow, contains('bil-ios38-preview-toolchain-'));
     expect(workflow, isNot(contains('xcode-select -s')));
     expect(workflow, isNot(contains('/Applications/Xcode_')));
 

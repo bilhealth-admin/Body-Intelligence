@@ -69,12 +69,19 @@ MIXED_NAMES = {
 
 # Capture and real-photo cache seeding in these files are explicitly opt-in.
 CAPTURE_GUARDED = {
+    "test/features/nutrition/meal_vision_consent_layout_test.dart": "BIL_CAPTURE_CONSENT_REVIEW",
+    "test/features/onboarding/onboarding_review_mode_test.dart": "BIL_CAPTURE_CONSENT_REVIEW",
     "test/features/community/community_review_regression_test.dart": "BIL_CAPTURE_COMMUNITY_REVIEW",
     "test/connected_health/health_devices_review_regression_test.dart": "BIL_CAPTURE_HEALTH_REVIEW",
 }
 # These files retain their full layout, navigation and health-data assertions.
 # Only their optional PNG output uses process-environment flags, not Dart defines.
 ENV_CAPTURE_GUARDED = {
+    "test/features/community/community_report_visual_test.dart": "BIL_CAPTURE_COMMUNITY_REPORT",
+    "test/features/smart_plan/bil_smart_plan_page_test.dart": "BIL_CAPTURE_SMART_PLAN_GOLDENS",
+    "test/features/smart_plan/bil_smart_plan_session_test.dart": "BIL_CAPTURE_SMART_PLAN_GOLDENS",
+    "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart": "BIL_CAPTURE_SMART_PLAN_GOLDENS",
+    "test/features/smart_plan/bil_smart_plan_states_visual_test.dart": "BIL_CAPTURE_SMART_PLAN_GOLDENS",
     "test/features/intelligence_center/ai_coach_report_confirmation_capture_test.dart": "BIL_CAPTURE_COACH_RELEASE",
     "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart": "BIL_CAPTURE_COACH_RELEASE",
     "test/dashboard_polish/dashboard_current_preview_test.dart": "BIL_CAPTURE_DASHBOARD_POLISH",
@@ -97,6 +104,10 @@ ENV_CAPTURE_DIRECTORIES = {
     "test/parallel/bil07/community_channels_capture_widget_test.dart": "BIL07_CAPTURE_DIR",
 }
 NON_VISUAL_BYTE_TESTS = {
+    "test/features/community/community_image_privacy_test.dart":
+        "synthetic EXIF and upload-byte privacy assertions, not screenshot/pixel comparisons",
+    "test/features/nutrition/meal_vision_image_privacy_test.dart":
+        "synthetic encoded request-payload privacy assertions, not screenshots",
     "test/launch_readiness/release_source_hygiene_classifier_contract_test.dart":
         "base64-encoded text fixtures for the secret scanner, not images",
 }
@@ -124,8 +135,7 @@ def flutter_test_command(flutter: str) -> list[str]:
     for flag in ENV_CAPTURE_DIRECTORIES.values():
         os.environ.pop(flag, None)
     return [str(dart), str(snapshot), 'test', '--no-pub', '--concurrency', '1', '--reporter', 'expanded',
-            '--dart-define=BIL_CAPTURE_COMMUNITY_REVIEW=false',
-            '--dart-define=BIL_CAPTURE_HEALTH_REVIEW=false']
+            *[f'--dart-define={flag}=false' for flag in sorted(set(CAPTURE_GUARDED.values()))]]
 
 
 def discover() -> tuple[list[str], list[str]]:

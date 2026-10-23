@@ -4,6 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_translation_copy.dart';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
+import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan_privacy_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
 import 'package:body_intelligence_log/features/settings/legal_document_page.dart';
 import 'package:body_intelligence_log/features/settings/food_search_privacy_disclosure.dart';
@@ -50,19 +52,32 @@ void main() {
     },
   );
 
-  for (final language in ['en', 'ar']) {
+  for (final language in RuntimeCopy.supported) {
     testWidgets(
       'privacy renders translation provider disclosure in $language',
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
-            locale: Locale(language),
-            supportedLocales: const [Locale('en'), Locale('ar')],
+            locale: BilLocalePolicy.localeFromTag(language),
+            supportedLocales: RuntimeCopy.supported.map(
+              BilLocalePolicy.localeFromTag,
+            ),
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
             home: const LegalDocumentPage(document: BilLegalDocument.privacy),
           ),
         );
         final context = tester.element(find.byType(LegalDocumentPage));
+        final notice = language == 'ar'
+            ? bilSmartPlanBackupPrivacyArabic
+            : language == 'en'
+            ? bilSmartPlanBackupPrivacyEnglish
+            : RuntimeCopy.resolve(bilSmartPlanBackupPrivacyEnglish, language)!;
+        await tester.scrollUntilVisible(
+          find.text(notice),
+          200,
+          maxScrolls: 200,
+        );
+        expect(find.text(notice), findsOneWidget);
         final disclosure = cloudTranslationDisclosure(context);
         expect(
           disclosure,
@@ -74,12 +89,16 @@ void main() {
         );
         await tester.scrollUntilVisible(
           find.text(disclosure),
-          600,
-          maxScrolls: 60,
+          200,
+          maxScrolls: 200,
         );
         expect(find.text(disclosure), findsOneWidget);
         final foodDisclosure = foodSearchPrivacyDisclosure(context);
-        await tester.scrollUntilVisible(find.text(foodDisclosure), 400);
+        await tester.scrollUntilVisible(
+          find.text(foodDisclosure),
+          200,
+          maxScrolls: 200,
+        );
         expect(find.text(foodDisclosure), findsOneWidget);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());

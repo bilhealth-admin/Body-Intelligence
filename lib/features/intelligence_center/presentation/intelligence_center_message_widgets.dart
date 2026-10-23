@@ -655,6 +655,7 @@ IconData _iconForAction(IntelligenceActionType type) => switch (type) {
   IntelligenceActionType.signOut => Icons.logout_rounded,
   IntelligenceActionType.saveMemory => Icons.bookmark_add_outlined,
   IntelligenceActionType.healthCommand => BilSemanticIcons.diary,
+  IntelligenceActionType.smartPlan => BilSemanticIcons.insights,
   IntelligenceActionType.readHealthData => BilSemanticIcons.insights,
 };
 
@@ -677,6 +678,7 @@ BilSemanticIconKind? _semanticKindForAction(
   IntelligenceActionType.reviewMeal => BilSemanticIconKind.meal,
   IntelligenceActionType.reviewWorkout => BilSemanticIconKind.exercise,
   IntelligenceActionType.openReport ||
+  IntelligenceActionType.smartPlan => BilSemanticIconKind.report,
   IntelligenceActionType.readHealthData => BilSemanticIconKind.report,
   IntelligenceActionType.setThemeMode => BilSemanticIconKind.appearance,
   IntelligenceActionType.setLanguage => BilSemanticIconKind.language,

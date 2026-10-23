@@ -1,3 +1,5 @@
+-- 2026-10-23: reviewed exact BEFORE DELETE account/circle cleanup; no external I/O.
+-- Its source hash/type/name are pinned below; every other hook still aborts.
 -- DRAFT / NOT EXECUTED. Root review and exact-SHA QA required before any call.
 -- This is NOT a migration, app build, native transaction or Auth login proof.
 -- After source-approved cloud_sync_authoritative_consent_boundary_v1 is applied,
@@ -90,7 +92,11 @@ begin
   raise exception 'AUDIT synthetic identifiers already exist; refuse reuse';
  end if;
  v_checks:=v_checks||jsonb_build_object('synthetic_identifiers_absent',true);
- if exists(select 1 from pg_trigger where tgrelid='auth.users'::regclass and not tgisinternal)
+ if exists(select 1 from pg_trigger where tgrelid='auth.users'::regclass and not tgisinternal and not (tgrelid='auth.users'::regclass
+      and tgname='bil_remove_owned_circles_before_account_delete_v1' and tgtype=11
+      and tgenabled='O' and tgnargs=0 and tgqual is null
+      and tgfoid=coalesce(to_regprocedure('private.bil_remove_owned_circles_before_account_delete_v1()')::oid,0)
+      and (select md5(prosrc) from pg_proc where oid=tgfoid)='07e9bc31211219735ef172d3d9e6eee4'))
     or (select count(*) from pg_trigger where tgrelid in
       ('public.bil_cloud_records'::regclass,'public.bil_cloud_operations'::regclass,
        'public.bil_cloud_devices'::regclass,'public.bil_consent_receipts'::regclass)

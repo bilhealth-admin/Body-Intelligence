@@ -32,7 +32,7 @@ void main() {
     expect(gate, isNot(contains('## Accepted parent')));
     expect(androidWorkflow, contains('(( BUILD_NUMBER == 33 ))'));
     expect(androidWorkflow, isNot(contains('(( BUILD_NUMBER == 29 ))')));
-    expect(iosWorkflow, contains('(( BUILD_NUMBER == 37 ))'));
+    expect(iosWorkflow, contains('(( BUILD_NUMBER == 38 ))'));
     expect(iosWorkflow, isNot(contains('(( BUILD_NUMBER == 35 ))')));
     expect(
       androidWorkflow,
@@ -41,14 +41,11 @@ void main() {
     expect(
       iosWorkflow,
       contains(r'--build-number "$BUILD_NUMBER"'),
-      reason: 'iOS must override pubspec +8 with the signed release build 37.',
+      reason: 'iOS must override pubspec +8 with the signed release build 38.',
     );
-    expect(
-      iosWorkflow,
-      contains('BIL_IOS_V37_FROZEN_SOURCE_MANIFEST_2026-10-16.md'),
-    );
-    expect(iosWorkflow, contains('BIL_IOS_V37_AUDITED_SOURCE_SHA'));
-    expect(iosWorkflow, contains('BIL_IOS_V37_STAGING_MANIFEST_SHA256'));
+    expect(iosWorkflow, contains('BIL_IOS_V38_CANDIDATE_2026-10-22.md'));
+    expect(iosWorkflow, contains('BIL_TESTED_SOURCE_SHA'));
+    expect(iosWorkflow, contains('BIL_AUDITED_FREEZE_MANIFEST_SHA256'));
   });
 
   test('all accepted launch boundaries remain present', () {

@@ -1,0 +1,49 @@
+{
+  "schema": "bil.coach-memory.live-evidence.v1",
+  "verified_at_utc": "2026-10-23 03:08:25 UTC",
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "source_head": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
+  "source_state": "uncommitted isolated candidate",
+  "audit_source": "tool/release/coach_memory_sync_production_rollback_e2e.sql",
+  "audit_sha256": "648c8b68d014adb84242a1ce326145c45062d7366ec1e41e7a39183170d6b4b9",
+  "transaction": {
+    "transaction_result": "PASS",
+    "exact_failure": null,
+    "completed_assertions": {
+      "rls_enabled": true,
+      "owner_transfer_denied": true,
+      "anonymous_access_denied": true,
+      "reviewed_trigger_inventory": true,
+      "stale_cas_writes_zero_rows": true,
+      "foreign_owner_insert_denied": true,
+      "foreign_owner_read_isolated": true,
+      "synthetic_identifiers_absent": true,
+      "foreign_owner_update_zero_rows": true,
+      "owner_create_and_timestamp_readback": true,
+      "matching_cas_and_independent_readback": true,
+      "confirmed_deletion_redacts_text_and_metadata": true
+    },
+    "completed_assertion_count": 12
+  },
+  "independent_residue": {
+    "inventoried_table_count": 3,
+    "zero_synthetic_rows": true,
+    "table_counts": [
+      {
+        "table_name": "auth.identities",
+        "synthetic_rows": 0
+      },
+      {
+        "table_name": "auth.users",
+        "synthetic_rows": 0
+      },
+      {
+        "table_name": "public.bil_coach_memories",
+        "synthetic_rows": 0
+      }
+    ]
+  },
+  "limitations": [
+    "Synthetic rollback SQL verifies real RLS/CAS behavior, not physical-device transport or Gemini response quality."
+  ]
+}

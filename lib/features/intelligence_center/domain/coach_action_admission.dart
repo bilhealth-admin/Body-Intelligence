@@ -205,6 +205,7 @@ final class CoachActionAdmission {
       case IntelligenceActionType.saveMemory:
       case IntelligenceActionType.manageSubscription:
       case IntelligenceActionType.healthCommand:
+      case IntelligenceActionType.smartPlan:
       case IntelligenceActionType.readHealthData:
         return null;
     }

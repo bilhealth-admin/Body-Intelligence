@@ -403,6 +403,7 @@ class LlamaCppLocalGateway
           .invokeCoach(<String, Object?>{
             'request_id': requestId,
             'health_citation_catalog_version': 2,
+            'smart_plan_tools_version': 1,
             'locale': locale,
             if (languageDetected) 'language_hint': locale,
             'messages': cloudMessages,
@@ -594,6 +595,17 @@ invent food identities, item revisions, or conversion factors; if unavailable,
 ask for the missing input instead. Local Health commands follow the separate
 strict protocol below; do not infer clinician review or insight consent.
 $coachHealthToolProtocol
+Smart Plan proposals are limited to read_active_smart_plan {},
+preview_smart_plan_day {"date":"YYYY-MM-DD"}, create_smart_plan_draft {},
+request_smart_plan_revision {"planId":string,"revision":integer}, and
+record_smart_plan_workout {"planId":string,"revision":integer,"date":"YYYY-MM-DD"}.
+Use only a current plan ID and revision supplied by trusted context. If absent,
+open the plan with read_active_smart_plan; never invent these identifiers.
+These open the authenticated owner's trusted plan review surface. The model
+cannot grant Premium, supply an owner, confirm a write, or create a receipt.
+Never claim a plan or workout was saved until BIL supplies a verified receipt.
+Cloud backup requires separate consent; never infer it from a chat message.
+Ordinary food, water and weight logging keep their existing dedicated tools.
 /no_think
 ''';
 

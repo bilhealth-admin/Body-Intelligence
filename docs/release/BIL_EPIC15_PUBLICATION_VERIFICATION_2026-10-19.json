@@ -4,12 +4,12 @@
   "verification_scope": "PUBLIC_ENDPOINT_AVAILABILITY_AND_DEPLOYED_STATIC_ASSET_BYTE_IDENTITY",
   "legal_approval": "NOT_CLAIMED",
   "method": "GET_ONLY_NO_STORE_OR_SITE_MUTATION",
-  "verified_at_utc": "2026-10-20T13:15:45.455013+00:00",
+  "verified_at_utc": "2026-10-23T01:07:18.810872+00:00",
   "domain": "bilhealth.com",
   "local_asset": {
     "path": "public_site/app.js",
-    "bytes": 95091,
-    "sha256": "d83ef4d8202777aeb26501a00e4f9352b15f6df616b41a929435cfc2c8dc004a"
+    "bytes": 96593,
+    "sha256": "47c3e2733420526d1664203faf8877a73648f08ee1d4f05799e207b66f642d56"
   },
   "remote_asset": {
     "url": "https://www.bilhealth.com/app.js",
@@ -17,8 +17,8 @@
     "http_status": 200,
     "content_type": "text/javascript",
     "redirected": false,
-    "bytes": 95091,
-    "sha256": "d83ef4d8202777aeb26501a00e4f9352b15f6df616b41a929435cfc2c8dc004a",
+    "bytes": 96593,
+    "sha256": "47c3e2733420526d1664203faf8877a73648f08ee1d4f05799e207b66f642d56",
     "byte_identical_to_local": true
   },
   "routes": [
@@ -28,11 +28,11 @@
       "http_status": 200,
       "content_type": "text/html",
       "redirected": false,
-      "bytes": 20546,
-      "sha256": "390c6926ed13e333e9b57c593dea0fbd61d334d3e6f68b6a1e6fa1efce0689ff",
+      "bytes": 21148,
+      "sha256": "1348ecefc55b428512f6e404e42360fd28a86e11c2eb2bd0f0d4aff566ed7b03",
       "name": "privacy",
       "path": "/privacy",
-      "response_sha256": "390c6926ed13e333e9b57c593dea0fbd61d334d3e6f68b6a1e6fa1efce0689ff"
+      "response_sha256": "1348ecefc55b428512f6e404e42360fd28a86e11c2eb2bd0f0d4aff566ed7b03"
     },
     {
       "url": "https://www.bilhealth.com/terms",
@@ -77,7 +77,21 @@
     "terms_en_minimum_age": "You must be at least 18 years old",
     "terms_ar_minimum_age": "يجب أن يكون عمرك 18 عامًا على الأقل"
   },
-  "evidence_report": "build/qa/unified-apple-rc-20261020/publication-readback/receipt.json",
+  "evidence_report": "build/release-ios38-android33/publication-readback/receipt.json",
   "deployment": "STATIC_READY_FILES_WRANGLER_4_125_0_NO_BUNDLE_KEEP_VARS_NO_APP_BUILD",
-  "deployment_version": "a652b32b-4bcc-44cb-8899-26ef97cd5654"
+  "deployment_version": "3366c1ef-caef-4496-b328-d47c0091e999",
+  "preserved_associations": [
+    {
+      "document": "apple-app-site-association",
+      "sha256": "f5b4e673f08264b75cf635b1a87da96ee85c96395f6b4979a33e8185b79cb455",
+      "byte_identical_to_preserved_reviewed_document": true
+    },
+    {
+      "document": "assetlinks.json",
+      "sha256": "5c6ae8e11182a7b60a5264a793e81cf8fd3cc69cd581ba4ad66f61e263786143",
+      "byte_identical_to_preserved_reviewed_document": true
+    }
+  ],
+  "app_ads_verified": true,
+  "scope_note": "Public privacy text/source publication only; no legal approval, app signing, store submission or real-user database mutation."
 }

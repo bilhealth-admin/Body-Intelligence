@@ -631,8 +631,8 @@ Deno.test("Gemini falls back only after a transient primary-model outage", async
     "test",
     32,
   );
-  assertEquals(models, ["gemini-primary", "gemini-3.7-flash"]);
-  assertEquals(recovered.model, "gemini-3.7-flash");
+  assertEquals(models, ["gemini-primary", "gemini-3.6-flash"]);
+  assertEquals(recovered.model, "gemini-3.6-flash");
   assertEquals(recovered.fallbackUsed, true);
 
   let permanentFailureCalls = 0;
@@ -1054,6 +1054,73 @@ Deno.test("provider timeout refunds exactly one established reservation", async 
   assertEquals(response.status, 503);
   assertEquals(fake.settlements.length, 1);
   assertEquals(fake.settlements[0].p_succeeded, false);
+});
+
+Deno.test("false execution prose is never returned and refunds one reservation without regeneration", async () => {
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+  let calls = 0;
+  const response = await handler(requestBody(), {
+    clients: fake.create as never,
+    geminiCall: async () => {
+      calls++;
+      const reply = {
+        ...citationContractReply(["cdc_healthy_eating"]),
+        reply: "I have saved your plan.",
+        spoken_reply: "تم حفظ الخطة.",
+      };
+      return {
+        attempts: 1,
+        data: {
+          candidates: [{
+            finishReason: "STOP",
+            content: { parts: [{ text: JSON.stringify(reply) }] },
+          }],
+        },
+      };
+    },
+  });
+  assertEquals(response.status, 503);
+  assertEquals(await response.json(), { error: "unverified_action_claim" });
+  assertEquals(calls, 1);
+  assertEquals(fake.settlements.length, 1);
+  assertEquals(fake.settlements[0].p_succeeded, false);
+});
+
+Deno.test("handler uses task complexity before calling the provider", async () => {
+  for (
+    const [text, expected] of [["Please I need a plan", "HIGH"], [
+      "شو تمريني اليوم؟",
+      "LOW",
+    ], ["ما قدرت أتمرن مبارح", "MEDIUM"]]
+  ) {
+    const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+    const levels: string[] = [];
+    const response = await handler(
+      new Request("https://example.test", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer test",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          request_id: "coach-task-complexity-0001",
+          locale: "en",
+          context: {},
+          messages: [{ role: "user", content: text }],
+        }),
+      }),
+      {
+        clients: fake.create as never,
+        geminiCall: (...args) => {
+          levels.push(args[5]!);
+          return successfulSettlementProvider();
+        },
+      },
+    );
+    assertEquals(response.status, 200);
+    assertEquals(levels, [expected]);
+    assertEquals(fake.settlements.length, 1);
+  }
 });
 
 Deno.test("failure diagnostics correlate a redacted request without user data", async () => {
@@ -1591,7 +1658,7 @@ export async function exerciseHealthCitationHandlerContract({
                         text: JSON.stringify(
                           citationContractReply(
                             firstCitations !== undefined &&
-                              providerRequests.length === 1
+                              providerRequests.length === (failPrimaryOnce ? 2 : 1)
                               ? firstCitations
                               : citations,
                           ),
@@ -1830,4 +1897,342 @@ Deno.test("citation regeneration cannot exceed the remaining client deadline", a
   assertEquals(result.providerRequests.length, 1);
   assertEquals(result.settlements.length, 1);
   assertEquals(result.settlements[0].p_succeeded, false);
+});
+
+Deno.test("actual provider prompt exposes only the negotiated client tool contract", async () => {
+  for (const version of [undefined, 0, 1, 99]) {
+    const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+    const systems: string[] = [];
+    const response = await handler(
+      new Request("https://example.test", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer test",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          request_id: "coach-negotiated-prompt-0001",
+          locale: "en",
+          context: {},
+          smart_plan_tools_version: version,
+          messages: [{ role: "user", content: "Hello" }],
+        }),
+      }),
+      {
+        clients: fake.create as never,
+        geminiCall: (...args) => {
+          systems.push(args[2]);
+          return successfulSettlementProvider();
+        },
+      },
+    );
+    assertEquals(response.status, 200);
+    assertEquals(systems.length, 1);
+    for (
+      const tool of [
+        "read_active_smart_plan",
+        "create_smart_plan_draft",
+        "preview_smart_plan_day",
+        "request_smart_plan_revision",
+        "record_smart_plan_workout",
+      ]
+    ) {
+      assertEquals(systems[0].includes(tool), version === 1);
+    }
+    assertEquals(systems[0].includes("|sign_out|"), true);
+    assertEquals(systems[0].includes("log_weight"), true);
+  }
+});
+
+Deno.test("provider string arguments become a confirmed mobile object without losing the measured value", async () => {
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+  const response = await handler(
+    new Request("https://example.test", {
+      method: "POST",
+      headers: {
+        authorization: "Bearer test",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        request_id: "coach-provider-arguments-0001",
+        locale: "en",
+        context: {},
+        messages: [{ role: "user", content: "Log my weight as 60 kg." }],
+      }),
+    }),
+    {
+      clients: fake.create as never,
+      geminiCall: () =>
+        Promise.resolve({
+          attempts: 1,
+          data: {
+            candidates: [{
+              finishReason: "STOP",
+              content: {
+                parts: [{
+                  text: JSON.stringify({
+                    reply: "Review this weight entry before saving.",
+                    spoken_reply: "Please review the weight entry.",
+                    reason: "Explicit current recording request",
+                    confidence: 1,
+                    evidence: [],
+                    citations: [],
+                    requires_health_citation: false,
+                    missing_data: [],
+                    proposed_actions: [{
+                      type: "log_weight",
+                      arguments_json: '{"weightKg":60}',
+                      requires_confirmation: true,
+                    }],
+                  }),
+                }],
+              },
+            }],
+            usageMetadata: { promptTokenCount: 20, candidatesTokenCount: 10 },
+          },
+        }),
+    },
+  );
+  assertEquals(response.status, 200);
+  const body = await response.json();
+  assertEquals(body.proposed_actions, [{
+    type: "log_weight",
+    arguments: { weightKg: 60 },
+    requires_confirmation: true,
+  }]);
+  assertEquals(fake.settlements.length, 1);
+  assertEquals(fake.settlements[0].p_succeeded, true);
+});
+
+Deno.test("native timeout is a stable provider code and never repeats the same model", async () => {
+  await withGeminiTestKey(async () => {
+    let calls = 0;
+    await assertRejects(
+      () =>
+        geminiCall("gemini-3.8-flash", [], "test", 32, false, "HIGH", () => {
+          calls++;
+          return Promise.reject(
+            new DOMException("Signal timed out.", "TimeoutError"),
+          );
+        }),
+      Error,
+      "provider_timeout",
+    );
+    assertEquals(calls, 1);
+  });
+});
+
+Deno.test("deep primary timeout recovers with independent balanced model and counts both attempts", async () => {
+  const calls: Array<{ model: string; level: string; catalog: number }> = [];
+  const result = await geminiCallWithFallback(
+    (model, _contents, _system, _maximum, _voice, level, _fetch, catalog) => {
+      calls.push({ model, level: level!, catalog: catalog! });
+      if (calls.length === 1) {
+        return Promise.reject(new Error("provider_timeout"));
+      }
+      return Promise.resolve({ data: {}, attempts: 1 });
+    },
+    "gemini-3.8-flash",
+    [],
+    "test",
+    4096,
+    false,
+    "HIGH",
+    2,
+  );
+  assertEquals(calls, [
+    { model: "gemini-3.8-flash", level: "HIGH", catalog: 2 },
+    { model: "gemini-3.6-flash", level: "MEDIUM", catalog: 2 },
+  ]);
+  assertEquals(result.provider.attempts, 2);
+  assertEquals(result.fallbackUsed, true);
+});
+
+Deno.test("allergen contradiction is withheld and refunds one reservation without another model call", async () => {
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+  let calls = 0;
+  const response = await handler(new Request("https://example.test", {
+    method: "POST",
+    headers: { authorization: "Bearer test", "content-type": "application/json" },
+    body: JSON.stringify({
+      request_id: "coach-allergen-test-0001", locale: "en",
+      messages: [{ role: "user", content: "Suggest a dinner" }],
+      context: { profile: { dietaryPreferences: { allergens: ["peanut"] } } },
+    }),
+  }), {
+    clients: fake.create as never,
+    geminiCall: async () => {
+      calls++;
+      return { attempts: 1, data: { candidates: [{ finishReason: "STOP", content: {
+        parts: [{ text: JSON.stringify({ ...citationContractReply(["cdc_healthy_eating"]),
+          reply: "Try peanut butter on toast.", spoken_reply: "Try peanut butter." }) }],
+      } }] } };
+    },
+  });
+  assertEquals(response.status, 503);
+  assertEquals(await response.json(), { error: "unsafe_dietary_advice" });
+  assertEquals(calls, 1);
+  assertEquals(fake.settlements.length, 1);
+  assertEquals(fake.settlements[0].p_succeeded, false);
+});
+
+Deno.test("citation repair uses one normal bounded attempt within the existing total client budget", async () => {
+  for (const [elapsed, expectedBudget] of [[0, 10000], [20000, 4000]]) {
+    const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+    let now = 1000, calls = 0;
+    const deadlines: Array<number | undefined> = [];
+    const response = await handler(requestBody(), {
+      clients: fake.create as never, now: () => now,
+      geminiCall: async (...args) => {
+        calls++; deadlines.push(args[8]);
+        now = 1000 + elapsed;
+        const reply = citationContractReply(calls === 1 ? [] : ["cdc_healthy_eating"]);
+        return { attempts: 1, data: { candidates: [{ finishReason: "STOP", content: {
+          parts: [{ text: JSON.stringify(reply) }],
+        } }] } };
+      },
+    });
+    assertEquals(response.status, 200);
+    assertEquals(calls, 2);
+    assertEquals(deadlines, [undefined, expectedBudget]);
+    assertEquals(fake.settlements.length, 1);
+    assertEquals(fake.settlements[0].p_succeeded, true);
+  }
+});
+
+Deno.test("fallback then citation repair has at most three calls and one billed reservation", async () => {
+  const actual = await exerciseHealthCitationHandlerContract({ failPrimaryOnce: true, firstCitations: [] });
+  assertEquals(actual.response.status, 200);
+  assertEquals(actual.providerRequests.length, 3);
+  assertEquals(actual.payload.attempts, 3);
+  assertEquals(actual.rpcCalls.filter((row) => row.name === "bil_reserve_ai_usage").length, 1);
+  assertEquals(actual.settlements.length, 1);
+  assertEquals(actual.settlements[0].p_succeeded, true);
+  assertEquals(actual.settlements[0].p_input_tokens, 40);
+  assertEquals(actual.settlements[0].p_output_tokens, 20);
+});
+
+Deno.test("unsafe health prose is withheld before citation repair and refunds exactly one reservation", async () => {
+  for (const citations of [[], ["cdc_healthy_eating"]]) {
+    for (const reply of [
+      "You have diabetes. That is my diagnosis.",
+      "Take 0.5 mg of warfarin daily.",
+      "Skip dinner to make up for your missed workout.",
+      "Ignore your chest pain and keep training.",
+      "You need 1800 kcal per day.",
+      "اشخصك بمرض السكري.",
+    ]) {
+      const reservations = [{duplicate:false,state:"reserved"}];
+      const fake = fakeClients(reservations);
+      let calls = 0;
+      const diagnostics: Array<Record<string,unknown>> = [];
+      const response = await handler(new Request("https://example.test", {
+        method:"POST", headers:{authorization:"Bearer test","content-type":"application/json"},
+        body:JSON.stringify({request_id:"coach-health-boundary-adversarial-0001",locale:"en",context:{},
+          messages:[{role:"user",content:"Give me a helpful general wellbeing suggestion."}]}),
+      }), {
+        clients:fake.create as never,
+        diagnosticLog: event => diagnostics.push(event as unknown as Record<string,unknown>),
+        geminiCall:async()=> {
+          calls++;
+          return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({
+            ...citationContractReply(citations),reply,spoken_reply:reply,
+          })}]}}],usageMetadata:{promptTokenCount:20,candidatesTokenCount:10}}};
+        },
+      });
+      assertEquals(response.status,503,reply);
+      assertEquals(await response.json(),{error:"unsafe_health_advice"});
+      assertEquals(calls,1,"No second model call for an unsafe answer");
+      assertEquals(reservations.length,0);
+      assertEquals(fake.settlements.length,1);
+      assertEquals(fake.settlements[0].p_succeeded,false);
+      assertEquals(diagnostics[0].error_code,"unsafe_health_advice");
+      assertEquals(diagnostics[0].compensation_succeeded,true);
+      assertEquals(JSON.stringify(diagnostics).includes(reply),false);
+    }
+  }
+});
+Deno.test("an allergen contradiction with missing citations is rejected before another model request", async () => {
+  const fake=fakeClients([{duplicate:false,state:"reserved"}]);let calls=0;
+  const response=await handler(new Request("https://example.test",{
+    method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+    body:JSON.stringify({request_id:"coach-allergen-pre-repair-0001",locale:"en",
+      context:{profile:{dietaryPreferences:{allergens:["peanut"]}}},
+      messages:[{role:"user",content:"Suggest a dinner."}]}),
+  }),{clients:fake.create as never,geminiCall:async()=>{
+    calls++;return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({
+      ...citationContractReply([]),reply:"Try peanut butter.",spoken_reply:"Try peanut butter.",
+    })}]}}]}};
+  }});
+  assertEquals(response.status,503);assertEquals(await response.json(),{error:"unsafe_dietary_advice"});
+  assertEquals(calls,1);assertEquals(fake.settlements.length,1);assertEquals(fake.settlements[0].p_succeeded,false);
+});
+Deno.test("sourced saved daily targets remain usable without a reviewer call or a second charge", async () => {
+  const fake=fakeClients([{duplicate:false,state:"reserved"}]);let calls=0;
+  const response=await handler(new Request("https://example.test",{
+    method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+    body:JSON.stringify({request_id:"coach-sourced-target-readback-0001",locale:"en",
+      context:{computedHealth:{dailyTargets:{caloriesKcal:1800},dailyTargetSources:{caloriesKcal:"scheduled_daily_goal"}}},
+      messages:[{role:"user",content:"What is my saved daily target?"}]}),
+  }),{clients:fake.create as never,geminiCall:async()=>{
+    calls++;return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({
+      ...citationContractReply(["cdc_healthy_eating"]),
+      reply:"Your daily calorie target is 1800 kcal.",spoken_reply:"Your daily calorie target is 1800 kcal.",
+    })}]}}],usageMetadata:{promptTokenCount:20,candidatesTokenCount:10}}};
+  }});
+  assertEquals(response.status,200);assertEquals(calls,1);assertEquals(fake.settlements.length,1);
+  assertEquals(fake.settlements[0].p_succeeded,true);assertEquals(fake.settlements[0].p_input_tokens,20);
+});
+
+Deno.test("pure record questions settle once without citation repair for either model classification flag", async () => {
+  for (const flag of [false,true]) {
+    for (const reply of ["Which exercise did you complete?","How many hours did you exercise?",
+      "I can open your saved exercise log for review.","اي تمرين اكملت؟"]) {
+      const fake=fakeClients([{duplicate:false,state:"reserved"}]);let calls=0;
+      const response=await handler(new Request("https://example.test",{
+        method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+        body:JSON.stringify({request_id:"coach-procedural-record-question-0001",locale:"en",context:{},
+          messages:[{role:"user",content:"I finished my workout."}]}),
+      }),{clients:fake.create as never,geminiCall:async()=>{
+        calls++;return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({
+          ...citationContractReply([]),reply,spoken_reply:reply,requires_health_citation:flag,
+          missing_data:["workout"],proposed_actions:[],
+        })}]}}],usageMetadata:{promptTokenCount:20,candidatesTokenCount:10}}};
+      }});
+      assertEquals(response.status,200,reply);const payload=await response.json();
+      assertEquals(payload.reply,reply);assertEquals(payload.requires_health_citation,false);
+      assertEquals(payload.citations,[]);assertEquals(calls,1);assertEquals(payload.attempts,1);
+      assertEquals(fake.settlements.length,1);assertEquals(fake.settlements[0].p_succeeded,true);
+      assertEquals(fake.settlements[0].p_input_tokens,20);
+    }
+  }
+});
+
+Deno.test("a false weight-save claim becomes only exact app-owned confirmation copy without another provider call", async () => {
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+  let calls = 0;
+  const response = await handler(new Request("https://example.test", {
+    method: "POST", headers: { authorization: "Bearer test", "content-type": "application/json" },
+    body: JSON.stringify({ request_id: "coach-weight-confirm-copy-0001", locale: "en", context: {},
+      messages: [{ role: "user", content: "Log my weight as 60 kg." }] }),
+  }), {
+    clients: fake.create as never,
+    geminiCall: async () => {
+      calls++;
+      return { attempts: 1, data: { candidates: [{ finishReason: "STOP", content: {
+        parts: [{ text: JSON.stringify({ ...citationContractReply(["cdc_healthy_eating"]),
+          reply: "I have logged your weight.", spoken_reply: "I have saved your weight.",
+          proposed_actions: [{ type: "log_weight", arguments: { weightKg: 60 }, requires_confirmation: true }],
+        }) }],
+      } }] } };
+    },
+  });
+  assertEquals(response.status, 200);
+  const result = await response.json();
+  assertEquals(result.reply, "Review 60 kg and confirm to log it. It has not been added to your records yet.");
+  assertEquals(result.proposed_actions[0].arguments.weightKg, 60);
+  assertEquals(result.proposed_actions[0].requires_confirmation, true);
+  assertEquals(calls, 1);
+  assertEquals(fake.settlements.length, 1);
+  assertEquals(fake.settlements[0].p_succeeded, true);
 });

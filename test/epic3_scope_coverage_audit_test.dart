@@ -18,6 +18,7 @@ void main() {
     '/context': 'intelligence',
     '/decision-memory': 'intelligence',
     '/plan': 'intelligence',
+    '/smart-plan': 'smart-plan',
     '/experiments': 'intelligence',
     '/share-studio': 'profile',
     '/challenges': 'wellness',
@@ -136,6 +137,13 @@ void main() {
     'intelligence': [
       'test/features/dashboard/presentation/dashboard_decision_explanation_page_test.dart',
       'test/features/admin/ai_coach_global_reset_test.dart',
+    ],
+    'smart-plan': [
+      'test/features/smart_plan/bil_smart_plan_page_test.dart',
+      'test/features/smart_plan/bil_smart_plan_repository_test.dart',
+      'test/features/smart_plan/bil_smart_plan_coach_test.dart',
+      'test/features/smart_plan/bil_smart_plan_sync_test.dart',
+      'test/app_router_plan_navigation_guard_test.dart',
     ],
     'profile': [
       'test/premium_profile_page_contract_test.dart',

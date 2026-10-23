@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'smart_plan_copy_sources.dart';
 
 const _targets = <String, String>{
   'de': 'de',
@@ -536,6 +537,20 @@ void _validateBrandOverrides() {
 
 Future<void> main(List<String> args) async {
   _validateBrandOverrides();
+  if (args.contains('--smart-plan-base') ||
+      args.contains('--smart-plan-base-missing')) {
+    final merge = args.contains('--smart-plan-base-missing');
+    await _writeBaseCopy(
+      sources: (await smartPlanCopySources()).difference(
+        await _runtimeCopyBaseKeys(includeSmartPlan: merge),
+      ),
+      className: 'SmartPlanRuntimeCopy',
+      outputPath: 'lib/app/localization/runtime_copy_smart_plan.dart',
+      commandFlag: '--smart-plan-base',
+      mergeExisting: merge,
+    );
+    return;
+  }
   if (args.contains('--check-sources')) {
     final sources = <String>{
       ...await _runtimeCopyBaseKeys(),
@@ -684,6 +699,10 @@ const _corePageBaseSources = <String>{
 };
 
 const _corePageReviewedOverrides = <(String, String), String>{
+  ('ar', 'seconds'): 'ثانية',
+  ('fr', 'seconds'): 'secondes',
+  ('es', 'seconds'): 'segundos',
+  ('tr', 'seconds'): 'saniye',
   ('ar', 'Cholesterol'): 'الكوليسترول',
   ('fr', 'Cholesterol'): 'Cholestérol',
   ('es', 'Cholesterol'): 'Colesterol',
@@ -827,8 +846,13 @@ Future<void> _writeBaseCopy({
   required String className,
   required String outputPath,
   required String commandFlag,
+  bool mergeExisting = false,
 }) async {
   final ordered = sources.toList(growable: false)..sort();
+  if (mergeExisting && ordered.isEmpty) {
+    stdout.writeln('NO_NEW_BASE_KEYS');
+    return;
+  }
   final translated = <String, List<String>>{};
   for (final entry in _coachBaseTargets.entries) {
     stdout.writeln(
@@ -857,7 +881,23 @@ Future<void> _writeBaseCopy({
   output
     ..writeln('  };')
     ..writeln('}');
-  await File(outputPath).writeAsString(output.toString());
+  final target = File(outputPath);
+  if (mergeExisting) {
+    final original = await target.readAsString();
+    const marker = '  static const values = <String, Map<String, String>>{';
+    final generated = output.toString();
+    final entries = generated.substring(
+      generated.indexOf(marker) + marker.length,
+      generated.lastIndexOf('  };'),
+    );
+    final end = original.lastIndexOf('  };');
+    if (end < 0) throw StateError('Existing base catalog shape changed');
+    await target.writeAsString(
+      original.substring(0, end) + entries + original.substring(end),
+    );
+  } else {
+    await target.writeAsString(output.toString());
+  }
 }
 
 Future<List<String>> _translateCatalog(
@@ -1006,22 +1046,26 @@ const _runtimeCopyBaseFiles = <String>[
   'lib/app/localization/runtime_copy_cuisines.dart',
   'lib/app/localization/runtime_copy_diets.dart',
   'lib/app/localization/runtime_copy_core_pages.dart',
+  'lib/app/localization/runtime_copy_smart_plan.dart',
 ];
 
 /// Reads the canonical five-locale catalogs directly instead of importing the
 /// Flutter package. Keeping this generator a pure Dart command avoids running
 /// unrelated Flutter/native build hooks during localization audits.
-Future<Set<String>> _runtimeCopyBaseKeys() async {
+Future<Set<String>> _runtimeCopyBaseKeys({bool includeSmartPlan = true}) async {
   final values = <String>{};
   final singleQuotedKey = RegExp(
-    r"^    '((?:\\.|[^'])*)':\s*\{",
+    r"^ {2,4}'((?:\\.|[^'])*)':\s*\{",
     multiLine: true,
   );
   final doubleQuotedKey = RegExp(
-    r'^    ("(?:\\.|[^"])*"):\s*\{',
+    r'^ {2,4}("(?:\\.|[^"])*"):\s*\{',
     multiLine: true,
   );
   for (final path in _runtimeCopyBaseFiles) {
+    if (!includeSmartPlan && path.endsWith('runtime_copy_smart_plan.dart')) {
+      continue;
+    }
     final source = await File(path).readAsString();
     values.addAll(
       singleQuotedKey
@@ -1845,7 +1889,7 @@ Future<Set<String>> _releaseSurfaceEnglishValues() async {
 Future<void> _mergeMissingSources(List<String> sources) async {
   final file = File('lib/app/localization/runtime_copy_extended.dart');
   final current = await file.readAsString();
-  final existing = RegExp(r'^    ("(?:\\.|[^"])*"): \{$', multiLine: true)
+  final existing = RegExp(r'^ {2,4}("(?:\\.|[^"])*"): \{$', multiLine: true)
       .allMatches(current)
       .map(
         (match) =>

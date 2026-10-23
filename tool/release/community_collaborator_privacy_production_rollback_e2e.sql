@@ -1,3 +1,5 @@
+-- 2026-10-23: reviewed exact BEFORE DELETE account/circle cleanup; no external I/O.
+-- Its source hash/type/name are pinned below; every other hook still aborts.
 -- DRAFT / NOT EXECUTED. Prepared from current Production metadata 2026-10-04.
 -- Project tgmanzhqulksykhslrzb. ROOT REVIEW REQUIRED; NOT a migration/build.
 -- Execute ONLY after exact new staging Targeted + Candidate SUCCESS, permanent
@@ -431,8 +433,9 @@ begin
     where name='community_collaborator_projection_privacy_v1')<>1
   or(select count(*) from supabase_migrations.schema_migrations
     where name='community_atomic_publish_operation_v1')<>1
+  or(select count(*) from supabase_migrations.schema_migrations where name='community_circle_visibility_legacy_projection_guard_v1')<>1
   or md5(replace(pg_get_functiondef('public.bil_community_post_reference_metadata_v1(uuid[])'::regprocedure),chr(13),''))
-    is distinct from '6527ab896dce29d2481b4f09aa8c331b' then
+    is distinct from '6c05d2c794175c030fd6f40afbcb7445' then
   raise exception 'AUDIT exact candidate collaborator function not permanently applied';
  end if;
  if has_function_privilege('anon','public.bil_community_post_reference_metadata_v1(uuid[])','EXECUTE')
@@ -462,10 +465,27 @@ begin
  if exists(select 1 from public.bil_social_handles_v2 where handle=any(v_handles)) then
   raise exception 'AUDIT synthetic handle already exists';
  end if;
- if exists(select 1 from pg_trigger where not tgisinternal and tgrelid in(
-  'auth.users'::regclass,'public.bil_community_notifications'::regclass,'public.bil_push_outbox'::regclass)) then
-  raise exception 'AUDIT external-boundary trigger inventory changed';
- end if;
+-- Exact four database-local receipt/cleanup triggers reviewed 2026-10-23; every drift still aborts.
+  if exists (
+    with expected(relation, name, trigger_hash, function_hash) as (values
+      ('auth.users'::regclass,'bil_remove_owned_circles_before_account_delete_v1','8e49f7b56a76260df01a0484b99feb30','b78b4aa2ab0840c7aab089abc81f15f1'),
+      ('public.bil_community_notifications'::regclass,'bil_post_review_activity_seen_v2','098c64dd0b11c571bf193646cf696194','057867220bd04f7229e3ea19b2dcfd6d'),
+      ('public.bil_community_notifications'::regclass,'bil_sync_post_receipt_seen_v1','285a14ad8fe3d95745045300f63c7ff8','7c52494c3197c17ce4f4195c4bdb78b9'),
+      ('private.bil_community_post_events_v1'::regclass,'bil_post_review_event_seen_v2','945c08aae4256c504df955ce394c4f3d','129535ef7d3c09843482ab77280bfcda')
+    ), actual as (
+      select tgrelid relation,tgname::text name,
+        md5(pg_get_triggerdef(oid)) trigger_hash,
+        md5(pg_get_functiondef(tgfoid)) function_hash
+      from pg_trigger where not tgisinternal and tgrelid in (
+        'auth.users'::regclass,'public.bil_community_notifications'::regclass,
+        'public.bil_push_outbox'::regclass,'private.bil_community_post_events_v1'::regclass)
+    )
+    select 1 from expected e full join actual a using(relation,name)
+    where e.trigger_hash is distinct from a.trigger_hash
+      or e.function_hash is distinct from a.function_hash
+  ) then
+    raise exception 'AUDIT external-boundary trigger inventory changed; review required';
+  end if;
  if(select count(*) from public.bil_content_policies where active and effective_at<=statement_timestamp())<>1 then
   raise exception 'AUDIT active policy unavailable';
  end if;
@@ -483,15 +503,15 @@ begin
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_uid,'role','authenticated')::text,true);
   execute 'set local role authenticated';
   if current_user<>'authenticated' or auth.uid() is distinct from v_uid then raise exception 'AUDIT principal mismatch'; end if;
-  insert into public.bil_public_profiles(user_id,display_name,bio,profile_visibility,discoverable,allow_follows)
-   values(v_uid,case v_i when 1 then 'Audit Author' when 2 then 'Audit Collaborator'
-    when 3 then 'Audit Viewer' else 'Audit Moderator' end,'Nutrition collaboration audit','public',true,true);
   insert into public.bil_content_policy_acceptances(user_id,policy_version)
    values(v_uid,v_policy) on conflict(user_id,policy_version) do update
    set user_id=excluded.user_id,policy_version=excluded.policy_version;
   if public.bil_current_community_policy_status()->>'status' is distinct from 'accepted' then
    raise exception 'AUDIT genuine policy owner readback failed';
   end if;
+    insert into public.bil_public_profiles(user_id,display_name,bio,profile_visibility,discoverable,allow_follows)
+   values(v_uid,case v_i when 1 then 'Audit Author' when 2 then 'Audit Collaborator'
+    when 3 then 'Audit Viewer' else 'Audit Moderator' end,'Nutrition collaboration audit','public',true,true);
   perform public.bil_social_claim_handle_v2(v_handles[v_i]);
   execute 'reset role';
  end loop;

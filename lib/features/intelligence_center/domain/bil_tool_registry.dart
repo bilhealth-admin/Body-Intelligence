@@ -1,3 +1,4 @@
+import '../../smart_plan/services/bil_smart_plan_coach.dart';
 import 'intelligence_action.dart';
 import '../app_commands/coach_health_tools.dart';
 import 'bil_navigation_registry.dart';
@@ -264,6 +265,7 @@ class BilToolRegistry {
 
   static const tools = <String, BilToolDescriptor>{
     ...coachHealthToolsByName,
+    ...smartPlanTools,
     'navigate': BilToolDescriptor(
       name: 'navigate',
       type: IntelligenceActionType.navigate,

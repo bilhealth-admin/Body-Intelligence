@@ -25,6 +25,17 @@ final class BilLaunchDeepLink {
   };
 
   static BilLaunchDeepLink? parse(Uri uri) {
+    // URI parsing can succeed while decoding percent-encoded UTF-8 later
+    // fails. External launch input must never throw into app startup.
+    if (uri.toString().length > 8192) return null;
+    try {
+      return _parseBounded(uri);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  static BilLaunchDeepLink? _parseBounded(Uri uri) {
     if (uri.userInfo.isNotEmpty || uri.hasPort || uri.fragment.isNotEmpty) {
       return null;
     }

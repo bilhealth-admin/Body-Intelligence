@@ -1,6 +1,6 @@
 """Execute existing guarded SQL audits with independent residue readback.
 
-Only the five checked-in synthetic rollback programs are accepted. No DDL,
+Only the seven checked-in synthetic rollback programs are accepted. No DDL,
 consent for real users, migration replay or policy bypass is introduced here.
 Their existing production body/ACL/trigger prerequisites remain authoritative.
 """
@@ -18,7 +18,7 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[2]
 SQL_FILES = tuple(f'tool/release/{name}_production_rollback_e2e.sql' for name in (
     'ai_consent_receipt', 'cloud_sync_consent', 'community_collaborator_privacy',
-    'community_policy_20261019', 'community_prebuild'))
+    'community_policy_20261019', 'community_prebuild', 'smart_plan_sync', 'coach_memory_sync'))
 
 
 def segments(source):

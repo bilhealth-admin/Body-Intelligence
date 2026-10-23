@@ -31,6 +31,7 @@ enum IntelligenceActionType {
   saveMemory,
   healthCommand,
   readHealthData,
+  smartPlan,
 }
 
 class IntelligenceAction {

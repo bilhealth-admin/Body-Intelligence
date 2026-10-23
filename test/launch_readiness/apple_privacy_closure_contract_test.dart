@@ -335,7 +335,10 @@ void main() {
       'public Community avatar',
       'Private messages are stored with access controls but are not end-to-end encrypted.',
       'treats this authenticated processing as linked to the account',
-      'the current selective sync scope is profile/body settings, weight, and hydration',
+      'Cloud sync is optional and selective: profile/body settings, weight and hydration',
+      'Nutrition and goal backup require their own explicit choices',
+      'Saved Smart Plans stay on the device unless you separately enable plan backup',
+      'A deletion marker may remain',
       'dietary preferences and recent nutrition, weight, activity, sleep, or verified connected-health summaries',
       'Google Gemini, a third-party AI service operated by Google',
       'Meal-photo analysis:',
@@ -352,6 +355,18 @@ void main() {
     expect(publicPolicy, contains('لا يحمّل أداة تحليلات ويب من BIL'));
 
     expect(inAppPolicy, contains("bilLegalPolicyRevision = '2026-10-19'"));
+    expect(inAppPolicy, contains('_smartPlanBackupPrivacySection(context)'));
+    final planNotice = File(
+      'lib/features/smart_plan/domain/bil_smart_plan_privacy_copy.dart',
+    ).readAsStringSync();
+    for (final required in [
+      'Nutrition and goal backup require separate choices',
+      'unless you separately enable plan backup',
+      'A deletion marker may remain',
+      'does not automatically copy HealthKit or Health Connect records',
+    ]) {
+      expect(planNotice, contains(required));
+    }
     expect(
       inAppPolicy,
       contains('Google Gemini, a third-party AI service operated by Google'),
@@ -370,8 +385,10 @@ void main() {
       'Performance Data | Yes | App Functionality',
       'Other Diagnostic Data | Yes | App Functionality',
       'Other Data Types | Yes | App Functionality; Product Personalization',
-      'profile/body settings,',
-      'weight records and hydration records',
+      'Selective profile/body, weight and hydration sync',
+      'separate choices for nutrition and goal backup',
+      'Smart Plan backup is separately enabled',
+      'Plan backup does not automatically copy HealthKit or Health Connect records.',
       'Apple/platform speech recognition',
     ]) {
       expect(inventory, contains(documented));

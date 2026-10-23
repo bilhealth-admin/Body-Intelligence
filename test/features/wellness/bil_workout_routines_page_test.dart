@@ -14,6 +14,7 @@ import 'package:body_intelligence_log/features/commerce/domain/subscription_stat
 import 'package:body_intelligence_log/features/commerce/presentation/premium_label_badge.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/wellness/domain/wellness_content_pack.dart';
+import 'package:body_intelligence_log/features/wellness/domain/gym_six_month_plan.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/bil_workout_routines_page.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_media_cache.dart';
 import 'package:drift/native.dart';
@@ -29,6 +30,49 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+  });
+
+  testWidgets('retry reloads a failed gym plan as well as the video library', (
+    tester,
+  ) async {
+    var attempts = 0;
+    await tester.pumpWidget(
+      _TestApp(
+        child: BilWorkoutRoutinesPage(
+          loader: (_) async => [_verifiedWorkout],
+          gymPlanLoader: () async {
+            if (++attempts == 1) {
+              throw StateError('synthetic catalog load failure');
+            }
+            return const GymSixMonthPlan(
+              sourcePath: 'test',
+              sourceContractId: 'test',
+              sourceSha256: '',
+              releaseManifestPath: 'test',
+              releaseManifestSha256: '',
+              months: [],
+              sessions: [],
+              warmups: GymPlanWarmups(exerciseIds: [], groups: []),
+              libraryPages: [],
+              exerciseIds: [],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('The installed workout library could not be opened.'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Retry'));
+    await tester.pumpAndSettle();
+    expect(attempts, 2);
+    expect(find.text('Foundation strength'), findsOneWidget);
+    expect(
+      find.text('The installed workout library could not be opened.'),
+      findsNothing,
+    );
   });
 
   testWidgets('phone header renders the complete workout title readably', (

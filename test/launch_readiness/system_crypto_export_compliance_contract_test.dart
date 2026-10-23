@@ -10,34 +10,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gotrue/gotrue.dart';
 
 void main() {
-  test('iOS native crypto runtime check is explicit opt-in with evidence', () {
+  test('iOS native crypto runtime check is mandatory with evidence', () {
     final workflow = File(
       '.github/workflows/bil_ios_signed_release.yml',
     ).readAsStringSync();
 
-    expect(
-      workflow,
-      contains(
-        'run_native_crypto_checks:\n'
-        '        description: Run the optional iOS Simulator AES-GCM runtime check\n'
-        '        required: true\n'
-        '        default: false\n'
-        '        type: boolean',
-      ),
-    );
+    expect(workflow, isNot(contains('run_native_crypto_checks:')));
     expect(
       RegExp(
         r'^\s*if:\s*(?:\$\{\{\s*inputs\.run_native_crypto_checks\s*\}\}|inputs\.run_native_crypto_checks)\s*$',
         multiLine: true,
       ).allMatches(workflow),
-      hasLength(2),
-      reason: 'Both Simulator boot and native execution require owner opt-in.',
+      isEmpty,
+      reason: 'Simulator boot and native execution must never be optional.',
     );
+    expect(workflow, isNot(contains('NOT_RUN_OWNER_WAIVED')));
+    expect(workflow, contains('BIL-ios-native-crypto-gate.txt'));
     expect(
       workflow,
-      contains('NATIVE_CRYPTO_RUNTIME_GATE=NOT_RUN_OWNER_WAIVED'),
+      contains('integration_test/system_crypto_bridge_integration_test.dart'),
     );
-    expect(workflow, contains('BIL-ios-native-crypto-gate.txt'));
     expect(
       workflow,
       contains(

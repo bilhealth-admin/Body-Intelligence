@@ -745,7 +745,7 @@ void main() {
           of: coachHero,
           matching: find.text('AI Coach'),
         );
-        final earnAction = find.byKey(const Key('ai-coach-earn-post'));
+        final earnAction = find.byKey(const Key('ai-coach-bil-gold'));
         final earnCoin = find.descendant(
           of: earnAction,
           matching: find.byType(BilGoldCoin),
@@ -769,8 +769,8 @@ void main() {
         final titleCenterY = tester.getRect(coachTitle).center.dy;
         expect(
           tester.getRect(earnAction).width,
-          lessThanOrEqualTo(48),
-          reason: 'Only the gold coin hit target appears in the Coach header.',
+          lessThanOrEqualTo(64),
+          reason: 'The coin and verified balance keep a bounded header target.',
         );
         for (final action in [
           earnAction,

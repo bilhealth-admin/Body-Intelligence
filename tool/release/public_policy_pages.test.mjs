@@ -32,6 +32,9 @@ for (const page of pages) {
     if (page.path === '/privacy') {
       assert.ok(body.includes('id="translation"'));
       assert.ok(body.includes('Google Cloud Translation'));
+      assert.ok(body.includes(page.lang === 'ar' ? 'تبقى الخطط الذكية المحفوظة على الجهاز' : 'Saved Smart Plans stay on the device'));
+      assert.ok(body.includes(page.lang === 'ar' ? 'علامة حذف' : 'deletion marker'));
+      assert.ok(body.includes(page.lang === 'ar' ? 'إيقاف نسخ الخطة' : 'stop plan backup'));
     }
     const head = await worker.fetch(new Request(`https://www.bilhealth.com${page.path}?lang=${page.lang}`, {method:'HEAD'}), env);
     assert.equal(head.status, 200);

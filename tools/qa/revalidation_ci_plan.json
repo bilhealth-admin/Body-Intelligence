@@ -264,6 +264,40 @@
       "allowed_skipped_jobs": [],
       "reason": "Run independent administration contracts and responsive browser E2E on approved web source 097dda710b2c8f3a98a413052b5d078863aac90c; this distinct web source is never mislabeled as mobile source.",
       "source_binding": "Exact final published headSha and required-job receipts; no skipped required jobs."
+    },
+    {
+      "workflow": "bil_android_isolated_emulator_smoke.yml",
+      "workflow_id": 384967897,
+      "lane_id": "android_startup_matrix",
+      "registered_workflow_name": "BIL Android isolated emulator startup evidence",
+      "inputs": {
+        "api36_only": "false"
+      },
+      "required_jobs": [
+        "Android 26 offline-config startup",
+        "Android 29 offline-config startup",
+        "Android 33 offline-config startup",
+        "Android 34 offline-config startup",
+        "Android 35 offline-config startup",
+        "Android 36 offline-config startup"
+      ],
+      "allowed_skipped_jobs": [],
+      "reason": "Actual isolated startup on all six supported Android API levels. Offline-config evidence only; never claimed as authenticated billing or cloud proof.",
+      "source_binding": "Exact final candidate SHA; all six matrix jobs must succeed."
+    },
+    {
+      "workflow": "bil_prebuild_store_backend_qa.yml",
+      "workflow_id": 374392375,
+      "lane_id": "prebuild_backend_faults_and_store_readonly",
+      "registered_workflow_name": "BIL pre-build store and backend contracts",
+      "inputs": {},
+      "required_jobs": [
+        "backend-fault-contracts",
+        "store-get-only"
+      ],
+      "allowed_skipped_jobs": [],
+      "reason": "Fault injection for backend auth, integrity, consent, purchase ownership, lifecycle and deletion; real Apple/Google catalog GET-only field audits. No store edits or genuine transaction claim.",
+      "source_binding": "Exact final candidate SHA; require both independently retained job results."
     }
   ],
   "superseded_failures": [
@@ -346,8 +380,10 @@
     334769308,
     357323507,
     371818189,
+    374392375,
     374438846,
     384948928,
+    384967897,
     385995260,
     386117761,
     390900524,
@@ -582,7 +618,22 @@
       ],
       "mode": "direct",
       "reason": "Exact existing guarded SQL PRECHECK, TRANSACTION, and independent RESIDUE; any source/body/ACL prerequisite mismatch blocks release."
+    },
+    "tool/release/smart_plan_sync_production_rollback_e2e.sql": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Exact deployed Smart Plan RPC/RLS, consent, paid access, CAS, deletion and independent five-table zero-residue checks; source and trigger drift block execution."
+    },
+    "tool/release/coach_memory_sync_production_rollback_e2e.sql": {
+      "lanes": [
+        "bil_live_service_contracts"
+      ],
+      "mode": "direct",
+      "reason": "Exact guarded Coach memory RLS/revocation/deletion/owner and independent three-table zero-residue roundtrip."
     }
   },
-  "expanded_e2e_scope": "All current runnable E2E entrypoints inventoried. Historical removed-fixture diagnostics and equivalent platform wrappers are explicitly mapped; physical store/OS/device journeys remain separately unproven."
+  "expanded_e2e_scope": "All current runnable E2E entrypoints inventoried. Historical removed-fixture diagnostics and equivalent platform wrappers are explicitly mapped; physical store/OS/device journeys remain separately unproven.",
+  "candidate_branch": "codex/bil-release-ios38-android33-20261022"
 }

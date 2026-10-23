@@ -12,6 +12,7 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_community_ci
 import 'package:body_intelligence_log/features/community/presentation/community_chat_guard_copy.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'smart_plan_copy_sources.dart';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_profile.dart';
@@ -349,6 +350,7 @@ Future<Set<String>> _requiredRuntimeSources() async {
     RegExp(r":\s*'((?:\\.|[^'])*)'", multiLine: true),
   );
   values.addAll(await _dashboardIntelligenceEnglishValues());
+  values.addAll(await smartPlanCopySources());
   final premiumGate = await read(
     'lib/features/commerce/presentation/premium_route_glass_gate.dart',
   );

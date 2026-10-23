@@ -192,6 +192,10 @@ void main() {
         const CloudManualSyncStatus(phase: CloudManualSyncPhase.never),
         const CloudManualSyncStatus(phase: CloudManualSyncPhase.syncing),
         const CloudManualSyncStatus(phase: CloudManualSyncPhase.unavailable),
+        const CloudManualSyncStatus(
+          phase: CloudManualSyncPhase.unavailable,
+          reason: 'consentMissing',
+        ),
         CloudManualSyncStatus(
           phase: CloudManualSyncPhase.idle,
           lastSuccessfulSyncAt: DateTime.utc(2026, 8, 21, 9, 30),
@@ -208,6 +212,33 @@ void main() {
           isNull,
           reason: '$tag / ${status.phase}',
         );
+        if (status.reason == 'consentMissing') {
+          // A declined, optional backup is not a transport failure or pending data.
+          for (final source in [
+            CloudSyncConsentCopy.localAction,
+            CloudSyncConsentCopy.choiceControl,
+          ]) {
+            final expected = RuntimeCopy.resolve(source, tag);
+            expect(expected, isNotNull, reason: '$tag / $source');
+            expect(find.text(expected!), findsOneWidget);
+          }
+          expect(
+            find.byKey(const Key('cloud-sync-consent-guidance')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const ValueKey('cloud-sync-phase-unavailable')),
+            findsNothing,
+          );
+          expect(
+            find.text('Some data is still pending. Retry synchronization.'),
+            findsNothing,
+          );
+          expect(
+            find.byKey(const Key('cloud-last-successful-sync-value')),
+            findsNothing,
+          );
+        }
         if (status.lastSuccessfulSyncAt != null) {
           final timestamp = find.byKey(
             const Key('cloud-last-successful-sync-value'),

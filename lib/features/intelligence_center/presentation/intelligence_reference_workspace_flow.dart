@@ -32,6 +32,8 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
       if (id != null) await _renameConversation(id);
     } else if (action == 'memory') {
       await context.push('/decision-memory');
+    } else if (action == 'smart_plan') {
+      await _openCoachWorkspaceRoute('/smart-plan');
     } else if (action == 'settings') {
       await _openAiCoachSettings();
     } else if (action == 'clear') {

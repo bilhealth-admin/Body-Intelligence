@@ -239,6 +239,11 @@ const _authAuthoredCopy = <String, Map<String, String>>{
     'es': 'No se pudieron abrir tus datos locales',
     'tr': 'Yerel verileriniz açılamadı',
   },
+  'Your cloud data could not be restored': {
+    'fr': 'Impossible de restaurer vos données cloud',
+    'es': 'No se pudieron restaurar tus datos en la nube',
+    'tr': 'Bulut verileriniz geri yüklenemedi',
+  },
   'Nothing was deleted or uploaded. You can retry safely.': {
     'fr':
         'Rien n’a été supprimé ni envoyé. Vous pouvez réessayer en toute sécurité.',

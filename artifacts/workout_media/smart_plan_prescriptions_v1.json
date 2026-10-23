@@ -1,0 +1,327 @@
+{
+  "schema": "bil.smart-plan.source-prescriptions.v1",
+  "sourceContractId": "bil-gym-six-month-video-plan-v1",
+  "sourceSha256": "24264d0c26ece4398f85954c1e02e52dbd8748479f42ef784d9f1ea742894d14",
+  "sessions": [
+    {
+      "id": "push-a",
+      "exercises": [
+        {
+          "exerciseId": "resistance-upper-body-dumbbell-bench-press-technique",
+          "sourceName": "Dumbbell bench press",
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-upper-body-standing-dumbbell-shoulder-press-technique",
+          "sourceName": "Standing dumbbell shoulder press",
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-upper-body-dumbbell-lateral-raise-technique",
+          "sourceName": "Dumbbell lateral raise",
+          "sets": 3,
+          "repetitions": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-upper-body-overhead-triceps-extension-technique",
+          "sourceName": "Overhead triceps extension",
+          "sets": 3,
+          "repetitions": "10-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-upper-body-bench-push-up-technique",
+          "sourceName": "Bench push-up",
+          "sets": 2,
+          "repetitions": "controlled technical reps",
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "push-b",
+      "exercises": [
+        {
+          "exerciseId": "resistance-upper-body-seated-dumbbell-shoulder-press-technique",
+          "sourceName": "Seated dumbbell shoulder press",
+          "sets": 4,
+          "repetitions": "6-10",
+          "restSeconds": 120
+        },
+        {
+          "exerciseId": "resistance-upper-body-dumbbell-floor-press-technique",
+          "sourceName": "Dumbbell floor press",
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-upper-body-dumbbell-front-raise-technique",
+          "sourceName": "Dumbbell front raise",
+          "sets": 2,
+          "repetitions": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-upper-body-triceps-kickback-technique",
+          "sourceName": "Triceps kickback",
+          "sets": 3,
+          "repetitions": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-upper-body-incline-push-up-technique",
+          "sourceName": "Incline push-up",
+          "sets": 2,
+          "repetitions": "controlled technical reps",
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "pull-a",
+      "exercises": [
+        {
+          "exerciseId": "resistance-upper-body-one-arm-dumbbell-row-technique",
+          "sourceName": "One-arm dumbbell row",
+          "sets": 4,
+          "repetitions": "8-12 each side",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-upper-body-chest-supported-dumbbell-row-technique",
+          "sourceName": "Chest-supported dumbbell row",
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-upper-body-dumbbell-reverse-fly-technique",
+          "sourceName": "Dumbbell reverse fly",
+          "sets": 3,
+          "repetitions": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-upper-body-dumbbell-biceps-curl-technique",
+          "sourceName": "Dumbbell biceps curl",
+          "sets": 3,
+          "repetitions": "10-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-upper-body-hammer-curl-technique",
+          "sourceName": "Hammer curl",
+          "sets": 2,
+          "repetitions": "10-15",
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "pull-b",
+      "exercises": [
+        {
+          "exerciseId": "resistance-upper-body-resistance-band-row-technique",
+          "sourceName": "Resistance-band row",
+          "sets": 4,
+          "repetitions": "10-15",
+          "restSeconds": 75
+        },
+        {
+          "exerciseId": "resistance-upper-body-band-pull-apart-technique",
+          "sourceName": "Band pull-apart",
+          "sets": 3,
+          "repetitions": "12-20",
+          "restSeconds": 45
+        },
+        {
+          "exerciseId": "resistance-upper-body-dumbbell-reverse-fly-technique",
+          "sourceName": "Dumbbell reverse fly",
+          "sets": 3,
+          "repetitions": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-upper-body-hammer-curl-technique",
+          "sourceName": "Hammer curl",
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-full-body-farmer-carry-technique",
+          "sourceName": "Farmer carry",
+          "sets": 3,
+          "repetitions": "20-40 seconds",
+          "restSeconds": 75
+        }
+      ]
+    },
+    {
+      "id": "legs-a",
+      "exercises": [
+        {
+          "exerciseId": "resistance-lower-body-goblet-squat-technique",
+          "sourceName": "Goblet squat",
+          "sets": 4,
+          "repetitions": "8-12",
+          "restSeconds": 120
+        },
+        {
+          "exerciseId": "resistance-lower-body-reverse-lunge-technique",
+          "sourceName": "Reverse lunge",
+          "sets": 3,
+          "repetitions": "8-12 each side",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-lower-body-hip-thrust-technique",
+          "sourceName": "Hip thrust",
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-lower-body-standing-calf-raise-technique",
+          "sourceName": "Standing calf raise",
+          "sets": 3,
+          "repetitions": "12-20",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-lower-body-lateral-band-walk-technique",
+          "sourceName": "Lateral band walk",
+          "sets": 2,
+          "repetitions": "10-15 each side",
+          "restSeconds": 45
+        }
+      ]
+    },
+    {
+      "id": "legs-b",
+      "exercises": [
+        {
+          "exerciseId": "resistance-lower-body-dumbbell-romanian-deadlift-technique",
+          "sourceName": "Dumbbell Romanian deadlift",
+          "sets": 4,
+          "repetitions": "6-10",
+          "restSeconds": 120
+        },
+        {
+          "exerciseId": "resistance-lower-body-split-squat-technique",
+          "sourceName": "Split squat",
+          "sets": 3,
+          "repetitions": "8-12 each side",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-lower-body-step-up-technique",
+          "sourceName": "Step-up",
+          "sets": 3,
+          "repetitions": "8-12 each side",
+          "restSeconds": 90
+        },
+        {
+          "exerciseId": "resistance-lower-body-band-hamstring-curl-technique",
+          "sourceName": "Band hamstring curl",
+          "sets": 3,
+          "repetitions": "10-15",
+          "restSeconds": 60
+        },
+        {
+          "exerciseId": "resistance-lower-body-seated-calf-raise-technique",
+          "sourceName": "Seated calf raise",
+          "sets": 3,
+          "repetitions": "12-20",
+          "restSeconds": 60
+        }
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "month": 1,
+      "name": "Technique foundation",
+      "sessionIds": [
+        "push-a",
+        "pull-a",
+        "legs-a"
+      ],
+      "progression": "Keep 2-4 good repetitions in reserve; learn stable setup and range.",
+      "deload": "Week 4: reduce working sets by about one third."
+    },
+    {
+      "month": 2,
+      "name": "Base volume",
+      "sessionIds": [
+        "push-b",
+        "pull-b",
+        "legs-b"
+      ],
+      "progression": "Add repetitions inside the range before adding a small load.",
+      "deload": "Week 8: reduce sets and keep all repetitions comfortably controlled."
+    },
+    {
+      "month": 3,
+      "name": "PPL A/B introduction",
+      "sessionIds": [
+        "push-a",
+        "pull-a",
+        "legs-a",
+        "push-b",
+        "pull-b",
+        "legs-b"
+      ],
+      "progression": "Continue the rotation across calendar weeks; never cram missed sessions.",
+      "deload": "Final week: one A session per pattern only."
+    },
+    {
+      "month": 4,
+      "name": "Hypertrophy PPL",
+      "sessionIds": [
+        "push-a",
+        "pull-a",
+        "legs-a",
+        "push-b",
+        "pull-b",
+        "legs-b"
+      ],
+      "progression": "Most work uses 8-15 reps with 1-3 repetitions in reserve.",
+      "deload": "Final 5-7 days: half the accessory sets."
+    },
+    {
+      "month": 5,
+      "name": "Strength-hypertrophy PPL",
+      "sessionIds": [
+        "push-b",
+        "pull-a",
+        "legs-b",
+        "push-a",
+        "pull-b",
+        "legs-a"
+      ],
+      "progression": "Primary lifts use the lower end of their range; accessories stay controlled.",
+      "deload": "Final week: no grinding repetitions and reduce primary load."
+    },
+    {
+      "month": 6,
+      "name": "PPL specialization and consolidation",
+      "sessionIds": [
+        "push-a",
+        "pull-a",
+        "legs-a",
+        "push-b",
+        "pull-b",
+        "legs-b"
+      ],
+      "progression": "Choose one lagging pattern for one extra accessory set, not every pattern.",
+      "deload": "Week 24: technique-only sessions, then restart with updated loads."
+    }
+  ]
+}

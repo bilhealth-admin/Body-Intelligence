@@ -1,0 +1,137 @@
+{
+  "schema": "bil.store-preparation.console-evidence.v1",
+  "read_date": "2026-10-23",
+  "scope": "Saved metadata/read-only evidence; never signed-artifact or release approval",
+  "apple_build35_rejection": {
+    "guideline": "5.1.2(i)",
+    "reviewed": "2026-10-14",
+    "reason": "Declared tracking without ATT"
+  },
+  "apple_privacy_saved": {
+    "tracking": {
+      "Device ID": false,
+      "User ID": false,
+      "Product Interaction": false
+    },
+    "collection_linkage_and_purposes_preserved": true,
+    "published_ui_proof_sha256": "6e399cf7f81bea1f0163d63eeb60bcd34822198df280c2fb6092de8bfd6462e7"
+  },
+  "apple_draft_metadata": {
+    "recorded_at": "2026-10-22T23:32:06.452Z",
+    "status": "SAVED_DRAFT_NOT_SUBMITTED",
+    "receipts": [
+      {
+        "type": "appStoreReviewDetails",
+        "attribute": "notes",
+        "after_sha256": "8bef42640c145c37422e608c3ee4e50ac011d07cac803ce434af393471b7fc35",
+        "length": 3379,
+        "readback_match": true
+      },
+      {
+        "type": "appStoreVersionLocalizations",
+        "attribute": "description",
+        "after_sha256": "e0b4982961602ecb2e0d7ebfbe3fa521c83355bf852122fb74217cfd126a7633",
+        "length": 3673,
+        "readback_match": true
+      }
+    ],
+    "reviewer_fields_unchanged": true,
+    "private_access_block_preserved": true,
+    "app_review_submitted": false,
+    "build_attached": false
+  },
+  "apple_five_product_source_market_parity": {
+    "recorded_at": "2026-10-23T00:48:41.437Z",
+    "mode": "READ_ONLY_NO_MUTATIONS",
+    "catalog": [
+      {
+        "product": "bil_premium",
+        "state": "READY_TO_SUBMIT",
+        "review_screenshot": "COMPLETE",
+        "territories": 4,
+        "exact_source_market_parity": true,
+        "localizations": 1
+      },
+      {
+        "product": "bil_premium_annual",
+        "state": "READY_TO_SUBMIT",
+        "review_screenshot": "COMPLETE",
+        "territories": 4,
+        "exact_source_market_parity": true,
+        "localizations": 1
+      },
+      {
+        "product": "bil_premium_ai_coach",
+        "state": "READY_TO_SUBMIT",
+        "review_screenshot": "COMPLETE",
+        "territories": 168,
+        "exact_source_market_parity": true,
+        "localizations": 1
+      },
+      {
+        "product": "bil_premium_ai_coach_annual",
+        "state": "READY_TO_SUBMIT",
+        "review_screenshot": "COMPLETE",
+        "territories": 168,
+        "exact_source_market_parity": true,
+        "localizations": 1
+      },
+      {
+        "product": "bil_ai_boost",
+        "state": "READY_TO_SUBMIT",
+        "review_screenshot": "COMPLETE",
+        "territories": 172,
+        "exact_source_market_parity": true,
+        "localizations": 1
+      }
+    ],
+    "existing_build38": [],
+    "store_approval": false
+  },
+  "apple_review_access": "Existing review account has active server grant, subscription and entitlement mirror until 2027-10-05; no rights/account changes; actual iOS38 login still required",
+  "purchase_sheet_icon": {
+    "source_icon_present": true,
+    "apple_icons_35_36_37_visually_verified_bil_logo": true,
+    "four_subscription_artworks_complete": true,
+    "reported_sheet_placeholder_cause": "UNCONFIRMED",
+    "ios38_native_sheet_verified": false
+  },
+  "google": {
+    "status": "Suspended",
+    "existing_appeal_ticket": "5-0719000041209",
+    "existing_appeal_denied": "2026-10-17 PDT",
+    "reply_saved_as_unsent_working_draft": true,
+    "app_content_forms_saved": false,
+    "console_form_blocker": "App content navigation returns to Policy status while suspended",
+    "final_native_video_ready": false
+  },
+  "historical_a084_record": {
+    "id": "A084",
+    "platform": "Apple",
+    "clause": "5.1.2(i)",
+    "official_urls": [
+      "https://developer.apple.com/app-store/review/guidelines/"
+    ],
+    "read_date": "2026-10-15",
+    "applies": true,
+    "rationale": "رفض build35 التاريخي كان بسبب tracking المعلن لـUser ID وDevice ID وProduct Interaction دون ATT. تحديث ASC الحي في 16 أكتوبر يجعل User ID وProduct Interaction بلا tracking، وDevice ID وحده ما زال tracking=true. candidate36 لم يُختبر على IPA/runtime موقع.",
+    "implementation": "`remote_ai_consent_coordinator.dart`، `coach_cloud_privacy_boundary.dart`، `meal_vision_consent_gate.dart`، `analyze-meal/consent.ts` و`providers/config.ts` — `remote_ai_consent_*`، `coach_remote_consent_preflight_test.dart`، `cloud_voice_privacy_contract_test.dart`. مصدرالحاجز لا يثبتنشرالخادم.; `pubspec.lock`، `ios/Runner/Info.plist`، `PrivacyInfo.xcprivacy`، entitlements، AdMob/UMP/AdPolicy — `apple_privacy_closure_contract_test.dart`، `apple_release_boundary_contract_test.dart`، اختبارات Ads/UMP؛ graph و runtime النهائيان منفصلان.",
+    "proof_test": "`remote_ai_consent_coordinator.dart`، `coach_cloud_privacy_boundary.dart`، `meal_vision_consent_gate.dart`، `analyze-meal/consent.ts` و`providers/config.ts` — `remote_ai_consent_*`، `coach_remote_consent_preflight_test.dart`، `cloud_voice_privacy_contract_test.dart`. مصدرالحاجز لا يثبتنشرالخادم.; `pubspec.lock`، `ios/Runner/Info.plist`، `PrivacyInfo.xcprivacy`، entitlements، AdMob/UMP/AdPolicy — `apple_privacy_closure_contract_test.dart`، `apple_release_boundary_contract_test.dart`، اختبارات Ads/UMP؛ graph و runtime النهائيان منفصلان.; results are bound to the cited source/run, not a signed-store journey",
+    "status": "FAIL",
+    "evidence": "evidence/policy-gate-20261015/live-store-ui-readback-20261015.json; evidence/policy-gate-20261015/apple-full-store-update-20261016/app-privacy-revision-20261016.json; BIL_20261015_APP_PRIVACY_FOUR_WAY_RECONCILIATION_AR.md",
+    "minimum_action": "P0 مفتوحة: تحقق من Device ID على IPA36 وإعداد الإعلان الفعلي؛ إن لم يحدث tracking صحح إفصاح Device ID، وإن حدث tracking نفذ ATT ومسار رفض آمن. مطابقة IPA36/runtime وإغلاق Apple الرسمي باقيان BLOCKED.",
+    "needs_signed_device_console": true,
+    "previous_rejection": "14Oct2026, iOS35, Guideline5.1.2(i): declared tracking of User ID/Device ID/Product Interaction without ATT; live read15Oct2026",
+    "risk": "P0",
+    "source_checked": true,
+    "release_certification": false,
+    "status_scope": "live_rejected_build35; current_store_metadata_partially_corrected_UserID_ProductInteraction_no_tracking_DeviceID_tracking; candidate36_artifact_alignment_BLOCKED",
+    "source_evidence_refs": "BIL_20261015_POLICY_GATE_APPENDIX_APPLE_AR.md: E4, E6",
+    "requirement_type": "mandatory_store_policy"
+  },
+  "policy_requirement_current_status": "BLOCKED pending signed-artifact/runtime and official-review evidence",
+  "policy_inventory_before_sha256": "e893582ef03d9ba6b7ef12d456b7e2abfc289bd7769810485f259194279d5c93",
+  "app_review_submitted": false,
+  "google_appeal_sent": false,
+  "google_play_uploaded": false
+}

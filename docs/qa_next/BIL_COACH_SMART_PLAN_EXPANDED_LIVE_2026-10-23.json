@@ -1,0 +1,896 @@
+{
+  "schema": "bil.coach-smart-plan.expanded-live-evidence.v1",
+  "verified_at_utc": "2026-10-23T08:52:52.319039+00:00",
+  "source_base": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
+  "protected_base": "31554b3e078667a38bd3c53aa105f5f1d2a4dc96",
+  "release_ready": false,
+  "ai_coach": {
+    "version": 128,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "existing_function_owned_authentication_preserved": true,
+    "exact_file_matches": 12,
+    "bundle_sha256": "5f14f3b37eeb15c58bab6ccbd5769a6991ddf9fdd6db408e25fa4f5e5c6d2d14",
+    "bundle_hash_encoding": "sha256 of sorted-key compact UTF8 JSON source-file array",
+    "ezbr_sha256": "ef334338c97426290f09fbf71b5c4a32d97354bdbe9e8edceb0a519a8a48ca95",
+    "source_files_sha256": {
+      "ai-coach/index.ts": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "ai-coach/server.ts": "8067399b7450f249c7dc7232254b48632f316e77b12c49f253381a117b6ee5fa",
+      "ai-coach/coach_reasoning.ts": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416",
+      "ai-coach/coach_answer_quality.ts": "9f0206d38079a6fc43ab751f9263845d9caa5de6c8c001c0733e2a25e97585ef",
+      "ai-coach/coach_tool_arguments.ts": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "_shared/bcp47.ts": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "_shared/ai_provider_recipient.ts": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "_shared/mobile_integrity.ts": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "ai-coach/deno.json": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411",
+      "ai-coach/coach_food_safety.ts": "8c83d1039655ef2684a713314e777ea4f95543e861b6889f49f6ecffec9b24f0",
+      "ai-coach/coach_verified_weight_proposal.ts": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd",
+      "ai-coach/coach_health_safety.ts": "804825cbf7e7071f13ce884620481634c2728fd7d6bb7d0ec53fd03b689b6a0f"
+    },
+    "files_match_readback": true,
+    "manual_authentication_preserved": true
+  },
+  "real_gemini": {
+    "status": "PASS",
+    "template_sha256": "ff7f64b19695c41635b3a01aa7110ef81dfd1599c16e80f91808d32adc85ec0a",
+    "cases": [
+      {
+        "case": "target_goal",
+        "status": "PASS",
+        "model": "gemini-3.8-flash",
+        "attempts": 1,
+        "http_roundtrip_ms": 4088,
+        "actions": [
+          {
+            "type": "update_goal",
+            "arguments": {
+              "targetWeightKg": 60
+            },
+            "requires_confirmation": true
+          }
+        ],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "log_weight",
+        "status": "PASS",
+        "model": "gemini-3.8-flash",
+        "attempts": 1,
+        "http_roundtrip_ms": 3160,
+        "actions": [
+          {
+            "type": "log_weight",
+            "arguments": {
+              "weightKg": 60
+            },
+            "requires_confirmation": true
+          }
+        ],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "need_plan",
+        "status": "PASS",
+        "model": "gemini-3.6-flash",
+        "attempts": 2,
+        "http_roundtrip_ms": 18581,
+        "actions": [
+          {
+            "type": "create_smart_plan_draft",
+            "arguments": {
+              "focus": "combined",
+              "horizon": "month"
+            },
+            "requires_confirmation": true
+          }
+        ],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "combined_month",
+        "status": "PASS",
+        "model": "gemini-3.6-flash",
+        "attempts": 2,
+        "http_roundtrip_ms": 19874,
+        "actions": [
+          {
+            "type": "create_smart_plan_draft",
+            "arguments": {
+              "focus": "combined",
+              "horizon": "month"
+            },
+            "requires_confirmation": true
+          }
+        ],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "today",
+        "status": "PASS",
+        "model": "gemini-3.8-flash",
+        "attempts": 1,
+        "http_roundtrip_ms": 3479,
+        "actions": [
+          {
+            "type": "read_active_smart_plan",
+            "arguments": {},
+            "requires_confirmation": true
+          }
+        ],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "missed",
+        "status": "PASS",
+        "model": "gemini-3.6-flash",
+        "attempts": 2,
+        "http_roundtrip_ms": 18041,
+        "actions": [],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "travel",
+        "status": "PASS",
+        "model": "gemini-3.6-flash",
+        "attempts": 2,
+        "http_roundtrip_ms": 18568,
+        "actions": [
+          {
+            "type": "read_active_smart_plan",
+            "arguments": {},
+            "requires_confirmation": true
+          }
+        ],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "three_months",
+        "status": "PASS",
+        "model": "gemini-3.6-flash",
+        "attempts": 2,
+        "http_roundtrip_ms": 16312,
+        "actions": [
+          {
+            "type": "create_smart_plan_draft",
+            "arguments": {
+              "focus": "combined",
+              "horizon": "threeMonths"
+            },
+            "requires_confirmation": true
+          }
+        ],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      },
+      {
+        "case": "done_without_saved_plan",
+        "status": "PASS",
+        "model": "gemini-3.8-flash",
+        "attempts": 1,
+        "http_roundtrip_ms": 3552,
+        "actions": [],
+        "quota_reserved": 0,
+        "duplicate_status": 409,
+        "session_revoked": true,
+        "user_deleted": true,
+        "cascade_clean": true
+      }
+    ]
+  },
+  "real_smart_plan_rpc": {
+    "schema": "bil.smart-plan.live-rpc.v1",
+    "status": "PASS",
+    "script_sha256": "4595f90316718a64bdd113e8f044fae0b632d1e25d827d7f2d9398d0160f01f6",
+    "fixtures_sha256": "f23148b700e85ab210d4a2647e1fdc1d7d42d165e083ad6e8c36227f5cfdb1a9",
+    "scope": "Real authenticated RPC writers and exact independent readbacks; not a physical-device test or diary execution.",
+    "cases": [
+      {
+        "horizon": "week",
+        "focus": "training",
+        "status": "PASS",
+        "days": 7,
+        "cloud_revision": 1,
+        "payload_sha256": "614f1a9ccc0662092d393529c15d17c5a3660897fb8ffd4386e011cbba1fe558"
+      },
+      {
+        "horizon": "week",
+        "focus": "nutrition",
+        "status": "PASS",
+        "days": 7,
+        "cloud_revision": 2,
+        "payload_sha256": "0b1ad300477440dd4af67f2bf13ce53a9bab6da6ac5f6e9732fa654d2ac5e15b"
+      },
+      {
+        "horizon": "week",
+        "focus": "combined",
+        "status": "PASS",
+        "days": 7,
+        "cloud_revision": 3,
+        "payload_sha256": "30ac568b5be41a435fb5b8ddc2928bbbd920dd4daaed2a3d9c3bad1af3692d84"
+      },
+      {
+        "horizon": "month",
+        "focus": "training",
+        "status": "PASS",
+        "days": 31,
+        "cloud_revision": 4,
+        "payload_sha256": "a3ab0339633451871a58429bcde5be30936df3537cd696481821953475bcfe1b"
+      },
+      {
+        "horizon": "month",
+        "focus": "nutrition",
+        "status": "PASS",
+        "days": 31,
+        "cloud_revision": 5,
+        "payload_sha256": "61486022ae9c64e4acc4a732b14a55506369a3f6cd5b3d939a498a6f23c30cf9"
+      },
+      {
+        "horizon": "month",
+        "focus": "combined",
+        "status": "PASS",
+        "days": 31,
+        "cloud_revision": 6,
+        "payload_sha256": "0116a1907d971ccba2a6a2270c4e15ac7fb228f938bc8c97ef59ec51c8d2ad2d"
+      },
+      {
+        "horizon": "threeMonths",
+        "focus": "training",
+        "status": "PASS",
+        "days": 92,
+        "cloud_revision": 7,
+        "payload_sha256": "c09536ea52530b0f697f8d30f914334f98f3bcd47283464e471d0490830b0435"
+      },
+      {
+        "horizon": "threeMonths",
+        "focus": "nutrition",
+        "status": "PASS",
+        "days": 92,
+        "cloud_revision": 8,
+        "payload_sha256": "f6d62a0a2fe4ab8826979e9dbe6a9cca870c1446f8950a5ed461a1d73b285362"
+      },
+      {
+        "horizon": "threeMonths",
+        "focus": "combined",
+        "status": "PASS",
+        "days": 92,
+        "cloud_revision": 9,
+        "payload_sha256": "001300239383caa226391c887f1e2b8e307328b818d2abd76711fd9ab7ad3958"
+      },
+      {
+        "horizon": "sixMonths",
+        "focus": "training",
+        "status": "PASS",
+        "days": 182,
+        "cloud_revision": 10,
+        "payload_sha256": "db59e665f9445908487f89810d01251f815c1fc3da04fd81e059a46bb690e8a4"
+      },
+      {
+        "horizon": "sixMonths",
+        "focus": "nutrition",
+        "status": "PASS",
+        "days": 182,
+        "cloud_revision": 11,
+        "payload_sha256": "7481bdefdd8820dd9a82aee266edf110669aaa2c550ac6a933a8ed5be21c1cfd"
+      },
+      {
+        "horizon": "sixMonths",
+        "focus": "combined",
+        "status": "PASS",
+        "days": 182,
+        "cloud_revision": 12,
+        "payload_sha256": "b717d359c5f550ab895ef523b21d0595e5a8531e59b0125f2929c94bbd51496e"
+      }
+    ],
+    "assertions": {
+      "consent_required": true,
+      "all_twelve_actual_rpc_readbacks": true,
+      "foreign_owner_payload_denied": true,
+      "two_writer_conflict_preserved": true,
+      "duplicate_revision_replay_denied": true,
+      "tombstone_prevents_stale_resurrection": true,
+      "revocation_and_reconsent_preserve_deletion": true
+    },
+    "session_revoked": true,
+    "disposable_user_deleted": true,
+    "user_linked_residue_zero": true,
+    "cleanup_inventoried_tables": 16,
+    "user_linked_cleanup_counts": {
+      "auth_identities": 0,
+      "auth_users": 0,
+      "consents": 0,
+      "credit_balances": 0,
+      "credit_monthly_usage": 0,
+      "credit_weekly_usage": 0,
+      "entitlements": 0,
+      "events": 0,
+      "feedback": 0,
+      "grants": 0,
+      "smart_plan_consent": 0,
+      "smart_plan_state": 0,
+      "store_audit_owner_links": 0,
+      "store_subscriptions": 0,
+      "subscriptions": 0,
+      "usage": 0
+    },
+    "no_real_user_changes": true
+  },
+  "plan_sql_rls": {
+    "transaction_result": "PASS",
+    "exact_failure": null,
+    "completed_assertions": {
+      "fresh_read": true,
+      "consent_required": true,
+      "free_write_denied": true,
+      "anonymous_rpc_denied": true,
+      "paid_cas_and_readback": true,
+      "table_rls_and_write_acl": true,
+      "foreign_payload_rejected": true,
+      "deployed_function_identity": true,
+      "malformed_payload_rejected": true,
+      "reviewed_trigger_inventory": true,
+      "synthetic_identifiers_absent": true,
+      "stale_revision_preserves_state": true,
+      "deletion_allowed_after_paid_expiry": true,
+      "confirmed_revision_journal_roundtrip": true,
+      "rpc_and_direct_select_owner_isolation": true,
+      "stale_conflict_returns_terminal_http409": true,
+      "personal_setup_roundtrip_and_owner_readback": true,
+      "revocation_and_reconsent_preserve_tombstone": true,
+      "journal_replay_preserves_exact_saved_version": true,
+      "injected_setup_field_rejected_without_overwrite": true,
+      "foreign_journal_field_rejected_without_overwrite": true
+    },
+    "completed_assertion_count": 21
+  },
+  "independent_plan_sql_residue": {
+    "inventoried_table_count": 5,
+    "zero_synthetic_rows": true,
+    "table_counts": [
+      {
+        "table_name": "auth.identities",
+        "synthetic_rows": 0
+      },
+      {
+        "table_name": "auth.users",
+        "synthetic_rows": 0
+      },
+      {
+        "table_name": "bil_smart_plan_private.consent",
+        "synthetic_rows": 0
+      },
+      {
+        "table_name": "public.bil_entitlements",
+        "synthetic_rows": 0
+      },
+      {
+        "table_name": "public.bil_smart_plan_sync_state",
+        "synthetic_rows": 0
+      }
+    ]
+  },
+  "conflict_remediation": {
+    "migration_version": "20261023042955",
+    "name": "bil_smart_plan_conflict_http409",
+    "sql_sha256_lf": "7b0f2317a451bc338a8f2e3b7032f6e3ef132ebf56985a919ebddd8943fe1266",
+    "before_body_md5": "2ab15681ac3d406a4245ea012bbf4da1",
+    "after_body_md5": "a161fcef0c6d370c9f14c5047da6b548",
+    "acl_owner_auth_consent_premium_cas_preserved": true,
+    "official_reference": "https://supabase.com/kb/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions",
+    "previous_failed_probes": [
+      "build/release-ios38-android33/smart-plan-live-rpc.json",
+      "build/release-ios38-android33/smart-plan-live-rpc-diagnostics.json"
+    ],
+    "previous_failures_cleaned": true
+  },
+  "security_advisor_counts": {
+    "INFO:rls_enabled_no_policy": 1,
+    "WARN:anon_security_definer_function_executable": 1,
+    "WARN:authenticated_security_definer_function_executable": 1,
+    "WARN:auth_leaked_password_protection": 1
+  },
+  "ledger": {
+    "deployed_rows": 252,
+    "local_files": 237,
+    "historical_deployed_rows_unchanged": 251,
+    "historical_local_hashes_unchanged": 236,
+    "status": "PASS"
+  },
+  "limits": [
+    "Physical iOS and Android device verification is not proved by these HTTP, SQL or provider tests.",
+    "Pending drafts, superseded plans and conflict archives are local and exportable; current-plan backup is separately consented.",
+    "Home catalog has no approved sets/repetitions/rest prescriptions; no prescriptions were invented."
+  ],
+  "ai_coach_previous_118": {
+    "version": 118,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "existing_function_owned_authentication_preserved": true,
+    "exact_file_matches": 9,
+    "bundle_sha256": "bdf7f1095822a1ea2e490ccea70e2065fa0c64c74abd8c1a52f75577aa387c50",
+    "source_files_sha256": {
+      "ai-coach/index.ts": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "ai-coach/server.ts": "ec854541bf97049473df9b738d7f2fed0da538eb96296529abd5be8c1ee75cce",
+      "ai-coach/coach_reasoning.ts": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416",
+      "ai-coach/coach_answer_quality.ts": "c5594ead5002243f579478ddd2c3cefe9dadfb121cf862f0119e7338bd83798f",
+      "ai-coach/coach_tool_arguments.ts": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "_shared/bcp47.ts": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "_shared/ai_provider_recipient.ts": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "_shared/mobile_integrity.ts": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "ai-coach/deno.json": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411"
+    },
+    "files_match_readback": true,
+    "manual_authentication_preserved": true,
+    "ezbr_sha256": "bdf7f1095822a1ea2e490ccea70e2065fa0c64c74abd8c1a52f75577aa387c50"
+  },
+  "current_provider_verification": {
+    "version": 128,
+    "status": "FAIL_7_PASS_4_PROVIDER_FAILURES",
+    "request_capabilities": {
+      "smart_plan_tools_version": 1,
+      "health_citation_catalog_version": 2
+    },
+    "successful_cases": [
+      {
+        "case": "target_goal",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 5761,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "log_weight",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 12857,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "today",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 14461,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "travel",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 19256,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "three_months",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 16532,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "allergy_dinner_en",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 4419,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "allergy_dinner_ar",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 5302,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      }
+    ],
+    "failed_cases": [
+      {
+        "case": "need_plan",
+        "cleanup_verified": true
+      },
+      {
+        "case": "combined_month",
+        "cleanup_verified": true
+      },
+      {
+        "case": "missed",
+        "cleanup_verified": true
+      },
+      {
+        "case": "done_without_saved_plan",
+        "cleanup_verified": true
+      }
+    ],
+    "evidence": {
+      "file": "build/release-ios38-android33/coach-live-v128-current-client-all.json",
+      "sha256": "04e25b34eb9cb160727c040d1a4236a2f573e288e0d9fc55c1bc2e4f2fa56381"
+    },
+    "post_live_exact_source_readback": {
+      "version": 128,
+      "files": 12,
+      "match": true
+    },
+    "aggregate_failure_diagnostics": "build/release-ios38-android33/coach-v128-failure-aggregate.json",
+    "note": "No happy-path success claimed for failed cases. All failed disposable fixtures cleaned. No live retries until provider rest during full frozen validation; source validation remains independent.",
+    "previous_v127": {
+      "version": 127,
+      "status": "FAIL4PASS7FAIL",
+      "evidence": "build/release-ios38-android33/coach-live-v127-all.json",
+      "request_capabilities": {
+        "smart_plan_tools_version": 1,
+        "health_citation_catalog_version": 1
+      },
+      "scope": "Prior synthetic probe used default legacy health catalog1, unlike current native client2; preserved as that contract profile, not relabeled current-native proof.",
+      "failed_fixture_cleanup_verified": true
+    }
+  },
+  "local_server_verification": {
+    "status": "PASS",
+    "tests": 123,
+    "evidence": "build/release-ios38-android33/coach-label-inspection-all-server.log"
+  },
+  "post_live_exact_source_readback_verified": true,
+  "ai_coach_previous_123": {
+    "version": 123,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "existing_function_owned_authentication_preserved": true,
+    "exact_file_matches": 11,
+    "bundle_sha256": "99c1318506bca9bbb0f512a145a468e4abc7aedcd5358e753fc145766ea4ba21",
+    "bundle_hash_encoding": "sha256 of sorted-key compact UTF8 JSON source-file array",
+    "ezbr_sha256": "fdf8b87de63eda1d08caab1ccd423a501d75bd1492b69bc69a356ba2900e4630",
+    "source_files_sha256": {
+      "ai-coach/index.ts": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "ai-coach/server.ts": "5451f7986eceae5b0c57bad6b3f8e71d18af311c7ff098170628cb53954c3ae8",
+      "ai-coach/coach_reasoning.ts": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416",
+      "ai-coach/coach_answer_quality.ts": "2c496230706dc64ff4ece1b84e1e4625771f53bf5e5d316b6adbbe4c30b78dc4",
+      "ai-coach/coach_tool_arguments.ts": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "_shared/bcp47.ts": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "_shared/ai_provider_recipient.ts": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "_shared/mobile_integrity.ts": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "ai-coach/deno.json": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411",
+      "ai-coach/coach_food_safety.ts": "c9bb746b3a6306218247d8624cbc5d7c07a05504fd2350aeeb2b3feb9bc143b1",
+      "ai-coach/coach_verified_weight_proposal.ts": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd"
+    },
+    "files_match_readback": true,
+    "manual_authentication_preserved": true
+  },
+  "previous_provider_verification_123": {
+    "version": 123,
+    "status": "ALL_11_CASES_OBSERVED_PASS_AFTER_SEPARATE_RECHECK",
+    "whole_first_run": "FAIL8PASS3FAIL",
+    "recheck": "PASS3/3",
+    "case_count": 11,
+    "note": "Original withheld/rate-limited results preserved. Independent recheck confirms each specified case can return a valid actual response on the same exact deployed source; not a promise of future provider availability.",
+    "evidence": [
+      {
+        "file": "build/release-ios38-android33/coach-live-v123-all.json",
+        "sha256": "ca6138c82eb5d9e5a1251ccd7061c84d94af9e78755d0fe123c3ab100f39207a"
+      },
+      {
+        "file": "build/release-ios38-android33/coach-live-v123-failed-cases-recheck.json",
+        "sha256": "f56a6513eebced1020cea4fedd00babcca9f86847029a66a8f731e0798f67bf7"
+      }
+    ],
+    "successful_cases": [
+      {
+        "case": "allergy_dinner_ar",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 4407,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "log_weight",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 3048,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "done_without_saved_plan",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 3037,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "target_goal",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 3519,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "need_plan",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 17665,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "combined_month",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 15047,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "today",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 3449,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "travel",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 18438,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "allergy_dinner_en",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 3917,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "missed",
+        "model": "gemini-3.8-flash",
+        "provider_attempts": 1,
+        "latency_ms": 10283,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      },
+      {
+        "case": "three_months",
+        "model": "gemini-3.6-flash",
+        "provider_attempts": 2,
+        "latency_ms": 15925,
+        "reserved": 0,
+        "duplicate_http": 409,
+        "cleanup": true
+      }
+    ]
+  },
+  "contract_composition_equivalence": {
+    "status": "PASS",
+    "cases": 6,
+    "real_provider_calls": 0,
+    "actual_prompt_sha256": "f8a79369940ffc50b9c5737fd9f2ff2ed85a6a353677615c1439097714d17bfd",
+    "unchanged_dart_contract_and_memory_tests": 60,
+    "server_tests": 104,
+    "evidence": [
+      "build/release-ios38-android33/contract-prompt-equivalence.log",
+      "build/release-ios38-android33/coach-decision-and-contract-regression.log",
+      "build/release-ios38-android33/coach-final-server-contract-compatible.log"
+    ]
+  },
+  "post_deploy_exact_source_readback_verified": true,
+  "ai_coach_previous_124": {
+    "version": 124,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "existing_function_owned_authentication_preserved": true,
+    "exact_file_matches": 11,
+    "bundle_sha256": "48a63c9aed74840ac3452def6afec335d0af3f39f7a5f77cac3de1c9d02d7957",
+    "bundle_hash_encoding": "sha256 of sorted-key compact UTF8 JSON source-file array",
+    "ezbr_sha256": "15b5dfd438311c1a6a93c5bca2e6060942c7005cb23f2f19c07d894217d71012",
+    "source_files_sha256": {
+      "ai-coach/index.ts": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "ai-coach/server.ts": "9a309da44ddb95b3e12fe352ff3a42b40b695a0964e2a47e1535d0805c3dfbe4",
+      "ai-coach/coach_reasoning.ts": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416",
+      "ai-coach/coach_answer_quality.ts": "2c496230706dc64ff4ece1b84e1e4625771f53bf5e5d316b6adbbe4c30b78dc4",
+      "ai-coach/coach_tool_arguments.ts": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "_shared/bcp47.ts": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "_shared/ai_provider_recipient.ts": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "_shared/mobile_integrity.ts": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "ai-coach/deno.json": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411",
+      "ai-coach/coach_food_safety.ts": "c9bb746b3a6306218247d8624cbc5d7c07a05504fd2350aeeb2b3feb9bc143b1",
+      "ai-coach/coach_verified_weight_proposal.ts": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd"
+    },
+    "files_match_readback": true,
+    "manual_authentication_preserved": true
+  },
+  "previous_provider_verification_124": {
+    "version": 124,
+    "status": "FAIL10PASS1FAIL_AND_FAILED_INDEPENDENT_RECHECK",
+    "first_evidence": "build/release-ios38-android33/coach-live-v124-all.json",
+    "independent_recheck": "build/release-ios38-android33/coach-live-v124-dietary-case-independent-recheck.json",
+    "failure": "unsafe_dietary_advice for English dinner; actual rejected wording was not logged and is not claimed to be known",
+    "failed_fixture_cleanup_verified": true
+  },
+  "english_food_boundary_remediation": {
+    "local_reproduced_failure": "English free-from exclusions were falsely rejected; negated free qualifiers could be falsely accepted",
+    "fix": "Recognize free from as a local exclusion, reject negated/uncertain free claims and retain later positive allergen rejection",
+    "before": "build/release-ios38-android33/coach-english-free-from-reproduced.log",
+    "after": "build/release-ios38-android33/coach-english-free-from-fixed-all-server.log",
+    "server_tests": 105,
+    "automatic_additional_model_calls": 0,
+    "actual_rejected_v124_prose_known": false
+  },
+  "ai_coach_previous_125": {
+    "version": 125,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "existing_function_owned_authentication_preserved": true,
+    "exact_file_matches": 11,
+    "bundle_sha256": "3a9286ce48a0a348d8bd1ebefba65ba1fc72a730846099d2cd535443ec1d4e09",
+    "bundle_hash_encoding": "sha256 of sorted-key compact UTF8 JSON source-file array",
+    "ezbr_sha256": "f796b9824c0005a7961408d85ab0bc41b549f53bf3462acf7092a3801c6b1106",
+    "source_files_sha256": {
+      "ai-coach/index.ts": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "ai-coach/server.ts": "9a309da44ddb95b3e12fe352ff3a42b40b695a0964e2a47e1535d0805c3dfbe4",
+      "ai-coach/coach_reasoning.ts": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416",
+      "ai-coach/coach_answer_quality.ts": "2c496230706dc64ff4ece1b84e1e4625771f53bf5e5d316b6adbbe4c30b78dc4",
+      "ai-coach/coach_tool_arguments.ts": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "_shared/bcp47.ts": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "_shared/ai_provider_recipient.ts": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "_shared/mobile_integrity.ts": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "ai-coach/deno.json": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411",
+      "ai-coach/coach_food_safety.ts": "5eb19783b7f0551cde2c4c27ac35c20d1dab27120db80a54152f0352acc02213",
+      "ai-coach/coach_verified_weight_proposal.ts": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd"
+    },
+    "files_match_readback": true,
+    "manual_authentication_preserved": true
+  },
+  "health_output_adversarial_verification": {
+    "status": "PASS",
+    "source": "supabase/functions/ai-coach/coach_health_safety.ts",
+    "initial_actual_handler": "build/release-ios38-android33/health-safety-actual-handler-before.log",
+    "fixed_actual_handler": "build/release-ios38-android33/health-safety-actual-handler-after-complete.log",
+    "server_tests": 116,
+    "server_test_log": "build/release-ios38-android33/coach-health-boundary-all-server-release-source.log",
+    "native_contract_tests": 73,
+    "native_contract_log": "build/release-ios38-android33/coach-health-boundary-native-contracts.log",
+    "behavior": "Explicit diagnosis, medication/dose changes, deprivation or compensatory exercise, dangerous pain advice and unsourced personal calorie/macro targets are withheld before citation repair. Single reservation refunded, no extra provider request. Attributed current user facts, general education and matching sourced targets remain usable. Product low-energy review floor mirrors native safety, not a new clinical recommendation.",
+    "scope": "Behavior verified for the explicit AR/EN adversarial and positive cases; not a medical certification or proof of every possible model phrasing."
+  },
+  "ai_coach_previous_126": {
+    "version": 126,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "existing_function_owned_authentication_preserved": true,
+    "exact_file_matches": 12,
+    "bundle_sha256": "3d8207a9610f713ef98e74ad91aff27bb001a981f7fdc0f23080f28c0caf027d",
+    "bundle_hash_encoding": "sha256 of sorted-key compact UTF8 JSON source-file array",
+    "ezbr_sha256": "8a718caaeadbf50433ff80fff5330be95fce3a0ec4788d7a61e19c354bb8b925",
+    "source_files_sha256": {
+      "ai-coach/index.ts": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "ai-coach/server.ts": "51ea2207b51d365026d10802c7ddc0b3a53838b4bc78dfe3c5a1422ecbed47e4",
+      "ai-coach/coach_reasoning.ts": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416",
+      "ai-coach/coach_answer_quality.ts": "e469f194c0a18141c0e8dc706964597ddf4768554313f296d27cc0fc46ca9452",
+      "ai-coach/coach_tool_arguments.ts": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "_shared/bcp47.ts": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "_shared/ai_provider_recipient.ts": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "_shared/mobile_integrity.ts": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "ai-coach/deno.json": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411",
+      "ai-coach/coach_food_safety.ts": "5eb19783b7f0551cde2c4c27ac35c20d1dab27120db80a54152f0352acc02213",
+      "ai-coach/coach_verified_weight_proposal.ts": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd",
+      "ai-coach/coach_health_safety.ts": "804825cbf7e7071f13ce884620481634c2728fd7d6bb7d0ec53fd03b689b6a0f"
+    },
+    "files_match_readback": true,
+    "manual_authentication_preserved": true
+  },
+  "procedural_citation_remediation": {
+    "status": "PASS",
+    "before": "build/release-ios38-android33/procedural-citation-actual-handler-before.log",
+    "after": "build/release-ios38-android33/procedural-citation-actual-handler-after.log",
+    "server_tests": 122,
+    "server_log": "build/release-ios38-android33/coach-procedural-citation-release-source-verified.log",
+    "native_contract_tests": 73,
+    "native_log": "build/release-ios38-android33/coach-procedural-citation-native-contracts.log",
+    "behavior": "Closed English/Arabic record/navigation questions and offers are classified as data flow, including conservative model flags, only when every clause qualifies. An appended health claim, unknown vocabulary or guidance keeps original citation requirements. No tool capability is granted by classification. Actual handler safe questions change503/refund to200/single successful settlement without reviewer call.",
+    "limitation": "Original live rejected wording was not retained, so the exact original phrase is not claimed. Reproduction demonstrates an independent concrete citation-classification defect."
+  },
+  "ai_coach_previous_127": {
+    "version": 127,
+    "status": "ACTIVE",
+    "verify_jwt": false,
+    "existing_function_owned_authentication_preserved": true,
+    "exact_file_matches": 12,
+    "bundle_sha256": "9deb00673e1b0f59c5f64fd217304f7584f30280f9e469c4c70c6367352735d6",
+    "bundle_hash_encoding": "sha256 of sorted-key compact UTF8 JSON source-file array",
+    "ezbr_sha256": "0e5309e9e2f80678e2a8f81ed057e56186f119f4e5d61507d6fe6f34cd0a2c05",
+    "source_files_sha256": {
+      "ai-coach/index.ts": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "ai-coach/server.ts": "8067399b7450f249c7dc7232254b48632f316e77b12c49f253381a117b6ee5fa",
+      "ai-coach/coach_reasoning.ts": "4216a5bfb7780e0e7979ed5cb32db1f3912b49dc8cc1f5bacb50264e18ffe416",
+      "ai-coach/coach_answer_quality.ts": "9f0206d38079a6fc43ab751f9263845d9caa5de6c8c001c0733e2a25e97585ef",
+      "ai-coach/coach_tool_arguments.ts": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "_shared/bcp47.ts": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "_shared/ai_provider_recipient.ts": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "_shared/mobile_integrity.ts": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "ai-coach/deno.json": "d2dc61f6669cde1904f0781903f11d553f38efb03db63cb8013d7493cfb63411",
+      "ai-coach/coach_food_safety.ts": "5eb19783b7f0551cde2c4c27ac35c20d1dab27120db80a54152f0352acc02213",
+      "ai-coach/coach_verified_weight_proposal.ts": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd",
+      "ai-coach/coach_health_safety.ts": "804825cbf7e7071f13ce884620481634c2728fd7d6bb7d0ec53fd03b689b6a0f"
+    },
+    "files_match_readback": true,
+    "manual_authentication_preserved": true
+  },
+  "label_inspection_and_native_contract_verification": {
+    "status": "PASS",
+    "behavior": "Ingredient/allergen label inspection is distinguished from consuming or proposing an allergen; a later food selection verb ends the exemption. Real QA request capabilities match actual native runtime2/1 instead of the prior hybrid1/1 profile.",
+    "source": "supabase/functions/ai-coach/coach_food_safety.ts",
+    "test": "supabase/functions/ai-coach/coach_food_safety_test.ts",
+    "before": "build/release-ios38-android33/label-inspection-before.log",
+    "after": "build/release-ios38-android33/label-inspection-after.log",
+    "server_tests": 123,
+    "server_log": "build/release-ios38-android33/coach-label-inspection-all-server.log",
+    "probe_ast_tests": 11,
+    "probe_ast_log": "build/release-ios38-android33/coach-current-client-probe-contract-fixed.log",
+    "actual_native_contract_tests": 28,
+    "actual_native_log": "build/release-ios38-android33/coach-actual-native-capabilities-contract.log",
+    "retained_synthetic_reply_review": {
+      "total": 43,
+      "admitted": 43,
+      "new_provider_calls": 0,
+      "evidence": "build/release-ios38-android33/coach-recorded-provider-quality-replay.json",
+      "scope": "Deterministic quality only, no reconstructed citations, no new HTTP or full wire validation."
+    }
+  }
+}

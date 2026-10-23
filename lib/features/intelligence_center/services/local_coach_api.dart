@@ -1,3 +1,5 @@
+import '../../smart_plan/services/bil_smart_plan_coach.dart';
+import 'coach_action_truth.dart';
 import '../domain/bil_tool_registry.dart';
 import '../domain/intelligence_action.dart';
 import '../settings_commands/coach_settings_tool_catalog.dart';
@@ -141,8 +143,22 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
     return LocalCoachResult(
       actions: action == null ? const [] : [action],
       processedOnDevice: model.processedOnDevice,
-      answer: model.text,
-      spokenAnswer: model.spokenText,
+      answer:
+          modelClaimsUnverifiedAction(
+            '${model.text}\n${model.spokenText ?? ''}',
+          )
+          ? intelligenceTextFor(
+              request.locale,
+              'Review the proposed action first. There is no verified save receipt for this reply.',
+              'راجع الإجراء المقترح أولًا. لا يوجد إيصال حفظ متحقق لهذا الرد.',
+            )
+          : model.text,
+      spokenAnswer:
+          modelClaimsUnverifiedAction(
+            '${model.text}\n${model.spokenText ?? ''}',
+          )
+          ? null
+          : model.spokenText,
       serviceStatus: CoachServiceStatus.ready,
       runtime: model.processedOnDevice
           ? CoachAnswerRuntime.onDevice
@@ -357,6 +373,17 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
         ),
       _ => null,
     };
+    if (name != null && smartPlanTools.containsKey(name)) {
+      return registry.createAction(
+        name: name,
+        arguments: arguments,
+        label: intelligenceTextFor(
+          locale,
+          'Review saved plan',
+          'مراجعة الخطة المحفوظة',
+        ),
+      );
+    }
     if (name != null &&
         (coachHealthWriteToolIds.contains(name) ||
             coachHealthReadToolIds.contains(name))) {

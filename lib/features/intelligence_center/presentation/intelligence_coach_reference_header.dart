@@ -111,8 +111,8 @@ class _CoachHero extends StatelessWidget {
               const SizedBox(width: 4),
               const CommunityGoldBalanceAction(
                 compact: true,
-                showBalance: false,
-                showEarn: true,
+                showBalance: true,
+                showEarn: false,
               ),
               compactActions,
             ],

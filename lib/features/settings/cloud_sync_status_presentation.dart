@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../app/localization/app_localizations.dart';
+import '../../app/localization/runtime_copy_cloud_sync.dart';
+
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../cloud_platform/services/cloud_manual_sync_service.dart';
 import '../connected_health/connected_health_copy.dart';
@@ -29,11 +32,10 @@ class CloudSyncStatusLine extends StatelessWidget {
         'Synchronizing',
         'تتم المزامنة',
       ),
-      CloudManualSyncPhase.unavailable => _tr(
-        context,
-        'Unavailable',
-        'غير متاح',
-      ),
+      CloudManualSyncPhase.unavailable =>
+        status.reason == 'consentMissing'
+            ? null
+            : _tr(context, 'Unavailable', 'غير متاح'),
     };
     final style = Theme.of(context).textTheme.bodySmall?.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -46,23 +48,33 @@ class CloudSyncStatusLine extends StatelessWidget {
       children: [
         if (status.reason != null && !status.isSyncing)
           Text(
-            _tr(
-              context,
-              status.reason == 'conflict_review_required'
-                  ? 'Review backup conflicts.'
-                  : status.reason == 'server_unsupported' ||
-                        status.reason == 'server_or_consent_unavailable'
-                  ? 'This server cannot currently restore the selected data.'
-                  : 'Some data is still pending. Retry synchronization.',
-              status.reason == 'conflict_review_required'
-                  ? 'راجع تعارضات النسخة الاحتياطية.'
-                  : status.reason == 'server_unsupported' ||
-                        status.reason == 'server_or_consent_unavailable'
-                  ? 'الخادم لا يتيح حاليًا استعادة البيانات المختارة.'
-                  : 'بعض البيانات ما زالت معلقة. أعد محاولة المزامنة.',
-            ),
+            status.reason == 'consentMissing'
+                ? context.strings.text(CloudSyncConsentCopy.localAction)
+                : _tr(
+                    context,
+                    status.reason == 'conflict_review_required'
+                        ? 'Review backup conflicts.'
+                        : status.reason == 'server_unsupported' ||
+                              status.reason == 'server_or_consent_unavailable'
+                        ? 'This server cannot currently restore the selected data.'
+                        : 'Some data is still pending. Retry synchronization.',
+                    status.reason == 'conflict_review_required'
+                        ? 'راجع تعارضات النسخة الاحتياطية.'
+                        : status.reason == 'server_unsupported' ||
+                              status.reason == 'server_or_consent_unavailable'
+                        ? 'الخادم لا يتيح حاليًا استعادة البيانات المختارة.'
+                        : 'بعض البيانات ما زالت معلقة. أعد محاولة المزامنة.',
+                  ),
             key: const Key('cloud-sync-partial-reason'),
             maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: style,
+          ),
+        if (status.reason == 'consentMissing' && !status.isSyncing)
+          Text(
+            context.strings.text(CloudSyncConsentCopy.choiceControl),
+            key: const Key('cloud-sync-consent-guidance'),
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: style,
           ),

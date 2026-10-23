@@ -13,6 +13,7 @@ import '../profile/providers/user_profile_provider.dart';
 import '../intelligence_center/services/coach_memory_repository.dart';
 import '../intelligence_center/services/coach_context_provider.dart';
 import 'providers/life_context_provider.dart';
+import 'coach_memory_sync_review_panel.dart';
 
 final explicitCoachMemoriesProvider = FutureProvider((ref) {
   return CoachMemoryRepository(
@@ -64,6 +65,12 @@ class DecisionMemoryPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
+          CoachMemorySyncReviewPanel(
+            onChanged: () {
+              ref.invalidate(explicitCoachMemoriesProvider);
+              ref.invalidate(coachContextSnapshotProvider);
+            },
+          ),
           Text(
             t('Confirmed by you'),
             style: Theme.of(

@@ -378,6 +378,7 @@ class IntelligenceMessageAction {
         return Map<String, Object?>.unmodifiable(validated);
       case IntelligenceActionType.saveMemory:
       case IntelligenceActionType.healthCommand:
+      case IntelligenceActionType.smartPlan:
       case IntelligenceActionType.readHealthData:
         return null;
     }

@@ -78,6 +78,20 @@ class CommunityDeepLink {
   }
 
   static String? routeFor(Uri uri) {
+    if (uri.toString().length > 8192) return null;
+    try {
+      // Decode once even when a route ignores its query. Malformed external
+      // UTF-8 is rejected before it can escape into navigation or startup.
+      return _routeFor(uri, uri.queryParametersAll);
+    } on FormatException {
+      return null;
+    }
+  }
+
+  static String? _routeFor(
+    Uri uri,
+    Map<String, List<String>> queryParametersAll,
+  ) {
     if (uri.userInfo.isNotEmpty || uri.hasPort || uri.fragment.isNotEmpty) {
       return null;
     }
@@ -89,12 +103,12 @@ class CommunityDeepLink {
           uri.hasPort ||
           uri.path != '/download' ||
           uri.fragment.isNotEmpty ||
-          uri.queryParametersAll.length != 1 ||
-          !uri.queryParametersAll.containsKey('member') ||
-          uri.queryParametersAll['member']?.length != 1) {
+          queryParametersAll.length != 1 ||
+          !queryParametersAll.containsKey('member') ||
+          queryParametersAll['member']?.length != 1) {
         return null;
       }
-      final code = uri.queryParametersAll['member']!.single.toLowerCase();
+      final code = queryParametersAll['member']!.single.toLowerCase();
       if (!RegExp(r'^[a-f0-9]{32}$').hasMatch(code)) return null;
       return '/community/member/$code';
     }
@@ -126,13 +140,13 @@ class CommunityDeepLink {
         if (uri.userInfo.isNotEmpty ||
             uri.hasPort ||
             uri.fragment.isNotEmpty ||
-            uri.queryParametersAll.keys.any((key) => key != 'comment') ||
-            (uri.queryParametersAll['comment']?.length ?? 1) != 1) {
+            queryParametersAll.keys.any((key) => key != 'comment') ||
+            (queryParametersAll['comment']?.length ?? 1) != 1) {
           return null;
         }
         return contentRoute(
           postId: segments[2],
-          commentId: uri.queryParametersAll['comment']?.single,
+          commentId: queryParametersAll['comment']?.single,
         );
       }
       if (segments.length == 1) return '/community';

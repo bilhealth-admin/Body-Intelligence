@@ -229,6 +229,7 @@ void main() {
           HealthEvidenceIds.fdaDailyValues,
         ]);
         expect(cloud.lastBody?['health_citation_catalog_version'], 2);
+        expect(cloud.lastBody?['smart_plan_tools_version'], 1);
         expect(cloud.events, <String>[
           'session',
           'consent',

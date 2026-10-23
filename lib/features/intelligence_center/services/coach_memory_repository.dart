@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -6,8 +7,12 @@ import 'package:uuid/uuid.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../../community/services/community_owner_operation.dart';
 import 'remote_ai_consent_coordinator.dart';
+import 'coach_memory_sync_protocol.dart';
 
 part 'coach_memory_owner_sync.dart';
+part 'coach_memory_sync_readback.dart';
+part 'coach_memory_sync_merge.dart';
+part 'coach_memory_sync_review.dart';
 
 class CoachMemoryVersionConflict implements Exception {
   const CoachMemoryVersionConflict(this.id);
@@ -50,7 +55,7 @@ class CoachMemoryRepository {
       return (jsonDecode(raw) as List<Object?>)
           .whereType<Map>()
           .map((item) => Map<String, Object?>.from(item))
-          .where((item) => item['text']?.toString().trim().isNotEmpty == true)
+          .where((item) => isCurrentConfirmedCoachMemory(item, DateTime.now()))
           .take(50)
           .toList(growable: true);
     } on Object {
@@ -104,7 +109,7 @@ class CoachMemoryRepository {
             (item['text']! as String).toLowerCase() == value.toLowerCase(),
       );
       entries.insert(0, entry);
-      return jsonEncode(entries.take(50).toList(growable: false));
+      return jsonEncode(_retainMemoryState(entries));
     });
     CommunityOwnerOperation.checkCurrent();
     final readback = _strictMemoryEntries(await preferences.get(storageKey));
@@ -118,7 +123,10 @@ class CoachMemoryRepository {
     await preferences.update(storageKey, (raw) {
       CommunityOwnerOperation.checkCurrent();
       final entries = _strictMemoryEntries(raw)
-        ..removeWhere((item) => item['id'] == id);
+          .map(
+            (item) => item['id'] == id ? _memoryDeletionTombstone(item) : item,
+          )
+          .toList(growable: false);
       return jsonEncode(entries);
     });
     CommunityOwnerOperation.checkCurrent();
@@ -159,15 +167,26 @@ class CoachMemoryRepository {
             throw CoachMemoryVersionConflict(selection.id);
           }
         }
-        entries.removeWhere((item) => ids.contains(item['id']));
-        return jsonEncode(entries);
+        return jsonEncode(
+          _retainMemoryState(
+            entries
+                .map(
+                  (item) => ids.contains(item['id'])
+                      ? _memoryDeletionTombstone(item)
+                      : item,
+                )
+                .toList(growable: false),
+          ),
+        );
       });
       CommunityOwnerOperation.checkCurrent();
       if (isCurrentOwner?.call() == false) {
         throw const CommunityOwnerOperationCancelled();
       }
       final readback = _strictMemoryEntries(await preferences.get(storageKey));
-      if (readback.any((item) => ids.contains(item['id']))) {
+      if (readback.any(
+        (item) => ids.contains(item['id']) && item['status'] != 'deleted',
+      )) {
         throw StateError('Selected Coach memories were not deleted');
       }
       return List<String>.unmodifiable(ids);
@@ -190,66 +209,7 @@ class CoachMemoryRepository {
     }
   }
 
-  Future<void> _mergeFromCloud() async {
-    final client = cloud;
-    if (client == null) return;
-    final user = client.auth.currentUser;
-    if (user == null || !await _remoteAiAllowed()) return;
-    CommunityOwnerOperation.checkCurrent();
-    try {
-      final rows = await client
-          .from('bil_coach_memories')
-          .select(
-            'id,kind,memory_text,status,source,confidence,learned_at,updated_at,expires_at',
-          )
-          .eq('owner_id', user.id)
-          .isFilter('deleted_at', null)
-          .order('updated_at', ascending: false)
-          .limit(50);
-      CommunityOwnerOperation.checkCurrent();
-      await preferences.update(storageKey, (raw) {
-        CommunityOwnerOperation.checkCurrent();
-        final local = _strictMemoryEntries(raw);
-        final byId = <String, Map<String, Object?>>{
-          for (final item in local) item['id']! as String: item,
-        };
-        for (final rawRow in rows) {
-          final row = Map<String, Object?>.from(rawRow);
-          final id = row['id']?.toString() ?? '';
-          if (id.isEmpty || row['memory_text'] is! String) continue;
-          final prior = byId[id];
-          if (prior != null &&
-              (prior['updatedAt']?.toString() ?? '').compareTo(
-                    row['updated_at']?.toString() ?? '',
-                  ) >=
-                  0) {
-            continue;
-          }
-          byId[id] = <String, Object?>{
-            'id': id,
-            'text': row['memory_text'],
-            'kind': row['kind'],
-            'status': row['status'],
-            'source': row['source'],
-            'confidence': row['confidence'],
-            'savedAt': row['learned_at'],
-            'updatedAt': row['updated_at'],
-            if (row['expires_at'] != null) 'expiresAt': row['expires_at'],
-          };
-        }
-        final merged = byId.values.toList(growable: false)
-          ..sort(
-            (a, b) => (b['updatedAt']?.toString() ?? '').compareTo(
-              a['updatedAt']?.toString() ?? '',
-            ),
-          );
-        return jsonEncode(merged.take(50).toList(growable: false));
-      });
-      CommunityOwnerOperation.checkCurrent();
-    } on Object {
-      // The Coach stays local-first when offline or before migration rollout.
-    }
-  }
+  Future<void> _mergeFromCloud() => _mergeMemoryCloudWithCheckpoints();
 
   Future<void> _upsertCloud(Map<String, Object?> entry) =>
       syncCommittedChange(id: entry['id']! as String, expectedLocal: entry);

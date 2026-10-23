@@ -2,6 +2,19 @@ part of 'app_router.dart';
 
 List<RouteBase> _wellnessRoutes() => <RouteBase>[
   GoRoute(
+    path: '/smart-plan',
+    builder: (_, state) => state.uri.queryParameters['privacy'] == '1'
+        ? const BilSmartPlanPage(privacyOnly: true)
+        : PremiumRouteGlassGate(
+            feature: PremiumGateFeature.personalPlan,
+            child: BilSmartPlanPage(
+              toolRequest: state.extra is BilSmartPlanToolRequest
+                  ? state.extra! as BilSmartPlanToolRequest
+                  : null,
+            ),
+          ),
+  ),
+  GoRoute(
     path: '/wellness-library',
     builder: (_, _) => const WellnessLibraryPage(),
   ),

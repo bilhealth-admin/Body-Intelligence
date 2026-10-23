@@ -4,6 +4,8 @@ import '../domain/coach_context_snapshot.dart';
 import 'coach_cloud_payload_sanitizer.dart';
 import 'local_model_gateway.dart';
 
+part 'coach_cloud_smart_plan_projection.dart';
+
 /// The only personal-data groups the mobile client may project into one
 /// remote Coach request. A future context field is excluded until it is
 /// deliberately assigned to one of these groups below.
@@ -256,6 +258,94 @@ CoachCloudContextProjection projectCoachCloudContext({
     projected['bodyContextHistory'] = context.bodyContextHistory
         .take(42)
         .toList(growable: false);
+  }
+  // A separate opt-in prepares this field. The existing question/category
+  // projector still limits what can leave the device after Gemini consent.
+  if (context.smartPlan.isNotEmpty &&
+      (categories.contains(CoachCloudContextCategory.trainingAndActivity) ||
+          categories.contains(CoachCloudContextCategory.nutritionAndWater))) {
+    projected['smartPlan'] = <String, Object?>{
+      for (final key in const [
+        'provenance',
+        'planId',
+        'revision',
+        'updatedAt',
+        'horizon',
+        'status',
+        'today',
+        'hasScheduledDay',
+        'proposalsAreNotDiaryEntries',
+      ])
+        if (context.smartPlan.containsKey(key)) key: context.smartPlan[key],
+      if (categories.contains(CoachCloudContextCategory.trainingAndActivity))
+        for (final key in const ['dueWorkouts', 'confirmedWorkouts'])
+          if (context.smartPlan.containsKey(key)) key: context.smartPlan[key],
+      if (categories.contains(
+        CoachCloudContextCategory.trainingAndActivity,
+      )) ...{
+        if (context.smartPlan['plannedWorkout'] is Map)
+          'plannedWorkout': _projectSmartPlanWorkout(
+            context.smartPlan['plannedWorkout'] as Map,
+          ),
+        if (context.smartPlan['trainingPreferences'] is Map)
+          'trainingPreferences': _projectSmartPlanPreferences(
+            context.smartPlan['trainingPreferences'] as Map,
+          ),
+        if (context.smartPlan['trainingWeek'] is List)
+          'trainingWeek': (context.smartPlan['trainingWeek'] as List)
+              .whereType<Map>()
+              .take(7)
+              .where(
+                (day) =>
+                    day['date'] is String &&
+                    RegExp(
+                      r'^\d{4}-\d{2}-\d{2}$',
+                    ).hasMatch(day['date'] as String),
+              )
+              .map(
+                (day) => {
+                  'date': day['date'],
+                  'workout': day['workout'] is Map
+                      ? _projectSmartPlanWorkout(day['workout'] as Map)
+                      : null,
+                },
+              )
+              .toList(growable: false),
+      },
+      if (categories.contains(CoachCloudContextCategory.nutritionAndWater) &&
+          context.smartPlan.containsKey('mealSuggestions'))
+        'mealSuggestions': context.smartPlan['mealSuggestions'],
+      if (context.smartPlan['recentChanges'] is List)
+        'recentChanges': (context.smartPlan['recentChanges'] as List)
+            .whereType<Map>()
+            .where(
+              (change) =>
+                  change['reason'] == 'status' ||
+                  (categories.contains(
+                        CoachCloudContextCategory.nutritionAndWater,
+                      ) &&
+                      change['reason'] == 'mealSwap') ||
+                  (categories.contains(
+                        CoachCloudContextCategory.trainingAndActivity,
+                      ) &&
+                      const {
+                        'completion',
+                        'correction',
+                        'schedule',
+                        'travel',
+                        'fatigue',
+                        'equipment',
+                      }.contains(change['reason'])),
+            )
+            .take(5)
+            .map(
+              (change) => {
+                for (final key in const ['revision', 'at', 'reason', 'source'])
+                  if (change.containsKey(key)) key: change[key],
+              },
+            )
+            .toList(growable: false),
+    };
   }
   final relevantMemories = _categoryRelevantEntries(
     context.explicitMemories,

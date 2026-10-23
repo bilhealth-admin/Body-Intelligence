@@ -202,6 +202,7 @@ flutter:
     - artifacts/workout_media/workout_release_bundle_gym_six_month_v1.json
     - artifacts/workout_media/workout_discovery_catalog_v1.json
     - artifacts/workout_media/gym_six_month_plan_runtime_v1.json
+    - artifacts/workout_media/smart_plan_prescriptions_v1.json
     - artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json
     - artifacts/workout_media/workout_owner_approval_home_200.json
     - artifacts/workout_media/workout_owner_approval_gym_102.json

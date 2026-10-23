@@ -1,0 +1,1958 @@
+{
+  "schema_version": 1,
+  "contract_id": "bil-gym-six-month-video-plan-v1",
+  "scope": "gym-only strength programming plus gym warm-up demonstrations",
+  "supported_locales": [
+    "ar",
+    "en",
+    "fr",
+    "es",
+    "tr",
+    "de",
+    "it",
+    "pt-BR",
+    "pt-PT",
+    "ur",
+    "fa",
+    "hi",
+    "id",
+    "ms",
+    "ja",
+    "ko",
+    "zh-Hans",
+    "zh-Hant",
+    "ru",
+    "bn",
+    "vi",
+    "th",
+    "pl",
+    "nl",
+    "uk"
+  ],
+  "locale_presenters": [
+    {
+      "locale": "ar",
+      "language": "Arabic",
+      "country": "Jordan",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Jordan; speaks Arabic; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "en",
+      "language": "English",
+      "country": "United States",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from United States; speaks English; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "fr",
+      "language": "French",
+      "country": "France",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from France; speaks French; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "es",
+      "language": "Spanish",
+      "country": "Spain",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Spain; speaks Spanish; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "tr",
+      "language": "Turkish",
+      "country": "Türkiye",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Türkiye; speaks Turkish; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "de",
+      "language": "German",
+      "country": "Germany",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Germany; speaks German; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "it",
+      "language": "Italian",
+      "country": "Italy",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Italy; speaks Italian; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "pt-BR",
+      "language": "Brazilian Portuguese",
+      "country": "Brazil",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Brazil; speaks Brazilian Portuguese; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "pt-PT",
+      "language": "European Portuguese",
+      "country": "Portugal",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Portugal; speaks European Portuguese; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "ur",
+      "language": "Urdu",
+      "country": "Pakistan",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Pakistan; speaks Urdu; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "fa",
+      "language": "Persian",
+      "country": "Iran",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Iran; speaks Persian; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "hi",
+      "language": "Hindi",
+      "country": "India",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from India; speaks Hindi; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "id",
+      "language": "Indonesian",
+      "country": "Indonesia",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Indonesia; speaks Indonesian; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "ms",
+      "language": "Malay",
+      "country": "Malaysia",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Malaysia; speaks Malay; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "ja",
+      "language": "Japanese",
+      "country": "Japan",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Japan; speaks Japanese; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "ko",
+      "language": "Korean",
+      "country": "South Korea",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from South Korea; speaks Korean; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "zh-Hans",
+      "language": "Simplified Chinese",
+      "country": "China",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from China; speaks Simplified Chinese; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "zh-Hant",
+      "language": "Traditional Chinese",
+      "country": "Taiwan",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Taiwan; speaks Traditional Chinese; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "ru",
+      "language": "Russian",
+      "country": "Russia",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Russia; speaks Russian; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "bn",
+      "language": "Bengali",
+      "country": "Bangladesh",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Bangladesh; speaks Bengali; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "vi",
+      "language": "Vietnamese",
+      "country": "Vietnam",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Vietnam; speaks Vietnamese; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "th",
+      "language": "Thai",
+      "country": "Thailand",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Thailand; speaks Thai; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "pl",
+      "language": "Polish",
+      "country": "Poland",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Poland; speaks Polish; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "nl",
+      "language": "Dutch",
+      "country": "Netherlands",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Netherlands; speaks Dutch; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    },
+    {
+      "locale": "uk",
+      "language": "Ukrainian",
+      "country": "Ukraine",
+      "identity": "One fictional, rights-clearable adult professional gym trainer from Ukraine; speaks Ukrainian; stable face, realistic healthy proportions, no celebrity likeness, no cultural costume, and no stereotyped appearance."
+    }
+  ],
+  "review_profile": {
+    "id": "production-reviewed",
+    "soft_warnings": [],
+    "hard_failures": [
+      "wrong exercise or motion-phase order",
+      "unsafe or impossible joint alignment or load path",
+      "extra, missing, fused, or malformed limbs, hands, feet, or fingers",
+      "wrong, missing, floating, or physically impossible equipment",
+      "head, hands, working equipment, knees, or feet leave the frame",
+      "camera motion hides setup or working range",
+      "BIL wordmark changes spelling, geometry, location, or moves independently",
+      "third-party logo, watermark, caption, UI, or duplicated person",
+      "synthetic-looking skin, face, fabric, equipment, gravity, or contact",
+      "distracting lighting, background, flicker, morphing, or continuity error"
+    ],
+    "publication_gate": "qualified human biomechanics and rights review required",
+    "retry_policy": {
+      "maximum_reviewed_attempts_per_exercise": 3,
+      "retry_only_after_recorded_rejection": true,
+      "retain_every_rejected_attempt": true,
+      "never_overwrite_attempt_evidence": true
+    }
+  },
+  "brand_and_reality_prompt": "Photorealistic premium commercial gym, real full-size equipment with believable weight and contact, locked 9:16 full-body camera, natural skin and fabric, accurate hands, feet and joint mechanics. Keep clothing plain and unbranded so no logo can warp with the moving trainer. Show the canonical BIL(TM) wordmark only on two stationary physical surfaces already present in the source image: a fixed rear-wall studio sign and a fixed equipment-base plaque. Both have real depth, perspective, occlusion and contact shadow; neither is an overlay, watermark, tracked patch, HUD, caption or moving object. No third-party marks.",
+  "video_duration_policy": {
+    "duration_seconds": 10,
+    "fps": 30,
+    "final_frames": 300,
+    "reason": "Ten seconds reliably shows setup, one complete controlled repetition and return without padding or rushing the movement.",
+    "no_slow_motion_or_looping": true
+  },
+  "warmups": {
+    "push": [
+      {
+        "movement": "Shoulder circles",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Scapular wall slide",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Band pull-apart",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Wrist mobility circles",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "pull": [
+      {
+        "movement": "Shoulder circles",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Scapular controlled rotation",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Band pull-apart",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Wrist mobility circles",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "legs": [
+      {
+        "movement": "Ankle dorsiflexion rock",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Standing hip controlled rotation",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Glute bridge",
+        "category": "resistance-lower-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Bodyweight squat",
+        "category": "resistance-lower-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "chest_triceps": [
+      {
+        "movement": "Doorway chest stretch",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Scapular wall slide",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Bench push-up",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "back_biceps": [
+      {
+        "movement": "Quadruped thoracic rotation",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Band pull-apart",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Resistance-band row",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "shoulders_arms": [
+      {
+        "movement": "Shoulder circles",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Scapular controlled rotation",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Wrist flexor stretch",
+        "category": "recovery-beginner",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Wrist extensor stretch",
+        "category": "recovery-beginner",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "full_body": [
+      {
+        "movement": "Cat-cow",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Standing hip controlled rotation",
+        "category": "mobility-flexibility",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Scapular wall slide",
+        "category": "resistance-upper-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "movement": "Bodyweight squat",
+        "category": "resistance-lower-body",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ]
+  },
+  "sessions": [
+    {
+      "name": "Push A",
+      "focus": "chest, shoulders, triceps",
+      "exercises": [
+        {
+          "movement": "Dumbbell bench press",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Standing dumbbell shoulder press",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Dumbbell lateral raise",
+          "category": null,
+          "sets": 3,
+          "reps": "12-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Overhead triceps extension",
+          "category": null,
+          "sets": 3,
+          "reps": "10-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Bench push-up",
+          "category": null,
+          "sets": 2,
+          "reps": "controlled technical reps",
+          "rest_seconds": 60,
+          "role": "technique"
+        }
+      ]
+    },
+    {
+      "name": "Push B",
+      "focus": "shoulder emphasis, chest, triceps",
+      "exercises": [
+        {
+          "movement": "Seated dumbbell shoulder press",
+          "category": null,
+          "sets": 4,
+          "reps": "6-10",
+          "rest_seconds": 120,
+          "role": "primary"
+        },
+        {
+          "movement": "Dumbbell floor press",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Dumbbell front raise",
+          "category": null,
+          "sets": 2,
+          "reps": "12-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Triceps kickback",
+          "category": null,
+          "sets": 3,
+          "reps": "12-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Incline push-up",
+          "category": null,
+          "sets": 2,
+          "reps": "controlled technical reps",
+          "rest_seconds": 60,
+          "role": "technique"
+        }
+      ]
+    },
+    {
+      "name": "Pull A",
+      "focus": "back, rear delts, biceps",
+      "exercises": [
+        {
+          "movement": "One-arm dumbbell row",
+          "category": null,
+          "sets": 4,
+          "reps": "8-12 each side",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Chest-supported dumbbell row",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Dumbbell reverse fly",
+          "category": null,
+          "sets": 3,
+          "reps": "12-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Dumbbell biceps curl",
+          "category": null,
+          "sets": 3,
+          "reps": "10-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Hammer curl",
+          "category": null,
+          "sets": 2,
+          "reps": "10-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        }
+      ]
+    },
+    {
+      "name": "Pull B",
+      "focus": "upper-back control, biceps, carries",
+      "exercises": [
+        {
+          "movement": "Resistance-band row",
+          "category": null,
+          "sets": 4,
+          "reps": "10-15",
+          "rest_seconds": 75,
+          "role": "primary"
+        },
+        {
+          "movement": "Band pull-apart",
+          "category": null,
+          "sets": 3,
+          "reps": "12-20",
+          "rest_seconds": 45,
+          "role": "accessory"
+        },
+        {
+          "movement": "Dumbbell reverse fly",
+          "category": null,
+          "sets": 3,
+          "reps": "12-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Hammer curl",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Farmer carry",
+          "category": "resistance-full-body",
+          "sets": 3,
+          "reps": "20-40 seconds",
+          "rest_seconds": 75,
+          "role": "carry"
+        }
+      ]
+    },
+    {
+      "name": "Legs A",
+      "focus": "quads, glutes, calves",
+      "exercises": [
+        {
+          "movement": "Goblet squat",
+          "category": null,
+          "sets": 4,
+          "reps": "8-12",
+          "rest_seconds": 120,
+          "role": "primary"
+        },
+        {
+          "movement": "Reverse lunge",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12 each side",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Hip thrust",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Standing calf raise",
+          "category": null,
+          "sets": 3,
+          "reps": "12-20",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Lateral band walk",
+          "category": null,
+          "sets": 2,
+          "reps": "10-15 each side",
+          "rest_seconds": 45,
+          "role": "activation"
+        }
+      ]
+    },
+    {
+      "name": "Legs B",
+      "focus": "hamstrings, glutes, unilateral control",
+      "exercises": [
+        {
+          "movement": "Dumbbell Romanian deadlift",
+          "category": null,
+          "sets": 4,
+          "reps": "6-10",
+          "rest_seconds": 120,
+          "role": "primary"
+        },
+        {
+          "movement": "Split squat",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12 each side",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Step-up",
+          "category": null,
+          "sets": 3,
+          "reps": "8-12 each side",
+          "rest_seconds": 90,
+          "role": "primary"
+        },
+        {
+          "movement": "Band hamstring curl",
+          "category": null,
+          "sets": 3,
+          "reps": "10-15",
+          "rest_seconds": 60,
+          "role": "accessory"
+        },
+        {
+          "movement": "Seated calf raise",
+          "category": null,
+          "sets": 3,
+          "reps": "12-20",
+          "rest_seconds": 60,
+          "role": "accessory"
+        }
+      ]
+    }
+  ],
+  "months": [
+    {
+      "month": 1,
+      "phase": "Technique foundation",
+      "frequency": "3 sessions/week",
+      "schedule": [
+        "Push A",
+        "Pull A",
+        "Legs A"
+      ],
+      "progression": "Keep 2-4 good repetitions in reserve; learn stable setup and range.",
+      "deload": "Week 4: reduce working sets by about one third."
+    },
+    {
+      "month": 2,
+      "phase": "Base volume",
+      "frequency": "3 sessions/week",
+      "schedule": [
+        "Push B",
+        "Pull B",
+        "Legs B"
+      ],
+      "progression": "Add repetitions inside the range before adding a small load.",
+      "deload": "Week 8: reduce sets and keep all repetitions comfortably controlled."
+    },
+    {
+      "month": 3,
+      "phase": "PPL A/B introduction",
+      "frequency": "4 sessions/week rotating",
+      "schedule": [
+        "Push A",
+        "Pull A",
+        "Legs A",
+        "Push B",
+        "Pull B",
+        "Legs B"
+      ],
+      "progression": "Continue the rotation across calendar weeks; never cram missed sessions.",
+      "deload": "Final week: one A session per pattern only."
+    },
+    {
+      "month": 4,
+      "phase": "Hypertrophy PPL",
+      "frequency": "5 sessions/week rotating",
+      "schedule": [
+        "Push A",
+        "Pull A",
+        "Legs A",
+        "Push B",
+        "Pull B",
+        "Legs B"
+      ],
+      "progression": "Most work uses 8-15 reps with 1-3 repetitions in reserve.",
+      "deload": "Final 5-7 days: half the accessory sets."
+    },
+    {
+      "month": 5,
+      "phase": "Strength-hypertrophy PPL",
+      "frequency": "5 sessions/week rotating",
+      "schedule": [
+        "Push B",
+        "Pull A",
+        "Legs B",
+        "Push A",
+        "Pull B",
+        "Legs A"
+      ],
+      "progression": "Primary lifts use the lower end of their range; accessories stay controlled.",
+      "deload": "Final week: no grinding repetitions and reduce primary load."
+    },
+    {
+      "month": 6,
+      "phase": "PPL specialization and consolidation",
+      "frequency": "3-6 sessions/week selected by recovery",
+      "schedule": [
+        "Push A",
+        "Pull A",
+        "Legs A",
+        "Push B",
+        "Pull B",
+        "Legs B"
+      ],
+      "progression": "Choose one lagging pattern for one extra accessory set, not every pattern.",
+      "deload": "Week 24: technique-only sessions, then restart with updated loads."
+    }
+  ],
+  "alternative_splits": [
+    {
+      "id": "ppl-3-day",
+      "name": "Classic PPL",
+      "days": 3,
+      "sequence": [
+        "Push A",
+        "Pull A",
+        "Legs A"
+      ]
+    },
+    {
+      "id": "ppl-6-day-ab",
+      "name": "PPL A/B twice weekly",
+      "days": 6,
+      "sequence": [
+        "Push A",
+        "Pull A",
+        "Legs A",
+        "Push B",
+        "Pull B",
+        "Legs B"
+      ]
+    },
+    {
+      "id": "ppl-rotating-4",
+      "name": "Rotating PPL",
+      "days": 4,
+      "sequence": [
+        "Continue P/P/L rotation across weeks"
+      ]
+    },
+    {
+      "id": "ppl-powerbuilding",
+      "name": "Strength + hypertrophy PPL",
+      "days": 5,
+      "sequence": [
+        "Push B",
+        "Pull A",
+        "Legs B",
+        "Push A",
+        "Pull B"
+      ]
+    },
+    {
+      "id": "ppl-upper-lower",
+      "name": "PPL + Upper/Lower hybrid",
+      "days": 5,
+      "sequence": [
+        "Push A",
+        "Pull A",
+        "Legs A",
+        "Upper",
+        "Lower"
+      ]
+    },
+    {
+      "id": "coach-antagonist",
+      "name": "Coach body-part split",
+      "days": 4,
+      "sequence": [
+        "Chest + triceps",
+        "Back + biceps",
+        "Legs",
+        "Shoulders + arms"
+      ]
+    },
+    {
+      "id": "arnold-style",
+      "name": "Chest/back + shoulders/arms + legs",
+      "days": 3,
+      "sequence": [
+        "Chest + back",
+        "Shoulders + arms",
+        "Legs"
+      ]
+    },
+    {
+      "id": "upper-lower",
+      "name": "Upper / Lower",
+      "days": 4,
+      "sequence": [
+        "Upper A",
+        "Lower A",
+        "Upper B",
+        "Lower B"
+      ]
+    },
+    {
+      "id": "full-body",
+      "name": "Full body",
+      "days": 3,
+      "sequence": [
+        "Full body A",
+        "Full body B",
+        "Full body C"
+      ]
+    }
+  ],
+  "library_pages": [
+    {
+      "id": "push-pull-legs",
+      "title": "Push / Pull / Legs",
+      "kind": "program",
+      "description": "Six-month progression with 3-day, rotating 4-day, 5-day and 6-day A/B routes.",
+      "filters": [
+        "month",
+        "experience",
+        "3/4/5/6 days",
+        "A/B session"
+      ]
+    },
+    {
+      "id": "warm-up-mobility",
+      "title": "Warm-up & mobility",
+      "kind": "session-preparation",
+      "description": "Short joint- and muscle-specific preparation selected from today's workout.",
+      "filters": [
+        "push",
+        "pull",
+        "legs",
+        "chest+triceps",
+        "back+biceps",
+        "shoulders+arms",
+        "full body"
+      ]
+    },
+    {
+      "id": "muscle-pair-split",
+      "title": "Muscle Pair Split",
+      "kind": "program",
+      "description": "Coach-style paired body-part days without calling every combination a separate plan.",
+      "filters": [
+        "chest+triceps",
+        "back+biceps",
+        "legs+shoulders",
+        "chest+back",
+        "shoulders+arms"
+      ]
+    },
+    {
+      "id": "upper-lower",
+      "title": "Upper / Lower",
+      "kind": "program",
+      "description": "Four-day upper/lower structure with A/B sessions.",
+      "filters": [
+        "beginner",
+        "intermediate",
+        "4 days"
+      ]
+    },
+    {
+      "id": "full-body",
+      "title": "Full Body",
+      "kind": "program",
+      "description": "Two- or three-day gym plans for beginners and time-limited users.",
+      "filters": [
+        "beginner",
+        "2 days",
+        "3 days"
+      ]
+    },
+    {
+      "id": "arnold-split",
+      "title": "Arnold Split",
+      "kind": "program",
+      "description": "Chest+back, shoulders+arms and legs, with recovery-aware 3- or 6-day variants.",
+      "filters": [
+        "intermediate",
+        "3 days",
+        "6 days"
+      ]
+    },
+    {
+      "id": "powerbuilding",
+      "title": "Strength + Hypertrophy",
+      "kind": "program",
+      "description": "Lower-repetition primary work followed by controlled hypertrophy accessories.",
+      "filters": [
+        "intermediate",
+        "strength bias",
+        "hypertrophy bias",
+        "4/5 days"
+      ]
+    },
+    {
+      "id": "exercise-technique",
+      "title": "Exercise Technique",
+      "kind": "reference",
+      "description": "Exact movement library grouped by muscle; not presented as a complete plan.",
+      "filters": [
+        "chest",
+        "back",
+        "shoulders",
+        "biceps",
+        "triceps",
+        "quads",
+        "hamstrings",
+        "glutes",
+        "calves",
+        "core"
+      ]
+    }
+  ],
+  "generation_queue": [
+    {
+      "exercise_id": "resistance-upper-body--dumbbell-bench-press--technique",
+      "movement": "Dumbbell bench press",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/dumbbell-bench-press.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep feet planted and shoulders stable. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--standing-dumbbell-shoulder-press--technique",
+      "movement": "Standing dumbbell shoulder press",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/standing-dumbbell-shoulder-press.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Avoid leaning back as the weights rise. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--dumbbell-lateral-raise--technique",
+      "movement": "Dumbbell lateral raise",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/dumbbell-lateral-raise.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Raise only to a comfortable shoulder height. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--overhead-triceps-extension--technique",
+      "movement": "Overhead triceps extension",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/overhead-triceps-extension.png",
+      "equipment_ids": "[\"dumbbell_single\"]",
+      "movement_cues": "Keep ribs down and elbows comfortably forward. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--bench-push-up--technique",
+      "movement": "Bench push-up",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/bench-push-up.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep a straight line from head to heel. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--seated-dumbbell-shoulder-press--technique",
+      "movement": "Seated dumbbell shoulder press",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/seated-dumbbell-shoulder-press.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep ribs down and wrists neutral. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--dumbbell-floor-press--technique",
+      "movement": "Dumbbell floor press",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/dumbbell-floor-press.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep wrists stacked and upper arms controlled. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--dumbbell-front-raise--technique",
+      "movement": "Dumbbell front raise",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/dumbbell-front-raise.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep the trunk still and shoulders relaxed. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--triceps-kickback--technique",
+      "movement": "Triceps kickback",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/triceps-kickback.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep the upper arm still and extend under control. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--incline-push-up--technique",
+      "movement": "Incline push-up",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/incline-push-up.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep elbows tracking comfortably from the torso. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--one-arm-dumbbell-row--technique",
+      "movement": "One-arm dumbbell row",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/one-arm-dumbbell-row.png",
+      "equipment_ids": "[\"dumbbell_single\"]",
+      "movement_cues": "Keep the spine long and pull toward the hip. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--chest-supported-dumbbell-row--technique",
+      "movement": "Chest-supported dumbbell row",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/chest-supported-dumbbell-row.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep the chest supported and shoulder blades controlled. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--dumbbell-reverse-fly--technique",
+      "movement": "Dumbbell reverse fly",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/dumbbell-reverse-fly.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Use a light load and keep the neck relaxed. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--dumbbell-biceps-curl--technique",
+      "movement": "Dumbbell biceps curl",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/dumbbell-biceps-curl.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep elbows quiet beside the ribs. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--hammer-curl--technique",
+      "movement": "Hammer curl",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/hammer-curl.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep wrists neutral and avoid swinging. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--resistance-band-row--technique",
+      "movement": "Resistance-band row",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/resistance-band-row.png",
+      "equipment_ids": "[\"long_resistance_band\"]",
+      "movement_cues": "Keep shoulders down and return the band slowly. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--band-pull-apart--technique",
+      "movement": "Band pull-apart",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/band-pull-apart.png",
+      "equipment_ids": "[\"flat_resistance_band\"]",
+      "movement_cues": "Keep ribs stacked and spread the band without shrugging. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--farmer-carry--technique",
+      "movement": "Farmer carry",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/farmer-carry.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Walk tall with quiet steps and weights beside the body. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--goblet-squat--technique",
+      "movement": "Goblet squat",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/goblet-squat.png",
+      "equipment_ids": "[\"kettlebell_single\"]",
+      "movement_cues": "Hold the load close and keep the torso controlled. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--reverse-lunge--technique",
+      "movement": "Reverse lunge",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/reverse-lunge.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Step back softly and keep the front foot planted. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--hip-thrust--technique",
+      "movement": "Hip thrust",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/hip-thrust.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep the chin tucked and finish with level hips. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--standing-calf-raise--technique",
+      "movement": "Standing calf raise",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/standing-calf-raise.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Rise evenly through the forefoot and lower slowly. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--lateral-band-walk--technique",
+      "movement": "Lateral band walk",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/lateral-band-walk.png",
+      "equipment_ids": "[\"mini_loop_band\"]",
+      "movement_cues": "Keep toes forward and maintain band tension. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--dumbbell-romanian-deadlift--technique",
+      "movement": "Dumbbell Romanian deadlift",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/dumbbell-romanian-deadlift.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Hinge at the hips with a long neutral spine. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--split-squat--technique",
+      "movement": "Split squat",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/split-squat.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Lower vertically with both feet stable. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--step-up--technique",
+      "movement": "Step-up",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/step-up.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use a stable step and drive through the working foot. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--band-hamstring-curl--technique",
+      "movement": "Band hamstring curl",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/band-hamstring-curl.png",
+      "equipment_ids": "[\"long_resistance_band\"]",
+      "movement_cues": "Keep hips level and control the band's return. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--seated-calf-raise--technique",
+      "movement": "Seated calf raise",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/seated-calf-raise.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Keep feet parallel and use a smooth full range. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--shoulder-circles--gentle-flow",
+      "movement": "Shoulder circles",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/shoulder-circles.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use smooth circles without shrugging. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--scapular-wall-slide--technique",
+      "movement": "Scapular wall slide",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/scapular-wall-slide.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Slide only through a pain-free shoulder range. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--wrist-mobility-circles--gentle-flow",
+      "movement": "Wrist mobility circles",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/wrist-mobility-circles.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use small pain-free circles. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--scapular-controlled-rotation--gentle-flow",
+      "movement": "Scapular controlled rotation",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/scapular-controlled-rotation.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Move the shoulder blade slowly without shrugging. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--ankle-dorsiflexion-rock--gentle-flow",
+      "movement": "Ankle dorsiflexion rock",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/ankle-dorsiflexion-rock.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Drive the knee forward while the heel stays down. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--standing-hip-controlled-rotation--gentle-flow",
+      "movement": "Standing hip controlled rotation",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/standing-hip-controlled-rotation.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use support and keep the pelvis stable. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--glute-bridge--technique",
+      "movement": "Glute bridge",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/glute-bridge.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Lift through the hips without overextending the back. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--bodyweight-squat--technique",
+      "movement": "Bodyweight squat",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/bodyweight-squat.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Track knees with toes and keep the whole foot grounded. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--doorway-chest-stretch--gentle-flow",
+      "movement": "Doorway chest stretch",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/doorway-chest-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use a gentle stretch without leaning aggressively. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--quadruped-thoracic-rotation--gentle-flow",
+      "movement": "Quadruped thoracic rotation",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/quadruped-thoracic-rotation.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Rotate through the upper back without forcing. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "recovery-beginner--wrist-flexor-stretch--gentle",
+      "movement": "Wrist flexor stretch",
+      "category": "recovery-beginner",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/recovery-beginner/wrist-flexor-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use light pressure and keep the elbow comfortable. Use an easy, symptom-free recovery pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "recovery-beginner--wrist-extensor-stretch--gentle",
+      "movement": "Wrist extensor stretch",
+      "category": "recovery-beginner",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/recovery-beginner/wrist-extensor-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use light pressure and avoid joint pain. Use an easy, symptom-free recovery pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--cat-cow--gentle-flow",
+      "movement": "Cat-cow",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/cat-cow.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Move the spine gently with the breath. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--knee-push-up--technique",
+      "movement": "Knee push-up",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/knee-push-up.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Brace the trunk and lower the chest as one unit. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-upper-body--resistance-band-chest-press--technique",
+      "movement": "Resistance-band chest press",
+      "category": "resistance-upper-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-upper-body/resistance-band-chest-press.png",
+      "equipment_ids": "[\"long_resistance_band\"]",
+      "movement_cues": "Press forward without arching the lower back. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--box-squat--technique",
+      "movement": "Box squat",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/box-squat.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Reach the hips to the box without collapsing onto it. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--forward-lunge--technique",
+      "movement": "Forward lunge",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/forward-lunge.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Control the forward step and push through the full front foot. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--lateral-lunge--technique",
+      "movement": "Lateral lunge",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/lateral-lunge.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Sit into one hip while the other leg stays long. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--sumo-squat--technique",
+      "movement": "Sumo squat",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/sumo-squat.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep knees aligned with the wider toe angle. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--clamshell--technique",
+      "movement": "Clamshell",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/clamshell.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep the pelvis stacked while the top knee opens. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--single-leg-sit-to-stand--technique",
+      "movement": "Single-leg sit-to-stand",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/single-leg-sit-to-stand.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use a stable chair and keep the knee tracking forward. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--wall-sit--technique",
+      "movement": "Wall sit",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/wall-sit.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use a comfortable knee angle and keep feet planted. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-lower-body--heel-elevated-squat--technique",
+      "movement": "Heel-elevated squat",
+      "category": "resistance-lower-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-lower-body/heel-elevated-squat.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use secure heel support and keep the torso tall. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--dumbbell-squat-to-press--technique",
+      "movement": "Dumbbell squat to press",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/dumbbell-squat-to-press.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Finish the squat before pressing overhead. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--dumbbell-deadlift-to-row--technique",
+      "movement": "Dumbbell deadlift to row",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/dumbbell-deadlift-to-row.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Stabilize the hinge before initiating the row. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--reverse-lunge-to-curl--technique",
+      "movement": "Reverse lunge to curl",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/reverse-lunge-to-curl.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Regain balance before curling the weights. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--step-up-to-knee-drive--technique",
+      "movement": "Step-up to knee drive",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/step-up-to-knee-drive.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use a stable step and control the balance at the top. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--kettlebell-deadlift--technique",
+      "movement": "Kettlebell deadlift",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/kettlebell-deadlift.png",
+      "equipment_ids": "[\"kettlebell_single\"]",
+      "movement_cues": "Keep the bell close and drive the floor away. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--suitcase-deadlift--technique",
+      "movement": "Suitcase deadlift",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/suitcase-deadlift.png",
+      "equipment_ids": "[\"dumbbell_single\"]",
+      "movement_cues": "Keep shoulders level despite the offset load. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--suitcase-carry--technique",
+      "movement": "Suitcase carry",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/suitcase-carry.png",
+      "equipment_ids": "[\"dumbbell_single\"]",
+      "movement_cues": "Resist leaning toward the one-sided load. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--bear-crawl--technique",
+      "movement": "Bear crawl",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/bear-crawl.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep knees low and move opposite hand and foot together. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--inchworm-walkout--technique",
+      "movement": "Inchworm walkout",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/inchworm-walkout.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Hinge softly, walk out under control, and keep hips steady. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--renegade-row-knees--technique",
+      "movement": "Renegade row from knees",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/renegade-row-from-knees.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Use a wide base and limit trunk rotation. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--half-kneeling-cable-chop--technique",
+      "movement": "Half-kneeling cable chop",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/half-kneeling-cable-chop.png",
+      "equipment_ids": "[\"cable_handle\"]",
+      "movement_cues": "Keep the pelvis square while the arms guide the cable. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--half-kneeling-cable-lift--technique",
+      "movement": "Half-kneeling cable lift",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/half-kneeling-cable-lift.png",
+      "equipment_ids": "[\"cable_handle\"]",
+      "movement_cues": "Move diagonally without arching the lower back. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--sandbag-bear-hug-squat--technique",
+      "movement": "Sandbag bear-hug squat",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/sandbag-bear-hug-squat.png",
+      "equipment_ids": "[\"sandbag\"]",
+      "movement_cues": "Hold the bag close and keep both feet grounded. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--medicine-ball-squat-press--technique",
+      "movement": "Medicine-ball squat to press",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/medicine-ball-squat-to-press.png",
+      "equipment_ids": "[\"medicine_ball\"]",
+      "movement_cues": "Stand fully before pressing the ball overhead. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--partial-turkish-get-up--technique",
+      "movement": "Partial Turkish get-up",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/partial-turkish-get-up.png",
+      "equipment_ids": "[\"kettlebell_single\"]",
+      "movement_cues": "Move one checkpoint at a time with eyes on the load. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--battle-rope-alternating-wave--technique",
+      "movement": "Battle-rope alternating wave",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/battle-rope-alternating-wave.png",
+      "equipment_ids": "[\"battle_rope_pair\"]",
+      "movement_cues": "Keep a stable athletic stance and relaxed shoulders. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--dumbbell-thruster--technique",
+      "movement": "Dumbbell thruster",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/dumbbell-thruster.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Transfer smoothly from the squat into the press. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--step-back-burpee--technique",
+      "movement": "Step-back burpee",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/step-back-burpee.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Step rather than jump and keep the landing controlled. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "resistance-full-body--dumbbell-front-rack-march--technique",
+      "movement": "Dumbbell front-rack march",
+      "category": "resistance-full-body",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/resistance-full-body/dumbbell-front-rack-march.png",
+      "equipment_ids": "[\"dumbbell_pair\"]",
+      "movement_cues": "Stay tall while alternating slow knee lifts. Use a controlled, repeatable technique pace.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--dead-bug--technique",
+      "movement": "Dead bug",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/dead-bug.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Move opposite limbs without losing trunk position. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--bird-dog--technique",
+      "movement": "Bird dog",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/bird-dog.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep hips square as opposite limbs reach. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--forearm-plank--technique",
+      "movement": "Forearm plank",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/forearm-plank.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep a long line and breathe normally. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--high-plank--technique",
+      "movement": "High plank",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/high-plank.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Stack shoulders above wrists and keep hips level. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--side-plank--technique",
+      "movement": "Side plank",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/side-plank.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Stack the shoulders and keep the body long. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--side-plank-knees--technique",
+      "movement": "Side plank from knees",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/side-plank-from-knees.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep hips forward and shoulder supported. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--glute-bridge-march--technique",
+      "movement": "Glute bridge march",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/glute-bridge-march.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep the pelvis level while alternating feet. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--supine-heel-tap--technique",
+      "movement": "Supine heel tap",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/supine-heel-tap.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep the ribs relaxed while alternating taps. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--tabletop-toe-tap--technique",
+      "movement": "Tabletop toe tap",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/tabletop-toe-tap.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Lower one foot at a time without arching. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--bent-knee-leg-lower--technique",
+      "movement": "Bent-knee leg lower",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/bent-knee-leg-lower.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use a small range that keeps the back comfortable. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--reverse-crunch--technique",
+      "movement": "Reverse crunch",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/reverse-crunch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Curl the pelvis gently without swinging. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--modified-curl-up--technique",
+      "movement": "Modified curl-up",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/modified-curl-up.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Lift only the head and shoulders without pulling the neck. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--bicycle-crunch--technique",
+      "movement": "Bicycle crunch",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/bicycle-crunch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Rotate from the trunk without pulling the head. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--slow-mountain-climber--technique",
+      "movement": "Slow mountain climber",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/slow-mountain-climber.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Bring one knee forward while the pelvis stays level. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--standing-pallof-press--technique",
+      "movement": "Standing Pallof press",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/standing-pallof-press.png",
+      "equipment_ids": "[\"long_resistance_band\"]",
+      "movement_cues": "Resist rotation as the hands press forward. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--half-kneeling-pallof-press--technique",
+      "movement": "Half-kneeling Pallof press",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/half-kneeling-pallof-press.png",
+      "equipment_ids": "[\"long_resistance_band\"]",
+      "movement_cues": "Keep hips square and ribs stacked. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--suitcase-carry-march--technique",
+      "movement": "Suitcase carry march",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/suitcase-carry-march.png",
+      "equipment_ids": "[\"dumbbell_single\"]",
+      "movement_cues": "Stay upright despite the one-sided load. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--bear-plank-shoulder-tap--technique",
+      "movement": "Bear plank shoulder tap",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/bear-plank-shoulder-tap.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Tap slowly and minimize trunk rotation. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--hollow-tuck-hold--technique",
+      "movement": "Hollow-body tuck hold",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/hollow-body-tuck-hold.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep knees tucked and lower back comfortable. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "core-stability--quadruped-knee-hover--technique",
+      "movement": "Quadruped knee hover",
+      "category": "core-stability",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/core-stability/quadruped-knee-hover.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Hover knees slightly while keeping the spine neutral. Brace gently and keep breathing throughout.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--side-lying-open-book--gentle-flow",
+      "movement": "Side-lying open book",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/side-lying-open-book.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep knees stacked while the upper body opens. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--wall-angel--gentle-flow",
+      "movement": "Wall angel",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/wall-angel.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Slide only through a comfortable shoulder range. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--neck-rotation--gentle-flow",
+      "movement": "Neck rotation",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/neck-rotation.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Turn slowly within a comfortable range. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--half-kneeling-hip-flexor-stretch--gentle-flow",
+      "movement": "Half-kneeling hip-flexor stretch",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/half-kneeling-hip-flexor-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Tuck the pelvis gently before shifting forward. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--ninety-ninety-hip-switch--gentle-flow",
+      "movement": "Ninety-ninety hip switch",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/ninety-ninety-hip-switch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Rotate the hips under control without forcing the knees. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--seated-hamstring-stretch--gentle-flow",
+      "movement": "Seated hamstring stretch",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/seated-hamstring-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Hinge from the hips rather than rounding forcefully. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--standing-quadriceps-stretch--gentle-flow",
+      "movement": "Standing quadriceps stretch",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/standing-quadriceps-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep knees close and use support if needed. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--standing-calf-stretch--gentle-flow",
+      "movement": "Standing calf stretch",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/standing-calf-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep the back heel down and toes forward. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--supported-deep-squat-hold--gentle-flow",
+      "movement": "Supported deep-squat hold",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/supported-deep-squat-hold.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Use firm support and stay in a comfortable depth. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--adductor-rock-back--gentle-flow",
+      "movement": "Adductor rock-back",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/adductor-rock-back.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep the spine long while the hips move backward. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--figure-four-hip-stretch--gentle-flow",
+      "movement": "Figure-four hip stretch",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/figure-four-hip-stretch.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Keep the ankle flexed and avoid pressing the knee. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    },
+    {
+      "exercise_id": "mobility-flexibility--seated-spinal-rotation--gentle-flow",
+      "movement": "Seated spinal rotation",
+      "category": "mobility-flexibility",
+      "source_image": "tool/workout_media/pipeline/start_images/movement_specific/mobility-flexibility/seated-spinal-rotation.png",
+      "equipment_ids": "[\"none\"]",
+      "movement_cues": "Rotate gently while staying tall. Move smoothly within a comfortable, pain-free range.",
+      "duration_seconds": 10,
+      "motion_delivery": "Show the exact setup, one complete controlled working cycle, and a stable return to the start position within one continuous take."
+    }
+  ],
+  "generation_queue_count": 102,
+  "notes": [
+    "Warm-up videos are demonstrations, not individualized medical advice.",
+    "The user chooses days per week from recovery and experience; missed sessions are not crammed.",
+    "The media queue intentionally reuses one exact movement video across plans.",
+    "Language changes labels and presenter casting direction; silent exercise mechanics stay identical."
+  ]
+}

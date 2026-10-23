@@ -145,6 +145,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
+      if (await _answerSmartPlanIntent(text, questionLocale)) {
+        localHealthHandled = true;
+        return;
+      }
       // A recognized health command (including an invalid one needing
       // clarification) must not be eaten by Food V2's generic "log"/"سجل"
       // prefix. Both hosts validate their own payload and ask for human review;

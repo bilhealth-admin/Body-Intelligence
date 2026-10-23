@@ -56,6 +56,7 @@ void main() {
     'recover errors keep startup retryable and do not route to onboarding',
     (tester) async {
       const ownerId = 'owner-restored-network-error';
+      var attempts = 0;
 
       await tester.pumpWidget(
         _app(
@@ -70,6 +71,7 @@ void main() {
             ),
             startupCloudProfileRestoreProvider.overrideWith((ref, owner) async {
               expect(owner, ownerId);
+              if (++attempts > 1) return true;
               throw const SocketException('network lost');
             }),
             cloudRuntimePreparationProvider.overrideWith(
@@ -82,11 +84,20 @@ void main() {
       );
 
       await tester.pump(const Duration(milliseconds: 2300));
-      await _pumpUntilVisible(tester, find.text('تعذّر فتح بياناتك المحلية'));
+      await _pumpUntilVisible(
+        tester,
+        find.text('تعذّرت استعادة بياناتك السحابية'),
+      );
 
-      expect(find.text('تعذّر فتح بياناتك المحلية'), findsOneWidget);
+      expect(find.text('تعذّرت استعادة بياناتك السحابية'), findsOneWidget);
+      expect(find.text('تعذّر فتح بياناتك المحلية'), findsNothing);
       expect(find.byIcon(Icons.refresh), findsOneWidget);
       expect(find.text('Onboarding Page'), findsNothing);
+      await tester.tap(find.byIcon(Icons.refresh));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 2300));
+      await _pumpUntilVisible(tester, find.text('Dashboard Page'));
+      expect(attempts, 2);
     },
   );
 

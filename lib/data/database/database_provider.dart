@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
+import '../../app/services/app_observability.dart';
 import 'app_database.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -39,7 +40,14 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   ref.onDispose(() {
     disposed = true;
     unawaited(authSubscription?.cancel());
-    unawaited(database.close());
+    // A LazyDatabase whose opener failed rethrows that failure on close.
+    // Observe it locally so retiring that connection cannot emit an uncaught
+    // asynchronous error while startup opens its replacement.
+    unawaited(
+      database.close().catchError((Object error, StackTrace stack) {
+        AppObservability.crashes.record(error, stack);
+      }),
+    );
   });
 
   return database;

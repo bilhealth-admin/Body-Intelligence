@@ -102,6 +102,7 @@ void main() {
     final ios = read('.github/workflows/bil_ios_signed_release.yml');
     const baseDefines = <String>{
       'BIL_ENVIRONMENT=production',
+      'BIL_SMART_PLAN_CLOUD_ENABLED=true',
       'BIL_PAYMENTS_ENABLED=true',
       'BIL_TERMS_URL=https://www.bilhealth.com/terms',
       'BIL_PRIVACY_URL=https://www.bilhealth.com/privacy',

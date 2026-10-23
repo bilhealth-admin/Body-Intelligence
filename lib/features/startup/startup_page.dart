@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../app/services/recoverable_image_picker.dart';
+import '../../data/database/database_provider.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../cloud_platform/providers/cloud_sync_providers.dart';
@@ -279,18 +280,29 @@ class _StartupPageState extends ConsumerState<StartupPage>
     imagePickerRecoveryLocation = null;
   }
 
-  void retry() {
+  void retry({bool reopenLocalDatabase = false}) {
     redirectScheduled = false;
     readyLocation = null;
     controller.value = 1;
     beginMinimumDisplayWindow();
     setState(() => retrying = true);
+    if (reopenLocalDatabase) {
+      // LazyDatabase retains a failed native opener. Re-reading profile and
+      // preferences alone would keep replaying that same failed Future.
+      // Recreate the connection to the same owner-scoped file; no file, row
+      // or encryption key is deleted, replaced or reset.
+      ref.invalidate(databaseProvider);
+    }
     ref.invalidate(userProfileProvider);
     ref.invalidate(dailyCheckInDueProvider);
     ref.invalidate(forceOnboardingProvider);
     ref.invalidate(accountGatewayReviewedProvider);
     ref.invalidate(localDataAccountBindingProvider);
     ref.invalidate(cloudRuntimePreparationProvider);
+    final ownerId = authSession?.user.id;
+    if (ownerId != null) {
+      ref.invalidate(startupCloudProfileRestoreProvider(ownerId));
+    }
     _resetImagePickerRecoveryResolution();
     // Preserve one complete loading frame before surfacing the result of the
     // new attempt. This prevents a stale AsyncError from flashing after the
@@ -325,14 +337,21 @@ class _StartupPageState extends ConsumerState<StartupPage>
         ? ref.watch(startupCloudProfileRestoreProvider(signedInOwnerId))
         : const AsyncValue<bool>.data(false);
     final waitingForAuth = AppEnvironment.cloudConfigured && !authStateResolved;
-    final error =
+    final localError =
         profile.hasError ||
         checkInDue.hasError ||
         forceOnboarding.hasError ||
         accountGatewayReviewed.hasError ||
-        localAccountBinding.hasError ||
-        cloudProfileRestore.hasError;
+        localAccountBinding.hasError;
+    final error = localError || cloudProfileRestore.hasError;
     final showError = error && !retrying;
+    final failure =
+        profile.asError?.error ??
+        checkInDue.asError?.error ??
+        forceOnboarding.asError?.error ??
+        accountGatewayReviewed.asError?.error ??
+        localAccountBinding.asError?.error ??
+        cloudProfileRestore.asError?.error;
 
     if (!waitingForAuth &&
         !error &&
@@ -417,7 +436,16 @@ class _StartupPageState extends ConsumerState<StartupPage>
             const PremiumSplashBackdrop(),
             Center(
               child: showError
-                  ? _StartupError(arabic: arabic, onRetry: retry)
+                  ? _StartupError(
+                      arabic: arabic,
+                      cloudRecovery:
+                          !localError && cloudProfileRestore.hasError,
+                      supportCode: startupFailureSupportCode(
+                        cloudRecovery: !localError,
+                        error: failure,
+                      ),
+                      onRetry: () => retry(reopenLocalDatabase: localError),
+                    )
                   : PremiumSplashExperience(controller: controller),
             ),
           ],
@@ -427,9 +455,35 @@ class _StartupPageState extends ConsumerState<StartupPage>
   }
 }
 
+/// Fixed categories only: never render a native message, path, owner or key.
+@visibleForTesting
+String startupFailureSupportCode({
+  required bool cloudRecovery,
+  required Object? error,
+}) {
+  final category = switch (error) {
+    TimeoutException() => 'TIMEOUT',
+    MissingPluginException() => 'BRIDGE',
+    PlatformException(code: 'health_backup_exclusion_failed') ||
+    PlatformException(code: 'health_backup_exclusion_unverified') => 'PRIVACY',
+    PlatformException(code: 'system_crypto_failed') => 'CRYPTO',
+    PlatformException() => 'PLATFORM',
+    FormatException() => 'FORMAT',
+    _ => 'UNAVAILABLE',
+  };
+  return 'BIL-S-${cloudRecovery ? 'CLOUD' : 'LOCAL'}-$category';
+}
+
 class _StartupError extends StatelessWidget {
-  const _StartupError({required this.arabic, required this.onRetry});
+  const _StartupError({
+    required this.arabic,
+    required this.cloudRecovery,
+    required this.supportCode,
+    required this.onRetry,
+  });
   final bool arabic;
+  final bool cloudRecovery;
+  final String supportCode;
   final VoidCallback onRetry;
 
   @override
@@ -472,8 +526,12 @@ class _StartupError extends StatelessWidget {
                     Text(
                       authFiveLocaleTextFor(
                         arabicLocaleCode(context, arabic),
-                        'Your local data could not be opened',
-                        'تعذّر فتح بياناتك المحلية',
+                        cloudRecovery
+                            ? 'Your cloud data could not be restored'
+                            : 'Your local data could not be opened',
+                        cloudRecovery
+                            ? 'تعذّرت استعادة بياناتك السحابية'
+                            : 'تعذّر فتح بياناتك المحلية',
                       ),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineSmall
@@ -493,6 +551,15 @@ class _StartupError extends StatelessWidget {
                       style: const TextStyle(
                         color: Color(0xFF526779),
                         height: 1.45,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      supportCode,
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF526779),
                       ),
                     ),
                     const SizedBox(height: 22),

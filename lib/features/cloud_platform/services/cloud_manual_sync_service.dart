@@ -80,6 +80,7 @@ final class CloudManualSyncResult {
     // finished. Keep unsupported records/conflicts visible as partial work.
     final complete =
         sync.availability == CloudPlatformAvailability.ready &&
+        sync.failureCode == null &&
         sync.pending == 0 &&
         produce.eligibleRemaining == 0 &&
         sync.conflicts == 0 &&
@@ -103,6 +104,7 @@ final class CloudManualSyncResult {
           sync.pending + produce.eligibleRemaining + (restore?.pending ?? 0),
       unsupported: apply.unsupported,
       reason:
+          sync.failureCode ??
           restore?.reason ??
           ((sync.conflicts + apply.conflicts + (restore?.conflicts ?? 0)) > 0
               ? 'conflict_review_required'
@@ -199,12 +201,15 @@ final class CloudManualSyncService {
     }
 
     CloudPlatformRuntime? runtime;
+    var stage = 'account_key';
     try {
       final key = await CloudAccountKeyRepository(
         client: _client,
       ).resolve(ownerId);
+      stage = 'device_identity';
       final device = await CloudDeviceIdentityRepository().resolve(ownerId);
       if (!isCurrent()) throw StateError('Cloud session changed');
+      stage = 'local_storage';
       final supportDirectory = await getProtectedApplicationSupportDirectory();
       final ledgerPath = p.join(
         supportDirectory.path,
@@ -222,6 +227,7 @@ final class CloudManualSyncService {
         ),
       );
 
+      stage = 'ledger_open';
       runtime = await CloudPlatformCompositionRoot.createSupabase(
         databasePath: ledgerPath,
         client: _client,
@@ -235,11 +241,13 @@ final class CloudManualSyncService {
         consent: consent,
       );
 
+      stage = 'outbox_production';
       final produce = await AppDatabaseCloudOutboxProducer(
         database: _database,
         accountBoundary: _accountBoundary,
         sink: coordinator,
       ).produce();
+      stage = 'page_drain';
       final sync = await drainCloudSyncPages(
         coordinator.synchronize,
         maximumPages: _maximumPagesPerRun,
@@ -256,8 +264,10 @@ final class CloudManualSyncService {
           pulled: sync.pulled,
           conflicts: sync.conflicts,
           pending: sync.pending,
+          reason: sync.failureCode,
         );
       }
+      stage = 'inbox_apply';
       final consumed = await coordinator.readConsumedRecords();
       if (!isCurrent()) throw StateError('Cloud session changed');
       final apply =
@@ -270,6 +280,7 @@ final class CloudManualSyncService {
             records: consumed,
           );
 
+      stage = 'restore_v2';
       final consentRepository =
           _restoreConsent ??
           CloudRestoreConsentRepository(
@@ -325,6 +336,7 @@ final class CloudManualSyncService {
       return CloudManualSyncResult(
         disposition: CloudManualSyncDisposition.unavailable,
         ownerId: ownerId,
+        reason: 'cloud_sync_${stage}_failed',
       );
     } finally {
       await runtime?.store.close();
@@ -355,23 +367,27 @@ Future<CloudSyncReport> drainCloudSyncPages(
   Future<CloudSyncReport> Function() synchronizePage, {
   int maximumPages = 20,
 }) async {
-  assert(maximumPages > 0);
+  if (maximumPages <= 0) {
+    throw ArgumentError.value(maximumPages, 'maximumPages', 'Must be positive');
+  }
   CloudSyncReport? latest;
+  DateTime? startedAt;
   var pushed = 0;
   var pulled = 0;
   var conflicts = 0;
   for (var page = 0; page < maximumPages; page++) {
     final report = await synchronizePage();
+    startedAt ??= report.startedAt;
     latest = report;
     pushed += report.pushed;
     pulled += report.pulled;
     conflicts += report.conflicts;
-    if (report.availability != CloudPlatformAvailability.paused) break;
+    if (!report.canContinue) break;
     await Future<void>.delayed(Duration.zero);
   }
   final report = latest!;
   return CloudSyncReport(
-    startedAt: report.startedAt,
+    startedAt: startedAt!,
     completedAt: report.completedAt,
     pushed: pushed,
     pulled: pulled,
@@ -379,5 +395,8 @@ Future<CloudSyncReport> drainCloudSyncPages(
     pending: report.pending,
     availability: report.availability,
     diagnostics: report.diagnostics,
+    hasMore: report.hasMore,
+    cursorAdvanced: report.cursorAdvanced,
+    failureCode: report.failureCode,
   );
 }

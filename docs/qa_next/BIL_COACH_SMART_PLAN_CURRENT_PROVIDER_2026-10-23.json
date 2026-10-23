@@ -1,0 +1,140 @@
+{
+  "version": 128,
+  "status": "9_OF_11_DISTINCT_CASES_PASSED_ACROSS_TWO_RUNS_2_UNRESOLVED",
+  "request_capabilities": {
+    "smart_plan_tools_version": 1,
+    "health_citation_catalog_version": 2
+  },
+  "successful_cases": [
+    {
+      "case": "target_goal",
+      "model": "gemini-3.8-flash",
+      "provider_attempts": 1,
+      "latency_ms": 5761,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "log_weight",
+      "model": "gemini-3.6-flash",
+      "provider_attempts": 2,
+      "latency_ms": 12857,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "today",
+      "model": "gemini-3.6-flash",
+      "provider_attempts": 2,
+      "latency_ms": 14461,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "travel",
+      "model": "gemini-3.6-flash",
+      "provider_attempts": 2,
+      "latency_ms": 19256,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "three_months",
+      "model": "gemini-3.6-flash",
+      "provider_attempts": 2,
+      "latency_ms": 16532,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "allergy_dinner_en",
+      "model": "gemini-3.8-flash",
+      "provider_attempts": 1,
+      "latency_ms": 4419,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "allergy_dinner_ar",
+      "model": "gemini-3.6-flash",
+      "provider_attempts": 2,
+      "latency_ms": 5302,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "need_plan",
+      "model": "gemini-3.6-flash",
+      "provider_attempts": 2,
+      "latency_ms": 16617,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    },
+    {
+      "case": "combined_month",
+      "model": "gemini-3.6-flash",
+      "provider_attempts": 2,
+      "latency_ms": 16954,
+      "reserved": 0,
+      "duplicate_http": 409,
+      "cleanup": true
+    }
+  ],
+  "failed_cases": [
+    {
+      "case": "missed",
+      "client_failure_code": "provider_timeout",
+      "cleanup_verified": true
+    },
+    {
+      "case": "done_without_saved_plan",
+      "client_failure_code": "missing_health_citation",
+      "cleanup_verified": true
+    }
+  ],
+  "evidence": {
+    "file": "build/release-ios38-android33/coach-live-v128-current-client-all.json",
+    "sha256": "04e25b34eb9cb160727c040d1a4236a2f573e288e0d9fc55c1bc2e4f2fa56381"
+  },
+  "post_live_exact_source_readback": {
+    "version": 128,
+    "files": 12,
+    "match": true
+  },
+  "aggregate_failure_diagnostics": "build/release-ios38-android33/coach-v128-failure-aggregate.json",
+  "note": "No happy-path success claimed for failed cases. All failed disposable fixtures cleaned. No live retries until provider rest during full frozen validation; source validation remains independent.",
+  "previous_v127": {
+    "version": 127,
+    "status": "FAIL4PASS7FAIL",
+    "evidence": "build/release-ios38-android33/coach-live-v127-all.json",
+    "request_capabilities": {
+      "smart_plan_tools_version": 1,
+      "health_citation_catalog_version": 1
+    },
+    "scope": "Prior synthetic probe used default legacy health catalog1, unlike current native client2; preserved as that contract profile, not relabeled current-native proof.",
+    "failed_fixture_cleanup_verified": true
+  },
+  "first_round_summary": {
+    "report": "build/release-ios38-android33/coach-live-v128-current-client-all.json",
+    "status": "FAIL",
+    "pass": 7,
+    "fail": 4
+  },
+  "live_qualification_pass": false,
+  "post_frozen_retry": {
+    "report": "build/release-ios38-android33/coach-live-v128-current-client-post-frozen-115252-retry.json",
+    "status": "FAIL",
+    "pass": 2,
+    "fail": 2
+  },
+  "post_retry_readback": "build/release-ios38-android33/coach-post-frozen-retry-cloud-readback.json",
+  "scope": "Nine distinct cases have at least one PASS on the same v128 source and native2/1 contract across two runs. Neither original batch nor retry is all-PASS. Failed reply text is not retained; no diagnosis of its prose or independent failed-fixture balance readback is claimed."
+}

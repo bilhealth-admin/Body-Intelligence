@@ -146,6 +146,11 @@ void main() {
       'read_fasting',
       'preview_plan',
       'search_health_content',
+      'read_active_smart_plan',
+      'preview_smart_plan_day',
+      'create_smart_plan_draft',
+      'request_smart_plan_revision',
+      'record_smart_plan_workout',
     };
     expect(BilToolRegistry.tools.keys, unorderedEquals(expectedToolNames));
     expect(BilToolRegistry.tools['sign_out']?.risk, BilToolRisk.sensitive);

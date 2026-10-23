@@ -17,10 +17,13 @@ class AiCoachAnswerReportDraft {
   final String? optionalNote;
 }
 
+enum AiCoachReportSubject { answer, smartPlan }
+
 Future<void> showAiCoachAnswerReportSheet(
   BuildContext context,
-  ValueChanged<AiCoachAnswerReportDraft> onReport,
-) async {
+  ValueChanged<AiCoachAnswerReportDraft> onReport, {
+  AiCoachReportSubject subject = AiCoachReportSubject.answer,
+}) async {
   String? reason;
   var consentAccepted = false;
   var privacyDetailsExpanded = false;
@@ -115,8 +118,12 @@ Future<void> showAiCoachAnswerReportSheet(
                         child: Text(
                           intelligenceText(
                             context,
-                            'Report this AI response',
-                            'الإبلاغ عن إجابة AI Coach',
+                            subject == AiCoachReportSubject.smartPlan
+                                ? 'Report this plan'
+                                : 'Report this AI response',
+                            subject == AiCoachReportSubject.smartPlan
+                                ? 'الإبلاغ عن هذه الخطة'
+                                : 'الإبلاغ عن إجابة AI Coach',
                           ),
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.w700),
@@ -222,8 +229,12 @@ Future<void> showAiCoachAnswerReportSheet(
                               child: Text(
                                 intelligenceText(
                                   context,
-                                  'Only your chosen answer and any note you add go to authorized BIL moderators. The answer may include health information.',
-                                  'تُرسل الإجابة التي تختارها وأي ملاحظة تضيفها إلى مشرفي BIL المخولين فقط. وقد تتضمن الإجابة معلومات صحية.',
+                                  subject == AiCoachReportSubject.smartPlan
+                                      ? 'A summary of this plan and any note you add go to authorized BIL moderators. The summary may include health information.'
+                                      : 'Only your chosen answer and any note you add go to authorized BIL moderators. The answer may include health information.',
+                                  subject == AiCoachReportSubject.smartPlan
+                                      ? 'يُرسل ملخص لهذه الخطة وأي ملاحظة تضيفها إلى مشرفي BIL المخولين فقط. وقد يتضمن الملخص معلومات صحية.'
+                                      : 'تُرسل الإجابة التي تختارها وأي ملاحظة تضيفها إلى مشرفي BIL المخولين فقط. وقد تتضمن الإجابة معلومات صحية.',
                                 ),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
@@ -282,8 +293,12 @@ Future<void> showAiCoachAnswerReportSheet(
                             child: Text(
                               intelligenceText(
                                 context,
-                                'The selected answer, reason, language, AI runtime, and any optional note are shared only for safety review. Your question, other messages, and health profile are not included.',
-                                'تُشارك الإجابة المختارة والسبب واللغة ونوع تشغيل الذكاء الاصطناعي وأي ملاحظة اختيارية لمراجعة السلامة فقط. لا يُرسل سؤالك أو بقية المحادثة أو ملفك الصحي.',
+                                subject == AiCoachReportSubject.smartPlan
+                                    ? 'Plan ID and revision, today’s suggested meals and workout status, reason, language, on-device runtime and any note are shared for safety review. Your conversation, full schedule and health profile are not included.'
+                                    : 'The selected answer, reason, language, AI runtime, and any optional note are shared only for safety review. Your question, other messages, and health profile are not included.',
+                                subject == AiCoachReportSubject.smartPlan
+                                    ? 'يُشارك رقم الخطة وإصدارها ومقترحات وجبات اليوم وحالة التدريب والسبب واللغة والتشغيل المحلي والملاحظة لمراجعة السلامة. لا تُرسل المحادثة أو الجدول الكامل أو ملفك الصحي.'
+                                    : 'تُشارك الإجابة المختارة والسبب واللغة ونوع تشغيل الذكاء الاصطناعي وأي ملاحظة اختيارية لمراجعة السلامة فقط. لا يُرسل سؤالك أو بقية المحادثة أو ملفك الصحي.',
                               ),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
@@ -323,8 +338,12 @@ Future<void> showAiCoachAnswerReportSheet(
                                   child: Text(
                                     intelligenceText(
                                       context,
-                                      'I agree to send this answer for safety review.',
-                                      'أوافق على إرسال هذه الإجابة لمراجعة السلامة.',
+                                      subject == AiCoachReportSubject.smartPlan
+                                          ? 'I agree to send this plan summary for safety review.'
+                                          : 'I agree to send this answer for safety review.',
+                                      subject == AiCoachReportSubject.smartPlan
+                                          ? 'أوافق على إرسال ملخص هذه الخطة لمراجعة السلامة.'
+                                          : 'أوافق على إرسال هذه الإجابة لمراجعة السلامة.',
                                     ),
                                     style: Theme.of(context)
                                         .textTheme

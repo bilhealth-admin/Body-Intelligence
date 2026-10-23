@@ -201,17 +201,28 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
       'assets/catalogs/recipes/v1/release-manifest.json';
   final AssetBundle _bundle;
   Future<List<RecipeCatalogSummary>>? _indexFuture;
+  List<RecipeCatalogSummary>? _indexData;
   RecipeReleaseManifest? _manifest;
   Map<String, RecipeCatalogSummary> _byId = const {};
   Map<String, RecipeCatalogImageAsset> _imageAssets = const {};
   final Map<int, Future<List<Map<String, dynamic>>>> _shards = {};
+  final Map<int, List<Map<String, dynamic>>> _shardData = {};
   final Map<String, Future<RecipeCatalogCardFacts>> _cardFacts = {};
+  final Map<String, RecipeCatalogCardFacts> _cardData = {};
 
   Future<List<RecipeCatalogSummary>> loadIndex() {
-    return _indexFuture ??= _loadIndex().catchError((Object error) {
-      _indexFuture = null;
-      throw error;
-    });
+    // Reuse verified values after completion, not a completed Future tied to
+    // a departed execution zone. Concurrent loads still share one operation.
+    if (_indexData != null) return Future.value(_indexData!);
+    return _indexFuture ??= _loadIndex()
+        .then((value) {
+          _indexData = value;
+          return value;
+        })
+        .catchError((Object error) {
+          _indexFuture = null;
+          throw error;
+        });
   }
 
   Future<List<RecipeCatalogSummary>> _loadIndex() async {
@@ -326,11 +337,17 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
         summary.ordinal >= 50) {
       throw const FormatException('Recipe summary is not catalog-owned.');
     }
-    final records = await (_shards[summary.shard] ??= _loadShard(summary.shard)
-        .catchError((Object error) {
-          _shards.remove(summary.shard);
-          throw error;
-        }));
+    final records =
+        _shardData[summary.shard] ??
+        await (_shards[summary.shard] ??= _loadShard(summary.shard)
+            .then((value) {
+              _shardData[summary.shard] = value;
+              return value;
+            })
+            .catchError((Object error) {
+              _shards.remove(summary.shard);
+              throw error;
+            }));
     final record = records[summary.ordinal];
     if (record['canonicalId'] != summary.id ||
         record['contentFingerprint'] != summary.fingerprint) {
@@ -345,6 +362,9 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
   /// caller can safely pass only a canonical id. The underlying shard and the
   /// projection future are both cached, avoiding one decode per card.
   Future<RecipeCatalogCardFacts> loadCardFacts(String canonicalId) {
+    if (_cardData.containsKey(canonicalId)) {
+      return Future.value(_cardData[canonicalId]!);
+    }
     return _cardFacts.putIfAbsent(canonicalId, () async {
       await loadIndex();
       final summary = _byId[canonicalId];
@@ -352,7 +372,9 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
         throw const FormatException('Recipe identity is not catalog-owned.');
       }
       final detail = await loadDetail(summary);
-      return RecipeCatalogCardFacts.fromDetail(detail);
+      final facts = RecipeCatalogCardFacts.fromDetail(detail);
+      _cardData[canonicalId] = facts;
+      return facts;
     });
   }
 

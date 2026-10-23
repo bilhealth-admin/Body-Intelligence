@@ -127,7 +127,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   late final TabController _tabs;
   final _searchController = TextEditingController();
   Future<List<WellnessContentItem>>? _items;
-  late final Future<GymSixMonthPlan> _gymPlan;
+  Future<GymSixMonthPlan>? _gymPlan;
   String? _loadedLocale;
   String _query = '';
   String? _category;
@@ -146,11 +146,6 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   void initState() {
     super.initState();
     _tabs = TabController(length: 4, vsync: this)..addListener(_onTabChanged);
-    _gymPlan =
-        widget.gymPlanLoader?.call() ??
-        (widget.loader == null
-            ? _loadBundledGymPlan()
-            : Future.value(_emptyInjectedGymPlan));
     _loadRoutineIds();
   }
 
@@ -254,6 +249,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   void _reload() {
     final locale = _loadedLocale ?? 'en';
     setState(() {
+      _gymPlan = null;
       _items =
           widget.loader?.call(locale) ??
           _manager.loadWorkoutLibraryItems(locale: locale);
@@ -449,7 +445,16 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                   final items = snapshot.data ?? const <WellnessContentItem>[];
                   _scheduleInitialItem(items);
                   return FutureBuilder<GymSixMonthPlan>(
-                    future: _gymPlan,
+                    // Attach the error boundary when starting this load. A
+                    // previously started future could fail while the outer
+                    // library was still loading, before it had a listener.
+                    future: _gymPlan ??= Future.sync(
+                      () =>
+                          widget.gymPlanLoader?.call() ??
+                          (widget.loader == null
+                              ? _loadBundledGymPlan()
+                              : Future.value(_emptyInjectedGymPlan)),
+                    ),
                     builder: (context, planSnapshot) {
                       if (planSnapshot.connectionState !=
                           ConnectionState.done) {

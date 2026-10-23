@@ -1,0 +1,7 @@
+/// Public disclosure only; no account state, identifiers or health data.
+const bilSmartPlanBackupPrivacyTitle = 'Saved plans and optional backup';
+const bilSmartPlanBackupPrivacyArabicTitle = 'الخطط المحفوظة والنسخ الاختياري';
+const bilSmartPlanBackupPrivacyEnglish =
+    'Cloud sync is optional and selective. Nutrition and goal backup require separate choices on supported builds. Saved Smart Plans stay on your device unless you separately enable plan backup. That backup sends plan settings, schedules, meal suggestions, confirmed completion state and revisions to your access-controlled Supabase account store. Suggestions are not logged food or completed activity. You can export or delete saved plans and stop plan backup in More > Sharing & Privacy > Saved plan data. A deletion marker may remain to prevent another device from restoring a deleted plan. Plan backup does not automatically copy HealthKit or Health Connect records.';
+const bilSmartPlanBackupPrivacyArabic =
+    'المزامنة السحابية اختيارية وانتقائية. يحتاج نسخ التغذية والأهداف إلى اختيار مستقل في النسخ الداعمة. تبقى الخطط الذكية المحفوظة على جهازك ما لم تفعّل نسخ الخطة منفصلًا. يرسل النسخ إعدادات الخطة وجدولها واقتراحات الوجبات وحالة الإكمال المؤكدة والمراجعات إلى مخزن حسابك في Supabase المحمي بضوابط الوصول. الاقتراحات ليست طعامًا مسجلًا أو نشاطًا مكتملًا. يمكنك التصدير أو الحذف وإيقاف نسخ الخطة من المزيد > المشاركة والخصوصية > بيانات الخطط المحفوظة. قد تبقى علامة حذف لمنع استعادة الخطة المحذوفة من جهاز آخر. نسخ الخطة لا ينسخ سجلات HealthKit أو Health Connect تلقائيًا.';

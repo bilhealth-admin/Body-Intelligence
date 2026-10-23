@@ -31,7 +31,8 @@ def passed():
 
 class RollbackAuditTest(unittest.TestCase):
     def test_all_real_audits_keep_three_segments_and_rollback(self):
-        self.assertEqual(len(audit.SQL_FILES), 5)
+        self.assertEqual(len(audit.SQL_FILES), 7)
+        self.assertIn('tool/release/coach_memory_sync_production_rollback_e2e.sql', audit.SQL_FILES)
         for name in audit.SQL_FILES:
             with self.subTest(name=name):
                 audit.segments((audit.ROOT / name).read_text(encoding='utf-8-sig'))

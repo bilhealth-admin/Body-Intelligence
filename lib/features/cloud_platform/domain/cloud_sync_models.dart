@@ -150,6 +150,9 @@ final class CloudSyncReport {
     required this.pending,
     required this.availability,
     required Iterable<String> diagnostics,
+    this.hasMore = false,
+    this.cursorAdvanced = false,
+    this.failureCode,
   }) : diagnostics = List.unmodifiable(diagnostics);
 
   final DateTime startedAt;
@@ -161,5 +164,18 @@ final class CloudSyncReport {
   final CloudPlatformAvailability availability;
   final List<String> diagnostics;
 
-  bool get completed => availability == CloudPlatformAvailability.ready;
+  /// Only a successfully persisted page may authorize the next request.
+  /// A paused failure must never be interpreted as pagination.
+  final bool hasMore;
+  final bool cursorAdvanced;
+  final String? failureCode;
+
+  bool get canContinue =>
+      availability == CloudPlatformAvailability.paused &&
+      hasMore &&
+      cursorAdvanced &&
+      failureCode == null;
+
+  bool get completed =>
+      availability == CloudPlatformAvailability.ready && failureCode == null;
 }

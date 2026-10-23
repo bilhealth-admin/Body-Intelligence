@@ -21,7 +21,8 @@ void main() {
     ).readAsStringSync();
     expect(localGateway, contains(r'$coachHealthToolProtocol'));
     final localPromptSources = '$localGateway\n$healthProtocol';
-    expect(BilToolRegistry.tools, hasLength(40));
+    // Five owner-bound Smart Plan proposals extend the original forty tools.
+    expect(BilToolRegistry.tools, hasLength(45));
     // The cloud must admit exactly the same finite allow-list the device
     // validates. A free-form prompt alone cannot authorize a new action.
     final cloudAllowList = RegExp(

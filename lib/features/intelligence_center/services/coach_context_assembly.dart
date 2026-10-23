@@ -254,3 +254,76 @@ List<Map<String, Object?>> _coachActivityHistory(
         ..sort((a, b) => '${b['day']}'.compareTo('${a['day']}'));
   return activityHistory;
 }
+
+/// Retain the latest explicit outcome for each recommendation kind before
+/// filling the existing ten-row context budget with recent unanswered items.
+/// This reads existing owner records only; it never stores an inferred refusal.
+List<Map<String, Object?>> compactCoachDecisionMemories(
+  Iterable<DecisionMemory> memories,
+) {
+  const responses = {'accepted', 'dismissed', 'notSuitable', 'done'};
+  bool reviewed(DecisionMemory row) =>
+      responses.contains(row.response) ||
+      (row.helpfulness != null &&
+          row.helpfulness! >= 1 &&
+          row.helpfulness! <= 5);
+  DateTime interactionAt(DecisionMemory row) {
+    final dates = <DateTime>[?row.respondedAt, ?row.evaluatedAt];
+    if (dates.isEmpty) return row.surfacedAt;
+    return dates.reduce((a, b) => a.isAfter(b) ? a : b);
+  }
+
+  final current = memories.where((row) => row.deletedAt == null).toList()
+    ..sort((a, b) => b.surfacedAt.compareTo(a.surfacedAt));
+  final latestReviewed = <String, DecisionMemory>{};
+  for (final row in current.where(reviewed)) {
+    final previous = latestReviewed[row.recommendationKey];
+    if (previous == null ||
+        interactionAt(row).isAfter(interactionAt(previous))) {
+      latestReviewed[row.recommendationKey] = row;
+    }
+  }
+  final outcomes = latestReviewed.values.toList()
+    ..sort((a, b) => interactionAt(b).compareTo(interactionAt(a)));
+  final selected = <DecisionMemory>[];
+  final seen = <String>{};
+  for (final row in [...outcomes, ...current]) {
+    if (reviewed(row) &&
+        latestReviewed[row.recommendationKey]?.uuid != row.uuid) {
+      continue;
+    }
+    if (!seen.add(row.uuid)) continue;
+    selected.add(row);
+    if (selected.length == 10) break;
+  }
+  return selected
+      .map((memory) {
+        final dates = <DateTime>[
+          memory.surfacedAt,
+          ?memory.respondedAt,
+          ?memory.evaluatedAt,
+        ];
+        final updatedAt = dates.reduce((a, b) => a.isAfter(b) ? a : b);
+        return <String, Object?>{
+          'source': 'owner_decision_memory',
+          'recommendationKey': memory.recommendationKey,
+          'title': memory.title,
+          'reason': memory.reason,
+          'confidence': memory.confidence,
+          'response': memory.response,
+          // Recommendation wording can be refreshed by the existing card engine.
+          // Do not claim the current wording is an immutable response-time copy.
+          'responseScope': 'recommendation_kind',
+          'wordingSource': 'latest_stored_recommendation',
+          if (memory.outcome != null) 'outcome': memory.outcome,
+          if (memory.helpfulness != null) 'helpfulness': memory.helpfulness,
+          'surfacedAt': memory.surfacedAt.toUtc().toIso8601String(),
+          if (memory.respondedAt != null)
+            'respondedAt': memory.respondedAt!.toUtc().toIso8601String(),
+          if (memory.evaluatedAt != null)
+            'evaluatedAt': memory.evaluatedAt!.toUtc().toIso8601String(),
+          'updatedAt': updatedAt.toUtc().toIso8601String(),
+        };
+      })
+      .toList(growable: false);
+}

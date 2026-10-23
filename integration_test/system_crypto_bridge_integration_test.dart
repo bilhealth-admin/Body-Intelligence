@@ -4,6 +4,10 @@ import 'dart:typed_data';
 
 import 'package:body_intelligence_log/features/cloud_platform/services/aes_gcm_cloud_payload_cipher.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/cloud_account_key_repository.dart';
+import 'package:body_intelligence_log/app/services/health_storage_directory_native.dart';
+import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/database/database_scope.dart';
+import 'package:path/path.dart' as p;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -48,6 +52,23 @@ void main() {
       plaintext,
     );
 
+    // Authentication failure must not become an empty or accepted cloud page.
+    for (final damaged in [
+      Uint8List.fromList(sealed.protectedBytes)..[0] ^= 1,
+      Uint8List.fromList(sealed.protectedBytes)
+        ..[sealed.protectedBytes.length - 1] ^= 1,
+      Uint8List.fromList(sealed.protectedBytes.take(8).toList()),
+    ]) {
+      await expectLater(
+        primitive.decrypt(
+          key: Uint8List.fromList(List<int>.generate(32, (index) => index)),
+          nonce: sealed.nonce,
+          protectedBytes: damaged,
+        ),
+        throwsA(isA<Exception>()),
+      );
+    }
+
     // Fixed pre-migration v1 wire fixture: zero key/nonce, no AAD, JSON
     // plaintext, and ciphertext followed immediately by the 16-byte GCM tag.
     final legacyCipher = AesGcmCloudPayloadCipher(Uint8List(32));
@@ -66,6 +87,82 @@ void main() {
       <String, Object?>{'legacy': true},
     );
   });
+
+  testWidgets(
+    'native owner SQLite opens, persists encrypted state and reopens safely',
+    (tester) async {
+      expect(Platform.isAndroid || Platform.isIOS, isTrue);
+      // Exercises the real iOS backup-exclusion channel, PathProvider, SQLite
+      // native loader, background connection and migrations, with no app/Auth.
+      final directory = await getProtectedApplicationSupportDirectory();
+      expect(
+        await File(p.join(directory.path, 'body_intelligence.sqlite')).exists(),
+        isFalse,
+        reason:
+            'Run only on an isolated QA target; never adopt real legacy data.',
+      );
+      final suffix = DateTime.now().microsecondsSinceEpoch;
+      final owners = ['bil-native-db-a-$suffix', 'bil-native-db-b-$suffix'];
+      final files = <File>[];
+      for (final owner in owners) {
+        final name = LocalDatabaseScope.databaseFileName(owner);
+        for (final tail in ['', '-wal', '-shm', '-journal']) {
+          final file = File(p.join(directory.path, '$name$tail'));
+          expect(
+            await file.exists(),
+            isFalse,
+            reason: 'Never overwrite preexisting data.',
+          );
+          files.add(file);
+        }
+      }
+      AppDatabase? database;
+      addTearDown(() async {
+        await database?.close();
+        // Exact, newly allocated fixture paths only; no directory deletion.
+        for (final file in files) {
+          expect(p.dirname(file.absolute.path), directory.absolute.path);
+          if (await file.exists()) await file.delete();
+        }
+      });
+      final cipher = AesGcmCloudPayloadCipher(
+        Uint8List.fromList(List<int>.generate(32, (i) => i + 1)),
+      );
+      final payload = <String, Object?>{'fixture': true, 'cursor': 'qa-page-2'};
+      final envelope = await cipher.encrypt(payload);
+      database = AppDatabase(localOwnerId: owners.first);
+      await database.customStatement(
+        'INSERT INTO preferences (key, value) VALUES (?, ?)',
+        ['qa.native.encrypted-state', jsonEncode(envelope)],
+      );
+      await database.close();
+      database = AppDatabase(localOwnerId: owners.first);
+      final rows = await database
+          .customSelect(
+            "SELECT value FROM preferences WHERE key = 'qa.native.encrypted-state'",
+          )
+          .get();
+      expect(rows, hasLength(1));
+      expect(
+        await cipher.decrypt(
+          Map<String, Object?>.from(
+            jsonDecode(rows.single.read<String>('value')) as Map,
+          ),
+        ),
+        payload,
+      );
+      await database.close();
+      database = AppDatabase(localOwnerId: owners.last);
+      expect(
+        await database
+            .customSelect(
+              "SELECT value FROM preferences WHERE key = 'qa.native.encrypted-state'",
+            )
+            .get(),
+        isEmpty,
+      );
+    },
+  );
 
   testWidgets(
     'native secure account-key cache survives reopen and isolates owners',

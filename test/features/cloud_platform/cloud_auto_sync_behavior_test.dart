@@ -180,6 +180,9 @@ class _Fixture {
 
 void main() {
   for (final reason in [
+    'cloud_sync_decrypt_failed',
+    'cloud_sync_cursor_write_failed',
+    'cloud_sync_dead_letters_pending',
     'server_or_consent_unavailable',
     'server_unsupported',
     'conflict_review_required',

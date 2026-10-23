@@ -78,8 +78,10 @@ class CoachContextSnapshot {
     this.activityHistory = const <Map<String, Object?>>[],
     this.bodyContextHistory = const <Map<String, Object?>>[],
     this.personalExperiments = const <Map<String, Object?>>[],
+    this.smartPlan = const <String, Object?>{},
   });
 
+  final Map<String, Object?> smartPlan;
   final DateTime generatedAt;
   final Map<String, Object?> profile;
   final List<CoachWeightPoint> weights;
@@ -184,6 +186,7 @@ class CoachContextSnapshot {
     'activityHistory': activityHistory,
     'bodyContextHistory': bodyContextHistory,
     'personalExperiments': personalExperiments,
+    if (smartPlan.isNotEmpty) 'smartPlan': smartPlan,
   };
 
   /// Compact, deterministic facts computed from the complete weight series.

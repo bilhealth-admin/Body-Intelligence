@@ -225,6 +225,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                       (t('Plan', 'الخطة'), '/plan'),
                       (t('Progress', 'التقدم'), '/history'),
                       (t('Tools', 'الأدوات'), '/daily-log'),
+                      (t('My Plan', 'خطتي'), '/smart-plan'),
                     ])
                       Padding(
                         padding: const EdgeInsetsDirectional.only(end: 5),

@@ -526,6 +526,7 @@ begin
   -- added/removed/changed trigger still blocks before fixture creation.
   if exists (
     with expected(relation, name, trigger_hash, function_hash) as (values
+      ('auth.users'::regclass,'bil_remove_owned_circles_before_account_delete_v1','8e49f7b56a76260df01a0484b99feb30','b78b4aa2ab0840c7aab089abc81f15f1'),
       ('public.bil_community_notifications'::regclass,'bil_post_review_activity_seen_v2','098c64dd0b11c571bf193646cf696194','057867220bd04f7229e3ea19b2dcfd6d'),
       ('public.bil_community_notifications'::regclass,'bil_sync_post_receipt_seen_v1','285a14ad8fe3d95745045300f63c7ff8','7c52494c3197c17ce4f4195c4bdb78b9'),
       ('private.bil_community_post_events_v1'::regclass,'bil_post_review_event_seen_v2','945c08aae4256c504df955ce394c4f3d','129535ef7d3c09843482ab77280bfcda')
@@ -606,10 +607,6 @@ begin
     if v_error_state is distinct from '42501' then
       raise exception 'AUDIT direct foreign notification preference read was not denied';
     end if;
-    insert into public.bil_public_profiles(user_id,display_name,bio,profile_visibility,
-        discoverable,allow_follows,show_membership_tier)
-      values(v_uid,case when v_uid=v_a then 'Audit Author' else 'Audit Reviewer' end,
-        'Nutrition release audit','public',true,true,false);
     -- SDK omits onConflict: PostgREST uses the complete composite primary key.
     -- Preserve the canonical owner/current-policy trigger on both write paths.
     insert into public.bil_content_policy_acceptances(user_id,policy_version)
@@ -619,6 +616,10 @@ begin
     if v_result->>'status' is distinct from 'accepted' then
       raise exception 'AUDIT authoritative policy readback did not accept: %',v_result;
     end if;
+    insert into public.bil_public_profiles(user_id,display_name,bio,profile_visibility,
+        discoverable,allow_follows,show_membership_tier)
+      values(v_uid,case when v_uid=v_a then 'Audit Author' else 'Audit Reviewer' end,
+        'Nutrition release audit','public',true,true,false);
     v_handle:=case when v_uid=v_a then 'qa18970beb' else 'qa1958c6c4' end;
     perform public.bil_social_claim_handle_v2(v_handle);
     if public.bil_join_community_circle_v1(v_circle) is distinct from 'active' then

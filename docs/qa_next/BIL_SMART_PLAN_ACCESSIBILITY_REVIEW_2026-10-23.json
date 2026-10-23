@@ -1,0 +1,239 @@
+{
+  "schema": "bil.smart-plan.visual-accessibility-review.v1",
+  "recorded_at_utc": "2026-10-23T05:15:16.455293+00:00",
+  "scope": "Smart Plan surfaces only; no global theme or Dashboard change",
+  "actual_failures": [
+    {
+      "label": "Today selected tab",
+      "required": 4.5,
+      "actual": 3.68
+    },
+    {
+      "label": "Outlined actions on pearl panels",
+      "required": 4.5,
+      "actual_min": 4.11,
+      "actual_max": 4.39
+    },
+    {
+      "label": "Active status and calendar icons",
+      "required": "4.5 text / 3.0 icons",
+      "actual_min": 2.7,
+      "actual_max": 3.6
+    },
+    {
+      "label": "Recipe style floating label overlaps training explanation",
+      "required": "non-overlapping",
+      "fix": "16 logical-pixel spacing after the explanation"
+    }
+  ],
+  "fix": "Existing BIL navy action/status ink in light mode and existing primary ink in dark; primary/onPrimary selected tabs; 16px gap before recipe style. No global scope, geometry or navigation substitution.",
+  "images": [
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_390.png",
+      "before_sha256": "df4e71841f1c7d8c30791c9e1820606d015e4004c34f41c63b4c9614eac7e670",
+      "after_sha256": "f541e9b67e0c6303279e0c6cf8f842aada4c33100fd7d4ec88c76ee7d82396e2"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_memory.png",
+      "before_sha256": "ac051d8cbf84512fd26ca834539471c4801eda50d3bf2aafad2cce9facb741a5",
+      "after_sha256": "cb11d72d983366219f2bfcf031c5f43223c174118bb7cd703a36bcd4fe250287"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_report.png",
+      "before_sha256": "b6a1681f6b22528c56a1fa6fcd6b16ef4de5c457cebe85c439682a012ea68fdb",
+      "after_sha256": "a9fabfbfa788004aeab6a658d94903a3207ad5faf7f7c980cd0e5cc313ef1001"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_ar_dark.png",
+      "before_sha256": "84ff0205bb156b2f8050e15656328c6ebad7e3ca5924478371aa6e86d56bc0b1",
+      "after_sha256": "c913ab7dfd25fee9692a933e549fe73eaf139f60895dabece69314f46f07e0a6"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_ar_light.png",
+      "before_sha256": "57807ed972f83f05d15656e11a9e2b5342eb0345728863015163e3d121c1202e",
+      "after_sha256": "21b55fcb1a101957f5094ac7e3f1accc85c811406c568420df04bf212f35e4bd"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_en_dark.png",
+      "before_sha256": "8b242fdeecca98bd0e15499f2a92fe033d1b597a1509cf74f45a34a07a61e6ea",
+      "after_sha256": "e77fbbd43a1e1349546a806c26bc1bcd8ceeef55fe8a167bf342a97584c4d063"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_conflict_en_light.png",
+      "before_sha256": "55fad422c3ad57ddc892125b8c55d4926fd95d0a1cd2673a098cf6548aa55c33",
+      "after_sha256": "4786e29306a193e6e4194542ace3256866c3821172349b176e83f1c9eafb5175"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_390.png",
+      "before_sha256": "d0592a8b1b85d7a70e807804514506532ce9c4771401b5b44042abaf91bf45a1",
+      "after_sha256": "400c2c95df79cbb2039b96a63e960d211746a9776f6148f07e78cc333d6b9292"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_memory.png",
+      "before_sha256": "9d9b769e109abdbd26163c205999f94ce3060d5127bb8348015fc6ee9d27cbff",
+      "after_sha256": "98f7b1ec86de57d60ac92dcbdb112d57d8793b66306e0f2cc215a15635d64dee"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_report.png",
+      "before_sha256": "6e4f1ae82fc41e05b0beec2026055073d39ed71827606e4575fef334479701b6",
+      "after_sha256": "4f2571db093ba69422be388570ea7d10a7a544f2464d4ec4421842975871a5e7"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_ar.png",
+      "before_sha256": "577df29f89b33667f3ba3f64b873fe5436eba5d2245acab6ef5c5f903cb78ffb",
+      "after_sha256": "4114ff6fe0d345cc9321a8359c5641d27ffff97f48c19e519749aafa8f7348db"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_en.png",
+      "before_sha256": "b133df350e0735a574f895f10cd6e7468559a2d57274a82f83bd506013d4862d",
+      "after_sha256": "27299fc34330147caac30eb23c94ec24435a4bff6bb774c3efa748470596d835"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_dark.png",
+      "before_sha256": "0f1e4c105ac9f5effa2b208ed23a772df8395ce812b9de6f557aac84f27a8bcd",
+      "after_sha256": "0f1e4c105ac9f5effa2b208ed23a772df8395ce812b9de6f557aac84f27a8bcd"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_light.png",
+      "before_sha256": "fdec8e49771143754f5e1f029424af56ea30d0a8e2ec6f8f0e5a24c4da6d5e4a",
+      "after_sha256": "39f500a5a76c3cfb34a1e3af143364adf59bcc06cc95721e69d141f6926679a0"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_dark.png",
+      "before_sha256": "d47b12a9118ca44bb8b1f56377b57c92871b5e21aa5aabb6b8c3e50b6e954c79",
+      "after_sha256": "d47b12a9118ca44bb8b1f56377b57c92871b5e21aa5aabb6b8c3e50b6e954c79"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_light.png",
+      "before_sha256": "daeb184ae6bb702c196d6b16ec369d9081e3c03d46cf18b76ddd841f1f1f6e35",
+      "after_sha256": "67f96fae9be4da52d63f362c41e32285600f7159f9367cf929304e88ea5a9eca"
+    }
+  ],
+  "status": "SOURCE_CONTRAST_AND_NATIVE_GUIDELINES_PASS",
+  "evidence": "build/release-ios38-android33/coach-native-accessibility-source-fixed.log",
+  "actual_tests": 49,
+  "checks": [
+    "textContrastGuideline with unchanged WCAG thresholds",
+    "iOSTapTargetGuideline",
+    "real AR/EN Light/Dark Goldens",
+    "320px 200 percent behavior"
+  ],
+  "new_states": [
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_ar_dark.png",
+      "sha256": "a7f292d23550bada840ef4ffdaaff17c5cdfcfa018a437c70b21ef8a19feee8e"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_ar_light.png",
+      "sha256": "3c0c9a9e7bcefc577c841c6e97be37e89f6ce50d2258ad0a8889bf9cb4db5a7e"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_en_dark.png",
+      "sha256": "1ec5de56ff010c30dc76af24e1a6229409fc0c5124b3d20e9700c8ce62376f93"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_creation_en_light.png",
+      "sha256": "3c52e62b2975426a90f098f3bdb1f221db86c46bef901e5940cdd78485b10319"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_ar_dark.png",
+      "sha256": "28da1813844693eb23432cbc52e47c1a13731964d35fb91b63b3bbd694dcc275"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_ar_light.png",
+      "sha256": "e9c715a640c42c578953065b221cdc52b863d837f124ff86bb48c21ee689e6fd"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_en_dark.png",
+      "sha256": "4badf69c304f82ee6f85785acf1ab67e5d8d8abe7ba41a85284f4170ae2a0de1"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_empty_en_light.png",
+      "sha256": "83711ec140b1370a841b7b74b2b42de15a2bb371d6ff8e3e796b340c18af2c17"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_ar_dark.png",
+      "sha256": "d7dc32a4bacd19b0a39b11e3b31c29219ad48ca5e81616d91837da314645d73a"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_ar_light.png",
+      "sha256": "fc9732cee8fc08116dfd42a0d8f5f314dcdeb5a80f3470dba0ba4f6e279d3a50"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_en_dark.png",
+      "sha256": "7839b9a871e5870a6fa6645a4a3058ad9216940265cb90ff47e6ac798158c2b4"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_error_en_light.png",
+      "sha256": "f912a69cb5d4192c9ad10614d7b6061f423c9392a0fd39645308f98cc87d1ac9"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_ar_dark.png",
+      "sha256": "ffa2b81e4fac07f57f0186fa477b76b928ad4a287f3ac17d84f0a53e18d1fb5c"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_ar_light.png",
+      "sha256": "c8849d5055c322a448629cc703eac524cb096bb50a11ba1c6413b1d45be1c94f"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_en_dark.png",
+      "sha256": "b1c5caa61544d6410542fdd2a9e4e98c47130ab73ed30e6878b7e8725cd68732"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_loading_en_light.png",
+      "sha256": "e64a5f7bcafee686eba42a9c4b00b106261de03628fa6911cdbaea606317948d"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_dark.png",
+      "sha256": "8befc18a0afa30e76aa3fcdbc7ba2c22be95f8148ac1b4ee5c6a500745a18482"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_light.png",
+      "sha256": "ec2e619f66769d748232898c203d399413d54635a1d50568822b13dc35441516"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_en_dark.png",
+      "sha256": "863396a53cbb1e9dbf5ea8abd92a8d580b8f06777ee4dcc8c6a5b3537ebabdeb"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_en_light.png",
+      "sha256": "a4124b7a6c83e1b9da6a89cf25dee5f2f4f87907ee931bcad9b56cfd28e8ed3d"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_dark.png",
+      "sha256": "9041faab393e365135abb5c08fd8b7389ed86baf7356edf4e7d7f4fdf4bca456"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_light.png",
+      "sha256": "1382becba8fde8c4f7f85b5dbb7cd9eca08c3cf14a7af6254d93d24d031dd0fc"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_dark.png",
+      "sha256": "f0a7b9a319d753759c6303cf2157f53b0147ef9aad2d2b567ed1404f4f1dc3db"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_light.png",
+      "sha256": "0cc80221cd76370b6ee9952194382d60f80e9422f81500684379d855efdb3242"
+    }
+  ],
+  "actual_comparisons": {
+    "standard_flutter_contrast_and_ios_tap_target": "49 PASS: coach-contrast-updated-source-goldens.log",
+    "all_six_states_ar_en_light_dark": "24 PASS: coach-all-state-wcag-native-visual-fixed.log",
+    "strict_gradient_review_method": "1 PASS: coach-wcag-review-method-tests.log",
+    "normal_png_comparison": "216 actual tests PASS; invocation also failed loading one mistyped architecture path, retained in coach-expanded-final-all-focused.log; correct guard run separately."
+  },
+  "gradient_review": {
+    "official_basis": "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+    "reason": "The generic pixel histogram may select two pearl-background shades for thin Arabic glyphs; do not change fonts or lower thresholds. Standard existing contrast checks retained. New state cases independently compare actual resolved foreground paint against every underlying gradient pixel after temporarily hiding only glyph paint, restoring spans in finally.",
+    "thresholds": {
+      "normal": 4.5,
+      "large_or_icon": 3.0
+    },
+    "negative_control": "known low-contrast gradient and ancestor-opacity failures rejected by smart_plan_contrast_review_test.dart"
+  },
+  "manual_review": {
+    "images": 24,
+    "contact_sheet": "build/release-ios38-android33/visual-states/review-contact-sheet.jpg",
+    "reviewed": "Actual AR/EN LTR/RTL light/dark creation, loading, empty, error, schedule and progress renders; text, spacing, source names, safe retry and BIL glass preserved. No overflow observed at captured 390x844; 320px/200 percent covered by separate real widgets."
+  }
+}

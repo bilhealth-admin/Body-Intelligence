@@ -86,19 +86,23 @@ void main() {
             find.byKey(const Key('community-report-reason-tap-harassment')),
           );
           await tester.pumpAndSettle();
-          await tester.runAsync(() async {
-            final png =
-                await (boundary.currentContext!.findRenderObject()!
-                        as RenderRepaintBoundary)
-                    .toImage(pixelRatio: 1);
-            final bytes = await png.toByteData(format: ui.ImageByteFormat.png);
-            final output = File(
-              'build/community-policy-repair-20261019/report-visuals/report-$language-${target.name}.png',
-            );
-            await output.parent.create(recursive: true);
-            await output.writeAsBytes(bytes!.buffer.asUint8List());
-            png.dispose();
-          });
+          if (Platform.environment['BIL_CAPTURE_COMMUNITY_REPORT'] != '0') {
+            await tester.runAsync(() async {
+              final png =
+                  await (boundary.currentContext!.findRenderObject()!
+                          as RenderRepaintBoundary)
+                      .toImage(pixelRatio: 1);
+              final bytes = await png.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              final output = File(
+                'build/community-policy-repair-20261019/report-visuals/report-$language-${target.name}.png',
+              );
+              await output.parent.create(recursive: true);
+              await output.writeAsBytes(bytes!.buffer.asUint8List());
+              png.dispose();
+            });
+          }
           final send = find.byKey(const Key('community-report-submit'));
           await tester.ensureVisible(send);
           await tester.pumpAndSettle();

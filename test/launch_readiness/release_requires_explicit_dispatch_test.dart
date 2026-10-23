@@ -20,15 +20,29 @@ void main() {
         expect(trigger, isNot(contains('workflow_run:')));
         expect(trigger, isNot(contains('schedule:')));
         if (platform == 'ios') {
-          expect(trigger, contains('upload_to_testflight:'));
-          expect(trigger, contains('default: false'));
+          expect(trigger, isNot(contains('upload_to_testflight:')));
           expect(source, isNot(contains("github.event_name == 'push'")));
-          expect(
-            source,
-            contains('if: \u0024{{ inputs.upload_to_testflight }}'),
-          );
+          expect(source, contains("UPLOAD_TO_TESTFLIGHT: 'false'"));
         }
       },
     );
   }
+  test(
+    'TestFlight promotion is independently dispatched without a rebuild',
+    () {
+      final source = File(
+        '.github/workflows/bil_ios_upload_existing_testflight.yml',
+      ).readAsStringSync();
+      final trigger = source.substring(
+        source.indexOf('\non:'),
+        source.indexOf('\npermissions:'),
+      );
+      expect(trigger, contains('workflow_dispatch:'));
+      for (final forbidden in ['push:', 'workflow_run:', 'schedule:']) {
+        expect(trigger, isNot(contains(forbidden)));
+      }
+      expect(source, contains('EXACT_SIGNED_IPA_38_BYTES_AND_SOURCE=PASS'));
+      expect(source, isNot(contains('flutter build')));
+    },
+  );
 }

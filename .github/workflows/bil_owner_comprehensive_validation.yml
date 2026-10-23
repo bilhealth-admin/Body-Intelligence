@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   analyze-then-comprehensive:
-    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/work/bil-ios37-release-security-20261022')
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/work/bil-ios37-release-security-20261022' || github.ref == 'refs/heads/codex/bil-release-ios38-android33-20261022')
     name: Full analysis then one unsharded root suite
     runs-on: windows-2025
     timeout-minutes: 360
@@ -30,16 +30,21 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+          fetch-depth: 0
       - name: Record exact dispatched source SHA with original runner-compatible local identity
         shell: pwsh
         run: |
-          if ($env:GITHUB_REF -notin @('refs/heads/integration/bil-qa-media-policy-20261011', 'refs/heads/work/bil-ios37-release-security-20261022')) {
+          if ($env:GITHUB_REF -notin @('refs/heads/integration/bil-qa-media-policy-20261011', 'refs/heads/work/bil-ios37-release-security-20261022', 'refs/heads/codex/bil-release-ios38-android33-20261022')) {
             throw 'Unauthorized release-source branch'
           }
           if ((git rev-parse HEAD) -ne $env:GITHUB_SHA) { throw 'Unexpected source SHA before local branch compatibility alias' }
           # Original unmodified unsharded runner requires this local alias only.
           # It does not move any remote branch or substitute a different tree.
-          git switch -c integration/bil-qa-media-policy-20261011
+          if ($env:GITHUB_REF_NAME -eq 'codex/bil-release-ios38-android33-20261022') {
+            git switch -c codex/bil-release-ios38-android33-20261022
+          } else {
+            git switch -c integration/bil-qa-media-policy-20261011
+          }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if ((git rev-parse HEAD) -ne $env:GITHUB_SHA) { throw 'Unexpected source SHA' }
           New-Item -ItemType Directory -Force build/qa/owner-github-comprehensive | Out-Null
@@ -70,7 +75,11 @@ jobs:
         run: |
           $flutterExecutable=(Get-Command flutter.bat -ErrorAction Stop).Source
           $runLabel="github-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
-          python -u tools/qa/bil_owner_full_test_runner.py $runLabel --expect-head $env:GITHUB_SHA --flutter $flutterExecutable
+          if ($env:GITHUB_REF_NAME -eq 'codex/bil-release-ios38-android33-20261022') {
+            python -u tools/qa/bil_candidate_owner_runner.py $runLabel --expect-head $env:GITHUB_SHA --flutter $flutterExecutable
+          } else {
+            python -u tools/qa/bil_owner_full_test_runner.py $runLabel --expect-head $env:GITHUB_SHA --flutter $flutterExecutable
+          }
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Summarize actual outcome without store certification
         if: always()
@@ -94,7 +103,7 @@ jobs:
           retention-days: 30
 
   supplemental-source-audits:
-    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/work/bil-ios37-release-security-20261022')
+    if: github.repository == 'bilhealth-admin/Body-Intelligence' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/work/bil-ios37-release-security-20261022' || github.ref == 'refs/heads/codex/bil-release-ios38-android33-20261022')
     name: Supplemental source and dependency audits
     runs-on: ubuntu-24.04
     timeout-minutes: 75
@@ -118,6 +127,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
+          fetch-depth: 0
       - name: Initialize actual source evidence
         shell: bash
         run: |
@@ -175,6 +185,7 @@ jobs:
           python3 -m unittest discover -s tool/prebuild -p 'test_*.py' -v 2>&1 | tee "$OUT/python-prebuild.log"
           python3 -m unittest discover -s tools/qa -p 'test_*.py' -v 2>&1 | tee "$OUT/python-qa.log"
           python3 -m unittest discover -s tool/release_certification -p 'test_*.py' -v 2>&1 | tee "$OUT/python-certification.log"
+          python3 -m unittest discover -s tool/release -p 'test_*.py' -v 2>&1 | tee "$OUT/python-release.log"
       - name: Run remaining source audits without repeating Flutter suites
         id: source_audits
         shell: bash
@@ -195,6 +206,8 @@ jobs:
           set -euo pipefail
           node --test tool/prebuild/dependency_advisories.test.mjs \
             tool/release/bilhealth_site_worker.test.mjs \
+            tool/release/public_policy_pages.test.mjs \
+            tool/release/merge_site_associations.test.mjs \
             cloudflare/admin_site/tests/*.test.mjs \
             tool/admin_web/ops_v1/ops_server.test.mjs \
             tool/admin_web/review_v1/*.test.mjs \

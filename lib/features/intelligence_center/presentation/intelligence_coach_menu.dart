@@ -93,6 +93,17 @@ class _CoachMenuSheet extends StatelessWidget {
             ),
             const SizedBox(height: 9),
             _CoachMenuTile(
+              icon: Icons.calendar_month_rounded,
+              title: intelligenceText(context, 'My Smart Plan', 'خطتي الذكية'),
+              subtitle: intelligenceText(
+                context,
+                'Training, nutrition and progress in one place',
+                'التدريب والتغذية والمتابعة في مكان واحد',
+              ),
+              onTap: () => Navigator.of(context).pop('smart_plan'),
+            ),
+            const SizedBox(height: 9),
+            _CoachMenuTile(
               icon: Icons.tune_rounded,
               title: intelligenceText(
                 context,

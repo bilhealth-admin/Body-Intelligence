@@ -40,7 +40,7 @@ def pages(api, endpoint, field=None):
     raise ValueError('GitHub evidence exceeds bounded pagination; no partial acceptance')
 
 
-def validate_prerequisites(manifest, run_ids, head, api=gh):
+def validate_prerequisites(manifest, run_ids, head, api=gh, *, expected_branch=BRANCH):
     lanes = planner.validate_ci_manifest(manifest, required_workflow_ids=manifest['required_workflow_ids'])
     expected = {lane['lane_id'] for lane in lanes}
     if (not isinstance(run_ids, dict) or set(run_ids) != expected
@@ -51,7 +51,7 @@ def validate_prerequisites(manifest, run_ids, head, api=gh):
     for lane in lanes:
         run_id = run_ids[lane['lane_id']]
         run = api(f'actions/runs/{run_id}')
-        if run.get('head_branch') != BRANCH or run.get('event') not in ('push', 'workflow_dispatch'):
+        if run.get('head_branch') != expected_branch or run.get('event') not in ('push', 'workflow_dispatch'):
             raise ValueError('CI prerequisite is from another branch/event')
         run['jobs'] = pages(api, f'actions/runs/{run_id}/jobs', 'jobs')
         proofs.append(planner.validate_ci_run(run, expected_head=head,
@@ -60,7 +60,7 @@ def validate_prerequisites(manifest, run_ids, head, api=gh):
     return proofs
 
 
-def security_reports(semgrep, mobsf, analyses, alerts, head):
+def security_reports(semgrep, mobsf, analyses, alerts, head, *, expected_branch=BRANCH):
     if (semgrep.get('source_head') != head or semgrep.get('result') != 'CLEAN_SCAN'
             or semgrep.get('findings_count') != 0 or semgrep.get('findings') != []
             or semgrep.get('errors_count') != 0 or semgrep.get('errors') != []
@@ -82,7 +82,7 @@ def security_reports(semgrep, mobsf, analyses, alerts, head):
     covered = set()
     for analysis in analyses:
         if (analysis.get('commit_sha') == head and analysis.get('tool', {}).get('name') == 'CodeQL'
-                and analysis.get('ref') == 'refs/heads/' + BRANCH):
+                and analysis.get('ref') == 'refs/heads/' + expected_branch):
             language = analysis.get('category', '').removeprefix('/language:')
             if language in LANGUAGES:
                 if analysis.get('error') or analysis.get('warning'):
@@ -109,14 +109,14 @@ def download_report(run_id, artifact, filename):
         return json.loads(matches[0].read_text(encoding='utf8'))
 
 
-def verify_security(run_ids, head, api=gh):
+def verify_security(run_ids, head, api=gh, *, expected_branch=BRANCH):
     semgrep = download_report(run_ids['source_audit'], f'bil-source-audit-{head}', 'semgrep.json')
     mobsf = download_report(run_ids['offline_mobsf'], f'bil-offline-mobsf-{head}', 'summary.json')
     from urllib.parse import quote
-    ref = quote('refs/heads/' + BRANCH, safe='')
+    ref = quote('refs/heads/' + expected_branch, safe='')
     analyses = pages(api, f'code-scanning/analyses?ref={ref}')
     alerts = pages(api, f'code-scanning/alerts?state=open&ref={ref}')
-    return security_reports(semgrep, mobsf, analyses, alerts, head)
+    return security_reports(semgrep, mobsf, analyses, alerts, head, expected_branch=expected_branch)
 
 
 def validate_upload(receipt, inventory, source, ipa_digest, head):

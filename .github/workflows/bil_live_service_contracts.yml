@@ -5,7 +5,7 @@ permissions:
   contents: read
 jobs:
   live-contracts:
-    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    if: (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/codex/bil-release-ios38-android33-20261022')
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -62,6 +62,10 @@ jobs:
           trap preserve_exit EXIT
           printf '%s\n' 'live_gate_command' > "$OUT/roundtrip-stage.txt"
           bash tool/release_certification/run_live_gate.sh 1 2>&1 | tee "$OUT/live-gate.log"
+          python3 tools/qa/bil_release_coach_live_probe.py --output "$OUT/coach-intelligence-e2e.json" --run
+          flutter pub get --enforce-lockfile
+          flutter test --no-pub --reporter=expanded test/features/smart_plan/bil_smart_plan_live_fixtures_test.dart
+          python3 tools/qa/bil_smart_plan_live_rpc_probe.py --output "$OUT/smart-plan-live-rpc.json" --run
           printf '%s\n' 'require_actual_live_pass' > "$OUT/roundtrip-stage.txt"
           grep -Fx 'LIVE_BACKEND_CORE=PASS' "$OUT/status.txt"
       - name: Preserve actual live-service outcome
@@ -115,7 +119,7 @@ jobs:
 
   transactional-cloud-roundtrip:
     name: Transactional live cloud roundtrip
-    if: github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011'
+    if: (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/codex/bil-release-ios38-android33-20261022')
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
