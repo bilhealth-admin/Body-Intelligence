@@ -27,6 +27,7 @@ env:
   BIL_VALIDATION_MODE: ${{ inputs.internal_testflight_existing_evidence && 'owner_authorized_internal_prior_app_evidence' || 'all_exact_source_ci' }}
   BIL_INTERNAL_TESTFLIGHT_AUTHORIZATION: ${{ inputs.internal_testflight_existing_evidence && 'OWNER_APPROVED_INTERNAL_ONLY_20261023' || '' }}
   BIL_TESTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+  BIL_RELEASE_MANIFEST_PATH: ${{ inputs.internal_testflight_existing_evidence && 'docs/release/BIL_IOS38_INTERNAL_TESTFLIGHT_FREEZE_2026-10-23.md' || 'docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md' }}
   BIL_ORIGINAL_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
 jobs:
   signed-ios-release:
@@ -51,7 +52,7 @@ jobs:
           else
             python3 tools/qa/bil_candidate_release.py --verify-ci --platform ios --expected-head "$BIL_TESTED_SOURCE_SHA"
           fi
-          echo "BIL_AUDITED_FREEZE_MANIFEST_SHA256=$(python3 -c 'import hashlib,pathlib;print(hashlib.sha256(pathlib.Path("docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md").read_bytes()).hexdigest())')" >> "$GITHUB_ENV"
+          echo "BIL_AUDITED_FREEZE_MANIFEST_SHA256=$(python3 -c 'import hashlib,pathlib,os;print(hashlib.sha256(pathlib.Path(os.environ["BIL_RELEASE_MANIFEST_PATH"]).read_bytes()).hexdigest())')" >> "$GITHUB_ENV"
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
         shell: bash
@@ -246,17 +247,18 @@ jobs:
           BIL_SOURCE_COMMIT: ${{ github.sha }}
           BIL_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
           BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: '38'
         run: |
           flutter pub get --enforce-lockfile
-          flutter analyze --no-pub
           dart run tool/release/validate_release_configuration.dart
+          if [[ "$BIL_INTERNAL_TESTFLIGHT" != true ]]; then
+          flutter analyze --no-pub
           # The owner comprehensive suite already runs independently.
           flutter test --no-pub --concurrency 1 --timeout 30s \
             --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
             test/features/commerce/app_purchase_confirmation_test.dart \
             test/features/commerce/app_subscription_confirmation_test.dart
+          fi
           flutter test --no-pub \
             test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
             --timeout 2m
