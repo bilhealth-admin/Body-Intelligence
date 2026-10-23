@@ -110,6 +110,10 @@ jobs:
           assert receipt['status']=='SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED'
           assert receipt['source_sha']==os.environ['BIL_TESTED_SOURCE'] and receipt['build']==38
           assert receipt.get('validation_mode','all_exact_source_ci')==os.environ['BIL_VALIDATION_MODE']
+          native_status=('NOT_RERUN_OWNER_APPROVED_INTERNAL_PRIOR_EVIDENCE'
+              if os.environ['BIL_INTERNAL_TESTFLIGHT']=='true' else 'PASS')
+          assert receipt['native_crypto_runtime_status']==native_status
+          assert ('NATIVE_CRYPTO_RUNTIME_GATE='+native_status) in unique('BIL-ios-native-crypto-gate.txt').read_text()
           assert receipt['ipa_sha256']==digest and receipt['ipa_bytes']==ipa.stat().st_size
           assert unique('BIL-source-head.txt').read_text().strip()==os.environ['BIL_TESTED_SOURCE']
           assert 'SIGNED_IPA_CODESIGN_GATE=PASS' in unique('BIL-ios-codesign-verify.txt').read_text()

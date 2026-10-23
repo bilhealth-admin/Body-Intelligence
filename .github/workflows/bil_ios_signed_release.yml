@@ -286,6 +286,7 @@ jobs:
 
       - name: Run native AES-GCM gate on iOS Simulator
         id: native_crypto_runtime_gate
+        if: ${{ !inputs.internal_testflight_existing_evidence }}
         shell: bash
         env:
           BIL_NATIVE_TARGET: system-crypto
@@ -317,6 +318,7 @@ jobs:
           retention-days: 14
 
       - name: Require successful native iOS cryptography without a waiver
+        if: ${{ !inputs.internal_testflight_existing_evidence }}
         shell: bash
         env:
           NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
@@ -324,6 +326,21 @@ jobs:
           set -euo pipefail
           test "$NATIVE_CRYPTO_OUTCOME" = success
           printf '%s\n' 'NATIVE_CRYPTO_RUNTIME_GATE=PASS' > BIL-ios-native-crypto-gate.txt
+
+      - name: Record owner-approved prior evidence without repeating simulator tests
+        if: ${{ inputs.internal_testflight_existing_evidence }}
+        shell: bash
+        env:
+          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
+        run: |
+          set -euo pipefail
+          test "$BIL_INTERNAL_TESTFLIGHT_AUTHORIZATION" = OWNER_APPROVED_INTERNAL_ONLY_20261023
+          test "$NATIVE_CRYPTO_OUTCOME" = skipped
+          printf '%s\n' \
+            'NATIVE_CRYPTO_RUNTIME_GATE=NOT_RERUN_OWNER_APPROVED_INTERNAL_PRIOR_EVIDENCE' \
+            'FRESH_NATIVE_RUNTIME_PASS=NOT_CLAIMED' \
+            'OWNER_SKIP_RETEST_AUTHORIZATION=2026-10-24' \
+            > BIL-ios-native-crypto-gate.txt
 
       - name: Preserve production AdMob plugin and validate configuration
         shell: bash
@@ -588,10 +605,15 @@ jobs:
           githead=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
           if githead!=os.environ['BIL_TESTED_SOURCE_SHA']:
               raise SystemExit('Built source differs from audited candidate')
+          native_status=('NOT_RERUN_OWNER_APPROVED_INTERNAL_PRIOR_EVIDENCE'
+              if os.environ['BIL_INTERNAL_TESTFLIGHT']=='true' else 'PASS')
+          if ('NATIVE_CRYPTO_RUNTIME_GATE='+native_status) not in pathlib.Path('BIL-ios-native-crypto-gate.txt').read_text():
+              raise SystemExit('Native runtime evidence scope mismatch')
           pathlib.Path('BIL-ios-build-only-receipt.json').write_text(json.dumps({
               'status':'SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED','source_sha':githead,
               'workflow_sha':os.environ['GITHUB_SHA'],'build':38,
               'validation_mode':os.environ['BIL_VALIDATION_MODE'],'public_release_approved':False,
+              'native_crypto_runtime_status':native_status,
               'ipa_sha256':digest,'ipa_bytes':files[0].stat().st_size,
               'testflight_upload':'NOT_RUN','app_store_connect':'NOT_RUN',
               'production_deploy':'NOT_RUN','physical_device':'NOT_RUN',

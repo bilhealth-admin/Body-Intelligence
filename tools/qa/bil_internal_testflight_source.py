@@ -80,9 +80,11 @@ def main():
         'application_and_native_test_bytes_unchanged':True,'protected_sha':PROTECTED,
         'exact_source_full_ci_repeated':False,'source_manifest_accepted':False,
         'known_unresolved_qa_runs':[40012542464,40012589309],
-        'native_crypto_gate_still_required':True,'signature_and_artifact_gates_still_required':True,
+        'native_crypto_gate_still_required':False,
+        'native_crypto_runtime_status':'NOT_RERUN_OWNER_APPROVED_INTERNAL_PRIOR_EVIDENCE',
+        'signature_and_artifact_gates_still_required':True,
         'physical_device_verified':False,'public_release_approved':False,
-        'owner_approval':'Explicit approval on 2026-10-23 to build and upload internally with prior application evidence, without repeating full CI.'}
+        'owner_approval':'Explicit approval on 2026-10-23 for prior application evidence; renewed on 2026-10-24 to skip repeated simulator runtime tests and build/upload TestFlight immediately. No new runtime PASS claimed.'}
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_bytes((json.dumps(result,indent=2)+'\n').encode())
     print(json.dumps(result))
