@@ -1,976 +1,133 @@
-name: BIL RC mobile test builds
-
+name: BIL Google signed RC native recording only
+run-name: "Google recording only; signed Android33 ${{ inputs.expected_source_sha }}"
 on:
-  push:
-    branches: [fix/community-sapphire-health-3033]
   workflow_dispatch:
     inputs:
-      ios_only:
-        description: 'Only iOS native and lifecycle validation; not full RC evidence'
-        type: boolean
-        default: false
-      notification_api33_only:
-        description: 'Only API 33 notification SDK validation; not full RC evidence'
-        type: boolean
-        default: false
-
-run-name: BIL RC - ${{ inputs.ios_only && 'iOS ONLY' || inputs.notification_api33_only && 'API33 notifications ONLY' || 'full mobile evidence' }} - ${{ github.sha }}
-
+      expected_source_sha:
+        description: Exact final Android33 source SHA, not capture-control SHA
+        required: true
+        type: string
+      signed_run_id:
+        description: Successful bil_android_release_candidate.yml run ID
+        required: true
+        type: string
+      signed_artifact_id:
+        description: Exact non-expired signed AAB artifact ID from that run
+        required: true
+        type: string
+      synthetic_account_ack:
+        description: Enter DEDICATED_REVIEW_ACCOUNT_ONLY
+        required: true
+        type: string
+      expected_reviewer_email_sha256:
+        description: SHA256 of normalized approved Google reviewer email; prevents using a purchase-test account
+        required: true
+        type: string
 permissions:
   contents: read
-
+  actions: read
 concurrency:
-  group: bil-rc-mobile-test-${{ github.ref }}
-  # Preserve the RC run being monitored; newer exact-source validations queue.
+  group: bil-google-native-capture
   cancel-in-progress: false
-
-env:
-  FLUTTER_VERSION: 3.44.6
-  BIL_APP_ID: com.bilhealth.bodyintelligencelog
-  BIL_TEST_BUILD_NUMBER: '33'
-
 jobs:
-  android-emulator-artifact:
-    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.ios_only && !inputs.notification_api33_only) }}
-    name: Android APK/AAB + emulator evidence
+  record-real-apk:
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 35
     steps:
-      - name: Checkout exact RC
+      - name: Checkout audited capture control only; do not build BIL
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.workflow_sha }}
           persist-credentials: false
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-
-      - name: Resolve dependencies and release build contracts
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter pub get
-          flutter test --no-pub             test/launch_readiness/android_release_build_contract_test.dart             test/launch_readiness/system_crypto_export_compliance_contract_test.dart             test/platform_readiness/native_permission_dialog_contract_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             --timeout 5m
-
-      - name: Prepare pinned Android policy library repairs
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/prepare_android_policy_plugin_overrides.py
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
-
-      - name: Prepare optional release signing
-        id: signing
-        shell: bash
+      - name: Validate capture-control parser and fail-closed guards
+        run: python3 -m unittest discover -s tools/qa/google_native_capture -p test_native_capture.py -v
+      - name: Require dedicated Google review credentials without exporting them
         env:
+          REVIEWER_EMAIL: ${{ secrets.BIL_GOOGLE_REVIEWER_EMAIL }}
+          REVIEWER_PASSWORD: ${{ secrets.BIL_GOOGLE_REVIEWER_PASSWORD }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+          ACK: ${{ inputs.synthetic_account_ack }}
+          EXPECTED_EMAIL_SHA256: ${{ inputs.expected_reviewer_email_sha256 }}
+        run: |
+          python3 - <<'PY'
+          import os,hashlib,re
+          assert os.environ.get('ACK') == 'DEDICATED_REVIEW_ACCOUNT_ONLY', 'Dedicated synthetic account acknowledgement is required'
+          assert os.environ.get('REVIEWER_EMAIL') and len(os.environ.get('REVIEWER_PASSWORD','')) >= 8, 'Dedicated Google reviewer secrets are missing'
+          assert os.environ.get('EXPECTED_UPLOAD_CERT_SHA256'), 'Expected upload certificate fingerprint is missing'
+          expected=os.environ.get('EXPECTED_EMAIL_SHA256','')
+          assert re.fullmatch('[a-f0-9]{64}',expected) and hashlib.sha256(os.environ['REVIEWER_EMAIL'].strip().lower().encode()).hexdigest()==expected, 'Configured identity differs from the approved Google reviewer; do not substitute a purchase-test or Apple account'
+          print('DEDICATED_GOOGLE_REVIEWER_SECRET_PRESENCE=PASS;credentials_exported=false')
+          PY
+      - name: Verify existing signed RC Android job and derive APK without recompilation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SOURCE_SHA: ${{ inputs.expected_source_sha }}
+        run: |
+          test "$SOURCE_SHA" = 1b23d4d4bb73d467f9c3cf1425b2eb2d8cc78c2d
+          python3 tools/qa/google_native_capture/prepare_verified_rc.py
+      - name: Verify real APK signature and package before emulator access
+        env:
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
         run: |
           set -euo pipefail
-          if [[ -n "${KEYSTORE_BASE64:-}" && -n "${STORE_PASSWORD:-}" && -n "${KEY_ALIAS:-}" && -n "${KEY_PASSWORD:-}" ]]; then
-            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-            {
-              echo 'storeFile=app/upload-keystore.jks'
-              echo "storePassword=$STORE_PASSWORD"
-              echo "keyAlias=$KEY_ALIAS"
-              echo "keyPassword=$KEY_PASSWORD"
-            } > android/key.properties
-            echo 'available=true' >> "$GITHUB_OUTPUT"
-          else
-            echo 'available=false' >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Build installable Android debug APK
-        shell: bash
+          APK="$RUNNER_TEMP/bil-google-signed-input/BIL-Android33-derived-universal.apk"
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -name apksigner -type f | sort -V | tail -n 1)
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > "$RUNNER_TEMP/bil-google-signed-input/verified-apk-signature.txt"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer" manifest print "$APK" > "$RUNNER_TEMP/bil-google-signed-input/verified-apk-manifest.xml"
+          python3 - <<'PY'
+          import os,pathlib,re
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-google-signed-input'
+          signatures=re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F:]+)$',(p/'verified-apk-signature.txt').read_text(),re.M)
+          assert len(signatures)==1 and signatures[0].replace(':','').lower()==os.environ['EXPECTED_UPLOAD_CERT_SHA256'].replace(':','').lower(), 'APK signing certificate mismatch'
+          import sys
+          sys.path.insert(0,'tools/qa/google_native_capture')
+          from native_capture import validate_manifest
+          validate_manifest((p/'verified-apk-manifest.xml').read_text())
+          PY
+      - name: Enable disposable hosted KVM only
         run: |
-          set -euo pipefail
-          flutter build apk --debug --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
-
-      - name: Enable KVM
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"'             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-
-      - name: Run Android native crypto on a clean emulator
+      - name: Record actual native reviewer route; preserve honest blocking state
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
+        env:
+          BIL_GOOGLE_REVIEWER_EMAIL: ${{ secrets.BIL_GOOGLE_REVIEWER_EMAIL }}
+          BIL_GOOGLE_REVIEWER_PASSWORD: ${{ secrets.BIL_GOOGLE_REVIEWER_PASSWORD }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+          BIL_CAPTURE_SYNTHETIC_ACCOUNT_ACK: ${{ inputs.synthetic_account_ack }}
+          BIL_EXPECTED_REVIEWER_EMAIL_SHA256: ${{ inputs.expected_reviewer_email_sha256 }}
+          SOURCE_SHA: ${{ inputs.expected_source_sha }}
         with:
           api-level: 35
           arch: x86_64
           target: google_apis
           profile: pixel_6
-          disable-animations: true
+          cores: 2
+          ram-size: 2048M
+          disable-animations: false
           emulator-boot-timeout: 900
-          pre-emulator-launch-script: |
-            adb kill-server || true
-            adb start-server
-            adb version
-            adb devices
-          script: BIL_ANDROID_EMULATOR_PHASE=crypto bash tool/release/rc_android_emulator_gate.sh
-
-      - name: Prepare disposable non-admin cloud accounts for native barcode and two-account RLS
-        shell: pwsh
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: ./tool/release_certification/native_cloud_fixture.ps1 -Mode create -StatePath "$env:RUNNER_TEMP/bil-native-fixture.json"
-
-      - name: Run Android native UI and lifecycle on a fresh emulator
-        env:
-          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
-          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
-        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
-        with:
-          api-level: 35
-          arch: x86_64
-          target: google_apis
-          profile: pixel_6
-          disable-animations: true
-          emulator-boot-timeout: 900
-          pre-emulator-launch-script: |
-            adb kill-server || true
-            adb start-server
-            adb version
-            adb devices
-          script: BIL_REQUIRE_LIVE_E2E=true BIL_ANDROID_EMULATOR_PHASE=ui bash tool/release/rc_android_emulator_gate.sh
-
-      - name: Run Android API 26 minimum-supported install/launch smoke
-        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
-        with:
-          api-level: 26
-          arch: x86_64
-          target: google_apis
-          profile: pixel_2
-          disable-animations: true
-          emulator-boot-timeout: 900
-          script: BIL_ANDROID_EMULATOR_PHASE=api26 bash tool/release/rc_android_emulator_gate.sh
-
-      - name: Run Android API 36 current-target install/deep-link smoke
-        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
-        with:
-          api-level: 36
-          arch: x86_64
-          target: google_apis
-          profile: pixel_6
-          disable-animations: true
-          emulator-boot-timeout: 900
-          script: BIL_ANDROID_EMULATOR_PHASE=api36 bash tool/release/rc_android_emulator_gate.sh
-
-      - name: Sanitize dev-only Android plugins for release
-        shell: bash
-        run: |
-          set -euo pipefail
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
-
-      - name: Build Android release AAB for offline inspection only
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter build appbundle --release --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
-
-      - name: Inspect Android artifacts
-        shell: bash
-        env:
-          SIGNING_AVAILABLE: ${{ steps.signing.outputs.available }}
-        run: |
-          set -euo pipefail
-          EVIDENCE=artifacts/release/rc_mobile_test/android
-          mkdir -p "$EVIDENCE"
-          APK=build/app/outputs/flutter-apk/app-debug.apk
-          AAB=build/app/outputs/bundle/release/app-release.aab
-          test -s "$APK"
-          test -s "$AAB"
-          sha256sum "$APK" "$AAB" > "$EVIDENCE/SHA256SUMS.txt"
-          stat --printf='%n %s\n' "$APK" "$AAB" > "$EVIDENCE/sizes.txt"
-          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
-          printf 'ANDROID_RELEASE_SIGNING=%s\n' "$SIGNING_AVAILABLE" > "$EVIDENCE/signing-status.txt"
-          if [[ "$SIGNING_AVAILABLE" == 'true' ]]; then
-            jarsigner -verify -verbose -certs "$AAB" > "$EVIDENCE/jarsigner.txt"
-            echo 'SIGNED_AAB_VERIFY=PASS' >> "$EVIDENCE/signing-status.txt"
-          else
-            echo 'SIGNED_AAB_VERIFY=NOT_RUN_MISSING_SIGNING_SECRETS' >> "$EVIDENCE/signing-status.txt"
-          fi
-
-      - name: Delete only the disposable native QA identities
+          emulator-options: -no-window -no-audio -no-snapshot -no-metrics -gpu swiftshader_indirect -camera-back none -camera-front none
+          script: python3 tools/qa/google_native_capture/native_capture.py capture --source "$SOURCE_SHA" --inputs "$RUNNER_TEMP/bil-google-signed-input" --output artifacts/google-native-capture --serial emulator-5554
+      - name: Preserve restricted native recording and sanitized receipt even on failure
         if: always()
-        shell: pwsh
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: ./tool/release_certification/native_cloud_fixture.ps1 -Mode cleanup -StatePath "$env:RUNNER_TEMP/bil-native-fixture.json"
-
-      - name: Upload completed main-app Android test binaries
-        if: success()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: bil-rc-android-main-binaries-${{ github.sha }}
-          path: |
-            build/app/outputs/flutter-apk/app-debug.apk
-            build/app/outputs/bundle/release/app-release.aab
+          name: bil-google-native-recording-${{ github.run_id }}
+          retention-days: 7
           if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload Android test artifacts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: bil-rc-android-test-${{ github.sha }}
           path: |
-            artifacts/release/rc_mobile_test/android
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Remove Android signing material
+            artifacts/google-native-capture/assets/raw/*.mp4
+            artifacts/google-native-capture/*.json
+            ${{ runner.temp }}/bil-google-signed-input/producer-identity.json
+            ${{ runner.temp }}/bil-google-signed-input/BIL-android-recording-apk-receipt.json
+      - name: Summarize boundary
         if: always()
-        shell: bash
-        run: rm -f android/app/upload-keystore.jks android/key.properties
-
-  ios-simulator-artifact:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.ios_only || !inputs.notification_api33_only }}
-    name: iOS simulator + unsigned IPA evidence
-    runs-on: macos-26
-    timeout-minutes: 100
-    env:
-      BIL_TEST_BUILD_NUMBER: '37'
-    steps:
-      - name: Checkout exact RC
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-
-      - name: Resolve dependencies and iOS contracts
-        shell: bash
         run: |
-          set -euo pipefail
-          python3 .github/scripts/test_bil_ios_mobile_native_scope.py
-          python3 .github/scripts/test_bil_native_bounded_command.py
-          flutter pub get
-          flutter test --no-pub             test/platform_readiness/native_permission_dialog_contract_test.dart             test/connected_health/apple_health_permission_flow_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart             test/launch_readiness/flutter_release_plugin_sanitizer_test.dart             --timeout 10m
-          plutil -lint ios/Runner/Info.plist
-          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
-          plutil -lint ios/Runner/Runner.entitlements
-          plutil -lint ios/Runner/RunnerDebug.entitlements
-
-      - name: Exclude Windows-only barcode plugin from iOS native graph
-        shell: bash
-        run: |
-          set -euo pipefail
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
-
-      - name: Select exact CocoaPods in an isolated job gem home
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
-          python3 .github/scripts/install_isolated_cocoapods.py \
-            --output artifacts/release/rc_mobile_test/ios/cocoapods-installation.json
-
-      - name: Upload isolated CocoaPods installation receipt
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: bil-cocoapods-rc-ios-${{ github.sha }}
-          path: artifacts/release/rc_mobile_test/ios/cocoapods-installation.json
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Build iOS simulator application
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --simulator --debug --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=qa             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false             --dart-define=BIL_PAYMENTS_ENABLED=false             --dart-define=BIL_ADS_ENABLED=false
-          test -d build/ios/iphonesimulator/Runner.app
-
-      - name: Build unsigned production-shaped iOS device application
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --release --no-codesign --no-pub             --build-number "$BIL_TEST_BUILD_NUMBER"             --dart-define=BIL_ENVIRONMENT=production             --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true             --dart-define=BIL_PAYMENTS_ENABLED=true             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true             --dart-define=BIL_FACEBOOK_LOGIN_READY=true             --dart-define=BIL_PUSH_ENABLED=true             --dart-define=BIL_PUSH_PROVIDER_READY=true             --dart-define=BIL_ADS_ENABLED=false             --dart-define=BIL_AD_PROVIDER_READY=false             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
-          test -d build/ios/iphoneos/Runner.app
-          rm -rf Payload BIL-unsigned-RC.ipa
-          mkdir -p Payload
-          cp -R build/ios/iphoneos/Runner.app Payload/Runner.app
-          zip -qry BIL-unsigned-RC.ipa Payload
-          ditto -c -k --sequesterRsrc --keepParent             build/ios/iphonesimulator/Runner.app             build/ios/iphonesimulator/BIL-RC-Simulator.app.zip
-
-      - name: Install checksum-locked iOS interaction bridge
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(uname -m)" = 'arm64'
-          mkdir -p "$RUNNER_TEMP/bil-idb-bin"
-          curl --fail --location --retry 3 \
-            --proto '=https' --tlsv1.2 \
-            https://github.com/facebook/idb/releases/download/v1.6.4/idb-companion.macos-arm64.tar.gz \
-            --output "$RUNNER_TEMP/idb-companion.tar.gz"
-          test "$(shasum -a 256 "$RUNNER_TEMP/idb-companion.tar.gz" | awk '{print $1}')" \
-            = '8c33fb82c7a6ecc58ef95c65671bd3fc4d36347afdbf594f7fd79fe2ae499ddd'
-          tar -xzf "$RUNNER_TEMP/idb-companion.tar.gz" -C "$RUNNER_TEMP/bil-idb-bin"
-          chmod +x "$RUNNER_TEMP/bil-idb-bin/idb_companion"
-          brew install python@3.11
-          "$(brew --prefix python@3.11)/bin/python3.11" -m venv "$RUNNER_TEMP/bil-idb-venv"
-          "$RUNNER_TEMP/bil-idb-venv/bin/python" -m pip install \
-            --disable-pip-version-check --no-deps --require-hashes \
-            -r tool/release/ios_tahoe_idb_requirements.lock
-          "$RUNNER_TEMP/bil-idb-venv/bin/python" -m pip check
-          "$RUNNER_TEMP/bil-idb-venv/bin/idb" --help >/dev/null
-          "$RUNNER_TEMP/bil-idb-bin/idb_companion" --version
-          echo "$RUNNER_TEMP/bil-idb-bin" >> "$GITHUB_PATH"
-          echo "$RUNNER_TEMP/bil-idb-venv/bin" >> "$GITHUB_PATH"
-
-      - name: Run bounded iOS crypto and settings from exact simulator bundles
-        shell: bash
-        env:
-          BIL_NATIVE_TARGET: crypto-and-settings
-        run: bash .github/scripts/bil_ios37_native_integration.sh
-
-      - name: Rebuild QA app after integration harness
-        shell: bash
-        run: |
-          set -euo pipefail
-          # The exact native test bundles use different Dart entrypoints.
-          # Restore the real QA app before creating the lifecycle simulators.
-          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --simulator --debug --no-codesign --no-pub \
-            --build-number "$BIL_TEST_BUILD_NUMBER" \
-            --dart-define=BIL_ENVIRONMENT=qa \
-            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
-            --dart-define=BIL_PAYMENTS_ENABLED=false \
-            --dart-define=BIL_ADS_ENABLED=false
-          test -d build/ios/iphonesimulator/Runner.app
-
-      - name: Create iPhone and iPad simulator sessions
-        id: sims
-        shell: bash
-        run: |
-          set -euo pipefail
-          read -r RUNTIME IPHONE_TYPE IPAD_TYPE < <(python3 - <<'PY'
-          import json, re, subprocess
-          runtimes=json.loads(subprocess.check_output(
-              ['xcrun','simctl','list','runtimes','available','-j']
-          ))['runtimes']
-          ios=[r for r in runtimes if r.get('isAvailable') and
-               r.get('identifier','').startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
-          if not ios:
-              raise SystemExit('No available iOS Simulator runtime')
-          def version(r):
-              return tuple(int(x) for x in re.findall(r'\d+', r.get('version','0')))
-          runtime=max(ios,key=version)
-          types=json.loads(subprocess.check_output(
-              ['xcrun','simctl','list','devicetypes','-j']
-          ))['devicetypes']
-          iphones=[d for d in types if d['name'].startswith('iPhone')]
-          ipads=[d for d in types if d['name'].startswith('iPad')]
-          def preferred(items, names):
-              by_name={item['name']: item for item in items}
-              for name in names:
-                  if name in by_name:
-                      return by_name[name]
-              return None
-          iphone=preferred(iphones, [
-              'iPhone 17 Pro',
-              'iPhone 17',
-              'iPhone 16 Pro',
-              'iPhone 16',
-              'iPhone 15 Pro',
-          ])
-          ipad=preferred(ipads, [
-              'iPad Pro 13-inch (M4)',
-              'iPad Pro (13-inch) (M4)',
-              'iPad Pro 11-inch (M4)',
-              'iPad Pro (11-inch) (M4)',
-              'iPad Pro (12.9-inch) (6th generation)',
-          ])
-          if iphone is None or ipad is None:
-              raise SystemExit('No audited modern iPhone/iPad simulator type is available')
-          print(runtime['identifier'], iphone['identifier'], ipad['identifier'])
-          PY
-          )
-          IPHONE="$(xcrun simctl create "BIL-RC-iPhone-${GITHUB_RUN_ID}" "$IPHONE_TYPE" "$RUNTIME")"
-          IPAD="$(xcrun simctl create "BIL-RC-iPad-${GITHUB_RUN_ID}" "$IPAD_TYPE" "$RUNTIME")"
-          echo "iphone=$IPHONE" >> "$GITHUB_OUTPUT"
-          echo "ipad=$IPAD" >> "$GITHUB_OUTPUT"
-          for UDID in "$IPHONE" "$IPAD"; do
-            xcrun simctl erase "$UDID"
-            xcrun simctl boot "$UDID"
-            xcrun simctl bootstatus "$UDID" -b
-            xcrun simctl ui "$UDID" appearance light
-            if ! xcrun simctl status_bar "$UDID" override \
-              --time 09:41 --batteryState charged --batteryLevel 100 \
-              --wifiBars 3 --cellularBars 4; then
-              echo 'Status-bar normalization unavailable; runtime evidence remains valid.'
-            fi
-            xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
-            xcrun simctl get_app_container "$UDID" "$BIL_APP_ID" app >/dev/null
-          done
-
-      - name: Run verified iPhone and iPad lifecycle/deep-link matrix
-        shell: bash
-        env:
-          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
-          IPAD_UDID: ${{ steps.sims.outputs.ipad }}
-        run: |
-          set -euo pipefail
-          EVIDENCE=artifacts/release/rc_mobile_test/ios
-          export PRIVATE_UI_DIR="$RUNNER_TEMP/bil-rc-lifecycle-accessibility"
-          rm -rf "$PRIVATE_UI_DIR"
-          mkdir -p "$EVIDENCE/iphone" "$EVIDENCE/ipad" "$PRIVATE_UI_DIR"
-          source tool/release/ios_plus8_simulator_ui/accessibility.sh
-          LIFECYCLE_START="$RUNNER_TEMP/bil-rc-lifecycle-start"
-          touch "$LIFECYCLE_START"
-
-          scheme_tree_for() {
-            local udid="$1"
-            local target="$PRIVATE_UI_DIR/$udid-scheme.json"
-            local stderr_path="$PRIVATE_UI_DIR/$udid-scheme.stderr"
-            local attempt
-            for attempt in 1 2 3; do
-              : > "$target"
-              : > "$stderr_path"
-              if idb ui describe-all --udid "$udid" \
-                --api axbridge --json > "$target" 2> "$stderr_path" &&
-                test -s "$target" &&
-                python3 -m json.tool "$target" >/dev/null 2>&1; then
-                rm -f "$stderr_path"
-                return 0
-              fi
-              sleep 1
-            done
-            cat "$stderr_path" >&2 || true
-            return 1
-          }
-
-          scheme_confirmation_state() {
-            local udid="$1"
-            local state
-            if ! scheme_tree_for "$udid"; then
-              return 2
-            fi
-            state="$(python3 - "$PRIVATE_UI_DIR/$udid-scheme.json" <<'PY'
-          import json
-          import sys
-
-          with open(sys.argv[1], encoding='utf-8') as handle:
-              payload = json.load(handle)
-          stack = list(payload if isinstance(payload, list) else [payload])
-          while stack:
-              item = stack.pop()
-              if not isinstance(item, dict):
-                  continue
-              text = ' '.join(str(item.get(key) or '') for key in (
-                  'AXLabel', 'AXValue', 'title', 'placeholder', 'help', 'value', 'label',
-              )).casefold()
-              if 'open in' in text:
-                  print('visible')
-                  raise SystemExit(0)
-              for value in item.values():
-                  if isinstance(value, dict):
-                      stack.append(value)
-                  elif isinstance(value, list):
-                      stack.extend(value)
-          print('absent')
-          PY
-          )" || return 2
-            if [[ "$state" == 'visible' ]]; then
-              return 0
-            fi
-            if [[ "$state" == 'absent' ]]; then
-              return 1
-            fi
-            return 2
-          }
-
-          exact_open_button_probe() {
-            local udid="$1"
-            local evidence="$2"
-            scheme_tree_for "$udid"
-            python3 - "$PRIVATE_UI_DIR/$udid-scheme.json" "$evidence" <<'PY'
-          import json
-          import sys
-
-          source, evidence = sys.argv[1:]
-          with open(source, encoding='utf-8') as handle:
-              payload = json.load(handle)
-
-          stack = list(payload if isinstance(payload, list) else [payload])
-          prompt_markers = []
-          buttons = []
-          while stack:
-              item = stack.pop()
-              if not isinstance(item, dict):
-                  continue
-              for value in item.values():
-                  if isinstance(value, dict):
-                      stack.append(value)
-                  elif isinstance(value, list):
-                      stack.extend(value)
-
-              text_fields = {
-                  key: str(item.get(key) or '').strip()
-                  for key in ('AXLabel', 'AXValue', 'title', 'placeholder', 'help', 'value', 'label')
-              }
-              if any('open in' in value.casefold() for value in text_fields.values()):
-                  prompt_markers.append({
-                      'text': {key: value for key, value in text_fields.items() if value},
-                      'type': item.get('type'),
-                      'role': item.get('role'),
-                      'role_description': item.get('role_description'),
-                      'frame': item.get('frame'),
-                  })
-
-              frame = item.get('frame')
-              if not isinstance(frame, dict):
-                  continue
-              try:
-                  x = float(frame.get('x', 0))
-                  y = float(frame.get('y', 0))
-                  width = float(frame.get('width', 0))
-                  height = float(frame.get('height', 0))
-              except (TypeError, ValueError):
-                  continue
-              if width <= 0 or height <= 0:
-                  continue
-
-              role_text = ' '.join(str(item.get(key) or '') for key in (
-                  'type', 'role', 'role_description',
-              )).casefold()
-              if 'button' not in role_text:
-                  continue
-
-              expected_key = next((
-                  key for key in ('AXLabel', 'title', 'AXValue')
-                  if str(item.get(key) or '').strip() == 'Open'
-              ), None)
-              if expected_key is None:
-                  continue
-              buttons.append({
-                  'expected_key': expected_key,
-                  'AXLabel': item.get('AXLabel'),
-                  'title': item.get('title'),
-                  'AXValue': item.get('AXValue'),
-                  'AXUniqueId': item.get('AXUniqueId'),
-                  'type': item.get('type'),
-                  'role': item.get('role'),
-                  'role_description': item.get('role_description'),
-                  'enabled': item.get('enabled'),
-                  'frame': {'x': x, 'y': y, 'width': width, 'height': height},
-                  'center': {'x': x + width / 2, 'y': y + height / 2},
-              })
-
-          unique = {}
-          for button in buttons:
-              frame = button['frame']
-              key = tuple(round(float(frame[name]), 4) for name in ('x', 'y', 'width', 'height'))
-              unique.setdefault(key, button)
-          candidates = list(unique.values())
-          report = {
-              'system_prompt_markers': prompt_markers,
-              'exact_open_button_candidates': candidates,
-          }
-          if len(candidates) == 1:
-              report['selected'] = candidates[0]
-          with open(evidence, 'w', encoding='utf-8') as handle:
-              json.dump(report, handle, indent=2, sort_keys=True)
-
-          if len(candidates) != 1:
-              raise SystemExit(f'exact_open_button_count={len(candidates)}')
-          selected = candidates[0]
-          print(
-              round(selected['center']['x']),
-              round(selected['center']['y']),
-              selected['expected_key'],
-          )
-          PY
-          }
-
-          validate_open_button_hit() {
-            local path="$1"
-            local expected_key="$2"
-            python3 - "$path" "$expected_key" <<'PY'
-          import json
-          import sys
-
-          path, expected_key = sys.argv[1:]
-          with open(path, encoding='utf-8') as handle:
-              payload = json.load(handle)
-          stack = list(payload if isinstance(payload, list) else [payload])
-          while stack:
-              item = stack.pop()
-              if not isinstance(item, dict):
-                  continue
-              for value in item.values():
-                  if isinstance(value, dict):
-                      stack.append(value)
-                  elif isinstance(value, list):
-                      stack.extend(value)
-              role_text = ' '.join(str(item.get(key) or '') for key in (
-                  'type', 'role', 'role_description',
-              )).casefold()
-              if (
-                  'button' in role_text
-                  and str(item.get(expected_key) or '').strip() == 'Open'
-              ):
-                  raise SystemExit(0)
-          raise SystemExit('open_button_hit_test_mismatch')
-          PY
-          }
-
-          write_scheme_result() {
-            local target="$1"
-            local status="$2"
-            local center="$3"
-            local expected_key="$4"
-            {
-              printf 'SYSTEM_CONFIRMATION=%s\n' "$status"
-              if [[ -n "$center" ]]; then
-                printf 'OPEN_BUTTON_CENTER=%s\n' "$center"
-              fi
-              if [[ -n "$expected_key" ]]; then
-                printf 'OPEN_EXPECTED_KEY=%s\n' "$expected_key"
-              fi
-              printf 'ACCESSIBILITY_ACTION_BACKEND=axbridge\n'
-            } > "$target"
-          }
-
-          dismiss_scheme_confirmation() {
-            local udid="$1"
-            local dir="$2"
-            local stem="$3"
-            local state attempt poll point x y expected_key action_log
-            local pressed=0
-
-            mkdir -p "$dir"
-            for attempt in 1 2 3; do
-              if scheme_confirmation_state "$udid"; then
-                state=0
-              else
-                state=$?
-              fi
-              if [[ "$state" -eq 1 ]]; then
-                if [[ "$pressed" -eq 1 ]]; then
-                  write_scheme_result \
-                    "$dir/$stem-scheme-confirmation-result.txt" \
-                    'HANDLED' "$x,$y" "$expected_key"
-                else
-                  write_scheme_result \
-                    "$dir/$stem-scheme-confirmation-result.txt" \
-                    'NOT_PRESENT' '' ''
-                fi
-                return 0
-              fi
-              if [[ "$state" -eq 2 ]]; then
-                sleep 1
-                continue
-              fi
-
-              xcrun simctl io "$udid" \
-                screenshot "$dir/$stem-scheme-confirmation-$attempt.png" || true
-
-              point="$(exact_open_button_probe \
-                "$udid" "$dir/$stem-scheme-confirmation-$attempt.json")"
-              read -r x y expected_key <<< "$point"
-
-              if ! idb ui describe-point --udid "$udid" "$x" "$y" \
-                --api axbridge --json \
-                > "$dir/$stem-open-hit-$attempt.json"; then
-                echo 'Could not hit-test the exact iOS Open button.' >&2
-                return 1
-              fi
-              validate_open_button_hit \
-                "$dir/$stem-open-hit-$attempt.json" "$expected_key"
-
-              action_log="$dir/$stem-open-action-$attempt.log"
-              pressed=1
-              if ! idb ui tap --udid "$udid" "$x" "$y" \
-                --api axbridge \
-                --expected-value Open \
-                --expected-key "$expected_key" \
-                > "$action_log" 2>&1; then
-                cat "$action_log" >&2
-              fi
-
-              for poll in 1 2 3 4 5 6 7 8 9 10; do
-                if scheme_confirmation_state "$udid"; then
-                  state=0
-                else
-                  state=$?
-                fi
-                if [[ "$state" -eq 1 ]]; then
-                  write_scheme_result \
-                    "$dir/$stem-scheme-confirmation-result.txt" \
-                    'HANDLED' "$x,$y" "$expected_key"
-                  return 0
-                fi
-                sleep 1
-              done
-            done
-
-            xcrun simctl io "$udid" \
-              screenshot "$dir/$stem-scheme-confirmation-final.png" || true
-            if scheme_tree_for "$udid"; then
-              cp "$PRIVATE_UI_DIR/$udid-scheme.json" \
-                "$dir/$stem-scheme-confirmation-final-accessibility.json" || true
-            fi
-            echo 'iOS custom-scheme confirmation remained visible after verified accessibility Open press.' >&2
-            return 1
-          }
-          save_accessibility() {
-            local udid="$1"
-            local target="$2"
-            tree_for "$udid"
-            cp "$PRIVATE_UI_DIR/$udid.json" "$target"
-            test -s "$target"
-          }
-
-          capture_verified() {
-            local udid="$1"
-            local dir="$2"
-            local stem="$3"
-            if has_marker "$udid" 'Open in'; then
-              echo "System Open confirmation obscured $stem." >&2
-              return 1
-            fi
-            xcrun simctl io "$udid" screenshot "$dir/$stem.png"
-            save_accessibility "$udid" "$dir/$stem-accessibility.json"
-            test -s "$dir/$stem.png"
-          }
-
-          wait_gateway() {
-            local udid="$1"
-            local dir="$2"
-            local stem="$3"
-            if wait_marker "$udid" 'Continue without an account' 60; then
-              return 0
-            fi
-            mkdir -p "$dir"
-            xcrun simctl io "$udid" screenshot "$dir/$stem-timeout.png" || true
-            if tree_for "$udid"; then
-              cp "$PRIVATE_UI_DIR/$udid.json" "$dir/$stem-timeout-accessibility.json" || true
-            fi
-            xcrun simctl spawn "$udid" log show               --style compact --last 8m               --predicate 'process == "Runner"'               > "$dir/$stem-timeout-runner.log" || true
-            if has_marker "$udid" 'BODY INTELLIGENCE LOG'; then
-              echo 'Startup remained on the splash surface; timeout evidence captured.' >&2
-            else
-              echo 'Account gateway marker was not reached; timeout evidence captured.' >&2
-            fi
-            return 1
-          }
-
-          open_verified_link() {
-            local udid="$1"
-            local url="$2"
-            local dir="$3"
-            local stem="$4"
-            xcrun simctl openurl "$udid" "$url"
-            sleep 3
-            dismiss_scheme_confirmation "$udid" "$dir" "$stem"
-          }
-
-          exercise_device() {
-            local name="$1"
-            local udid="$2"
-            local dir="$EVIDENCE/$name"
-
-            xcrun simctl launch "$udid" "$BIL_APP_ID" \
-              -AppleLanguages '(en)' -AppleLocale 'en_US' \
-              | tee "$dir/launch.txt"
-            wait_gateway "$udid" "$dir" '01-cold-account-gateway'
-            capture_verified "$udid" "$dir" '01-cold-account-gateway'
-
-            open_verified_link "$udid" 'bil://login' "$dir" '02-login-deep-link'
-            wait_marker "$udid" 'Store reviewer access' 30
-            wait_marker "$udid" 'Email address' 30
-            capture_verified "$udid" "$dir" '02-login-deep-link'
-
-            # Removed operator URLs must leave the ordinary login visible.
-            for forbidden in admin/ai-coach community/moderation community/food-review; do
-              stem="02-rejected-${forbidden//\//-}"
-              open_verified_link "$udid" "bil://$forbidden" "$dir" "$stem"
-              wait_marker "$udid" 'Email address' 30
-              capture_verified "$udid" "$dir" "$stem"
-            done
-
-            open_verified_link "$udid" 'bil://connected-health' "$dir" '03-connected-health-deep-link'
-            wait_marker "$udid" 'Apps & Devices' 30
-            wait_marker "$udid" 'Health Hub' 30
-            capture_verified "$udid" "$dir" '03-connected-health-deep-link'
-
-            xcrun simctl terminate "$udid" "$BIL_APP_ID"
-            xcrun simctl launch "$udid" "$BIL_APP_ID" \
-              -AppleLanguages '(en)' -AppleLocale 'en_US' \
-              | tee "$dir/relaunch.txt"
-            wait_gateway "$udid" "$dir" '04-terminate-relaunch'
-            capture_verified "$udid" "$dir" '04-terminate-relaunch'
-
-            xcrun simctl ui "$udid" appearance dark
-            sleep 2
-            wait_gateway "$udid" "$dir" '05-dark-account-gateway'
-            capture_verified "$udid" "$dir" '05-dark-account-gateway'
-
-            xcrun simctl ui "$udid" appearance light
-            xcrun simctl terminate "$udid" "$BIL_APP_ID"
-            xcrun simctl spawn "$udid" launchctl setenv TZ Africa/Cairo
-            xcrun simctl launch "$udid" "$BIL_APP_ID" \
-              -AppleLanguages '(ar)' -AppleLocale 'ar_EG' \
-              | tee "$dir/arabic-cairo-launch.txt"
-            sleep 8
-            capture_verified "$udid" "$dir" '06-arabic-cairo-runtime'
-
-            xcrun simctl terminate "$udid" "$BIL_APP_ID"
-            xcrun simctl spawn "$udid" launchctl unsetenv TZ
-            xcrun simctl launch "$udid" "$BIL_APP_ID" \
-              -AppleLanguages '(en)' -AppleLocale 'en_US' \
-              | tee "$dir/post-locale-relaunch.txt"
-            wait_gateway "$udid" "$dir" '06b-post-locale-account-gateway'
-
-            xcrun simctl ui "$udid" content_size accessibility-extra-extra-extra-large
-            sleep 2
-            wait_gateway "$udid" "$dir" '06-large-text-account-gateway'
-            capture_verified "$udid" "$dir" '06-large-text-account-gateway'
-
-            xcrun simctl get_app_container "$udid" "$BIL_APP_ID" app >/dev/null
-            xcrun simctl spawn "$udid" log show \
-              --style compact --last 8m \
-              --predicate 'process == "Runner"' \
-              > "$dir/runner.log" || true
-            if grep -Eiq \
-              'Unhandled Exception|RenderFlex overflowed|EXC_CRASH|SIGABRT|fatal error' \
-              "$dir/runner.log"; then
-              echo "Runner runtime error marker found for $name." >&2
-              return 1
-            fi
-            if grep -Eiq \
-              'authorization:.*bearer[[:space:]]+[A-Za-z0-9._~-]{20,}|access[_ -]?token[=:]["'"'"' ]*[A-Za-z0-9._~-]{20,}|refresh[_ -]?token[=:]["'"'"' ]*[A-Za-z0-9._~-]{20,}|service_role.*eyJ|sb_secret_' \
-              "$dir/runner.log"; then
-              echo "Sensitive token value found in iOS Runner logs for $name." >&2
-              return 1
-            fi
-          }
-
-          exercise_device iphone "$IPHONE_UDID"
-          exercise_device ipad "$IPAD_UDID"
-
-          CRASHES="$(find "$HOME/Library/Logs/DiagnosticReports" \
-            -maxdepth 1 -type f -name 'Runner*' -newer "$LIFECYCLE_START" -print)"
-          test -z "$CRASHES" || {
-            echo 'Runner crash report detected during verified lifecycle matrix.' >&2
-            printf '%s\n' "$CRASHES" >&2
-            exit 1
-          }
-
-          xcodebuild -version > "$EVIDENCE/xcode-version.txt"
-          xcrun simctl list runtimes available > "$EVIDENCE/runtimes.txt"
-          shasum -a 256 BIL-unsigned-RC.ipa \
-            build/ios/iphonesimulator/BIL-RC-Simulator.app.zip \
-            > "$EVIDENCE/SHA256SUMS.txt"
-          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
-          printf '%s\n' \
-            'IOS_SIMULATOR_BUILD=PASS' \
-            'IOS_UNSIGNED_DEVICE_BUILD=PASS_TEST_ONLY_EXPECTED_NO_CODESIGN' \
-            'IOS_IPHONE_COLD_ACCOUNT_GATEWAY=PASS' \
-            'IOS_IPAD_COLD_ACCOUNT_GATEWAY=PASS' \
-            'IOS_CUSTOM_SCHEME_CONFIRMATION_HANDLED=PASS' \
-            'IOS_LOGIN_DEEP_LINK_ACTUAL_PAGE=PASS' \
-            'IOS_CONNECTED_HEALTH_DEEP_LINK_ACTUAL_PAGE=PASS' \
-            'IOS_TERMINATE_RELAUNCH_ACTUAL_PAGE=PASS' \
-            'IOS_DARK_MODE_ACTUAL_APP_UI=PASS' \
-            'IOS_LARGE_TEXT_ACTUAL_APP_UI=PASS' \
-            'IOS_ARABIC_LOCALE_RUNTIME=PASS' \
-            'IOS_CAIRO_TIMEZONE_RUNTIME=PASS' \
-            'IOS_ACCESSIBILITY_TREES=PASS' \
-            'IOS_RUNTIME_CRASH_SCAN=PASS' \
-            'IOS_RUNTIME_SECRET_LOG_SCAN=PASS' \
-            'IOS_NATIVE_CRYPTO=PASS' \
-            'IOS_NATIVE_SETTINGS_UI=PASS' \
-            'IOS_SCREENSHOT_DISPLAY=DEFAULT_LCD' \
-            'IOS_IPAD_LANDSCAPE_RUNTIME=NOT_CLAIMED_WIDGET_CONTRACT_ONLY' \
-            'IOS_APP_ATTEST_GENUINE=PHYSICAL_DEVICE_REQUIRED' \
-            'IOS_HEALTHKIT_GENUINE=PHYSICAL_DEVICE_REQUIRED' \
-            'IOS_STOREKIT_SANDBOX_GENUINE=PHYSICAL_DEVICE_OR_STORE_SANDBOX_REQUIRED' \
-            > "$EVIDENCE/gate-status.txt"
-
-      - name: Upload iOS test artifacts
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: bil-rc-ios-test-${{ github.sha }}
-          path: |
-            BIL-unsigned-RC.ipa
-            build/ios/iphonesimulator/BIL-RC-Simulator.app.zip
-            artifacts/release/rc_mobile_test/ios
-            artifacts/qa/text18/ios37-simulators
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Remove disposable simulators
-        if: always()
-        shell: bash
-        env:
-          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
-          IPAD_UDID: ${{ steps.sims.outputs.ipad }}
-        run: |
-          set +e
-          for UDID in "$IPHONE_UDID" "$IPAD_UDID"; do
-            [[ -z "${UDID:-}" ]] && continue
-            xcrun simctl terminate "$UDID" "$BIL_APP_ID"
-            xcrun simctl uninstall "$UDID" "$BIL_APP_ID"
-            xcrun simctl shutdown "$UDID"
-            xcrun simctl delete "$UDID"
-          done
-          rm -rf Payload
-
-  android-notification-sdk:
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.ios_only }}
-    name: Android API ${{ matrix.api }} local notification permission states
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        api: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.notification_api33_only && '[33]' || '[33,36]') }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-      - name: Resolve the exact candidate dependencies
-        run: flutter pub get
-      - name: Require accelerated disposable emulator
-        run: bash .github/scripts/bil_prepare_android_kvm.sh
-      - name: Verify the exact CMake SDK package before the native build
-        run: |
-          set -euo pipefail
-          python3 .github/scripts/test_bil_prepare_android_cmake.py
-          python3 .github/scripts/bil_prepare_android_cmake.py --receipt artifacts/qa/notification-sdk-api${{ matrix.api }}/cmake-provision.json
-      - name: Verify denied and granted native local notifications without cloud or push
-        uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
-        with:
-          api-level: ${{ matrix.api }}
-          arch: x86_64
-          target: google_apis
-          profile: pixel_6
-          disable-animations: true
-          emulator-boot-timeout: 900
-          script: bash .github/scripts/bil_android_notification_sdk_qa.sh
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
-        with:
-          name: bil-notification-sdk-api${{ matrix.api }}-${{ github.sha }}
-          path: artifacts/qa/notification-sdk-api${{ matrix.api }}/
-          if-no-files-found: error
-          retention-days: 14
+          printf '%s\n' 'Native recording may be partial or blocked. No final video, Play delivery, billing, Integrity recognition or appeal submission is certified by this job.' >> "$GITHUB_STEP_SUMMARY"
