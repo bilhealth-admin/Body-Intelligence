@@ -192,7 +192,7 @@ def validate_meal_goal_content(nodes, viewport):
     require(own, "meal_calorie_goals_wrong_app_package")
     text = [s for n in own for s in labels(n)]
     # A title, an Active badge, or a route into Plans is not paid-feature proof.
-    require(not any(re.search(r"^Plans$|\bView Premium plans\b|\bExplore Premium\b|\bRetry subscription check\b|\bRestore purchases\b|\bOpening secure purchase\b|^Continue(?:\s*[Â·â€¢].*)?$", s, re.I)
+    require(not any(re.search(r"^Plans$|\bView Premium plans\b|\bExplore Premium\b|\bRetry subscription check\b|\bRestore purchases\b|\bOpening secure purchase\b|^Continue(?:\s*[Ã‚Â·Ã¢â‚¬Â¢].*)?$", s, re.I)
                     for s in text), "meal_calorie_goals_paywall_or_unverified")
     require(any(re.fullmatch(r"Set a separate calorie goal for each meal\.", s, re.I)
                 for s in text), "meal_calorie_goals_content_not_visible")
@@ -438,10 +438,16 @@ class Device:
     def authenticated_navigation(self):
         end = time.monotonic() + 90
         skipped_checkin = False
+        self.demo_setup_evidence = None
         while time.monotonic() < end:
             nodes = self.nodes()
             blocker = classify_blocker(nodes)
             if blocker:
+                if blocker == "onboarding_requires_explicit_test_profile_no_values_invented" and self.demo_setup_evidence is None:
+                    from demo_setup import complete_demo_setup
+                    self.demo_setup_evidence = complete_demo_setup(self,require,labels,select,PACKAGE)
+                    end = time.monotonic() + 90
+                    continue
                 raise Blocked(blocker)
             try:
                 select(nodes, r"More(?: Tab \d of \d)?")
@@ -580,6 +586,9 @@ def capture(args):
         if d.authenticated_navigation():
             result["stages"].append("OPTIONAL_DAILY_WEIGHT_CHECKIN_SKIPPED_NO_WEIGHT_LOGGED")
         result["stages"].append("REVIEWER_SIGNIN_REACHED_VISIBLE_MAIN_NAVIGATION")
+        if getattr(d,"demo_setup_evidence",None):
+            result["dedicated_demo_setup"] = d.demo_setup_evidence
+            result["stages"].append("VISIBLE_DEDICATED_DEMO_SETUP_FINISH_CONFIRMED_NOT_PERSONAL_HEALTH_DATA")
         d.start("authenticated-visible-navigation")
         d.more()
         nodes = d.see(r"Active|Explore Premium|Retry subscription check", seconds=40)
