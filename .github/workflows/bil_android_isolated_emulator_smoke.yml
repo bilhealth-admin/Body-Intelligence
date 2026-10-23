@@ -36,8 +36,8 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJSON(
         inputs.api36_only == true &&
-          '{"include":[{"api-level":36,"profile":"pixel_6","ram-size":"4096M"}]}'
-        || '{"include":[{"api-level":26,"profile":"pixel_2"},{"api-level":29,"profile":"pixel_2"},{"api-level":33,"profile":"pixel_6"},{"api-level":34,"profile":"pixel_6","ram-size":"4096M"},{"api-level":35,"profile":"pixel_6","ram-size":"4096M"},{"api-level":36,"profile":"pixel_6","ram-size":"4096M"}]}'
+          '{"include":[{"api-level":36,"profile":"pixel_6"}]}'
+        || '{"include":[{"api-level":26,"profile":"pixel_2"},{"api-level":29,"profile":"pixel_2"},{"api-level":33,"profile":"pixel_6"},{"api-level":34,"profile":"pixel_6","ram-size":"4096M"},{"api-level":35,"profile":"pixel_6","ram-size":"4096M"},{"api-level":36,"profile":"pixel_6"}]}'
         ) }}
 
     steps:
