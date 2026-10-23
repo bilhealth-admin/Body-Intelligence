@@ -3,6 +3,10 @@ run-name: BIL iOS38 TestFlight promotion from signed run ${{ inputs.signed_run_i
 on:
   workflow_dispatch:
     inputs:
+      internal_testflight_existing_evidence:
+        description: 'Explicit owner-approved internal TestFlight only; byte-identical prior app evidence, no full CI repeat'
+        type: boolean
+        default: false
       expected_source_sha:
         description: Full application source SHA proven by every prerequisite
         required: true
@@ -31,6 +35,9 @@ concurrency:
   group: bil-ios38-testflight-one-shot
   cancel-in-progress: false
 env:
+  BIL_INTERNAL_TESTFLIGHT: ${{ inputs.internal_testflight_existing_evidence }}
+  BIL_VALIDATION_MODE: ${{ inputs.internal_testflight_existing_evidence && 'owner_authorized_internal_prior_app_evidence' || 'all_exact_source_ci' }}
+  BIL_INTERNAL_TESTFLIGHT_AUTHORIZATION: ${{ inputs.internal_testflight_existing_evidence && 'OWNER_APPROVED_INTERNAL_ONLY_20261023' || '' }}
   BIL_TESTED_SOURCE: ${{ inputs.expected_source_sha }}
   BIL_SIGNED_RUN: ${{ inputs.signed_run_id }}
   BIL_SIGNED_ARTIFACT: ${{ inputs.signed_artifact_id }}
@@ -55,8 +62,15 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_RUN_ATTEMPT" = '1'
-          python3 tools/qa/bil_candidate_release.py --verify-ci --platform ios --expected-head "$BIL_TESTED_SOURCE"
+          if [[ "$BIL_INTERNAL_TESTFLIGHT" == true ]]; then
+            python3 tools/qa/bil_internal_testflight_source.py --expected-head "$BIL_TESTED_SOURCE" --output "$RUNNER_TEMP/internal-testflight-authorization.json"
+          else
+            python3 tools/qa/bil_candidate_release.py --verify-ci --platform ios --expected-head "$BIL_TESTED_SOURCE"
+          fi
           mkdir -p delivery evidence
+          if [[ "$BIL_INTERNAL_TESTFLIGHT" == true ]]; then
+            cp "$RUNNER_TEMP/internal-testflight-authorization.json" evidence/internal-testflight-authorization.json
+          fi
           python3 - <<'PY'
           import json,os,re,subprocess
           def api(endpoint):
@@ -95,6 +109,7 @@ jobs:
           receipt=json.loads(unique('BIL-ios-build-only-receipt.json').read_text())
           assert receipt['status']=='SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED'
           assert receipt['source_sha']==os.environ['BIL_TESTED_SOURCE'] and receipt['build']==38
+          assert receipt.get('validation_mode','all_exact_source_ci')==os.environ['BIL_VALIDATION_MODE']
           assert receipt['ipa_sha256']==digest and receipt['ipa_bytes']==ipa.stat().st_size
           assert unique('BIL-source-head.txt').read_text().strip()==os.environ['BIL_TESTED_SOURCE']
           assert 'SIGNED_IPA_CODESIGN_GATE=PASS' in unique('BIL-ios-codesign-verify.txt').read_text()

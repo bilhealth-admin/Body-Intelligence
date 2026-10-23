@@ -3,6 +3,10 @@ run-name: "BIL ios 38 exact-source signed artifact; no store upload"
 on:
   workflow_dispatch:
     inputs:
+      internal_testflight_existing_evidence:
+        description: 'Explicit owner-approved internal TestFlight only; byte-identical prior app evidence, no full CI repeat'
+        type: boolean
+        default: false
       expected_source_sha:
         description: Final committed SHA that passed every candidate prerequisite
         required: true
@@ -19,6 +23,9 @@ concurrency:
   group: bil-ios-38-artifact-${{ github.ref }}
   cancel-in-progress: false
 env:
+  BIL_INTERNAL_TESTFLIGHT: ${{ inputs.internal_testflight_existing_evidence }}
+  BIL_VALIDATION_MODE: ${{ inputs.internal_testflight_existing_evidence && 'owner_authorized_internal_prior_app_evidence' || 'all_exact_source_ci' }}
+  BIL_INTERNAL_TESTFLIGHT_AUTHORIZATION: ${{ inputs.internal_testflight_existing_evidence && 'OWNER_APPROVED_INTERNAL_ONLY_20261023' || '' }}
   BIL_TESTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
   BIL_ORIGINAL_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
 jobs:
@@ -39,7 +46,11 @@ jobs:
           QA_RUN_IDS: ${{ inputs.qa_run_ids }}
         run: |
           set -euo pipefail
-          python3 tools/qa/bil_candidate_release.py --verify-ci --platform ios --expected-head "$BIL_TESTED_SOURCE_SHA"
+          if [[ "$BIL_INTERNAL_TESTFLIGHT" == true ]]; then
+            python3 tools/qa/bil_internal_testflight_source.py --expected-head "$BIL_TESTED_SOURCE_SHA" --output BIL-internal-testflight-authorization.json
+          else
+            python3 tools/qa/bil_candidate_release.py --verify-ci --platform ios --expected-head "$BIL_TESTED_SOURCE_SHA"
+          fi
           echo "BIL_AUDITED_FREEZE_MANIFEST_SHA256=$(python3 -c 'import hashlib,pathlib;print(hashlib.sha256(pathlib.Path("docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md").read_bytes()).hexdigest())')" >> "$GITHUB_ENV"
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
@@ -578,6 +589,7 @@ jobs:
           pathlib.Path('BIL-ios-build-only-receipt.json').write_text(json.dumps({
               'status':'SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED','source_sha':githead,
               'workflow_sha':os.environ['GITHUB_SHA'],'build':38,
+              'validation_mode':os.environ['BIL_VALIDATION_MODE'],'public_release_approved':False,
               'ipa_sha256':digest,'ipa_bytes':files[0].stat().st_size,
               'testflight_upload':'NOT_RUN','app_store_connect':'NOT_RUN',
               'production_deploy':'NOT_RUN','physical_device':'NOT_RUN',
@@ -611,6 +623,7 @@ jobs:
             BIL-build-number.txt
             BIL-source-head.txt
             BIL-ios-build-only-receipt.json
+            BIL-internal-testflight-authorization.json
             BIL-apple-release-toolchain.txt
             BIL-apple-release-toolchain.json
 
