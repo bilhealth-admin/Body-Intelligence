@@ -109,13 +109,16 @@ jobs:
           api-level: 35
           arch: x86_64
           target: google_apis
-          profile: pixel_6
+          profile: pixel_2
           cores: 2
-          ram-size: 2048M
+          ram-size: 3072M
           disable-animations: false
           emulator-boot-timeout: 900
           emulator-options: -no-window -no-audio -no-snapshot -no-metrics -gpu swiftshader_indirect -camera-back none -camera-front none
-          script: python3 tools/qa/google_native_capture/native_capture.py capture --source "$SOURCE_SHA" --inputs "$RUNNER_TEMP/bil-google-signed-input" --output artifacts/google-native-capture --serial emulator-5554
+          script: |
+            sleep 25
+            adb -s emulator-5554 shell am force-stop com.google.android.apps.nexuslauncher
+            python3 tools/qa/google_native_capture/native_capture.py capture --source "$SOURCE_SHA" --inputs "$RUNNER_TEMP/bil-google-signed-input" --output artifacts/google-native-capture --serial emulator-5554
       - name: Preserve restricted native recording and sanitized receipt even on failure
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
