@@ -43,7 +43,13 @@ def complete_demo_setup(d, require, labels, select, package):
     fill('05/17/1990')
     tap(r'OK|Save')
     # The read-only country field is the sole EditText on the facts screen.
-    fields=[n for n in d.nodes() if n.get('package')==package and n.get('class')=='android.widget.EditText']
+    fields=[]
+    for _ in range(5):
+        fields=[n for n in d.nodes() if n.get('package')==package and n.get('class')=='android.widget.EditText']
+        if fields:break
+        size=re.search(r'Physical size: (\d+)x(\d+)',d.adb('shell','wm','size'))
+        require(size,'demo_screen_size_missing');w,h=map(int,size.groups())
+        d.adb('shell','input','swipe',w//2,h*3//4,w//2,h//3,500);time.sleep(1)
     require(len(fields)==1,'demo_country_field_not_unique')
     d.adb('shell','input','tap',*fields[0]['center']);time.sleep(1)
     fill('Egypt')
@@ -52,6 +58,8 @@ def complete_demo_setup(d, require, labels, select, package):
     centers={n['center'] for n in rows};require(centers and max(y for x,y in centers)-min(y for x,y in centers)<100,'demo_country_result_not_unique')
     d.adb('shell','input','tap',*sorted(centers,key=lambda pair:pair[0])[0]);time.sleep(1)
     next_step(r'Choose your units')
+    d.stop()
+    d.start('dedicated-demo-onboarding-finalize')
     # Metric is the untouched initial default; verify the real visible control.
     d.see(r'Metric');next_step(r'What is your height\?')
     fill('170');next_step(r'What is your current weight\?')
