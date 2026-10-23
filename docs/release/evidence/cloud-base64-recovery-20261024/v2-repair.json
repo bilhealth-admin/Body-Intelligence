@@ -12,5 +12,7 @@
   "schema_or_rls_changed": false,
   "remaining_affected_rows": 0,
   "private_encrypted_backup_sha256": "2b9237d1104fc5713b5795c296d07c18b9d0227ff72afd1d425f2dbb8922d71f",
-  "phone_success": "NOT_YET_PROVEN"
+  "phone_success": "OWNER_CONFIRMED_SYNC_COMPLETED_AND_LAST_SUCCESS_DATE_UPDATED_ON_INSTALLED38",
+  "phone_confirmation_recorded_at_utc": "2026-10-23T22:46:53.647421+00:00",
+  "phone_confirmation_source": "Direct account owner reply in this conversation"
 }
