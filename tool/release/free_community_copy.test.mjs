@@ -54,7 +54,14 @@ for (const lang of ['en', 'ar']) {
     assert.match(sharing, /Google UMP/);
     assert.match(sharing, lang === 'en' ? /Ads are excluded for guests and paid users/ : /لا تظهر الإعلانات للضيف أو للمستخدم المدفوع/);
     assert.match(sharing, lang === 'en' ? /Health data is not sold/ : /لا تُباع البيانات الصحية/);
-    assert.match(privacy.updated, lang === 'en' ? /20 October 2026/ : /20 أكتوبر 2026/);
+    // The reviewed Smart Plan privacy disclosure superseded the October20 copy.
+    // Require the approved date and the complete matching non-JavaScript page.
+    assert.equal(privacy.updated, lang === 'en' ? '23 October 2026' : '23 أكتوبر 2026');
+    const collection = privacy.sections.find(([key]) => key === 'collection')[2];
+    assert.match(collection, lang === 'en' ? /Saved Smart Plans stay on the device/ : /تبقى الخطط الذكية المحفوظة على الجهاز/);
+    const staticPolicy = fs.readFileSync(new URL(`../../public_site/policy-pages/privacy.${lang}.html`, import.meta.url), 'utf8');
+    assert.ok(staticPolicy.includes(privacy.updated));
+    assert.ok(staticPolicy.includes(lang === 'en' ? 'Saved Smart Plans stay on the device' : 'تبقى الخطط الذكية المحفوظة على الجهاز'));
   });
 }
 
@@ -71,10 +78,25 @@ test('no-script privacy retains the current Android and iOS provider disclosure'
   const html = fs.readFileSync(new URL('../../public_site/index.html', import.meta.url), 'utf8');
   const fallback = html.match(/<noscript>([\s\S]*?)<\/noscript>/)?.[1];
   assert.ok(fallback, 'Actual no-script legal fallback must remain readable');
-  assert.match(fallback, /Last updated: 20 October 2026/);
+  assert.match(fallback, /Last updated: 23 October 2026/);
+  assert.match(fallback, /آخر تحديث: 23 أكتوبر 2026/);
   assert.match(fallback, /Google Mobile Ads.*supported Android and iOS builds/);
   assert.doesNotMatch(fallback, /Google Mobile Ads.*supported Android builds/);
-  assert.match(fallback, /Health data is not sold or used to personalize advertising/);
+  assert.match(fallback, /Health data is not sold, shared with data brokers, or used to target ads/);
+  assert.match(fallback, /لا تُباع البيانات الصحية/);
+  assert.match(fallback, /Google UMP/);
+  assert.match(fallback, /Ads are excluded for guests and paid users/);
+  assert.match(fallback, /لا تظهر الإعلانات للضيف أو للمستخدم المدفوع/);
+  assert.match(fallback, /Saved Smart Plans stay on the device/);
+  assert.match(fallback, /تبقى الخطط الذكية المحفوظة على الجهاز/);
+  assert.match(fallback, /deletion marker/);
+  assert.match(fallback, /علامة حذف/);
+  assert.match(fallback, /Plan backup does not automatically copy HealthKit or Health Connect records/);
+  assert.match(fallback, /No Premium subscription or AI Boost purchase is required/);
+  assert.match(fallback, /لا تتطلب هذه الميزات اشتراك Premium أو شراء AI Boost/);
+  assert.match(fallback, /does not cancel or reprice an existing subscription/);
+  assert.match(fallback, /لا يلغي ذلك أي اشتراك قائم أو يغير سعره/);
+  assert.match(fallback, /Restore Purchases/);
   assert.match(fallback, /account-deletion/);
   assert.match(fallback, /privacy@bilhealth\.com/);
 });
