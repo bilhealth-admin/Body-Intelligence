@@ -3,10 +3,81 @@ import 'package:body_intelligence_log/features/cloud_platform/domain/cloud_platf
 import 'package:body_intelligence_log/features/cloud_platform/domain/cloud_sync_models.dart';
 import 'package:body_intelligence_log/features/cloud_platform/persistence/sqlite_cloud_platform_store.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/cloud_platform_ports.dart';
+import 'package:body_intelligence_log/features/cloud_platform/services/cloud_manual_sync_service.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/durable_offline_first_cloud_platform.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('203 queued rows drain in three acknowledged upload batches', () async {
+    final store = SqliteCloudPlatformStore.inMemory();
+    await store.initialize();
+    addTearDown(store.close);
+    final clock = _Clock(DateTime.utc(2026, 10, 23));
+    final transport = _SuccessTransport();
+    final runtime = DurableOfflineFirstCloudPlatform(
+      store: store,
+      transport: transport,
+      cipher: _Cipher(),
+      connectivity: _Connectivity(true),
+      clock: clock,
+      policy: const CloudPlatformPolicy(),
+    );
+    final consent = CloudPrivacyConsent(
+      ownerId: 'o',
+      grantedAt: clock.now(),
+      policy: CloudSelectiveSyncPolicy(
+        enabledKinds: const {CloudEntityKind.weight},
+      ),
+    );
+    final device = CloudDeviceRegistration(
+      deviceId: 'd',
+      ownerId: 'o',
+      displayName: 'phone',
+      registeredAt: clock.now(),
+    );
+    final session = CloudSession(
+      sessionId: 's',
+      ownerId: 'o',
+      deviceId: 'd',
+      issuedAt: clock.now(),
+      expiresAt: clock.now().add(const Duration(days: 1)),
+    );
+    for (var i = 0; i < 203; i++) {
+      await runtime.enqueue(
+        consent: consent,
+        record: CloudRecordEnvelope(
+          entityKind: CloudEntityKind.weight,
+          recordId: 'row-$i',
+          ownerId: 'o',
+          revision: CloudRevision(deviceId: 'd', sequence: 1),
+          updatedAt: clock.now(),
+          payload: {'kg': 80},
+        ),
+      );
+    }
+    var calls = 0;
+    final report = await drainCloudSyncPages(() async {
+      calls++;
+      final page = await runtime.synchronize(
+        consent: consent,
+        device: device,
+        session: session,
+      );
+      if (calls == 1) {
+        expect(page.pending, 103);
+        expect(page.hasMore, isFalse);
+        expect(page.availability, CloudPlatformAvailability.paused);
+        expect(page.completed, isFalse);
+      }
+      return page;
+    });
+    expect(calls, 3);
+    expect(report.pushed, 203);
+    expect(report.pending, 0);
+    expect(report.completed, isTrue);
+    expect(await store.pendingCount(), 0);
+    expect(await store.readDeadLetters(), isEmpty);
+  });
   test('persists a partial page cursor and never reports ready', () async {
     final store = SqliteCloudPlatformStore.inMemory();
     await store.initialize();

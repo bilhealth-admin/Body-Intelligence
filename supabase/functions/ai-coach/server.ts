@@ -8,6 +8,7 @@ import { isPureCoachRecordInteraction, validateCoachAnswerQuality } from "./coac
 import { validateCoachFoodBoundaries } from "./coach_food_safety.ts";
 import { validateCoachHealthBoundaries } from "./coach_health_safety.ts";
 import { verifiedWeightProposalCopy } from "./coach_verified_weight_proposal.ts";
+import { verifiedWorkoutReviewCopy } from "./coach_workout_review_copy.ts";
 import { decodeCoachToolArguments } from "./coach_tool_arguments.ts";
 import {
   disclosedGeminiEndpoint,
@@ -1342,54 +1343,67 @@ export async function handler(
       );
     };
     let result: ReturnType<typeof parseModelJson>;
+    let qualityRecovery: "verified_workout_review" | null = null;
     try {
       result = decode(provider.data);
     } catch (error) {
-      const budget = Math.min(geminiAttemptTimeoutMs, 24000 - (now() - started));
-      if (
-        !(error instanceof Error) ||
-        error.message !== "missing_health_citation" || budget < 1500
-      ) throw error;
-      // Regenerate once under the SAME reservation and catalog. Never invent
-      // or attach a citation to unreviewed text and never weaken parseModelJson.
-      failureStage = "health_citation_repair";
-      const originalUsage = (provider.data.usageMetadata ?? {}) as Record<
-        string,
-        unknown
-      >;
-      const repair = await callGemini(
-        servedModel,
-        contents,
-        system +
-          " The previous answer was rejected as missing_health_citation. Regenerate a complete answer with the exact allowed citation IDs supporting every general health recommendation, named inline. Do not invent a source or make unsupported claims. For a pure account action or repetition of the user's records with no guidance, use requires_health_citation=false. Return only the required JSON.",
-        4096,
-        false,
-        "LOW",
-        undefined,
-        citationCatalogVersion,
-        budget,
-      );
-      result = decode(repair.data);
-      const repairedUsage = (repair.data.usageMetadata ?? {}) as Record<
-        string,
-        unknown
-      >;
-      provider = {
-        ...repair,
-        attempts: provider.attempts + repair.attempts,
-        data: {
-          ...repair.data,
-          usageMetadata: {
-            promptTokenCount: Number(originalUsage.promptTokenCount ?? 0) +
-              Number(repairedUsage.promptTokenCount ?? 0),
-            candidatesTokenCount:
-              Number(originalUsage.candidatesTokenCount ?? 0) +
-              Number(repairedUsage.candidatesTokenCount ?? 0),
-            thoughtsTokenCount: Number(originalUsage.thoughtsTokenCount ?? 0) +
-              Number(repairedUsage.thoughtsTokenCount ?? 0),
+      const clarification = error instanceof Error && error.message === "missing_health_citation"
+        ? verifiedWorkoutReviewCopy(messages, context, locale, body.smart_plan_tools_version === 1 ? 1 : 0)
+        : null;
+      if (clarification != null) {
+        // This exact input is procedural. Discard ALL provider prose and
+        // actions, then validate app-owned clarification through the same
+        // citation/action parser and final health/food/quality gates. Never
+        // exempt uncited health advice or invent a workout/execution receipt.
+        result = parseModelJson(JSON.stringify(clarification), false, citationCatalogVersion, body.smart_plan_tools_version === 1 ? 1 : 0);
+        qualityRecovery = "verified_workout_review";
+      } else {
+        const budget = Math.min(geminiAttemptTimeoutMs, 24000 - (now() - started));
+        if (
+          !(error instanceof Error) ||
+          error.message !== "missing_health_citation" || budget < 1500
+        ) throw error;
+        // Regenerate once under the SAME reservation and catalog. Never invent
+        // or attach a citation to unreviewed text and never weaken parseModelJson.
+        failureStage = "health_citation_repair";
+        const originalUsage = (provider.data.usageMetadata ?? {}) as Record<
+          string,
+          unknown
+        >;
+        const repair = await callGemini(
+          servedModel,
+          contents,
+          system +
+            " The previous answer was rejected as missing_health_citation. Regenerate a complete answer with the exact allowed citation IDs supporting every general health recommendation, named inline. Do not invent a source or make unsupported claims. For a pure account action or repetition of the user's records with no guidance, use requires_health_citation=false. Return only the required JSON.",
+          4096,
+          false,
+          "LOW",
+          undefined,
+          citationCatalogVersion,
+          budget,
+        );
+        result = decode(repair.data);
+        const repairedUsage = (repair.data.usageMetadata ?? {}) as Record<
+          string,
+          unknown
+        >;
+        provider = {
+          ...repair,
+          attempts: provider.attempts + repair.attempts,
+          data: {
+            ...repair.data,
+            usageMetadata: {
+              promptTokenCount: Number(originalUsage.promptTokenCount ?? 0) +
+                Number(repairedUsage.promptTokenCount ?? 0),
+              candidatesTokenCount:
+                Number(originalUsage.candidatesTokenCount ?? 0) +
+                Number(repairedUsage.candidatesTokenCount ?? 0),
+              thoughtsTokenCount: Number(originalUsage.thoughtsTokenCount ?? 0) +
+                Number(repairedUsage.thoughtsTokenCount ?? 0),
+            },
           },
-        },
-      };
+        };
+      }
     }
     // A short acceptance refers to the immediately preceding assistant offer.
     // Recover this safe read-only navigation deterministically if the model's
@@ -1452,6 +1466,7 @@ export async function handler(
     ) throw new Error("settlement_failed");
     return json({
       ...result,
+      ...(qualityRecovery == null ? {} : { quality_recovery: qualityRecovery }),
       response_id: requestId,
       response_locale: locale,
       provider: "gemini",

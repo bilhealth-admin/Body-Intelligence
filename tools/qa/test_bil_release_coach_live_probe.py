@@ -44,6 +44,16 @@ class CoachLiveProbeGuards(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'absent saved plan'):
                 probe.validate('today', self.result([{'type': action, 'arguments': {'planId': 'invented'}}]))
 
+    def test_verified_completion_clarification_is_audited_and_cannot_hide_other_case_failures(self):
+        recovered = self.result() | {'quality_recovery': 'verified_workout_review'}
+        probe.validate('done_without_saved_plan', recovered)
+        with self.assertRaisesRegex(ValueError, 'Unexpected'):
+            probe.validate('today', recovered)
+        with self.assertRaisesRegex(ValueError, 'Unexpected'):
+            probe.validate('done_without_saved_plan', recovered | {'quality_recovery': 'unsafe-generic-pass'})
+        with self.assertRaisesRegex(ValueError, 'clarification'):
+            probe.validate('done_without_saved_plan', self.result() | {'missing_data': []})
+
     def test_cleanup_settlement_and_duplicate_checks_cannot_be_skipped(self):
         for key, value in [('success', False), ('session_revoked', False), ('user_deleted', False),
                            ('cascade_clean', False), ('quota_reserved', 1), ('duplicate_status', 200)]:

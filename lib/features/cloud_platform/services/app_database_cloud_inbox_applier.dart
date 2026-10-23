@@ -140,6 +140,46 @@ final class AppDatabaseCloudInboxApplier {
       return _InboxOutcome.applied;
     }
 
+    if (_couldReplay(
+      existing.syncStatus,
+      existing.updatedAt,
+      existing.revision,
+      existing.deletedAt,
+      record,
+    )) {
+      final preferences =
+          await (_database.select(_database.preferences)..where(
+                (row) => row.key.isIn(const [
+                  'profileDateOfBirth',
+                  'countryRegion',
+                  'onboarding.goalPriorities.v1',
+                ]),
+              ))
+              .get();
+      final values = {for (final row in preferences) row.key: row.value};
+      if (_samePayload(record, {
+        'gender': existing.gender,
+        'age': existing.age,
+        'height': existing.height,
+        'currentWeight': existing.currentWeight,
+        'targetWeight': existing.targetWeight,
+        'activityLevel': existing.activityLevel,
+        'exercises': existing.exercises,
+        'medicalConditions': existing.medicalConditions,
+        'waist': existing.waist,
+        'neck': existing.neck,
+        'chest': existing.chest,
+        'arm': existing.arm,
+        'thigh': existing.thigh,
+        'createdAt': existing.createdAt,
+        'profileDateOfBirth': values['profileDateOfBirth'],
+        'countryRegion': values['countryRegion'],
+        'onboardingGoalPriorities': values['onboarding.goalPriorities.v1'],
+      })) {
+        return _InboxOutcome.acknowledged;
+      }
+    }
+
     final decision = _compareLocal(
       localUpdatedAt: existing.updatedAt,
       localRevision: existing.revision,
@@ -229,6 +269,24 @@ final class AppDatabaseCloudInboxApplier {
       return _InboxOutcome.applied;
     }
 
+    if (_couldReplay(
+          existing.syncStatus,
+          existing.updatedAt,
+          existing.revision,
+          existing.deletedAt,
+          record,
+        ) &&
+        _samePayload(record, {
+          'date': existing.date,
+          'dayKey': existing.dayKey,
+          'weight': existing.weight,
+          'note': existing.note,
+          'measurementContext': existing.measurementContext,
+          'createdAt': existing.createdAt,
+        })) {
+      return _InboxOutcome.acknowledged;
+    }
+
     final decision = _compareLocal(
       localUpdatedAt: existing.updatedAt,
       localRevision: existing.revision,
@@ -307,6 +365,22 @@ final class AppDatabaseCloudInboxApplier {
       return _InboxOutcome.applied;
     }
 
+    if (_couldReplay(
+          existing.syncStatus,
+          existing.updatedAt,
+          existing.revision,
+          existing.deletedAt,
+          record,
+        ) &&
+        _samePayload(record, {
+          'occurredAt': existing.occurredAt,
+          'dayKey': existing.dayKey,
+          'amountMl': existing.amountMl,
+          'createdAt': existing.createdAt,
+        })) {
+      return _InboxOutcome.acknowledged;
+    }
+
     final decision = _compareLocal(
       localUpdatedAt: existing.updatedAt,
       localRevision: existing.revision,
@@ -382,6 +456,62 @@ final class AppDatabaseCloudInboxApplier {
             ),
           );
     }
+  }
+
+  /// The durable inbox is replayed after reopening the app. Only an already
+  /// synced row with the exact same metadata AND supported payload is a replay.
+  /// A dirty row or equal-clock different value remains a genuine conflict.
+  bool _couldReplay(
+    String status,
+    DateTime updated,
+    int revision,
+    DateTime? deleted,
+    CloudRecordEnvelope remote,
+  ) =>
+      status == 'synced' &&
+      _storedInstant(updated) == _storedInstant(remote.updatedAt) &&
+      revision == remote.revision.sequence &&
+      _storedOptionalInstant(deleted) ==
+          _storedOptionalInstant(remote.deletedAt);
+
+  // Drift's existing SQLite DateTime columns store integer epoch seconds.
+  // Compare replay metadata at that same precision, without changing any
+  // stored date, revision or health value.
+  int _storedInstant(DateTime value) => value.millisecondsSinceEpoch ~/ 1000;
+  int? _storedOptionalInstant(DateTime? value) =>
+      value == null ? null : _storedInstant(value);
+
+  Object? _profilePreference(Object? value) =>
+      value is String ? (value.trim().isEmpty ? null : value.trim()) : value;
+
+  bool _samePayload(CloudRecordEnvelope remote, Map<String, Object?> local) {
+    if (remote.isTombstone) return remote.payload.isEmpty;
+    final incoming = remote.payload;
+    if (incoming.keys.any((key) => !local.containsKey(key))) return false;
+    return local.entries.every((entry) {
+      final value = incoming[entry.key];
+      if (entry.value is DateTime) {
+        return value is String &&
+            DateTime.tryParse(value) != null &&
+            _storedInstant(DateTime.parse(value)) ==
+                _storedInstant(entry.value! as DateTime);
+      }
+      if (const {
+        'profileDateOfBirth',
+        'countryRegion',
+        'onboardingGoalPriorities',
+      }.contains(entry.key)) {
+        // The profile restorer already trims these optional preferences and
+        // does not write empty strings. A replay must use the same semantics.
+        return _profilePreference(entry.value) == _profilePreference(value);
+      }
+      // Older envelopes predate this explicit default; the applier has always
+      // restored the same default, without creating a new measurement.
+      if (entry.key == 'measurementContext' && value == null) {
+        return entry.value == 'differentConditions';
+      }
+      return entry.value == value;
+    });
   }
 
   _InboxOutcome _compareLocal({

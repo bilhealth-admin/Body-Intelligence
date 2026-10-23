@@ -227,11 +227,13 @@ final class DurableOfflineFirstCloudPlatform {
         pulled: applied,
         conflicts: conflicts,
         pending: remaining,
-        availability: batch.hasMore || blocked
+        availability: batch.hasMore || blocked || remaining > 0
             ? CloudPlatformAvailability.paused
             : CloudPlatformAvailability.ready,
         diagnostics: batch.hasMore
             ? const ['More cloud pages remain; durable cursor saved.']
+            : remaining > 0
+            ? const ['Upload batches remain; durable outbox preserved.']
             : const [],
         hasMore: batch.hasMore,
         cursorAdvanced: batch.serverCursor != cursor,

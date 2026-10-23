@@ -1,0 +1,110 @@
+{
+  "schema": "bil.smart-plan.warmups.v1",
+  "gymSourceSha256": "24264d0c26ece4398f85954c1e02e52dbd8748479f42ef784d9f1ea742894d14",
+  "gym": {
+    "push": [
+      {
+        "title": "Shoulder circles",
+        "exerciseId": "mobility-flexibility-shoulder-circles-gentle-flow",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Scapular wall slide",
+        "exerciseId": "resistance-upper-body-scapular-wall-slide-technique",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Band pull-apart",
+        "exerciseId": "resistance-upper-body-band-pull-apart-technique",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Wrist mobility circles",
+        "exerciseId": "mobility-flexibility-wrist-mobility-circles-gentle-flow",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "pull": [
+      {
+        "title": "Shoulder circles",
+        "exerciseId": "mobility-flexibility-shoulder-circles-gentle-flow",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Scapular controlled rotation",
+        "exerciseId": "mobility-flexibility-scapular-controlled-rotation-gentle-flow",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Band pull-apart",
+        "exerciseId": "resistance-upper-body-band-pull-apart-technique",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Wrist mobility circles",
+        "exerciseId": "mobility-flexibility-wrist-mobility-circles-gentle-flow",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ],
+    "legs": [
+      {
+        "title": "Ankle dorsiflexion rock",
+        "exerciseId": "mobility-flexibility-ankle-dorsiflexion-rock-gentle-flow",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Standing hip controlled rotation",
+        "exerciseId": "mobility-flexibility-standing-hip-controlled-rotation-gentle-flow",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Glute bridge",
+        "exerciseId": "resistance-lower-body-glute-bridge-technique",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      },
+      {
+        "title": "Bodyweight squat",
+        "exerciseId": "resistance-lower-body-bodyweight-squat-technique",
+        "dose": "1 controlled set; 6-10 reps or 20-30 seconds"
+      }
+    ]
+  },
+  "homeSourceUrl": "https://www.nhs.uk/live-well/exercise/how-to-warm-up-before-exercising/",
+  "homeMinimumSeconds": 360,
+  "home": [
+    {
+      "title": "March on the spot",
+      "titleAr": "المشي في المكان",
+      "exerciseId": "cardio-low-impact-march-in-place-steady",
+      "dose": "3 minutes; start gently and move your arms naturally.",
+      "doseAr": "3 دقائق؛ ابدأ بلطف وحرّك ذراعيك بصورة طبيعية."
+    },
+    {
+      "title": "Alternating heel digs",
+      "titleAr": "مدّ الكعب بالتبادل",
+      "exerciseId": "cardio-low-impact-alternating-heel-dig-steady",
+      "dose": "60 alternating heel digs over 60 seconds; keep the supporting knee soft.",
+      "doseAr": "60 حركة بالتبادل خلال 60 ثانية؛ اترك الركبة الداعمة مثنية قليلًا."
+    },
+    {
+      "title": "Alternating knee lifts",
+      "titleAr": "رفع الركبتين بالتبادل",
+      "exerciseId": "cardio-low-impact-alternating-knee-lift-steady",
+      "dose": "30 alternating lifts over 30 seconds, with a steady upright posture.",
+      "doseAr": "30 رفعة بالتبادل خلال 30 ثانية، مع ثبات الجذع بوضع مستقيم."
+    },
+    {
+      "title": "Shoulder rolls while marching",
+      "titleAr": "تدوير الكتفين مع المشي في المكان",
+      "dose": "2 sets of 10 rolls; each set has 5 forward and 5 backward rolls.",
+      "doseAr": "مجموعتان من 10 دورات؛ في كل مجموعة 5 للأمام و5 للخلف."
+    },
+    {
+      "title": "Shallow knee bends",
+      "titleAr": "ثني خفيف للركبتين",
+      "dose": "10 bends, lowering no more than 10 cm; rise gently each time.",
+      "doseAr": "10 تكرارات، بانخفاض لا يتجاوز 10 سم؛ عُد إلى الوقوف بلطف."
+    }
+  ],
+  "mappingNote": "Only the three exact BIL movement matches have video IDs. Shoulder rolls and shallow knee bends use the linked NHS instructions, without substituting a deeper squat or a different shoulder exercise."
+}

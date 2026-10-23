@@ -1,0 +1,253 @@
+{
+  "schema": "bil.manual-sync.actual-proof-followup.v1",
+  "updated_at": "2026-10-23T16:47:56.554567+00:00",
+  "source_parent": "d02e78462b88e1639d19a6ce73eb2b51519dccd9",
+  "candidate_branch": "codex/bil-release-ios38-android33-20261022",
+  "release_ready": false,
+  "status": "ACTUAL_SYNC_AND_REPORTED_ACCOUNTS_PASS_LOCAL_FROZEN_PASS_CI_PENDING",
+  "reported_incident": "The user reports More last-success stayed 2026-10-13 after an explicit iOS37 sync; iOS36 also affected, iOS35 appeared to work.",
+  "read_only_account_metadata": {
+    "cloud_records": 218,
+    "basic_entities": [
+      "profile",
+      "weight",
+      "hydration"
+    ],
+    "aes_gcm_envelope_structure_count": 218,
+    "latest_base_update_utc": "2026-10-22T18:26:41Z",
+    "latest_cloud_device_seen_utc": "2026-10-23T13:08:40.652847Z",
+    "limits": "Metadata proves partial server contact/writes; does not prove decryption, local apply, complete synchronization or the initial device failure. No user payload/key, deletion, repair or consent change was performed."
+  },
+  "proven_defects": [
+    {
+      "name": "outgoing-batch-not-drained",
+      "before": "Actual deployed RPC acknowledged 100 of 203 queued rows with has_more=false; 103 remained and the 13 October success time was correctly retained.",
+      "fix": "Treat acknowledged outgoing batches with pending rows as bounded forward progress independently of inbound pagination. Stop on every failure or zero progress; preserve retry/dead-letter/cursor safeguards.",
+      "files": [
+        "lib/features/cloud_platform/domain/cloud_sync_models.dart",
+        "lib/features/cloud_platform/services/durable_offline_first_cloud_platform.dart"
+      ]
+    },
+    {
+      "name": "identical-restored-inbox-treated-as-conflict",
+      "before": "An empty second SQLite database restored 203 rows, then a second sync reported 203 false conflicts on the unchanged durable inbox.",
+      "fix": "Acknowledge replay only for already synced rows with identical timestamps, revision, tombstone and full supported payload. Changed health/goal/date values or pending local edits remain conflicts.",
+      "files": [
+        "lib/features/cloud_platform/services/app_database_cloud_inbox_applier.dart"
+      ]
+    }
+  ],
+  "actual_live": {
+    "result": "PASS",
+    "stages": 12,
+    "source_files_bound": 91,
+    "sqlite_devices": 3,
+    "auth_accounts": 2,
+    "entitlement_grants_added": 0,
+    "initial_base_rows": 203,
+    "hydration_after_additional_write": 202,
+    "nutrition_and_goals": "Actual separately consented V2 repository-authored data, stable UUID relationships, unknown vs zero nutrients and goals survive restore/reopen.",
+    "crypto": "Real AES-256-GCM locally with actual authenticated Vault key; secure storage, path and connectivity OS channels modeled on Windows.",
+    "stage_results": [
+      {
+        "stage": "a-upload-all-data",
+        "completed": true,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:34.595594Z"
+      },
+      {
+        "stage": "b-restore-empty-sqlite",
+        "completed": true,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:38.949573Z"
+      },
+      {
+        "stage": "b-idempotent-repeat-after-reopen",
+        "completed": true,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:41.020533Z"
+      },
+      {
+        "stage": "a-response-lost-after-real-commit",
+        "completed": false,
+        "reason": "cloud_sync_transport_failed",
+        "pending": 1,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:34.595594Z"
+      },
+      {
+        "stage": "a-resume-preserved-outbox",
+        "completed": true,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:50.394119Z"
+      },
+      {
+        "stage": "b-pull-after-commit-response-loss",
+        "completed": true,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:52.460838Z"
+      },
+      {
+        "stage": "c-aes-authentication-failure",
+        "completed": false,
+        "reason": "cloud_sync_decrypt_failed",
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": null
+      },
+      {
+        "stage": "c-retry-authentic-page",
+        "completed": true,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:59.173424Z"
+      },
+      {
+        "stage": "a-offline-preserves-data",
+        "completed": false,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:50.394119Z"
+      },
+      {
+        "stage": "a-real-consent-denial",
+        "completed": false,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:53:50.394119Z"
+      },
+      {
+        "stage": "a-consent-regranted",
+        "completed": true,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:54:04.279504Z"
+      },
+      {
+        "stage": "b-account-cannot-use-a-local-store",
+        "completed": false,
+        "reason": null,
+        "pending": 0,
+        "conflicts": 0,
+        "last_success": "2026-10-23T13:54:04.279504Z"
+      }
+    ],
+    "evidence": "build/coach-ci-compat/manual-sync-live-legacy-verified-20261023/result.json",
+    "cleanup": {
+      "verified": true,
+      "owned_columns_inventoried": 68,
+      "all_counts_zero": true,
+      "auth_sessions_vault_keys_and_owned_rows_zero": true,
+      "temporary_credential_file_removed": true
+    }
+  },
+  "tests": {
+    "cloud_flutter": 249,
+    "cloud_flutter_result": "PASS",
+    "cloud_flutter_log": "build/coach-ci-compat/manual-sync-cloud-legacy-regression.log",
+    "evidence_guards": 12,
+    "controller_guards": 9,
+    "guard_result": "PASS",
+    "strict_focused_dart_analysis": "No issues found; 7 actual changed source/test inputs",
+    "red_logs": [
+      "build/coach-ci-compat/manual-sync-upload-drain-red.log",
+      "build/coach-ci-compat/manual-sync-durable-upload-red.log",
+      "build/coach-ci-compat/manual-sync-inbox-replay-red.log"
+    ]
+  },
+  "final_validation_guard": "Both --manual-sync-proof and --reported-account-proof are required. The first final stage rejects missing or stale source hashes, partial completion, pending ciphertext, incomplete fixture cleanup or replay conflicts for either reported account.",
+  "not_proved": [
+    "A physical iPhone running final38",
+    "The exact first failure in this user installation",
+    "Successful full frozen validation or new SHA CI after these changes",
+    "Signed iOS38 artifact, TestFlight38 installation or store review"
+  ],
+  "installed_37": "Dart/client repairs require the new38 binary; no claim that cloud publication patches the already installed37 app.",
+  "reported_accounts": {
+    "read_only": true,
+    "cloud_state_changes": 0,
+    "kadem": {
+      "base_records": 218,
+      "v2_records": 220,
+      "data_values_and_dates_preserved": true,
+      "repeat_conflicts_using_37_code": 199,
+      "repeat_conflicts_current": 0
+    },
+    "latest_apple_account": {
+      "base_records": 4,
+      "v2_records": 3,
+      "repeat_conflicts_using_37_code": 4,
+      "repeat_conflicts_current": 0
+    },
+    "evidence": "build/release-ios38-android33/readonly-account-sqlite-proof.json",
+    "cipher_proof": "build/release-ios38-android33/readonly-account-cipher-proof.json",
+    "limits": "Actual account snapshots restored with the application SQLite codec on Windows in independent memory databases. Real iPhone startup / cached Keychain material remain unproven."
+  },
+  "legacy_followup": {
+    "root_cause": "An optional profile birth preference containing an empty string restores as absence; replay formerly compared it against null as a different value. Metadata subsecond dates also differed from the existing SQLite integer-seconds precision.",
+    "repair": "Normalize only optional profile preference absence/trim and compare replay dates at the actual storage precision. Revision, owner, dirty-row and health-value safeguards remain.",
+    "actual_red_cases": 3,
+    "focused_applier_tests_passed": 19,
+    "evidence": [
+      "build/coach-ci-compat/manual-sync-legacy-profile-and-precision-red.log",
+      "build/coach-ci-compat/manual-sync-legacy-profile-and-precision-green.log"
+    ]
+  },
+  "import_review": {
+    "existing_operator_located": true,
+    "key_rotated_by_import": false,
+    "modified_records_use_increased_revision": true,
+    "data_corruption_not_found": true,
+    "exact_first_phone_startup_failure_not_proven": true,
+    "notes": "The initial Python datetime diagnostic was stricter than Dart and was corrected by executing the actual Dart date decoder; no application data was changed to satisfy that diagnostic."
+  },
+  "same_phone_user_clarification": {
+    "recorded_at": "2026-10-23T14:48:02.734060+00:00",
+    "source": "Direct user clarification in the active task",
+    "installed_build": 37,
+    "same_physical_phone": true,
+    "kadem_account": "Startup fails before product entry",
+    "other_apple_login_account": "Product entry succeeds; manual sync reports conflicts",
+    "diagnostic_limit": "Account-specific local database, cached key or cloud recovery remains a hypothesis. Canonical cloud payload authentication and clean SQLite restoration passed; the failed physical installation and its cached key have not been inspected.",
+    "acceptance_required": "Verify candidate38 on this same phone with both accounts, preserving local data and keys; verify startup, completed sync and truthful last-success time."
+  },
+  "frozen_validation": {
+    "status": "local_validation_passed",
+    "path": "build/release-ios38-android33/frozen-20261023-172310",
+    "source_fingerprint": "6ded9e7b776aa1d58795584778e49b37f2f2babf9e6515352c52900c6fb3afa3",
+    "root_counts": {
+      "success": 10595
+    }
+  },
+  "same_phone_gateway_readback": {
+    "evidence": "build/release-ios38-android33/same-phone-gateway-readonly-proof.json",
+    "read_only": true,
+    "window_utc": [
+      "2026-10-23T14:05:00Z",
+      "2026-10-23T14:07:00Z"
+    ],
+    "kadem_restore_requests": 5,
+    "returned_non_deleted_records": 213,
+    "http_status": "200",
+    "server_origin_ms_range": [
+      75,
+      106
+    ],
+    "interpretation": "Gateway accepted account-specific reads and returned 213 nondeleted base records; this does not prove device decryption, SQLite apply or complete sync.",
+    "encoding_review": "Import uses the same v1/A256GCM, base64url nonce12 and ciphertext-with-tag16 format as the application. Dart decodes base64url into typed bytes before invoking iOS CryptoKit. No encoding incompatibility was found by source inspection; no claim of physical device execution."
+  }
+}

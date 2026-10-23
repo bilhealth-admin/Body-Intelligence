@@ -38,6 +38,8 @@ import '../domain/bil_smart_plan_engine.dart';
 import '../domain/bil_smart_plan_review.dart';
 import '../services/bil_smart_plan_catalog.dart';
 import '../services/bil_smart_plan_prescriptions.dart';
+import 'bil_smart_plan_panel.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/bil_smart_plan_phase_copy.dart';
 import '../../wellness/domain/wellness_content_pack.dart';
 import '../../wellness/services/wellness_content_pack_manager.dart';
@@ -173,6 +175,18 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
       return _t(
         'Your subscription could not be verified. Refresh your access and try again.',
         'تعذّر التحقق من الاشتراك. حدّث حالة وصولك وحاول مجددًا.',
+      );
+    }
+    if (code.contains('no_verified_workout')) {
+      return _t(
+        'No source-backed session fits these choices. Allow more session time or review your equipment and experience. Your saved plan has not changed.',
+        'لا توجد جلسة موثقة تناسب هذه الخيارات. أتح وقتًا أطول أو راجع المعدات والخبرة. لم تتغير خطتك المحفوظة.',
+      );
+    }
+    if (code.contains('home_strength_recovery_days_required')) {
+      return _t(
+        'Home strength sessions need recovery days. Choose up to 3 sessions per week and review the draft.',
+        'تحتاج جلسات القوة المنزلية إلى أيام للتعافي. اختر حتى 3 جلسات أسبوعيًا وراجع المسودة.',
       );
     }
     if (code.contains('requires_review')) {
@@ -515,8 +529,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
                 children: [
-                  if (_busy && _reviewDepth == 0)
-                    const LinearProgressIndicator(),
+                  if (_busy && _reviewDepth == 0) _loadingPanel(),
                   if (_error != null)
                     _panel(
                       child: Column(

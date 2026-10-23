@@ -26,6 +26,316 @@ void main() {
 
     tearDown(() => database.close());
 
+    for (final legacyEmptyBirth in ['', '  ']) {
+      test(
+        'legacy empty profile birth preference is an idempotent absence [$legacyEmptyBirth]',
+        () async {
+          final at = DateTime.utc(2026, 10, 23, 12);
+          final base = _profileRecord(at);
+          final record = CloudRecordEnvelope(
+            entityKind: base.entityKind,
+            recordId: base.recordId,
+            ownerId: base.ownerId,
+            revision: base.revision,
+            updatedAt: base.updatedAt,
+            payload: {...base.payload, 'profileDateOfBirth': legacyEmptyBirth},
+          );
+          await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [record],
+          );
+          final repeated = await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [record],
+          );
+          expect(repeated.conflicts, 0);
+          expect(repeated.acknowledged, 1);
+          expect(
+            (await database.select(database.preferences).get()).where(
+              (r) => r.key == 'profileDateOfBirth',
+            ),
+            isEmpty,
+          );
+        },
+      );
+    }
+
+    test(
+      'subsecond metadata replays at actual SQLite storage precision',
+      () async {
+        final at = DateTime.utc(2026, 10, 23, 12, 30, 15, 123, 456);
+        final records = [
+          _profileRecord(at),
+          _weightRecord(
+            deviceId: 'device-b',
+            sequence: 1,
+            updatedAt: at,
+            weight: 80,
+            date: at,
+            createdAt: at,
+          ),
+          CloudRecordEnvelope(
+            entityKind: CloudEntityKind.hydration,
+            recordId: 'water-subseconds',
+            ownerId: 'owner-a',
+            revision: CloudRevision(deviceId: 'device-b', sequence: 1),
+            updatedAt: at,
+            payload: {
+              'occurredAt': at.toIso8601String(),
+              'createdAt': at.toIso8601String(),
+              'dayKey': '2026-10-23',
+              'amountMl': 250,
+            },
+          ),
+        ];
+        await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: records,
+        );
+        final repeated = await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: records,
+        );
+        expect(repeated.conflicts, 0);
+        expect(repeated.applied, 0);
+        expect(repeated.acknowledged, 3);
+        expect(
+          (await database.select(database.weightEntries).getSingle()).weight,
+          80,
+        );
+      },
+    );
+
+    test(
+      'a different nonempty birth preference remains a genuine conflict',
+      () async {
+        final at = DateTime.utc(2026, 10, 23, 12);
+        final base = _profileRecord(at, includeOnboardingIdentity: true);
+        await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [base],
+        );
+        final changed = CloudRecordEnvelope(
+          entityKind: base.entityKind,
+          recordId: base.recordId,
+          ownerId: base.ownerId,
+          revision: base.revision,
+          updatedAt: base.updatedAt,
+          payload: {
+            ...base.payload,
+            'profileDateOfBirth': '1991-02-03T00:00:00.000',
+          },
+        );
+        final report = await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [changed],
+        );
+        expect(report.conflicts, 1);
+        final pref = await (database.select(
+          database.preferences,
+        )..where((r) => r.key.equals('profileDateOfBirth'))).getSingle();
+        expect(pref.value, '1990-05-17T00:00:00.000');
+      },
+    );
+
+    test(
+      'replaying restored profile weight and hydration is idempotent',
+      () async {
+        final at = DateTime.utc(2026, 10, 23, 12);
+        final records = [
+          _profileRecord(at, includeOnboardingIdentity: true),
+          _weightRecord(
+            deviceId: 'device-b',
+            sequence: 1,
+            updatedAt: at,
+            weight: 80,
+          ),
+          CloudRecordEnvelope(
+            entityKind: CloudEntityKind.hydration,
+            recordId: 'water-replay',
+            ownerId: 'owner-a',
+            revision: CloudRevision(deviceId: 'device-b', sequence: 1),
+            updatedAt: at,
+            payload: {
+              'occurredAt': at.toIso8601String(),
+              'createdAt': at.toIso8601String(),
+              'dayKey': '2026-10-23',
+              'amountMl': 250,
+            },
+          ),
+        ];
+        expect(
+          (await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: records,
+          )).applied,
+          3,
+        );
+        final replay = await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: records,
+        );
+        expect(replay.conflicts, 0);
+        expect(replay.acknowledged, 3);
+        expect(replay.applied, 0);
+        expect(await database.select(database.userProfile).get(), hasLength(1));
+        expect(
+          await database.select(database.weightEntries).get(),
+          hasLength(1),
+        );
+        expect(
+          await database.select(database.waterEntries).get(),
+          hasLength(1),
+        );
+      },
+    );
+
+    for (final changedField in ['weight', 'date', 'deleted']) {
+      test(
+        'equal revision and timestamp do not hide changed $changedField',
+        () async {
+          final at = DateTime.utc(2026, 10, 23, 12);
+          final original = _weightRecord(
+            deviceId: 'device-b',
+            sequence: 1,
+            updatedAt: at,
+            weight: 80,
+          );
+          await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [original],
+          );
+          final different = CloudRecordEnvelope(
+            entityKind: original.entityKind,
+            recordId: original.recordId,
+            ownerId: original.ownerId,
+            revision: original.revision,
+            updatedAt: original.updatedAt,
+            deletedAt: changedField == 'deleted' ? at : null,
+            payload: {
+              ...original.payload,
+              if (changedField == 'weight') 'weight': 79.0,
+              if (changedField == 'date') 'date': at.toIso8601String(),
+            },
+          );
+          final report = await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [different],
+          );
+          expect(report.conflicts, 1);
+          expect(report.acknowledged, 0);
+          final row = await database.select(database.weightEntries).getSingle();
+          expect(row.weight, 80);
+          expect(row.date, DateTime.utc(2026, 8, 17, 8).toLocal());
+          expect(row.deletedAt, isNull);
+        },
+      );
+    }
+
+    test(
+      'a matching downloaded row cannot clear a pending local edit',
+      () async {
+        final at = DateTime.utc(2026, 10, 23, 12);
+        final original = _weightRecord(
+          deviceId: 'device-b',
+          sequence: 1,
+          updatedAt: at,
+          weight: 80,
+        );
+        await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [original],
+        );
+        await database
+            .update(database.weightEntries)
+            .write(const WeightEntriesCompanion(syncStatus: Value('pending')));
+        final report = await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [original],
+        );
+        expect(report.conflicts, 1);
+        expect(report.acknowledged, 0);
+        expect(
+          (await database.select(database.weightEntries).getSingle())
+              .syncStatus,
+          'pending',
+        );
+      },
+    );
+
+    for (final kind in ['profile', 'hydration']) {
+      test(
+        'same clock $kind changes remain conflicts after restoration',
+        () async {
+          final at = DateTime.utc(2026, 10, 23, 12);
+          final original = kind == 'profile'
+              ? _profileRecord(at)
+              : CloudRecordEnvelope(
+                  entityKind: CloudEntityKind.hydration,
+                  recordId: 'water-protected',
+                  ownerId: 'owner-a',
+                  revision: CloudRevision(deviceId: 'device-b', sequence: 1),
+                  updatedAt: at,
+                  payload: {
+                    'occurredAt': at.toIso8601String(),
+                    'createdAt': at.toIso8601String(),
+                    'dayKey': '2026-10-23',
+                    'amountMl': 250,
+                  },
+                );
+          await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [original],
+          );
+          final changed = CloudRecordEnvelope(
+            entityKind: original.entityKind,
+            recordId: original.recordId,
+            ownerId: original.ownerId,
+            revision: original.revision,
+            updatedAt: original.updatedAt,
+            payload: {
+              ...original.payload,
+              if (kind == 'profile') 'targetWeight': 55.0,
+              if (kind == 'hydration') 'amountMl': 1000,
+            },
+          );
+          final report = await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [changed],
+          );
+          expect(report.conflicts, 1);
+          expect(report.acknowledged, 0);
+          if (kind == 'profile') {
+            expect(
+              (await database.select(database.userProfile).getSingle())
+                  .targetWeight,
+              75,
+            );
+          } else {
+            expect(
+              (await database.select(database.waterEntries).getSingle())
+                  .amountMl,
+              250,
+            );
+          }
+        },
+      );
+    }
+
     test('applies a newer remote weight to an empty local store', () async {
       final record = _weightRecord(
         deviceId: 'device-b',

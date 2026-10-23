@@ -1892,5 +1892,255 @@ abstract final class SmartPlanRuntimeCopy {
       "es": "Usar la versión del dispositivo",
       "tr": "Cihaz sürümünü kullan",
     },
+
+    " · Session time budget: ": {
+      'en': " · Session time budget: ",
+      "ar": " · الوقت المتاح للجلسة: ",
+      "fr": "· Budget temps de séance :",
+      "es": "· Presupuesto de tiempo de sesión:",
+      "tr": "· Oturum süresi bütçesi:",
+    },
+    "Allow at least 6 minutes. Start gently, take longer when needed, and stop if you feel pain or become unwell.": {
+      'en':
+          "Allow at least 6 minutes. Start gently, take longer when needed, and stop if you feel pain or become unwell.",
+      "ar":
+          "خصص 6 دقائق على الأقل. ابدأ بلطف وخذ وقتًا أطول عند الحاجة، وتوقف إذا شعرت بألم أو بتوعك.",
+      "fr":
+          "Comptez au moins 6 minutes. Commencez doucement, prenez plus de temps si nécessaire et arrêtez si vous ressentez de la douleur ou si vous ne vous sentez pas bien.",
+      "es":
+          "Espere al menos 6 minutos. Comience suavemente, tómese más tiempo cuando sea necesario y deténgase si siente dolor o no se encuentra bien.",
+      "tr":
+          "En az 6 dakika bekleyin. Yavaşça başlayın, gerektiğinde daha uzun süre kullanın ve ağrı hissederseniz veya kendinizi iyi hissetmezseniz durun.",
+    },
+    "BIL adapts published NHS and CDC strength guidance for this general adult program. It is not injury rehabilitation. Sets and resistance never increase automatically; review and approve any change.": {
+      'en':
+          "BIL adapts published NHS and CDC strength guidance for this general adult program. It is not injury rehabilitation. Sets and resistance never increase automatically; review and approve any change.",
+      "ar":
+          "يطبّق BIL إرشادات القوة المنشورة لدى NHS وCDC في برنامج عام للبالغين وليس لتأهيل الإصابات. لا تزيد المجموعات أو المقاومة تلقائيًا؛ راجع أي تعديل ووافق عليه.",
+      "fr":
+          "BIL adapte les directives de force publiées par le NHS et le CDC pour ce programme général pour adultes. Il ne s’agit pas de rééducation après une blessure. Les ensembles et la résistance n’augmentent jamais automatiquement ; examiner et approuver tout changement.",
+      "es":
+          "BIL adapta la guía de fortaleza publicada por NHS y CDC para este programa general para adultos. No es rehabilitación de lesiones. Las series y la resistencia nunca aumentan automáticamente; revisar y aprobar cualquier cambio.",
+      "tr":
+          "BIL, bu genel yetişkin programı için yayınlanmış NHS ve CDC güç rehberliğini uyarlar. Yaralanma rehabilitasyonu değildir. Setler ve dirençler asla otomatik olarak artmaz; herhangi bir değişikliği gözden geçirin ve onaylayın.",
+    },
+    "CDC rest guidance": {
+      'en': "CDC rest guidance",
+      "ar": "إرشادات الراحة من CDC",
+      "fr": "Conseils de repos du CDC",
+      "es": "Guía de descanso de los CDC",
+      "tr": "CDC dinlenme kılavuzu",
+    },
+    "Continue to exercises": {
+      'en': "Continue to exercises",
+      "ar": "المتابعة إلى التمارين",
+      "fr": "Continuer les exercices",
+      "es": "continuar con los ejercicios",
+      "tr": "Egzersizlere devam edin",
+    },
+    "Fixed wall and non-slip footing": {
+      'en': "Fixed wall and non-slip footing",
+      "ar": "حائط ثابت وموضع قدمين غير قابل للانزلاق",
+      "fr": "Mur fixe et pied antidérapant",
+      "es": "Pared fija y pie antideslizante.",
+      "tr": "Sabit duvar ve kaymaz temel",
+    },
+    "Guidance and sources": {
+      'en': "Guidance and sources",
+      "ar": "الإرشادات والمصادر",
+      "fr": "Conseils et sources",
+      "es": "Orientación y fuentes",
+      "tr": "Rehberlik ve kaynaklar",
+    },
+    "Home full-body A": {
+      'en': "Home full-body A",
+      "ar": "قوة منزلية لكامل الجسم · أ",
+      "fr": "Accueil corps entier A",
+      "es": "Inicio cuerpo completo A",
+      "tr": "Evde tam vücut A",
+    },
+    "Home full-body B": {
+      'en': "Home full-body B",
+      "ar": "قوة منزلية لكامل الجسم · ب",
+      "fr": "Accueil corps entier B",
+      "es": "Inicio cuerpo completo B",
+      "tr": "Evde tam vücut B",
+    },
+    "Home strength sessions need recovery days. Choose up to 3 sessions per week and review the draft.": {
+      'en':
+          "Home strength sessions need recovery days. Choose up to 3 sessions per week and review the draft.",
+      "ar":
+          "تحتاج جلسات القوة المنزلية إلى أيام للتعافي. اختر حتى 3 جلسات أسبوعيًا وراجع المسودة.",
+      "fr":
+          "Les séances de musculation à domicile nécessitent des jours de récupération. Choisissez jusqu'à 3 séances par semaine et révisez le brouillon.",
+      "es":
+          "Las sesiones de fuerza en casa necesitan días de recuperación. Elige hasta 3 sesiones por semana y revisa el borrador.",
+      "tr":
+          "Evde güç seanslarının iyileşme günlerine ihtiyacı vardır. Haftada en fazla 3 oturum seçin ve taslağı inceleyin.",
+    },
+    "Home strength · dumbbells": {
+      'en': "Home strength · dumbbells",
+      "ar": "قوة منزلية · أوزان يدوية",
+      "fr": "Force à domicile · haltères",
+      "es": "Fuerza en casa · mancuernas",
+      "tr": "Ev gücü · dambıl",
+    },
+    "Home strength · kettlebell": {
+      'en': "Home strength · kettlebell",
+      "ar": "قوة منزلية · كرة حديدية",
+      "fr": "Force à domicile · kettlebell",
+      "es": "Fuerza en casa · pesas rusas",
+      "tr": "Ev gücü · kettlebell",
+    },
+    "Loading your schedule and confirmed progress.": {
+      'en': "Loading your schedule and confirmed progress.",
+      "ar": "جارٍ تحميل الجدول والتقدم المؤكد.",
+      "fr": "Chargement de votre planning et progression confirmée.",
+      "es": "Cargando tu agenda y progreso confirmado.",
+      "tr": "Programınız ve onaylanmış ilerlemeniz yükleniyor.",
+    },
+    "Move with control. Stop if painful and rest longer when needed.": {
+      'en': "Move with control. Stop if painful and rest longer when needed.",
+      "ar": "حافظ على التحكم. توقف عند الألم وزد الراحة عند الحاجة.",
+      "fr":
+          "Déplacez-vous avec contrôle. Arrêtez si cela est douloureux et reposez-vous plus longtemps si nécessaire.",
+      "es":
+          "Muévete con control. Deténgase si le duele y descanse más tiempo cuando sea necesario.",
+      "tr":
+          "Kontrollü hareket edin. Acı veriyorsa durun ve gerektiğinde daha uzun süre dinlenin.",
+    },
+    "NHS sets and repetitions": {
+      'en': "NHS sets and repetitions",
+      "ar": "المجموعات والتكرارات من NHS",
+      "fr": "Séries et répétitions NHS",
+      "es": "Series y repeticiones del NHS",
+      "tr": "NHS setleri ve tekrarları",
+    },
+    "NHS warm-up reference": {
+      'en': "NHS warm-up reference",
+      "ar": "مرجع الإحماء من NHS",
+      "fr": "Référence d'échauffement du NHS",
+      "es": "Referencia de calentamiento del NHS",
+      "tr": "NHS ısınma referansı",
+    },
+    "No source-backed session fits these choices. Allow more session time or review your equipment and experience. Your saved plan has not changed.": {
+      'en':
+          "No source-backed session fits these choices. Allow more session time or review your equipment and experience. Your saved plan has not changed.",
+      "ar":
+          "لا توجد جلسة موثقة تناسب هذه الخيارات. أتح وقتًا أطول أو راجع المعدات والخبرة. لم تتغير خطتك المحفوظة.",
+      "fr":
+          "Aucune session basée sur la source ne correspond à ces choix. Prévoyez plus de temps de séance ou révisez votre équipement et votre expérience. Votre forfait enregistré n’a pas changé.",
+      "es":
+          "Ninguna sesión respaldada por código fuente se ajusta a estas opciones. Permita más tiempo de sesión o revise su equipo y experiencia. Su plan guardado no ha cambiado.",
+      "tr":
+          "Hiçbir kaynak destekli oturum bu seçeneklere uymuyor. Daha fazla seans süresi tanıyın veya ekipmanınızı ve deneyiminizi gözden geçirin. Kayıtlı planınız değişmedi.",
+    },
+    "Opening your saved plan": {
+      'en': "Opening your saved plan",
+      "ar": "فتح خطتك المحفوظة",
+      "fr": "Ouvrir votre forfait enregistré",
+      "es": "Abrir su plan guardado",
+      "tr": "Kayıtlı planınızı açma",
+    },
+    "Prepare with the movements from your BIL source plan. Keep the effort gentle; these are preparation sets, separate from your working sets.": {
+      'en':
+          "Prepare with the movements from your BIL source plan. Keep the effort gentle; these are preparation sets, separate from your working sets.",
+      "ar":
+          "استعد بحركات الإحماء من خطة BIL الموثقة. حافظ على جهد خفيف؛ هذه مجموعات تحضيرية منفصلة عن مجموعات التدريب.",
+      "fr":
+          "Préparez-vous avec les mouvements de votre plan source BIL. Gardez l'effort doux; ce sont des sets de préparation, distincts de vos sets de travail.",
+      "es":
+          "Prepárese con los movimientos de su plan fuente BIL. Mantenga el esfuerzo suave; Estos son conjuntos de preparación, separados de los conjuntos de trabajo.",
+      "tr":
+          "BIL kaynak planınızdaki hareketlerle hazırlanın. Çabayı nazik tutun; bunlar çalışma setlerinizden ayrı hazırlık setleridir.",
+    },
+    "Preparing your session": {
+      'en': "Preparing your session",
+      "ar": "تحضير جلستك",
+      "fr": "Préparer votre séance",
+      "es": "Preparando tu sesión",
+      "tr": "Oturumunuzu hazırlamak",
+    },
+    "Reviewing this preparation does not record a completed workout.": {
+      'en': "Reviewing this preparation does not record a completed workout.",
+      "ar": "مراجعة الإحماء لا تسجّل تمرينًا مكتملًا.",
+      "fr":
+          "La révision de cette préparation n’enregistre pas un entraînement terminé.",
+      "es":
+          "La revisión de esta preparación no registra un entrenamiento completo.",
+      "tr":
+          "Bu hazırlığın gözden geçirilmesi tamamlanmış bir antrenmanı kaydetmez.",
+    },
+    "Source-backed Home strength sessions include warm-up, sets, repetitions and rest. Up to 3 sessions per week leave recovery days. Use stable furniture where required, a clear safe floor, and comfortable resistance. Your chosen time is availability, not a finish deadline.": {
+      'en':
+          "Source-backed Home strength sessions include warm-up, sets, repetitions and rest. Up to 3 sessions per week leave recovery days. Use stable furniture where required, a clear safe floor, and comfortable resistance. Your chosen time is availability, not a finish deadline.",
+      "ar":
+          "جلسات القوة المنزلية موثقة بالإحماء والمجموعات والتكرارات والراحة. حتى 3 جلسات أسبوعيًا مع أيام للتعافي. استخدم أثاثًا ثابتًا عند الحاجة وأرضية آمنة ومقاومة مريحة. الوقت المختار وقت متاح وليس مهلة للإكمال.",
+      "fr":
+          "Les séances de musculation à domicile soutenues par la source comprennent l'échauffement, les séries, les répétitions et le repos. Jusqu'à 3 séances par semaine laissent des jours de récupération. Utilisez des meubles stables si nécessaire, un sol clair et sûr et une résistance confortable. L'heure que vous avez choisie correspond à la disponibilité et non à une date limite de fin.",
+      "es":
+          "Las sesiones de fuerza en casa respaldadas por fuentes incluyen calentamiento, series, repeticiones y descanso. Hasta 3 sesiones por semana dejan días de recuperación. Utilice muebles estables cuando sea necesario, un piso claro y seguro y una resistencia cómoda. El tiempo elegido es la disponibilidad, no una fecha límite de finalización.",
+      "tr":
+          "Kaynak destekli Ev gücü seansları ısınma, setler, tekrarlar ve dinlenmeyi içerir. Haftada en fazla 3 seansa kadar iyileşme günleri bırakılır. Gerektiğinde sağlam mobilyalar, temiz, güvenli bir zemin ve rahat bir direnç kullanın. Seçtiğiniz zaman, bitiş tarihi değil, uygunluk durumudur.",
+    },
+    "Stable chair and clear floor": {
+      'en': "Stable chair and clear floor",
+      "ar": "كرسي ثابت وأرضية خالية من العوائق",
+      "fr": "Chaise stable et sol dégagé",
+      "es": "Silla estable y suelo despejado.",
+      "tr": "Sağlam sandalye ve temiz zemin",
+    },
+    "Stable fixed counter": {
+      'en': "Stable fixed counter",
+      "ar": "سطح مرتفع ثابت وآمن",
+      "fr": "Comptoir fixe stable",
+      "es": "Contador fijo estable",
+      "tr": "Kararlı sabit sayaç",
+    },
+    "The reference could not be opened. Try again.": {
+      'en': "The reference could not be opened. Try again.",
+      "ar": "تعذّر فتح المرجع. حاول مجددًا.",
+      "fr": "La référence n'a pas pu être ouverte. Essayer à nouveau.",
+      "es": "No se pudo abrir la referencia. Intentar otra vez.",
+      "tr": "Referans açılamadı. Tekrar deneyin.",
+    },
+    "Use a comfortable resistance. Allow more time rather than shortening rest or rushing technique.": {
+      'en':
+          "Use a comfortable resistance. Allow more time rather than shortening rest or rushing technique.",
+      "ar":
+          "استخدم مقاومة مريحة. أتح وقتًا أطول بدلًا من اختصار الراحة أو استعجال الأداء.",
+      "fr":
+          "Utilisez une résistance confortable. Prévoyez plus de temps plutôt que de raccourcir le repos ou de précipiter la technique.",
+      "es":
+          "Utilice una resistencia cómoda. Permita más tiempo en lugar de acortar el descanso o apresurar la técnica.",
+      "tr":
+          "Rahat bir direnç kullanın. Dinlenmeyi kısaltmak veya tekniği aceleye getirmek yerine daha fazla zaman tanıyın.",
+    },
+    "Uses the released BIL Gym plan with its source warm-up, sets, repetitions and rest. Review the draft before activating it.": {
+      'en':
+          "Uses the released BIL Gym plan with its source warm-up, sets, repetitions and rest. Review the draft before activating it.",
+      "ar":
+          "يستخدم خطة النادي المعتمدة في BIL مع الإحماء والمجموعات والتكرارات والراحة من مصدرها. راجع المسودة قبل تفعيلها.",
+      "fr":
+          "Utilise le plan BIL Gym publié avec son échauffement source, ses séries, ses répétitions et son repos. Examinez le brouillon avant de l’activer.",
+      "es":
+          "Utiliza el plan de gimnasio BIL lanzado con su fuente de calentamiento, series, repeticiones y descanso. Revisa el borrador antes de activarlo.",
+      "tr":
+          "Kaynak ısınması, setler, tekrarlar ve dinlenmeyle birlikte yayımlanan BIL Gym planını kullanır. Taslağı etkinleştirmeden önce inceleyin.",
+    },
+    "View verified movement": {
+      'en': "View verified movement",
+      "ar": "عرض الحركة الموثقة",
+      "fr": "Afficher le mouvement vérifié",
+      "es": "Ver movimiento verificado",
+      "tr": "Doğrulanmış hareketi görüntüle",
+    },
+    "Warm up before your session": {
+      'en': "Warm up before your session",
+      "ar": "الإحماء قبل جلستك",
+      "fr": "Échauffez-vous avant votre séance",
+      "es": "Calienta antes de tu sesión",
+      "tr": "Seanstan önce ısınmak",
+    },
   };
 }

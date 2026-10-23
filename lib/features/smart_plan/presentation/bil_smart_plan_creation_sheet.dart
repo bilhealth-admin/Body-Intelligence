@@ -70,6 +70,7 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
     if (frequency != null && frequency >= 1 && frequency <= 6) {
       sessions = frequency;
     }
+    if (environment == BilPlanEnvironment.home && sessions > 3) sessions = 3;
     // Every replacement still requires fresh safety and preference confirmation.
   }
 
@@ -165,8 +166,13 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                       child: Text(t('Home', 'المنزل')),
                     ),
                   ],
-                  onChanged: (value) =>
-                      setState(() => environment = value ?? environment),
+                  onChanged: (value) => setState(() {
+                    environment = value ?? environment;
+                    if (environment == BilPlanEnvironment.home &&
+                        sessions > 3) {
+                      sessions = 3;
+                    }
+                  }),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<BilPlanExperience>(
@@ -259,17 +265,22 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                 Slider(
                   value: sessions.toDouble(),
                   min: 1,
-                  max: 6,
-                  divisions: 5,
+                  max: environment == BilPlanEnvironment.home ? 3 : 6,
+                  divisions: environment == BilPlanEnvironment.home ? 2 : 5,
                   label: sessions.toString(),
                   onChanged: (value) =>
                       setState(() => sessions = value.round()),
                 ),
                 Text(
-                  t(
-                    'Uses released BIL movements that match your environment and equipment. Missing training prescriptions will be shown clearly.',
-                    'يستخدم حركات BIL المعتمدة المناسبة للمكان والمعدات. يظهر أي نقص في وصف التدريب بوضوح.',
-                  ),
+                  environment == BilPlanEnvironment.home
+                      ? t(
+                          'Source-backed Home strength sessions include warm-up, sets, repetitions and rest. Up to 3 sessions per week leave recovery days. Use stable furniture where required, a clear safe floor, and comfortable resistance. Your chosen time is availability, not a finish deadline.',
+                          'جلسات القوة المنزلية موثقة بالإحماء والمجموعات والتكرارات والراحة. حتى 3 جلسات أسبوعيًا مع أيام للتعافي. استخدم أثاثًا ثابتًا عند الحاجة وأرضية آمنة ومقاومة مريحة. الوقت المختار وقت متاح وليس مهلة للإكمال.',
+                        )
+                      : t(
+                          'Uses the released BIL Gym plan with its source warm-up, sets, repetitions and rest. Review the draft before activating it.',
+                          'يستخدم خطة النادي المعتمدة في BIL مع الإحماء والمجموعات والتكرارات والراحة من مصدرها. راجع المسودة قبل تفعيلها.',
+                        ),
                 ),
                 const SizedBox(height: 16),
               ],

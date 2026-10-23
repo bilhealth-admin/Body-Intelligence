@@ -33,7 +33,7 @@ void main() {
         await const WorkoutReleaseCatalogRepository().load(),
       );
       for (final session in sessions) {
-        expect(session.exerciseIds.length, lessThanOrEqualTo(4));
+        expect(session.exerciseIds.length, 6);
         for (final id in session.exerciseIds) {
           final item = discovery.singleWhere(
             (item) => item.id == id && item.releaseBundleId == 'home-training',

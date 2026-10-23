@@ -1,4 +1,4 @@
-"""Pure controller tests: all Git/GitHub/Flutter/process I/O is mocked."""
+"""Controller fault injection and offline helper contracts; no live service I/O."""
 import argparse
 from contextlib import ExitStack, nullcontext
 import importlib.util
@@ -6,6 +6,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -801,6 +802,18 @@ class LiveBarcodeFixtureSafetyTests(unittest.TestCase):
         self.assertIn("p_gtin=$gtin", script)
         self.assertNotIn("p_gtin='4006381333931'", script)
         self.assertIn("RemoveOwnedCacheEntry", script)
-        self.assertIn("Prefer='return=representation'", script)
         self.assertIn("cleanup_legacy_fixture", script)
-        self.assertNotIn('Db "delete from public.bil_barcode_shared_cache', script)
+        self.assertNotIn('/rest/v1/bil_barcode_shared_cache?', script)
+        # The private table intentionally denies service-role REST access.
+        # Exercise actual ownership/deleted-row/readback behavior rather than
+        # requiring the old transport's return=representation header.
+        powershell = shutil.which('pwsh') or shutil.which('powershell')
+        self.assertIsNotNone(powershell, 'Offline fixture safety cannot be skipped')
+        root = Path(__file__).resolve().parents[2]
+        result = subprocess.run(
+            [powershell, '-NoProfile', '-File',
+             str(root / 'tool/nutrition/test_live_barcode_fixture_store.ps1')],
+            cwd=root, capture_output=True, text=True, encoding='utf8', errors='replace',
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('BARCODE_FIXTURE_STORE_TESTS_PASS=13;LIVE_REQUESTS=0', result.stdout)

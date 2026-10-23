@@ -3,6 +3,69 @@ import 'package:body_intelligence_log/features/cloud_platform/services/cloud_man
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'drains acknowledged upload batches when the server has no more pages',
+    () async {
+      var calls = 0;
+      final report = await drainCloudSyncPages(() async {
+        calls++;
+        return _report(
+          pushed: calls < 3 ? 100 : 3,
+          pending: calls == 1
+              ? 103
+              : calls == 2
+              ? 3
+              : 0,
+          pulled: 0,
+          availability: calls < 3
+              ? CloudPlatformAvailability.paused
+              : CloudPlatformAvailability.ready,
+        );
+      });
+      expect(calls, 3);
+      expect(report.pushed, 203);
+      expect(report.pending, 0);
+      expect(report.completed, isTrue);
+    },
+  );
+
+  test(
+    'a waiting upload without acknowledgement does not retry in a loop',
+    () async {
+      var calls = 0;
+      final report = await drainCloudSyncPages(() async {
+        calls++;
+        return _report(
+          pending: 103,
+          pulled: 0,
+          availability: CloudPlatformAvailability.paused,
+        );
+      });
+      expect(calls, 1);
+      expect(report.pending, 103);
+      expect(report.completed, isFalse);
+    },
+  );
+
+  test(
+    'an upload failure stops even when some operations were acknowledged',
+    () async {
+      var calls = 0;
+      final report = await drainCloudSyncPages(() async {
+        calls++;
+        return _report(
+          pushed: 100,
+          pending: 103,
+          pulled: 0,
+          availability: CloudPlatformAvailability.paused,
+          failureCode: 'cloud_sync_decrypt_failed',
+        );
+      });
+      expect(calls, 1);
+      expect(report.pending, 103);
+      expect(report.completed, isFalse);
+    },
+  );
   test('a failed paused page is attempted once, not twenty times', () async {
     var calls = 0;
     final report = await drainCloudSyncPages(() async {
@@ -104,13 +167,15 @@ CloudSyncReport _report({
   bool hasMore = false,
   bool cursorAdvanced = false,
   String? failureCode,
+  int pushed = 0,
+  int pending = 0,
 }) => CloudSyncReport(
   startedAt: DateTime.utc(2026, 9, 28),
   completedAt: DateTime.utc(2026, 9, 28, 0, 0, 1),
-  pushed: 0,
+  pushed: pushed,
   pulled: pulled,
   conflicts: 0,
-  pending: 0,
+  pending: pending,
   availability: availability,
   diagnostics: const [],
   hasMore: hasMore,

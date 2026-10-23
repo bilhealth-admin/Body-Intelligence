@@ -1,140 +1,53 @@
 {
-  "version": 128,
-  "status": "9_OF_11_DISTINCT_CASES_PASSED_ACROSS_TWO_RUNS_2_UNRESOLVED",
-  "request_capabilities": {
-    "smart_plan_tools_version": 1,
-    "health_citation_catalog_version": 2
+  "version": 131,
+  "status": "ELEVEN_DISTINCT_CASES_PASS_ACROSS_BATCH_AND_FOCUSED_TIMEOUT_RETRY",
+  "updated_at": "2026-10-23T13:58:38.632872+00:00",
+  "fresh_batch_evidence": "build/release-ios38-android33/coach-live-v131-complete-eleven.json",
+  "focused_actual_live_evidence": "build/release-ios38-android33/coach-live-v130-focused-allergy.json",
+  "root_cause": {
+    "proven_by_owned_live_trace": true,
+    "captured_phrase": "It fits your Halal requirement and avoids dairy, peanuts, and sesame.",
+    "failure": "The prior exclusion grammar accepted avoid/avoiding but not avoids; spoken_reply was incorrectly rejected.",
+    "evidence": "build/release-ios38-android33/dietary-owned-trace/response-1.json",
+    "earlier_unlogged_reply_not_claimed_known": true
   },
-  "successful_cases": [
-    {
-      "case": "target_goal",
-      "model": "gemini-3.8-flash",
-      "provider_attempts": 1,
-      "latency_ms": 5761,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "log_weight",
-      "model": "gemini-3.6-flash",
-      "provider_attempts": 2,
-      "latency_ms": 12857,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "today",
-      "model": "gemini-3.6-flash",
-      "provider_attempts": 2,
-      "latency_ms": 14461,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "travel",
-      "model": "gemini-3.6-flash",
-      "provider_attempts": 2,
-      "latency_ms": 19256,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "three_months",
-      "model": "gemini-3.6-flash",
-      "provider_attempts": 2,
-      "latency_ms": 16532,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "allergy_dinner_en",
-      "model": "gemini-3.8-flash",
-      "provider_attempts": 1,
-      "latency_ms": 4419,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "allergy_dinner_ar",
-      "model": "gemini-3.6-flash",
-      "provider_attempts": 2,
-      "latency_ms": 5302,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "need_plan",
-      "model": "gemini-3.6-flash",
-      "provider_attempts": 2,
-      "latency_ms": 16617,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    },
-    {
-      "case": "combined_month",
-      "model": "gemini-3.6-flash",
-      "provider_attempts": 2,
-      "latency_ms": 16954,
-      "reserved": 0,
-      "duplicate_http": 409,
-      "cleanup": true
-    }
-  ],
-  "failed_cases": [
-    {
-      "case": "missed",
-      "client_failure_code": "provider_timeout",
-      "cleanup_verified": true
-    },
-    {
-      "case": "done_without_saved_plan",
-      "client_failure_code": "missing_health_citation",
-      "cleanup_verified": true
-    }
-  ],
-  "evidence": {
-    "file": "build/release-ios38-android33/coach-live-v128-current-client-all.json",
-    "sha256": "04e25b34eb9cb160727c040d1a4236a2f573e288e0d9fc55c1bc2e4f2fa56381"
+  "repair": {
+    "component": "supabase/functions/ai-coach/coach_food_safety.ts",
+    "scope": "Recognize inflected exclusions/selection verbs; later ingredient presence and negated exclusions remain blocked. Negated ingredient presence remains usable.",
+    "no_extra_model_call": true,
+    "no_guard_credit_rls_or_consent_relaxation": true,
+    "all_coach_deno_tests": 135,
+    "red_then_green_evidence": [
+      "build/coach-ci-compat/food-avoids-captured-red.log",
+      "build/coach-ci-compat/food-avoids-captured-green.log",
+      "build/coach-ci-compat/food-exclusion-scope-adversarial-red.log",
+      "build/coach-ci-compat/food-exclusion-scope-all-coach-green.log"
+    ]
   },
-  "post_live_exact_source_readback": {
-    "version": 128,
-    "files": 12,
-    "match": true
+  "fixture_safety": {
+    "synthetic_account_cleaned_and_deleted": true,
+    "all_ten_cleanup_readbacks_zero": true,
+    "temporary_function_deleted": true,
+    "no_real_user_data_collected": true,
+    "evidence": "build/release-ios38-android33/dietary-owned-trace/cleanup-proof.json"
   },
-  "aggregate_failure_diagnostics": "build/release-ios38-android33/coach-v128-failure-aggregate.json",
-  "note": "No happy-path success claimed for failed cases. All failed disposable fixtures cleaned. No live retries until provider rest during full frozen validation; source validation remains independent.",
-  "previous_v127": {
-    "version": 127,
-    "status": "FAIL4PASS7FAIL",
-    "evidence": "build/release-ios38-android33/coach-live-v127-all.json",
-    "request_capabilities": {
-      "smart_plan_tools_version": 1,
-      "health_citation_catalog_version": 1
-    },
-    "scope": "Prior synthetic probe used default legacy health catalog1, unlike current native client2; preserved as that contract profile, not relabeled current-native proof.",
-    "failed_fixture_cleanup_verified": true
-  },
-  "first_round_summary": {
-    "report": "build/release-ios38-android33/coach-live-v128-current-client-all.json",
+  "before_live_exact_13_file_readback": "build/release-ios38-android33/coach-v131-before-live-readback.json",
+  "prior_failed_batch": "build/release-ios38-android33/coach-live-v129-complete-eleven.json",
+  "release_ready": false,
+  "fresh_batch": {
+    "passed": 10,
+    "failed": 1,
     "status": "FAIL",
-    "pass": 7,
-    "fail": 4
+    "failure": "Arabic dietary provider_timeout; original batch preserved."
   },
-  "live_qualification_pass": false,
-  "post_frozen_retry": {
-    "report": "build/release-ios38-android33/coach-live-v128-current-client-post-frozen-115252-retry.json",
-    "status": "FAIL",
-    "pass": 2,
-    "fail": 2
+  "focused_timeout_retry": {
+    "passed": 1,
+    "failed": 0,
+    "status": "PASS",
+    "source_version": 131,
+    "evidence": "build/release-ios38-android33/coach-live-v131-arabic-timeout-retry.json"
   },
-  "post_retry_readback": "build/release-ios38-android33/coach-post-frozen-retry-cloud-readback.json",
-  "scope": "Nine distinct cases have at least one PASS on the same v128 source and native2/1 contract across two runs. Neither original batch nor retry is all-PASS. Failed reply text is not retained; no diagnosis of its prose or independent failed-fixture balance readback is claimed."
+  "one_complete_eleven_pass_batch": false,
+  "distinct_cases_passed": 11,
+  "after_live_exact_13_file_readback": "build/release-ios38-android33/coach-v131-after-live-readback.json"
 }

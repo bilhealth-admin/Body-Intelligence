@@ -13,7 +13,7 @@ Future<Set<String>> smartPlanCopySources() async {
     'Training, nutrition and progress in one place',
   };
   final calls = RegExp(
-    r'''\b(?:_t|t)\(\s*((?:(?:'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")\s*)+),''',
+    r'''\b(?:(?:_t|t)\(|_smartPlanText\(\s*context,)\s*((?:(?:'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")\s*)+),''',
     multiLine: true,
   );
   final strings = RegExp(r'''('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")''');

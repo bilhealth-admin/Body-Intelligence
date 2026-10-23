@@ -1,0 +1,1035 @@
+{
+  "schema": "bil.smart-plan.home-prescriptions.v1",
+  "sourceContractId": "bil-home-strength-general-adult-v1",
+  "reviewedOn": "2026-10-23",
+  "catalogSha256": "2387b01877f0ad365c2d378cdcd191b6ae436683cf8de8909739a2fba550f101",
+  "scope": "General strength practice for adults who pass the existing BIL safety assessment; not injury rehabilitation or an individual clinical prescription.",
+  "sources": [
+    {
+      "id": "nhs-strength-frequency-2026",
+      "publisher": "NHS",
+      "title": "How to improve your strength and flexibility",
+      "url": "https://www.nhs.uk/live-well/exercise/how-to-improve-strength-flexibility/",
+      "section": "How often should I do strength and flexibility exercises?",
+      "facts": {
+        "repetitions": [
+          8,
+          12
+        ],
+        "sets": [
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "cdc-pcd-strength-rest-2014",
+      "publisher": "CDC / Preventing Chronic Disease",
+      "title": "A Strength Training Program for Primary Care Patients, Central Pennsylvania, 2012",
+      "url": "https://www.cdc.gov/pcd/issues/2014/13_0403.htm",
+      "section": "Introduction; DOI 10.5888/pcd11.130403",
+      "facts": {
+        "restSecondsRange": [
+          60,
+          180
+        ]
+      }
+    },
+    {
+      "id": "acsm-home-resistance-2026",
+      "publisher": "ACSM",
+      "title": "ACSM Publishes Updated Resistance Training Guidelines",
+      "url": "https://acsm.org/resistance-training-guidelines-update-2026/",
+      "facts": {
+        "homeAndBodyweightSupported": true,
+        "mandatoryFailureTraining": false
+      }
+    },
+    {
+      "id": "mayo-strength-recovery",
+      "publisher": "Mayo Clinic",
+      "title": "Strength training: Get stronger, leaner, healthier",
+      "url": "https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/strength-training/art-20046670",
+      "facts": {
+        "fullRecoveryDayBetweenSameMuscleGroups": true,
+        "stopIfPainful": true
+      }
+    }
+  ],
+  "bilAdaptation": {
+    "selection": "Only listed released dynamic strength movements. General dosage ranges are adapted by BIL; the publishers do not endorse this exact BIL sequence.",
+    "setsByExperience": {
+      "beginner": 2,
+      "regular": 2,
+      "experienced": 3
+    },
+    "restSeconds": 120,
+    "restChoiceReason": "Two minutes is a BIL starting choice within the published 1-3 minute range; rest longer when necessary.",
+    "maxSessionsPerWeek": 3,
+    "progression": "No automatic load or set increase. Review technique, comfort and completion weekly; any change requires a reviewed draft and explicit approval.",
+    "environment": "Use a clear safe floor, a stable chair for chair squats, and a fixed wall or stable counter for the named push-up variation. Do not use unstable furniture.",
+    "timeBudget": "Member availability, not measured session duration. Never shorten rests or rush technique to fit the budget."
+  },
+  "sessions": [
+    {
+      "id": "home-strength-v1-beginner-a",
+      "experience": "beginner",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-chair-squat-standard",
+          "sourceName": "Chair squat",
+          "titleAr": "القرفصاء باستخدام كرسي",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-wall-push-up-standard",
+          "sourceName": "Wall push-up",
+          "titleAr": "تمرين الضغط على الحائط",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-bodyweight-hip-hinge-standard",
+          "sourceName": "Bodyweight hip hinge",
+          "titleAr": "ثني الورك بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-glute-bridge-standard",
+          "sourceName": "Glute bridge",
+          "titleAr": "جسر الأرداف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-beginner-b",
+      "experience": "beginner",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-chair-squat-standard",
+          "sourceName": "Chair squat",
+          "titleAr": "القرفصاء باستخدام كرسي",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-wall-push-up-standard",
+          "sourceName": "Wall push-up",
+          "titleAr": "تمرين الضغط على الحائط",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-bodyweight-hip-hinge-standard",
+          "sourceName": "Bodyweight hip hinge",
+          "titleAr": "ثني الورك بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-dead-bug-standard",
+          "sourceName": "Dead bug",
+          "titleAr": "مدّ الذراع والساق المتعاكسين من الاستلقاء",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12 each side",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-regular-a",
+      "experience": "regular",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-counter-incline-push-up-standard",
+          "sourceName": "Counter incline push-up",
+          "titleAr": "تمرين الضغط المائل على سطح ثابت",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-bodyweight-hip-hinge-standard",
+          "sourceName": "Bodyweight hip hinge",
+          "titleAr": "ثني الورك بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-glute-bridge-standard",
+          "sourceName": "Glute bridge",
+          "titleAr": "جسر الأرداف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-regular-b",
+      "experience": "regular",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-counter-incline-push-up-standard",
+          "sourceName": "Counter incline push-up",
+          "titleAr": "تمرين الضغط المائل على سطح ثابت",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-bodyweight-hip-hinge-standard",
+          "sourceName": "Bodyweight hip hinge",
+          "titleAr": "ثني الورك بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-dead-bug-standard",
+          "sourceName": "Dead bug",
+          "titleAr": "مدّ الذراع والساق المتعاكسين من الاستلقاء",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12 each side",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-regular-dumbbells",
+      "experience": "regular",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-counter-incline-push-up-standard",
+          "sourceName": "Counter incline push-up",
+          "titleAr": "تمرين الضغط المائل على سطح ثابت",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "resistance-full-body-dumbbell-deadlift-to-row-technique",
+          "sourceName": "Dumbbell deadlift to row",
+          "titleAr": "الرفعة الأرضية والسحب بالأوزان اليدوية",
+          "equipment": [
+            "dumbbell pair"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-glute-bridge-standard",
+          "sourceName": "Glute bridge",
+          "titleAr": "جسر الأرداف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-regular-kettlebell",
+      "experience": "regular",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-counter-incline-push-up-standard",
+          "sourceName": "Counter incline push-up",
+          "titleAr": "تمرين الضغط المائل على سطح ثابت",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "resistance-full-body-kettlebell-deadlift-technique",
+          "sourceName": "Kettlebell deadlift",
+          "titleAr": "الرفعة الأرضية بالكرة الحديدية",
+          "equipment": [
+            "kettlebell single"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-glute-bridge-standard",
+          "sourceName": "Glute bridge",
+          "titleAr": "جسر الأرداف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 2,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-experienced-a",
+      "experience": "experienced",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standard-push-up-standard",
+          "sourceName": "Standard push-up",
+          "titleAr": "تمرين الضغط",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-bodyweight-hip-hinge-standard",
+          "sourceName": "Bodyweight hip hinge",
+          "titleAr": "ثني الورك بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-glute-bridge-standard",
+          "sourceName": "Glute bridge",
+          "titleAr": "جسر الأرداف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-experienced-b",
+      "experience": "experienced",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standard-push-up-standard",
+          "sourceName": "Standard push-up",
+          "titleAr": "تمرين الضغط",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-bodyweight-hip-hinge-standard",
+          "sourceName": "Bodyweight hip hinge",
+          "titleAr": "ثني الورك بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-dead-bug-standard",
+          "sourceName": "Dead bug",
+          "titleAr": "مدّ الذراع والساق المتعاكسين من الاستلقاء",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12 each side",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-experienced-dumbbells",
+      "experience": "experienced",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standard-push-up-standard",
+          "sourceName": "Standard push-up",
+          "titleAr": "تمرين الضغط",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "resistance-full-body-dumbbell-deadlift-to-row-technique",
+          "sourceName": "Dumbbell deadlift to row",
+          "titleAr": "الرفعة الأرضية والسحب بالأوزان اليدوية",
+          "equipment": [
+            "dumbbell pair"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-glute-bridge-standard",
+          "sourceName": "Glute bridge",
+          "titleAr": "جسر الأرداف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "home-strength-v1-experienced-kettlebell",
+      "experience": "experienced",
+      "exercises": [
+        {
+          "exerciseId": "home-bodyweight-air-squat-standard",
+          "sourceName": "Air squat",
+          "titleAr": "القرفصاء بوزن الجسم",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standard-push-up-standard",
+          "sourceName": "Standard push-up",
+          "titleAr": "تمرين الضغط",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "resistance-full-body-kettlebell-deadlift-technique",
+          "sourceName": "Kettlebell deadlift",
+          "titleAr": "الرفعة الأرضية بالكرة الحديدية",
+          "equipment": [
+            "kettlebell single"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-prone-y-raise-standard",
+          "sourceName": "Prone Y raise",
+          "titleAr": "رفع الذراعين بوضعية Y من الانبطاح",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-glute-bridge-standard",
+          "sourceName": "Glute bridge",
+          "titleAr": "جسر الأرداف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        },
+        {
+          "exerciseId": "home-bodyweight-standing-calf-raise-standard",
+          "sourceName": "Standing calf raise",
+          "titleAr": "رفع الكعبين من الوقوف",
+          "equipment": [
+            "none"
+          ],
+          "sets": 3,
+          "repetitions": "8-12",
+          "restSeconds": 120,
+          "doseSourceIds": [
+            "nhs-strength-frequency-2026",
+            "cdc-pcd-strength-rest-2014"
+          ]
+        }
+      ]
+    }
+  ]
+}

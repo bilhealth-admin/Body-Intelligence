@@ -1,6 +1,6 @@
 {
   "schema": "bil.coach-smart-plan.source-inventory.v1",
-  "recorded_at_utc": "2026-10-23T08:55:10.491904+00:00",
+  "recorded_at_utc": "2026-10-23T16:47:56.554567+00:00",
   "candidate_branch": "codex/bil-release-ios38-android33-20261022",
   "source_base": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
   "protected_base": "31554b3e078667a38bd3c53aa105f5f1d2a4dc96",
@@ -22,8 +22,8 @@
     "A\tlib/features/smart_plan/services/bil_smart_plan_catalog.dart",
     "A\ttest/features/smart_plan/bil_smart_plan_engine_test.dart"
   ],
-  "frozen_manifest": "build/release-ios38-android33/frozen-20261023-115252/source-manifest.json",
-  "changed_input_count": 263,
+  "frozen_manifest": "build/release-ios38-android33/frozen-20261023-172310/source-manifest.json",
+  "changed_input_count": 298,
   "files": [
     {
       "file": ".github/scripts/bil_ios_simulator_adhoc_sign.py",
@@ -48,6 +48,12 @@
       "status": " M",
       "area": "preserved_authorized_release_work",
       "sha256": "d30f3aee23b6eb147a241909833018d20e461a964cc85406c2ad690640f37894"
+    },
+    {
+      "file": ".github/workflows/bil_codeql_security_extended.yml",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "2732ee6fd1c907b74ac54ded9d9089011e7359a0d629d4aa90af0d4f8c805187"
     },
     {
       "file": ".github/workflows/bil_ios37_candidate_apple_signing_preflight_20261022.yml",
@@ -98,10 +104,22 @@
       "sha256": "24264d0c26ece4398f85954c1e02e52dbd8748479f42ef784d9f1ea742894d14"
     },
     {
+      "file": "artifacts/workout_media/home_smart_plan_prescriptions_v1.json",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "9b312a4d02abff12f25935c7bfe03e006d19231655271f6bc08fdae6598679f3"
+    },
+    {
       "file": "artifacts/workout_media/smart_plan_prescriptions_v1.json",
       "status": "??",
       "area": "coach_smart_plan",
       "sha256": "cd2d3c9ab280116c3a0b13f8c9271426cb414c9429d6f20a7e30af012b38dae3"
+    },
+    {
+      "file": "artifacts/workout_media/smart_plan_warmups_v1.json",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "0c45ae85862797907d4c8352e929883bbf0770150d4187417599f8d67c44ae0f"
     },
     {
       "file": "docs/qa_next/BIL_20261022_SMART_PLAN_CLOUD_LOCAL_CANDIDATE.sql",
@@ -197,13 +215,13 @@
       "file": "lib/app/localization/runtime_copy_extended.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
-      "sha256": "83c4974e944543da01caea1c3b672489dfe516cf9b30db5dea46e57336140292"
+      "sha256": "e317e8b3ee982c6f8a3a26d8c50e0c9d3a05952b8466b31a61523cb43267ba9e"
     },
     {
       "file": "lib/app/localization/runtime_copy_smart_plan.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "bdca5d2a83c203e84b31d191bf9fd647a3e09a8b60f4d637c0089f2419a9624b"
+      "sha256": "eb1b868178b733ad5a9486a5eb4e133be62223ac5299f0e1617e9c6cf9e9c52b"
     },
     {
       "file": "lib/app/router/app_router.dart",
@@ -233,13 +251,19 @@
       "file": "lib/features/cloud_platform/domain/cloud_sync_models.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
-      "sha256": "416fd95a8ed0964b7144b5d09742de6cad2ed42bea6d9d5e631f5a0ad21693ff"
+      "sha256": "e8c65bfc81beabca9faf68545aad15ad78975f719e801e83705dea10c4af72a7"
     },
     {
       "file": "lib/features/cloud_platform/persistence/sqlite_cloud_platform_store.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
       "sha256": "c9666aa4daf7c4d99316ea492d71926da7064f3d3823efb021ad4f5de732ffa0"
+    },
+    {
+      "file": "lib/features/cloud_platform/services/app_database_cloud_inbox_applier.dart",
+      "status": "modified_or_added",
+      "area": "cloud_sync_incident_fix_and_evidence_gate",
+      "sha256": "0cd736037d63bb24b7d64a384d91e13dedf71b0eeaca0b6545b9f6c1a9d3b8d9"
     },
     {
       "file": "lib/features/cloud_platform/services/cloud_manual_sync_service.dart",
@@ -251,7 +275,7 @@
       "file": "lib/features/cloud_platform/services/durable_offline_first_cloud_platform.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
-      "sha256": "46e2cf9b1b19053c784033509d07d805a12a52e49154b8927256c59af3429108"
+      "sha256": "333c4bd5149e7098ac6a29da55e2df8d5ede3678d73a270b2b06e4234d415022"
     },
     {
       "file": "lib/features/cloud_platform/services/supabase_cloud_transport.dart",
@@ -515,7 +539,7 @@
       "file": "lib/features/smart_plan/domain/bil_smart_plan.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "8bed778a124483d700c630736ceff222941ad7f69592fb0963d79464f57ca3b3"
+      "sha256": "19f3cbae2db34c5a47cf2a4582add7480f2ebae1cd1149bda2123d5f80a406c3"
     },
     {
       "file": "lib/features/smart_plan/domain/bil_smart_plan_adaptation.dart",
@@ -533,7 +557,7 @@
       "file": "lib/features/smart_plan/domain/bil_smart_plan_engine.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "16943a959785e07278f1df364bae8c85c10b742db150e279b6691e82608dd475"
+      "sha256": "1e54270741051a7601c8372b624936ad98f26bf46f1ffefed7ea039abdba691c"
     },
     {
       "file": "lib/features/smart_plan/domain/bil_smart_plan_nutrition.dart",
@@ -546,6 +570,12 @@
       "status": "??",
       "area": "coach_smart_plan",
       "sha256": "db8d38c33869be89d927998e2d4f8ab5f5286db1fde666811cdf7b6c79bfcaae"
+    },
+    {
+      "file": "lib/features/smart_plan/domain/bil_smart_plan_recovery.dart",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "da15af82c52d36821a217be2f81e52a04bccc017e8d3f728b66e6471027d54cb"
     },
     {
       "file": "lib/features/smart_plan/domain/bil_smart_plan_review.dart",
@@ -569,13 +599,13 @@
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_adaptation.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "e4084cef14ccb281cc321c03cbc1016d45ac4da55dadf03291d869c746baf1fc"
+      "sha256": "1b8332b3ec274b01a37b9c3d9f29141008222d463c9acaf612de6405cc19c9e3"
     },
     {
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "919b09d38fc17a1b182757abeccf95c283ebc35957da3374f0307beec1e92e88"
+      "sha256": "1b2d3934d0de30553d397184684a19e00f82d4fbddd172a051d732f1c33e6f7e"
     },
     {
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_context_consent.dart",
@@ -587,7 +617,7 @@
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "7a9993972ede1379b47d1c6a6c6d0d286331f113cddcd9f6411b4a5874f22561"
+      "sha256": "9f180e21e512cf02dc7519df8a72efc762a1ea2ec309844c27ed646ecf4ee940"
     },
     {
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_drafts.dart",
@@ -611,7 +641,13 @@
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "91035710dbc0aa5dbce34553f89bff733500c0c1180d8f6ab4fc7595785aa1c2"
+      "sha256": "5e8df072e40a748f9a55b0755d331a2817c2ad2f47bf9fa1957a68653ba04782"
+    },
+    {
+      "file": "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "751c55cf50366484b3d7e2f8eef3d1ce8c19327cd5225c446d028c807da80def"
     },
     {
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_privacy_surface.dart",
@@ -623,13 +659,13 @@
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "ef583d0459932a302bc2d82ec1f187b05ba9f47d79755e0f270e55ab58d67fba"
+      "sha256": "19629509cca53862119ca7820a0ec178e2aa69b76f82e39f3cef544eab4a6736"
     },
     {
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_session.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "899af8ab21f8a39ee8e1065259bd1419f990c3721170556bb4b11efa9e6e7dba"
+      "sha256": "a210e8ed8609d9d7c1a9413fb6f06baf7cffae82992bd1dcbee1f41ad0fe5816"
     },
     {
       "file": "lib/features/smart_plan/presentation/bil_smart_plan_sync_review.dart",
@@ -641,7 +677,7 @@
       "file": "lib/features/smart_plan/services/bil_smart_plan_catalog.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "92eb7ffb176dc0f2d95476e1509d18d0e56e49ad18d020bd643af9703f16dd12"
+      "sha256": "45096ca51f25b40432779716d7decaa5064f67bc3bccac3936b10e92c9e57095"
     },
     {
       "file": "lib/features/smart_plan/services/bil_smart_plan_clock.dart",
@@ -671,7 +707,7 @@
       "file": "lib/features/smart_plan/services/bil_smart_plan_prescriptions.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "1bf82586e2ef8cf6adbaf92218ac5933686d85357253cf4a8664a649e7dc1c15"
+      "sha256": "769a8e3bb9913250e0abc15de8fd814f4580f2cf17a2b1efac5f32cff560ca9d"
     },
     {
       "file": "lib/features/smart_plan/services/bil_smart_plan_workout.dart",
@@ -719,7 +755,7 @@
       "file": "pubspec.yaml",
       "status": " M",
       "area": "preserved_authorized_release_work",
-      "sha256": "a993ecf712726507653681154279b14669e39f7cdd10f6f6442df52d0e164709"
+      "sha256": "5055a011ac23a1db50ff4aaccb840507afabfb1b9d025ab7496a67dff5521d2a"
     },
     {
       "file": "supabase/functions/ai-coach/coach_answer_quality.ts",
@@ -737,13 +773,13 @@
       "file": "supabase/functions/ai-coach/coach_food_safety.ts",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "8c83d1039655ef2684a713314e777ea4f95543e861b6889f49f6ecffec9b24f0"
+      "sha256": "27a320a5b2fce9ec98fee985da0f7e9ed76ef02a278db7890f57e39be841706b"
     },
     {
       "file": "supabase/functions/ai-coach/coach_food_safety_test.ts",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "7a3c506d7e3b5a37fac8a4f8c4cc64cb2a0877769abe2a484b1ba06e6b6c5e96"
+      "sha256": "d3243c0cb0a80cceaddcfa6fdcf7a05efdf0f1da7f298250d02ca422d7e3b163"
     },
     {
       "file": "supabase/functions/ai-coach/coach_health_safety.ts",
@@ -800,16 +836,28 @@
       "sha256": "cde3a2f562b34de591e3e337e6898d6d285ffd2125b99bd1ae15941f0f27910a"
     },
     {
+      "file": "supabase/functions/ai-coach/coach_workout_review_copy.ts",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "3927b893a9800e7ebe652c40b3030765ca8484983a853d3ab68c47a9f5f10f94"
+    },
+    {
+      "file": "supabase/functions/ai-coach/coach_workout_review_copy_test.ts",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "ab224c07c9cd18adbb01c68abf619e8bfbd6a48d2f06d42edbe2f59e5d4f9860"
+    },
+    {
       "file": "supabase/functions/ai-coach/server.ts",
       "status": " M",
       "area": "coach_smart_plan",
-      "sha256": "8067399b7450f249c7dc7232254b48632f316e77b12c49f253381a117b6ee5fa"
+      "sha256": "94671a09860f15c06984eca360d81694d613ad7dfb7fa0b8d1b38900752aa164"
     },
     {
       "file": "supabase/functions/ai-coach/server_test.ts",
       "status": " M",
       "area": "coach_smart_plan",
-      "sha256": "920bb03b0ea8bf51ae2e24898c0fd967a65afaf41972758ea3a7b50ff6b33ed1"
+      "sha256": "115fefdf03bd8b43c1c3a96ecff6e52b50fd36c70ee744ba02a7db43a37e9a98"
     },
     {
       "file": "supabase/functions/ai-coach/smart_plan_tools_test.ts",
@@ -848,6 +896,12 @@
       "sha256": "5c7eb696ed1fafb84c7e0025e74f30c1c269f8ad04f877c5fdbb1aeb5b8b757b"
     },
     {
+      "file": "test/features/cloud_platform/app_database_cloud_inbox_applier_test.dart",
+      "status": "modified_or_added",
+      "area": "cloud_sync_incident_fix_and_evidence_gate",
+      "sha256": "9f113ff939075695d9a0ed8e112e08570206292488932045e2958e35bb52e4f7"
+    },
+    {
       "file": "test/features/cloud_platform/cloud_auto_sync_behavior_test.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
@@ -857,7 +911,7 @@
       "file": "test/features/cloud_platform/cloud_page_drain_test.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
-      "sha256": "886a33788431babcf244226076c5144d5bb9e820e7c1c098e1968174e9929cfb"
+      "sha256": "3c0c861309a38d4238877b885a2792ca1edf83932927386862aba23dd9b76208"
     },
     {
       "file": "test/features/cloud_platform/cloud_sync_failure_recovery_test.dart",
@@ -869,7 +923,7 @@
       "file": "test/features/cloud_platform/durable_cloud_runtime_test.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
-      "sha256": "95f1067e687e27dd3885567e2d32150edbc453dbc263e982d240e052ce3575be"
+      "sha256": "e79d8292bbd3a5cb9a140609f563a879c9338eb3db6e406263de118163afebec"
     },
     {
       "file": "test/features/community/community_report_visual_test.dart",
@@ -962,6 +1016,18 @@
       "sha256": "cdfcebcd656da804ffd8e9292ef61e2b01ce363eab6fab56d90436b6aa752e15"
     },
     {
+      "file": "test/features/smart_plan/bil_smart_plan_home_live_fixtures_test.dart",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "729e9242fb2c5e7d21de1436f46296a070bf69d5c52970faaee3a9f00430f240"
+    },
+    {
+      "file": "test/features/smart_plan/bil_smart_plan_home_prescriptions_test.dart",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "c61a25b5417591192179e1f1169490c46718a05cae2058f457364a27c0ad87e0"
+    },
+    {
       "file": "test/features/smart_plan/bil_smart_plan_live_fixtures_test.dart",
       "status": "??",
       "area": "coach_smart_plan",
@@ -974,10 +1040,16 @@
       "sha256": "be59fa33899de368f371476dcda0d82e9eef15cd96a6a3352173369af7622b8d"
     },
     {
+      "file": "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "2b467ecf1e55c9ac41b34f487358c02230cd230fda1ab2823a1eadca659caf87"
+    },
+    {
       "file": "test/features/smart_plan/bil_smart_plan_page_test.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "65a2afcb5bf7cccf3b4dcdec64c9bf5b858ee1a87f6ad7b83efb17e68414e8d8"
+      "sha256": "830b3e61394e937713fb7050b807cabfe71523c33f1946381c10f4cb1449e8ec"
     },
     {
       "file": "test/features/smart_plan/bil_smart_plan_prescriptions_test.dart",
@@ -1001,13 +1073,13 @@
       "file": "test/features/smart_plan/bil_smart_plan_session_test.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "2c11c384f209f934bcfa482708bb4fb4c10c514aefa943b3f32071d6ff255324"
+      "sha256": "b49990450d75cda5394476051f5c624a1d14817df2f4d0dc14864ac62fe2df56"
     },
     {
       "file": "test/features/smart_plan/bil_smart_plan_setup_test.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "3272cfda78042610597f16bbc089aaf8527992a8c6ff313df48db5d266d35450"
+      "sha256": "1f21bcaf7e064fc6cb7e966ecf1acd591f0908601a44ede9a0f794dd60a59795"
     },
     {
       "file": "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
@@ -1031,241 +1103,289 @@
       "file": "test/features/smart_plan/goldens/smart_plan_ar_390.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "f541e9b67e0c6303279e0c6cf8f842aada4c33100fd7d4ec88c76ee7d82396e2"
+      "sha256": "88494f33210471aae1f14490db248ba2f57625550671cfeafdab614d37ad24fe"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_ar_memory.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "cb11d72d983366219f2bfcf031c5f43223c174118bb7cd703a36bcd4fe250287"
+      "sha256": "0c94d68e947df5c614962ad8988ece51512e5f17c41e1dbca1e7ceb5720ee8cc"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_ar_report.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "a9fabfbfa788004aeab6a658d94903a3207ad5faf7f7c980cd0e5cc313ef1001"
+      "sha256": "1ed9d22009afe0f597cf2e6c13693a29e7f5c27336900996bdbfcee70b073dc0"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_conflict_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "c913ab7dfd25fee9692a933e549fe73eaf139f60895dabece69314f46f07e0a6"
+      "sha256": "6e97c818034ad7a03c1e7612f1cb543542a67d37daa60f5fd0a8479b0b0da733"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_conflict_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "21b55fcb1a101957f5094ac7e3f1accc85c811406c568420df04bf212f35e4bd"
+      "sha256": "d1ea590b90267cecaec0bec9b523b73d2d76e8dc0d2942fc8b05bbed622492dc"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_conflict_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "e77fbbd43a1e1349546a806c26bc1bcd8ceeef55fe8a167bf342a97584c4d063"
+      "sha256": "6eddbc3bda64893042180256d4db0c30681dcde87b3f7f5ea8a1ac69be9a860d"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_conflict_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "4786e29306a193e6e4194542ace3256866c3821172349b176e83f1c9eafb5175"
+      "sha256": "9708da1c131f50857b8185d3667d41899d8b8b5ec2cdb2dbfd29e54c088bb92b"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_creation_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "a7f292d23550bada840ef4ffdaaff17c5cdfcfa018a437c70b21ef8a19feee8e"
+      "sha256": "7f8efc65e0c738c627afe1a510460e0b3cd6e36138d6090450c63edca785c618"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_creation_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "3c0c9a9e7bcefc577c841c6e97be37e89f6ce50d2258ad0a8889bf9cb4db5a7e"
+      "sha256": "cbd93a401403f299acd7367d2eb4b0afb10d582d6f0c495a5ec0654c47808d9d"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_creation_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "1ec5de56ff010c30dc76af24e1a6229409fc0c5124b3d20e9700c8ce62376f93"
+      "sha256": "0c8adfc46c369a3543f80e0ca9b206ace103a3d62af18f56a71cbe6b1e977590"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_creation_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "3c52e62b2975426a90f098f3bdb1f221db86c46bef901e5940cdd78485b10319"
+      "sha256": "48145327c5509fcb5b9848b4976060d72af6cb4274766ead03a66912b995a609"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_empty_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "28da1813844693eb23432cbc52e47c1a13731964d35fb91b63b3bbd694dcc275"
+      "sha256": "1275606e4977d1f965055ce4528c0dc60c73d1de8e0efb0a4c7b1d409dd99193"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_empty_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "e9c715a640c42c578953065b221cdc52b863d837f124ff86bb48c21ee689e6fd"
+      "sha256": "8f56ada9321143b887fd3994588767b0b1e58b55fa3b2ff8e2e0f314f4a37ac7"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_empty_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "4badf69c304f82ee6f85785acf1ab67e5d8d8abe7ba41a85284f4170ae2a0de1"
+      "sha256": "0705fac70d59400510e11e2d99d0d89b1b59e3c076c54b767c813fbf26c82f90"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_empty_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "83711ec140b1370a841b7b74b2b42de15a2bb371d6ff8e3e796b340c18af2c17"
+      "sha256": "0e7fe678d935c85e0f4f158bc20713c255619c101cb8a958ced9fd5858fc84cf"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_en_390.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "400c2c95df79cbb2039b96a63e960d211746a9776f6148f07e78cc333d6b9292"
+      "sha256": "c09bbe5ff9a2d3a995b9edc6be5ca540061d0d2f4c1e8a36e1efa4c983a49fc1"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_en_memory.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "98f7b1ec86de57d60ac92dcbdb112d57d8793b66306e0f2cc215a15635d64dee"
+      "sha256": "39807e378c0394db51d7aa727fdcc274b481a2333e0256b35ceda219532405c1"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_en_report.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "4f2571db093ba69422be388570ea7d10a7a544f2464d4ec4421842975871a5e7"
+      "sha256": "030b42d6bdd8eab202f1f399e4eb7ef17f9c2aaa3375d4cea9f9596353fc1a6b"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_error_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "d7dc32a4bacd19b0a39b11e3b31c29219ad48ca5e81616d91837da314645d73a"
+      "sha256": "fc2be2eb256a4e4db6ae28004d6f72895c7273e060f10b927e4f0f1f75e88621"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_error_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "fc9732cee8fc08116dfd42a0d8f5f314dcdeb5a80f3470dba0ba4f6e279d3a50"
+      "sha256": "1baee266503f7d3b12af2ba679bc13435304cd2405bdc3e266c23ffc8d5e0a92"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_error_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "7839b9a871e5870a6fa6645a4a3058ad9216940265cb90ff47e6ac798158c2b4"
+      "sha256": "77bc1cd3c745728553fec009f2faeb33f038e345a0ae83ec9e05de861ecf6779"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_error_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "f912a69cb5d4192c9ad10614d7b6061f423c9392a0fd39645308f98cc87d1ac9"
+      "sha256": "63f515e5a1ef8b14d055b22854f23428bf2630f257cb32816ed5a1a222a6c480"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_dark.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "7edd37a4f9c7533f6b2c5096f1f52aa662631f34480319911856e383c40658e7"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_light.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "cff2a286c3cf628c1844053a0e8b9acd2ac98b11c991cfdadeee951a72557c00"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_dark.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "b7ef2daea781ce812bd196df4e588f9b8a655654ae2335eef9cfa0ea581fb5de"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_light.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "35c9e9ee38dffdea82ca3e517d11a57ebfc63967dd7dd7576b49c69518640488"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_ar_dark.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "17de711ceafb9c4c19b7dec49129ea055ac325486fe92acf2f910e1ae690750d"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_ar_light.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "1b86787d59ac2efdbf8560e4a2df76298e89e942aac8cb1287a75262cb03a6bc"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_en_dark.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "d2f6f82b6be48a0044749dcf35912061503197a749773d001f096d6f03d470ab"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_en_light.png",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "868c12160a277fd1c28a76b885bed536be7bdafdcfdf7c1524ee1b3b11b21386"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_loading_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "ffa2b81e4fac07f57f0186fa477b76b928ad4a287f3ac17d84f0a53e18d1fb5c"
+      "sha256": "e28a55583b0ae57817d72895e59d3df9b20b7ae3d6b7214ae2b931061436afa9"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_loading_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "c8849d5055c322a448629cc703eac524cb096bb50a11ba1c6413b1d45be1c94f"
+      "sha256": "8b729c3add3a99a0ea569e201138acd281afa29caf112dfcbd4f7541faf63feb"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_loading_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "b1c5caa61544d6410542fdd2a9e4e98c47130ab73ed30e6878b7e8725cd68732"
+      "sha256": "e2432b8685eb72b3377d4ed159b87634aaaef07135f081c18de853435a88825d"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_loading_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "e64a5f7bcafee686eba42a9c4b00b106261de03628fa6911cdbaea606317948d"
+      "sha256": "d9037793b1cbd26374585b4e66bcfc5a13ba15b027cd3b23f5dfc57334b7e64a"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_pending_ar.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "4114ff6fe0d345cc9321a8359c5641d27ffff97f48c19e519749aafa8f7348db"
+      "sha256": "b65f152dd45520fbfa1d04c035a9bdb213c38bf8b1233c50137acdb983b491e2"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_pending_en.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "27299fc34330147caac30eb23c94ec24435a4bff6bb774c3efa748470596d835"
+      "sha256": "fa5d1d613983064da2fc2f22cbe2a07776c42ef18085d5447a3c300f4b03e3c8"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "8befc18a0afa30e76aa3fcdbc7ba2c22be95f8148ac1b4ee5c6a500745a18482"
+      "sha256": "4c706066a34a0a26c8ba46acb6f90e3afe57c5792aae315c806e4ab3a5647ebf"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "ec2e619f66769d748232898c203d399413d54635a1d50568822b13dc35441516"
+      "sha256": "8e8b13397265d77f96da0894ead751b92c740e266a86ad67438c0cac3b332653"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_progress_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "863396a53cbb1e9dbf5ea8abd92a8d580b8f06777ee4dcc8c6a5b3537ebabdeb"
+      "sha256": "00a7798699bb5b552f5ab5b8bfe488b330cc2005fea4c1f96159746d874bb797"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_progress_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "a4124b7a6c83e1b9da6a89cf25dee5f2f4f87907ee931bcad9b56cfd28e8ed3d"
+      "sha256": "3004696a051d01e0ec40fb49533d789ebb3b8783a61d93b0690416dd9080e43f"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "9041faab393e365135abb5c08fd8b7389ed86baf7356edf4e7d7f4fdf4bca456"
+      "sha256": "3df55bb1d86aed2dd163f8df96d938bce16f18f15c99447faa9db12304103bae"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "1382becba8fde8c4f7f85b5dbb7cd9eca08c3cf14a7af6254d93d24d031dd0fc"
+      "sha256": "3ccc68149022263bf8c462b4535d8e889266d3cbf44777ee52a0c548294f11b3"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "f0a7b9a319d753759c6303cf2157f53b0147ef9aad2d2b567ed1404f4f1dc3db"
+      "sha256": "970f66ecaf3765ae6d06bdd21dce35a2adedea635db33164a5ab279edb8435b4"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "0cc80221cd76370b6ee9952194382d60f80e9422f81500684379d855efdb3242"
+      "sha256": "0452b8aea1e7ff629fde1ebd8c6f749052dd2c6f3890871ea98dc63be09faa44"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_session_ar_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "0f1e4c105ac9f5effa2b208ed23a772df8395ce812b9de6f557aac84f27a8bcd"
+      "sha256": "fec7bc237c8c526e798271b13969adf685926687de9a5f9a43a67fab32a6d1bf"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_session_ar_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "39f500a5a76c3cfb34a1e3af143364adf59bcc06cc95721e69d141f6926679a0"
+      "sha256": "515a1b84e4189bf02b334abab3e24c87ff15c899f23bcfebbbb26c76a7abe3c9"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_session_en_dark.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "d47b12a9118ca44bb8b1f56377b57c92871b5e21aa5aabb6b8c3e50b6e954c79"
+      "sha256": "d46d05b8e46133273a4c98950cbe258bb36af539ba632b994a295838f831387e"
     },
     {
       "file": "test/features/smart_plan/goldens/smart_plan_session_en_light.png",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "67f96fae9be4da52d63f362c41e32285600f7159f9367cf929304e88ea5a9eca"
+      "sha256": "f9fc69c4a16b77b894d7c932e361c3375a7d949043479c2f78836dd3ec2fee72"
     },
     {
       "file": "test/features/smart_plan/smart_plan_contrast_review.dart",
@@ -1328,6 +1448,12 @@
       "sha256": "43c271cc2230db67555437c541da675bfaaccf5086718fd91ddf534f01a0bf8b"
     },
     {
+      "file": "test/launch_readiness/epic14_split_ios_workflow_audit_test.dart",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "6c155e61ee18c592bad742fa87b4e8d3ceecd1225ffdf0be8e2558185ed6dd6f"
+    },
+    {
       "file": "test/launch_readiness/release_candidate_gate_contract_test.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
@@ -1367,7 +1493,7 @@
       "file": "test/localization/smart_plan_25_locale_test.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "b726b0b4b7537a92a1d842cce128ed0a04593c4486bd8dd277156fb50560064f"
+      "sha256": "5207af9727d3ad59ed0f277126325dbd84a2e8409eee177f6bb38d43c2142e60"
     },
     {
       "file": "test/parallel/bil03/integration_overlay_contract_test.dart",
@@ -1394,6 +1520,12 @@
       "sha256": "6d93da08e8a68339d0703a0d9e7a7a72c7cf8e20b50505497d01d5877e45f3c4"
     },
     {
+      "file": "tool/epic14_release_audit.dart",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "284a78f818d3036b45d2ac84efb180ed50621395fb132737b1c866d1838859d7"
+    },
+    {
       "file": "tool/localization/generate_extended_runtime_copy.dart",
       "status": " M",
       "area": "preserved_authorized_release_work",
@@ -1409,7 +1541,19 @@
       "file": "tool/localization/smart_plan_copy_sources.dart",
       "status": "??",
       "area": "coach_smart_plan",
-      "sha256": "cfcf07b01b33866b5cc44b4c03108245543b03eff59fc56f135b1c0326ae99d6"
+      "sha256": "e378309f208202a632e01417a13d2548c931d1a466446e56a4cc3e0f1d453bbe"
+    },
+    {
+      "file": "tool/nutrition/run_live_barcode_resolved_fixture_e2e.ps1",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "3db0e8b8639b657268256b76e949279c61e165197b5f3f3c41c38559446e2d16"
+    },
+    {
+      "file": "tool/nutrition/test_live_barcode_fixture_store.ps1",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "17fa4d63a508341c4731aee57fb88806026da3dd5a4b3b32aec48679162a062b"
     },
     {
       "file": "tool/prebuild/run_code_tests.py",
@@ -1508,10 +1652,22 @@
       "sha256": "8c9937faad5931835b347b147cddb72a07df888eb6ada443855bdd0c92f45e04"
     },
     {
+      "file": "tools/qa/bil_manual_sync_evidence.py",
+      "status": "modified_or_added",
+      "area": "cloud_sync_incident_fix_and_evidence_gate",
+      "sha256": "3fa1a707ba2b639167ab1da8f45edde48cd60bf0253e74b91f445edeb683dc39"
+    },
+    {
+      "file": "tools/qa/bil_mobsf_offline_static.py",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "ef74ae3b0041f22553f452f68daeffb96a7ec4cd4d91fc44ff42244b29a79201"
+    },
+    {
       "file": "tools/qa/bil_release_candidate_validate.py",
       "status": "??",
       "area": "preserved_authorized_release_work",
-      "sha256": "ba4a08aa1b382e32a8e1c7000d35cea198103ab969aa8de62dfafcf99cca54e9"
+      "sha256": "8d104738cd1fd6b67d5c6175c24b8a61d05216063bab0a2537b10f971690b580"
     },
     {
       "file": "tools/qa/bil_release_cloud_e2e.py",
@@ -1523,7 +1679,7 @@
       "file": "tools/qa/bil_release_coach_live_probe.py",
       "status": "??",
       "area": "preserved_authorized_release_work",
-      "sha256": "1ee5e470b63c8c84c9c232b7cbd78a234fbd72c95b2953d83990f299d86d210c"
+      "sha256": "b7bbb7a0ed69ea8f7852eb7ab4afc2e2f18d10109eddcf233b9222a0d028c6f2"
     },
     {
       "file": "tools/qa/bil_release_delivery.py",
@@ -1544,10 +1700,34 @@
       "sha256": "0b7d6f8517d141fd93b40d93d493c419a854fddc70f2156bb8431cdc53be3317"
     },
     {
+      "file": "tools/qa/build_home_smart_plan_prescriptions.py",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "9a69dc1be760f3b4ec029f013ef604beeddf1814d75a766b8fa214974a51d34f"
+    },
+    {
+      "file": "tools/qa/flutter/manual_sync_live_e2e_test.dart",
+      "status": "modified_or_added",
+      "area": "cloud_sync_incident_fix_and_evidence_gate",
+      "sha256": "0db695b93d1850212d53a9b3db31e6b95b89aec79b3be8314265f9d5f0d165f0"
+    },
+    {
+      "file": "tools/qa/manual_sync_crypto_bridge.mjs",
+      "status": "modified_or_added",
+      "area": "cloud_sync_incident_fix_and_evidence_gate",
+      "sha256": "8e57407286196ef3008bdfecb08a3c55c749223ecee2176cc0394b09513d1369"
+    },
+    {
       "file": "tools/qa/revalidation_ci_plan.json",
       "status": " M",
       "area": "preserved_authorized_release_work",
       "sha256": "a6e02523d919e31b58ef0de92433f6eddc05a4fafa9a0ae591fc4a2d54a79ad4"
+    },
+    {
+      "file": "tools/qa/run_manual_sync_live_e2e.py",
+      "status": "modified_or_added",
+      "area": "cloud_sync_incident_fix_and_evidence_gate",
+      "sha256": "fe55a7a7d44e29f4d8062152f9c0ae6d13b88bda735e6f9d5d040924b99b45c3"
     },
     {
       "file": "tools/qa/test_bil_candidate_owner_runner.py",
@@ -1574,10 +1754,16 @@
       "sha256": "b35061817b135de9584fabbe22285898804a454917e4f97c3fca5e2c32fd33c8"
     },
     {
+      "file": "tools/qa/test_bil_mobsf_offline_static.py",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "fed6217a9d3b1e1f6a5c69a2c1cdc6b797140dd2be1db3c814ea68829d164c60"
+    },
+    {
       "file": "tools/qa/test_bil_release_candidate_validate.py",
       "status": "??",
       "area": "preserved_authorized_release_work",
-      "sha256": "ee61fc51e3e57bc7ed13d91e6288118d2de7be9a7fffa9bf5d94d744bdb931f8"
+      "sha256": "5ca22d26fa633e4654bde111cb14fde32ea00c2611027eaf38c330d9fe4b1aa3"
     },
     {
       "file": "tools/qa/test_bil_release_cloud_e2e.py",
@@ -1589,7 +1775,31 @@
       "file": "tools/qa/test_bil_release_coach_live_probe.py",
       "status": "??",
       "area": "preserved_authorized_release_work",
-      "sha256": "609e7db1cb644bbb1f2d313f65259ef85e06e1397f190d6c276676c2d0d3d5aa"
+      "sha256": "62ecc667da002a2adbd7d7c26805a43c7dc85cd31500fa4c24ff6b529d128c74"
+    },
+    {
+      "file": "tools/qa/test_bil_release_home_prescription_source.py",
+      "status": "new_followup_input",
+      "area": "coach_smart_plan_followup",
+      "sha256": "71a760d30f0dc2f087990adf03bcef1f3e7a043c8f13250c9b35e473cb710eda"
+    },
+    {
+      "file": "tools/qa/test_bil_release_manual_sync_evidence.py",
+      "status": "modified_or_added",
+      "area": "cloud_sync_incident_fix_and_evidence_gate",
+      "sha256": "488551e564db07ebd839cfe1eeba7d259f3776ef39fdcb6cfc7a7248a4f40e55"
+    },
+    {
+      "file": "tools/qa/test_bil_release_native_workflow_isolation.py",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "9113e824555fe6276f1a1cbcfefab6ec5163e041c34a2c6c74c65b1809ca462b"
+    },
+    {
+      "file": "tools/qa/test_bil_release_revalidation.py",
+      "status": "new_followup_input",
+      "area": "release_validation_followup",
+      "sha256": "83f11ab17d1e8909b16b68d4e80e3b6e82620097da8892a01d315ded3ac5f6f9"
     },
     {
       "file": "tools/qa/test_bil_release_smart_plan_live_rpc_probe.py",
@@ -1605,11 +1815,16 @@
     }
   ],
   "self_and_mutable_evidence_excluded": true,
-  "source_fingerprint": "1f2015201d125f56f260f8be4bdc0e7c336d666b1ac6c8932a18e713c99c0da8",
-  "inventory_scope": "All changed runtime inputs relative to protected/inherited candidate source, plus dirty and nonignored new runtime files. Other preexisting authorized release repairs are preserved and labeled separately.",
+  "source_fingerprint": "6ded9e7b776aa1d58795584778e49b37f2f2babf9e6515352c52900c6fb3afa3",
+  "inventory_scope": "Candidate files compared with the preserved source base, including prior authorized work and reviewed follow-ups. File hashes come from the current complete frozen manifest; its source fingerprint covers all runtime/test/workflow inputs. Mutable evidence reports are excluded.",
   "area_counts": {
     "preserved_authorized_release_work": 104,
+    "release_validation_followup": 9,
+    "coach_smart_plan_followup": 19,
     "coach_smart_plan": 154,
+    "cloud_sync_incident_fix_and_evidence_gate": 7,
     "coach_or_smart_plan": 5
-  }
+  },
+  "source_parent": "d02e78462b88e1639d19a6ce73eb2b51519dccd9",
+  "manual_sync_actual_proof": "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
 }

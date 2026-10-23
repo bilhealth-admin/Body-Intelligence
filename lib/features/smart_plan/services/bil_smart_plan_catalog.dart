@@ -20,53 +20,22 @@ final class BilSmartPlanCatalog {
   static final _recipeRepository = RecipeReleaseRepository();
   static final _recipeTitles = <String, RecipeCatalogSummary>{};
 
-  /// Assemble reviewable Home practice sessions from released BIL groups.
-  /// IDs and equipment come from the catalog; dose remains unspecified when
-  /// absent from that source. The time budget is the member's own choice.
+  /// Source-backed strength practice over existing approved Home movements.
   Future<List<BilVerifiedWorkout>> homeSessions(BilPlanSetup setup) async {
     final released = await const WorkoutReleaseCatalogRepository().load();
     final discovery = const WorkoutDiscoveryCatalogRepository().parse(
       await rootBundle.loadString(WorkoutDiscoveryCatalogRepository.assetPath),
       released,
     );
-    final groups = setup.experience == BilPlanExperience.beginner
-        ? const [
-            'home-recovery-beginner',
-            'home-mobility-flexibility',
-            'home-balance-coordination',
-          ]
-        : const [
-            'home-home-bodyweight',
-            'home-resistance-full-body',
-            'home-cardio-low-impact',
-            'home-core-stability',
-          ];
-    final result = <BilVerifiedWorkout>[];
-    for (final group in groups) {
-      final items = discovery
-          .where(
-            (item) =>
-                item.releaseBundleId == 'home-training' &&
-                item.primaryPlanGroupId == group &&
-                item.equipment.every(
-                  (equipment) =>
-                      equipment == 'none' ||
-                      setup.equipment.contains(equipment),
-                ),
-          )
-          .toList(growable: false);
-      // Short lists support a real sequential session without prescribing sets.
-      for (var offset = 0; offset < items.length; offset += 4) {
-        result.add(
-          BilVerifiedWorkout(
-            id: '$group-$offset',
-            exerciseIds: items.skip(offset).take(4).map((item) => item.id),
-            minutes: setup.sessionMinutes,
-          ),
-        );
-      }
-    }
-    return List.unmodifiable(result);
+    return const BilSmartPlanPrescriptions().homeWorkouts(
+      setup: setup,
+      equipmentByExercise: {
+        for (final item in discovery.where(
+          (item) => item.releaseBundleId == 'home-training',
+        ))
+          item.id: item.equipment.toSet(),
+      },
+    );
   }
 
   /// Hash-verified BIL recipe records, including ingredient-level exclusions.
@@ -258,6 +227,9 @@ final class BilSmartPlanCatalog {
   }
 
   Future<void> validate(BilSmartPlan plan, DietaryPreferences dietary) async {
+    if (!plan.hasSafeHomeRecovery) {
+      throw StateError('home_strength_recovery_days_required');
+    }
     final sessions = plan.focus == BilPlanFocus.nutrition
         ? <BilVerifiedWorkout>[]
         : plan.setup?.environment == BilPlanEnvironment.home

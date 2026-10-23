@@ -1,7 +1,32 @@
 part of 'bil_smart_plan_page.dart';
 
 extension _BilSmartPlanSections on _BilSmartPlanPageState {
-  Widget _panel({required Widget child}) => BilPearlMaterialCard(
+  Widget _loadingPanel() => Semantics(
+    liveRegion: true,
+    child: _panel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.calendar_month_rounded),
+          const SizedBox(height: 12),
+          Text(
+            _t('Opening your saved plan', 'فتح خطتك المحفوظة'),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          const LinearProgressIndicator(),
+          const SizedBox(height: 12),
+          Text(
+            _t(
+              'Loading your schedule and confirmed progress.',
+              'جارٍ تحميل الجدول والتقدم المؤكد.',
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+  Widget _panel({required Widget child}) => BilSmartPlanPanel(
     margin: const EdgeInsets.only(bottom: 12),
     child: Padding(padding: const EdgeInsets.all(16), child: child),
   );
@@ -59,7 +84,10 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                         'عدد التمارين الموثقة: ',
                       ) +
                       day.workout!.exerciseIds.length.toString() +
-                      _t(' · Planning estimate: ', ' · تقدير للتخطيط: ') +
+                      _t(
+                        ' · Session time budget: ',
+                        ' · الوقت المتاح للجلسة: ',
+                      ) +
                       day.workout!.minutes.toString() +
                       _t(' min', ' دقيقة'),
                 ),
@@ -75,9 +103,7 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                         dense: true,
                         onTap: () => _openExercise(id),
                         trailing: const Icon(Icons.play_circle_outline_rounded),
-                        title: Text(
-                          const BilSmartPlanCatalog().exerciseTitle(id),
-                        ),
+                        title: Text(_exerciseTitle(id)),
                       ),
                   ],
                 ),
@@ -184,8 +210,30 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
     'push-a' || 'push-b' => _t('Push session', 'تمارين الدفع'),
     'pull-a' || 'pull-b' => _t('Pull session', 'تمارين السحب'),
     'legs-a' || 'legs-b' => _t('Leg session', 'تمارين الرجلين'),
+    final home
+        when home.startsWith('home-strength-v1-') &&
+            home.endsWith('-dumbbells') =>
+      _t('Home strength · dumbbells', 'قوة منزلية · أوزان يدوية'),
+    final home
+        when home.startsWith('home-strength-v1-') &&
+            home.endsWith('-kettlebell') =>
+      _t('Home strength · kettlebell', 'قوة منزلية · كرة حديدية'),
+    final home
+        when home.startsWith('home-strength-v1-') && home.endsWith('-b') =>
+      _t('Home full-body B', 'قوة منزلية لكامل الجسم · ب'),
+    final home when home.startsWith('home-strength-v1-') => _t(
+      'Home full-body A',
+      'قوة منزلية لكامل الجسم · أ',
+    ),
     _ => _t('Verified training session', 'جلسة تدريب موثقة'),
   };
+
+  String _exerciseTitle(String id) =>
+      const BilSmartPlanPrescriptions().exerciseTitle(
+        id,
+        locale: BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+      ) ??
+      const BilSmartPlanCatalog().exerciseTitle(id);
 
   String _horizonName(BilPlanHorizon value) => switch (value) {
     BilPlanHorizon.week => _t('One week', 'أسبوع'),
@@ -281,7 +329,11 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
             (candidate) =>
                 candidate.date.compareTo(today) >= 0 &&
                 candidate.date != day.date &&
-                candidate.workout == null,
+                candidate.workout == null &&
+                current.recoveryAllowsMove(
+                  date: BilPlanDate.parse(day.date),
+                  target: BilPlanDate.parse(candidate.date),
+                ),
           )
           .toList(growable: false);
       if (available.isEmpty) throw StateError('smart_plan_no_recovery_day');
@@ -413,7 +465,7 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                   unawaited(_openExercise(id));
                 },
                 trailing: const Icon(Icons.play_circle_outline_rounded),
-                title: Text(const BilSmartPlanCatalog().exerciseTitle(id)),
+                title: Text(_exerciseTitle(id)),
               ),
             if (day.workout != null &&
                 !day.workout!.completed &&

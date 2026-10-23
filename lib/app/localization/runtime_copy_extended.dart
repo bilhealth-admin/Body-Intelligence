@@ -93745,5 +93745,809 @@ abstract final class ExtendedRuntimeCopy {
       "nl": "Gebruik de apparaatversie",
       "uk": "Використовувати версію пристрою",
     },
+    " · Session time budget: ": {
+      "de": "· Sitzungszeitbudget:",
+      "it": "· Budget del tempo della sessione:",
+      "pt-BR": "· Orçamento de tempo de sessão:",
+      "pt-PT": "· Orçamento do tempo de sessão:",
+      "ur": "سیشن کا وقت بجٹ:",
+      "fa": "· بودجه زمان جلسه:",
+      "hi": "· सत्र समय बजट:",
+      "id": "· Anggaran waktu sesi:",
+      "ms": "· Belanjawan masa sesi:",
+      "ja": "· セッション時間の予算:",
+      "ko": "· 세션 시간 예산:",
+      "zh-Hans": "· 会议时间预算：",
+      "zh-Hant": "· 會議時間預算：",
+      "ru": "· Бюджет времени сессии:",
+      "bn": "সেশনের সময় বাজেট:",
+      "vi": "· Ngân sách thời gian của buổi học:",
+      "th": "· งบประมาณเวลาเซสชัน:",
+      "pl": "· Budżet czasu sesji:",
+      "nl": "· Sessietijdbudget:",
+      "uk": "· Бюджет часу сесії:",
+    },
+    "Allow at least 6 minutes. Start gently, take longer when needed, and stop if you feel pain or become unwell.": {
+      "de":
+          "Warten Sie mindestens 6 Minuten. Beginnen Sie vorsichtig, nehmen Sie bei Bedarf länger und hören Sie auf, wenn Sie Schmerzen verspüren oder sich unwohl fühlen.",
+      "it":
+          "Consentire almeno 6 minuti. Inizia delicatamente, prenditi più tempo quando necessario e interrompi se senti dolore o non ti senti bene.",
+      "pt-BR":
+          "Aguarde pelo menos 6 minutos. Comece suavemente, demore mais quando necessário e pare se sentir dor ou se sentir mal.",
+      "pt-PT":
+          "Aguarde pelo menos 6 minutos. Comece suavemente, demore mais tempo quando necessário e pare se sentir dor ou se sentir mal.",
+      "ur":
+          "کم از کم 6 منٹ کی اجازت دیں۔ آہستہ سے شروع کریں، ضرورت پڑنے پر زیادہ وقت لگائیں، اور اگر آپ درد محسوس کریں یا بیمار ہو جائیں تو رک جائیں۔",
+      "fa":
+          "حداقل 6 دقیقه زمان بگذارید. به آرامی شروع کنید، در صورت نیاز بیشتر طول بکشید و در صورت احساس درد یا ناخوشی متوقف شوید.",
+      "hi":
+          "कम से कम 6 मिनट का समय दें. धीरे से शुरू करें, आवश्यकता पड़ने पर अधिक समय लें और यदि दर्द महसूस हो या अस्वस्थ हो जाएं तो रुक जाएं।",
+      "id":
+          "Biarkan setidaknya 6 menit. Mulailah dengan lembut, lakukan lebih lama jika diperlukan, dan hentikan jika Anda merasa sakit atau tidak sehat.",
+      "ms":
+          "Biarkan sekurang-kurangnya 6 minit. Mulakan perlahan-lahan, ambil masa lebih lama apabila diperlukan, dan hentikan jika anda berasa sakit atau tidak sihat.",
+      "ja": "少なくとも 6 分間お待ちください。穏やかに始めて、必要に応じて時間をかけて、痛みを感じたり気分が悪くなったら中止してください。",
+      "ko":
+          "최소 6분 정도 기다리십시오. 부드럽게 시작하고, 필요할 때 더 오래 걸리고, 통증이 느껴지거나 몸이 불편해지면 중단하세요.",
+      "zh-Hans": "至少留出 6 分钟时间。轻轻开始，需要时延长时间，如果感到疼痛或不适则停止。",
+      "zh-Hant": "至少留出 6 分鐘時間。輕輕開始，需要時延長時間，如果感到疼痛或不適則停止。",
+      "ru":
+          "Дайте по крайней мере 6 минут. Начинайте осторожно, при необходимости занимайте больше времени и прекращайте, если почувствуете боль или ухудшитесь самочувствие.",
+      "bn":
+          "কমপক্ষে 6 মিনিটের অনুমতি দিন। মৃদুভাবে শুরু করুন, প্রয়োজনে বেশি সময় নিন এবং আপনি যদি ব্যথা অনুভব করেন বা অসুস্থ হয়ে পড়েন তবে বন্ধ করুন।",
+      "vi":
+          "Cho phép ít nhất 6 phút. Bắt đầu nhẹ nhàng, lâu hơn khi cần thiết và dừng lại nếu bạn cảm thấy đau hoặc không khỏe.",
+      "th":
+          "ให้เวลาอย่างน้อย 6 นาที เริ่มเบาๆ ใช้เวลานานขึ้นเมื่อจำเป็น และหยุดหากคุณรู้สึกเจ็บปวดหรือไม่สบาย",
+      "pl":
+          "Odczekaj co najmniej 6 minut. Zacznij delikatnie, w razie potrzeby przerwij, jeśli poczujesz ból lub źle się poczujesz, przerwij.",
+      "nl":
+          "Wacht minimaal 6 minuten. Begin voorzichtig, neem langer de tijd als dat nodig is en stop als u pijn voelt of zich onwel voelt.",
+      "uk":
+          "Зачекайте не менше 6 хвилин. Почніть обережно, за потреби тримайте більше часу та припиніть, якщо відчуєте біль або погіршите самопочуття.",
+    },
+    "BIL adapts published NHS and CDC strength guidance for this general adult program. It is not injury rehabilitation. Sets and resistance never increase automatically; review and approve any change.": {
+      "de":
+          "BIL passt die veröffentlichten NHS- und CDC-Kraftleitlinien für dieses allgemeine Programm für Erwachsene an. Es handelt sich nicht um eine Verletzungsrehabilitation. Sätze und Widerstand erhöhen sich nie automatisch; Überprüfen und genehmigen Sie jede Änderung.",
+      "it":
+          "BIL adatta le linee guida pubblicate dall'NHS e dal CDC sul potenziamento per questo programma generale per adulti. Non è riabilitazione da infortuni. Le serie e la resistenza non aumentano mai automaticamente; rivedere e approvare qualsiasi modifica.",
+      "pt-BR":
+          "BIL adapta as orientações de força publicadas pelo NHS e CDC para este programa geral para adultos. Não é reabilitação de lesões. Conjuntos e resistência nunca aumentam automaticamente; revisar e aprovar qualquer alteração.",
+      "pt-PT":
+          "BIL adapta as orientações de força publicadas pelo NHS e CDC para este programa geral para adultos. Não é reabilitação de lesões. Os conjuntos e a resistência nunca aumentam automaticamente; rever e aprovar qualquer alteração.",
+      "ur":
+          "BIL اس عام بالغ پروگرام کے لیے شائع شدہ NHS اور CDC کی طاقت کی رہنمائی کو اپناتا ہے۔ یہ چوٹ کی بحالی نہیں ہے۔ سیٹ اور مزاحمت کبھی خود بخود نہیں بڑھتے۔ کسی بھی تبدیلی کا جائزہ لیں اور اسے منظور کریں۔",
+      "fa":
+          "BIL دستورالعمل‌های قدرت NHS و CDC منتشر شده را برای این برنامه عمومی بزرگسالان تطبیق می‌دهد. توانبخشی آسیب نیست. مجموعه ها و مقاومت هرگز به طور خودکار افزایش نمی یابد. بررسی و تایید هر گونه تغییر",
+      "hi":
+          "BIL इस सामान्य वयस्क कार्यक्रम के लिए प्रकाशित एनएचएस और सीडीसी शक्ति मार्गदर्शन को अपनाता है। यह चोट पुनर्वास नहीं है. सेट और प्रतिरोध कभी भी स्वचालित रूप से नहीं बढ़ते; किसी भी परिवर्तन की समीक्षा करें और अनुमोदन करें।",
+      "id":
+          "BIL mengadaptasi panduan kekuatan NHS dan CDC yang diterbitkan untuk program dewasa umum ini. Ini bukan rehabilitasi cedera. Set dan resistensi tidak pernah meningkat secara otomatis; meninjau dan menyetujui perubahan apa pun.",
+      "ms":
+          "BIL menyesuaikan panduan kekuatan NHS dan CDC yang diterbitkan untuk program dewasa umum ini. Ia bukan pemulihan kecederaan. Set dan rintangan tidak pernah meningkat secara automatik; menyemak dan meluluskan sebarang perubahan.",
+      "ja":
+          "BIL は、公開されている NHS および CDC の強度ガイダンスをこの一般的な成人向けプログラムに適応させています。怪我のリハビリではありません。セットと抵抗が自動的に増加することはありません。変更を確認して承認します。",
+      "ko":
+          "BIL는 이 일반 성인 프로그램에 대해 게시된 NHS 및 CDC 강도 지침을 적용합니다. 부상 재활이 아닙니다. 세트와 저항은 자동으로 증가하지 않습니다. 변경 사항을 검토하고 승인합니다.",
+      "zh-Hans":
+          "BIL 改编了 NHS 和 CDC 已发布的针对此一般成人计划的力量指南。这不是损伤康复。组数和阻力永远不会自动增加；审查并批准任何变更。",
+      "zh-Hant":
+          "BIL 改編了 NHS 和 CDC 已發布的針對此一般成人計劃的力量指南。這不是損傷復健。組數和阻力永遠不會自動增加；審查並批准任何變更。",
+      "ru":
+          "BIL адаптирует опубликованные рекомендации NHS и CDC по силовой подготовке для этой общей программы для взрослых. Это не реабилитация после травм. Подходы и сопротивление никогда не увеличиваются автоматически; просмотреть и утвердить любые изменения.",
+      "bn":
+          "BIL এই সাধারণ প্রাপ্তবয়স্ক প্রোগ্রামের জন্য প্রকাশিত NHS এবং CDC শক্তি নির্দেশিকা গ্রহণ করে। এটি আঘাতের পুনর্বাসন নয়। সেট এবং প্রতিরোধ স্বয়ংক্রিয়ভাবে বৃদ্ধি পায় না; পর্যালোচনা এবং কোনো পরিবর্তন অনুমোদন.",
+      "vi":
+          "BIL điều chỉnh hướng dẫn về sức mạnh của NHS và CDC đã được công bố cho chương trình chung dành cho người lớn này. Đó không phải là phục hồi chấn thương. Bộ và lực cản không bao giờ tự động tăng lên; xem xét và phê duyệt bất kỳ thay đổi nào.",
+      "th":
+          "BIL ปรับคำแนะนำด้านความแข็งแกร่งของ NHS และ CDC ที่เผยแพร่สำหรับโปรแกรมสำหรับผู้ใหญ่ทั่วไปนี้ ไม่ใช่การฟื้นฟูอาการบาดเจ็บ เซ็ตและความต้านทานจะไม่เพิ่มขึ้นโดยอัตโนมัติ ทบทวนและอนุมัติการเปลี่ยนแปลงใดๆ",
+      "pl":
+          "BIL dostosowuje opublikowane wytyczne NHS i CDC dotyczące siły na potrzeby tego ogólnego programu dla dorosłych. To nie jest rehabilitacja po kontuzji. Seria i opór nigdy nie zwiększają się automatycznie; sprawdź i zatwierdź wszelkie zmiany.",
+      "nl":
+          "BIL past de gepubliceerde NHS- en CDC-sterkterichtlijnen aan voor dit algemene programma voor volwassenen. Het is geen blessurerehabilitatie. Sets en weerstand nemen nooit automatisch toe; eventuele wijzigingen beoordelen en goedkeuren.",
+      "uk":
+          "BIL адаптує опубліковані рекомендації NHS і CDC для цієї загальної програми для дорослих. Це не реабілітація після травми. Сети та опір ніколи не збільшуються автоматично; переглядати та затверджувати будь-які зміни.",
+    },
+    "CDC rest guidance": {
+      "de": "CDC-Ruheleitfaden",
+      "it": "Guida al riposo CDC",
+      "pt-BR": "Orientação de descanso do CDC",
+      "pt-PT": "Orientação de descanso CDC",
+      "ur": "سی ڈی سی آرام کی رہنمائی",
+      "fa": "راهنمای استراحت CDC",
+      "hi": "सीडीसी आराम मार्गदर्शन",
+      "id": "Panduan istirahat CDC",
+      "ms": "Panduan rehat CDC",
+      "ja": "CDC の休息に関するガイダンス",
+      "ko": "CDC 휴식 지침",
+      "zh-Hans": "CDC休息指导",
+      "zh-Hant": "CDC休息指導",
+      "ru": "Рекомендации CDC по отдыху",
+      "bn": "সিডিসি বিশ্রাম নির্দেশিকা",
+      "vi": "Hướng dẫn nghỉ ngơi của CDC",
+      "th": "คำแนะนำการพักผ่อนของ CDC",
+      "pl": "Wytyczne CDC dotyczące odpoczynku",
+      "nl": "CDC-rustbegeleiding",
+      "uk": "Керівництво CDC відпочинку",
+    },
+    "Continue to exercises": {
+      "de": "Weiter zu den Übungen",
+      "it": "Continua con gli esercizi",
+      "pt-BR": "Continuar com os exercícios",
+      "pt-PT": "Continuar com os exercícios",
+      "ur": "مشقیں جاری رکھیں",
+      "fa": "به تمرینات ادامه دهید",
+      "hi": "व्यायाम जारी रखें",
+      "id": "Lanjutkan latihan",
+      "ms": "Teruskan bersenam",
+      "ja": "演習を続ける",
+      "ko": "계속해서 연습하세요",
+      "zh-Hans": "继续练习",
+      "zh-Hant": "繼續練習",
+      "ru": "Продолжить упражнения",
+      "bn": "ব্যায়াম চালিয়ে যান",
+      "vi": "Continue to exercises",
+      "th": "ออกกำลังกายต่อไป",
+      "pl": "Kontynuuj ćwiczenia",
+      "nl": "Ga verder met oefeningen",
+      "uk": "Продовжуйте вправи",
+    },
+    "Fixed wall and non-slip footing": {
+      "de": "Feste Wand und rutschfester Standfuß",
+      "it": "Parete fissa e base antiscivolo",
+      "pt-BR": "Parede fixa e base antiderrapante",
+      "pt-PT": "Parede fixa e base antiderrapante",
+      "ur": "فکسڈ وال اور غیر پرچی فوٹنگ",
+      "fa": "دیوار ثابت و پایه ضد لغزش",
+      "hi": "स्थिर दीवार और नॉन-स्लिप फ़ुटिंग",
+      "id": "Memperbaiki dinding dan pijakan anti selip",
+      "ms": "Dinding tetap dan tapak tidak licin",
+      "ja": "固定壁と滑り止め足場",
+      "ko": "고정된 벽 및 미끄럼 방지 기초",
+      "zh-Hans": "固定墙和防滑基脚",
+      "zh-Hant": "固定牆和防滑基腳",
+      "ru": "Фиксированная стена и нескользящая ножка",
+      "bn": "স্থির প্রাচীর এবং নন-স্লিপ ফুটিং",
+      "vi": "Tường cố định và chân chống trượt",
+      "th": "ผนังคงที่และฐานกันลื่น",
+      "pl": "Stała ściana i antypoślizgowa podstawa",
+      "nl": "Vaste muur en antislipvoet",
+      "uk": "Стаціонарна стіна та неслизька основа",
+    },
+    "Guidance and sources": {
+      "de": "Anleitung und Quellen",
+      "it": "Orientamenti e fonti",
+      "pt-BR": "Orientação e fontes",
+      "pt-PT": "Orientação e fontes",
+      "ur": "رہنمائی اور ذرائع",
+      "fa": "راهنمایی و منابع",
+      "hi": "मार्गदर्शन एवं सूत्र",
+      "id": "Bimbingan dan sumber",
+      "ms": "Panduan dan sumber",
+      "ja": "ガイダンスと情報源",
+      "ko": "지침 및 출처",
+      "zh-Hans": "指导和来源",
+      "zh-Hant": "指導和來源",
+      "ru": "Руководство и источники",
+      "bn": "নির্দেশিকা এবং সূত্র",
+      "vi": "Hướng dẫn và nguồn",
+      "th": "คำแนะนำและแหล่งที่มา",
+      "pl": "Wskazówki i źródła",
+      "nl": "Begeleiding en bronnen",
+      "uk": "Керівництво та джерела",
+    },
+    "Home full-body A": {
+      "de": "Heim-Ganzkörper A",
+      "it": "Casa tutto il corpo A",
+      "pt-BR": "Casa de corpo inteiro A",
+      "pt-PT": "Casa de corpo inteiro A",
+      "ur": "ہوم فل باڈی اے",
+      "fa": "خانه تمام بدن A",
+      "hi": "होम फुल-बॉडी ए",
+      "id": "Rumah seluruh tubuh A",
+      "ms": "Rumah penuh badan A",
+      "ja": "ホーム全身A",
+      "ko": "홈 전신 A",
+      "zh-Hans": "家用全身A",
+      "zh-Hant": "家用全身A",
+      "ru": "Домашний полный комплект А",
+      "bn": "হোম পূর্ণ শরীর A",
+      "vi": "Trang chủ toàn thân A",
+      "th": "บ้านเต็มตัว A",
+      "pl": "Domowe całe ciało A",
+      "nl": "Thuis volledig lichaam A",
+      "uk": "Домашнє повне тіло А",
+    },
+    "Home full-body B": {
+      "de": "Heim-Ganzkörper B",
+      "it": "Casa tutto il corpo B",
+      "pt-BR": "Casa de corpo inteiro B",
+      "pt-PT": "Casa de corpo inteiro B",
+      "ur": "ہوم فل باڈی بی",
+      "fa": "خانه تمام بدن B",
+      "hi": "होम फुल-बॉडी बी",
+      "id": "Rumah seluruh tubuh B",
+      "ms": "Rumah sepenuh badan B",
+      "ja": "ホーム全身B",
+      "ko": "홈 전신 B",
+      "zh-Hans": "家用全身B",
+      "zh-Hant": "家用全身B",
+      "ru": "Домашний полный комплект B",
+      "bn": "হোম পূর্ণাঙ্গ বি",
+      "vi": "Trang chủ toàn thân B",
+      "th": "บ้านเต็มตัวB",
+      "pl": "Domowe całe ciało B",
+      "nl": "Thuis full-body B",
+      "uk": "Домашнє повне тіло B",
+    },
+    "Home strength sessions need recovery days. Choose up to 3 sessions per week and review the draft.": {
+      "de":
+          "Krafttraining zu Hause braucht Erholungstage. Wählen Sie bis zu 3 Sitzungen pro Woche und überprüfen Sie den Entwurf.",
+      "it":
+          "Le sessioni di forza a casa necessitano di giorni di recupero. Scegli fino a 3 sessioni a settimana e rivedi la bozza.",
+      "pt-BR":
+          "As sessões de força em casa precisam de dias de recuperação. Escolha até 3 sessões por semana e revise o rascunho.",
+      "pt-PT":
+          "As sessões de força em casa precisam de dias de recuperação. Escolha até 3 sessões por semana e reveja o rascunho.",
+      "ur":
+          "گھریلو طاقت کے سیشنوں کو بحالی کے دنوں کی ضرورت ہوتی ہے۔ فی ہفتہ 3 سیشن تک کا انتخاب کریں اور مسودے کا جائزہ لیں۔",
+      "fa":
+          "جلسات قدرتی در خانه به روزهای ریکاوری نیاز دارد. حداکثر 3 جلسه در هفته انتخاب کنید و پیش نویس را مرور کنید.",
+      "hi":
+          "घरेलू शक्ति सत्रों को पुनर्प्राप्ति दिनों की आवश्यकता होती है। प्रति सप्ताह अधिकतम 3 सत्र चुनें और मसौदे की समीक्षा करें।",
+      "id":
+          "Sesi kekuatan di rumah membutuhkan hari-hari pemulihan. Pilih hingga 3 sesi per minggu dan tinjau drafnya.",
+      "ms":
+          "Sesi kekuatan rumah memerlukan hari pemulihan. Pilih sehingga 3 sesi setiap minggu dan semak draf.",
+      "ja": "自宅での筋力トレーニングには回復日が必要です。週に最大 3 つのセッションを選択し、ドラフトを確認します。",
+      "ko": "가정 강화 세션에는 회복일이 필요합니다. 주당 최대 3개의 세션을 선택하고 초안을 검토하세요.",
+      "zh-Hans": "家庭力量训练需要恢复日。每周最多选择 3 次会议并审阅草稿。",
+      "zh-Hant": "家庭肌力訓練需要恢復日。每週最多選擇 3 次會議並審查草稿。",
+      "ru":
+          "Домашние силовые тренировки требуют дней восстановления. Выберите до 3 занятий в неделю и просмотрите проект.",
+      "bn":
+          "হোম শক্তি সেশন পুনরুদ্ধারের দিন প্রয়োজন. প্রতি সপ্তাহে 3টি সেশন বেছে নিন এবং খসড়াটি পর্যালোচনা করুন।",
+      "vi":
+          "Các buổi tập sức mạnh tại nhà cần ngày phục hồi. Chọn tối đa 3 buổi mỗi tuần và xem xét bản dự thảo.",
+      "th":
+          "การฝึกความแข็งแกร่งที่บ้านต้องใช้เวลาพักฟื้น เลือกได้สูงสุด 3 เซสชันต่อสัปดาห์และทบทวนฉบับร่าง",
+      "pl":
+          "Sesje siłowe w domu wymagają dni odpoczynku. Wybierz maksymalnie 3 sesje tygodniowo i przejrzyj wersję roboczą.",
+      "nl":
+          "Thuiskrachtsessies hebben hersteldagen nodig. Kies maximaal 3 sessies per week en bekijk het concept.",
+      "uk":
+          "Домашні силові заняття потребують днів відновлення. Виберіть до 3 сеансів на тиждень і перегляньте чернетку.",
+    },
+    "Home strength · dumbbells": {
+      "de": "Heimkraft · Hanteln",
+      "it": "Forza domestica · manubri",
+      "pt-BR": "Força em casa · halteres",
+      "pt-PT": "Força em casa · halteres",
+      "ur": "گھر کی طاقت · ڈمبلز",
+      "fa": "قدرت خانه · دمبل",
+      "hi": "घरेलू शक्ति · डम्बल",
+      "id": "Kekuatan rumah · halter",
+      "ms": "Kekuatan rumah · dumbel",
+      "ja": "ホームストレングス・ダンベル",
+      "ko": "홈 근력 · 덤벨",
+      "zh-Hans": "首页力量·哑铃",
+      "zh-Hant": "首頁力量·啞鈴",
+      "ru": "Домашняя сила · гантели",
+      "bn": "বাড়ির শক্তি · ডাম্বেল",
+      "vi": "Sức mạnh tại nhà · quả tạ",
+      "th": "ความแข็งแกร่งในบ้าน · ดัมเบล",
+      "pl": "Siła w domu · hantle",
+      "nl": "Thuissterkte · halters",
+      "uk": "Домашня сила · гантелі",
+    },
+    "Home strength · kettlebell": {
+      "de": "Heimkraft · Kettlebell",
+      "it": "Forza a casa · kettlebell",
+      "pt-BR": "Força doméstica · kettlebell",
+      "pt-PT": "Força doméstica · kettlebell",
+      "ur": "گھر کی طاقت · کیٹل بیل",
+      "fa": "قدرت خانه · کتل بل",
+      "hi": "घरेलू ताकत · केटलबेल",
+      "id": "Kekuatan rumah · kettlebell",
+      "ms": "Kekuatan rumah · kettlebell",
+      "ja": "ホームストレングス・ケトルベル",
+      "ko": "홈 근력 · 케틀벨",
+      "zh-Hans": "首页力量·壶铃",
+      "zh-Hant": "首頁力量·壺鈴",
+      "ru": "Домашняя сила · гиря",
+      "bn": "বাড়ির শক্তি · কেটলবেল",
+      "vi": "Sức mạnh gia đình · chuông ấm",
+      "th": "ความแรงของบ้าน · เคตเทิลเบลล์",
+      "pl": "Siła w domu · Kettlebell",
+      "nl": "Thuissterkte · Kettlebell",
+      "uk": "Домашня сила · гиря",
+    },
+    "Loading your schedule and confirmed progress.": {
+      "de": "Laden Sie Ihren Zeitplan und den bestätigten Fortschritt.",
+      "it": "Caricamento del programma e conferma dei progressi.",
+      "pt-BR": "Carregando sua programação e progresso confirmado.",
+      "pt-PT": "Carregando a sua programação e progresso confirmado.",
+      "ur": "آپ کا شیڈول لوڈ ہو رہا ہے اور پیشرفت کی تصدیق ہو رہی ہے۔",
+      "fa": "بارگیری برنامه و پیشرفت تأیید شده شما.",
+      "hi": "आपका शेड्यूल और पुष्ट प्रगति लोड हो रही है।",
+      "id": "Memuat jadwal Anda dan mengonfirmasi kemajuan.",
+      "ms": "Memuatkan jadual anda dan mengesahkan kemajuan.",
+      "ja": "スケジュールをロードし、進行状況を確認します。",
+      "ko": "일정과 확인된 진행 상황을 로드하는 중입니다.",
+      "zh-Hans": "加载您的日程安排并确认进度。",
+      "zh-Hant": "載入您的日程安排並確認進度。",
+      "ru": "Загрузка вашего расписания и подтверждение прогресса.",
+      "bn": "আপনার সময়সূচী লোড হচ্ছে এবং অগ্রগতি নিশ্চিত করা হচ্ছে।",
+      "vi": "Đang tải lịch trình của bạn và xác nhận tiến độ.",
+      "th": "กำลังโหลดกำหนดการของคุณและยืนยันความคืบหน้า",
+      "pl": "Ładowanie harmonogramu i potwierdzone postępy.",
+      "nl": "Uw planning en bevestigde voortgang worden geladen.",
+      "uk": "Завантаження вашого розкладу та підтвердженого прогресу.",
+    },
+    "Move with control. Stop if painful and rest longer when needed.": {
+      "de":
+          "Bewegen Sie sich kontrolliert. Hören Sie auf, wenn es schmerzt, und ruhen Sie sich bei Bedarf länger aus.",
+      "it":
+          "Muoviti con controllo. Fermati se fa male e riposa più a lungo quando necessario.",
+      "pt-BR":
+          "Mova-se com controle. Pare se estiver dolorido e descanse mais quando necessário.",
+      "pt-PT":
+          "Mova-se com controlo. Pare se estiver dorido e descanse mais quando necessário.",
+      "ur":
+          "کنٹرول کے ساتھ حرکت کریں۔ اگر درد ہو تو رکیں اور ضرورت پڑنے پر دیر تک آرام کریں۔",
+      "fa":
+          "با کنترل حرکت کنید. در صورت درد متوقف شوید و در صورت نیاز بیشتر استراحت کنید.",
+      "hi":
+          "नियंत्रण के साथ आगे बढ़ें. यदि दर्द हो तो रुकें और आवश्यकता पड़ने पर अधिक समय तक आराम करें।",
+      "id":
+          "Bergerak dengan kendali. Hentikan jika terasa nyeri dan istirahat lebih lama bila diperlukan.",
+      "ms":
+          "Bergerak dengan kawalan. Berhenti jika sakit dan berehat lebih lama apabila diperlukan.",
+      "ja": "コントロールしながら動きます。痛みがある場合は中止し、必要に応じてさらに休憩してください。",
+      "ko": "통제력 있게 움직이세요. 통증이 있으면 중단하고 필요할 경우 더 오래 휴식을 취하십시오.",
+      "zh-Hans": "控制移动。如果疼痛就停止，需要时休息更长时间。",
+      "zh-Hant": "控制移動。如果疼痛就停止，需要時休息更長時間。",
+      "ru":
+          "Двигайтесь под контролем. Остановитесь, если больно, и отдохните дольше, когда это необходимо.",
+      "bn":
+          "নিয়ন্ত্রণের সাথে সরান। বেদনাদায়ক হলে থামুন এবং প্রয়োজনে দীর্ঘ বিশ্রাম নিন।",
+      "vi":
+          "Di chuyển có kiểm soát. Dừng lại nếu đau và nghỉ ngơi lâu hơn khi cần thiết.",
+      "th":
+          "เคลื่อนไหวอย่างมีการควบคุม หยุดหากเจ็บปวดและพักผ่อนให้นานขึ้นเมื่อจำเป็น",
+      "pl":
+          "Poruszaj się pod kontrolą. Zatrzymaj się, jeśli jest to bolesne i odpocznij dłużej, jeśli zajdzie taka potrzeba.",
+      "nl":
+          "Beweeg met controle. Stop als het pijn doet en rust langer als dat nodig is.",
+      "uk":
+          "Рухайтеся з контролем. Зупиніться, якщо боляче, і відпочиньте довше, коли це необхідно.",
+    },
+    "NHS sets and repetitions": {
+      "de": "NHS-Sets und Wiederholungen",
+      "it": "Serie e ripetizioni del servizio sanitario nazionale",
+      "pt-BR": "Séries e repetições do NHS",
+      "pt-PT": "Séries e repetições do NHS",
+      "ur": "NHS سیٹ اور تکرار",
+      "fa": "مجموعه ها و تکرارهای NHS",
+      "hi": "एनएचएस सेट और दोहराव",
+      "id": "Set dan pengulangan NHS",
+      "ms": "Set dan ulangan NHS",
+      "ja": "NHS のセットと繰り返し",
+      "ko": "NHS 세트 및 반복",
+      "zh-Hans": "NHS 组数和重复次数",
+      "zh-Hant": "NHS 組數和重複次數",
+      "ru": "Наборы и повторения NHS",
+      "bn": "NHS সেট এবং পুনরাবৃত্তি",
+      "vi": "Bộ NHS và sự lặp lại",
+      "th": "ชุดและการทำซ้ำของ NHS",
+      "pl": "Serie i powtórzenia NHS",
+      "nl": "NHS-sets en herhalingen",
+      "uk": "NHS підходи та повторення",
+    },
+    "NHS warm-up reference": {
+      "de": "NHS-Aufwärmreferenz",
+      "it": "Riferimento per il riscaldamento del Servizio Sanitario Nazionale",
+      "pt-BR": "Referência de aquecimento do NHS",
+      "pt-PT": "Referência de aquecimento do NHS",
+      "ur": "NHS وارم اپ حوالہ",
+      "fa": "مرجع گرم کردن NHS",
+      "hi": "एनएचएस वार्म-अप संदर्भ",
+      "id": "Referensi pemanasan NHS",
+      "ms": "Rujukan pemanasan badan NHS",
+      "ja": "NHS ウォームアップのリファレンス",
+      "ko": "NHS 준비 참조",
+      "zh-Hans": "NHS 热身参考",
+      "zh-Hant": "NHS 熱身參考",
+      "ru": "Справочник по разминке NHS",
+      "bn": "এনএইচএস ওয়ার্ম-আপ রেফারেন্স",
+      "vi": "Tài liệu tham khảo khởi động NHS",
+      "th": "ข้อมูลอ้างอิงการอุ่นเครื่องของ NHS",
+      "pl": "Odniesienie do rozgrzewki NHS",
+      "nl": "NHS-opwarmreferentie",
+      "uk": "Довідка про розминку NHS",
+    },
+    "No source-backed session fits these choices. Allow more session time or review your equipment and experience. Your saved plan has not changed.": {
+      "de":
+          "Keine quellengestützte Sitzung passt zu diesen Auswahlmöglichkeiten. Planen Sie mehr Sitzungszeit ein oder überprüfen Sie Ihre Ausrüstung und Erfahrung. Ihr gespeicherter Plan hat sich nicht geändert.",
+      "it":
+          "Nessuna sessione supportata dall'origine si adatta a queste scelte. Concedi più tempo alla sessione o rivedi la tua attrezzatura e la tua esperienza. Il tuo piano salvato non è cambiato.",
+      "pt-BR":
+          "Nenhuma sessão baseada no código-fonte se ajusta a essas escolhas. Reserve mais tempo de sessão ou revise seu equipamento e experiência. Seu plano salvo não mudou.",
+      "pt-PT":
+          "Nenhuma sessão baseada no código-fonte se ajusta a estas escolhas. Reserve mais tempo de sessão ou reveja o seu equipamento e experiência. O seu plano salvo não mudou.",
+      "ur":
+          "کوئی ماخذ کی حمایت یافتہ سیشن ان انتخاب میں فٹ نہیں بیٹھتا ہے۔ مزید سیشن کا وقت دیں یا اپنے آلات اور تجربے کا جائزہ لیں۔ آپ کا محفوظ کردہ منصوبہ تبدیل نہیں ہوا ہے۔",
+      "fa":
+          "هیچ جلسه ای با پشتوانه منبع مناسب این انتخاب ها نیست. زمان جلسه بیشتری را در نظر بگیرید یا تجهیزات و تجربه خود را مرور کنید. طرح ذخیره شده شما تغییر نکرده است.",
+      "hi":
+          "कोई भी स्रोत-समर्थित सत्र इन विकल्पों में फिट नहीं बैठता। अधिक सत्र समय की अनुमति दें या अपने उपकरण और अनुभव की समीक्षा करें। आपकी सहेजी गई योजना नहीं बदली है.",
+      "id":
+          "Tidak ada sesi yang didukung sumber yang cocok dengan pilihan ini. Berikan lebih banyak waktu sesi atau tinjau peralatan dan pengalaman Anda. Paket simpanan Anda tidak berubah.",
+      "ms":
+          "Tiada sesi yang disokong sumber yang sesuai dengan pilihan ini. Benarkan lebih banyak masa sesi atau semak peralatan dan pengalaman anda. Pelan anda yang disimpan tidak berubah.",
+      "ja":
+          "これらの選択肢に適合するソースに裏付けられたセッションはありません。セッション時間を延長するか、機器とエクスペリエンスを見直してください。保存したプランは変更されていません。",
+      "ko":
+          "이러한 선택에 맞는 소스 지원 세션은 없습니다. 세션 시간을 더 허용하거나 장비 및 경험을 검토하십시오. 저장된 계획은 변경되지 않았습니다.",
+      "zh-Hans": "没有源支持的会话适合这些选择。留出更多的会话时间或检查您的设备和经验。您保存的计划没有改变。",
+      "zh-Hant": "沒有來源支援的會話適合這些選擇。留出更多的會話時間或檢查您的設備和經驗。您儲存的計劃沒有改變。",
+      "ru":
+          "Ни один сеанс с поддержкой источника не подходит под этот выбор. Уделите больше времени сеансу или просмотрите свое оборудование и опыт. Ваш сохраненный план не изменился.",
+      "bn":
+          "কোনও উত্স-সমর্থিত সেশন এই পছন্দগুলির সাথে খাপ খায় না। আরও সেশনের সময় দিন বা আপনার সরঞ্জাম এবং অভিজ্ঞতা পর্যালোচনা করুন। আপনার সংরক্ষিত পরিকল্পনা পরিবর্তিত হয়নি.",
+      "vi":
+          "Không có phiên hỗ trợ nguồn nào phù hợp với những lựa chọn này. Cho phép nhiều thời gian phiên hơn hoặc xem lại thiết bị và kinh nghiệm của bạn. Kế hoạch đã lưu của bạn không thay đổi.",
+      "th":
+          "ไม่มีเซสชันที่ได้รับการสนับสนุนจากแหล่งที่มาที่เหมาะกับตัวเลือกเหล่านี้ ให้เวลาเซสชันมากขึ้นหรือตรวจสอบอุปกรณ์และประสบการณ์ของคุณ แผนที่บันทึกไว้ของคุณไม่มีการเปลี่ยนแปลง",
+      "pl":
+          "Żadna sesja oparta na źródle nie pasuje do tych wyborów. Daj więcej czasu na sesję lub przejrzyj swój sprzęt i doświadczenie. Twój zapisany plan nie uległ zmianie.",
+      "nl":
+          "Geen enkele brongebaseerde sessie past bij deze keuzes. Plan meer sessietijd of bekijk uw apparatuur en ervaring. Uw opgeslagen abonnement is niet gewijzigd.",
+      "uk":
+          "Жоден сеанс із підтримкою джерела не підходить для цих виборів. Дайте більше часу сеансу або перегляньте своє обладнання та досвід. Ваш збережений план не змінився.",
+    },
+    "Opening your saved plan": {
+      "de": "Öffnen Sie Ihren gespeicherten Plan",
+      "it": "Apertura del piano salvato",
+      "pt-BR": "Abrindo seu plano salvo",
+      "pt-PT": "Abrindo o seu plano guardado",
+      "ur": "آپ کا محفوظ کردہ پلان کھول رہا ہے۔",
+      "fa": "باز کردن طرح ذخیره شده شما",
+      "hi": "आपकी सहेजी गई योजना खुल रही है",
+      "id": "Membuka paket simpanan Anda",
+      "ms": "Membuka pelan anda yang disimpan",
+      "ja": "保存したプランを開く",
+      "ko": "저장된 계획 열기",
+      "zh-Hans": "打开您保存的计划",
+      "zh-Hant": "打開您已儲存的計劃",
+      "ru": "Открытие сохраненного плана",
+      "bn": "আপনার সংরক্ষিত প্ল্যান খোলা হচ্ছে",
+      "vi": "Mở kế hoạch đã lưu của bạn",
+      "th": "กำลังเปิดแผนที่บันทึกไว้",
+      "pl": "Otwieram zapisany plan",
+      "nl": "Uw opgeslagen abonnement openen",
+      "uk": "Відкриття збереженого плану",
+    },
+    "Prepare with the movements from your BIL source plan. Keep the effort gentle; these are preparation sets, separate from your working sets.": {
+      "de":
+          "Bereiten Sie sich mit den Bewegungen aus Ihrem BIL-Quellenplan vor. Halten Sie die Anstrengung sanft; Dies sind Vorbereitungssets, getrennt von Ihren Arbeitssets.",
+      "it":
+          "Preparati con i movimenti del tuo piano di origine BIL. Mantieni lo sforzo delicato; questi sono set di preparazione, separati dai tuoi set di lavoro.",
+      "pt-BR":
+          "Prepare-se com os movimentos do seu plano de origem BIL. Mantenha o esforço suave; estes são conjuntos de preparação, separados dos conjuntos de trabalho.",
+      "pt-PT":
+          "Prepare-se com os movimentos do seu plano de origem BIL. Mantenha o esforço suave; são conjuntos de preparação, separados dos conjuntos de trabalho.",
+      "ur":
+          "اپنے BIL سورس پلان سے نقل و حرکت کے ساتھ تیاری کریں۔ کوشش کو نرم رکھیں؛ یہ تیاری کے سیٹ ہیں، آپ کے ورکنگ سیٹ سے الگ۔",
+      "fa":
+          "با حرکات طرح منبع BIL خود را آماده کنید. تلاش را ملایم نگه دارید؛ اینها مجموعه های آماده سازی هستند، جدا از مجموعه های کاری شما.",
+      "hi":
+          "अपने BIL स्रोत योजना से गतिविधियों के साथ तैयारी करें। प्रयास सौम्य रखें; ये तैयारी सेट हैं, जो आपके कामकाजी सेट से अलग हैं।",
+      "id":
+          "Bersiaplah dengan pergerakan dari paket sumber BIL Anda. Usahakan tetap lembut; ini adalah set persiapan, terpisah dari set kerja Anda.",
+      "ms":
+          "Sediakan dengan pergerakan dari pelan sumber BIL anda. Pastikan usaha lembut; ini adalah set persediaan, berasingan daripada set kerja anda.",
+      "ja":
+          "BIL ソース プランの動きを使用して準備します。努力は穏やかにしてください。これらは準備セットであり、作業セットとは別のものです。",
+      "ko": "BIL 소스 계획의 움직임을 준비하세요. 노력을 부드럽게 유지하십시오. 이는 작업 세트와 별개인 준비 세트입니다.",
+      "zh-Hans": "准备 BIL 源计划中的动作。保持动作轻柔；这些是准备组，与工作组分开。",
+      "zh-Hant": "準備 BIL 來源計畫中的動作。保持動作輕柔；這些是準備小組，與工作小組分開。",
+      "ru":
+          "Подготовьтесь к действиям из исходного плана BIL. Делайте усилия мягкими; это подготовительные наборы, отдельные от рабочих наборов.",
+      "bn":
+          "আপনার BIL উৎস পরিকল্পনা থেকে আন্দোলনের সাথে প্রস্তুত করুন। প্রচেষ্টা মৃদু রাখুন; এগুলো হল প্রস্তুতির সেট, আপনার কাজের সেট থেকে আলাদা।",
+      "vi":
+          "Chuẩn bị với các chuyển động từ gói nguồn BIL của bạn. Giữ nỗ lực nhẹ nhàng; đây là những bộ chuẩn bị, tách biệt với bộ công việc của bạn.",
+      "th":
+          "เตรียมความเคลื่อนไหวจากแผนต้นทาง BIL ของคุณ พยายามอย่างอ่อนโยน เหล่านี้เป็นชุดเตรียมการ แยกจากชุดทำงานของคุณ",
+      "pl":
+          "Przygotuj się, korzystając z ruchów z planu źródłowego BIL. Utrzymuj wysiłek delikatny; są to zestawy przygotowawcze, niezależne od zestawów roboczych.",
+      "nl":
+          "Bereid u voor met de bewegingen uit uw BIL-bronplan. Houd de inspanning zacht; dit zijn voorbereidingssets, los van je werksets.",
+      "uk":
+          "Підготуйтеся з рухами з вашого вихідного плану BIL. Зберігайте зусилля м’якими; це підготовчі набори, окремі від ваших робочих наборів.",
+    },
+    "Preparing your session": {
+      "de": "Bereiten Sie Ihre Sitzung vor",
+      "it": "Preparare la sessione",
+      "pt-BR": "Preparando sua sessão",
+      "pt-PT": "Preparar a sua sessão",
+      "ur": "اپنے سیشن کی تیاری کر رہا ہے۔",
+      "fa": "در حال آماده کردن جلسه شما",
+      "hi": "आपका सत्र तैयार हो रहा है",
+      "id": "Mempersiapkan sesi Anda",
+      "ms": "Menyediakan sesi anda",
+      "ja": "セッションの準備",
+      "ko": "세션 준비",
+      "zh-Hans": "准备你的会议",
+      "zh-Hant": "準備你的會議",
+      "ru": "Подготовка сеанса",
+      "bn": "আপনার অধিবেশন প্রস্তুতি",
+      "vi": "Đang chuẩn bị phiên của bạn",
+      "th": "กำลังเตรียมเซสชั่นของคุณ",
+      "pl": "Przygotowanie sesji",
+      "nl": "Je sessie voorbereiden",
+      "uk": "Підготовка сесії",
+    },
+    "Reviewing this preparation does not record a completed workout.": {
+      "de":
+          "Durch die Überprüfung dieser Vorbereitung wird kein abgeschlossenes Training erfasst.",
+      "it":
+          "La revisione di questa preparazione non registra un allenamento completato.",
+      "pt-BR": "A revisão desta preparação não registra um treino concluído.",
+      "pt-PT": "A revisão desta preparação não regista um treino concluído.",
+      "ur": "اس تیاری کا جائزہ لینے سے مکمل ورزش ریکارڈ نہیں ہوتی۔",
+      "fa": "مرور این آماده سازی یک تمرین کامل را ثبت نمی کند.",
+      "hi": "इस तैयारी की समीक्षा करने से पूर्ण वर्कआउट रिकॉर्ड नहीं होता है।",
+      "id": "Meninjau persiapan ini tidak mencatat latihan yang telah selesai.",
+      "ms":
+          "Menyemak persediaan ini tidak merekodkan senaman yang telah selesai.",
+      "ja": "この準備を確認しても、完了したワークアウトは記録されません。",
+      "ko": "이 준비를 검토한다고 해서 완료된 운동이 기록되지는 않습니다.",
+      "zh-Hans": "查看此准备工作并不记录已完成的锻炼。",
+      "zh-Hant": "查看此準備工作並不記錄已完成的鍛鍊。",
+      "ru": "Просмотр этой подготовки не фиксирует завершенную тренировку.",
+      "bn":
+          "এই প্রস্তুতি পর্যালোচনা করা একটি সম্পূর্ণ ওয়ার্কআউট রেকর্ড করে না।",
+      "vi":
+          "Việc xem lại sự chuẩn bị này không ghi lại một bài tập đã hoàn thành.",
+      "th":
+          "การตรวจสอบการเตรียมการนี้ไม่ได้บันทึกการออกกำลังกายที่เสร็จสมบูรณ์",
+      "pl": "Przeglądanie tego preparatu nie rejestruje ukończonego treningu.",
+      "nl":
+          "Als u deze voorbereiding doorneemt, wordt geen voltooide training geregistreerd.",
+      "uk": "Перегляд цього препарату не фіксує завершене тренування.",
+    },
+    "Source-backed Home strength sessions include warm-up, sets, repetitions and rest. Up to 3 sessions per week leave recovery days. Use stable furniture where required, a clear safe floor, and comfortable resistance. Your chosen time is availability, not a finish deadline.": {
+      "de":
+          "Quellengestützte Krafttrainingseinheiten für zu Hause umfassen Aufwärmen, Sätze, Wiederholungen und Ruhe. Bis zu 3 Sitzungen pro Woche sorgen für Erholungstage. Verwenden Sie bei Bedarf stabile Möbel, einen freien, sicheren Boden und einen bequemen Widerstand. Bei der von Ihnen gewählten Zeit handelt es sich um die Verfügbarkeit, nicht um eine Endfrist.",
+      "it":
+          "Le sessioni di forza Home supportate dalla fonte includono riscaldamento, serie, ripetizioni e riposo. Fino a 3 sessioni a settimana lasciano giorni di recupero. Utilizzare mobili stabili dove richiesto, un pavimento pulito e sicuro e una resistenza confortevole. L'orario scelto è la disponibilità, non una scadenza.",
+      "pt-BR":
+          "As sessões de força doméstica apoiadas pela fonte incluem aquecimento, séries, repetições e descanso. Até 3 sessões por semana deixam dias de recuperação. Use móveis estáveis ​​quando necessário, um piso claro e seguro e uma resistência confortável. O horário escolhido é a disponibilidade, não um prazo de término.",
+      "pt-PT":
+          "As sessões de força doméstica apoiadas pela fonte incluem aquecimento, séries, repetições e descanso. Até 3 sessões por semana deixam dias de recuperação. Utilize mobiliário estável quando necessário, um piso claro e seguro e uma resistência confortável. O horário escolhido é a disponibilidade, não um prazo de término.",
+      "ur":
+          "ماخذ سے حمایت یافتہ ہوم طاقت کے سیشن میں وارم اپ، سیٹ، تکرار اور آرام شامل ہیں۔ فی ہفتہ 3 سیشن تک بحالی کے دنوں میں چھٹیاں۔ جہاں ضرورت ہو مستحکم فرنیچر کا استعمال کریں، صاف محفوظ فرش، اور آرام دہ مزاحمت۔ آپ کا منتخب کردہ وقت دستیابی ہے، آخری تاریخ نہیں۔",
+      "fa":
+          "جلسات قدرتی با پشتوانه منبع شامل گرم کردن، ست ها، تکرارها و استراحت است. حداکثر 3 جلسه در هفته روزهای نقاهت را ترک کنید. در صورت نیاز از مبلمان ثابت، کف ایمن شفاف و مقاومت راحت استفاده کنید. زمان انتخابی شما در دسترس بودن است، نه مهلت پایان.",
+      "hi":
+          "स्रोत-समर्थित घरेलू शक्ति सत्रों में वार्म-अप, सेट, दोहराव और आराम शामिल हैं। प्रति सप्ताह 3 सत्र तक पुनर्प्राप्ति दिवस छोड़ें। जहां आवश्यक हो, स्थिर फर्नीचर, स्पष्ट सुरक्षित फर्श और आरामदायक प्रतिरोध का उपयोग करें। आपका चुना हुआ समय उपलब्धता है, समाप्ति की समय सीमा नहीं।",
+      "id":
+          "Sesi kekuatan Rumah yang didukung sumber mencakup pemanasan, set, pengulangan, dan istirahat. Hingga 3 sesi per minggu meninggalkan hari pemulihan. Gunakan furnitur yang stabil jika diperlukan, lantai aman yang bersih, dan ketahanan yang nyaman. Waktu yang Anda pilih adalah ketersediaan, bukan batas waktu penyelesaian.",
+      "ms":
+          "Sesi kekuatan Rumah yang disokong sumber termasuk memanaskan badan, set, ulangan dan rehat. Sehingga 3 sesi seminggu cuti hari pemulihan. Gunakan perabot yang stabil jika perlu, lantai selamat yang jelas dan rintangan yang selesa. Masa pilihan anda ialah ketersediaan, bukan tarikh akhir penamat.",
+      "ja":
+          "ソースに裏付けられたホームストレングスセッションには、ウォームアップ、セット、反復、休憩が含まれます。週に最大 3 回のセッションが回復日として残されます。必要に応じて安定した家具、透明で安全な床、快適な抵抗を使用してください。選択した時間は空き状況であり、終了期限ではありません。",
+      "ko":
+          "소스 기반 홈 강도 세션에는 워밍업, 세트, 반복 및 휴식이 포함됩니다. 일주일에 최대 3번의 세션은 회복일을 남겨둡니다. 필요한 경우 안정적인 가구를 사용하고 깨끗하고 안전한 바닥과 편안한 저항을 사용하세요. 귀하가 선택한 시간은 마감 기한이 아니라 이용 가능 시간입니다.",
+      "zh-Hans":
+          "有来源支持的家庭力量课程包括热身、组数、重复和休息。每周最多 3 次疗程可留出恢复日。需要时使用稳定的家具、干净的安全地板和舒适的阻力。您选择的时间是可用时间，而不是完成期限。",
+      "zh-Hant":
+          "有來源支持的家庭力量課程包括熱身、組數、重複和休息。每週最多 3 次療程可留出恢復日。需要時使用穩定的家具、乾淨的安全地板和舒適的阻力。您選擇的時間是可用時間，而不是完成期限。",
+      "ru":
+          "Домашние силовые тренировки с поддержкой Source включают в себя разминку, подходы, повторения и отдых. До 3-х занятий в неделю оставляют восстановительные дни. При необходимости используйте устойчивую мебель, чистый безопасный пол и удобное сопротивление. Выбранное вами время — это доступность, а не крайний срок завершения.",
+      "bn":
+          "উত্স-সমর্থিত হোম শক্তি সেশনের মধ্যে রয়েছে ওয়ার্ম-আপ, সেট, পুনরাবৃত্তি এবং বিশ্রাম। প্রতি সপ্তাহে 3টি সেশন পর্যন্ত পুনরুদ্ধারের দিন ছুটি। যেখানে প্রয়োজন সেখানে স্থিতিশীল আসবাবপত্র ব্যবহার করুন, একটি পরিষ্কার নিরাপদ মেঝে এবং আরামদায়ক প্রতিরোধ। আপনার নির্বাচিত সময় প্রাপ্যতা, শেষ সময়সীমা নয়।",
+      "vi":
+          "Các buổi tập sức mạnh tại nhà được hỗ trợ từ nguồn bao gồm khởi động, tập, lặp lại và nghỉ ngơi. Tối đa 3 buổi mỗi tuần để lại những ngày phục hồi. Sử dụng đồ nội thất ổn định khi cần thiết, sàn an toàn thông thoáng và khả năng chịu lực thoải mái. Thời gian bạn chọn là thời gian sẵn sàng, không phải là thời hạn kết thúc.",
+      "th":
+          "เซสชันความแข็งแกร่งในบ้านที่ได้รับการสนับสนุนจากแหล่งที่มา ได้แก่ การวอร์มอัพ เซต การทำซ้ำ และการพักผ่อน วันลาพักฟื้นสูงสุด 3 ครั้งต่อสัปดาห์ ใช้เฟอร์นิเจอร์ที่มั่นคงเมื่อจำเป็น พื้นปลอดภัยที่ชัดเจน และทนทานต่อการใช้งาน เวลาที่คุณเลือกคือเวลาว่าง ไม่ใช่กำหนดเวลาสิ้นสุด",
+      "pl":
+          "Domowe sesje siłowe wspierane przez źródła obejmują rozgrzewkę, serie, powtórzenia i odpoczynek. Do 3 sesji tygodniowo pozostawia dni regeneracyjne. W razie potrzeby użyj stabilnych mebli, czystej, bezpiecznej podłogi i wygodnego oporu. Wybrany przez Ciebie czas oznacza dostępność, a nie termin zakończenia.",
+      "nl":
+          "Bron-ondersteunde krachtsessies voor thuis omvatten warming-up, sets, herhalingen en rust. Maximaal 3 sessies per week laten hersteldagen achter. Gebruik waar nodig stabiel meubilair, een duidelijke veilige vloer en een comfortabele weerstand. Het door u gekozen tijdstip is beschikbaarheid, geen einddeadline.",
+      "uk":
+          "Домашні силові сеанси за підтримки джерела включають розминку, підходи, повторення та відпочинок. До 3 сеансів на тиждень залишають дні відновлення. Використовуйте стійкі меблі, де потрібно, чисту безпечну підлогу та зручну опору. Вибраний вами час – це доступність, а не кінцевий термін.",
+    },
+    "Stable chair and clear floor": {
+      "de": "Stabiler Stuhl und klarer Boden",
+      "it": "Sedia stabile e pavimento chiaro",
+      "pt-BR": "Cadeira estável e piso limpo",
+      "pt-PT": "Cadeira estável e chão limpo",
+      "ur": "مستحکم کرسی اور صاف فرش",
+      "fa": "صندلی ثابت و کف شفاف",
+      "hi": "स्थिर कुर्सी और साफ़ फर्श",
+      "id": "Kursi yang stabil dan lantai yang bersih",
+      "ms": "Kerusi yang stabil dan lantai yang jelas",
+      "ja": "安定した椅子と透明な床",
+      "ko": "안정적인 의자와 깨끗한 바닥",
+      "zh-Hans": "稳定的椅子和干净的地板",
+      "zh-Hant": "穩定的椅子和乾淨的地板",
+      "ru": "Стабильный стул и чистый пол",
+      "bn": "স্থিতিশীল চেয়ার এবং পরিষ্কার মেঝে",
+      "vi": "Ghế ổn định và sàn trong suốt",
+      "th": "เก้าอี้ที่มั่นคงและพื้นใส",
+      "pl": "Stabilne krzesło i czysta podłoga",
+      "nl": "Stabiele stoel en heldere vloer",
+      "uk": "Стабільний стілець і чиста підлога",
+    },
+    "Stable fixed counter": {
+      "de": "Stabile feste Theke",
+      "it": "Bancone fisso stabile",
+      "pt-BR": "Contador fixo estável",
+      "pt-PT": "Contador fixo estável",
+      "ur": "مستحکم فکسڈ کاؤنٹر",
+      "fa": "شمارنده ثابت ثابت",
+      "hi": "स्थिर निश्चित काउंटर",
+      "id": "Penghitung tetap yang stabil",
+      "ms": "Kaunter tetap stabil",
+      "ja": "安定した固定カウンター",
+      "ko": "안정적인 고정 카운터",
+      "zh-Hans": "稳定的固定计数器",
+      "zh-Hant": "穩定的固定計數器",
+      "ru": "Стабильный фиксированный счетчик",
+      "bn": "স্থিতিশীল স্থায়ী কাউন্টার",
+      "vi": "Bộ đếm cố định ổn định",
+      "th": "เคาน์เตอร์คงที่มั่นคง",
+      "pl": "Stabilny, stały licznik",
+      "nl": "Stabiele vaste balie",
+      "uk": "Стабільний фіксований лічильник",
+    },
+    "The reference could not be opened. Try again.": {
+      "de":
+          "Die Referenz konnte nicht geöffnet werden. Versuchen Sie es erneut.",
+      "it": "Impossibile aprire il riferimento. Riprova.",
+      "pt-BR": "A referência não pôde ser aberta. Tente novamente.",
+      "pt-PT": "A referência não pôde ser aberta. Tente novamente.",
+      "ur": "ریفرنس نہیں کھولا جا سکا۔ دوبارہ کوشش کریں۔",
+      "fa": "مرجع باز نشد. دوباره امتحان کنید.",
+      "hi": "संदर्भ खोला नहीं जा सका. पुनः प्रयास करें।",
+      "id": "Referensi tidak dapat dibuka. Coba lagi.",
+      "ms": "Rujukan tidak dapat dibuka. Cuba lagi.",
+      "ja": "参照を開けませんでした。もう一度やり直してください。",
+      "ko": "참조를 열 수 없습니다. 다시 시도해 보세요.",
+      "zh-Hans": "无法打开参考。再试一次。",
+      "zh-Hant": "無法打開參考。再試一次。",
+      "ru": "Ссылку не удалось открыть. Попробуйте еще раз.",
+      "bn": "রেফারেন্স খোলা যায়নি. আবার চেষ্টা করুন",
+      "vi": "Không thể mở tài liệu tham khảo. Hãy thử lại.",
+      "th": "ไม่สามารถเปิดข้อมูลอ้างอิงได้ ลองอีกครั้ง",
+      "pl": "Nie można otworzyć odniesienia. Spróbuj ponownie.",
+      "nl": "De referentie kon niet worden geopend. Probeer het opnieuw.",
+      "uk": "Не вдалося відкрити посилання. Спробуйте знову.",
+    },
+    "Use a comfortable resistance. Allow more time rather than shortening rest or rushing technique.": {
+      "de":
+          "Verwenden Sie einen angenehmen Widerstand. Planen Sie mehr Zeit ein, anstatt die Ruhezeiten zu verkürzen oder die Technik zu überstürzen.",
+      "it":
+          "Utilizzare una resistenza comoda. Concedere più tempo invece di accorciare il riposo o affrettare la tecnica.",
+      "pt-BR":
+          "Use uma resistência confortável. Reserve mais tempo em vez de encurtar o descanso ou apressar a técnica.",
+      "pt-PT":
+          "Utilize uma resistência confortável. Reserve mais tempo em vez de encurtar o descanso ou apressar a técnica.",
+      "ur":
+          "آرام دہ اور پرسکون مزاحمت کا استعمال کریں. آرام کو کم کرنے یا جلدی کرنے کی تکنیک کے بجائے زیادہ وقت دیں۔",
+      "fa":
+          "از یک مقاومت راحت استفاده کنید. به جای کوتاه کردن استراحت یا تکنیک عجله، زمان بیشتری بگذارید.",
+      "hi":
+          "एक आरामदायक प्रतिरोध का प्रयोग करें. आराम या जल्दबाजी की तकनीक को कम करने के बजाय अधिक समय दें।",
+      "id":
+          "Gunakan resistensi yang nyaman. Berikan lebih banyak waktu daripada memperpendek waktu istirahat atau teknik terburu-buru.",
+      "ms":
+          "Gunakan rintangan yang selesa. Berikan lebih banyak masa daripada memendekkan rehat atau teknik tergesa-gesa.",
+      "ja": "心地よい抵抗感を使用してください。休憩を短くしたり、テクニックを急ぐのではなく、より多くの時間を与えてください。",
+      "ko": "편안한 저항을 사용하십시오. 짧게 쉬거나 돌진하는 기술보다는 시간을 더 많이 허용하세요.",
+      "zh-Hans": "使用舒适的阻力。留出更多的时间，而不是缩短休息时间或急于求成。",
+      "zh-Hant": "使用舒適的阻力。留出更多的時間，而不是縮短休息時間或急於求成。",
+      "ru":
+          "Используйте удобное сопротивление. Дайте больше времени, а не сокращайте отдых или ускоряйте технику.",
+      "bn":
+          "একটি আরামদায়ক প্রতিরোধ ব্যবহার করুন। বিশ্রাম বা তাড়াহুড়ো করার কৌশল সংক্ষিপ্ত করার পরিবর্তে আরও বেশি সময় দিন।",
+      "vi":
+          "Sử dụng một sức đề kháng thoải mái. Dành nhiều thời gian hơn là rút ngắn thời gian nghỉ ngơi hoặc kỹ thuật gấp gáp.",
+      "th":
+          "ใช้ความต้านทานที่สะดวกสบาย ให้เวลามากขึ้นแทนที่จะลดเวลาพักผ่อนหรือเทคนิคการเร่งรีบ",
+      "pl":
+          "Użyj wygodnego oporu. Daj więcej czasu, zamiast skracać odpoczynek lub technikę pośpiechu.",
+      "nl":
+          "Gebruik een comfortabele weerstand. Geef meer tijd in plaats van de rust- of haasttechniek in te korten.",
+      "uk":
+          "Використовуйте зручний опір. Виділіть більше часу, а не скорочуйте відпочинок або поспішну техніку.",
+    },
+    "Uses the released BIL Gym plan with its source warm-up, sets, repetitions and rest. Review the draft before activating it.": {
+      "de":
+          "Verwendet den veröffentlichten BIL-Fitnessplan mit seinen Quellen zum Aufwärmen, Sätzen, Wiederholungen und Ruhepausen. Überprüfen Sie den Entwurf, bevor Sie ihn aktivieren.",
+      "it":
+          "Utilizza il piano palestra BIL rilasciato con la relativa fonte di riscaldamento, serie, ripetizioni e riposo. Esamina la bozza prima di attivarla.",
+      "pt-BR":
+          "Utiliza o plano de ginástica BIL lançado com sua fonte de aquecimento, séries, repetições e descanso. Revise o rascunho antes de ativá-lo.",
+      "pt-PT":
+          "Utiliza o plano de ginástica BIL lançado com a sua fonte de aquecimento, séries, repetições e descanso. Reveja o rascunho antes de o ativar.",
+      "ur":
+          "جاری کردہ BIL جم پلان کو اپنے سورس وارم اپ، سیٹس، تکرار اور آرام کے ساتھ استعمال کرتا ہے۔ ڈرافٹ کو چالو کرنے سے پہلے اس کا جائزہ لیں۔",
+      "fa":
+          "از برنامه ورزشی منتشر شده BIL با گرم کردن منبع، ست ها، تکرارها و استراحت خود استفاده می کند. پیش نویس را قبل از فعال کردن بررسی کنید.",
+      "hi":
+          "अपने स्रोत वार्म-अप, सेट, दोहराव और आराम के साथ जारी BIL जिम योजना का उपयोग करता है। ड्राफ्ट को सक्रिय करने से पहले उसकी समीक्षा करें।",
+      "id":
+          "Menggunakan rencana Gym BIL yang dirilis dengan sumber pemanasan, set, pengulangan, dan istirahat. Tinjau draf sebelum mengaktifkannya.",
+      "ms":
+          "Menggunakan pelan Gim BIL yang dikeluarkan dengan sumber pemanasan, set, ulangan dan rehat. Semak draf sebelum mengaktifkannya.",
+      "ja":
+          "リリースされた BIL ジム プランを使用し、そのソース ウォームアップ、セット、反復、休憩を行います。有効化する前にドラフトを確認してください。",
+      "ko":
+          "소스 워밍업, 세트, 반복 및 휴식과 함께 출시된 BIL 체육관 계획을 사용합니다. 활성화하기 전에 초안을 검토하세요.",
+      "zh-Hans": "使用已发布的 BIL 健身房计划及其源热身、组数、重复次数和休息。在激活之前查看草稿。",
+      "zh-Hant": "使用已發布的 BIL 健身房計劃及其來源熱身、組數、重複次數和休息。在啟動之前查看草稿。",
+      "ru":
+          "Использует выпущенный план тренажерного зала BIL с исходной разминкой, подходами, повторениями и отдыхом. Прежде чем активировать проект, просмотрите его.",
+      "bn":
+          "রিলিজকৃত BIL জিম প্ল্যানটি এর উত্স ওয়ার্ম-আপ, সেট, পুনরাবৃত্তি এবং বিশ্রাম সহ ব্যবহার করে। এটি সক্রিয় করার আগে খসড়া পর্যালোচনা করুন.",
+      "vi":
+          "Sử dụng kế hoạch tập thể dục BIL đã phát hành với nguồn khởi động, hiệp, số lần lặp lại và nghỉ ngơi. Xem lại bản nháp trước khi kích hoạt nó.",
+      "th":
+          "ใช้แผนยิม BIL ที่มีการวอร์มอัพ เซต การทำซ้ำ และการพักผ่อน ตรวจสอบฉบับร่างก่อนเปิดใช้งาน",
+      "pl":
+          "Korzysta z udostępnionego planu siłowni BIL wraz z jego źródłami: rozgrzewką, seriami, powtórzeniami i odpoczynkiem. Przejrzyj wersję roboczą przed jej aktywacją.",
+      "nl":
+          "Maakt gebruik van het uitgebrachte BIL Gym-plan met de bronwarming-up, sets, herhalingen en rust. Controleer het concept voordat u het activeert.",
+      "uk":
+          "Використовує опублікований план тренажерного залу BIL із вихідною розминкою, підходами, повторами та відпочинком. Перегляньте чернетку перед її активацією.",
+    },
+    "View verified movement": {
+      "de": "Verifizierte Bewegung anzeigen",
+      "it": "Visualizza il movimento verificato",
+      "pt-BR": "Ver movimento verificado",
+      "pt-PT": "Ver movimento verificado",
+      "ur": "تصدیق شدہ حرکت دیکھیں",
+      "fa": "مشاهده حرکت تایید شده",
+      "hi": "सत्यापित गतिविधि देखें",
+      "id": "Lihat gerakan terverifikasi",
+      "ms": "Lihat pergerakan yang disahkan",
+      "ja": "検証済みの動きを表示する",
+      "ko": "검증된 움직임 보기",
+      "zh-Hans": "查看已验证的运动",
+      "zh-Hant": "查看已驗證的運動",
+      "ru": "Посмотреть подтвержденное движение",
+      "bn": "যাচাইকৃত আন্দোলন দেখুন",
+      "vi": "Xem chuyển động đã được xác minh",
+      "th": "ดูการเคลื่อนไหวที่ตรวจสอบแล้ว",
+      "pl": "Zobacz zweryfikowany ruch",
+      "nl": "Bekijk geverifieerde beweging",
+      "uk": "Переглянути перевірений рух",
+    },
+    "Warm up before your session": {
+      "de": "Wärmen Sie sich vor Ihrer Sitzung auf",
+      "it": "Riscaldati prima della sessione",
+      "pt-BR": "Aqueça antes da sessão",
+      "pt-PT": "Aqueça antes da sessão",
+      "ur": "اپنے سیشن سے پہلے گرم کریں۔",
+      "fa": "قبل از جلسه خود را گرم کنید",
+      "hi": "अपने सत्र से पहले वार्मअप करें",
+      "id": "Lakukan pemanasan sebelum sesi Anda",
+      "ms": "Memanaskan badan sebelum sesi anda",
+      "ja": "セッション前のウォーミングアップ",
+      "ko": "세션 전 워밍업",
+      "zh-Hans": "训练前热身",
+      "zh-Hant": "訓練前熱身",
+      "ru": "Разминка перед тренировкой",
+      "bn": "আপনার অধিবেশন আগে উষ্ণ আপ",
+      "vi": "Khởi động trước buổi tập của bạn",
+      "th": "อุ่นเครื่องก่อนเซสชั่นของคุณ",
+      "pl": "Rozgrzej się przed sesją",
+      "nl": "Opwarmen vóór uw sessie",
+      "uk": "Розминка перед сеансом",
+    },
   };
 }

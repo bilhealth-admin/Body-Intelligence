@@ -21,7 +21,7 @@ on:
         type: boolean
         default: false
       android_only:
-        description: Run only the Java/Kotlin and Android API 33 certification job
+        description: Run Java/Kotlin compiler analysis and produce the isolated static APK
         required: false
         type: boolean
         default: false
@@ -275,30 +275,15 @@ jobs:
           test/features/commerce/verified_store_purchase_startup_event_test.dart
           test/features/intelligence_center/ai_boost_purchase_service_test.dart
 
-      - name: Enable and require KVM before Android native integration
-        if: matrix.flutter-build == 'android'
-        shell: bash
-        run: bash .github/scripts/bil_prepare_android_kvm.sh
-
-      - name: Run Android 33 native integration journeys offline
-        if: matrix.flutter-build == 'android'
-        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
-        with:
-          api-level: 33
-          arch: x86_64
-          target: google_apis
-          profile: pixel_6
-          disable-animations: true
-          emulator-boot-timeout: 1200
-          script: bash .github/scripts/bil_android33_native_integration.sh
-
-      - name: Upload Android API 33 native integration evidence
+      # The mandatory untraced job below owns all native journeys. Compiler
+      # tracing must not change the environment of frame-identity assertions.
+      - name: Upload Android CodeQL APK and build evidence
         if: always() && matrix.flutter-build == 'android'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: bil-android33-native-integration-${{ github.sha }}
+          name: bil-android-codeql-apk-${{ github.sha }}-${{ github.run_attempt }}
           path: artifacts/qa/text18/android-api33
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
 
       # Native journeys run in the separate fresh macOS job below. CodeQL's
@@ -733,7 +718,10 @@ jobs:
           retention-days: 14
 
   android-native-only:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.android_native_only == true }}
+    if: >-
+      ${{ inputs.ios_native_only != true && inputs.source_audit_only != true && inputs.mobsf_only != true &&
+          (inputs.android_native_only == true ||
+           (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true)) }}
     name: Android API 33 native integration without CodeQL tracing
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -870,9 +858,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BIL_ANDROID_ARTIFACT_RUN: ${{ inputs.android_artifact_run }}
+          BIL_AUDIT_BRANCH: ${{ github.ref_name }}
         run: >-
           python3 tools/qa/bil_mobsf_offline_static.py
           --artifact-run "$BIL_ANDROID_ARTIFACT_RUN"
+          --expected-branch "$BIL_AUDIT_BRANCH"
           --output artifacts/qa/text18/offline-mobsf/summary.json
       - name: Upload sanitized static artifact evidence
         if: always()

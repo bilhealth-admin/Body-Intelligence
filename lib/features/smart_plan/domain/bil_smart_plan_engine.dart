@@ -115,6 +115,11 @@ abstract final class BilPlanSafety {
       reasons.add('choose_training_frequency');
     }
     if (request.focus != BilPlanFocus.nutrition &&
+        request.setup?.environment == BilPlanEnvironment.home &&
+        request.workoutsPerWeek > 3) {
+      reasons.add('home_strength_recovery_days_required');
+    }
+    if (request.focus != BilPlanFocus.nutrition &&
         request.workoutCatalog.isEmpty) {
       reasons.add('no_verified_workout');
     }

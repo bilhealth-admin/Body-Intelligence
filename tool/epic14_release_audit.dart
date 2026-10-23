@@ -36,6 +36,89 @@ bool debugPushEnvironmentIsValid(String entitlements) {
       entries.single.group(1)?.trim() == 'development';
 }
 
+String? splitIosReleaseWorkflowIssue(String signedIos, String uploadIos) {
+  String source(String text) => text
+      .replaceAll('\r\n', '\n')
+      .split('\n')
+      .where((line) => !line.trimLeft().startsWith('#'))
+      .join('\n');
+  final build = source(signedIos);
+  final upload = source(uploadIos);
+  const ciGate =
+      'bil_candidate_release.py --verify-ci --platform ios --expected-head';
+  for (final workflow in [build, upload]) {
+    if (!RegExp(
+          r'^  workflow_dispatch:\s*$',
+          multiLine: true,
+        ).hasMatch(workflow) ||
+        RegExp(
+          r'^\s+(?:push|pull_request|workflow_run):',
+          multiLine: true,
+        ).hasMatch(workflow)) {
+      return 'iOS signing and promotion must remain manual workflows';
+    }
+    if (!workflow.contains(ciGate)) {
+      return 'iOS workflow is missing the exact-source CI gate';
+    }
+  }
+  for (final value in [
+    'APPLE_DISTRIBUTION_CERTIFICATE_BASE64',
+    'APPLE_PROVISIONING_PROFILE_BASE64',
+    'APPLE_TEAM_ID',
+    'flutter build ipa --release',
+    'BIL-ios-build-only-receipt.json',
+    'SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED',
+    "'testflight_upload':'NOT_RUN'",
+  ]) {
+    if (!build.contains(value)) return 'signed iOS workflow missing: $value';
+  }
+  if (build.contains('altool --upload-app')) {
+    return 'signing workflow must not upload to TestFlight';
+  }
+  if (build.indexOf(ciGate) > build.indexOf('secrets.APPLE_')) {
+    return 'signing credentials precede the exact-source CI gate';
+  }
+  for (final name in ['KEY_ID', 'ISSUER_ID', 'PRIVATE_KEY_BASE64']) {
+    final mapping = RegExp(
+      r'^\s+ASC_' +
+          name +
+          r': \$\{\{ secrets\.APP_STORE_CONNECT_' +
+          name +
+          r' \}\}$',
+      multiLine: true,
+    );
+    if (!mapping.hasMatch(upload)) {
+      return 'TestFlight workflow missing credential mapping: $name';
+    }
+  }
+  for (final value in [
+    'BIL-ios-build-only-receipt.json',
+    "receipt['status']=='SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED'",
+    "receipt['source_sha']==os.environ['BIL_TESTED_SOURCE']",
+    "receipt['ipa_sha256']==digest",
+    "digest==os.environ['BIL_IPA_SHA256']",
+    'SIGNED_IPA_CODESIGN_GATE=PASS',
+    'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0',
+    'altool --validate-app',
+    'altool --upload-app',
+  ]) {
+    if (!upload.contains(value)) return 'TestFlight workflow missing: $value';
+  }
+  final credentials = upload.indexOf('secrets.APP_STORE_CONNECT_');
+  if (upload.indexOf(ciGate) > credentials ||
+      upload.indexOf("receipt['ipa_sha256']==digest") > credentials) {
+    return 'TestFlight credentials precede CI or signed-byte verification';
+  }
+  if (upload.contains('flutter build ipa')) {
+    return 'TestFlight promotion must use the verified existing IPA';
+  }
+  if (upload.indexOf('altool --validate-app') >
+      upload.indexOf('altool --upload-app')) {
+    return 'Apple validation must precede upload';
+  }
+  return null;
+}
+
 void main() {
   final pubspec = _read('pubspec.yaml');
   final releaseVersion = _releaseVersion(pubspec);
@@ -137,18 +220,11 @@ void main() {
   ]) {
     _requires(officialRequirements, authority, 'official requirements');
   }
-  for (final value in <String>[
-    'APPLE_DISTRIBUTION_CERTIFICATE_BASE64',
-    'APPLE_PROVISIONING_PROFILE_BASE64',
-    'APPLE_TEAM_ID',
-    'APP_STORE_CONNECT_KEY_ID',
-    'APP_STORE_CONNECT_ISSUER_ID',
-    'APP_STORE_CONNECT_PRIVATE_KEY_BASE64',
-    'flutter build ipa --release',
-    'altool --validate-app',
-  ]) {
-    _requires(signedIos, value, 'signed iOS workflow');
-  }
+  final uploadIos = _read(
+    '.github/workflows/bil_ios_upload_existing_testflight.yml',
+  );
+  final iosWorkflowIssue = splitIosReleaseWorkflowIssue(signedIos, uploadIos);
+  if (iosWorkflowIssue != null) _fail(iosWorkflowIssue);
 
   const allowedHealthPermissions = <String>{
     'READ_STEPS',

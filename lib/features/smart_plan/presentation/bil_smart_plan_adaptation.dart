@@ -157,7 +157,7 @@ extension _BilSmartPlanAdaptation on _BilSmartPlanPageState {
                 for (final id in selected.exerciseIds)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 6),
-                    child: Text(catalog.exerciseTitle(id)),
+                    child: Text(_exerciseTitle(id)),
                   ),
                 DropdownButtonFormField<BilPlanChangeReason>(
                   initialValue: reason,

@@ -16,6 +16,55 @@ import urllib.request
 IMAGE = 'opensecurity/mobile-security-framework-mobsf@sha256:5113fbad0727445dda01afdccafea5e107bfa8632ead8a169492f5caa8aa1b7c'
 REPOSITORY = 'bilhealth-admin/Body-Intelligence'
 BRANCH = 'integration/bil-qa-media-policy-20261011'
+CANDIDATE_BRANCH = 'codex/bil-release-ios38-android33-20261022'
+ALLOWED_BRANCHES = (BRANCH, CANDIDATE_BRANCH)
+CODEQL_WORKFLOW_ID = 384948928
+
+
+def validate_producer(producer, jobs, *, branch, audit_sha):
+    if branch not in ALLOWED_BRANCHES:
+        raise ValueError('Unauthorized audit branch')
+    if producer.get('head_branch') != branch or producer.get('status') != 'completed':
+        raise ValueError('Producer must be completed on the exact audit branch')
+    if producer.get('workflow_id') != CODEQL_WORKFLOW_ID or producer.get('event') not in ('push', 'workflow_dispatch'):
+        raise ValueError('The authorized compiler workflow must produce the APK')
+    source, attempt = producer.get('head_sha'), producer.get('run_attempt')
+    if not isinstance(source, str) or not re.fullmatch('[0-9a-f]{40}', source):
+        raise ValueError('Invalid producer source')
+    if type(attempt) is not int or attempt < 1:
+        raise ValueError('Invalid producer attempt')
+    if branch == CANDIDATE_BRANCH and (source != audit_sha or producer.get('conclusion') != 'success'):
+        raise ValueError('Candidate APK requires a successful producer on the exact candidate SHA')
+    required = {'Build Android plugin sources for CodeQL',
+                'Preserve the isolated Android debug APK for static inspection'}
+    for job in jobs:
+        if job.get('name') != 'CodeQL (java-kotlin)':
+            continue
+        if branch == CANDIDATE_BRANCH and job.get('conclusion') != 'success':
+            continue
+        passed = {step.get('name') for step in job.get('steps', []) if step.get('conclusion') == 'success'}
+        if required <= passed and 'Upload Android CodeQL APK and build evidence' in passed:
+            return source, attempt, f'bil-android-codeql-apk-{source}-{attempt}'
+        # Preserve the original diagnostic-only integration-branch contract.
+        # Never reuse an earlier-attempt legacy artifact for a newer attempt.
+        if branch == BRANCH and attempt == 1 and required <= passed and 'Upload Android API 33 native integration evidence' in passed:
+            return source, attempt, f'bil-android33-native-integration-{source}'
+    raise ValueError('One exact producer job must retain successful build, APK capture and upload steps')
+
+
+def select_artifact(artifacts, *, name, run_id, source):
+    matches = [item for item in artifacts if item.get('name') == name]
+    if len(matches) != 1:
+        raise ValueError('Missing or ambiguous exact-attempt APK artifact')
+    artifact = matches[0]
+    if artifact.get('expired') is not False or type(artifact.get('id')) is not int or artifact['id'] <= 0:
+        raise ValueError('Expired or invalid APK artifact')
+    if type(artifact.get('size_in_bytes')) is not int or not 0 < artifact['size_in_bytes'] <= 1024**3:
+        raise ValueError('Invalid or excessive artifact size')
+    identity = artifact.get('workflow_run', {})
+    if str(identity.get('id')) != str(run_id) or identity.get('head_sha') != source:
+        raise ValueError('APK artifact belongs to another run or source')
+    return artifact
 
 
 def summarize(report):
@@ -76,8 +125,10 @@ def inside_container():
 
 
 def host(args):
-    if os.environ.get('GITHUB_REPOSITORY') != REPOSITORY or os.environ.get('GITHUB_REF_NAME') != BRANCH:
-        raise ValueError('Only the authorized repository and integration branch are allowed')
+    if (args.expected_branch not in ALLOWED_BRANCHES or
+            os.environ.get('GITHUB_REPOSITORY') != REPOSITORY or
+            os.environ.get('GITHUB_REF_NAME') != args.expected_branch):
+        raise ValueError('Only the authorized repository and exact audit branch are allowed')
     if not re.fullmatch('[0-9]+', args.artifact_run):
         raise ValueError('A numeric producer run is required')
 
@@ -85,21 +136,16 @@ def host(args):
         return subprocess.check_output(['gh', *command], text=True)
 
     producer = json.loads(gh('api', f'repos/{REPOSITORY}/actions/runs/{args.artifact_run}'))
-    if producer['head_branch'] != BRANCH or producer['status'] != 'completed':
-        raise ValueError('The producer must be a completed integration-branch run')
-    source = producer['head_sha']
-    if not re.fullmatch('[0-9a-f]{40}', source):
-        raise ValueError('Invalid producer source')
-    jobs = json.loads(gh('api', f'repos/{REPOSITORY}/actions/runs/{args.artifact_run}/jobs'))['jobs']
-    required = {'Build Android plugin sources for CodeQL',
-                'Preserve the isolated Android debug APK for static inspection',
-                'Upload Android API 33 native integration evidence'}
-    passed = {step['name'] for job in jobs for step in job.get('steps', [])
-              if step.get('conclusion') == 'success'}
-    if not required <= passed:
-        raise ValueError('The source build, APK capture and artifact upload must all have passed')
-    # A failed simulator run can still provide a valid static APK. Its failure
-    # remains explicit and is never converted into a passed native journey.
+    attempt = producer.get('run_attempt')
+    if type(attempt) is not int or attempt < 1:
+        raise ValueError('Invalid producer attempt')
+    jobs = json.loads(gh('api', f'repos/{REPOSITORY}/actions/runs/{args.artifact_run}/attempts/{attempt}/jobs?per_page=100'))['jobs']
+    source, attempt, artifact_name = validate_producer(producer, jobs,
+        branch=args.expected_branch, audit_sha=os.environ['GITHUB_SHA'])
+    listed = json.loads(gh('api', f'repos/{REPOSITORY}/actions/runs/{args.artifact_run}/artifacts?per_page=100'))
+    if listed.get('total_count', 0) > 100:
+        raise ValueError('Artifact inventory requires explicit pagination')
+    artifact = select_artifact(listed['artifacts'], name=artifact_name, run_id=args.artifact_run, source=source)
     subprocess.run(['git', 'fetch', '--no-tags', '--depth=1', 'origin', source], check=True,
                    stdout=subprocess.DEVNULL)
     paths = subprocess.check_output(['git', 'diff', '--name-only', source, 'HEAD'], text=True).splitlines()
@@ -108,7 +154,7 @@ def host(args):
         raise ValueError('Application/dependency changes require a newly built APK')
     inputs = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bil-mobsf-apk'
     subprocess.run(['gh', 'run', 'download', args.artifact_run,
-                    '-n', f'bil-android33-native-integration-{source}', '-D', str(inputs)], check=True)
+                    '-n', artifact_name, '-D', str(inputs)], check=True)
     apk = inputs / 'offline-debug-build33.apk'
     expected = (inputs / 'apk.sha256').read_text().split()[0]
     actual = hashlib.sha256(apk.read_bytes()).hexdigest()
@@ -134,6 +180,7 @@ def host(args):
         result = json.loads(executed.stdout)
         result.update({'scanner_image': IMAGE, 'producer_run': args.artifact_run,
                        'producer_source': source, 'producer_conclusion': producer['conclusion'],
+                       'producer_attempt': attempt, 'artifact_id': artifact['id'], 'artifact_name': artifact_name,
                        'audit_source': os.environ['GITHUB_SHA'], 'apk_sha256': actual,
                        'qa_only_changed_paths': paths})
         output = pathlib.Path(args.output)
@@ -153,6 +200,7 @@ if __name__ == '__main__':
         else:
             parser = argparse.ArgumentParser()
             parser.add_argument('--artifact-run', required=True)
+            parser.add_argument('--expected-branch', required=True, choices=ALLOWED_BRANCHES)
             parser.add_argument('--output', required=True)
             host(parser.parse_args())
     except Exception as error:

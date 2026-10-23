@@ -2,6 +2,7 @@ import 'dart:convert';
 part 'bil_smart_plan_setup.dart';
 part 'bil_smart_plan_change.dart';
 part 'bil_smart_plan_adaptation.dart';
+part 'bil_smart_plan_recovery.dart';
 
 enum BilPlanHorizon { week, month, threeMonths, sixMonths }
 
@@ -478,6 +479,9 @@ final class BilSmartPlan {
       meals: days[source].meals,
     );
     next[destination] = days[destination].withWorkout(days[source].workout!);
+    if (!_homeRecoverySequenceIsSafe(this, next)) {
+      throw StateError('home_strength_recovery_days_required');
+    }
     return _updated(status: status, days: next, now: now, reason: reason);
   }
 

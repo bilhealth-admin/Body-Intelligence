@@ -1,8 +1,8 @@
 {
   "schema": "bil.coach-smart-plan.traceability.v1",
-  "updated_at": "2026-10-23T09:58:06.421245+00:00",
-  "source_head": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
-  "source_state": "Frozen source locally accepted; immutable candidate commit and exact-source CI pending",
+  "updated_at": "2026-10-23T16:47:56.554567+00:00",
+  "source_head": "d02e78462b88e1639d19a6ce73eb2b51519dccd9",
+  "source_state": "Completed Home, warm-up, Overview finish and verified workout-review recovery; final frozen validation pending with explicit JDK environment.",
   "protected_head": "31554b3e078667a38bd3c53aa105f5f1d2a4dc96",
   "release_ready": false,
   "live_coach_version_at_audit": 113,
@@ -188,22 +188,33 @@
       "components": [
         "lib/features/smart_plan/services/bil_smart_plan_catalog.dart",
         "lib/features/smart_plan/services/bil_smart_plan_prescriptions.dart",
-        "artifacts/workout_media/smart_plan_prescriptions_v1.json"
+        "artifacts/workout_media/smart_plan_prescriptions_v1.json",
+        "artifacts/workout_media/home_smart_plan_prescriptions_v1.json",
+        "artifacts/workout_media/smart_plan_warmups_v1.json",
+        "lib/features/smart_plan/domain/bil_smart_plan_recovery.dart"
       ],
       "baseline": "partial",
-      "status": "partial",
-      "behavior": "Audited Gym and Home release catalogs and hash-pinned media/source contracts; Home doses are absent from approved source.",
+      "status": "complete",
+      "behavior": "Hash-pinned released Gym and Home movements now have real source-backed working doses and a separate warm-up stage. Home general-adult guidance is adapted transparently from NHS/CDC/ACSM/Mayo sources; clinical-risk gates and approval remain required.",
       "tests": [
         "test/features/smart_plan/bil_smart_plan_catalog_test.dart",
         "test/features/smart_plan/bil_smart_plan_prescriptions_test.dart",
-        "test/features/smart_plan/bil_smart_plan_setup_test.dart"
+        "test/features/smart_plan/bil_smart_plan_setup_test.dart",
+        "test/features/smart_plan/bil_smart_plan_home_prescriptions_test.dart",
+        "test/features/smart_plan/bil_smart_plan_home_live_fixtures_test.dart",
+        "test/features/smart_plan/bil_smart_plan_session_test.dart"
       ],
-      "result": "Actual focused behavioral tests passed; see retained logs and linked test cases.",
+      "result": "219 actual Smart Plan tests including 48 reviewed Golden comparisons passed; all 36 actual Home cloud RPC save/readbacks and strict fixture cleanup passed.",
       "evidence": [
-        "build/release-ios38-android33/coach-expanded-final-all-focused.log"
+        "build/release-ios38-android33/coach-expanded-final-all-focused.log",
+        "build/coach-ci-compat/smart-plan-all-with-reviewed-goldens.log",
+        "docs/qa_next/BIL_COACH_HOME_OVERVIEW_FOLLOWUP_2026-10-23.json",
+        "build/release-ios38-android33/home-live-beginner.json",
+        "build/release-ios38-android33/home-live-regular.json",
+        "build/release-ios38-android33/home-live-experienced.json"
       ],
       "verification_scope": "component behavior; full frozen and native release results are tracked separately",
-      "remaining": "Home source includes released movements/equipment but no approved sets/reps/rest."
+      "remaining": null
     },
     {
       "id": "1.7",
@@ -1397,22 +1408,33 @@
       "components": [
         "lib/features/smart_plan/services/bil_smart_plan_catalog.dart",
         "lib/features/smart_plan/services/bil_smart_plan_prescriptions.dart",
-        "artifacts/workout_media/smart_plan_prescriptions_v1.json"
+        "artifacts/workout_media/smart_plan_prescriptions_v1.json",
+        "artifacts/workout_media/home_smart_plan_prescriptions_v1.json",
+        "artifacts/workout_media/smart_plan_warmups_v1.json",
+        "lib/features/smart_plan/domain/bil_smart_plan_recovery.dart"
       ],
       "baseline": "partial",
-      "status": "partial",
-      "behavior": "Thirty Gym exercise doses and six phases are projected from the hash-verified original source; Home sets/reps/rest remain unavailable rather than fabricated.",
+      "status": "complete",
+      "behavior": "Hash-pinned released Gym and Home movements now have real source-backed working doses and a separate warm-up stage. Home general-adult guidance is adapted transparently from NHS/CDC/ACSM/Mayo sources; clinical-risk gates and approval remain required.",
       "tests": [
         "test/features/smart_plan/bil_smart_plan_catalog_test.dart",
         "test/features/smart_plan/bil_smart_plan_prescriptions_test.dart",
-        "test/features/smart_plan/bil_smart_plan_setup_test.dart"
+        "test/features/smart_plan/bil_smart_plan_setup_test.dart",
+        "test/features/smart_plan/bil_smart_plan_home_prescriptions_test.dart",
+        "test/features/smart_plan/bil_smart_plan_home_live_fixtures_test.dart",
+        "test/features/smart_plan/bil_smart_plan_session_test.dart"
       ],
-      "result": "Actual focused behavioral tests passed; see retained logs and linked test cases.",
+      "result": "219 actual Smart Plan tests including 48 reviewed Golden comparisons passed; all 36 actual Home cloud RPC save/readbacks and strict fixture cleanup passed.",
       "evidence": [
-        "build/release-ios38-android33/coach-expanded-final-all-focused.log"
+        "build/release-ios38-android33/coach-expanded-final-all-focused.log",
+        "build/coach-ci-compat/smart-plan-all-with-reviewed-goldens.log",
+        "docs/qa_next/BIL_COACH_HOME_OVERVIEW_FOLLOWUP_2026-10-23.json",
+        "build/release-ios38-android33/home-live-beginner.json",
+        "build/release-ios38-android33/home-live-regular.json",
+        "build/release-ios38-android33/home-live-experienced.json"
       ],
       "verification_scope": "component behavior; full frozen and native release results are tracked separately",
-      "remaining": "Approved Home dosage/safety source material is missing; do not invent it."
+      "remaining": null
     },
     {
       "id": "5.9",
@@ -1449,7 +1471,7 @@
       ],
       "baseline": "partial",
       "status": "partial",
-      "behavior": "Displayed planning duration is the member-selected time budget; actual performed duration is separately entered and confirmed. Sessions are excluded when their source-prescribed between-set rests alone exhaust the available time.",
+      "behavior": "Displayed session time budget is the member-selected time budget; actual performed duration is separately entered and confirmed. Sessions are excluded when their source-prescribed between-set rests alone exhaust the available time. Home filtering also includes the source NHS minimum warm-up time.",
       "tests": [
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_repository_test.dart",
@@ -1862,7 +1884,8 @@
         "lib/features/intelligence_center/domain/bil_tool_registry.dart",
         "lib/features/intelligence_center/domain/coach_action_admission.dart",
         "lib/features/intelligence_center/presentation/intelligence_smart_plan_flow.dart",
-        "supabase/functions/ai-coach/coach_tool_arguments.ts"
+        "supabase/functions/ai-coach/coach_tool_arguments.ts",
+        "supabase/functions/ai-coach/coach_workout_review_copy.ts"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -1871,7 +1894,8 @@
         "test/features/smart_plan/bil_smart_plan_coach_test.dart",
         "test/features/smart_plan/bil_smart_plan_page_test.dart",
         "supabase/functions/ai-coach/smart_plan_tools_test.ts",
-        "supabase/functions/ai-coach/coach_tool_arguments_test.ts"
+        "supabase/functions/ai-coach/coach_tool_arguments_test.ts",
+        "supabase/functions/ai-coach/coach_workout_review_copy_test.ts"
       ],
       "result": "Actual focused behavioral tests passed; see retained logs and linked test cases.",
       "evidence": [
@@ -2014,13 +2038,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.2",
@@ -2043,13 +2068,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.3",
@@ -2131,13 +2157,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.6",
@@ -2160,13 +2187,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.7",
@@ -2189,13 +2217,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.8",
@@ -2247,13 +2276,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.10",
@@ -2276,13 +2306,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.11",
@@ -2334,13 +2365,14 @@
         "tool/release/smart_plan_sync_production_rollback_e2e.sql",
         "tools/qa/bil_smart_plan_live_rpc_probe.py"
       ],
-      "result": "12 native plan combinations and seven actual HTTP assertions PASS;21 live SQL assertions PASS; no fixture residue.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
         "build/release-ios38-android33/smart-plan-live-rpc-http409.json",
         "build/release-ios38-android33/smart-plan-http409-local-sql.log",
-        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_EXPANDED_LIVE_2026-10-23.json",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "7.13",
@@ -2352,16 +2384,17 @@
       ],
       "baseline": "partial",
       "status": "complete",
-      "behavior": "No-progress pagination exits on paused/failed apply without advancing a durable cursor; bounded resume requires real progress.",
+      "behavior": "Bounded progress drains both acknowledged uploads and advancing inbound cursors; failed pages are attempted once. Replaying identical already synced inbox rows creates no false conflicts; divergent and pending local rows remain protected.",
       "tests": [
         "test/features/cloud_platform/cloud_page_drain_test.dart",
         "test/features/cloud_platform/cloud_sync_failure_recovery_test.dart"
       ],
-      "result": "Actual focused behavioral tests passed; see retained logs and linked test cases.",
+      "result": "PASS: 12 live authenticated synchronization stages, real read-only restoration of both reported account snapshots and 249 cloud regression tests. Native phone acceptance remains separate.",
       "evidence": [
-        "docs/release/BIL_IOS38_ANDROID33_EXPANDED_QA_2026-10-23.md"
+        "docs/release/BIL_IOS38_ANDROID33_EXPANDED_QA_2026-10-23.md",
+        "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json"
       ],
-      "verification_scope": "component behavior; full frozen and native release results are tracked separately"
+      "verification_scope": "actual live service and local SQLite behavior; final frozen, exact-SHA CI and final mobile artifact remain separate gates"
     },
     {
       "id": "8.1",
@@ -2810,7 +2843,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -2820,7 +2854,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -2838,7 +2873,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -2848,7 +2884,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -2866,7 +2903,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -2876,7 +2914,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -2894,7 +2933,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -2904,7 +2944,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -2922,7 +2963,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -2932,7 +2974,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -2950,7 +2993,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -2960,7 +3004,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -2978,7 +3023,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "broken_or_incomplete",
       "status": "complete",
@@ -2988,7 +3034,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -3006,7 +3053,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -3016,7 +3064,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -3034,7 +3083,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -3044,7 +3094,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -3062,7 +3113,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "partial",
@@ -3072,7 +3124,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -3091,7 +3144,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -3101,7 +3155,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -3119,7 +3174,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -3129,7 +3185,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -3147,7 +3204,8 @@
         "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
         "lib/features/smart_plan/presentation/bil_smart_plan_creation_sheet.dart",
-        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart"
+        "lib/features/smart_plan/presentation/bil_smart_plan_conflict_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart"
       ],
       "baseline": "complete",
       "status": "complete",
@@ -3157,7 +3215,8 @@
         "test/features/smart_plan/bil_smart_plan_session_test.dart",
         "test/features/smart_plan/bil_smart_plan_conflict_panel_test.dart",
         "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
-        "test/features/smart_plan/smart_plan_contrast_review_test.dart"
+        "test/features/smart_plan/smart_plan_contrast_review_test.dart",
+        "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart"
       ],
       "result": "49 standard accessibility/native widget tests PASS and24 real state captures PASS; normal comparisons covered216 behavioral tests.",
       "evidence": [
@@ -3278,7 +3337,8 @@
         "lib/features/intelligence_center/domain/bil_tool_registry.dart",
         "lib/features/intelligence_center/domain/coach_action_admission.dart",
         "lib/features/intelligence_center/presentation/intelligence_smart_plan_flow.dart",
-        "supabase/functions/ai-coach/coach_tool_arguments.ts"
+        "supabase/functions/ai-coach/coach_tool_arguments.ts",
+        "supabase/functions/ai-coach/coach_workout_review_copy.ts"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -3287,7 +3347,8 @@
         "test/features/smart_plan/bil_smart_plan_coach_test.dart",
         "test/features/smart_plan/bil_smart_plan_page_test.dart",
         "supabase/functions/ai-coach/smart_plan_tools_test.ts",
-        "supabase/functions/ai-coach/coach_tool_arguments_test.ts"
+        "supabase/functions/ai-coach/coach_tool_arguments_test.ts",
+        "supabase/functions/ai-coach/coach_workout_review_copy_test.ts"
       ],
       "result": "Actual focused behavioral tests passed; see retained logs and linked test cases.",
       "evidence": [
@@ -3333,7 +3394,8 @@
         "supabase/functions/ai-coach/coach_reasoning.ts",
         "supabase/functions/ai-coach/coach_answer_quality.ts",
         "supabase/functions/ai-coach/coach_food_safety.ts",
-        "supabase/functions/ai-coach/coach_verified_weight_proposal.ts"
+        "supabase/functions/ai-coach/coach_verified_weight_proposal.ts",
+        "supabase/functions/ai-coach/coach_workout_review_copy.ts"
       ],
       "baseline": "partial",
       "status": "complete",
@@ -3343,7 +3405,8 @@
         "supabase/functions/ai-coach/coach_reasoning_test.ts",
         "supabase/functions/ai-coach/coach_answer_quality_test.ts",
         "supabase/functions/ai-coach/coach_food_safety_test.ts",
-        "supabase/functions/ai-coach/coach_verified_weight_proposal_test.ts"
+        "supabase/functions/ai-coach/coach_verified_weight_proposal_test.ts",
+        "supabase/functions/ai-coach/coach_workout_review_copy_test.ts"
       ],
       "result": "104 actual Deno handler/fetch/semantic tests PASS. Current v123 real-provider result is separate and retains any failed/withheld answers; it is not inferred from previous deployments.",
       "evidence": [
@@ -3401,10 +3464,12 @@
         "supabase/functions/ai-coach/coach_food_safety_test.ts",
         "supabase/functions/ai-coach/coach_verified_weight_proposal_test.ts"
       ],
-      "result": "104 actual Deno handler/fetch/semantic tests PASS. Current v123 real-provider result is separate and retains any failed/withheld answers; it is not inferred from previous deployments.",
+      "result": "135 actual Coach Deno tests PASS. Current v131 real-provider batch 10 PASS/1 provider timeout; the single failed Arabic case passed on a focused v131 retry. Eleven distinct cases passed across both runs; no claim of one complete eleven-pass batch.",
       "evidence": [
-        "build/release-ios38-android33/coach-final-server-all.log",
-        "build/release-ios38-android33/coach-live-v123-all.json"
+        "docs/qa_next/BIL_COACH_SMART_PLAN_CURRENT_PROVIDER_2026-10-23.json",
+        "build/release-ios38-android33/coach-live-v131-complete-eleven.json",
+        "build/release-ios38-android33/coach-live-v131-arabic-timeout-retry.json",
+        "build/coach-ci-compat/food-exclusion-scope-all-coach-green.log"
       ],
       "verification_scope": "component behavior; full frozen and native release results are tracked separately",
       "remaining": "Qualitative future-provider style consistency cannot be established by the finite cases alone."
@@ -3773,10 +3838,12 @@
         "tools/qa/test_bil_release_candidate_validate.py",
         "test/architecture_source_file_size_guard_test.dart"
       ],
-      "result": "Focused analysis: no issues; architecture guard1PASS. Full frozen/native/release verification pending.",
+      "result": "Full frozen local validation PASS:24 stages, full fatal analysis with no issues,10595 root tests PASS. Candidate source bytes unchanged. Current final commit, fresh CI, signed artifacts and native38 evidence remain pending.",
       "evidence": [
         "build/release-ios38-android33/coach-targeted-analysis-final.log",
-        "build/release-ios38-android33/coach-architecture-final.log"
+        "build/release-ios38-android33/coach-architecture-final.log",
+        "build/release-ios38-android33/frozen-20261023-172310/status.json",
+        "build/release-ios38-android33/frozen-20261023-172310/source-manifest.json"
       ],
       "verification_scope": "component behavior; full frozen and native release results are tracked separately",
       "remaining": "No current expanded-source committed CI/native/signed-device pass yet."
@@ -3993,24 +4060,26 @@
         "tools/qa/test_bil_release_candidate_validate.py",
         "test/architecture_source_file_size_guard_test.dart"
       ],
-      "result": "Focused analysis: no issues; architecture guard1PASS. Full frozen/native/release verification pending.",
+      "result": "Full frozen local validation PASS:24 stages, full fatal analysis with no issues,10595 root tests PASS. Candidate source bytes unchanged. Current final commit, fresh CI, signed artifacts and native38 evidence remain pending.",
       "evidence": [
         "build/release-ios38-android33/coach-targeted-analysis-final.log",
-        "build/release-ios38-android33/coach-architecture-final.log"
+        "build/release-ios38-android33/coach-architecture-final.log",
+        "build/release-ios38-android33/frozen-20261023-172310/status.json",
+        "build/release-ios38-android33/frozen-20261023-172310/source-manifest.json"
       ],
       "verification_scope": "component behavior; full frozen and native release results are tracked separately",
       "remaining": "No new final immutable commit yet; candidate remains uncommitted pending successful validation."
     }
   ],
-  "live_coach_current_version": 128,
-  "final_validation_status": "LOCAL_VALIDATION_PASSED_LIVE_9_OF_11_CI_PENDING",
+  "live_coach_current_version": 131,
+  "final_validation_status": "LOCAL_FROZEN_VALIDATION_PASSED_CURRENT_CI_PENDING",
   "definitions": {
     "complete": "Specified component behavior has actual focused evidence within the stated scope, not a release/device certification.",
     "partial": "Implemented/tested part with explicit remaining boundary; never accepted as full release readiness."
   },
   "status_counts": {
-    "complete": 137,
-    "partial": 12
+    "complete": 139,
+    "partial": 10
   },
   "known_live_failures_retained": [
     {
@@ -4052,27 +4121,9 @@
     "format_log": "build/release-ios38-android33/coach-all-inputs-formatted.log"
   },
   "current_live_provider_run": {
-    "version": 128,
-    "status": "9_OF_11_DISTINCT_CASES_PASSED_ACROSS_TWO_RUNS_2_UNRESOLVED",
-    "live_qualification_pass": false,
-    "report": "docs/qa_next/BIL_COACH_SMART_PLAN_CURRENT_PROVIDER_2026-10-23.json",
-    "original_profile": {
-      "report": "build/release-ios38-android33/coach-live-v128-current-client-all.json",
-      "status": "FAIL",
-      "pass": 7,
-      "fail": 4
-    },
-    "retry": {
-      "report": "build/release-ios38-android33/coach-live-v128-current-client-post-frozen-115252-retry.json",
-      "status": "FAIL",
-      "pass": 2,
-      "fail": 2
-    },
-    "remaining_codes": [
-      "provider_timeout",
-      "missing_health_citation"
-    ],
-    "all_source_files_exact_after_retry": 12
+    "version": 131,
+    "status": "RUNNING",
+    "report": "docs/qa_next/BIL_COACH_SMART_PLAN_CURRENT_PROVIDER_2026-10-23.json"
   },
   "source_freeze_tool_environment_retry": {
     "failed_run": "build/release-ios38-android33/frozen-20261023-084310",
@@ -4093,15 +4144,15 @@
     "reason": "Found missing replacement setup prefill; stopped only owned validator before source edits. No acceptance of the incomplete run."
   },
   "current_frozen_run": {
-    "path": "build/release-ios38-android33/frozen-20261023-115252",
+    "path": "build/release-ios38-android33/frozen-20261023-172310",
     "status": "local_validation_passed",
-    "source_fingerprint": "1f2015201d125f56f260f8be4bdc0e7c336d666b1ac6c8932a18e713c99c0da8",
+    "source_fingerprint": "6ded9e7b776aa1d58795584778e49b37f2f2babf9e6515352c52900c6fb3afa3",
     "counts": {
-      "success": 10532
+      "success": 10595
     },
-    "all_stages_passed": 17,
-    "head_at_validation": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
-    "source_manifest": "build/release-ios38-android33/frozen-20261023-115252/source-manifest.json"
+    "all_stages_passed": 24,
+    "head_at_validation": "d02e78462b88e1639d19a6ce73eb2b51519dccd9",
+    "source_manifest": "build/release-ios38-android33/frozen-20261023-172310/source-manifest.json"
   },
   "previous_frozen_run4": {
     "path": "build/release-ios38-android33/frozen-20261023-090107",
@@ -4195,5 +4246,49 @@
     "accepted": false,
     "reason": "Reproduced safe label-inspection rejection and verified old QA capability1 differs from actual native catalog2.",
     "owned_process_audit": "build/release-ios38-android33/coach-label-contract-controller-before-stop.json"
+  },
+  "home_overview_followup": "docs/qa_next/BIL_COACH_HOME_OVERVIEW_FOLLOWUP_2026-10-23.json",
+  "home_warmup_localization_followup": {
+    "new_static_keys": 29,
+    "production_locales": 25,
+    "arabic": "Reviewed authored UI copy; other locale machine translations are not native reviewed.",
+    "extractor": "Covers direct _smartPlanText(context,...) as well as t/_t; literal Home/Gym disclosures are now visible to audit.",
+    "actual_tests": 221,
+    "status": "PASS",
+    "goldens_updated_during_verification": false,
+    "evidence": "build/coach-ci-compat/home-warmup-localization-and-smart-plan.log",
+    "previous_frozen_failure": "build/release-ios38-android33/frozen-20261023-153114/status.json"
+  },
+  "actual_dietary_root_cause": {
+    "proven_by_owned_live_trace": true,
+    "captured_phrase": "It fits your Halal requirement and avoids dairy, peanuts, and sesame.",
+    "failure": "The prior exclusion grammar accepted avoid/avoiding but not avoids; spoken_reply was incorrectly rejected.",
+    "evidence": "build/release-ios38-android33/dietary-owned-trace/response-1.json",
+    "earlier_unlogged_reply_not_claimed_known": true
+  },
+  "dietary_remediation": {
+    "component": "supabase/functions/ai-coach/coach_food_safety.ts",
+    "scope": "Recognize inflected exclusions/selection verbs; later ingredient presence and negated exclusions remain blocked. Negated ingredient presence remains usable.",
+    "no_extra_model_call": true,
+    "no_guard_credit_rls_or_consent_relaxation": true,
+    "all_coach_deno_tests": 135,
+    "red_then_green_evidence": [
+      "build/coach-ci-compat/food-avoids-captured-red.log",
+      "build/coach-ci-compat/food-avoids-captured-green.log",
+      "build/coach-ci-compat/food-exclusion-scope-adversarial-red.log",
+      "build/coach-ci-compat/food-exclusion-scope-all-coach-green.log"
+    ]
+  },
+  "manual_sync_followup": "docs/qa_next/BIL_MANUAL_SYNC_LIVE_PROOF_2026-10-23.json",
+  "previous_frozen_run_before_manual_sync": {
+    "path": "build/release-ios38-android33/frozen-20261023-115252",
+    "status": "local_validation_passed",
+    "source_fingerprint": "1f2015201d125f56f260f8be4bdc0e7c336d666b1ac6c8932a18e713c99c0da8",
+    "counts": {
+      "success": 10532
+    },
+    "all_stages_passed": 17,
+    "head_at_validation": "937aea673c2e9c0bec15ef988131d58f96bf5afe",
+    "source_manifest": "build/release-ios38-android33/frozen-20261023-115252/source-manifest.json"
   }
 }

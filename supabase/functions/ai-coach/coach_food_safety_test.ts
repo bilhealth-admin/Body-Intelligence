@@ -4,6 +4,49 @@ import { validateCoachFoodBoundaries } from "./coach_food_safety.ts";
 const question = [{ role: "user", content: "Suggest a dinner / اقترح عشاء" }];
 const context = (allergens: string[] = [], extra: Record<string, unknown> = {}) =>
   ({ profile: { dietaryPreferences: { allergens, ...extra } } });
+Deno.test("the captured live dinner keeps third-person allergen exclusions distinct from ingredients", () => {
+  const restrictions = context(["peanut", "milk", "sesame"], { requirements: ["halal"] });
+  validateCoachFoodBoundaries(
+    "How about grilled lemon-herb chicken breast with roasted sweet potatoes and steamed broccoli? It fits your Halal requirement and avoids dairy, peanuts, and sesame. Would you like a recipe or macro breakdown?",
+    question, restrictions,
+  );
+});
+Deno.test("third-person exclusions never hide a later inflected allergen selection", () => {
+  const restrictions = context(["peanut", "milk", "sesame"]);
+  for (const text of [
+    "This dinner avoids peanuts but includes milk.",
+    "This dinner avoids milk and adds sesame.",
+    "This dinner avoids sesame but uses peanuts.",
+    "The recipe avoids peanuts, then recommends milk.",
+    "The recipe avoids milk, then suggests sesame.",
+    "The recipe avoids peanuts, then serves milk.",
+    "Check labels for peanuts, then the recipe includes milk.",
+  ]) assertThrows(() => validateCoachFoodBoundaries(text, question, restrictions), Error, "unsafe_dietary_advice", text);
+});
+Deno.test("an earlier exclusion cannot hide a later declared ingredient presence", () => {
+  for (const text of [
+    "This dinner avoids peanuts and contains milk.",
+    "This dinner avoids milk but contains sesame.",
+    "Check labels for peanuts; this dinner contains milk.",
+  ]) assertThrows(() => validateCoachFoodBoundaries(text, question, context(["peanut", "milk", "sesame"])), Error, "unsafe_dietary_advice", text);
+});
+Deno.test("explicit negated presence stays distinct from a later real ingredient", () => {
+  const restrictions=context(["peanut", "milk", "sesame"]);
+  for (const text of [
+    "This dinner does not contain milk, peanuts, or sesame.",
+    "This dinner doesn't contain milk.",
+    "These meals do not contain peanuts.",
+    "This dinner contains no milk.",
+  ]) validateCoachFoodBoundaries(text, question, restrictions);
+  assertThrows(() => validateCoachFoodBoundaries("This dinner does not contain peanuts but contains milk.",question,restrictions));
+});
+Deno.test("negating an avoidance statement does not exempt the allergen", () => {
+  for (const text of [
+    "This dinner does not avoid milk.",
+    "This dinner is not avoiding peanuts.",
+    "Never avoid sesame in this dinner.",
+  ]) assertThrows(() => validateCoachFoodBoundaries(text,question,context(["milk","peanut","sesame"])),Error,"unsafe_dietary_advice",text);
+});
 Deno.test("label inspection warnings are distinct from selecting the allergen later in the same sentence", () => {
   const restrictions = context(["peanut", "milk", "sesame"]);
   for (const text of [

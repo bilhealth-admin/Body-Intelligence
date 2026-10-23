@@ -644,7 +644,14 @@ void main() {
         before.encode(),
       );
       await tester.tap(find.widgetWithText(FilledButton, 'Confirm'));
-      await tester.pumpAndSettle();
+      // Completion includes real SQLite I/O. Wait for the actual busy gate to
+      // reopen; pumping only fake time can strand a still-pending disk write.
+      await waitForSurface(
+        tester,
+        find.byWidgetPredicate(
+          (widget) => widget is PopupMenuButton<String> && widget.enabled,
+        ),
+      );
       await tester.drag(find.byType(ListView).first, const Offset(0, 1100));
       await waitForSurface(
         tester,

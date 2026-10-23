@@ -25,6 +25,10 @@ void main() {
           'My Smart Plan',
           'No HealthKit writes, food logging, or AI submission occurs when preparing a draft.',
           'I am 18 or older and reviewed my allergies, dietary restrictions and training availability.',
+          'Warm up before your session',
+          'Continue to exercises',
+          'The reference could not be opened. Try again.',
+          'Uses the released BIL Gym plan with its source warm-up, sets, repetitions and rest. Review the draft before activating it.',
         ]),
       );
       for (final source in sources) {

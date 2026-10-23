@@ -39,6 +39,9 @@ def validate(case: str, response: dict) -> None:
         raise ValueError('Credit settlement or duplicate-request guard failed')
     if response.get('provider') != 'gemini' or response.get('provider_attempts') not in (1, 2, 3):
         raise ValueError('Real bounded Gemini call is required')
+    recovery = response.get('quality_recovery')
+    if recovery not in (None, '', 'verified_workout_review') or (recovery and case != 'done_without_saved_plan'):
+        raise ValueError('Unexpected app-owned quality recovery')
     if response.get('provider_attempts') == 3:
         elapsed = response.get('latency_ms')
         if isinstance(elapsed, bool) or not isinstance(elapsed, (int, float)) or not 0 < elapsed < 28000:
@@ -60,6 +63,8 @@ def validate(case: str, response: dict) -> None:
         raise ValueError('An action invented an absent saved plan identity')
     if case in ('missed', 'done_without_saved_plan') and 'log_exercise' in types:
         raise ValueError('Missing workout identity/duration became a log action')
+    if case == 'done_without_saved_plan' and not response.get('missing_data') and 'read_active_smart_plan' not in types:
+        raise ValueError('Completion without a verified session needs actual clarification or native review')
     if case == 'log_weight':
         if len(actions) != 1 or actions[0].get('type') != 'log_weight':
             raise ValueError('Explicit weight recording was not proposed')
@@ -105,7 +110,7 @@ def script_for(case: str, cli: str | None = None) -> str:
         raise ValueError('Reviewed provider attempt boundary changed')
     source = source.replace(marker, 'if ([int]$response.attempts -lt 1 -or [int]$response.attempts -gt 3)')
     source = source.replace('reply = $response.reply',
-        'proposed_actions = @($response.proposed_actions)\n    missing_data = @($response.missing_data)\n    reply = $response.reply', 1)
+        "proposed_actions = @($response.proposed_actions)\n    missing_data = @($response.missing_data)\n    quality_recovery = $(if ($response.PSObject.Properties['quality_recovery']) { [string]$response.quality_recovery } else { $null })\n    reply = $response.reply", 1)
     def absolute_import(match):
         path = (TEMPLATE.parent / match[1].replace('\\', '/')).resolve()
         if not path.is_relative_to(ROOT) or not path.is_file():

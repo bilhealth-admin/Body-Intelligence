@@ -26,14 +26,14 @@ const strings = (v: unknown): string[] => Array.isArray(v)
   ? v.filter((s): s is string => typeof s === "string" && s.length <= 80).slice(0, 20)
   : [];
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const positive = /\b(?:eat|add|include|choose|recommend|suggest|serve|use|try|have)\b|تناول|اضف|اختر|اقترح|استخدم|جرب/gu;
-const negative = /\b(?:avoid(?:ing)?|without|exclude(?:d|s|ing)?|free (?:of|from)|never|don.t|do not|no)\b|تجنب|بدون|دون|بلا|استبعد|تستبعد|خال(?:ي|ية|يا)?\s+(?:تماما\s+)?من|لا\s+(?:تتناول|تضف|تاكل|تستخدم|تاخذ|يحتوي|تحتوي)/gu;
-const strong = /\b(?:eat|add|include|choose|recommend|suggest|serve|try)\b|تناول|اضف|اختر|اقترح|جرب/u;
+const positive = /\b(?:(?:eat|add|include|choose|recommend|suggest|serve|use)s?|tr(?:y|ies)|ha(?:ve|s)|contain(?:s|ing)?)\b|تناول|اضف|اختر|اقترح|استخدم|جرب/gu;
+const negative = /(?:does not|doesn.t|do not|don.t|never)\s+contain(?:s)?|\b(?:avoid(?:s|ing)?|without|exclude(?:d|s|ing)?|free (?:of|from)|never|don.t|do not|no)\b|تجنب|بدون|دون|بلا|استبعد|تستبعد|خال(?:ي|ية|يا)?\s+(?:تماما\s+)?من|لا\s+(?:تتناول|تضف|تاكل|تستخدم|تاخذ|يحتوي|تحتوي)/gu;
+const strong = /\b(?:(?:eat|add|include|choose|recommend|suggest|serve)s?|tr(?:y|ies))\b|تناول|اضف|اختر|اقترح|جرب/u;
 const inspectLabel = /\b(?:check(?:ing)?|read(?:ing)?|inspect(?:ing)?|review(?:ing)?)\b[^.!?;\n]{0,45}\b(?:labels?|ingredients?|allergen statements?)\b|(?:افحص|اقرا|راجع)\s+(?:ملصق|الملصق|مكونات|المكونات|قائمة المكونات)/gu;
-const foodSelection = /\b(?:eat(?:ing|s)?|add(?:ing|s)?|includ(?:e|ing|es)|choos(?:e|ing)|recommend(?:ing)?|suggest(?:ing)?|serv(?:e|ing)|us(?:e|ing)|try(?:ing)?|have|consum(?:e|ing|es)|drink(?:ing|s)?)\b|تناول|اضف|اختر|اقترح|استخدم|جرب|اشرب|(?:ثم|بعد ذلك)\s+كل/gu;
-const lastIndex = (pattern: RegExp, text: string) => {
+const foodSelection = /\b(?:eat(?:ing|s)?|add(?:ing|s)?|includ(?:e|ing|es)|choos(?:e|es|ing)|recommend(?:s|ing)?|suggest(?:s|ing)?|serv(?:e|es|ing)|us(?:e|es|ing)|tr(?:y|ies|ying)|hav(?:e|ing)|has|contain(?:s|ing)?|consum(?:e|ing|es)|drink(?:ing|s)?)\b|تناول|اضف|اختر|اقترح|استخدم|جرب|اشرب|(?:ثم|بعد ذلك)\s+كل/gu;
+const lastIndex = (pattern: RegExp, text: string, end = false) => {
   let index = -1;
-  for (const match of text.matchAll(pattern)) index = match.index;
+  for (const match of text.matchAll(pattern)) index = match.index + (end ? match[0].length : 0);
   return index;
 };
 // A negative/uncertain free-from claim is not an allergen exclusion. Keep this
@@ -115,7 +115,12 @@ export function validateCoachFoodBoundaries(
         // milk occurrence must still be reviewed. Never exempt a nut allergy.
         if (kind === "milk" && (/\b(?:almond|soy|soya|oat|rice|coconut|plant)\s*$/u.test(before) || /^\s+(?:نباتي|اللوز|الصويا|الشوفان)/u.test(after))) continue;
         const negativeAt = lastIndex(negative, before);
-        if (negativeAt > lastIndex(positive, before) &&
+        // A negated presence verb includes the whole phrase (does not
+        // contain); an earlier exclusion cannot hide a later ingredient.
+        const negativeEnd = lastIndex(negative, before, true);
+        const reversedExclusion = /^(?:avoid|exclude)/u.test(before.slice(negativeAt)) &&
+          /\b(?:not|never|don.t|doesn.t|cannot|can.t|isn.t|aren.t)\s*$/u.test(before.slice(0, negativeAt));
+        if (!reversedExclusion && negativeEnd > lastIndex(positive, before) &&
           (!/^free /u.test(before.slice(negativeAt)) || !doubtfulFreeClaim(before))) continue;
         throw new Error("unsafe_dietary_advice");
       }

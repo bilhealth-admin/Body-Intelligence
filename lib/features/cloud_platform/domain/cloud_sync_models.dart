@@ -164,16 +164,15 @@ final class CloudSyncReport {
   final CloudPlatformAvailability availability;
   final List<String> diagnostics;
 
-  /// Only a successfully persisted page may authorize the next request.
-  /// A paused failure must never be interpreted as pagination.
+  /// A successfully persisted pull page or acknowledged upload batch may
+  /// authorize another request. A paused failure never authorizes a retry.
   final bool hasMore;
   final bool cursorAdvanced;
   final String? failureCode;
 
   bool get canContinue =>
       availability == CloudPlatformAvailability.paused &&
-      hasMore &&
-      cursorAdvanced &&
+      ((hasMore && cursorAdvanced) || (pending > 0 && pushed > 0)) &&
       failureCode == null;
 
   bool get completed =>

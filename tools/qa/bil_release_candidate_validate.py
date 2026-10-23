@@ -38,6 +38,8 @@ def main():
     parser.add_argument('--expect-head', required=True)
     parser.add_argument('--flutter', required=True)
     parser.add_argument('--run', action='store_true')
+    parser.add_argument('--manual-sync-proof', type=Path)
+    parser.add_argument('--reported-account-proof', type=Path)
     args = parser.parse_args()
     if owner.git('branch', '--show-current') != BRANCH:
         raise RuntimeError('Release candidate requires its authorized independent branch')
@@ -73,6 +75,10 @@ def main():
     print(str(folder), flush=True)
     if not args.run:
         return 0
+    if args.manual_sync_proof is None or args.reported_account_proof is None:
+        owner.atomic_json(folder / 'status.json', {**state, 'status': 'failed',
+            'release_ready': False, 'error': 'Actual manual-sync and reported-account restoration proofs are required before final validation'})
+        raise RuntimeError('Actual manual-sync and reported-account restoration proofs are required before final validation')
 
     def stable():
         if owner.git('rev-parse', 'HEAD') != args.expect_head or owner.git('branch', '--show-current') != BRANCH or snapshot() != frozen:
@@ -126,13 +132,25 @@ def main():
     if not deno:
         raise RuntimeError('Deno is required; backend tests cannot be skipped')
     try:
+        stage('manual-sync-live-proof', [sys.executable, 'tools/qa/bil_manual_sync_evidence.py',
+            '--proof', str(args.manual_sync_proof.resolve()),
+            '--reported-account-proof', str(args.reported_account_proof.resolve())])
         for offset in range(0, len(changed_dart), 40):
             stage('format-' + str(offset//40+1), [str(dart), 'format', '--output=none', '--set-exit-if-changed', *changed_dart[offset:offset+40]])
         stage('release-controller-guards', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/qa', '-p', 'test_bil_release*.py', '-v'])
         stage('candidate-identity-guards', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/qa', '-p', 'test_bil_candidate*.py', '-v'])
+        stage('offline-apk-producer-guards', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/qa', '-p', 'test_bil_mobsf*.py', '-v'])
         stage('release-tool-regressions', [sys.executable, '-m', 'unittest', 'discover', '-s', 'tool/release', '-p', 'test_*.py', '-v'])
         stage('public-policy-regressions', ['node', '--test', 'tool/release/public_policy_pages.test.mjs',
             'tool/release/bilhealth_site_worker.test.mjs', 'tool/release/merge_site_associations.test.mjs'])
+        for number, audit in (
+            (11, 'epic11_localization_audit'),
+            (12, 'epic12_security_audit'),
+            (13, 'epic13_commerce_audit'),
+            (14, 'epic14_release_audit'),
+            (16, 'epic16_release_audit'),
+        ):
+            stage('source-audit-epic' + str(number), [str(dart), 'tool/' + audit + '.dart'])
         stage('architecture-guard', [*flutter_cmd, 'test', '--no-pub', '--reporter=expanded',
             'test/architecture_source_file_size_guard_test.dart', 'test/epic3_scope_coverage_audit_test.dart'])
         stage('feature-and-boundaries', [*flutter_cmd, 'test', '--no-pub', '--concurrency=2', '--reporter=expanded',

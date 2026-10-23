@@ -90,7 +90,7 @@ class BilSmartPlanConflictReviewPanel extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            BilPearlMaterialCard(
+            BilSmartPlanPanel(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -106,7 +106,7 @@ class BilSmartPlanConflictReviewPanel extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            BilPearlMaterialCard(
+            BilSmartPlanPanel(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(

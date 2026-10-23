@@ -1,0 +1,197 @@
+{
+  "schema": "bil.coach.home-overview.followup.v1",
+  "updated_at": "2026-10-23T12:31:09.725280+00:00",
+  "source_parent": "d02e78462b88e1639d19a6ce73eb2b51519dccd9",
+  "work_branch": "codex/bil-coach-ci-compat-20261023",
+  "candidate_branch": "codex/bil-release-ios38-android33-20261022",
+  "release_ready": false,
+  "status": "FOCUSED_PASS_FULL_FROZEN_VALIDATION_PENDING",
+  "home": {
+    "actual_released_movements_only": true,
+    "templates": 10,
+    "source_doses": 60,
+    "horizons": 4,
+    "focuses": 3,
+    "experience_levels": 3,
+    "source_asset": "artifacts/workout_media/home_smart_plan_prescriptions_v1.json",
+    "source_asset_sha256": "9b312a4d02abff12f25935c7bfe03e006d19231655271f6bc08fdae6598679f3",
+    "dose_policy": "BIL adapts NHS 2-3 sets and 8-12 repetitions; 120-second starting rests sit within the CDC-published 60-180 second range. This exact sequence is a BIL adaptation, not publisher endorsement or injury rehabilitation.",
+    "consent": "All creation/replacement still needs the existing adult, safety, preference and approval flow. No automatic load/set increase or diary completion.",
+    "recovery": "At least one full civil recovery day, up to three sessions per anchored plan week. Domain mutations and catalog restoration enforce it; UI previews filter unsafe dates.",
+    "legacy_plans": "No existing approved plan is silently rewritten; legacy unsupported Home plans remain stored for explicit review/export.",
+    "sources": [
+      "https://www.nhs.uk/live-well/exercise/how-to-improve-strength-flexibility/",
+      "https://www.cdc.gov/pcd/issues/2014/13_0403.htm",
+      "https://acsm.org/resistance-training-guidelines-update-2026/",
+      "https://www.mayoclinic.org/healthy-lifestyle/fitness/in-depth/strength-training/art-20046670"
+    ]
+  },
+  "warmup": {
+    "asset": "artifacts/workout_media/smart_plan_warmups_v1.json",
+    "sha256": "0c45ae85862797907d4c8352e929883bbf0770150d4187417599f8d67c44ae0f",
+    "gym": "All six original source sessions retain their exact push/pull/legs warm-up groups and doses.",
+    "home": "Five NHS preparation steps, at least six minutes; only three exact Home catalog matches have video IDs. Shoulder rolls and shallow knee bends use source instructions without a fabricated media ID.",
+    "source": "https://www.nhs.uk/live-well/exercise/how-to-warm-up-before-exercising/",
+    "separate_from_working_sets": true,
+    "review_does_not_log_activity": true
+  },
+  "overview_finish": {
+    "implementation": "BilSmartPlanPanel uses the actual Coach Overview BilPearlFinish.panel decoration, clipping and transparent Material ink. No global theme or main navigation change.",
+    "direct_actual_overview_comparison_cases": 4,
+    "prior_golden_count": 40,
+    "new_golden_count": 48,
+    "before_after_review": "build/coach-ci-compat/overview-finish-review-1.jpg through -3.jpg",
+    "prior_baselines": "build/coach-ci-compat/prior-golden-baselines-d02e78462b88/manifest.json",
+    "retained_comparison_failures": "build/coach-ci-compat/preserved-golden-comparison-failures/preservation-manifest.json",
+    "new_states": [
+      "home warm-up",
+      "home working session",
+      "polished plan and session loading"
+    ],
+    "language": "New Home exercise names and warm-up names use reviewed Arabic wording; source and safety details remain expandable.",
+    "contrast": "New gradient surfaces use the existing strict 4.5/3 real-foreground/background-pixel reviewer. Its low-contrast and opacity negative tests remain active; glyph histogram false alarms were retained."
+  },
+  "validation": {
+    "focused_analysis": {
+      "status": "PASS",
+      "evidence": "build/coach-ci-compat/smart-plan-final-focused-analyze.log"
+    },
+    "smart_plan": {
+      "status": "PASS",
+      "tests": 219,
+      "golden_comparisons_updated_during_verification": false,
+      "evidence": "build/coach-ci-compat/smart-plan-all-with-reviewed-goldens.log"
+    },
+    "release_controller": {
+      "status": "PASS",
+      "tests": 141,
+      "evidence": "build/coach-ci-compat/final-release-controller-guards.log"
+    },
+    "mobsf_producer": {
+      "status": "PASS",
+      "tests": 8,
+      "evidence": "build/coach-ci-compat/mobsf-producer-guards.log"
+    },
+    "actual_live_home_rpc": {
+      "status": "PASS",
+      "actual_full_payload_roundtrips": 36,
+      "levels": [
+        "beginner",
+        "regular",
+        "experienced"
+      ],
+      "horizons": 4,
+      "focuses": 3,
+      "independently_confirmed_cleanup_tables_per_fixture": 16,
+      "evidence": [
+        "build/release-ios38-android33/home-live-beginner.json",
+        "build/release-ios38-android33/home-live-regular.json",
+        "build/release-ios38-android33/home-live-experienced.json"
+      ]
+    }
+  },
+  "ci_repairs": {
+    "epic14": "Validate the existing separate signed-build and existing-IPA upload workflows as a composed guarded contract, without introducing unused ASC secrets into the build workflow. Nine actual Dart behavior cases and actual audits passed.",
+    "barcode": "Use already-authorized management SQL for the synthetic private-cache fixture; retain ownership predicates and independent cleanup readbacks. No ACL, RLS or production application change. Corrected real live fixture passed.",
+    "native_isolation": "All actual Android native journeys stay mandatory in the fresh untraced job; CodeQL produces an attempt-bound APK for offline static scanning. Frame-identity assertions are unchanged.",
+    "mobsf": "Allow only the protected diagnostic branch and this exact independent candidate branch. Candidate producer must be successful on exact SHA; require same-job successful steps and exact-attempt unexpired artifact identity."
+  },
+  "prior_source_ci": {
+    "sha": "d02e78462b88e1639d19a6ce73eb2b51519dccd9",
+    "full_analysis_and_unsharded_root_job": "PASS",
+    "overall_lane_counts_latest_attempts": {
+      "pass": 11,
+      "fail": 4,
+      "blocked": 1
+    },
+    "evidence": "build/release-ios38-android33/ci-d02e78462b88/latest-attempts-reconciliation.json",
+    "not_new_source_validation": true
+  },
+  "limits": [
+    "Member time availability remains separate from actual recorded session duration; no invented universal physiological duration estimate.",
+    "Medical risks still require review; no individualized injury rehabilitation is certified.",
+    "Exact final-source CI, native/physical-device checks and signed distribution remain separate gates.",
+    "Earlier live-provider failures and all failed validation attempts stay retained."
+  ],
+  "verified_workout_review_recovery": {
+    "deployment_version": 129,
+    "exact_reviewed_files": 13,
+    "other_eleven_dependencies_unchanged": true,
+    "auth_and_consent_and_integrity_unchanged": true,
+    "billing": "One original reservation and settlement; no additional model call or duplicate billing. Original failure refund remains for other rejected answers.",
+    "scope": "Only a closed current AR/EN completion utterance whose provider answer failed citation validation. Discard the entire rejected model prose and proposals; pass app-owned clarification through the same parser and final health, food and action checks.",
+    "no_fake_identity_duration_or_execution": true,
+    "supported_native_read_only_when_known_plan_and_capability_v1": true,
+    "full_server_tests": 129,
+    "evidence": [
+      "build/coach-ci-compat/workout-review-handler-before-integration.log",
+      "build/coach-ci-compat/coach-all-with-verified-workout-review.log",
+      "build/release-ios38-android33/coach-live-v129-workout-review.json",
+      "build/release-ios38-android33/coach-v129-before-full-live-readback.json"
+    ],
+    "full_live_batch": "RUNNING; prior v128 single-batch 10/11 failure remains retained"
+  },
+  "environment_retry": {
+    "previous_frozen_run": "frozen-20261023-150437",
+    "status": "FAILED_BEFORE_FULL_ANALYSIS_AND_ROOT",
+    "reason": "Operator omitted the existing JDK from the process environment. No tests were disabled.",
+    "verified_existing_jdk": "G:/BIL_Toolchains/Java/jdk-21",
+    "javac_version": "21.0.10",
+    "next_run": "Explicit JAVA_HOME and PATH configured for the whole validation process tree."
+  },
+  "localization_followup": {
+    "new_static_keys": 29,
+    "production_locales": 25,
+    "arabic": "Reviewed authored UI copy; other locale machine translations are not native reviewed.",
+    "extractor": "Covers direct _smartPlanText(context,...) as well as t/_t; literal Home/Gym disclosures are now visible to audit.",
+    "actual_tests": 221,
+    "status": "PASS",
+    "goldens_updated_during_verification": false,
+    "evidence": "build/coach-ci-compat/home-warmup-localization-and-smart-plan.log",
+    "previous_frozen_failure": "build/release-ios38-android33/frozen-20261023-153114/status.json"
+  },
+  "final_frozen_validation": "STARTING_AFTER_PROVEN_LOCAL_AND_LIVE_DIETARY_FIX",
+  "current_live_provider": {
+    "version": 131,
+    "status": "RUNNING",
+    "focused_english_case": "PASS",
+    "report": "docs/qa_next/BIL_COACH_SMART_PLAN_CURRENT_PROVIDER_2026-10-23.json"
+  },
+  "food_boundary_actual_root_cause": {
+    "version": 131,
+    "status": "FRESH_COMPLETE_BATCH_RUNNING_FOCUSED_ENGLISH_CASE_PASSED",
+    "updated_at": "2026-10-23T13:12:31.822573+00:00",
+    "fresh_batch_evidence": "build/release-ios38-android33/coach-live-v131-complete-eleven.json",
+    "focused_actual_live_evidence": "build/release-ios38-android33/coach-live-v130-focused-allergy.json",
+    "root_cause": {
+      "proven_by_owned_live_trace": true,
+      "captured_phrase": "It fits your Halal requirement and avoids dairy, peanuts, and sesame.",
+      "failure": "The prior exclusion grammar accepted avoid/avoiding but not avoids; spoken_reply was incorrectly rejected.",
+      "evidence": "build/release-ios38-android33/dietary-owned-trace/response-1.json",
+      "earlier_unlogged_reply_not_claimed_known": true
+    },
+    "repair": {
+      "component": "supabase/functions/ai-coach/coach_food_safety.ts",
+      "scope": "Recognize inflected exclusions/selection verbs; later ingredient presence and negated exclusions remain blocked. Negated ingredient presence remains usable.",
+      "no_extra_model_call": true,
+      "no_guard_credit_rls_or_consent_relaxation": true,
+      "all_coach_deno_tests": 135,
+      "red_then_green_evidence": [
+        "build/coach-ci-compat/food-avoids-captured-red.log",
+        "build/coach-ci-compat/food-avoids-captured-green.log",
+        "build/coach-ci-compat/food-exclusion-scope-adversarial-red.log",
+        "build/coach-ci-compat/food-exclusion-scope-all-coach-green.log"
+      ]
+    },
+    "fixture_safety": {
+      "synthetic_account_cleaned_and_deleted": true,
+      "all_ten_cleanup_readbacks_zero": true,
+      "temporary_function_deleted": true,
+      "no_real_user_data_collected": true,
+      "evidence": "build/release-ios38-android33/dietary-owned-trace/cleanup-proof.json"
+    },
+    "before_live_exact_13_file_readback": "build/release-ios38-android33/coach-v131-before-live-readback.json",
+    "prior_failed_batch": "build/release-ios38-android33/coach-live-v129-complete-eleven.json",
+    "release_ready": false
+  }
+}
