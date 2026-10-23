@@ -180,7 +180,11 @@ final class AesGcmCloudPayloadCipher implements CloudPayloadCipher {
 
   static Uint8List _decode(String value, String field) {
     try {
-      return Uint8List.fromList(base64Url.decode(value));
+      // Legacy imports can omit Base64 padding. Normalize the representation
+      // before decoding, without altering the ciphertext or its GCM tag.
+      // Percent escapes are not part of the persisted JSON envelope contract.
+      if (value.contains('%')) throw const FormatException();
+      return Uint8List.fromList(base64Url.decode(base64Url.normalize(value)));
     } on FormatException {
       throw FormatException('Malformed BIL cloud $field.');
     }

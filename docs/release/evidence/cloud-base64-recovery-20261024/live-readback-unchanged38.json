@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "method": "Read-only current snapshot, SDK mock transport, actual Node AES-GCM via modeled OS channel, real app SQLite; not physical iOS proof",
+  "encoding_failures": [],
+  "apply": {
+    "applied": 213,
+    "acknowledged": 0,
+    "conflicts": 0
+  },
+  "restored": true,
+  "elapsed_ms": 617,
+  "profile_readback": true,
+  "daily_readback": "none",
+  "v2_authenticated_and_applied": 220,
+  "http_calls": 1,
+  "authenticated_records": 433
+}

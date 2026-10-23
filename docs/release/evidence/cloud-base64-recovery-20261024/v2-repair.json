@@ -1,0 +1,16 @@
+{
+  "status": "APPLIED_AND_READBACK_VERIFIED",
+  "recorded_at_utc": "2026-10-23T22:43:00.268591+00:00",
+  "affected_rows": 96,
+  "change": "Append only missing Base64 padding to ciphertext strings",
+  "decoded_cipher_bytes_unchanged": true,
+  "all_other_payload_fields_and_record_metadata_unchanged": true,
+  "server_updated_at": "Not present on V2; all metadata unchanged",
+  "keys_changed": false,
+  "rows_deleted": 0,
+  "health_values_changed": false,
+  "schema_or_rls_changed": false,
+  "remaining_affected_rows": 0,
+  "private_encrypted_backup_sha256": "2b9237d1104fc5713b5795c296d07c18b9d0227ff72afd1d425f2dbb8922d71f",
+  "phone_success": "NOT_YET_PROVEN"
+}

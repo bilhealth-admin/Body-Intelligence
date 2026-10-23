@@ -1,0 +1,27 @@
+{
+  "status": "FAIL",
+  "method": "Read-only current snapshot, SDK mock transport, actual Node AES-GCM via modeled OS channel, real app SQLite; not physical iOS proof",
+  "encoding_failures": [],
+  "apply": {
+    "applied": 213,
+    "acknowledged": 0,
+    "conflicts": 0
+  },
+  "restored": true,
+  "elapsed_ms": 786,
+  "profile_readback": true,
+  "daily_readback": "none",
+  "error_type": "FormatException",
+  "stack_frames": [
+    "#0      AesGcmCloudPayloadCipher._decode (package:body_intelligence_log/features/cloud_platform/services/aes_gcm_cloud_payload_cipher.dart:185:7)",
+    "#1      AesGcmCloudPayloadCipher.decrypt (package:body_intelligence_log/features/cloud_platform/services/aes_gcm_cloud_payload_cipher.dart:162:28)",
+    "<asynchronous suspension>",
+    "#3      Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)",
+    "<asynchronous suspension>",
+    "#4      Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)",
+    "<asynchronous suspension>",
+    "#5      Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)"
+  ],
+  "http_calls": 1,
+  "authenticated_records": 213
+}

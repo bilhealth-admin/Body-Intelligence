@@ -50,6 +50,84 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test(
+    'legacy unpadded envelopes preserve protected bytes and authenticate',
+    () async {
+      final cipher = AesGcmCloudPayloadCipher(
+        Uint8List(32),
+        primitive: const _AuthenticatedTestPrimitive(),
+      );
+      final remainders = <int>{};
+      for (var length = 0; length < 3; length++) {
+        final clear = <String, Object?>{
+          'note': List.filled(length, 'x').join(),
+        };
+        final envelope = await cipher.encrypt(clear);
+        final unpadded = (envelope['ciphertext']! as String).replaceAll(
+          '=',
+          '',
+        );
+        remainders.add(unpadded.length % 4);
+        final legacy = <String, Object?>{...envelope, 'ciphertext': unpadded};
+        expect(await cipher.decrypt(legacy), clear);
+        expect(
+          legacy['ciphertext'],
+          unpadded,
+          reason: 'Never mutate stored input',
+        );
+
+        final damaged = base64Url.decode(base64Url.normalize(unpadded));
+        damaged[damaged.length - 1] ^= 1;
+        await expectLater(
+          cipher.decrypt({
+            ...legacy,
+            'ciphertext': base64Url.encode(damaged).replaceAll('=', ''),
+          }),
+          throwsA(isA<StateError>()),
+        );
+      }
+      expect(remainders, {0, 2, 3});
+    },
+  );
+
+  test(
+    'normalization still rejects invalid encodings and envelope lengths',
+    () async {
+      final cipher = AesGcmCloudPayloadCipher(
+        Uint8List(32),
+        primitive: const _AuthenticatedTestPrimitive(),
+      );
+      final envelope = await cipher.encrypt({'value': 1});
+      for (final invalid in [
+        'A',
+        'AA=',
+        'AA===',
+        'AA=A',
+        'AA A',
+        'AA\nA',
+        'AA%3D%3D',
+        'AA!A',
+      ]) {
+        await expectLater(
+          cipher.decrypt({...envelope, 'ciphertext': invalid}),
+          throwsFormatException,
+          reason: 'Malformed encoding remains rejected',
+        );
+      }
+      for (final change in <Map<String, Object?>>[
+        {'nonce': base64Url.encode(Uint8List(11)).replaceAll('=', '')},
+        {'ciphertext': base64Url.encode(Uint8List(15)).replaceAll('=', '')},
+        {'_bil_cipher_v': 2},
+        {'alg': 'none'},
+      ]) {
+        await expectLater(
+          cipher.decrypt({...envelope, ...change}),
+          throwsFormatException,
+        );
+      }
+    },
+  );
 }
 
 /// Test-only authenticated transform. Production has no Dart cipher fallback.

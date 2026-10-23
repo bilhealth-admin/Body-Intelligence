@@ -1,0 +1,17 @@
+{
+  "status": "APPLIED_AND_READBACK_VERIFIED",
+  "recorded_at_utc": "2026-10-23T22:38:00.298921+00:00",
+  "affected_rows": 14,
+  "change": "Append only missing Base64 padding to ciphertext strings",
+  "decoded_cipher_bytes_unchanged": true,
+  "all_other_payload_fields_and_record_metadata_unchanged": true,
+  "server_updated_at": "Advanced by existing unmodified trigger",
+  "keys_changed": false,
+  "rows_deleted": 0,
+  "health_values_changed": false,
+  "schema_or_rls_changed": false,
+  "remaining_affected_rows": 0,
+  "private_encrypted_backup_sha256": "a4ba4043a5473b82bdf4e6ace8db1a436205aa2204f939859a59d70eafb6fd49",
+  "phone_success": "OWNER_CONFIRMED_ACCOUNT_OPENED_ON_INSTALLED38",
+  "phone_scope": "Account startup only; manual sync subsequently reported pending. V2 repair tracked separately."
+}

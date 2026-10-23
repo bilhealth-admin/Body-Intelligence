@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "checked_at_utc": "2026-10-23T22:44:33.134077+00:00",
+  "tests_passed": 22,
+  "test_files": [
+    "test/features/cloud_platform/aes_gcm_cloud_payload_cipher_test.dart",
+    "test/features/cloud_platform/cloud_sync_failure_recovery_test.dart",
+    "test/features/cloud_platform/cloud_page_drain_test.dart",
+    "test/features/cloud_platform/supabase_startup_cloud_restore_reader_test.dart"
+  ],
+  "analysis": "Two edited Dart files: no issues",
+  "tests_log_sha256": "d6e6479e73567fc4a51d1471525b13e73fad4706be606ec6994e23b2644202aa",
+  "analysis_log_sha256": "51aa450f04069437b9095b07bde6b54e583502ca5eb9752d693da7f5b751f6e0",
+  "cipher_source_sha256": "3cf9dd8080f0247dc2d9bb0d191ea1b75951c7dcb4bdd8ad3815f4a137562ee5",
+  "full_suite_rerun": false,
+  "new_native_runtime_gate_run": false,
+  "testflight38_binary_changed": false,
+  "additional_v2_tests_passed": 26,
+  "total_focused_tests_passed": 48,
+  "v2_tests_log_sha256": "be3f10d32255d668e232ff64f0f1e70ff462c16ffc582aafc476b0216699c134",
+  "v2_fixture_warning": "Drift multiple AppDatabase instances diagnostic in isolated fixtures; distinct QueryExecutors, all26 tests pass; not suppressed or changed."
+}
