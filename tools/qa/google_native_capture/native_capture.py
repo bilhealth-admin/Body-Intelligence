@@ -192,7 +192,7 @@ def validate_meal_goal_content(nodes, viewport):
     require(own, "meal_calorie_goals_wrong_app_package")
     text = [s for n in own for s in labels(n)]
     # A title, an Active badge, or a route into Plans is not paid-feature proof.
-    require(not any(re.search(r"^Plans$|\bView Premium plans\b|\bExplore Premium\b|\bRetry subscription check\b|\bRestore purchases\b|\bOpening secure purchase\b|^Continue(?:\s*[·•].*)?$", s, re.I)
+    require(not any(re.search(r"^Plans$|\bView Premium plans\b|\bExplore Premium\b|\bRetry subscription check\b|\bRestore purchases\b|\bOpening secure purchase\b|^Continue(?:\s*[Â·â€¢].*)?$", s, re.I)
                     for s in text), "meal_calorie_goals_paywall_or_unverified")
     require(any(re.fullmatch(r"Set a separate calorie goal for each meal\.", s, re.I)
                 for s in text), "meal_calorie_goals_content_not_visible")
@@ -566,7 +566,12 @@ def capture(args):
         d.start("launch-and-reviewer-entry")
         d.adb("shell", "am", "start", "-n", PACKAGE + "/.MainActivity")
         d.reviewer_entry()
-        d.wait(r"Password", snapshot="reviewer-form-empty")
+        d.wait(r"Store reviewer access", snapshot="reviewer-form-empty")
+        # Flutter's editable hint need not be an independent UIAutomator text
+        # node. Require the actual two enabled input controls, not a hint string.
+        fields = d.nodes("reviewer-form-controls-empty")
+        select(fields, "", edit_index=0)
+        select(fields, "", edit_index=1)
         d.stop()  # Authentication input is deliberately not in any recording.
         d.field(0, email)
         d.field(1, password)
