@@ -271,39 +271,37 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Boot iOS Simulator for the system-crypto release gate
-        id: crypto_simulator
-        shell: bash
-        run: |
-          set -euo pipefail
-          UDID="$(xcrun simctl list devices available \
-            | awk -F '[()]' '/iPhone/ {print $2; exit}')"
-          test -n "$UDID" || {
-            echo 'No available iPhone Simulator was found.' >&2
-            exit 1
-          }
-          xcrun simctl boot "$UDID" 2>/dev/null || true
-          xcrun simctl bootstatus "$UDID" -b
-          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
-
       - name: Run native AES-GCM gate on iOS Simulator
         id: native_crypto_runtime_gate
         shell: bash
         env:
-          SIMULATOR_UDID: ${{ steps.crypto_simulator.outputs.udid }}
-        run: >-
-          flutter test --no-pub
-          integration_test/system_crypto_bridge_integration_test.dart
-          -d "$SIMULATOR_UDID"
-          --timeout 10m
-
-      - name: Remove system-crypto iOS Simulator
-        if: always() && steps.crypto_simulator.outputs.udid != ''
-        shell: bash
-        env:
-          UDID: ${{ steps.crypto_simulator.outputs.udid }}
+          BIL_NATIVE_TARGET: system-crypto
         run: |
-          xcrun simctl shutdown "$UDID" 2>/dev/null || true
+          set -euo pipefail
+          test -n "${FLUTTER_ROOT:-}"
+          test -f "$FLUTTER_ROOT/packages/integration_test/example/test_driver/integration_test.dart"
+          OUT=artifacts/qa/text18/ios37-simulators
+          mkdir -p "$OUT"
+          python3 .github/scripts/bil_native_bounded_command.py \
+            --label signed-crypto-plugin-prep --log "$OUT/signed-crypto-plugin-prep.log" \
+            --receipt "$OUT/signed-crypto-plugin-prep-result.json" --timeout-seconds 120 -- \
+            dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          python3 .github/scripts/bil_native_bounded_command.py \
+            --label signed-crypto-pods --log "$OUT/signed-crypto-pods.log" \
+            --receipt "$OUT/signed-crypto-pods-result.json" --timeout-seconds 900 -- \
+            pod install --project-directory=ios
+          # system-crypto executes integration_test/system_crypto_bridge_integration_test.dart
+          # The shared script owns fresh simulator creation, bounded commands and cleanup.
+          bash .github/scripts/bil_ios37_native_integration.sh
+
+      - name: Preserve bounded native cryptography diagnostics
+        if: ${{ always() && steps.native_crypto_runtime_gate.outcome != 'skipped' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-ios38-native-crypto-${{ github.run_id }}
+          path: artifacts/qa/text18/ios37-simulators/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Require successful native iOS cryptography without a waiver
         shell: bash
@@ -417,6 +415,7 @@ jobs:
         run: |
           set -euo pipefail
           flutter build ipa --release --no-pub \
+            --target lib/main.dart \
             --export-options-plist "$RUNNER_TEMP/BIL-export-options.plist" \
             --build-number "$BUILD_NUMBER" \
             --dart-define=BIL_ENVIRONMENT=production \

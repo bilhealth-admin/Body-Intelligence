@@ -1,0 +1,105 @@
+name: BIL supplementary security fixture inventory
+on:
+  push:
+    branches: [codex/bil-native-gates-diagnostic-20261023]
+    paths:
+      - .github/workflows/bil_security_fixture_inventory.yml
+      - tools/qa/bil_security_fixture_inventory.py
+      - tools/qa/test_bil_security_fixture_inventory.py
+      - tools/qa/bil_fixture_network_deny.cjs
+      - tools/qa/bil_circle_review_native_fixture.mjs
+      - tools/qa/native_pg_fixture/**
+      - tools/qa/security_delete_message/**
+      - tool/shared/**
+      - tool/prebuild/**
+      - tool/release/**
+      - tool/apple_store_connect/**
+      - tool/google_play/**
+      - public_site/index.html
+      - public_site/app.js
+      - public_site/policy-pages/**
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact reviewed diagnostic or final source SHA
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: bil-security-fixtures-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  node-fixtures:
+    name: Non-live store URL reviewer and disclosure negative fixtures
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.18.0'
+      - name: Require reviewed exact source
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.expected_sha || github.sha }}
+        run: test "$EXPECTED_SHA" = "$GITHUB_SHA"
+      - name: Test discovery and real child isolation
+        run: python3 -m unittest discover -s tools/qa -p test_bil_security_fixture_inventory.py -v
+      - name: Run every discovered non-live Node unit fixture
+        run: python3 tools/qa/bil_security_fixture_inventory.py --root "$GITHUB_WORKSPACE" --output "$RUNNER_TEMP/bil-security-node-fixtures" --expected-sha "$GITHUB_SHA"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: bil-security-node-fixtures-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-security-node-fixtures/
+          if-no-files-found: error
+  native-circle-review:
+    name: Native PostgreSQL17 circle review negative and replay assertions
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: isolated-native-circle-fixture-only
+          POSTGRES_DB: postgres
+        ports: ['55479:5432']
+        options: --health-cmd "pg_isready -U postgres -d postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24.18.0'
+      - name: Require reviewed exact source
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.expected_sha || github.sha }}
+        run: test "$EXPECTED_SHA" = "$GITHUB_SHA"
+      - name: Install integrity-locked QA-only PostgreSQL driver
+        run: npm ci --prefix tools/qa/native_pg_fixture --ignore-scripts --no-audit --no-fund
+      - name: Run unchanged native review assertions on a newly created database
+        env:
+          BIL_NATIVE_PG_QA_PASSWORD: isolated-native-circle-fixture-only
+        run: node tools/qa/bil_circle_review_native_fixture.mjs "$GITHUB_WORKSPACE" "$RUNNER_TEMP/bil-native-circle-review" "$GITHUB_WORKSPACE/tools/qa/native_pg_fixture/package.json" "$GITHUB_SHA"
+      - name: Verify bounded delete-message ownership and ACL behavior
+        env:
+          BIL_NATIVE_PG_QA_PASSWORD: isolated-native-circle-fixture-only
+        run: node tools/qa/security_delete_message/bil_delete_message_defensive_fixture.mjs "$GITHUB_WORKSPACE" "$RUNNER_TEMP/bil-delete-message-defensive" "$GITHUB_WORKSPACE/tools/qa/native_pg_fixture/package.json" "$GITHUB_SHA"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: bil-delete-message-defensive-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-delete-message-defensive/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: bil-native-circle-review-${{ github.sha }}
+          path: ${{ runner.temp }}/bil-native-circle-review/
+          if-no-files-found: error

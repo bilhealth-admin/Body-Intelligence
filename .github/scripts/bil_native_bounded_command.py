@@ -27,6 +27,73 @@ COUNTER = re.compile(r"\b\d{1,2}:\d{2}(?:\.\d+)? \+\d+(?: -\d+)?: (.+)")
 SUMMARY = re.compile(r"^(All tests passed|Some tests failed)[.!]\s*$")
 
 
+class _NonBlockingConsole:
+    """Best-effort console mirror; the raw log and receipt stay authoritative.
+
+    Never let a stalled log consumer delay the deadline or process cleanup.
+    No console queue is kept: backpressured display bytes are counted, while
+    the complete consumed child bytes still go to the raw log and parser.
+    """
+
+    def __init__(self):
+        self.fd = None
+        self.was_blocking = None
+        self.written = 0
+        self.omitted = 0
+        self.unavailable_reason = None
+        try:
+            self.fd = os.dup(sys.stdout.fileno())
+            self.was_blocking = os.get_blocking(self.fd)
+            os.set_blocking(self.fd, False)
+        except (AttributeError, OSError, ValueError) as error:
+            self.unavailable_reason = type(error).__name__
+            self.close()
+
+    def write(self, raw):
+        if self.fd is None:
+            self.omitted += len(raw)
+            return
+        remaining = memoryview(raw)
+        while remaining:
+            try:
+                count = os.write(self.fd, remaining[:65536])
+                if count <= 0:
+                    self.omitted += len(remaining)
+                    return
+                self.written += count
+                remaining = remaining[count:]
+            except BlockingIOError:
+                self.omitted += len(remaining)
+                return
+            except OSError as error:
+                self.unavailable_reason = type(error).__name__
+                self.omitted += len(remaining)
+                return
+
+    def line(self, text):
+        self.write((text + "\n").encode("utf-8"))
+
+    def close(self):
+        if self.fd is not None:
+            try:
+                if self.was_blocking is not None:
+                    os.set_blocking(self.fd, self.was_blocking)
+            except OSError as error:
+                self.unavailable_reason = type(error).__name__
+            finally:
+                try:
+                    os.close(self.fd)
+                except OSError as error:
+                    self.unavailable_reason = type(error).__name__
+                self.fd = None
+
+    def receipt(self):
+        return {"mode": "nonblocking_no_queue", "written_bytes": self.written,
+                "omitted_display_bytes": self.omitted,
+                "unavailable_reason": self.unavailable_reason,
+                "raw_log_and_result_parser_unchanged": True}
+
+
 def positive_seconds(value):
     result = float(value)
     if not math.isfinite(result) or result <= 0:
@@ -174,7 +241,12 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
     cleanup = None
     output_hash = hashlib.sha256()
     output_bytes = 0
+    parser_tail = ""
     chunks = queue.Queue()
+    chunks.maxsize = 64
+    reader_stop = threading.Event()
+    queue_peak = [0]
+    console = _NonBlockingConsole()
     reader = None
     eof = False
     output_drain_limited = False
@@ -200,14 +272,17 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
 
     def consume(raw, stream):
         nonlocal deadline, phase, first_test_at, terminal_at
-        nonlocal native_summary, native_failed, output_bytes
+        nonlocal native_summary, native_failed, output_bytes, parser_tail
         stream.write(raw)
         stream.flush()
         output_hash.update(raw)
         output_bytes += len(raw)
-        sys.stdout.buffer.write(raw)
-        sys.stdout.buffer.flush()
-        text = ANSI.sub("", raw.decode("utf-8", errors="replace")).strip()
+        console.write(raw)
+        text = parser_tail + raw.decode("utf-8", errors="replace")
+        # Keep a bounded overlap when a long line crosses the chunk limit so
+        # a split native failure/summary cannot disappear from the receipt.
+        parser_tail = text[-4096:] if not raw.endswith(b"\n") else ""
+        text = ANSI.sub("", text).strip()
         match = COUNTER.search(text)
         if match is None or match.group(1).lower().startswith("loading "):
             return
@@ -229,7 +304,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         options = {"start_new_session": True} if os.name == "posix" else {
             "creationflags": subprocess.CREATE_NEW_PROCESS_GROUP,
         }
-        print(f"BIL_NATIVE_STAGE {label}: starting (OS deadline enabled)", flush=True)
+        console.line(f"BIL_NATIVE_STAGE {label}: starting (OS deadline enabled)")
         process = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **options,
         )
@@ -237,10 +312,23 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
 
         def read_output():
             try:
-                for raw in iter(process.stdout.readline, b""):
-                    chunks.put(raw)
+                for raw in iter(lambda: process.stdout.readline(65536), b""):
+                    while not reader_stop.is_set():
+                        try:
+                            chunks.put(raw, timeout=.1)
+                            queue_peak[0] = max(queue_peak[0], chunks.qsize())
+                            break
+                        except queue.Full:
+                            pass
+                    if reader_stop.is_set():
+                        return
             finally:
-                chunks.put(None)
+                while not reader_stop.is_set():
+                    try:
+                        chunks.put(None, timeout=.1)
+                        break
+                    except queue.Full:
+                        pass
 
         reader = threading.Thread(target=read_output, daemon=True)
         reader.start()
@@ -257,8 +345,8 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
                     pass
                 now = time.monotonic()
                 if now - last_heartbeat >= 30:
-                    print(f"BIL_NATIVE_STAGE {label}: {phase}, "
-                          f"elapsed={int(now-started)}s", flush=True)
+                    console.line(f"BIL_NATIVE_STAGE {label}: {phase}, "
+                                 f"elapsed={int(now-started)}s")
                     last_heartbeat = now
                 if interrupted or now >= deadline:
                     timed_out = not interrupted
@@ -302,6 +390,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
                     raw_returncode = observed
             except Exception as error:
                 supervisor_error = supervisor_error or type(error).__name__
+        reader_stop.set()
         for sig, handler in previous_signals.items():
             try:
                 signal.signal(sig, handler)
@@ -318,6 +407,8 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
     )
     if raw_returncode == 0 and native_failed and not timed_out:
         reason = "native_failure_summary_with_zero_process_exit"
+    console.line(f"BIL_NATIVE_STAGE {label}: {reason}, exit={exit_code}")
+    console.close()
     receipt = {
         "label": label,
         "started_at_utc": dt.datetime.fromtimestamp(
@@ -338,6 +429,10 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         "cleanup_attempted": cleanup_attempted,
         "cleanup": cleanup,
         "effective_returncode": exit_code,
+        "reader_queue_capacity_chunks": chunks.maxsize,
+        "reader_chunk_max_bytes": 65536,
+        "reader_queue_peak_chunks": queue_peak[0],
+        "console_forwarding": console.receipt(),
         "output_bytes": output_bytes,
         "output_sha256": output_hash.hexdigest(),
         "output_complete": eof and not output_drain_limited,
@@ -345,7 +440,6 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         "success_basis": "process exit 0 and no native failure summary; never inferred from a log alone",
     }
     receipt_path.write_bytes((json.dumps(receipt, indent=2) + "\n").encode("utf-8"))
-    print(f"BIL_NATIVE_STAGE {label}: {reason}, exit={exit_code}", flush=True)
     return exit_code
 
 

@@ -280,7 +280,7 @@ export function validateCatalog(catalog) {
     errors.push('Standard BIL subscriptions must use UPFRONT, not Apple monthly-commitment billing');
   }
   warnings.push('Dry-run records only canonical USD reference prices. Every customer-facing local price must come from Apple equalization/store metadata.');
-  warnings.push('Apple has no exact USD 2.50 tier for the Premium monthly and Boost targets; the canonical Apple reference is USD 2.49, never above the business target.');
+  warnings.push('Apple has no exact USD 2.50 tier for the Premium monthly target; its canonical Apple reference remains USD 2.49. AI Boost uses the owner-approved USD 1.99 Apple reference (2026-10-23). This policy alignment does not mutate live prices.');
   warnings.push('This package never submits for review, publishes a version, or changes availability/prices in dry-run/inspect modes.');
   warnings.push('Trial policy is declarative only; this utility has no introductory-offer mutation path.');
   return { errors, warnings, unresolved, valid: errors.length === 0, applyReady: errors.length === 0 && unresolved.length === 0 };

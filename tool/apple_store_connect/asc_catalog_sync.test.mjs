@@ -49,8 +49,10 @@ test('catalog split and immutable product metadata match release truth', () => {
   assert.equal(products.bil_premium.territoryCount, 4);
   assert.equal(products.bil_premium_ai_coach.territoryCount, 168);
   assert.equal(products.bil_ai_boost.territoryCount, 172);
-  assert.equal(products.bil_ai_boost.appleReferencePrice.businessTargetAmount, 2.5);
-  assert.equal(products.bil_ai_boost.appleReferencePrice.appleReferenceAmount, 2.49);
+  assert.equal(products.bil_ai_boost.appleReferencePrice.businessTargetAmount, 1.99);
+  assert.equal(products.bil_ai_boost.appleReferencePrice.appleReferenceAmount, 1.99);
+  assert.equal(products.bil_ai_boost.appleReferencePrice.selection, 'exact_supported_price');
+  assert.equal(catalog.canonicalPricing.products.bil_ai_boost.ownerApprovedReferencePriceChangeDate, '2026-10-23');
 });
 
 test('trial decision covers both AI products, excludes Premium, and is declarative', () => {

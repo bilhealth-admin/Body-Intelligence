@@ -51,10 +51,11 @@
     },
     "bil_ai_boost": {
       "kind": "CONSUMABLE",
-      "businessTargetUsd": "2.50",
+      "businessTargetUsd": "1.99",
       "appleReferenceTerritory": "US",
-      "appleReferencePriceUsd": "2.49",
-      "applePriceSelection": "closest_supported_price_not_above_business_target",
+      "appleReferencePriceUsd": "1.99",
+      "applePriceSelection": "exact_supported_price",
+      "ownerApprovedReferencePriceChangeDate": "2026-10-23",
       "localization": "apple_equalized"
     }
   },

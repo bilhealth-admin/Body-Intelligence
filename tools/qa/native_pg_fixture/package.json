@@ -1,0 +1,9 @@
+{
+  "name": "bil-native-postgres-qa-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dedicated native PostgreSQL QA driver; never an app dependency",
+  "dependencies": {
+    "pg": "8.23.1"
+  }
+}

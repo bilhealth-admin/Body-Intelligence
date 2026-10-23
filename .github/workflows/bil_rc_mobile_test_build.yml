@@ -5,12 +5,16 @@ on:
     branches: [fix/community-sapphire-health-3033]
   workflow_dispatch:
     inputs:
+      ios_only:
+        description: 'Only iOS native and lifecycle validation; not full RC evidence'
+        type: boolean
+        default: false
       notification_api33_only:
         description: 'Only API 33 notification SDK validation; not full RC evidence'
         type: boolean
         default: false
 
-run-name: BIL RC - ${{ inputs.notification_api33_only && 'API33 notifications ONLY' || 'full mobile evidence' }} - ${{ github.sha }}
+run-name: BIL RC - ${{ inputs.ios_only && 'iOS ONLY' || inputs.notification_api33_only && 'API33 notifications ONLY' || 'full mobile evidence' }} - ${{ github.sha }}
 
 permissions:
   contents: read
@@ -27,7 +31,7 @@ env:
 
 jobs:
   android-emulator-artifact:
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.notification_api33_only }}
+    if: ${{ github.event_name != 'workflow_dispatch' || (!inputs.ios_only && !inputs.notification_api33_only) }}
     name: Android APK/AAB + emulator evidence
     runs-on: ubuntu-24.04
     timeout-minutes: 90
@@ -227,7 +231,7 @@ jobs:
         run: rm -f android/app/upload-keystore.jks android/key.properties
 
   ios-simulator-artifact:
-    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.notification_api33_only }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.ios_only || !inputs.notification_api33_only }}
     name: iOS simulator + unsigned IPA evidence
     runs-on: macos-26
     timeout-minutes: 100
@@ -250,6 +254,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          python3 .github/scripts/test_bil_ios_mobile_native_scope.py
+          python3 .github/scripts/test_bil_native_bounded_command.py
           flutter pub get
           flutter test --no-pub             test/platform_readiness/native_permission_dialog_contract_test.dart             test/connected_health/apple_health_permission_flow_test.dart             test/features/notifications/apple_notification_permission_timing_test.dart             test/launch_readiness/deep_link_exhaustive_source_contract_test.dart             test/launch_readiness/deferred_ios_simple_barcode_scanner_plugin_test.dart             test/launch_readiness/flutter_release_plugin_sanitizer_test.dart             --timeout 10m
           plutil -lint ios/Runner/Info.plist
@@ -324,6 +330,26 @@ jobs:
           echo "$RUNNER_TEMP/bil-idb-bin" >> "$GITHUB_PATH"
           echo "$RUNNER_TEMP/bil-idb-venv/bin" >> "$GITHUB_PATH"
 
+      - name: Run bounded iOS crypto and settings from exact simulator bundles
+        shell: bash
+        env:
+          BIL_NATIVE_TARGET: crypto-and-settings
+        run: bash .github/scripts/bil_ios37_native_integration.sh
+
+      - name: Rebuild QA app after integration harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The exact native test bundles use different Dart entrypoints.
+          # Restore the real QA app before creating the lifecycle simulators.
+          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --simulator --debug --no-codesign --no-pub \
+            --build-number "$BIL_TEST_BUILD_NUMBER" \
+            --dart-define=BIL_ENVIRONMENT=qa \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
+            --dart-define=BIL_PAYMENTS_ENABLED=false \
+            --dart-define=BIL_ADS_ENABLED=false
+          test -d build/ios/iphonesimulator/Runner.app
+
       - name: Create iPhone and iPad simulator sessions
         id: sims
         shell: bash
@@ -385,38 +411,6 @@ jobs:
               --wifiBars 3 --cellularBars 4; then
               echo 'Status-bar normalization unavailable; runtime evidence remains valid.'
             fi
-            xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
-          done
-
-      - name: Run iOS native integration tests
-        shell: bash
-        env:
-          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
-        run: |
-          set -euo pipefail
-          flutter test --no-pub             integration_test/system_crypto_bridge_integration_test.dart             -d "$IPHONE_UDID" --timeout 10m
-          flutter test --no-pub             integration_test/native_settings_polish_test.dart             -d "$IPHONE_UDID" --timeout 10m
-
-      - name: Rebuild and reinstall QA app after integration harness
-        shell: bash
-        env:
-          IPHONE_UDID: ${{ steps.sims.outputs.iphone }}
-          IPAD_UDID: ${{ steps.sims.outputs.ipad }}
-        run: |
-          set -euo pipefail
-          # flutter test integration_test may replace the simulator Runner.app
-          # with a test-harness build. Rebuild the real QA app before lifecycle
-          # evidence so startup/navigation is measured on the intended bundle.
-          python3 tool/release/retry_sqlite_asset_build.py -- flutter build ios --simulator --debug --no-codesign --no-pub \
-            --build-number "$BIL_TEST_BUILD_NUMBER" \
-            --dart-define=BIL_ENVIRONMENT=qa \
-            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=false \
-            --dart-define=BIL_PAYMENTS_ENABLED=false \
-            --dart-define=BIL_ADS_ENABLED=false
-          test -d build/ios/iphonesimulator/Runner.app
-          for UDID in "$IPHONE_UDID" "$IPAD_UDID"; do
-            xcrun simctl bootstatus "$UDID" -b
-            xcrun simctl uninstall "$UDID" "$BIL_APP_ID" >/dev/null 2>&1 || true
             xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
             xcrun simctl get_app_container "$UDID" "$BIL_APP_ID" app >/dev/null
           done
@@ -915,6 +909,7 @@ jobs:
             BIL-unsigned-RC.ipa
             build/ios/iphonesimulator/BIL-RC-Simulator.app.zip
             artifacts/release/rc_mobile_test/ios
+            artifacts/qa/text18/ios37-simulators
           if-no-files-found: warn
           retention-days: 14
 
@@ -936,6 +931,7 @@ jobs:
           rm -rf Payload
 
   android-notification-sdk:
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.ios_only }}
     name: Android API ${{ matrix.api }} local notification permission states
     runs-on: ubuntu-24.04
     timeout-minutes: 60

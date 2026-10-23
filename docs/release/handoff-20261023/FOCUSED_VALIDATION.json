@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "platform": "Windows",
+  "recorded_at_utc": "2026-10-23T19:24:02.813990+00:00",
+  "scope": "Focused assembled handoff validation only, not full final-source CI or release acceptance.",
+  "results": [
+    {
+      "name": "native-supervisor",
+      "exit_code": 0,
+      "log_sha256": "8016288da73e4e4bd15fdccaa408d263cf66819c6db3740ff7bc521d44a4acb1",
+      "log": "native-supervisor.log"
+    },
+    {
+      "name": "mobile-native-scope",
+      "exit_code": 0,
+      "log_sha256": "1879f5a35fdec38a732c0d907340f119cf3d2f95402df70ab400d03dcdf22efa",
+      "log": "mobile-native-scope.log"
+    },
+    {
+      "name": "candidate-owner",
+      "exit_code": 0,
+      "log_sha256": "22be1b7ea76df1e50231911006ba39e7ede1baa7f7c805fde8d05d5c0a3ce1d1",
+      "log": "candidate-owner.log"
+    },
+    {
+      "name": "candidate-workflows",
+      "exit_code": 0,
+      "log_sha256": "dc964164a2a93a1eac6076dbb78027de53b8694a44de0b941bd88330ec4381f8",
+      "log": "candidate-workflows.log"
+    },
+    {
+      "name": "candidate-release",
+      "exit_code": 0,
+      "log_sha256": "99fcb39b806c32792cfff6a86bf586969856f239c73f9f29f429a5b320780b2b",
+      "log": "candidate-release.log"
+    },
+    {
+      "name": "security-inventory",
+      "exit_code": 0,
+      "log_sha256": "874e72238f92c211c81c2ac0b6dd704c81d34fc4916c22ac871d6012f8cbf830",
+      "log": "security-inventory.log"
+    },
+    {
+      "name": "pricing-and-public-policy",
+      "exit_code": 0,
+      "log_sha256": "3e45d9f5856831ab557db2df8a7f7f2d379b2d5f7f1b3111eda3c872e5fc757e",
+      "log": "pricing-and-public-policy.log"
+    }
+  ]
+}

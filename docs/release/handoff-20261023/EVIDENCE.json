@@ -1,0 +1,319 @@
+{
+  "status": "HANDOFF_NOT_RELEASE_ACCEPTANCE",
+  "base_sha": "1b23d4d4bb73d467f9c3cf1425b2eb2d8cc78c2d",
+  "protected_sha": "31554b3e078667a38bd3c53aa105f5f1d2a4dc96",
+  "batch_manifest_sha256": "8f5da7d43a5f7bd223f0363fcd55594bc80a6161bc406204ac6d1bc15953c682",
+  "file_count": 46,
+  "files": [
+    {
+      "path": ".github/workflows/bil_android_isolated_emulator_smoke.yml",
+      "sha256": "7c822eee6516653dabc0ed737c939709b8d4ee0f95f5dde79b5189047cce722a",
+      "operation": "replace"
+    },
+    {
+      "path": "tools/qa/bil_candidate_owner_runner.py",
+      "sha256": "4859c57e0d6aac5b724373f16695a2482545f965e5dc2b099a42a771e126c1ee",
+      "operation": "replace"
+    },
+    {
+      "path": "tools/qa/test_bil_candidate_owner_runner.py",
+      "sha256": "afc560709f425070025f39b6fab18a446685d59f7c51c54dd0878709da3036b1",
+      "operation": "replace"
+    },
+    {
+      "path": ".github/workflows/bil_owner_comprehensive_validation.yml",
+      "sha256": "f9ae714c07bba447ad90f5d214ada6f7176c079dd316a000827efb8e9c844c76",
+      "operation": "replace"
+    },
+    {
+      "path": "tool/apple_store_connect/canonical_store_pricing_2026-09-05.json",
+      "sha256": "512783f19cd06f84083dd10c8c4b8305369e5bf7fce5580a16d537ffd21ef233",
+      "operation": "replace"
+    },
+    {
+      "path": "tool/apple_store_connect/apple_catalog_policy.json",
+      "sha256": "ee9c3c6818dcde2286409faec1bffc428ace89408698edcde68211b1892ad74b",
+      "operation": "replace"
+    },
+    {
+      "path": "tool/apple_store_connect/asc_catalog_sync.mjs",
+      "sha256": "bbf25cde6096e2292a5c96a3018d99522aef718bedb703d20f858da544df3779",
+      "operation": "replace"
+    },
+    {
+      "path": "tool/apple_store_connect/asc_catalog_sync.test.mjs",
+      "sha256": "a4f7b02ddfa1993b9eccbb65f4ee9d07420432b2d70010bf7e26922222b2abf8",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/index.html",
+      "sha256": "4a2ad05bfdea9a9c443a35074626630e8883e489fb29ee7ec1a402606f1a3cc4",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/account-deletion.ar.html",
+      "sha256": "566911720753ff5178e8eba8fa642cd752497aaef7c88e6689ba6086d0900d4b",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/account-deletion.en.html",
+      "sha256": "45550462517730abb940c5571c4ef7659e8ecfc639a94a562b2610cea3ce17e5",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/community-guidelines.ar.html",
+      "sha256": "d50d07e1a907dcc11eace48cfdc8c6421db0b16a4a6de8a74c96a3e38fcdec29",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/community-guidelines.en.html",
+      "sha256": "7d0c020e4e324dda23cca046d9f91e1e917ec4cd748abb9f5d6a83a361c97fa7",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/contact.ar.html",
+      "sha256": "4737f8e9e61d27f3d0beb17b3adc0789669cab083651de0cb04d56c70db27833",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/contact.en.html",
+      "sha256": "c96b084d7d6dded9f6d6e10cc3d7183cad2a8caa7964eddcef683751094620ba",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/data-deletion.ar.html",
+      "sha256": "42fc4607428fe9786928bab1e77e7ef5493f1416c5e79ce632caaa3431f8c5c7",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/data-deletion.en.html",
+      "sha256": "297d6116352c7fdf4178eb01f943e7d7a3daeb255d5df71d3ceccc2e59380207",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/health-disclaimer.ar.html",
+      "sha256": "ab778beb4d9b84768966283dcb643e4c1349c08ed3ba28eaa1f14d44f872cf28",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/health-disclaimer.en.html",
+      "sha256": "a6f35d99df436a99041628e393e221af09040b093433823468523d48daa92335",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/privacy.ar.html",
+      "sha256": "d0238d57b4a34f421c42da4668b8a9a076558c08da8c55932f407dbc5d635b5a",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/privacy.en.html",
+      "sha256": "a13bcd00993d2efba1175ab8269fa6316e15a2eac5760899b5fd4c776e4a229a",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/subscription-terms.ar.html",
+      "sha256": "5988ea9e9f83664163d5913465eb4b768f42f9cb488dc64a581023420f703894",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/subscription-terms.en.html",
+      "sha256": "12e9e16dedccd402358f45e892cbe8cfa57366f8f86934963f76330de5f59b81",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/support.ar.html",
+      "sha256": "d9842859e7f83662a6f32945fe91d4f0b3d00e582e249da46200aa22abe3bb02",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/support.en.html",
+      "sha256": "79164c49eedc74126c454902f83532c71567ecf5381741d8fb788d83938e8cdc",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/terms.ar.html",
+      "sha256": "520a5e2d8cd329bc1c432c36bff07a1789093d676a0dbe3cd38ec4a675624a08",
+      "operation": "replace"
+    },
+    {
+      "path": "public_site/policy-pages/terms.en.html",
+      "sha256": "9efeab9a7071dd879cbeb3abc059bebdc59af0e41577cf5b54430bc4ff03e200",
+      "operation": "replace"
+    },
+    {
+      "path": "tool/release/free_community_copy.test.mjs",
+      "sha256": "15f3b2c7c35edffa7b387658d1f4512aa8b4ad5b02fd694672a759a9a0d81beb",
+      "operation": "replace"
+    },
+    {
+      "path": "tool/release/public_policy_pages.test.mjs",
+      "sha256": "eea2332479621363b1b1011211c2dd600834a4c3b2d8f08c8f20e55f60be2d8c",
+      "operation": "replace"
+    },
+    {
+      "path": "tool/release/render_public_policy_pages.mjs",
+      "sha256": "9dc57b6c6005ad126c9df2d09e75156fd76dcc7420318c8bffeedcc918fcefa4",
+      "operation": "replace"
+    },
+    {
+      "path": "tools/qa/bil_security_fixture_inventory.py",
+      "sha256": "27e5d2b85c0f620f1a0e84ab1e42d85957785853c705a7ed42aaf497336b23d3",
+      "operation": "add"
+    },
+    {
+      "path": "tools/qa/bil_fixture_network_deny.cjs",
+      "sha256": "901bf92a60a8bd36d3eea5e07e8190bcbdb6fa80ad396f14efc1f8e80aa8978c",
+      "operation": "add"
+    },
+    {
+      "path": "tools/qa/test_bil_security_fixture_inventory.py",
+      "sha256": "e8af4655bb05eeeac77d1708e7c4b99c61ca8a9be9c15f9d951f207b27b39a38",
+      "operation": "add"
+    },
+    {
+      "path": "tools/qa/native_pg_fixture/package.json",
+      "sha256": "1faa7ec3c26666ab927a7212dd49cdd2b639bd134ea6eee84b45ea27a08ee51c",
+      "operation": "add"
+    },
+    {
+      "path": "tools/qa/native_pg_fixture/package-lock.json",
+      "sha256": "fc85563d9368b454fb7fadf67351d92a704df644c9a401605a95fa05af00b9bf",
+      "operation": "add"
+    },
+    {
+      "path": "tools/qa/bil_circle_review_native_fixture.mjs",
+      "sha256": "af8da508404e89be52c9975f3fd6527f693e375656a0100b3c1eb5ee3542e136",
+      "operation": "add"
+    },
+    {
+      "path": ".github/workflows/bil_security_fixture_inventory.yml",
+      "sha256": "f0c7645c0aefcdd410cf2772ae704286ef4bd464aaf1a017568e5eca0cb65aff",
+      "operation": "add"
+    },
+    {
+      "path": "tools/qa/security_delete_message/bil_delete_message_defensive_fixture.mjs",
+      "sha256": "e38d57e02c3154a14cdb2be420f0e2501f325ffcec61702e46e547663a327c5b",
+      "operation": "add"
+    },
+    {
+      "path": "tools/qa/security_delete_message/bil_delete_message.hardening.sql",
+      "sha256": "6d91d142f7cf307faecd738caebd593f5ef29c70a10e0178fed7ad2a69275401",
+      "operation": "add"
+    },
+    {
+      "path": ".github/workflows/bil_rc_mobile_test_build.yml",
+      "sha256": "c136dce83982b79cdba6a1a5b8b8663428bd81fc7790d03dd2275c5b7b8ee6f9",
+      "operation": "replace"
+    },
+    {
+      "path": ".github/scripts/bil_ios37_native_integration.sh",
+      "sha256": "f90294eff0db799d30182ab2c292ffc7f2a24757ec6220dce59e6eeb962c6f96",
+      "operation": "replace"
+    },
+    {
+      "path": ".github/scripts/test_bil_ios_mobile_native_scope.py",
+      "sha256": "db9875af6ab9f7f9827f298b3bb75cb73ad95351b0b9811cfc8863955b3cfd02",
+      "operation": "add"
+    },
+    {
+      "path": "supabase/migrations/20261023190403_harden_bil_delete_message_search_path.sql",
+      "sha256": "eefcef08d051f3c1ec725f8cef15707d5e8a86d45aacfe7dc78f9f3ea72a00a3",
+      "operation": "add"
+    },
+    {
+      "path": ".github/workflows/bil_ios_signed_release.yml",
+      "sha256": "8806098cb1215309ca7d2c35ab20b286009c99ebc3be73ca224f13862b2be496",
+      "operation": "replace"
+    },
+    {
+      "path": ".github/scripts/bil_native_bounded_command.py",
+      "sha256": "50e9f10a61e794997b37d7d1df95ef31ca462fc643fe5cf0000e2e3f7e58c98d",
+      "operation": "replace"
+    },
+    {
+      "path": ".github/scripts/test_bil_native_bounded_command.py",
+      "sha256": "0601e4d0651ad0daa5c06fde730fdee64c379b81e392c72e20c0ce0ea916d030",
+      "operation": "replace"
+    }
+  ],
+  "focused_validation": {
+    "status": "PASS",
+    "platform": "Windows",
+    "recorded_at_utc": "2026-10-23T19:24:02.813990+00:00",
+    "scope": "Focused assembled handoff validation only, not full final-source CI or release acceptance.",
+    "results": [
+      {
+        "name": "native-supervisor",
+        "exit_code": 0,
+        "log_sha256": "8016288da73e4e4bd15fdccaa408d263cf66819c6db3740ff7bc521d44a4acb1",
+        "log": "native-supervisor.log"
+      },
+      {
+        "name": "mobile-native-scope",
+        "exit_code": 0,
+        "log_sha256": "1879f5a35fdec38a732c0d907340f119cf3d2f95402df70ab400d03dcdf22efa",
+        "log": "mobile-native-scope.log"
+      },
+      {
+        "name": "candidate-owner",
+        "exit_code": 0,
+        "log_sha256": "22be1b7ea76df1e50231911006ba39e7ede1baa7f7c805fde8d05d5c0a3ce1d1",
+        "log": "candidate-owner.log"
+      },
+      {
+        "name": "candidate-workflows",
+        "exit_code": 0,
+        "log_sha256": "dc964164a2a93a1eac6076dbb78027de53b8694a44de0b941bd88330ec4381f8",
+        "log": "candidate-workflows.log"
+      },
+      {
+        "name": "candidate-release",
+        "exit_code": 0,
+        "log_sha256": "99fcb39b806c32792cfff6a86bf586969856f239c73f9f29f429a5b320780b2b",
+        "log": "candidate-release.log"
+      },
+      {
+        "name": "security-inventory",
+        "exit_code": 0,
+        "log_sha256": "874e72238f92c211c81c2ac0b6dd704c81d34fc4916c22ac871d6012f8cbf830",
+        "log": "security-inventory.log"
+      },
+      {
+        "name": "pricing-and-public-policy",
+        "exit_code": 0,
+        "log_sha256": "3e45d9f5856831ab557db2df8a7f7f2d379b2d5f7f1b3111eda3c872e5fc757e",
+        "log": "pricing-and-public-policy.log"
+      }
+    ]
+  },
+  "evidence_boundaries": {
+    "full_root_suite_base_sha_only": 10595,
+    "final_source_full_ci_complete": false,
+    "ios38_testflight_uploaded": false,
+    "android33_production_artifact_verified": false,
+    "google_final_native_video_ready": false,
+    "google_reply_sent": false
+  },
+  "native_diagnostic": {
+    "run_id": 40000225995,
+    "iphone_native_settings": "PASS",
+    "ipad_native_settings": "BOOTSTRAP_TIMEOUT_EXIT_124",
+    "unread_stdout_defect_cause_of_ci_run": "NOT_PROVEN"
+  },
+  "deployment": {
+    "migration_version": "20261023190403",
+    "migration_name": "harden_bil_delete_message_search_path",
+    "deployed_and_read_back": true,
+    "ci_run_id": 40006941773,
+    "defensive_assertions": 10
+  },
+  "local_evidence_archive_sha256": "6f2f1a7556cb4e8138a2d963bc03955a6319ede4a426e5aefe18d90e77c9eb83",
+  "format_only_normalizations_after_batch": [
+    {
+      "path": "tools/qa/security_delete_message/bil_delete_message.hardening.sql",
+      "reason": "Remove extra blank line at EOF only; SQL tokens unchanged",
+      "before_sha256": "fd29c2f71cac5036b65bdf07d5f69cca534fd6b374b1e83c2e85b6ca42179594",
+      "after_sha256": "6d91d142f7cf307faecd738caebd593f5ef29c70a10e0178fed7ad2a69275401"
+    }
+  ]
+}

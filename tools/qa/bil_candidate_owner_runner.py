@@ -1,7 +1,7 @@
 """Run the immutable owner engine for the one authorized iOS38/Android33 branch.
 
-Only branch identity and the deployed Smart Plan build capability differ.
-Original source-freeze, scope, evidence, concurrency and failure checks remain.
+Branch identity, Smart Plan capability and candidate input coverage differ.
+Original source-freeze, root test scope, evidence, concurrency and failure checks remain.
 """
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ PROTECTED = '31554b3e078667a38bd3c53aa105f5f1d2a4dc96'
 SOURCE_BASE = '937aea673c2e9c0bec15ef988131d58f96bf5afe'
 OWNER_SHA256 = '3dbdc556d1484dfc250eb1d55154d431e8cc587ac013285f9c9e2d7fe1af54b2'
 _original_command = owner.root_test_command
+_original_inputs = owner.inputs
 
 
 def verify_original(path):
@@ -37,6 +38,24 @@ def root_command(dart, snapshot):
             '--dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true']
 
 
+def source_inputs():
+    """Match the existing frozen candidate scope without changing its engine."""
+    result = _original_inputs()
+    for name in owner.git('ls-files', '-co', '--exclude-standard').splitlines():
+        path = owner.ROOT / name
+        if path.is_file() and name.startswith((
+                'artifacts/workout_media/',
+                'docs/qa_next/BIL_20261022_SMART_PLAN_')):
+            result[name] = owner.digest(path)
+    return result
+
+
+def analysis_inputs(branch):
+    """Use the root suite's exact scope for both analysis boundary snapshots."""
+    verify_original(Path(owner.__file__))
+    return source_inputs() if branch == BRANCH else _original_inputs()
+
+
 def main():
     # The full root run must include all new PNG comparisons/captures even if
     # a previous code-only process inherited suppression flags.
@@ -51,6 +70,7 @@ def main():
                        cwd=owner.ROOT, check=True)
     owner.ALLOWED_BRANCH = BRANCH
     owner.root_test_command = root_command
+    owner.inputs = source_inputs
     return owner.main()
 
 

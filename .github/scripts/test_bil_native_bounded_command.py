@@ -307,5 +307,78 @@ class BoundedNativeCommandTests(unittest.TestCase):
         self.assertEqual(receipt["supervisor_error"], "OSError")
 
 
+class StdoutBackpressureTests(unittest.TestCase):
+    def run_without_stdout_reader(self, source, *, timeout=2, grace=.2):
+        with tempfile.TemporaryDirectory(prefix="bil-backpressure-") as directory:
+            root = Path(directory)
+            process = subprocess.Popen([
+                sys.executable, str(SCRIPT), "--label", "backpressure-fixture",
+                "--log", str(root / "raw.log"), "--receipt", str(root / "receipt.json"),
+                "--timeout-seconds", str(timeout), "--kill-grace-seconds", ".1",
+                "--summary-grace-seconds", str(grace), "--",
+                sys.executable, "-u", "-c", source,
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            exited_without_reader = True
+            try:
+                process.wait(timeout=7)
+            except subprocess.TimeoutExpired:
+                exited_without_reader = False
+            # Drain only after the bounded-exit assertion has been observed.
+            # This also lets the old faulty supervisor clean up its own child
+            # when the regression is deliberately run against that version.
+            stdout, stderr = process.communicate(timeout=8)
+            receipt = json.loads((root / "receipt.json").read_bytes())
+            raw = (root / "raw.log").read_bytes()
+        self.assertTrue(exited_without_reader, "stdout backpressure delayed the OS deadline or process exit")
+        self.assertEqual(receipt["output_bytes"], len(raw))
+        self.assertEqual(receipt["output_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertTrue(receipt["output_complete"])
+        self.assertGreater(receipt["console_forwarding"]["omitted_display_bytes"], 0)
+        self.assertEqual(receipt["console_forwarding"]["mode"], "nonblocking_no_queue")
+        self.assertIsNone(receipt["console_forwarding"]["unavailable_reason"])
+        self.assertEqual(stderr, b"")
+        return process.returncode, receipt, raw, stdout
+
+    def test_unread_stdout_cannot_block_timeout_and_raw_output_is_complete(self):
+        code, receipt, raw, _ = self.run_without_stdout_reader(
+            "import sys,time; sys.stdout.buffer.write(b'x'*1048576+b'\\n'); sys.stdout.flush(); time.sleep(30)")
+        self.assertEqual(code, 124)
+        self.assertEqual(receipt["reason"], "bootstrap_timeout")
+        self.assertLess(receipt["elapsed_seconds"], 6)
+        self.assertEqual(raw, b"x" * 1048576 + b"\n")
+
+    def test_hidden_console_failure_summary_still_fails_zero_exit(self):
+        code, receipt, raw, _ = self.run_without_stdout_reader(
+            "import sys; sys.stdout.buffer.write(b'x'*1048576+b'\\n00:01 +1 -1: Some tests failed.\\n'); sys.stdout.flush()")
+        self.assertEqual(code, 1)
+        self.assertEqual(receipt["raw_returncode"], 0)
+        self.assertTrue(receipt["native_failure_summary_seen"])
+        self.assertIn(b"Some tests failed.", raw)
+
+    def test_hidden_console_pass_summary_does_not_pass_a_hung_process(self):
+        code, receipt, raw, _ = self.run_without_stdout_reader(
+            "import sys,time; sys.stdout.buffer.write(b'x'*1048576+b'\\n00:01 +2: All tests passed.\\n'); sys.stdout.flush(); time.sleep(30)")
+        self.assertEqual(code, 124)
+        self.assertEqual(receipt["reason"], "result_delivery_timeout")
+        self.assertIn(b"All tests passed.", raw)
+
+    def test_native_failure_split_at_chunk_boundary_cannot_be_hidden(self):
+        code, receipt, raw, _ = self.run_without_stdout_reader(
+            "import sys; sys.stdout.buffer.write(b'x'*65515+b' 00:01 +1 -1: Some tests failed.\\n'); sys.stdout.flush()")
+        self.assertEqual(code, 1)
+        self.assertTrue(receipt["native_failure_summary_seen"])
+        self.assertEqual(raw, b"x" * 65515 + b" 00:01 +1 -1: Some tests failed.\n")
+
+    def test_large_output_uses_bounded_chunks_and_queue_without_losing_raw_bytes(self):
+        code, receipt, raw, _ = self.run_without_stdout_reader(
+            "import sys; sys.stdout.buffer.write(b'x'*8388608+b'\\n'); sys.stdout.flush()", timeout=10)
+        self.assertEqual(code, 0)
+        self.assertEqual(raw, b"x" * 8388608 + b"\n")
+        self.assertEqual(receipt["reader_chunk_max_bytes"], 65536)
+        self.assertEqual(receipt["reader_queue_capacity_chunks"], 64)
+        self.assertGreater(receipt["reader_queue_peak_chunks"], 0)
+        self.assertLessEqual(receipt["reader_queue_peak_chunks"], 64)
+
+
 if __name__ == "__main__":
     unittest.main()

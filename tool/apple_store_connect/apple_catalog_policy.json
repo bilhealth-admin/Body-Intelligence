@@ -124,7 +124,7 @@
       "pricingPolicyId": "bil_ai_boost",
       "localPricePolicy": {
         "state": "APPLE_EQUALIZED",
-        "reason": "Use the closest supported Apple reference point not above the USD 2.50 business target, then use Apple's equalized prices."
+        "reason": "Preserve the owner-approved Apple USA AI Boost reference price of USD 1.99 (2026-10-23). Customer-facing localized prices remain device-store authoritative; this source policy does not change live Apple or Google prices."
       }
     }
   ],

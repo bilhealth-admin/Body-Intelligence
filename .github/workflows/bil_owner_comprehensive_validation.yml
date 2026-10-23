@@ -61,14 +61,14 @@ jobs:
         run: |
           git diff --exit-code -- pubspec.yaml pubspec.lock
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python -c "import sys,json,pathlib; sys.path.insert(0,'tools/qa'); import bil_owner_full_test_runner as r; pathlib.Path('build/qa/owner-github-comprehensive/analysis-inputs.json').write_text(json.dumps(r.inputs()),encoding='utf-8')"
+          python -c "import sys,json,pathlib,os; sys.path.insert(0,'tools/qa'); import bil_candidate_owner_runner as r; pathlib.Path('build/qa/owner-github-comprehensive/analysis-inputs.json').write_text(json.dumps(r.analysis_inputs(os.environ.get('GITHUB_REF_NAME',''))),encoding='utf-8')"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run complete Flutter analysis before any root suite
         shell: pwsh
         run: |
           flutter analyze --no-pub 2>&1 | Tee-Object -FilePath build/qa/owner-github-comprehensive/flutter-analyze.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python -c "import sys,json,pathlib; sys.path.insert(0,'tools/qa'); import bil_owner_full_test_runner as r; assert r.inputs()==json.loads(pathlib.Path('build/qa/owner-github-comprehensive/analysis-inputs.json').read_text(encoding='utf-8')), 'Source changed during analysis'"
+          python -c "import sys,json,pathlib,os; sys.path.insert(0,'tools/qa'); import bil_candidate_owner_runner as r; assert r.analysis_inputs(os.environ.get('GITHUB_REF_NAME',''))==json.loads(pathlib.Path('build/qa/owner-github-comprehensive/analysis-inputs.json').read_text(encoding='utf-8')), 'Source changed during analysis'"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Run one complete root suite with every failure retained
         shell: pwsh
