@@ -88,6 +88,11 @@ jobs:
           from native_capture import validate_manifest
           validate_manifest((p/'verified-apk-manifest.xml').read_text())
           PY
+      - name: Install video probe and decoder for recording finalization
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          command -v ffprobe
       - name: Enable disposable hosted KVM only
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -123,6 +128,7 @@ jobs:
           path: |
             artifacts/google-native-capture/assets/raw/*.mp4
             artifacts/google-native-capture/*.json
+            artifacts/google-native-capture/*.xml
             ${{ runner.temp }}/bil-google-signed-input/producer-identity.json
             ${{ runner.temp }}/bil-google-signed-input/BIL-android-recording-apk-receipt.json
       - name: Summarize boundary
