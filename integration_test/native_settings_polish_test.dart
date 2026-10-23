@@ -39,6 +39,12 @@ void main() {
         ? TargetPlatform.android
         : TargetPlatform.iOS;
     BilNativeSettingsSymbols.clearCache();
+    BilNativeSettingsSymbols.onDiagnostic = (diagnostic) {
+      debugPrint(
+        'BIL_NATIVE_SYMBOL_DIAGNOSTIC ${jsonEncode(diagnostic.toJson())}',
+      );
+    };
+    addTearDown(() => BilNativeSettingsSymbols.onDiagnostic = null);
     for (final symbol in BilSettingsSymbol.values) {
       final bytes = await BilNativeSettingsSymbols.load(symbol, 66, platform);
       expect(

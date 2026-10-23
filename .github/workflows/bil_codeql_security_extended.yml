@@ -53,6 +53,7 @@ on:
           - all
           - system-crypto
           - feature-splashes
+          - native-settings
         default: all
       android_native_target:
         description: Android-only scope override when iOS needs a different affected entrypoint

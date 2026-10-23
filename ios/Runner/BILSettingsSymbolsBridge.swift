@@ -53,6 +53,16 @@ final class BILSettingsSymbolsBridge: NSObject, FlutterPlugin {
     instance.cache.countLimit = 72
     let channel = FlutterMethodChannel(name: "bil/settings_symbols", binaryMessenger: registrar.messenger())
     registrar.addMethodCallDelegate(instance, channel: channel)
+    #if DEBUG
+    NSLog("BIL_NATIVE_SYMBOL_BRIDGE_REGISTERED")
+    #endif
+  }
+
+  private func trace(_ stage: String, key: String, pixels: Int, started: TimeInterval) {
+    #if DEBUG
+    let elapsed = Int((ProcessInfo.processInfo.systemUptime - started) * 1000)
+    NSLog("BIL_NATIVE_SYMBOL_RENDER %@", "stage=\(stage) symbol=\(key) pixels=\(pixels) elapsed_ms=\(elapsed) main_thread=\(Thread.isMainThread)")
+    #endif
   }
 
   func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -64,12 +74,16 @@ final class BILSettingsSymbolsBridge: NSObject, FlutterPlugin {
       result(FlutterError(code: "invalid_symbol", message: nil, details: nil)); return
     }
     let pixels = max(16, min(128, requested.intValue))
+    let started = ProcessInfo.processInfo.systemUptime
+    trace("received", key: key, pixels: pixels, started: started)
     let cacheKey = "\(key):\(pixels)" as NSString
     if let bytes = cache.object(forKey: cacheKey) {
+      trace("cache_hit", key: key, pixels: pixels, started: started)
       result(FlutterStandardTypedData(bytes: bytes as Data)); return
     }
     let configuration = UIImage.SymbolConfiguration(pointSize: CGFloat(pixels) * 0.82, weight: .regular)
     guard let image = UIImage(systemName: name, withConfiguration: configuration)?.withTintColor(.white, renderingMode: .alwaysOriginal) else {
+      trace("uiimage_nil", key: key, pixels: pixels, started: started)
       result(nil); return
     }
     let side = CGFloat(pixels)
@@ -82,8 +96,12 @@ final class BILSettingsSymbolsBridge: NSObject, FlutterPlugin {
     let output = renderer.image { _ in
       image.draw(in: CGRect(x: (side - size.width) / 2, y: (side - size.height) / 2, width: size.width, height: size.height))
     }
-    guard let bytes = output.pngData() else { result(nil); return }
+    guard let bytes = output.pngData() else {
+      trace("png_data_nil", key: key, pixels: pixels, started: started)
+      result(nil); return
+    }
     cache.setObject(bytes as NSData, forKey: cacheKey)
+    trace("success", key: key, pixels: pixels, started: started)
     result(FlutterStandardTypedData(bytes: bytes))
   }
 }

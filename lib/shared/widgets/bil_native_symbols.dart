@@ -64,11 +64,75 @@ enum BilSettingsSymbol {
   diary,
 }
 
+/// Non-sensitive outcomes for a native render attempt. No raw exception
+/// messages, stack traces, user data or platform arguments are captured.
+enum BilNativeSymbolRenderOutcome {
+  success,
+  nativeNull,
+  timeout,
+  missingPlugin,
+  platformError,
+  unexpectedError,
+}
+
+@immutable
+class BilNativeSymbolRenderDiagnostic {
+  const BilNativeSymbolRenderDiagnostic({
+    required this.symbol,
+    required this.pixels,
+    required this.outcome,
+    required this.elapsedMilliseconds,
+    this.errorType,
+  });
+
+  final BilSettingsSymbol symbol;
+  final int pixels;
+  final BilNativeSymbolRenderOutcome outcome;
+  final int elapsedMilliseconds;
+  final String? errorType;
+
+  Map<String, Object?> toJson() => {
+    'symbol': symbol.name,
+    'pixels': pixels,
+    'outcome': outcome.name,
+    'elapsed_ms': elapsedMilliseconds,
+    if (errorType != null) 'error_type': errorType,
+  };
+}
+
 /// Loads real SF Symbols from UIKit or Google's bundled Material Symbols
 /// VectorDrawables on Android. No network, platform view or health data.
 abstract final class BilNativeSettingsSymbols {
   static const channel = MethodChannel('bil/settings_symbols');
   static final _cache = <String, Future<Uint8List?>>{};
+
+  /// Opt-in test diagnostics only. An observer cannot alter render results.
+  @visibleForTesting
+  static ValueChanged<BilNativeSymbolRenderDiagnostic>? onDiagnostic;
+
+  static void _report(
+    BilSettingsSymbol symbol,
+    int pixels,
+    Stopwatch clock,
+    BilNativeSymbolRenderOutcome outcome, [
+    Object? error,
+  ]) {
+    final observer = onDiagnostic;
+    if (observer == null) return;
+    try {
+      observer(
+        BilNativeSymbolRenderDiagnostic(
+          symbol: symbol,
+          pixels: pixels,
+          outcome: outcome,
+          elapsedMilliseconds: clock.elapsedMilliseconds,
+          errorType: error?.runtimeType.toString(),
+        ),
+      );
+    } on Object {
+      // Diagnostics must never change the production fallback/cache behavior.
+    }
+  }
 
   static Future<Uint8List?> load(
     BilSettingsSymbol symbol,
@@ -103,14 +167,58 @@ abstract final class BilNativeSettingsSymbols {
     BilSettingsSymbol symbol,
     int pixels,
   ) async {
+    final clock = Stopwatch()..start();
     try {
-      return await channel
+      final bytes = await channel
           .invokeMethod<Uint8List>('render', {
             'symbol': symbol.name,
             'pixels': pixels,
           })
           .timeout(const Duration(seconds: 2));
-    } on Object {
+      _report(
+        symbol,
+        pixels,
+        clock,
+        bytes == null
+            ? BilNativeSymbolRenderOutcome.nativeNull
+            : BilNativeSymbolRenderOutcome.success,
+      );
+      return bytes;
+    } on TimeoutException catch (error) {
+      _report(
+        symbol,
+        pixels,
+        clock,
+        BilNativeSymbolRenderOutcome.timeout,
+        error,
+      );
+      return null;
+    } on MissingPluginException catch (error) {
+      _report(
+        symbol,
+        pixels,
+        clock,
+        BilNativeSymbolRenderOutcome.missingPlugin,
+        error,
+      );
+      return null;
+    } on PlatformException catch (error) {
+      _report(
+        symbol,
+        pixels,
+        clock,
+        BilNativeSymbolRenderOutcome.platformError,
+        error,
+      );
+      return null;
+    } on Object catch (error) {
+      _report(
+        symbol,
+        pixels,
+        clock,
+        BilNativeSymbolRenderOutcome.unexpectedError,
+        error,
+      );
       // Desktop/web/widget previews must not pretend to be native iOS proof.
       return null;
     }
