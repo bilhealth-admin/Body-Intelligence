@@ -276,6 +276,8 @@ BIL_PRIVACY_PY
       xcrun simctl bootstatus "$DEVICE" -b
     stage "$LABEL-$KIND-appearance" 120 "$OUT/$LABEL-$KIND-appearance.log" \
       xcrun simctl ui "$DEVICE" appearance light
+    # Driver response and exit remain mandatory. Avoid Flutter stopApp hanging
+    # after success; the owned simulator is shut down/deleted below on all paths.
     BIL_NATIVE_CAPTURE_DEVICE_ID="$DEVICE" \
     BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-native-settings" \
     BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-feature-splashes" \
@@ -283,7 +285,7 @@ BIL_PRIVACY_PY
         --log "$OUT/$LABEL-$KIND.log" --receipt "$OUT/$LABEL-$KIND-drive-result.json" \
         --timeout-seconds 1800 --running-timeout-seconds 1200 \
         --summary-grace-seconds 60 -- \
-        flutter drive --no-pub --device-id "$DEVICE" --timeout 1200 \
+        flutter drive --no-pub --keep-app-running --device-id "$DEVICE" --timeout 1200 \
         --use-application-binary "$APP" --target "$TARGET" --driver "$DRIVER" \
         --test-arguments="--packages=$GITHUB_WORKSPACE/.dart_tool/package_config.json"
     collect_app_files "$LABEL-$KIND" "$DEVICE"

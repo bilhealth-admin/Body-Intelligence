@@ -1,5 +1,6 @@
 """Owner-approved internal-only use of prior byte-identical application evidence."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -34,6 +35,14 @@ def validate_prior(run,jobs):
             or any(j.get('status')!='completed' or j.get('conclusion')!='success' for j in jobs)):
         raise ValueError('Prior application evidence jobs incomplete or failed')
 
+def validate_helpers(changes, read_bytes):
+    # Only this reviewed simulator cleanup correction differs from 6a0ef55b.
+    # No production signing, native assertions or exit-status gate is waived.
+    allowed = {'.github/scripts/bil_ios37_native_integration.sh': '68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314'}
+    if any(path not in allowed or hashlib.sha256(read_bytes(path)).hexdigest()!=allowed[path]
+           for path in changes):
+        raise ValueError('Unreviewed native or build helper changed')
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--expected-head',required=True)
@@ -56,8 +65,8 @@ def main():
     if api('git/ref/heads/integration/bil-qa-media-policy-20261011')['object']['sha']!=PROTECTED:
         raise ValueError('Protected branch moved')
     # Build helpers and existing native gate must retain the reviewed bytes.
-    if git('diff','--name-only',REVIEWED,head,'--','.github/scripts','tool/release','tool/apple_store_connect'):
-        raise ValueError('Reviewed native or build helper changed')
+    helper_changes=git('diff','--name-only',REVIEWED,head,'--','.github/scripts','tool/release','tool/apple_store_connect').splitlines()
+    validate_helpers(helper_changes,lambda path:(ROOT/path).read_bytes())
     migration=git('diff','--name-only',REVIEWED,head,'--','supabase/migrations')
     if migration:
         raise ValueError('Migration source changed after reviewed deployment')

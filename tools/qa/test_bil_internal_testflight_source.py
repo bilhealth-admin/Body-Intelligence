@@ -1,6 +1,6 @@
 import copy
 import unittest
-from bil_internal_testflight_source import AUTH,BASE,BRANCH,PRIOR_RUN,validate_identity,validate_prior
+from bil_internal_testflight_source import AUTH,BASE,BRANCH,PRIOR_RUN,validate_identity,validate_prior,validate_helpers
 
 class InternalTestFlightGuardTest(unittest.TestCase):
     def test_exact_identity_and_unchanged_application_allowed_only_with_explicit_auth(self):
@@ -34,5 +34,16 @@ class InternalTestFlightGuardTest(unittest.TestCase):
             if kind=='missing':jobs.pop()
             else:jobs[0]['conclusion']=kind
             with self.subTest(kind=kind),self.assertRaises(ValueError):validate_prior(run,jobs)
+
+class SimulatorCleanupGuardTest(unittest.TestCase):
+    def test_only_exact_reviewed_cleanup_bytes_allowed(self):
+        from pathlib import Path
+        root=Path(__file__).resolve().parents[2]
+        validate_helpers(['.github/scripts/bil_ios37_native_integration.sh'],lambda p:(root/p).read_bytes())
+
+    def test_tampered_cleanup_or_other_signing_helper_rejected(self):
+        for path in ('.github/scripts/bil_ios37_native_integration.sh','tool/release/other.py'):
+            with self.subTest(path=path),self.assertRaises(ValueError):
+                validate_helpers([path],lambda p:b'tampered')
 
 if __name__=='__main__':unittest.main()
