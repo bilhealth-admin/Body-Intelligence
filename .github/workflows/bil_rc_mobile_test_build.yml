@@ -3,6 +3,11 @@ run-name: "Google recording only; signed Android33 ${{ inputs.expected_source_sh
 on:
   workflow_dispatch:
     inputs:
+      derive_only:
+        description: Export exact derived signed RC APK without emulator or app rebuild
+        required: false
+        type: boolean
+        default: false
       expected_source_sha:
         description: Exact final Android33 source SHA, not capture-control SHA
         required: true
@@ -89,14 +94,17 @@ jobs:
           validate_manifest((p/'verified-apk-manifest.xml').read_text())
           PY
       - name: Install SHA512-pinned static native-video probe
+        if: ${{ !inputs.derive_only }}
         timeout-minutes: 3
         run: python3 tools/qa/google_native_capture/install_capture_probe.py
       - name: Enable disposable hosted KVM only
+        if: ${{ !inputs.derive_only }}
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Record actual native reviewer route; preserve honest blocking state
+        if: ${{ !inputs.derive_only }}
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
         env:
           BIL_GOOGLE_REVIEWER_EMAIL: ${{ secrets.BIL_GOOGLE_REVIEWER_EMAIL }}
@@ -120,7 +128,7 @@ jobs:
             adb -s emulator-5554 shell am force-stop com.google.android.apps.nexuslauncher
             python3 tools/qa/google_native_capture/native_capture.py capture --source "$SOURCE_SHA" --inputs "$RUNNER_TEMP/bil-google-signed-input" --output artifacts/google-native-capture --serial emulator-5554
       - name: Preserve restricted native recording and sanitized receipt even on failure
-        if: always()
+        if: ${{ always() && !inputs.derive_only }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: bil-google-native-recording-${{ github.run_id }}
@@ -132,6 +140,17 @@ jobs:
             artifacts/google-native-capture/*.xml
             ${{ runner.temp }}/bil-google-signed-input/producer-identity.json
             ${{ runner.temp }}/bil-google-signed-input/BIL-android-recording-apk-receipt.json
+      - name: Export only the verified signed recording APK and public identity receipts
+        if: ${{ inputs.derive_only }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-google-derived-recording-apk-${{ github.run_id }}
+          retention-days: 2
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/bil-google-signed-input/BIL-Android33-derived-universal.apk
+            ${{ runner.temp }}/bil-google-signed-input/BIL-android-recording-apk-receipt.json
+            ${{ runner.temp }}/bil-google-signed-input/producer-identity.json
       - name: Summarize boundary
         if: always()
         run: |
