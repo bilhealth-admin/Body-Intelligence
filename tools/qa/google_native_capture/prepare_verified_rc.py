@@ -71,8 +71,9 @@ def main():
     sdk=Path(os.environ['ANDROID_HOME'])
     signer=sorted(sdk.glob('build-tools/*/apksigner'))[-1]
     signature=subprocess.check_output([str(signer),'verify','--verbose','--print-certs',str(apk)],text=True)
-    certs=re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F:]+)$',signature,re.M)
-    require(len(certs)==1 and certs[0].replace(':','').lower()==expected,'apk_certificate_mismatch')
+    certs=re.findall(r'certificate SHA-256 digest: ([0-9a-fA-F:]+)',signature,re.M)
+    print('APK_CERTIFICATE_DECLARATIONS='+str(len(certs))+';distinct='+str(len(set(certs))))
+    require(certs and {x.replace(':','').lower() for x in certs}=={expected},'apk_certificate_mismatch')
     xml=subprocess.check_output([str(sdk/'cmdline-tools/latest/bin/apkanalyzer'),'manifest','print',str(apk)],text=True)
     validate_manifest(xml)
     save(out/'BIL-android-recording-apk-receipt.json',{

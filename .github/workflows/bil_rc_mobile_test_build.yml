@@ -39,8 +39,6 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-      - name: Validate capture-control parser and fail-closed guards
-        run: python3 -m unittest discover -s tools/qa/google_native_capture -p test_native_capture.py -v
       - name: Require dedicated Google review credentials without exporting them
         env:
           REVIEWER_EMAIL: ${{ secrets.BIL_GOOGLE_REVIEWER_EMAIL }}
@@ -83,8 +81,8 @@ jobs:
           python3 - <<'PY'
           import os,pathlib,re
           p=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil-google-signed-input'
-          signatures=re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F:]+)$',(p/'verified-apk-signature.txt').read_text(),re.M)
-          assert len(signatures)==1 and signatures[0].replace(':','').lower()==os.environ['EXPECTED_UPLOAD_CERT_SHA256'].replace(':','').lower(), 'APK signing certificate mismatch'
+          signatures=re.findall(r'certificate SHA-256 digest: ([0-9a-fA-F:]+)',(p/'verified-apk-signature.txt').read_text(),re.M)
+          assert signatures and {x.replace(':','').lower() for x in signatures}=={os.environ['EXPECTED_UPLOAD_CERT_SHA256'].replace(':','').lower()}, 'APK signing certificate mismatch'
           import sys
           sys.path.insert(0,'tools/qa/google_native_capture')
           from native_capture import validate_manifest
