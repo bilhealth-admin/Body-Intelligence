@@ -18,6 +18,10 @@ import {
 } from "./recipe-thumbnails";
 import approvedObjects from "../../../artifacts/workout_media/cloudflare_runtime_v2/protected_object_keys_v2.json";
 import freePreviews from "../../../artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json";
+import {
+  isWorkoutSourceDocumentRequest,
+  workoutSourceDocumentResponse,
+} from "./workout-source-page";
 
 const protectedObjectPrefix = "/v2/objects/";
 const videoKey = /^workouts\/v1\/(?:home|gym-six-month)\/movements\/[a-z0-9]+(?:-[a-z0-9]+)*\.mp4$/;
@@ -151,6 +155,17 @@ async function handleRequest(
         publicWorkoutPreviewPolicy,
         env,
       );
+    }
+
+    // The app opens sourceUrl in a separate browser, which cannot carry its
+    // protected Supabase bearer. A top-level HTML navigation may see an
+    // attribution page, never the Premium video bytes. All ordinary media,
+    // HEAD, range and authenticated requests keep their previous behavior.
+    if (
+      videoKey.test(objectKey) &&
+      isWorkoutSourceDocumentRequest(request)
+    ) {
+      return workoutSourceDocumentResponse(objectKey);
     }
 
     let user: AuthenticatedUser;

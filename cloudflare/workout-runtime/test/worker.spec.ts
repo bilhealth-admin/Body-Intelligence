@@ -95,6 +95,92 @@ describe("workout runtime Worker", () => {
     ).toMatchObject({ status: 404 });
   });
 
+  it("serves a safe source page for external browser navigation without releasing Premium bytes", async () => {
+    const bicepsKey =
+      "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-biceps-curl-technique.mp4";
+    expect(approvedObjects.keys).toContain(bicepsKey);
+    expect(freePreviews.videoObjectKeys).not.toContain(bicepsKey);
+    const path = `/v2/objects/${bicepsKey}`;
+
+    await env.WORKOUTS.put(bicepsKey, "protected-test-video-bytes", {
+      httpMetadata: { contentType: "video/mp4" },
+    });
+
+    const browser = await dispatch(
+      incoming(path, {
+        headers: {
+          accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "sec-fetch-mode": "navigate",
+          "sec-fetch-dest": "document",
+        },
+      }),
+    );
+    expect(browser.status).toBe(200);
+    expect(browser.headers.get("content-type")).toContain("text/html");
+    expect(browser.headers.get("cache-control")).toBe("no-store");
+    expect(browser.headers.get("content-security-policy")).toContain("default-src 'none'");
+    expect(browser.headers.get("vary")).toContain("Authorization");
+    const html = await browser.text();
+    expect(html).toContain("Dumbbell Biceps Curl");
+    expect(html).toContain("BIL Health");
+    expect(html).toContain("inside Body Intelligence Log");
+    expect(html).not.toContain("protected-test-video-bytes");
+
+    const legacySafari = await dispatch(incoming(path, {
+      headers: { accept: "text/html,*/*" },
+    }));
+    expect(legacySafari.status).toBe(200);
+
+    const navigationWithoutAccept = await dispatch(incoming(path, {
+      headers: {
+        "sec-fetch-mode": "navigate",
+        "sec-fetch-dest": "document",
+      },
+    }));
+    expect(navigationWithoutAccept.status).toBe(200);
+
+    for (const request of [
+      incoming(path, { headers: { accept: "video/mp4" } }),
+      incoming(path, { headers: { accept: "text/html", range: "bytes=0-1" } }),
+      incoming(path, { method: "HEAD", headers: { accept: "text/html" } }),
+      incoming(path, { headers: { accept: "text/html", origin: "https://untrusted.example" } }),
+      incoming(path, { headers: { accept: "text/html", "sec-fetch-dest": "video" } }),
+      incoming(path, { headers: { accept: "text/html", "sec-fetch-mode": "cors" } }),
+    ]) {
+      const blocked = await dispatch(request);
+      expect(blocked.status).toBe(401);
+      expect(blocked.headers.get("content-type")).toContain("application/json");
+    }
+
+    const packKey = approvedObjects.keys.find((key) =>
+      key.startsWith("workouts/v2/packs/") && key.endsWith(".json"),
+    )!;
+    expect(
+      (await dispatch(incoming(`/v2/objects/${packKey}`, {
+        headers: { accept: "text/html" },
+      }))).status,
+    ).toBe(401);
+
+    expect(
+      (await dispatch(incoming("/v2/objects/workouts/v1/gym-six-month/movements/unknown.mp4", {
+        headers: { accept: "text/html" },
+      }))).status,
+    ).toBe(404);
+
+    mockAuthenticated(true);
+    const entitled = await dispatch(
+      incoming(path, {
+        headers: {
+          accept: "text/html",
+          authorization: `Bearer ${hs256Token}`,
+        },
+      }),
+    );
+    expect(entitled.status).toBe(200);
+    expect(entitled.headers.get("content-type")).toContain("video/mp4");
+    expect(await entitled.text()).toBe("protected-test-video-bytes");
+  });
+
   it("rejects missing authentication and unsafe object paths", async () => {
     const unauthenticated = await dispatch(
       incoming(`/v2/objects/${paidVideoKey}`),

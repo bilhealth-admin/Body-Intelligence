@@ -1,0 +1,106 @@
+name: BIL Cloudflare workout browser-source hotfix
+on:
+  push:
+    branches:
+      - hotfix/cloudflare-workout-source-page-20261024
+    paths:
+      - 'cloudflare/workout-runtime/src/index.ts'
+      - 'cloudflare/workout-runtime/src/workout-source-page.ts'
+      - 'cloudflare/workout-runtime/test/worker.spec.ts'
+      - '.github/workflows/bil_workout_source_browser_hotfix.yml'
+permissions:
+  contents: read
+concurrency:
+  group: bil-workout-runtime-production-hotfix
+  cancel-in-progress: false
+jobs:
+  verify-and-deploy-worker-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            cloudflare/workout-runtime/**
+            artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json
+            artifacts/workout_media/cloudflare_runtime_v2/protected_object_keys_v2.json
+            assets/catalogs/recipes/v1/recipe-images.json
+            assets/catalogs/recipes/v1/recipe-thumbnails-v4.json
+            assets/catalogs/recipes/v1/release-manifest.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Verify isolated patch does not modify iOS or Android project files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only HEAD^ HEAD | tee /tmp/workout-hotfix-files.txt
+          if grep -Ev '^(cloudflare/workout-runtime/src/(index.ts|workout-source-page.ts)|cloudflare/workout-runtime/test/worker.spec.ts|.github/workflows/bil_workout_source_browser_hotfix.yml)$' /tmp/workout-hotfix-files.txt; then
+            echo 'Unexpected file changes; refusing release' >&2
+            exit 1
+          fi
+      - name: Verify Worker TypeScript, runtime security contracts, and dry-run
+        working-directory: cloudflare/workout-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run types
+          npm run check
+          npm test
+          npm run dry-run
+      - name: Check existing protected route is authentication-gated
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://workouts.bilhealth.com/v2/objects/workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-biceps-curl-technique.mp4'
+          status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bil-before.json --write-out '%{http_code}' -H 'Accept: video/mp4' "$URL")"
+          test "$status" = 401 || { echo "Pre-deploy protected access drift: $status"; exit 1; }
+      - name: Resolve intended Cloudflare account; fail closed if token missing
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "No Cloudflare deployment credentials; no deployment"; exit 1; }
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+          req = urllib.request.Request('https://api.cloudflare.com/client/v4/accounts',
+            headers={'Authorization': 'Bearer ' + os.environ['CLOUDFLARE_API_TOKEN']})
+          with urllib.request.urlopen(req, timeout=20) as res:
+            data = json.load(res)
+          accounts = data.get('result') or []
+          if not data.get('success') or len(accounts) != 1:
+            raise SystemExit('Cloudflare account is not uniquely identified; no deployment')
+          account_id = accounts[0].get('id')
+          if not account_id:
+            raise SystemExit('Cloudflare account id missing; no deployment')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as out:
+            out.write('CLOUDFLARE_ACCOUNT_ID=' + account_id + '\n')
+          print('Cloudflare account scope: PASS')
+          PY
+      - name: Deploy only the existing workout-runtime Worker
+        working-directory: cloudflare/workout-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run deploy
+      - name: Verify production Safari source page and preserved Premium gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://workouts.bilhealth.com/v2/objects/workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-biceps-curl-technique.mp4'
+          status="$(curl --silent --show-error --max-time 20 --output /tmp/bil-source.html --write-out '%{http_code}' -H 'Accept: text/html,application/xhtml+xml' "$URL")"
+          test "$status" = 200 || { echo "Source page status: $status"; exit 1; }
+          grep -Fq 'Dumbbell Biceps Curl' /tmp/bil-source.html
+          grep -Fq 'inside Body Intelligence Log' /tmp/bil-source.html
+          status="$(curl --silent --show-error --max-time 20 --output /tmp/bil-protected.json --write-out '%{http_code}' -H 'Accept: video/mp4' "$URL")"
+          test "$status" = 401 || { echo "Premium gate changed: $status"; exit 1; }
+          grep -Fq '"authentication_required"' /tmp/bil-protected.json
+          echo 'Workout source page and protected-video boundary: PASS'
