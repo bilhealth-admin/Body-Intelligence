@@ -21,21 +21,23 @@ double _contrast(Color foreground, Color background) {
 }
 
 void main() {
-  test('local category illustrations never imply an individual verified video',
-      () {
-    expect(BilSmartPlanArt.overview, startsWith('assets/images/'));
-    expect(BilSmartPlanArt.meals, contains('lifestyle'));
-    expect(BilSmartPlanArt.recovery, contains('stretching'));
-    expect(
-      BilSmartPlanArt.forWorkout('home-strength-v1-a'),
-      contains('full_body_strength.jpg'),
-    );
-    expect(
-      BilSmartPlanArt.forWorkout('home-strength-v1-kettlebell'),
-      contains('kettlebell'),
-    );
-    expect(BilSmartPlanArt.forWorkout('push-a'), contains('strength'));
-  });
+  test(
+    'local category illustrations never imply an individual verified video',
+    () {
+      expect(BilSmartPlanArt.overview, startsWith('assets/images/'));
+      expect(BilSmartPlanArt.meals, contains('lifestyle'));
+      expect(BilSmartPlanArt.recovery, contains('stretching'));
+      expect(
+        BilSmartPlanArt.forWorkout('home-strength-v1-a'),
+        contains('full_body_strength.jpg'),
+      );
+      expect(
+        BilSmartPlanArt.forWorkout('home-strength-v1-kettlebell'),
+        contains('kettlebell'),
+      );
+      expect(BilSmartPlanArt.forWorkout('push-a'), contains('strength'));
+    },
+  );
 
   test('the trailing image scrim meets AA in light and dark worst cases', () {
     // Darkest possible underlying light photo and lightest dark photo.
@@ -89,8 +91,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('high contrast hides decorative image, not content',
-      (tester) async {
+  testWidgets('high contrast hides decorative image, not content', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -111,8 +114,9 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('RTL, text enlargement and narrow cards remain readable',
-      (tester) async {
+  testWidgets('RTL, text enlargement and narrow cards remain readable', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 720);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);

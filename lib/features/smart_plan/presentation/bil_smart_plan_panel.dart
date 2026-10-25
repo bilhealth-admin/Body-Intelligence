@@ -122,6 +122,10 @@ class BilSmartPlanSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final styles = Theme.of(context).textTheme;
+    // The Progress subtitle was measured below WCAG AA over illustration art.
+    final subtitleInk = scheme.brightness == Brightness.light
+        ? BilPearlFinish.lightInk
+        : scheme.onSurfaceVariant;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -152,7 +156,7 @@ class BilSmartPlanSectionTitle extends StatelessWidget {
                 Text(
                   subtitle!,
                   style: styles.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
+                    color: subtitleInk,
                     height: 1.4,
                   ),
                 ),
@@ -196,8 +200,7 @@ class BilSmartPlanMetric extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (icon != null)
-                Icon(icon, color: scheme.primary, size: 19),
+              if (icon != null) Icon(icon, color: scheme.primary, size: 19),
               if (icon != null) const SizedBox(height: 6),
               Text(
                 label,

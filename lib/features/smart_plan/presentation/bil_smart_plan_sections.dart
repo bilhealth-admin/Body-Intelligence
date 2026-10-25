@@ -26,12 +26,11 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
       ),
     ),
   );
-  Widget _panel({required Widget child, String? artwork}) =>
-      BilSmartPlanPanel(
-        margin: const EdgeInsets.only(bottom: 12),
-        artwork: artwork,
-        child: Padding(padding: const EdgeInsets.all(16), child: child),
-      );
+  Widget _panel({required Widget child, String? artwork}) => BilSmartPlanPanel(
+    margin: const EdgeInsets.only(bottom: 12),
+    artwork: artwork,
+    child: Padding(padding: const EdgeInsets.all(16), child: child),
+  );
 
   Widget _today(BilSmartPlan plan) {
     final day = plan.onDate(
@@ -58,7 +57,8 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               BilSmartPlanSectionTitle(
-                title: _requestedDay != null &&
+                title:
+                    _requestedDay != null &&
                         BilPlanDate.iso(_requestedDay!) !=
                             BilPlanDate.iso(
                               ref.read(bilSmartPlanClockProvider)(),
@@ -81,9 +81,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
               else ...[
                 Text(
                   _workoutTitle(day.workout!.templateId),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -274,7 +274,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
             children: [
               IconButton(
                 key: const ValueKey('bil-smart-plan-previous-week'),
-                onPressed: first <= 0 ? null : () => _mutate(() => _weekOffset--),
+                onPressed: first <= 0
+                    ? null
+                    : () => _mutate(() => _weekOffset--),
                 icon: Icon(
                   Directionality.of(context) == TextDirection.rtl
                       ? Icons.chevron_right_rounded
@@ -283,9 +285,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
               ),
               Text(
                 _t('Week ', 'الأسبوع ') + (_weekOffset + 1).toString(),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
               IconButton(
                 key: const ValueKey('bil-smart-plan-next-week'),
@@ -315,9 +317,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
               ),
               title: Text(
                 day.date,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               subtitle: Text(
                 day.workout == null
@@ -707,9 +709,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
               height: 46,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(
-                  alpha: .10,
-                ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
@@ -741,9 +743,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(
-                        alpha: .10,
-                      ),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: .10),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
