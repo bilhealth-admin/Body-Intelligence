@@ -631,6 +631,7 @@ extension _BilSmartPlanActions on _BilSmartPlanPageState {
         // Standalone catalog links retain their normal browsing behavior.
         await context.push(
           returnToSession ? '$route&returnToSession=1' : route,
+          extra: returnToSession,
         );
       }
     } on Object catch (error) {

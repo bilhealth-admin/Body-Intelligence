@@ -84,6 +84,9 @@ void main() {
       routes,
       contains("state.uri.queryParameters['returnToSession'] == '1'"),
     );
+    // A URL query alone must not skip an unrelated warm deep-link caller.
+    expect(actions, contains('extra: returnToSession'));
+    expect(routes, contains('state.extra == true'));
     expect(library, contains('this.returnToCallerAfterInitialItem = false'));
     expect(library, contains('await _openDetails(item);'));
     expect(library, contains('!widget.returnToCallerAfterInitialItem'));

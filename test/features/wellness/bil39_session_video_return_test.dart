@@ -71,6 +71,28 @@ void main() {
     expect(find.byType(BilWorkoutRoutineDetailsPage), findsNothing);
   });
 
+  testWidgets('BIL-10 warm forged flag preserves library', (tester) async {
+    await _mount(tester);
+    // Deep links can append returnToSession=1, but cannot supply GoRouter.extra.
+    await tester.tap(find.byKey(const Key('fixture-open-untrusted-link')));
+    await tester.pumpAndSettle();
+    expect(find.byType(BilWorkoutRoutineDetailsPage), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.byType(BilWorkoutRoutinesPage), findsOneWidget);
+    expect(find.byType(BilWorkoutRoutineDetailsPage), findsNothing);
+    expect(find.byKey(const Key('fixture-session-progress')), findsNothing);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const Key('fixture-open-untrusted-link')),
+      findsOneWidget,
+    );
+    expect(find.byType(BilWorkoutRoutinesPage), findsNothing);
+  });
+
   testWidgets('BIL-10 cold session-flag link cannot pop a missing caller', (
     tester,
   ) async {
@@ -142,6 +164,7 @@ Future<GoRouter> _mount(
                               key: const Key('fixture-open-movement'),
                               onPressed: () => planContext.push(
                                 _movementRoute(fromSession: true),
+                                extra: true,
                               ),
                               child: const Text('View verified movement'),
                             ),
@@ -159,6 +182,12 @@ Future<GoRouter> _mount(
                     planContext.push(_movementRoute(fromSession: false)),
                 child: const Text('Browse movement'),
               ),
+              FilledButton(
+                key: const Key('fixture-open-untrusted-link'),
+                onPressed: () =>
+                    planContext.push(_movementRoute(fromSession: true)),
+                child: const Text('Open warm external movement link'),
+              ),
             ],
           ),
         ),
@@ -172,7 +201,8 @@ Future<GoRouter> _mount(
             offline: true,
             initialItemId: state.uri.queryParameters['item'],
             returnToCallerAfterInitialItem:
-                state.uri.queryParameters['returnToSession'] == '1',
+                state.uri.queryParameters['returnToSession'] == '1' &&
+                state.extra == true,
           ),
         ),
       ),
