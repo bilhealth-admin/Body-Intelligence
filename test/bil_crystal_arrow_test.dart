@@ -10,10 +10,7 @@ void main() {
   for (final dark in [false, true]) {
     for (final rtl in [false, true]) {
       testWidgets(
-        'resting crystal persists across tap dark=' +
-            dark.toString() +
-            ' rtl=' +
-            rtl.toString(),
+        'resting crystal persists across tap dark=$dark rtl=$rtl',
         (tester) async {
           var taps = 0;
           tester.view.physicalSize = const Size(390, 844);
@@ -188,7 +185,7 @@ void main() {
       final node = tester.getSemantics(
         find.byKey(const Key('semantic-crystal-arrow')),
       );
-      expect(node.hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(node.flagsCollection.isButton, isTrue);
       expect(node.label, 'Go forward');
 
       focus.requestFocus();
