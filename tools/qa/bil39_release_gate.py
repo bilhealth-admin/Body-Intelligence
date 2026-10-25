@@ -21,6 +21,8 @@ CASES = tuple(
  [f"BIL-{i:02d}" for i in range(1, 28)]
  + [f"COACH-ADD-{i:02d}" for i in range(1, 11)]
  + [f"QA-COACH-{i:02d}" for i in range(1, 19)]
+ + ["VIDEO-SOURCE-01", "CLOUD-COACH-01", "CLOUD-COACH-02"]
+ + [f"CC-1009-{i:02d}" for i in range(1, 11)]
 )
 EXPECTED = "https://github.com/bilhealth-admin/Body-Intelligence/"
 HEX40 = re.compile(r"^[0-9a-f]{40}$")

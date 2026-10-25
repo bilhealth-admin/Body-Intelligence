@@ -28,6 +28,18 @@ def sample():
 
 
 class FailClosedEvidenceTests(unittest.TestCase):
+    def test_supplemental_cloud_and_video_cases_cannot_be_omitted(self):
+        expected = (['VIDEO-SOURCE-01', 'CLOUD-COACH-01', 'CLOUD-COACH-02']
+                    + [f'CC-1009-{i:02d}' for i in range(1, 11)])
+        self.assertEqual(len(qa.CASES), 68)
+        for case in expected:
+            with self.subTest(case=case):
+                s = sample()
+                del s['coverage'][case]
+                result = qa.evaluate(s)
+                self.assertEqual(result['decision'], 'BLOCKED')
+                self.assertIn(f'{case} has no candidate-specific proof', result['blockers'])
+
     def test_synthetic_full_contract_is_passable(self):
         self.assertEqual(qa.evaluate(sample())["decision"], "READY_FOR_INTERNAL_TESTFLIGHT_UPLOAD_ONLY")
 

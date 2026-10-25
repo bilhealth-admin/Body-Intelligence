@@ -1,7 +1,7 @@
 name: BIL39 strict QA harness only (NOT release validation)
 on:
   push:
-    branches: [bil39/strict-qa-20261025]
+    branches: [bil39/strict-qa-20261025, codex/bil39-qa-completion-20261025, bil39/integration-20261025]
     paths:
       - 'tools/qa/bil39_release_gate.py'
       - 'tools/qa/test_bil39_release_gate.py'
