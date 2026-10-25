@@ -86,22 +86,35 @@ void main() {
   testWidgets('BIL-10 unrecognized movement does not navigate or log', (
     tester,
   ) async {
-    await _mount(
+    var loggedWorkouts = 0;
+    final router = await _mount(
       tester,
       initialLocation: _movementRoute(
         fromSession: true,
         id: 'unknown-and-untrusted-item',
       ),
+      onLogWorkout: (_) async {
+        loggedWorkouts++;
+      },
+    );
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      '/wellness/workouts/routines',
     );
     expect(find.byType(BilWorkoutRoutinesPage), findsOneWidget);
     expect(find.byType(BilWorkoutRoutineDetailsPage), findsNothing);
-    expect(find.text('Verified movement fixture'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('workout-video-library-header')),
+      findsOneWidget,
+    );
+    expect(loggedWorkouts, isZero);
   });
 }
 
 Future<GoRouter> _mount(
   WidgetTester tester, {
   String initialLocation = '/smart-plan',
+  WorkoutLogHandler? onLogWorkout,
 }) async {
   final router = GoRouter(
     initialLocation: initialLocation,
@@ -154,6 +167,7 @@ Future<GoRouter> _mount(
         path: '/wellness/workouts/routines',
         pageBuilder: (context, state) => NoTransitionPage(
           child: BilWorkoutRoutinesPage(
+            onLogWorkout: onLogWorkout,
             loader: (locale) async => [_preview],
             offline: true,
             initialItemId: state.uri.queryParameters['item'],
