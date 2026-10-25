@@ -25,11 +25,15 @@ void main() {
     ).readAsStringSync();
     expect(
       settings,
-      contains("context.push('/connected-health/steps/history')"),
+      contains(
+        RegExp(r"context\.push\(\s*'/connected-health/steps/history',?\s*\)"),
+      ),
     );
     expect(
       settings,
-      isNot(contains("context.go('/connected-health/steps/history')")),
+      isNot(
+        contains(RegExp(r"context\.go\(\s*'/connected-health/steps/history'")),
+      ),
     );
     expect(history, contains('BilSafeReturnButton('));
     expect(history, contains("fallbackLocation: '/connected-health/steps'"));
