@@ -590,9 +590,11 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 context.push(
                   Uri(
                     path: '/daily-log',
-                    queryParameters: const {
+                    queryParameters: {
                       'action': 'food',
                       'focus': 'meal',
+                      'meal': recipe.meal.toLowerCase(),
+                      'query': recipe.title,
                     },
                   ).toString(),
                 );

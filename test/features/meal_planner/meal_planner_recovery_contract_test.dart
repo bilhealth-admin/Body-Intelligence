@@ -22,10 +22,13 @@ void main() {
 
     expect(recipeFlow, contains("'action': 'food'"));
     expect(recipeFlow, contains("'focus': 'meal'"));
+    expect(recipeFlow, contains("'meal': recipe.meal.toLowerCase()"));
+    expect(recipeFlow, contains("'query': recipe.title"));
     expect(recipeFlow, isNot(contains('mealRepositoryProvider')));
     expect(recipeFlow, isNot(contains('addMeal')));
     expect(navigationSource, contains("case 'food':"));
     expect(navigationSource, contains('_openFoodSearchAfterBuild()'));
+    expect(navigationSource, contains('foodSearch.text = initialQuery'));
     expect(navigationSource, contains("widget.initialAction == 'food'"));
     expect(navigationSource, contains("context.go('/meal-planner')"));
   });

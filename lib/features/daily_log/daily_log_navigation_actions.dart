@@ -142,7 +142,14 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     try {
       switch (action) {
         case 'food':
-          // Review/log is a search-and-review flow, not a write operation.
+          // The planner's recipe title is only a search hint. The user must
+          // select a canonical diary food and confirm its portion before save.
+          final initialQuery = GoRouterState.of(
+            context,
+          ).uri.queryParameters['query']?.trim();
+          if (initialQuery != null && initialQuery.isNotEmpty) {
+            foodSearch.text = initialQuery;
+          }
           _updateState(() {
             selectedFood = null;
             mealSearchActive = true;
