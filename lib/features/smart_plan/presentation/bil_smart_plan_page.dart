@@ -527,7 +527,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 760),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 children: [
                   if (_busy && _reviewDepth == 0) _loadingPanel(),
                   if (_error != null)
@@ -643,7 +643,13 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                   ),
                                 ),
                                 onPressed: () => setState(() => _tab = tab.$1),
-                                child: Text(tab.$2),
+                                child: Text(
+                                  tab.$2,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ),
                         ],
