@@ -465,13 +465,27 @@ class LocalCoachCommandParser {
     // application language. Only explicit app/interface setting changes may
     // produce the set_language action.
     final conversationLanguage = _contains(value, const [
-      'reply', 'respond', 'answer', 'speak', 'talk', 'talking',
-      'رد ', 'جاوب', 'اتكلم', 'تكلم', 'احكي',
+      'reply',
+      'respond',
+      'answer',
+      'speak',
+      'talk',
+      'talking',
+      'رد ',
+      'جاوب',
+      'اتكلم',
+      'تكلم',
+      'احكي',
     ]);
     final appLanguage = _contains(value, const [
-      'app language', 'application language', 'interface language',
-      'language settings', 'لغة التطبيق', 'لغة الواجهة',
-      'لغة الإعدادات', 'لغه التطبيق',
+      'app language',
+      'application language',
+      'interface language',
+      'language settings',
+      'لغة التطبيق',
+      'لغة الواجهة',
+      'لغة الإعدادات',
+      'لغه التطبيق',
     ]);
     if (conversationLanguage && !appLanguage) return null;
     if (!_contains(value, const ['language', 'لغة', 'اللغه', 'غير اللغة'])) {

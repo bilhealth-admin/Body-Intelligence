@@ -11,7 +11,8 @@ CoachContextSnapshot _fixture({
     // Goal is deliberately distinct from every actual weigh-in.
     'targetWeightKg': 60,
   },
-  weights: weights ??
+  weights:
+      weights ??
       [
         CoachWeightPoint(at: DateTime.utc(2026, 8, 20), kg: 93),
         CoachWeightPoint(at: DateTime.utc(2026, 10, 1), kg: 90),
@@ -66,9 +67,7 @@ void main() {
   test('a lone weigh-in cannot imply a trend', () {
     final result = CoachWeightHistoryReadout.build(
       snapshot: _fixture(
-        weights: [
-          CoachWeightPoint(at: DateTime.utc(2026, 10, 23), kg: 88),
-        ],
+        weights: [CoachWeightPoint(at: DateTime.utc(2026, 10, 23), kg: 88)],
       ),
       question: 'Last month weight trend',
       languageTag: 'en',

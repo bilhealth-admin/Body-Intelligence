@@ -50,8 +50,10 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     final access = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
     // Same server-authoritative quota decision as the existing Coach gate.
     // Verified paid Boost can grant Coach access without a subscription.
-    final unlocked = ref.watch(aiCoachCreditAccessProvider).asData?.value == true;
-    final paidLabel = access != null &&
+    final unlocked =
+        ref.watch(aiCoachCreditAccessProvider).asData?.value == true;
+    final paidLabel =
+        access != null &&
         access.authority == EntitlementAuthority.verifiedServer &&
         access.plan != CommercePlan.free &&
         access.grants(CommerceEntitlement.advancedIntelligence);
@@ -183,12 +185,17 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                             child: Text(
                               paidLabel
                                   ? BilStoreCopy.text(
-                                      Localizations.localeOf(context).toLanguageTag(),
+                                      Localizations.localeOf(
+                                        context,
+                                      ).toLanguageTag(),
                                       access.plan == CommercePlan.premiumAiCoach
                                           ? 'premium_ai_coach'
                                           : 'premium',
                                     )
-                                  : t('Verified AI Boost access', 'وصول موثق عبر AI Boost'),
+                                  : t(
+                                      'Verified AI Boost access',
+                                      'وصول موثق عبر AI Boost',
+                                    ),
                               key: const Key('coach-workspace-plan-label'),
                               style: TextStyle(
                                 color: scheme.onPrimaryContainer,
@@ -285,7 +292,9 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                   key: const Key('coach-workspace-open-chat'),
                   onPressed: onChat,
                   icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-                  label: Text(t('Open Coach conversation', 'افتح محادثة المدرب')),
+                  label: Text(
+                    t('Open Coach conversation', 'افتح محادثة المدرب'),
+                  ),
                 ),
               ),
               const SizedBox(height: 4),

@@ -19,10 +19,13 @@ void main() {
     'View my weight history',
     'سجل وزني 62 كيلو',
   ]) {
-    test('BIL39 weight lookup/check-in does not become a food portion: $request', () {
-      final parsed = food.parse(request, referenceLocal: localDay);
-      expect(parsed.kind, CoachFoodTurnKind.none, reason: request);
-    });
+    test(
+      'BIL39 weight lookup/check-in does not become a food portion: $request',
+      () {
+        final parsed = food.parse(request, referenceLocal: localDay);
+        expect(parsed.kind, CoachFoodTurnKind.none, reason: request);
+      },
+    );
   }
 
   test('BIL39 explicit meal logging remains supported for review', () {
@@ -40,10 +43,7 @@ void main() {
     expect(classifyCoachRequest(chart).kind, CoachRequestKind.savedData);
     expect(isCoachPlanNegated('لا أريد خطة'), isTrue);
     expect(classifyCoachRequest('لا أريد خطة').createsPlan, isFalse);
-    expect(
-      classifyCoachPlanFollowUp('شهر', chart).createsPlan,
-      isFalse,
-    );
+    expect(classifyCoachPlanFollowUp('شهر', chart).createsPlan, isFalse);
     expect(
       classifyCoachPlanSequence(const <String>[
         'اطلع على سجل أوزاني',
@@ -62,7 +62,11 @@ void main() {
       'لا أريد خطة',
       'أريد جدول نزولي بالوزن لشهر',
     ]) {
-      expect(coachAllowsSuggestedPlanAction(question), isFalse, reason: question);
+      expect(
+        coachAllowsSuggestedPlanAction(question),
+        isFalse,
+        reason: question,
+      );
     }
     expect(
       coachAllowsSuggestedPlanAction('Create a one month workout plan'),
@@ -70,13 +74,16 @@ void main() {
     );
   });
 
-  test('BIL39 an explicit monthly training and nutrition plan is still valid', () {
-    final intent = classifyCoachRequest(
-      'أريد إنشاء خطة تمارين وتغذية لمدة شهر',
-    );
-    expect(intent.kind, CoachRequestKind.combinedPlan);
-    expect(intent.horizon, 'month');
-  });
+  test(
+    'BIL39 an explicit monthly training and nutrition plan is still valid',
+    () {
+      final intent = classifyCoachRequest(
+        'أريد إنشاء خطة تمارين وتغذية لمدة شهر',
+      );
+      expect(intent.kind, CoachRequestKind.combinedPlan);
+      expect(intent.horizon, 'month');
+    },
+  );
 
   test('BIL39 target is not a measured weigh-in', () {
     expect(
@@ -92,11 +99,13 @@ void main() {
   test('BIL39 chat language is independent of application settings', () {
     const resolver = CoachLanguageResolver();
     expect(
-      resolver.resolve(
-        input: 'can u talking en lang',
-        uiLocale: 'ar',
-        previousClearLanguageTag: 'ar',
-      ).languageTag,
+      resolver
+          .resolve(
+            input: 'can u talking en lang',
+            uiLocale: 'ar',
+            previousClearLanguageTag: 'ar',
+          )
+          .languageTag,
       'en',
     );
     expect(
@@ -105,45 +114,42 @@ void main() {
     );
     const commands = LocalCoachCommandParser();
     expect(commands.parse('Reply in English language', locale: 'ar'), isEmpty);
-    final appChange = commands.parse(
-      'غير لغة التطبيق للانجليزي',
-      locale: 'ar',
-    );
+    final appChange = commands.parse('غير لغة التطبيق للانجليزي', locale: 'ar');
     expect(appChange, hasLength(1));
     expect(appChange.single.type, IntelligenceActionType.setLanguage);
   });
 
-  test('BIL39 weight context from Arabic plurals never leaks other categories', () {
-    final snapshot = CoachContextSnapshot(
-      generatedAt: DateTime.utc(2026, 10, 25),
-      profile: const <String, Object?>{},
-      weights: <CoachWeightPoint>[
-        CoachWeightPoint(at: DateTime.utc(2026, 10, 1), kg: 90),
-        CoachWeightPoint(at: DateTime.utc(2026, 10, 23), kg: 88),
-      ],
-      nutritionDays: const <CoachNutritionDay>[],
-      waterHistory: const <Map<String, Object?>>[],
-      computedHealth: const <String, Object?>{},
-    );
-    final scoped = projectCoachCloudContext(
-      question: 'اطلع على سجل أوزاني خلال الفترة الماضية',
-      context: snapshot,
-    );
-    expect(scoped.context, contains('weight'));
-    expect(scoped.context, isNot(contains('nutritionHistory')));
-    expect(scoped.context, isNot(contains('activityHistory')));
-    final weight = scoped.context['weight'] as Map;
-    expect((weight['summary'] as Map)['recordCount'], 2);
-    expect(weight['readStatus'], 'verified');
-  });
+  test(
+    'BIL39 weight context from Arabic plurals never leaks other categories',
+    () {
+      final snapshot = CoachContextSnapshot(
+        generatedAt: DateTime.utc(2026, 10, 25),
+        profile: const <String, Object?>{},
+        weights: <CoachWeightPoint>[
+          CoachWeightPoint(at: DateTime.utc(2026, 10, 1), kg: 90),
+          CoachWeightPoint(at: DateTime.utc(2026, 10, 23), kg: 88),
+        ],
+        nutritionDays: const <CoachNutritionDay>[],
+        waterHistory: const <Map<String, Object?>>[],
+        computedHealth: const <String, Object?>{},
+      );
+      final scoped = projectCoachCloudContext(
+        question: 'اطلع على سجل أوزاني خلال الفترة الماضية',
+        context: snapshot,
+      );
+      expect(scoped.context, contains('weight'));
+      expect(scoped.context, isNot(contains('nutritionHistory')));
+      expect(scoped.context, isNot(contains('activityHistory')));
+      final weight = scoped.context['weight'] as Map;
+      expect((weight['summary'] as Map)['recordCount'], 2);
+      expect(weight['readStatus'], 'verified');
+    },
+  );
 
   test('BIL39 an unavailable weight repository is not verified empty', () {
     final failed = CoachContextSnapshot.empty();
     expect(failed.weightReadStatus, CoachWeightReadStatus.unavailable);
-    expect(
-      (failed.toJson()['weight'] as Map)['readStatus'],
-      'unavailable',
-    );
+    expect((failed.toJson()['weight'] as Map)['readStatus'], 'unavailable');
     final consentOff = CoachContextSnapshot(
       generatedAt: DateTime.utc(2026, 10, 25),
       profile: const <String, Object?>{},
@@ -153,9 +159,6 @@ void main() {
       waterHistory: const <Map<String, Object?>>[],
       computedHealth: const <String, Object?>{},
     );
-    expect(
-      (consentOff.toJson()['weight'] as Map)['readStatus'],
-      'withheld',
-    );
+    expect((consentOff.toJson()['weight'] as Map)['readStatus'], 'withheld');
   });
 }

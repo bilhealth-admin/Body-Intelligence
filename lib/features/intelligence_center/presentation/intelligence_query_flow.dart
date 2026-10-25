@@ -29,7 +29,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         ownerAtStart != conversationPreferences.localOwnerId) {
       return true;
     }
-    final text = snapshot == null ||
+    final text =
+        snapshot == null ||
             snapshot.weightReadStatus != CoachWeightReadStatus.verified
         ? intelligenceTextFor(
             locale,
@@ -350,8 +351,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           // A repository timeout or missing analytics permission never proves
           // that the diary is empty. Do not bill for a speculative AI answer.
           localHealthHandled = true;
-          final copy = coachContext.weightReadStatus ==
-                  CoachWeightReadStatus.withheld
+          final copy =
+              coachContext.weightReadStatus == CoachWeightReadStatus.withheld
               ? intelligenceTextFor(
                   questionLocale,
                   'Weight history is not available to Coach under your current context-sharing settings. No records were changed.',

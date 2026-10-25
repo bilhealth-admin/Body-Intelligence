@@ -26,7 +26,8 @@ class CoachLanguageResolver {
     // application's UI. Recognize colloquial chat requests before using the
     // interface language as fallback (e.g. "can u talking en lang").
     final chatPreference = value.toLowerCase().replaceAll(
-      RegExp('[أإآٱ]'), 'ا',
+      RegExp('[أإآٱ]'),
+      'ا',
     );
     if (RegExp(
       r'\b(?:reply|respond|answer|speak|talk|talking)\b.*\b(?:english|en lang)\b|'
