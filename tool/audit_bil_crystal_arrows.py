@@ -16,7 +16,7 @@ SOURCE_DIRS = ("lib", "ios", "android", "macos", "windows", "linux", "test", "in
 EXTENSIONS = {".dart", ".swift", ".kt", ".java", ".m", ".mm", ".xml", ".storyboard", ".xib"}
 ASSET_EXTENSIONS = {".svg", ".png", ".webp", ".jpg", ".jpeg", ".gif", ".pdf", ".json", ".avif"}
 ASSET_NAME_PATTERN = re.compile(
-    r"(?:arrow|chevron|caret|back|forward|expand|collapse|next|previous|dropdown|disclosure)",
+    r"(?:arrow|chevron|caret|expand|collapse|dropdown|disclosure|(?:^|[_-])(?:ic|icon|nav|btn)[_-](?:back|forward|next|previous)(?:[_-]|$))",
     re.IGNORECASE,
 )
 SKIP_DIRS = {
@@ -36,7 +36,7 @@ PATTERNS = (
         re.IGNORECASE,
     )),
     ("ASSET_REFERENCE", re.compile(
-        r"\b(?:assets?/|(?:\.\./)*assets?/)[\w./-]*(?:arrow|chevron|caret|back|forward|expand|collapse|next|previous)[\w./-]*",
+        r"\b(?:assets?/|(?:\.\./)*assets?/)[\w./-]*(?:arrow|chevron|caret|expand|collapse|dropdown|disclosure|(?:ic|icon|nav|btn)[_-](?:back|forward|next|previous))[\w./-]*",
         re.IGNORECASE,
     )),
     ("ANDROID_RESOURCE", re.compile(

@@ -26,12 +26,18 @@ class DirectionalAssetInventoryTest(unittest.TestCase):
             write("assets/icons/arrow_back.png", b"\x89PNG\x00\xff\xff")
             write("assets/icons/chevron_left.svg", b'<svg xmlns="http://www.w3.org/2000/svg"/>')
             write("assets/icons/meal_photo.png", b"\x89PNG\x00\xff")
+            # These are not navigation arrows. Prefix-only substring matches
+            # for "back" in background and "forward" in diet names are wrong.
+            write("assets/images/v9/v9_hdr_background.webp", b"RIFF\xff")
+            write("assets/images/nutrition_plans/plant_forward_lifestyle.webp", b"RIFF\xff")
             write("ios/Runner/Assets.xcassets/BackArrow.imageset/arrow_next.png", b"\x89PNG\x00\xff")
             write("android/app/src/main/res/drawable-xhdpi/ic_arrow_right.webp", b"RIFF\xff\x00")
             write(
                 "lib/features/test_menu.dart",
                 b"final icon = Image.asset('assets/icons/arrow_back.png');\n"
-                b"final nav = BackButton();\n",
+                b"final nav = BackButton();\n"
+                b"final photo = Image.asset('assets/images/v9/v9_hdr_background.webp');\n"
+                b"final plan = Image.asset('assets/images/nutrition_plans/plant_forward_lifestyle.webp');\n",
             )
             write(
                 audit.PROTECTED_COMMERCE_PATH,
@@ -66,6 +72,8 @@ class DirectionalAssetInventoryTest(unittest.TestCase):
                 self.assertEqual(hits[0]["manual_review_required"], "YES")
 
             self.assertNotIn("assets/icons/meal_photo.png", files)
+            self.assertNotIn("assets/images/v9/v9_hdr_background.webp", files)
+            self.assertNotIn("assets/images/nutrition_plans/plant_forward_lifestyle.webp", files)
             dart = [row for row in rows if row["file"] == "lib/features/test_menu.dart"]
             kinds = ";".join(row["candidate_types"] for row in dart)
             self.assertIn("ASSET_REFERENCE", kinds)
