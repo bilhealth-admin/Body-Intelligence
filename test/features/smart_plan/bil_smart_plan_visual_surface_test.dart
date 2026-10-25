@@ -97,6 +97,60 @@ void main() {
     );
   });
 
+  testWidgets('metric pair reflows at phone, tablet and large text sizes', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final variant in [
+      (320.0, 1.0, false, TextDirection.ltr),
+      (390.0, 1.0, true, TextDirection.ltr),
+      (430.0, 1.0, true, TextDirection.rtl),
+      (768.0, 1.0, true, TextDirection.rtl),
+      (390.0, 2.0, false, TextDirection.rtl),
+    ]) {
+      tester.view.physicalSize = Size(variant.$1, 900);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(variant.$2),
+              ),
+              child: Directionality(
+                textDirection: variant.$4,
+                child: const Scaffold(
+                  body: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: BilSmartPlanMetricPair(
+                      first: BilSmartPlanMetric(
+                        label: 'Days in plan',
+                        value: '31',
+                      ),
+                      second: BilSmartPlanMetric(
+                        label: 'Scheduled workouts',
+                        value: '14',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final first = tester.getTopLeft(find.byType(BilSmartPlanMetric).first);
+      final second = tester.getTopLeft(find.byType(BilSmartPlanMetric).last);
+      expect(
+        (first.dy - second.dy).abs() < 1,
+        variant.$3,
+        reason: 'Unexpected metric layout at ${variant.$1}px / ${variant.$2}x',
+      );
+      expect(tester.takeException(), isNull);
+    }
+  });
+
   testWidgets('illustrated panel retains buttons and layout', (tester) async {
     var presses = 0;
     await tester.pumpWidget(

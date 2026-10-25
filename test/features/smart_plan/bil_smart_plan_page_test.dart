@@ -832,8 +832,13 @@ void main() {
         final open = find.byKey(
           const ValueKey('bil-smart-plan-replace-session'),
         );
-        await tester.ensureVisible(open);
+        await tester.scrollUntilVisible(
+          open,
+          170,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
+        expect(open, findsOneWidget);
         await tester.tap(open);
         final field = find.byKey(
           const ValueKey('bil-smart-plan-alternative-session'),
@@ -892,8 +897,13 @@ void main() {
         await repo.save(before, expectedRevision: initial.revision);
         await pump(tester, locale, 320, 2);
         final meal = find.byIcon(Icons.restaurant_menu_rounded).first;
-        await tester.ensureVisible(meal);
+        await tester.scrollUntilVisible(
+          meal,
+          170,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
+        expect(meal, findsOneWidget);
         await tester.tap(meal);
         final schedule = find.byKey(
           const ValueKey('bil-smart-plan-meal-schedule'),

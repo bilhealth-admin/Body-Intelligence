@@ -224,3 +224,36 @@ class BilSmartPlanMetric extends StatelessWidget {
     );
   }
 }
+
+/// Compact Coach-style metric tiles become side-by-side at phone width while
+/// remaining full-width on 320px phones and for enlarged accessible text.
+/// This is presentation-only: values and ownership stay with the caller.
+class BilSmartPlanMetricPair extends StatelessWidget {
+  const BilSmartPlanMetricPair({
+    super.key,
+    required this.first,
+    required this.second,
+  });
+
+  final Widget first;
+  final Widget second;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final enlargedText = MediaQuery.textScalerOf(context).scale(14) > 18;
+      final twoColumns = constraints.maxWidth >= 310 && !enlargedText;
+      final width = twoColumns
+          ? (constraints.maxWidth - 10) / 2
+          : constraints.maxWidth;
+      return Wrap(
+        spacing: 10,
+        runSpacing: 10,
+        children: [
+          SizedBox(width: width, child: first),
+          SizedBox(width: width, child: second),
+        ],
+      );
+    },
+  );
+}

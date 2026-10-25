@@ -30,36 +30,19 @@ extension _BilSmartPlanProgressSections on _BilSmartPlanPageState {
             '$done / $scheduled${_t(' confirmed sessions', ' جلسات مؤكدة')}',
           ),
           const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth >= 410
-                  ? (constraints.maxWidth - 10) / 2
-                  : constraints.maxWidth;
-              return Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  SizedBox(
-                    width: width,
-                    child: BilSmartPlanMetric(
-                      label: _t('Confirmed', 'المؤكدة'),
-                      value: done.toString(),
-                      icon: Icons.check_circle_outline_rounded,
-                    ),
-                  ),
-                  SizedBox(
-                    width: width,
-                    child: BilSmartPlanMetric(
-                      label: _t('Scheduled', 'المجدولة'),
-                      value: scheduled.toString(),
-                      icon: Icons.calendar_today_rounded,
-                    ),
-                  ),
-                ],
-              );
-            },
+          BilSmartPlanMetricPair(
+          first: BilSmartPlanMetric(
+            label: _t('Confirmed', 'المؤكدة'),
+            value: done.toString(),
+            icon: Icons.check_circle_outline_rounded,
           ),
-          const SizedBox(height: 12),
+          second: BilSmartPlanMetric(
+            label: _t('Scheduled', 'المجدولة'),
+            value: scheduled.toString(),
+            icon: Icons.calendar_today_rounded,
+          ),
+        ),
+        const SizedBox(height: 12),
           Text(
             _t(
               'Nutrition suggestions do not count as actual intake. Review the diary for recorded food.',
@@ -232,37 +215,20 @@ extension _BilSmartPlanProgressSections on _BilSmartPlanPageState {
         const SizedBox(height: 12),
         Text(_t('A clear plan, one day at a time.', 'خطتك واضحة، يومًا بيوم.')),
         const SizedBox(height: 14),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth >= 410
-                ? (constraints.maxWidth - 10) / 2
-                : constraints.maxWidth;
-            return Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                SizedBox(
-                  width: width,
-                  child: BilSmartPlanMetric(
-                    label: _t('Days in plan', 'أيام الخطة'),
-                    value: plan.days.length.toString(),
-                    icon: Icons.date_range_rounded,
-                  ),
-                ),
-                SizedBox(
-                  width: width,
-                  child: BilSmartPlanMetric(
-                    label: _t('Scheduled workouts', 'التمارين المجدولة'),
-                    value: plan.days
-                        .where((day) => day.workout != null)
-                        .length
-                        .toString(),
-                    icon: Icons.fitness_center_rounded,
-                  ),
-                ),
-              ],
-            );
-          },
+        BilSmartPlanMetricPair(
+          first: BilSmartPlanMetric(
+            label: _t('Days in plan', 'أيام الخطة'),
+            value: plan.days.length.toString(),
+            icon: Icons.date_range_rounded,
+          ),
+          second: BilSmartPlanMetric(
+            label: _t('Scheduled workouts', 'التمارين المجدولة'),
+            value: plan.days
+                .where((day) => day.workout != null)
+                .length
+                .toString(),
+            icon: Icons.fitness_center_rounded,
+          ),
         ),
         if (!_catalogBlocked &&
             (plan.status == BilPlanStatus.draft ||
