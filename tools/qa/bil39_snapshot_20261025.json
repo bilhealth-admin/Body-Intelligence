@@ -1,0 +1,365 @@
+{
+  "schema": "bil39.strict.qa.snapshot.v1",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "observed_utc": "2026-10-25T01:34:51Z",
+  "candidate": null,
+  "reviewed_overlap_resolutions": {},
+  "coverage": {
+    "BIL-01": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-02": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-03": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-04": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-05": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-06": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-07": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-08": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-09": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-10": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-11": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-12": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-13": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-14": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-15": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-16": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-17": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-18": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-19": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-20": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-21": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-22": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-23": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-24": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-25": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-26": {
+      "status": "UNVERIFIED"
+    },
+    "BIL-27": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-01": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-02": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-03": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-04": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-05": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-06": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-07": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-08": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-09": {
+      "status": "UNVERIFIED"
+    },
+    "COACH-ADD-10": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-01": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-02": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-03": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-04": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-05": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-06": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-07": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-08": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-09": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-10": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-11": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-12": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-13": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-14": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-15": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-16": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-17": {
+      "status": "UNVERIFIED"
+    },
+    "QA-COACH-18": {
+      "status": "UNVERIFIED"
+    }
+  },
+  "gates": {},
+  "native_matrix": {
+    "android": {},
+    "ios": {}
+  },
+  "safety_flags": {
+    "mutated_ios38": false,
+    "mutated_app_review": false,
+    "mutated_production": false,
+    "made_real_purchase": false,
+    "changed_payment_cta": false,
+    "merged_pr": false
+  },
+  "ios_build_number": null,
+  "prs": {
+    "17": {
+      "state": "open",
+      "draft": true,
+      "base_sha": "155b079696430919f8272df934371f033fb11be2",
+      "head_sha": "a7c37d7d7b6dcb22744b50d55cffda3b34d5823c",
+      "changed_files": [
+        "lib/app/router/app_wellness_routes.dart",
+        "lib/features/connected_health/connected_health_signal_detail_page.dart",
+        "lib/features/connected_health/partner_capabilities_page.dart",
+        "lib/features/connected_health/steps_history_page.dart",
+        "lib/features/connected_health/steps_settings_page.dart",
+        "lib/features/settings/language_settings_page.dart",
+        "lib/features/settings/reference_goals_page.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_actions.dart",
+        "lib/features/wellness/presentation/bil_workout_routines_page.dart",
+        "test/bil39_routes_regression_contract_test.dart",
+        "test/features/connected_health/steps_history_navigation_test.dart"
+      ],
+      "verify": {
+        "conclusion": "failure",
+        "head_sha": "a7c37d7d7b6dcb22744b50d55cffda3b34d5823c",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40147373248",
+        "id": 40147373248
+      },
+      "android_debug": {
+        "conclusion": "success",
+        "head_sha": "a7c37d7d7b6dcb22744b50d55cffda3b34d5823c",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40147373167",
+        "id": 40147373167
+      }
+    },
+    "18": {
+      "state": "open",
+      "draft": true,
+      "base_sha": "155b079696430919f8272df934371f033fb11be2",
+      "head_sha": "553a9f65276cfb899fd1d2aa498fc7793ef17af7",
+      "changed_files": [
+        ".github/workflows/verify.yml",
+        "docs/qa/BIL39_CRYSTAL_ARROW_INVENTORY.md",
+        "lib/app/theme/bil_navigation_press_style.dart",
+        "lib/shared/widgets/bil_crystal_arrow.dart",
+        "lib/shared/widgets/secondary_page_app_bar.dart",
+        "test/bil_crystal_arrow_test.dart",
+        "tool/audit_bil_crystal_arrows.py"
+      ],
+      "verify": {
+        "conclusion": "in_progress",
+        "head_sha": "553a9f65276cfb899fd1d2aa498fc7793ef17af7",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40151536647",
+        "id": 40151536647
+      },
+      "android_debug": {
+        "conclusion": "in_progress",
+        "head_sha": "553a9f65276cfb899fd1d2aa498fc7793ef17af7",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40151536484",
+        "id": 40151536484
+      }
+    },
+    "19": {
+      "state": "open",
+      "draft": true,
+      "base_sha": "155b079696430919f8272df934371f033fb11be2",
+      "head_sha": "a29ce359e6b9de6e0b5f51b7e7b301dbe25ea824",
+      "changed_files": [
+        ".github/workflows/verify.yml",
+        "lib/features/daily_log/daily_log_navigation_actions.dart",
+        "lib/features/meal_planner/presentation/meal_planner_copy.dart",
+        "lib/features/meal_planner/presentation/meal_planner_page.dart",
+        "test/features/meal_planner/meal_planner_e2e_contract_test.dart",
+        "test/features/meal_planner/meal_planner_recovery_contract_test.dart"
+      ],
+      "verify": {
+        "conclusion": "in_progress",
+        "head_sha": "a29ce359e6b9de6e0b5f51b7e7b301dbe25ea824",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40147915890",
+        "id": 40147915890
+      },
+      "android_debug": {
+        "conclusion": "success",
+        "head_sha": "a29ce359e6b9de6e0b5f51b7e7b301dbe25ea824",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40147915878",
+        "id": 40147915878
+      }
+    },
+    "20": {
+      "state": "open",
+      "draft": true,
+      "base_sha": "155b079696430919f8272df934371f033fb11be2",
+      "head_sha": "790cc3f4a9ee0ca8bb32e57f029140200e42246e",
+      "changed_files": [
+        "lib/features/profile/profile_summary_page.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_load_failure.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
+        "test/features/profile/profile_primary_loading_notice_test.dart",
+        "test/features/profile/profile_summary_partial_loading_contract_test.dart",
+        "test/features/profile/profile_summary_partial_loading_widget_test.dart",
+        "test/features/smart_plan/bil_smart_plan_load_failure_test.dart",
+        "test/features/smart_plan/bil_smart_plan_readonly_action_contract_test.dart"
+      ],
+      "verify": {
+        "conclusion": "queued",
+        "head_sha": "790cc3f4a9ee0ca8bb32e57f029140200e42246e",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40151452254",
+        "id": 40151452254
+      },
+      "android_debug": {
+        "conclusion": "in_progress",
+        "head_sha": "790cc3f4a9ee0ca8bb32e57f029140200e42246e",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40151452297",
+        "id": 40151452297
+      }
+    },
+    "21": {
+      "state": "open",
+      "draft": true,
+      "base_sha": "155b079696430919f8272df934371f033fb11be2",
+      "head_sha": "8c3721d302eaa483b34d566888b653ba11252767",
+      "changed_files": [
+        "lib/features/intelligence_center/domain/coach_context_snapshot.dart",
+        "lib/features/intelligence_center/food_flow/coach_food_turn_parser.dart",
+        "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+        "lib/features/intelligence_center/presentation/intelligence_query_flow.dart",
+        "lib/features/intelligence_center/presentation/intelligence_reference_chat_body.dart",
+        "lib/features/intelligence_center/presentation/intelligence_reference_workspace_flow.dart",
+        "lib/features/intelligence_center/presentation/intelligence_smart_plan_flow.dart",
+        "lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart",
+        "lib/features/intelligence_center/services/coach_cloud_privacy_boundary.dart",
+        "lib/features/intelligence_center/services/coach_context_provider.dart",
+        "lib/features/intelligence_center/services/coach_language_resolver.dart",
+        "lib/features/intelligence_center/services/coach_request_intent.dart",
+        "lib/features/intelligence_center/services/coach_weight_history_readout.dart",
+        "lib/features/intelligence_center/services/local_coach_command_parser.dart",
+        "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+        "test/features/intelligence_center/bil39_coach_weight_readout_test.dart"
+      ],
+      "verify": {
+        "conclusion": "failure",
+        "head_sha": "8c3721d302eaa483b34d566888b653ba11252767",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40148377034",
+        "id": 40148377034
+      },
+      "android_debug": {
+        "conclusion": "success",
+        "head_sha": "8c3721d302eaa483b34d566888b653ba11252767",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40148377033",
+        "id": 40148377033
+      }
+    },
+    "22": {
+      "state": "open",
+      "draft": true,
+      "base_sha": "155b079696430919f8272df934371f033fb11be2",
+      "head_sha": "9522d5d1c572ad6690b4fb507be6afeae9573be5",
+      "changed_files": [
+        ".github/workflows/bil39_myplan_format_preview.yml",
+        "docs/qa_next/BIL39_MYPLAN_VISUAL_TOKENS_AND_CI_20261025.md",
+        "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_panel.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_sections.dart",
+        "lib/features/smart_plan/presentation/bil_smart_plan_session.dart",
+        "test/features/smart_plan/bil_smart_plan_visual_surface_test.dart"
+      ],
+      "verify": {
+        "conclusion": "in_progress",
+        "head_sha": "9522d5d1c572ad6690b4fb507be6afeae9573be5",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40151680420",
+        "id": 40151680420
+      },
+      "android_debug": {
+        "conclusion": "in_progress",
+        "head_sha": "9522d5d1c572ad6690b4fb507be6afeae9573be5",
+        "url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40151680403",
+        "id": 40151680403
+      }
+    }
+  }
+}
