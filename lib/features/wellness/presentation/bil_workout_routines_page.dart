@@ -84,6 +84,7 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
     this.gymPlanLoader,
     this.offline = false,
     this.initialItemId,
+    this.returnToCallerAfterInitialItem = false,
   });
 
   final WellnessContentPackManager? manager;
@@ -93,6 +94,9 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
   final CustomRoutineWriter? customRoutineWriter;
   final GymPlanLoader? gymPlanLoader;
   final String? initialItemId;
+  /// Set only for verified movement opened from an active Smart Plan session.
+  /// Normal library browsing and ordinary deep links are unaffected.
+  final bool returnToCallerAfterInitialItem;
 
   /// Set by the owning connectivity provider. Installed packs remain usable
   /// while this is true; no remote availability is inferred by this page.
@@ -516,6 +520,16 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     if (mounted) setState(() {});
   }
 
+  Future<void> _openInitialItemDetails(WellnessContentItem item) async {
+    await _openDetails(item);
+    if (!mounted || !widget.returnToCallerAfterInitialItem) return;
+    // Only unwind our own library route after its detail has closed. Do not
+    // pop another destination if the user navigated away while it was open.
+    if (ModalRoute.of(context)?.isCurrent == true && context.canPop()) {
+      context.pop();
+    }
+  }
+
   void _scheduleInitialItem(List<WellnessContentItem> items) {
     if (_initialItemHandled) return;
     final requested = widget.initialItemId?.trim();
@@ -554,7 +568,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
       }
       // A deep link opens its requested detail, never an unsolicited paywall.
       // The detail retains its real content gate and explicit upgrade action.
-      _openDetails(item);
+      unawaited(_openInitialItemDetails(item));
     });
   }
 
