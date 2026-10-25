@@ -244,10 +244,7 @@ void main() {
     );
     expect(find.text('التمارين المجدولة للأسبوع الحالي'), findsOneWidget);
     expect(find.text('3 / 5'), findsOneWidget);
-    expect(
-      tester.widget<Text>(find.text('الجلسات المؤكدة')).maxLines,
-      isNull,
-    );
+    expect(tester.widget<Text>(find.text('الجلسات المؤكدة')).maxLines, isNull);
     expect(tester.takeException(), isNull);
   });
 }
