@@ -1,5 +1,5 @@
 import '../../app/theme/bil_navigation_press_style.dart';
-import '../../shared/widgets/bil_crystal_arrow.dart';
+import 'bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
