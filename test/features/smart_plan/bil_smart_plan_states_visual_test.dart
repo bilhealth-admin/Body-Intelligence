@@ -180,6 +180,22 @@ void main() {
                   find.byKey(const ValueKey('bil-smart-plan-error')),
                   findsOneWidget,
                 );
+                final recoveryText = tester.widget<Text>(
+                  find.byKey(const ValueKey('bil-smart-plan-error')),
+                );
+                expect(
+                  recoveryText.data,
+                  contains(
+                    ar
+                        ? 'تعذّر فتح بيانات الخطة المحفوظة بأمان.'
+                        : 'The saved plan data could not be opened safely.',
+                  ),
+                );
+                expect(recoveryText.data, isNot(contains('FormatException')));
+                expect(
+                  find.byKey(const ValueKey('bil-smart-plan-retry')),
+                  findsOneWidget,
+                );
                 expect(
                   find.byKey(const ValueKey('bil-smart-plan-create')),
                   findsNothing,
