@@ -60,7 +60,7 @@ void main() {
     await tester.tap(find.text('Open step history'));
     await tester.pumpAndSettle();
     expect(find.byType(StepsHistoryPage), findsOneWidget);
-    await tester.tap(find.byKey(const Key('bil-safe-return'));
+    await tester.tap(find.byKey(const Key('bil-safe-return')));
     await tester.pumpAndSettle();
     expect(find.text('Open step history'), findsOneWidget);
     expect(find.byType(StepsHistoryPage), findsNothing);
@@ -74,7 +74,7 @@ void main() {
       initialLocation: '/connected-health/steps/history',
     );
     expect(find.byType(StepsHistoryPage), findsOneWidget);
-    await tester.tap(find.byKey(const Key('bil-safe-return'));
+    await tester.tap(find.byKey(const Key('bil-safe-return')));
     await tester.pumpAndSettle();
     expect(find.text('Open step history'), findsOneWidget);
     expect(find.byType(StepsHistoryPage), findsNothing);
