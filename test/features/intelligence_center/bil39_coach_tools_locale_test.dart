@@ -42,9 +42,6 @@ void main() {
       () => CoachToolsLocaleCopy.resolve('Unknown tools label', 'ar'),
       throwsArgumentError,
     );
-    expect(
-      CoachToolsLocaleCopy.resolve('Food diary', 'xx'),
-      'Food diary',
-    );
+    expect(CoachToolsLocaleCopy.resolve('Food diary', 'xx'), 'Food diary');
   });
 }

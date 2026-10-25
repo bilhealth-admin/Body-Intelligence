@@ -43,7 +43,9 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
 
   Future<void> _showCoachToolsSheet() async {
     if (!mounted || _referenceNavigating) return;
-    final localeTag = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
+    final localeTag = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
     // Tools is a chooser, not an alias for Today's diary.
     final selection = await showBilPearlBottomSheet<String>(
       context: context,
