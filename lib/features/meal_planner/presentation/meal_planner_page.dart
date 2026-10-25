@@ -286,7 +286,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         const SizedBox(height: 12),
         OutlinedButton.icon(
           key: const Key('share-meal-plan-grocery-list'),
-          onPressed: () => _shareGrocery(copy, items),
+          // Do not export optimistic or stale checks before the owner-guarded
+          // grocery transaction has committed or recovery has completed.
+          onPressed:
+              _saving ||
+                  _grocerySaveInFlight ||
+                  _loadInFlight ||
+                  _loadError != null ||
+                  _readSnapshot == null
+              ? null
+              : () => _shareGrocery(copy, items),
           icon: const Icon(Icons.ios_share_outlined),
           label: Text(copy.text('shareGrocery')),
         ),

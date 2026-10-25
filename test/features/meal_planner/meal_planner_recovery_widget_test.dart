@@ -236,6 +236,47 @@ void main() {
   );
 
   testWidgets(
+    'share stays disabled for pending writes and stale grocery snapshots',
+    (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      final repo = _ControlledRepository(db);
+      addTearDown(() => _dispose(tester, db));
+      await _seed(repo, 'lentil_soup');
+      await _pumpPlanner(tester, repo);
+      await tester.tap(find.text('Grocery list'));
+      await tester.pumpAndSettle();
+      final share = find.byKey(const Key('share-meal-plan-grocery-list'));
+      expect(tester.widget<OutlinedButton>(share).onPressed, isNotNull);
+
+      repo.writeGate = Completer<void>();
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Carrot'));
+      await tester.pump();
+      expect(tester.widget<OutlinedButton>(share).onPressed, isNull);
+      repo.writeGate!.complete();
+      await tester.pumpAndSettle();
+      expect(tester.widget<OutlinedButton>(share).onPressed, isNotNull);
+
+      // Another session changes the checklist after the visible snapshot.
+      // The next check is rejected; the stale list must not be exportable.
+      await repo.set(_checksKey, '["Onion"]');
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Onion'));
+      await tester.pumpAndSettle();
+      expect(repo.attemptedMutations, 2);
+      expect(tester.widget<OutlinedButton>(share).onPressed, isNull);
+      expect(await repo.get(_checksKey), '["Onion"]');
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(tester.widget<OutlinedButton>(share).onPressed, isNotNull);
+      expect(
+        tester.widget<CheckboxListTile>(
+          find.widgetWithText(CheckboxListTile, 'Onion'),
+        ).value,
+        isTrue,
+      );
+    },
+  );
+
+  testWidgets(
     '320px Arabic RTL tabs scroll and long recipe sheet avoids overflow',
     (tester) async {
       final db = AppDatabase.forTesting(NativeDatabase.memory());
