@@ -537,6 +537,9 @@ void registerCoachRequestCases() {
       identical(state, tester.state(find.byType(IntelligenceCenterPage))),
       isFalse,
     );
+    // A new owner gets its own default Overview. Enter through its real action
+    // before asserting that the previous owner's draft did not cross accounts.
+    await openCoachConversationFromOverview(tester);
     expect(
       tester
           .widget<TextField>(find.byKey(const Key('ai-coach-question-field')))

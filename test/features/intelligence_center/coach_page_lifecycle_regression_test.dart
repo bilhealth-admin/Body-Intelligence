@@ -599,10 +599,22 @@ void main() {
         preferences: preferences,
       );
       preferences.heldHistory = Completer<String?>();
+      addTearDown(() {
+        final held = preferences.heldHistory;
+        if (held != null && !held.isCompleted) held.complete(null);
+      });
       await tester.tap(
         find.byKey(const Key('ai-coach-conversation-history-button')),
       );
       await tester.pump();
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      // Conversation Back returns to the approved Overview. Its separate exit
+      // leaves the Coach route while the actual history read is still held.
+      expect(
+        find.byKey(const Key('coach-reference-workspace')),
+        findsOneWidget,
+      );
       await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
       expect(router.routeInformationProvider.value.uri.path, '/dashboard');
