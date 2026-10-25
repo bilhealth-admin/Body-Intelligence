@@ -53,6 +53,23 @@ void main() {
     );
   });
 
+  test('BIL39 review buttons never authorize unsolicited Smart Plan actions', () {
+    for (final question in <String>[
+      'Review my day from my saved BIL data and tell me the most useful next step.',
+      'Review today’s nutrition from my saved BIL data.',
+      'Explain my recorded sleep trend.',
+      'Based on my selected BIL context, what should I focus on next?',
+      'لا أريد خطة',
+      'أريد جدول نزولي بالوزن لشهر',
+    ]) {
+      expect(coachAllowsSuggestedPlanAction(question), isFalse, reason: question);
+    }
+    expect(
+      coachAllowsSuggestedPlanAction('Create a one month workout plan'),
+      isTrue,
+    );
+  });
+
   test('BIL39 an explicit monthly training and nutrition plan is still valid', () {
     final intent = classifyCoachRequest(
       'أريد إنشاء خطة تمارين وتغذية لمدة شهر',
