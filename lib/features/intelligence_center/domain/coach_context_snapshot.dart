@@ -1,3 +1,6 @@
+/// Distinguishes a verified empty weight diary from a failed or withheld read.
+enum CoachWeightReadStatus { verified, unavailable, withheld }
+
 class CoachWeightPoint {
   const CoachWeightPoint({
     required this.at,
@@ -69,6 +72,7 @@ class CoachContextSnapshot {
     required this.generatedAt,
     required this.profile,
     required this.weights,
+    this.weightReadStatus = CoachWeightReadStatus.verified,
     required this.nutritionDays,
     required this.waterHistory,
     required this.computedHealth,
@@ -85,6 +89,7 @@ class CoachContextSnapshot {
   final DateTime generatedAt;
   final Map<String, Object?> profile;
   final List<CoachWeightPoint> weights;
+  final CoachWeightReadStatus weightReadStatus;
   final List<CoachNutritionDay> nutritionDays;
   final List<Map<String, Object?>> waterHistory;
   final Map<String, Object?> computedHealth;
@@ -103,6 +108,7 @@ class CoachContextSnapshot {
       generatedAt: generatedAt ?? DateTime.now(),
       profile: const <String, Object?>{},
       weights: const <CoachWeightPoint>[],
+      weightReadStatus: CoachWeightReadStatus.unavailable,
       nutritionDays: const <CoachNutritionDay>[],
       waterHistory: const <Map<String, Object?>>[],
       computedHealth: const <String, Object?>{},
@@ -169,6 +175,7 @@ class CoachContextSnapshot {
     'generatedAt': generatedAt.toUtc().toIso8601String(),
     'profile': profile,
     'weight': {
+      'readStatus': weightReadStatus.name,
       'today': _weightAtDaysAgo(0),
       'yesterday': _weightAtDaysAgo(1),
       'sevenDaysAgo': _weightAtDaysAgo(7),
