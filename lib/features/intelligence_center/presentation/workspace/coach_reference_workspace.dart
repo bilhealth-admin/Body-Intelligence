@@ -245,11 +245,9 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                           key: Key('coach-workspace-tab-${item.$2}'),
                           style: TextButton.styleFrom(
                             foregroundColor: item.$2 == 'coach'
-                                ? Colors.white
+                                ? scheme.onSurface
                                 : muted,
-                            backgroundColor: item.$2 == 'coach'
-                                ? _blue
-                                : Colors.transparent,
+                            backgroundColor: Colors.transparent,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 17,
                               vertical: 10,

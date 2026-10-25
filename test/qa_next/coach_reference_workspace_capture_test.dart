@@ -29,6 +29,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../visual_closure/visual_evidence_font.dart';
+import '../support/coach_conversation_entry.dart';
 
 final _clock = DateTime(2026, 10, 5, 9, 41);
 final _snapshot = CoachContextSnapshot(
@@ -146,6 +147,9 @@ Future<void> _mount(
         verifiedSubscriptionAccessProvider.overrideWithValue(
           AsyncData(_subscription(premium)),
         ),
+        // This synthetic account declares both verified subscription and
+        // authoritative quota access. A paid plan alone is not a quota proof.
+        aiCoachCreditAccessProvider.overrideWith((ref) async => premium),
         coachContextSnapshotProvider.overrideWith((ref) async => _snapshot),
         intelligenceConversationClockProvider.overrideWithValue(() => _clock),
         intelligenceHealthContextProvider.overrideWith(
@@ -183,7 +187,12 @@ Future<void> _mount(
           ).copyWith(textScaler: TextScaler.linear(scale)),
           child: RepaintBoundary(
             key: key,
-            child: visualEvidenceTextSurface(child),
+            child: visualEvidenceTextSurface(
+              child,
+              fontFamily: language == 'ar'
+                  ? 'NotoArabicEvidence'
+                  : 'RobotoEvidence',
+            ),
           ),
         ),
       ),
@@ -192,6 +201,25 @@ Future<void> _mount(
   await tester.pumpAndSettle();
   await settleVisualAssetImages(tester);
   await tester.pumpAndSettle();
+}
+
+Future<void> _revealWorkspaceAction(WidgetTester tester, Finder action) async {
+  if (action.evaluate().isEmpty) {
+    final vertical = find.byWidgetPredicate(
+      (widget) =>
+          widget is Scrollable &&
+          (widget.axisDirection == AxisDirection.down ||
+              widget.axisDirection == AxisDirection.up),
+    );
+    await tester.scrollUntilVisible(
+      action,
+      150,
+      scrollable: vertical.first,
+      maxScrolls: 40,
+    );
+  } else {
+    await tester.ensureVisible(action);
+  }
 }
 
 void main() {
@@ -234,6 +262,21 @@ void main() {
               dark: dark,
             );
             expect(tester.takeException(), isNull);
+            final coachTab = find.byKey(const Key('coach-workspace-tab-coach'));
+            expect(
+              find.descendant(
+                of: coachTab,
+                matching: find.byIcon(Icons.smart_toy_outlined),
+              ),
+              findsOneWidget,
+            );
+            expect(
+              find.descendant(
+                of: coachTab,
+                matching: find.text(language == 'ar' ? 'المدرب' : 'Coach'),
+              ),
+              findsOneWidget,
+            );
             expect(find.text('612 / 1200'), findsOneWidget);
             expect(find.text('Premium AI Coach'), findsOneWidget);
             expect(find.text('Pro'), findsNothing);
@@ -297,7 +340,7 @@ void main() {
             final photo = find.text(
               language == 'ar' ? 'سجّل وجبة' : 'Log a Meal',
             );
-            await tester.ensureVisible(photo);
+            await _revealWorkspaceAction(tester, photo);
             await tester.pumpAndSettle();
             expect(photo.hitTestable(), findsOneWidget);
             await tester.tap(photo);
@@ -305,7 +348,7 @@ void main() {
             final voice = find.text(
               language == 'ar' ? 'تسجيل صوتي' : 'Voice Log',
             );
-            await tester.ensureVisible(voice);
+            await _revealWorkspaceAction(tester, voice);
             await tester.pumpAndSettle();
             expect(voice.hitTestable(), findsOneWidget);
             await tester.tap(voice);
@@ -313,7 +356,7 @@ void main() {
             final scan = find.text(
               language == 'ar' ? 'مسح منتج' : 'Scan Product',
             );
-            await tester.ensureVisible(scan);
+            await _revealWorkspaceAction(tester, scan);
             await tester.pumpAndSettle();
             expect(scan.hitTestable(), findsOneWidget);
             await tester.tap(scan);
@@ -459,14 +502,17 @@ void main() {
           createdAt: _clock.subtract(const Duration(minutes: 28)),
         ),
       ];
-      await preferences.set(
-        'intelligenceConversationV1',
-        jsonEncode(transcript.map((m) => m.toJson()).toList()),
+      await tester.runAsync(
+        () => preferences.set(
+          'intelligenceConversationV1',
+          jsonEncode(transcript.map((m) => m.toJson()).toList()),
+        ),
       );
       final key = GlobalKey();
       await _mount(tester, const IntelligenceCenterPage(), db, key);
       await tester.pump(const Duration(seconds: 3));
       await tester.pumpAndSettle();
+      await openCoachConversationFromOverview(tester);
       expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
       expect(find.byKey(const Key('bil-reference-navigation')), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -483,7 +529,7 @@ void main() {
       await tester.tap(find.text('Overview'));
       await tester.pumpAndSettle();
       expect(find.byType(CoachReferenceWorkspace), findsOneWidget);
-      await tester.tap(find.byKey(const Key('coach-workspace-tab-chat')));
+      await tester.tap(find.byKey(const Key('coach-workspace-open-chat')));
       await tester.pumpAndSettle();
       expect(find.text('Keep this unfinished draft'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -491,7 +537,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(BilQuickAddSheet), findsOneWidget);
       expect(
-        jsonDecode((await preferences.get('intelligenceConversationV1'))!),
+        jsonDecode(
+          (await tester.runAsync(
+            () async => (await preferences.get('intelligenceConversationV1'))!,
+          ))!,
+        ),
         transcript.map((message) => message.toJson()).toList(),
       );
       await settleVisualAssetImages(tester);
