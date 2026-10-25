@@ -594,6 +594,19 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                                           'I finished this movement',
                                           'أنهيت هذه الحركة',
                                         ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              color:
+                                                  Theme.of(
+                                                        context,
+                                                      ).brightness ==
+                                                      Brightness.dark
+                                                  ? BilPearlFinish.darkInk
+                                                  : BilPearlFinish.lightInk,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                     ),
                                     Wrap(

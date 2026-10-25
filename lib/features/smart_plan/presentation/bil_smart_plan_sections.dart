@@ -105,12 +105,20 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                 const SizedBox(height: 8),
                 ExpansionTile(
                   key: const ValueKey('bil-smart-plan-workout-steps'),
+                  collapsedBackgroundColor:
+                      Theme.of(context).brightness == Brightness.dark
+                      ? BilPearlFinish.darkSurface
+                      : BilPearlFinish.lightSurface,
                   textColor: labelInk,
                   collapsedTextColor: labelInk,
                   iconColor: labelInk,
                   collapsedIconColor: labelInk,
                   title: Text(
                     _t('Exercises in this session', 'تمارين هذه الجلسة'),
+                    style: TextStyle(
+                      color: labelInk,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   children: [
                     for (final id in day.workout!.exerciseIds)

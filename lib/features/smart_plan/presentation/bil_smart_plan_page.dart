@@ -637,7 +637,9 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                       : tabInk,
                                   backgroundColor: _tab == tab.$1
                                       ? tabSelectedFill
-                                      : Colors.transparent,
+                                      : dark
+                                      ? BilPearlFinish.darkSurface
+                                      : BilPearlFinish.lightSurface,
                                   minimumSize: const Size(48, 44),
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 17,
@@ -653,7 +655,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                   // Keep ink explicit for the real RTL/LTR
                                   // contrast guideline, not just palette tests.
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w800,
                                     color: _tab == tab.$1
                                         ? Colors.white
