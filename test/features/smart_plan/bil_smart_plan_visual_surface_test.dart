@@ -1,5 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_smart_plan_visual.dart';
 import 'package:body_intelligence_log/app/theme/bil_pearl_finish.dart';
 import 'package:body_intelligence_log/features/smart_plan/presentation/bil_smart_plan_panel.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +24,20 @@ double _contrast(Color foreground, Color background) {
 }
 
 void main() {
+  test('My Plan visual metrics have localized copy in all production languages', () {
+    expect(SmartPlanVisualRuntimeCopy.balanced, isTrue);
+    for (final source in SmartPlanVisualRuntimeCopy.sources) {
+      for (final locale in BilLocalePolicy.productionTags) {
+        final translated = RuntimeCopy.resolve(source, locale);
+        expect(translated, isNotNull, reason: '$locale: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$locale: $source');
+        if (locale != 'en') {
+          expect(translated, isNot(source), reason: '$locale: $source');
+        }
+      }
+    }
+  });
+
   test(
     'local category illustrations never imply an individual verified video',
     () {

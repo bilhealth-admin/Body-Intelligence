@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'dart:convert';
 import 'dart:io';
 import 'smart_plan_copy_sources.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_smart_plan_visual.dart';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_profile.dart';
@@ -131,6 +132,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     File('lib/features/auth/auth_five_locale_copy.dart').readAsString(),
   ])).join('\n');
   final catalogKeys = <String>{
+    ...SmartPlanVisualRuntimeCopy.sources,
     ...ClosureAccessRuntimeCopy.sources,
     ...ClosureCoachRuntimeCopy.sources,
     ...ClosureFoodRuntimeCopy.sources,
