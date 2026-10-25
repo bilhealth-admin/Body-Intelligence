@@ -487,7 +487,16 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
+      // A model suggestion cannot turn "Check nutrition", "Review my day"
+      // or a weight-chart read into a Smart Plan transition.
+      final allowPlanActions = coachAllowsSuggestedPlanAction(text);
       final availableActions = reply.actions
+          .where(
+            (action) =>
+                allowPlanActions ||
+                (action.type != IntelligenceActionType.smartPlan &&
+                    action.type != IntelligenceActionType.openPlan),
+          )
           .map(const CoachActionAdmission().admitProposal)
           .whereType<IntelligenceAction>()
           .toList(growable: false);
