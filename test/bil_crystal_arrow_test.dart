@@ -154,7 +154,6 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
     final focus = FocusNode();
     addTearDown(focus.dispose);
     var taps = 0;
@@ -196,5 +195,8 @@ void main() {
     expect(taps, 1);
     expect(find.byKey(_bubble), findsOneWidget);
     expect(tester.takeException(), isNull);
+    // Flutter verifies SemanticsHandles before addTearDown callbacks run.
+    // Explicitly close this handle after all strict assertions.
+    semantics.dispose();
   });
 }
