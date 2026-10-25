@@ -112,6 +112,9 @@ void main() {
     for (final question in <String>[
       'Review my day from my saved BIL data and tell me the most useful next step.',
       'Review today’s nutrition from my saved BIL data.',
+      'راجع تغذية اليوم من بياناتي المحفوظة',
+      'Analyze today’s recorded workout.',
+      'حلّل تمرين اليوم من السجل',
       'Explain my recorded sleep trend.',
       'Based on my selected BIL context, what should I focus on next?',
       'لا أريد خطة',
@@ -127,6 +130,17 @@ void main() {
       coachAllowsSuggestedPlanAction('Create a one month workout plan'),
       isTrue,
     );
+    for (final question in <String>[
+      'What is my workout today?',
+      'شو تمريني اليوم؟',
+      'What meals are in my plan today?',
+    ]) {
+      expect(
+        coachAllowsSuggestedPlanAction(question),
+        isTrue,
+        reason: question,
+      );
+    }
   });
 
   test(
@@ -169,9 +183,16 @@ void main() {
     );
     const commands = LocalCoachCommandParser();
     expect(commands.parse('Reply in English language', locale: 'ar'), isEmpty);
-    final appChange = commands.parse('غير لغة التطبيق للانجليزي', locale: 'ar');
-    expect(appChange, hasLength(1));
-    expect(appChange.single.type, IntelligenceActionType.setLanguage);
+    for (final request in <String>[
+      'غير لغة التطبيق للانجليزي',
+      'غيّر لغة التطبيق للإنجليزي',
+      'Change app language to English',
+    ]) {
+      final appChange = commands.parse(request, locale: 'ar');
+      expect(appChange, hasLength(1), reason: request);
+      expect(appChange.single.type, IntelligenceActionType.setLanguage);
+      expect(appChange.single.payload['locale'], 'en');
+    }
   });
 
   test(

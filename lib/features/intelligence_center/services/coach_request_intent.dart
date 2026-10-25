@@ -169,6 +169,9 @@ CoachRequestIntent classifyCoachRequest(String input) {
   }
   if ((training || nutrition) &&
       has(r'\btoday\b|اليوم') &&
+      // Reviewing recorded nutrition or training is a read, even when it
+      // mentions today. It does not authorize a suggested plan operation.
+      !has(r'\b(review|analy[sz]e)\b|راجع|مراجعة|حلل') &&
       !has(
         r'\b(ate|eaten|had|log|logged|record|recorded|add|added)\b|اكلت|تناولت|سجل|اضف',
       )) {

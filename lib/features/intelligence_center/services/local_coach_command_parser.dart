@@ -493,7 +493,7 @@ class LocalCoachCommandParser {
     }
     const variants = <String, List<String>>{
       'ar': ['arabic', 'العربي', 'عربي'],
-      'en': ['english', 'الانجليزي', 'إنجليزي'],
+      'en': ['english', 'الانجليزي', 'انجليزي'],
       'fr': ['french', 'الفرنسي', 'فرنسي'],
       'es': ['spanish', 'الاسباني', 'إسباني'],
       'tr': ['turkish', 'التركي', 'تركي'],
