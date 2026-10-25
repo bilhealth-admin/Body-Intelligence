@@ -90,9 +90,14 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   })();
   final weightsFuture = (() async {
     try {
-      return await ref.read(weightRepositoryProvider).getAll();
+      final values = await ref
+          .read(weightRepositoryProvider)
+          .getAll()
+          .timeout(const Duration(seconds: 6));
+      return (values: values, available: true);
     } on Object {
-      return <WeightEntry>[];
+      // Failure is not evidence that the owner has zero weigh-ins.
+      return (values: <WeightEntry>[], available: false);
     }
   })();
   final latestBodyMeasurementFuture = (() async {
@@ -216,7 +221,8 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
         })();
   final canonicalOutput = await canonicalOutputFuture;
   final decisionMemories = await decisionMemoriesFuture;
-  final weights = await weightsFuture;
+  final weightRead = await weightsFuture;
+  final weights = weightRead.values;
   final latestBodyMeasurement = await latestBodyMeasurementFuture;
   final meals = await mealsFuture;
   final water = await waterFuture;
@@ -536,6 +542,11 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   );
   return CoachContextSnapshot(
     smartPlan: savedPlanContext,
+    weightReadStatus: !includeAnalytics
+        ? CoachWeightReadStatus.withheld
+        : weightRead.available
+        ? CoachWeightReadStatus.verified
+        : CoachWeightReadStatus.unavailable,
     generatedAt: DateTime.now(),
     profile: profile == null
         ? <String, Object?>{

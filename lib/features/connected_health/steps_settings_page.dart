@@ -377,7 +377,9 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                       ),
                       onTap: saving
                           ? null
-                          : () => context.go('/connected-health/steps/history'),
+                          : () => context.push(
+                              '/connected-health/steps/history',
+                            ),
                     ),
                     ListTile(
                       key: const Key('daily-step-goal'),

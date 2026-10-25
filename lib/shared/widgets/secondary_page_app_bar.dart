@@ -1,4 +1,5 @@
 import '../../app/theme/bil_navigation_press_style.dart';
+import 'bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -6,7 +7,7 @@ import 'package:go_router/go_router.dart';
 ///
 /// Back behavior is deterministic:
 /// - pop when the page was pushed and history exists;
-/// - otherwise return safely to the Dashboard (direct link or `context.go`).
+/// - otherwise return safely to the Dashboard (direct link or context.go).
 class SecondaryPageAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const SecondaryPageAppBar({
@@ -54,8 +55,8 @@ class SecondaryPageAppBar extends StatelessWidget
           key: const Key('secondary-page-back'),
           tooltip: arabic ? 'رجوع' : 'Back',
           onPressed: onBack ?? leaveSecondaryPage,
-          style: BilNavigationPressStyle.neutralBubble(context),
-          icon: const BackButtonIcon(),
+          style: BilNavigationPressStyle.crystalButton(context),
+          icon: const BilCrystalArrow(child: BackButtonIcon()),
         ),
       ),
       actions: [

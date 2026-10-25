@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_crystal_arrow.dart';
 import 'bil_pearl_finish.dart';
 
 abstract final class BilNavigationPressStyle {
@@ -28,6 +28,22 @@ abstract final class BilNavigationPressStyle {
     );
   }
 
+  /// Transparent button chrome for a child that draws its own resting crystal.
+  /// This method is intentionally not used by commerce purchase controls.
+  static ButtonStyle crystalButton(BuildContext context) {
+    final foreground = Theme.of(context).colorScheme.onSurface;
+    return IconButton.styleFrom(
+      backgroundColor: Colors.transparent,
+      foregroundColor: foreground,
+      disabledBackgroundColor: Colors.transparent,
+      disabledForegroundColor: foreground.withValues(alpha: .38),
+      overlayColor: foreground.withValues(alpha: .08),
+      minimumSize: const Size(48, 48),
+      padding: EdgeInsets.zero,
+      shape: const CircleBorder(side: BorderSide(color: Colors.transparent)),
+    );
+  }
+
   static Widget backIcon(BuildContext context) =>
-      const BilGlassPressFeedback(child: Icon(Icons.chevron_left_rounded));
+      const BilCrystalArrow(child: Icon(Icons.chevron_left_rounded));
 }

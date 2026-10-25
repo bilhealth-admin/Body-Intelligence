@@ -3,6 +3,7 @@ import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../smart_plan/services/bil_smart_plan_coach.dart';
 import '../services/coach_request_intent.dart';
+import '../services/coach_weight_history_readout.dart';
 import '../../smart_plan/data/bil_smart_plan_repository.dart';
 import '../../smart_plan/domain/bil_smart_plan.dart';
 import '../../smart_plan/services/bil_smart_plan_catalog.dart';
@@ -560,7 +561,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     super.dispose();
   }
 
-  bool _referenceOverview = false;
+  // Authorized Coach opens on Overview, not a blank conversation.
+  // History is still loaded and retained by the existing owner-scoped store.
+  bool _referenceOverview = true;
   bool _referenceNavigating = false;
 
   @override

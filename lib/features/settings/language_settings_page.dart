@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/router/bil_safe_return_button.dart';
 
 import '../../app/localization/bil_locale_names.dart';
 import '../../app/localization/bil_locale_policy.dart';
@@ -17,7 +18,10 @@ class LanguageSettingsPage extends ConsumerWidget {
     final selected = ref.watch(appSettingsProvider).localeCode;
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
-        appBar: AppBar(title: Text(context.strings.text('Language'))),
+        appBar: AppBar(
+          leading: const BilSafeReturnButton(fallbackLocation: '/settings'),
+          title: Text(context.strings.text('Language')),
+        ),
         body: ListView.builder(
           itemCount: orderedTags.length,
           itemBuilder: (context, index) {

@@ -1,6 +1,72 @@
 part of 'intelligence_center_page.dart';
 
 extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
+  Future<bool> _readVerifiedWeightHistoryInChat(
+    String questionText,
+    String locale,
+    int generation, {
+    required bool autoSpeakReply,
+  }) async {
+    // All supported locales still use the general Coach flow. This
+    // deterministic in-chat readout is limited to reviewed Arabic/English copy.
+    if (!locale.startsWith('ar') && !locale.startsWith('en')) return false;
+    if (!isCoachWeightHistoryReadRequest(questionText)) return false;
+
+    final ownerAtStart = conversationPreferences.localOwnerId;
+    final epoch = conversationPersistenceEpoch;
+    CoachContextSnapshot? snapshot;
+    try {
+      snapshot = await ref
+          .read(coachContextSnapshotProvider.future)
+          .timeout(const Duration(seconds: 8));
+    } on Object {
+      // A timeout is an unknown dataset, never a verified empty history.
+    }
+    if (!mounted ||
+        generation != requestGeneration ||
+        epoch != conversationPersistenceEpoch ||
+        coachMessageVisitCancelled ||
+        ownerAtStart != conversationPreferences.localOwnerId) {
+      return true;
+    }
+    final text = snapshot == null ||
+            snapshot.weightReadStatus != CoachWeightReadStatus.verified
+        ? intelligenceTextFor(
+            locale,
+            'Weight history could not be verified at this time. This does not mean you have no weigh-ins; please retry the read.',
+            'تعذّر التحقق من سجل أوزانك الآن؛ هذا لا يعني عدم وجود قياسات. يرجى إعادة المحاولة.',
+          )
+        : CoachWeightHistoryReadout.build(
+            snapshot: snapshot,
+            question: questionText,
+            languageTag: locale,
+            now: ref.read(intelligenceConversationClockProvider)(),
+          ).message;
+    final message = IntelligenceMessage(
+      id: 'coach-verified-weight-${DateTime.now().microsecondsSinceEpoch}',
+      role: IntelligenceMessageRole.bil,
+      kind: IntelligenceMessageKind.coach,
+      text: text,
+      createdAt: DateTime.now(),
+      evidence: const ['owner-scoped-local-weight-history'],
+      confidence: 1,
+      modality: autoSpeakReply
+          ? IntelligenceMessageModality.voice
+          : IntelligenceMessageModality.text,
+    );
+    _updateState(() {
+      messages.add(message);
+      animatedResponseIds.add(message.id);
+    });
+    _scrollToLatest();
+    unawaited(_saveConversation());
+    if (autoSpeakReply) {
+      await _speakCoachText(message.text, locale);
+      await _resumeLiveCallIfNeeded(generation);
+    }
+    return true;
+  }
+
   Future<void> ask({
     CoachInputChannel inputChannel = CoachInputChannel.text,
     String? detectedLanguageTag,
@@ -145,6 +211,15 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
+      if (await _readVerifiedWeightHistoryInChat(
+        text,
+        questionLocale,
+        generation,
+        autoSpeakReply: autoSpeakReply,
+      )) {
+        localHealthHandled = true;
+        return;
+      }
       if (await _answerSmartPlanIntent(text, questionLocale)) {
         localHealthHandled = true;
         return;
@@ -270,6 +345,40 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         final healthContext = await healthContextFuture;
         final coachContext = await coachContextFuture;
         if (!mounted || generation != requestGeneration) return;
+        if (isCoachWeightHistoryReadRequest(text) &&
+            coachContext.weightReadStatus != CoachWeightReadStatus.verified) {
+          // A repository timeout or missing analytics permission never proves
+          // that the diary is empty. Do not bill for a speculative AI answer.
+          localHealthHandled = true;
+          final copy = coachContext.weightReadStatus ==
+                  CoachWeightReadStatus.withheld
+              ? intelligenceTextFor(
+                  questionLocale,
+                  'Weight history is not available to Coach under your current context-sharing settings. No records were changed.',
+                  'سجل الوزن غير متاح للمدرب وفق إعدادات مشاركة السياق الحالية. لم يتغير أي سجل.',
+                )
+              : intelligenceTextFor(
+                  questionLocale,
+                  'I could not verify your weight history right now. This does not mean that you have no records. Please retry the read.',
+                  'تعذّر التحقق من سجل أوزانك الآن، وهذا لا يعني عدم وجود سجلات. يرجى إعادة محاولة القراءة.',
+                );
+          final notice = IntelligenceMessage(
+            id: 'coach-weight-read-unavailable-${DateTime.now().microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.coach,
+            text: copy,
+            createdAt: DateTime.now(),
+            evidence: const ['local-weight-context-read-status'],
+            confidence: 1,
+          );
+          _updateState(() {
+            messages.add(notice);
+            animatedResponseIds.add(notice.id);
+          });
+          _scrollToLatest();
+          unawaited(_saveConversation());
+          return;
+        }
         final activeEngine = IntelligenceCenterEngine(
           localApi: ModelBackedLocalCoachApi(
             gateway: bindCoachCloudRequest(
@@ -378,7 +487,16 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
+      // A model suggestion cannot turn "Check nutrition", "Review my day"
+      // or a weight-chart read into a Smart Plan transition.
+      final allowPlanActions = coachAllowsSuggestedPlanAction(text);
       final availableActions = reply.actions
+          .where(
+            (action) =>
+                allowPlanActions ||
+                (action.type != IntelligenceActionType.smartPlan &&
+                    action.type != IntelligenceActionType.openPlan),
+          )
           .map(const CoachActionAdmission().admitProposal)
           .whereType<IntelligenceAction>()
           .toList(growable: false);

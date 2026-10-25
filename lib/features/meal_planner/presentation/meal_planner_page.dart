@@ -31,6 +31,9 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   WeeklyMealPlan? _plan;
   var _loading = true;
   var _saving = false;
+  var _loadInFlight = false;
+  String? _loadError;
+  String? _saveError;
   final _checkedGrocery = <String>{};
 
   @override
@@ -39,9 +42,17 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
     _load();
   }
 
-  Future<void> _load() async {
-    final repository = ref.read(preferencesRepositoryProvider);
+  Future<void> _load({bool retry = false}) async {
+    if (_loadInFlight) return;
+    _loadInFlight = true;
+    if (retry && mounted) {
+      setState(() {
+        _loading = _plan == null;
+        _loadError = null;
+      });
+    }
     try {
+      final repository = ref.read(preferencesRepositoryProvider);
       final values = await Future.wait([
         repository.get(_preferencesKey),
         repository.get(_planKey),
@@ -68,29 +79,55 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
             ..addAll((jsonDecode(checks) as List).cast<String>());
         }
         _loading = false;
+        _loadError = null;
       });
     } catch (_) {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = 'loadFailed';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loadInFlight = false);
+      } else {
+        _loadInFlight = false;
+      }
     }
   }
 
   Future<void> _generate() async {
-    setState(() => _saving = true);
-    final plan = _engine.generate(
-      _preferences,
-      dietaryPreferences: _dietaryPreferences,
-    );
+    if (_saving) return;
+    final preferences = _preferences;
+    final dietaryPreferences = _dietaryPreferences;
+    setState(() {
+      _saving = true;
+      _saveError = null;
+    });
     try {
+      final plan = _engine.generate(
+        preferences,
+        dietaryPreferences: dietaryPreferences,
+      );
       final repository = ref.read(preferencesRepositoryProvider);
-      await repository.set(_preferencesKey, jsonEncode(_preferences.toJson()));
-      await repository.set(_planKey, plan.encode());
-      await repository.remove(_groceryChecksKey);
-      if (mounted) {
-        setState(() {
-          _plan = plan;
-          _checkedGrocery.clear();
-        });
-      }
+      // Preferences, the new plan, and grocery-check reset are one durable
+      // transaction. A failed write leaves the previous saved week intact.
+      await repository.mutate(
+        set: {
+          _preferencesKey: jsonEncode(preferences.toJson()),
+          _planKey: plan.encode(),
+        },
+        remove: [_groceryChecksKey],
+      );
+      if (!mounted) return;
+      setState(() {
+        _plan = plan;
+        _checkedGrocery.clear();
+        _saveError = null;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _saveError = 'generateFailed');
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -106,6 +143,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         appBar: AppBar(
           title: Text(copy.text('title')),
           bottom: TabBar(
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: [
               Tab(text: copy.text('week')),
               Tab(text: copy.text('grocery')),
@@ -114,16 +153,66 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
             ],
           ),
         ),
-        body: _loading
+        body: _loading && _plan == null
             ? const Center(child: CircularProgressIndicator())
-            : TabBarView(
+            : Column(
                 children: [
-                  _week(copy),
-                  _grocery(copy),
-                  _prep(copy),
-                  _preferencesView(copy),
+                  if (_loadError != null)
+                    _recoverableError(
+                      copy,
+                      _loadError!,
+                      () => _load(retry: true),
+                    ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _week(copy),
+                        _grocery(copy),
+                        _prep(copy),
+                        _preferencesView(copy),
+                      ],
+                    ),
+                  ),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _recoverableError(
+    _PlannerCopy copy,
+    String messageKey,
+    VoidCallback onRetry,
+  ) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
+      child: BilPearlMaterialCard(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.error_outline_rounded, color: scheme.error),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(copy.text(messageKey))),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton.icon(
+                  onPressed: _loadInFlight ? null : onRetry,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: Text(copy.text('retry')),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -139,6 +228,41 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ),
         const SizedBox(height: 8),
         Text(copy.text('heroBody')),
+        const SizedBox(height: 12),
+        BilPearlMaterialCard(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        copy.text('sourceLabel'),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  copy.text('sourceBody'),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (_saveError != null) ...[
+          const SizedBox(height: 12),
+          _recoverableError(copy, _saveError!, () => _generate()),
+        ],
         const SizedBox(height: 18),
         FilledButton.icon(
           key: const Key('generate-weekly-meal-plan'),
@@ -212,7 +336,9 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ...items.map(
           (item) => CheckboxListTile(
             value: _checkedGrocery.contains(item.key),
-            onChanged: (checked) => _toggleGrocery(item.key, checked == true),
+            onChanged: _saving
+                ? null
+                : (checked) => _toggleGrocery(item.key, checked == true),
             controlAffinity: ListTileControlAffinity.leading,
             title: Text(item.key),
             subtitle: Text(_amount(item.value)),
@@ -332,14 +458,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: value!,
-              budget: _preferences.budget,
-              maxMinutes: _preferences.maxMinutes,
-              servings: _preferences.servings,
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: value!,
+                    budget: _preferences.budget,
+                    maxMinutes: _preferences.maxMinutes,
+                    servings: _preferences.servings,
+                  ),
+                ),
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<MealPlanBudget>(
@@ -353,14 +481,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: _preferences.diet,
-              budget: value!,
-              maxMinutes: _preferences.maxMinutes,
-              servings: _preferences.servings,
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: _preferences.diet,
+                    budget: value!,
+                    maxMinutes: _preferences.maxMinutes,
+                    servings: _preferences.servings,
+                  ),
+                ),
         ),
         const SizedBox(height: 16),
         Text(
@@ -371,14 +501,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 10,
           max: 60,
           divisions: 10,
-          onChanged: (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: _preferences.diet,
-              budget: _preferences.budget,
-              maxMinutes: value.round(),
-              servings: _preferences.servings,
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: _preferences.diet,
+                    budget: _preferences.budget,
+                    maxMinutes: value.round(),
+                    servings: _preferences.servings,
+                  ),
+                ),
         ),
         Text('${copy.text('servings')}: ${_preferences.servings}'),
         Slider(
@@ -386,14 +518,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 1,
           max: 8,
           divisions: 7,
-          onChanged: (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: _preferences.diet,
-              budget: _preferences.budget,
-              maxMinutes: _preferences.maxMinutes,
-              servings: value.round(),
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: _preferences.diet,
+                    budget: _preferences.budget,
+                    maxMinutes: _preferences.maxMinutes,
+                    servings: value.round(),
+                  ),
+                ),
         ),
         const SizedBox(height: 12),
         Text(copy.text('safety'), style: Theme.of(context).textTheme.bodySmall),
@@ -458,7 +592,20 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
             FilledButton(
               onPressed: () {
                 Navigator.of(sheetContext).pop();
-                context.push('/daily-log?action=food');
+                // The planner catalog is not the diary's canonical food
+                // catalog. Let the user choose a matching food and confirm
+                // its portion in the diary; never log a recipe automatically.
+                context.push(
+                  Uri(
+                    path: '/daily-log',
+                    queryParameters: {
+                      'action': 'food',
+                      'focus': 'meal',
+                      'meal': recipe.meal.toLowerCase(),
+                      'query': recipe.title,
+                    },
+                  ).toString(),
+                );
               },
               child: Text(copy.text('reviewLog')),
             ),

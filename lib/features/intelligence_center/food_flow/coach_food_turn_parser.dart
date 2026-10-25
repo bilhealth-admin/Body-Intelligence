@@ -183,22 +183,13 @@ final class CoachFoodTurnParser {
     );
   }
 
-  static bool _loggingIntent(String value) => _hasAny(value, const [
-    'اكلت',
-    'سجل',
-    'سجّل',
-    'ضيف',
-    'اضف',
-    'أضف',
-    'فطرت',
-    'اتغديت',
-    'تعشيت',
-    'i ate',
-    'i had',
-    'log ',
-    'add ',
-    'record ',
-  ]);
+  // Word boundaries are Unicode-aware: a *noun* such as "المسجلة" must
+  // never be mistaken for an imperative to log food. No writes happen here.
+  static bool _loggingIntent(String value) => RegExp(
+    r'(?<![\p{L}\p{N}])(?:اكلت|سجل|سجلي|سجللي|سجلت|ضيف|اضف|فطرت|اتغديت|تعشيت|i ate|i had|log|add|record)(?![\p{L}\p{N}])',
+    caseSensitive: false,
+    unicode: true,
+  ).hasMatch(value);
 
   static CoachFoodCorrectionKind? _correctionKind(String value) {
     if (_hasAny(value, const [
@@ -527,23 +518,24 @@ final class CoachFoodTurnParser {
   }
 
   static bool _looksLikeBodyWeight(String value) {
-    // A read-only weight-history request includes the word "سجل" (record).
-    // That is not food logging, even for the plural "أوزاني" spelling.
-    // Match the complete navigation intent; do not swallow actual food logs.
-    if (RegExp(
-      r'^(?:(?:استعرض|اعرض|افتح) سجل (?:الوزن|وزني|اوزاني)|تاريخ (?:وزني|اوزاني))$',
-      unicode: true,
-    ).hasMatch(value)) {
-      return true;
-    }
+    // Personal weight/history requests are read or weight-check-in intents,
+    // not food portions, even when they contain "سجل" or "المسجلة".
+    // Food V2 must not convert those words into quantity questions.
     return _hasAny(value, const [
-          'وزني',
-          'وزن الجسم',
-          'body weight',
-          'my weight',
-          'weigh ',
-        ]) &&
-        !_loggingIntent(value);
+      'وزني',
+      'اوزاني',
+      'اوزان',
+      'وزن الجسم',
+      'سجل الوزن',
+      'تاريخ الوزن',
+      'قياسات الوزن',
+      'قياسات الجسم',
+      'body weight',
+      'my weight',
+      'weight history',
+      'weight log',
+      'weight measurements',
+    ]);
   }
 
   static bool _onlyContext(String value) => const {

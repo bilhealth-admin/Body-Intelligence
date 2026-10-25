@@ -131,6 +131,7 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
       padding: const EdgeInsets.all(16),
       children: [
         BilSmartPlanPanel(
+          artwork: BilSmartPlanArt.recovery,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -345,6 +346,9 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                           padding: const EdgeInsets.all(16),
                           children: [
                             BilSmartPlanPanel(
+                              artwork: BilSmartPlanArt.forWorkout(
+                                widget.day.workout!.templateId,
+                              ),
                               child: Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Column(

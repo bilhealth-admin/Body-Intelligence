@@ -110,7 +110,20 @@ jobs:
             'lib/features/notifications/services/inactivity_reminder_coordinator.dart',
             'test/app/router/audited_route_return_source_contract_test.dart',
             'test/app/router/notification_return_navigation_test.dart',
-            'test/features/community/community_reference_navigation_test.dart'
+            'test/features/community/community_reference_navigation_test.dart',
+            'lib/features/meal_planner/presentation/meal_planner_page.dart',
+            'lib/features/meal_planner/presentation/meal_planner_copy.dart',
+            'lib/features/daily_log/daily_log_navigation_actions.dart',
+            'test/features/meal_planner/meal_planner_e2e_contract_test.dart',
+            'test/features/meal_planner/meal_planner_recovery_contract_test.dart',
+            'lib/features/connected_health/steps_settings_page.dart',
+            'lib/features/wellness/presentation/bil_workout_routines_page.dart',
+            'test/bil39_routes_regression_contract_test.dart',
+            'test/features/connected_health/steps_history_navigation_test.dart',
+            'lib/app/theme/bil_navigation_press_style.dart',
+            'lib/shared/widgets/bil_crystal_arrow.dart',
+            'lib/shared/widgets/secondary_page_app_bar.dart',
+            'test/bil_crystal_arrow_test.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets
@@ -152,6 +165,14 @@ jobs:
           test/features/settings/more_language_entry_test.dart
           test/features/settings/more_latest_weight_test.dart
           test/features/settings/more_premium_polish_contract_test.dart
+
+      - name: Verify Meal Planner recovery and Review & log
+        if: ${{ success() }}
+        shell: pwsh
+        run: >
+          flutter test --no-pub --timeout=2m
+          test/features/meal_planner/meal_planner_e2e_contract_test.dart
+          test/features/meal_planner/meal_planner_recovery_contract_test.dart
 
   p0:
     # The critical data/journal and Vision/architecture suites must pass

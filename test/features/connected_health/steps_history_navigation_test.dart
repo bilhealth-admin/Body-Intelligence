@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/features/connected_health/steps_history_pa
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -25,7 +26,18 @@ void main() {
       File('lib/app/router/app_community_routes.dart').readAsStringSync(),
     ].join('\n');
 
-    expect(settings, contains("context.go('/connected-health/steps/history')"));
+    expect(
+      settings,
+      contains(
+        RegExp(r"context\.push\(\s*'/connected-health/steps/history',?\s*\)"),
+      ),
+    );
+    expect(
+      settings,
+      isNot(
+        contains(RegExp(r"context\.go\(\s*'/connected-health/steps/history'")),
+      ),
+    );
     expect(
       dashboard,
       contains("context.push('/connected-health/steps/history')"),
@@ -36,6 +48,36 @@ void main() {
     );
     expect(route, contains("path: '/connected-health/steps/history'"));
     expect(settings, isNot(contains("context.go('/history')")));
+  });
+
+  testWidgets('Steps history Back restores the calling screen after push', (
+    tester,
+  ) async {
+    await _pumpHistoryRouter(
+      tester,
+      initialLocation: '/connected-health/steps',
+    );
+    await tester.tap(find.text('Open step history'));
+    await tester.pumpAndSettle();
+    expect(find.byType(StepsHistoryPage), findsOneWidget);
+    await tester.tap(find.byKey(const Key('bil-safe-return')));
+    await tester.pumpAndSettle();
+    expect(find.text('Open step history'), findsOneWidget);
+    expect(find.byType(StepsHistoryPage), findsNothing);
+  });
+
+  testWidgets('Steps history opened directly has an explicit safe fallback', (
+    tester,
+  ) async {
+    await _pumpHistoryRouter(
+      tester,
+      initialLocation: '/connected-health/steps/history',
+    );
+    expect(find.byType(StepsHistoryPage), findsOneWidget);
+    await tester.tap(find.byKey(const Key('bil-safe-return')));
+    await tester.pumpAndSettle();
+    expect(find.text('Open step history'), findsOneWidget);
+    expect(find.byType(StepsHistoryPage), findsNothing);
   });
 
   testWidgets('step history renders HealthKit daily totals and no fake days', (
@@ -99,6 +141,55 @@ void main() {
       findsOneWidget,
     );
   });
+}
+
+Future<void> _pumpHistoryRouter(
+  WidgetTester tester, {
+  required String initialLocation,
+}) async {
+  final router = GoRouter(
+    initialLocation: initialLocation,
+    routes: [
+      GoRoute(
+        path: '/connected-health/steps',
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(title: const Text('Steps settings fixture')),
+          body: Center(
+            child: FilledButton(
+              onPressed: () => context.push('/connected-health/steps/history'),
+              child: const Text('Open step history'),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/connected-health/steps/history',
+        builder: (context, state) => const StepsHistoryPage(),
+      ),
+    ],
+  );
+  addTearDown(router.dispose);
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        connectedHealthGatewayProvider.overrideWithValue(
+          const _HistoryGateway(ConnectedHealthSnapshot.unavailable()),
+        ),
+      ],
+      child: MaterialApp.router(
+        routerConfig: router,
+        locale: const Locale('en'),
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
 }
 
 final class _HistoryGateway implements ConnectedHealthGateway {
