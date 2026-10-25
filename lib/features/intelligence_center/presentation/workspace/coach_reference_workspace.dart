@@ -22,8 +22,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     required this.snapshot,
     required this.now,
     required this.onChat,
-    required this.onExit,
-    required this.onTools,
+    this.onExit,
+    this.onTools,
     required this.onRoute,
     required this.onQuickAdd,
     required this.onPhoto,
@@ -33,8 +33,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
   final CoachContextSnapshot? snapshot;
   final DateTime now;
   final VoidCallback onChat;
-  final VoidCallback onExit;
-  final VoidCallback onTools;
+  final VoidCallback? onExit;
+  final VoidCallback? onTools;
   final ValueChanged<String> onRoute;
   final VoidCallback onQuickAdd;
   final VoidCallback onPhoto;
@@ -139,7 +139,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                   IconButton(
                     key: const Key('coach-workspace-back-to-chat'),
                     tooltip: t('Back', 'رجوع'),
-                    onPressed: onExit,
+                    onPressed: onExit ?? onChat,
                     icon: BilGlassPressFeedback(
                       child: Icon(
                         ar
@@ -255,7 +255,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                           onPressed: item.$2 == 'coach'
                               ? () {}
                               : item.$2 == '/daily-log'
-                              ? onTools
+                              ? (onTools ?? () => onRoute('/daily-log'))
                               : () => onRoute(item.$2),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
