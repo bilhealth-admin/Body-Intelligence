@@ -53,6 +53,12 @@ jobs:
           test "$(git hash-object lib/shared/widgets/bil_glass_press_feedback.dart)" = "653d424ddb6cca8adeb0d394f5c8f8866da3792d"
       - name: Check scoped Dart formatting
         run: dart format --output=none --set-exit-if-changed lib/app/theme/bil_navigation_press_style.dart lib/shared/widgets/bil_crystal_arrow.dart lib/shared/widgets/secondary_page_app_bar.dart test/bil_crystal_arrow_test.dart
+      - name: Diagnose exact scoped formatter diff on failure
+        if: failure()
+        shell: bash
+        run: |
+          dart format test/bil_crystal_arrow_test.dart
+          git diff -- test/bil_crystal_arrow_test.dart
       - name: Resolve dependencies
         run: flutter pub get
       - name: Analyze full Dart source
