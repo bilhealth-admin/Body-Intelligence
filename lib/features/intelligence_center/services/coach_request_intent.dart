@@ -77,6 +77,20 @@ String resolveCoachWeightHistoryFollowUp(
     return current;
   }
   final period = normalizeCoachMeaning(current);
+  // A short read acknowledgement inherits only the preceding weight topic.
+  // Preserve its explicit date range rather than silently reading all time.
+  if (const <String>{
+    'اطلع',
+    'اعرض',
+    'وريني',
+    'استعرض',
+    'show',
+    'show it',
+    'view',
+    'go ahead',
+  }.contains(period)) {
+    return previousUserRequest;
+  }
   if (!RegExp(
     r'^(?:last |for )?(?:week|two weeks|2 weeks|14 days|month|one month|30 days|year|'
     r'اسبوع|الاسبوع|اسبوعين|شهر|الشهر|شهر واحد|عام|سنه|سنة|اخر شهر|اخر اسبوعين)$',

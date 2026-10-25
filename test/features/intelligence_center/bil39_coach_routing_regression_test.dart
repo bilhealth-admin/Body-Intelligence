@@ -84,6 +84,28 @@ void main() {
       ),
       'لا أريد خطة',
     );
+    for (final (prior, reply) in <(String, String)>[
+      ('اطلع على سجل أوزاني آخر شهر', 'اطلع'),
+      ('قارن سجل وزني آخر أسبوعين', 'اعرض'),
+      ('Show my weight history last month', 'show it'),
+    ]) {
+      final resumed = resolveCoachWeightHistoryFollowUp(
+        reply,
+        previousUserRequest: prior,
+      );
+      expect(resumed, prior, reason: reply);
+      expect(classifyCoachRequest(resumed).kind, CoachRequestKind.savedData);
+    }
+    for (final prior in <String>[
+      'سجل 3 بيضات',
+      'Create a monthly workout plan',
+      'Switch to English',
+    ]) {
+      expect(
+        resolveCoachWeightHistoryFollowUp('اطلع', previousUserRequest: prior),
+        'اطلع',
+      );
+    }
   });
 
   test('BIL39 review buttons never authorize unsolicited Smart Plan actions', () {

@@ -18,6 +18,30 @@ class CoachWeightHistoryReadout {
   final int comparableCount;
   final double? changeKg;
 
+  /// Unavailable is not an empty diary; withheld means sharing is disabled.
+  /// Neither state permits inventing records or implying a successful read.
+  static String statusMessage({
+    required CoachWeightReadStatus status,
+    required String languageTag,
+  }) {
+    if (status == CoachWeightReadStatus.verified) {
+      throw StateError('weight_history_is_verified');
+    }
+    final arabic = languageTag.toLowerCase().startsWith('ar');
+    if (status == CoachWeightReadStatus.withheld) {
+      return arabic
+          ? 'سجل الوزن غير متاح للمدرب وفق إعدادات مشاركة السياق الحالية. '
+                'لم يتغير أي سجل.'
+          : 'Weight history is not available to Coach under your current '
+                'context-sharing settings. No records were changed.';
+    }
+    return arabic
+        ? 'تعذّر التحقق من سجل أوزانك الآن؛ هذا لا يعني عدم وجود قياسات. '
+              'يرجى إعادة المحاولة.'
+        : 'Weight history could not be verified at this time. '
+              'This does not mean you have no weigh-ins; please retry the read.';
+  }
+
   static CoachWeightHistoryReadout build({
     required CoachContextSnapshot snapshot,
     required String question,

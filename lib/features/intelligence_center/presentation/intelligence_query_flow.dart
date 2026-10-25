@@ -31,19 +31,19 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       return true;
     }
     final text =
-        snapshot == null ||
-            snapshot.weightReadStatus != CoachWeightReadStatus.verified
-        ? intelligenceTextFor(
-            locale,
-            'Weight history could not be verified at this time. This does not mean you have no weigh-ins; please retry the read.',
-            'تعذّر التحقق من سجل أوزانك الآن؛ هذا لا يعني عدم وجود قياسات. يرجى إعادة المحاولة.',
-          )
-        : CoachWeightHistoryReadout.build(
+        snapshot != null &&
+            snapshot.weightReadStatus == CoachWeightReadStatus.verified
+        ? CoachWeightHistoryReadout.build(
             snapshot: snapshot,
             question: readQuestion,
             languageTag: locale,
             now: ref.read(intelligenceConversationClockProvider)(),
-          ).message;
+          ).message
+        : CoachWeightHistoryReadout.statusMessage(
+            status:
+                snapshot?.weightReadStatus ?? CoachWeightReadStatus.unavailable,
+            languageTag: locale,
+          );
     final message = IntelligenceMessage(
       id: 'coach-verified-weight-${DateTime.now().microsecondsSinceEpoch}',
       role: IntelligenceMessageRole.bil,

@@ -107,6 +107,35 @@ void main() {
     );
   });
 
+  test('withheld is explicit, while a failed read is still unknown', () {
+    final withheldArabic = CoachWeightHistoryReadout.statusMessage(
+      status: CoachWeightReadStatus.withheld,
+      languageTag: 'ar',
+    );
+    expect(withheldArabic, contains('مشاركة السياق'));
+    expect(withheldArabic, contains('لم يتغير أي سجل'));
+    expect(withheldArabic, isNot(contains('لم أجد')));
+    final withheldEnglish = CoachWeightHistoryReadout.statusMessage(
+      status: CoachWeightReadStatus.withheld,
+      languageTag: 'en',
+    );
+    expect(withheldEnglish, contains('sharing settings'));
+    expect(withheldEnglish, contains('No records were changed'));
+    final unavailable = CoachWeightHistoryReadout.statusMessage(
+      status: CoachWeightReadStatus.unavailable,
+      languageTag: 'en',
+    );
+    expect(unavailable, contains('could not be verified'));
+    expect(unavailable, contains('does not mean you have no weigh-ins'));
+    expect(
+      () => CoachWeightHistoryReadout.statusMessage(
+        status: CoachWeightReadStatus.verified,
+        languageTag: 'ar',
+      ),
+      throwsStateError,
+    );
+  });
+
   test('two weeks means 14 days in Arabic and English, never 7', () {
     for (final question in <String>['آخر أسبوعين', 'last two weeks']) {
       final result = CoachWeightHistoryReadout.build(
