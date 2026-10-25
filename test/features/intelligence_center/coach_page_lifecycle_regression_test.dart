@@ -1,4 +1,6 @@
 // Exercises the real Coach page and entitlement gate with controlled local I/O.
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -266,6 +268,7 @@ Future<GoRouter> _mount(
       ),
     ),
   );
+  await openCoachConversationFromOverview(tester);
   await tester.pumpAndSettle();
   if (waitForBrief) await _settleBoundedBrief(tester);
   return router;

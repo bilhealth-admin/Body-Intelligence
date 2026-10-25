@@ -1,3 +1,5 @@
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -37,6 +39,7 @@ void main() {
           gateway: gateway,
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       await _send(tester, 'اشرح لي تعافي جسمي اليوم');
@@ -108,6 +111,7 @@ void main() {
         },
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     // Restoring a chat no longer appends another welcome. Locate each actual
@@ -172,6 +176,7 @@ void main() {
         },
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     final chip = find.byKey(const Key('ai-coach-action-openPlan-open-plan'));
@@ -248,6 +253,7 @@ void main() {
         },
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     await _send(tester, 'Open it.');
@@ -260,7 +266,7 @@ void main() {
     await _disposeCoachAndFlushDrift(tester);
   });
 
-  testWidgets('Arabic weight-history request opens the real history route', (
+  testWidgets('Arabic weight-history request reads verified records in chat', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(430, 932));
@@ -271,11 +277,23 @@ void main() {
     await tester.pumpWidget(
       _coachApp(
         database: database,
+        snapshot: CoachContextSnapshot(
+          generatedAt: DateTime(2026, 10, 25),
+          profile: const {},
+          weights: [
+            CoachWeightPoint(at: DateTime(2026, 10, 1), kg: 90),
+            CoachWeightPoint(at: DateTime(2026, 10, 23), kg: 88),
+          ],
+          nutritionDays: const [],
+          waterHistory: const [],
+          computedHealth: const {},
+        ),
         navigation: (context, path, push) async {
           openedPaths.add(path);
         },
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     await tester.enterText(
@@ -286,17 +304,28 @@ void main() {
     tester.testTextInput.hide();
     await tester.pump();
     await tester.tap(find.byKey(const Key('ai-coach-send-button')));
-    for (var attempt = 0; attempt < 80 && openedPaths.isEmpty; attempt += 1) {
+    final verifiedReply = find.textContaining('راجعت 2 قياسات مؤكدة');
+    for (
+      var attempt = 0;
+      attempt < 80 && verifiedReply.evaluate().isEmpty;
+      attempt += 1
+    ) {
       await tester.pump(const Duration(milliseconds: 100));
     }
-
-    expect(openedPaths, <String>['/weight-history']);
-    // Navigation is invoked before the next transcript layout and pin frame.
     await tester.pumpAndSettle();
     expect(
-      find.text(AiCoachChatCopy.resolve('ar', AiCoachChatCopy.navigationReady)),
-      findsOneWidget,
+      openedPaths,
+      isEmpty,
+      reason: 'Reading does not launch another page.',
     );
+    expect(verifiedReply, findsOneWidget);
+    final reply = tester.widget<EditableText>(verifiedReply).controller.text;
+    expect(reply, contains('2026-10-01'));
+    expect(reply, contains('2026-10-23'));
+    expect(reply, contains('90.0'));
+    expect(reply, contains('88.0'));
+    expect(reply, contains('-2.0'));
+    expect(reply, contains('لا تثبت تغيّر الدهون'));
     expect(tester.takeException(), isNull);
     await _disposeCoachAndFlushDrift(tester);
   });
@@ -314,6 +343,7 @@ Widget _coachApp({
   required AppDatabase database,
   required IntelligenceCenterNavigationExecutor navigation,
   LocalModelGateway? gateway,
+  CoachContextSnapshot? snapshot,
 }) {
   final router = GoRouter(
     initialLocation: '/intelligence-center',
@@ -333,8 +363,12 @@ Widget _coachApp({
       if (gateway != null)
         intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),
       coachContextSnapshotProvider.overrideWith(
-        (ref) async => CoachContextSnapshot.empty(),
+        (ref) async => snapshot ?? CoachContextSnapshot.empty(),
       ),
+      if (snapshot != null)
+        intelligenceConversationClockProvider.overrideWithValue(
+          () => snapshot.generatedAt,
+        ),
       intelligenceHealthContextProvider.overrideWith(
         (ref) async => const IntelligenceHealthContext(
           primaryMessage: '',

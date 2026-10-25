@@ -148,6 +148,7 @@ void _nativeRecoveryCases() {
           }
           final before = await _nativeRecoverySnapshot(fixture);
           await tester.pumpWidget(_nativeCoachApp(fixture));
+          await openCoachConversationFromOverview(tester);
           await tester.pumpAndSettle();
           expect(find.widgetWithText(OutlinedButton, 'Undo'), findsNothing);
           expect(await _nativeRecoverySnapshot(fixture), before);
@@ -243,6 +244,7 @@ Future<void> _remountNativeCoach(
 ) async {
   await _unmountNativeCoach(tester);
   await tester.pumpWidget(_nativeCoachApp(fixture));
+  await openCoachConversationFromOverview(tester);
   await tester.pumpAndSettle();
 }
 

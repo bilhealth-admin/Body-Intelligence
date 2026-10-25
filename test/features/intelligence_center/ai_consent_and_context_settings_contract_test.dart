@@ -78,8 +78,12 @@ void main() {
   });
 
   test('in-conversation consent prompt states the actual speech boundary', () {
+    final page = File(
+      'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
+    ).readAsStringSync();
+    expect(page, contains("part 'intelligence_query_guard_flow.dart';"));
     final source = File(
-      'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
+      'lib/features/intelligence_center/presentation/intelligence_query_guard_flow.dart',
     ).readAsStringSync();
 
     expect(source, contains('Send selected personal data to Google Gemini?'));

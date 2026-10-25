@@ -24,6 +24,7 @@ void _coachMealRecoveryCases() {
             settingsService: settings,
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
       }
 
@@ -113,6 +114,7 @@ void _coachMealRecoveryCases() {
               ),
             ),
           );
+          await openCoachConversationFromOverview(tester);
           await tester.pumpAndSettle();
           expect(find.text('Persisted meal receipt'), findsOneWidget);
           expect(find.widgetWithText(OutlinedButton, 'Undo'), findsNothing);
@@ -182,6 +184,7 @@ void _coachMealRecoveryCases() {
             settingsService: AppSettingsService(store: _MemorySettingsStore()),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         expect(find.text('Persisted meal receipt'), findsOneWidget);
         expect(find.widgetWithText(OutlinedButton, 'Undo'), findsNothing);
@@ -220,6 +223,7 @@ void _coachMealRecoveryCases() {
             settingsService: AppSettingsService(store: _MemorySettingsStore()),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         expect(find.widgetWithText(OutlinedButton, 'Undo'), findsOneWidget);
         await tester.tap(
@@ -287,6 +291,7 @@ void _coachMealRecoveryCases() {
             ),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         expect(find.widgetWithText(OutlinedButton, 'Undo'), findsOneWidget);
         owner = 'owner-b';

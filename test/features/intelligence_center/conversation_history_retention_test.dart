@@ -1,3 +1,5 @@
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -206,6 +208,7 @@ void main() {
       });
 
       await tester.pumpWidget(_app(database));
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
       expect(find.text('Question 23'), findsOneWidget);
 
@@ -237,6 +240,7 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
       await tester.pumpWidget(_app(database));
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       expect(find.text('Question 23'), findsOneWidget);
@@ -280,6 +284,7 @@ void main() {
     );
 
     await tester.pumpWidget(_app(database));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
     await tester.tap(
       find.byKey(const Key('ai-coach-conversation-history-button')),

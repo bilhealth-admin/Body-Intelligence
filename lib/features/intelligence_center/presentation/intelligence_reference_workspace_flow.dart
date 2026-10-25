@@ -144,6 +144,9 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
   }
 
   Widget _buildReferencePresentation(BuildContext context) {
+    // Keep the approved entry hold before the default Overview, including
+    // reduced-motion mode. Entering a conversation later does not replay it.
+    if (entryWelcomeVisible) return const _AiCoachEntryWelcome();
     if (_referenceOverview) {
       final snapshot = ref.watch(coachContextSnapshotProvider).asData?.value;
       return CoachReferenceWorkspace(

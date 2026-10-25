@@ -18,6 +18,7 @@ void main() {
               'intelligence_conversation_voice.dart',
               'intelligence_conversation_voice_transcript.dart',
               'intelligence_query_flow.dart',
+              'intelligence_query_guard_flow.dart',
             ]
             .map((name) {
               return File(

@@ -1,3 +1,5 @@
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -122,7 +124,11 @@ void main() {
           onContextBuild: () => contextBuilds += 1,
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
+      final contextContainer = ProviderScope.containerOf(
+        tester.element(find.byType(IntelligenceCenterPage)),
+      );
       final beforeWater = contextBuilds;
 
       await _submitNextTool(
@@ -132,6 +138,9 @@ void main() {
         expectedReceipt: 'Logged 375 ml of water.',
       );
       expect(await WaterRepository(database).totalForDay(DateTime.now()), 375);
+      // Overview no longer watches this provider while chat is open. A fresh
+      // read must rebuild the invalidated context, not return its cached value.
+      await contextContainer.read(coachContextSnapshotProvider.future);
       expect(contextBuilds, greaterThan(beforeWater));
 
       final beforeWeight = contextBuilds;
@@ -145,6 +154,7 @@ void main() {
       expect(weights, hasLength(1));
       expect(weights.single.weight, 82.4);
       expect(weights.single.dayKey, '2026-09-05');
+      await contextContainer.read(coachContextSnapshotProvider.future);
       expect(contextBuilds, greaterThan(beforeWeight));
 
       final preferences = PreferencesRepository(database);
@@ -167,6 +177,7 @@ void main() {
           onContextBuild: () => contextBuilds += 1,
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       expect(find.text('Weight saved.'), findsOneWidget);
@@ -215,6 +226,7 @@ void main() {
           settingsService: AppSettingsService(store: _MemorySettingsStore()),
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       await _submitNextTool(
@@ -286,6 +298,7 @@ void main() {
         settingsService: AppSettingsService(store: _MemorySettingsStore()),
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     await _submitNextTool(
@@ -327,6 +340,7 @@ void main() {
           settingsService: AppSettingsService(store: _MemorySettingsStore()),
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       await _submitNextTool(
@@ -376,6 +390,7 @@ void main() {
           settingsService: AppSettingsService(store: _MemorySettingsStore()),
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       await _openNextToolAction(
@@ -464,6 +479,7 @@ void main() {
           settingsService: AppSettingsService(store: _MemorySettingsStore()),
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
       await _openNextToolAction(
         tester,
@@ -506,6 +522,7 @@ void main() {
           settingsService: AppSettingsService(store: _MemorySettingsStore()),
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('ai-coach-action-updateGoal-update_goal')),
@@ -576,6 +593,7 @@ void main() {
           settingsService: AppSettingsService(store: _MemorySettingsStore()),
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       await _submitNextTool(
@@ -689,6 +707,7 @@ void main() {
         settingsService: AppSettingsService(store: settingsStore),
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
     final container = ProviderScope.containerOf(
       tester.element(find.byType(IntelligenceCenterPage)),
@@ -793,6 +812,7 @@ void main() {
         settingsService: AppSettingsService(store: _MemorySettingsStore()),
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     await _submitNextTool(

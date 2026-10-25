@@ -34,6 +34,7 @@ void _nativeRecoveryLifecycleCases() {
         );
         final before = await _nativeRecoverySnapshot(fixture);
         await tester.pumpWidget(_nativeCoachApp(fixture));
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         expect(find.widgetWithText(OutlinedButton, 'Undo'), findsOneWidget);
         expect(await _nativeRecoverySnapshot(fixture), before);
@@ -122,6 +123,7 @@ void _nativeRecoveryLifecycleCases() {
           final beforeA = await _nativeRecoverySnapshot(a);
           final beforeB = await _nativeRecoverySnapshot(b);
           await tester.pumpWidget(_nativeCoachApp(b));
+          await openCoachConversationFromOverview(tester);
           await tester.pumpAndSettle();
           expect(find.widgetWithText(OutlinedButton, 'Undo'), findsNothing);
           expect(await _nativeRecoverySnapshot(a), beforeA);
@@ -153,6 +155,7 @@ void _nativeRecoveryLifecycleCases() {
             fixture.recoveryPreferences = preferences;
             if (boundary == 'restore') preferences.arm();
             await tester.pumpWidget(_nativeCoachApp(fixture));
+            await openCoachConversationFromOverview(tester);
             await tester.pumpAndSettle();
             if (boundary == 'Undo') {
               expect(
@@ -212,6 +215,7 @@ void _nativeRecoveryLifecycleCases() {
             ..arm();
           fixture.recoveryPreferences = preferences;
           await tester.pumpWidget(_nativeCoachApp(fixture));
+          await openCoachConversationFromOverview(tester);
           await tester.pumpAndSettle();
           expect(preferences.started!.isCompleted, isTrue);
           await _unmountNativeCoach(tester);
