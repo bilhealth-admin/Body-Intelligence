@@ -20,7 +20,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443046/job/121111982809:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121111982975:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252379:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252368:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252342:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252361:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252371:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252323:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252367:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252351:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315387:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315399:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315449:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315508:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315400:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179749:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179768:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179796:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179769:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179746:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179747:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005472:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005510:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005462:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005455:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005509:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005502:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005536:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005533:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121122999101:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0960.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-reliability-completion-20261025",
+      "completion_sha": "cbb51fa62f648ec260fe9bca221e82015a6d7760"
     },
     {
       "ID": "BIL-02",
@@ -31,13 +33,15 @@
       "branch": "bil39/crystal-20261025",
       "source_sha": "4253c3abf653d958535b25b5d14d36b5edd14702",
       "code_review_status": "PARTIAL_IMPLEMENTATION_CONFIRMED",
-      "implemented": "New crystal component/shared secondary back only; broad 411-candidate arrow inventory not closed",
+      "implemented": "84 scoped tests passed on worker source; full scan preserved 639 candidates, including 486 lib rows in 207 files; all-arrow closure remains incomplete",
       "missing": "Classify and migrate remaining eligible arrows; preserve 88 exclusions/protected purchase CTA; review affected goldens and native routes",
       "status": "BLOCKED_PENDING_INTEGRATED_EXACT_SHA",
       "test_files": "test/bil_crystal_arrow_test.dart;test/bil_crystal_calendar_video_test.dart;test/bil_crystal_purchase_cta_isolation_test.dart",
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482873/job/121145258584:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482936/job/121145310947:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121146926463:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482873/job/121145258756:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199551:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199583:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199617:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199593:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199553:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199546:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199610:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199586:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970823:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970754:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970863:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970745:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970758:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121149879863:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121149879980:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121149879107:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0960.jpeg; IMG_0962.png",
-      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate"
+      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
+      "completion_branch": "codex/bil39-crystal-completion-20261025",
+      "completion_sha": "fcfa4fea25124b38e696f5a9af965b6cd9342e00"
     },
     {
       "ID": "BIL-03",
@@ -56,7 +60,7 @@
       "private_reference_names": "IMG_0964.jpeg; IMG_0965.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-04",
@@ -75,7 +79,7 @@
       "private_reference_names": "IMG_0967.jpeg; IMG_0966.jpeg; IMG_0962.png",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-05",
@@ -92,7 +96,9 @@
       "test_files": "test/app/router/bil39_pop_scope_return_test.dart;test/app/router/bil39_safe_return_widget_test.dart;test/bil39_routes_regression_contract_test.dart;test/features/connected_health/steps_history_navigation_test.dart;test/features/wellness/bil39_session_video_return_test.dart;test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570031/job/121133556553:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570039/job/121133556698:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121133556534:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980192:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980181:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980209:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980185:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980198:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980201:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980174:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980152:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365268:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365345:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365325:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365382:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365417:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238431:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238332:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238344:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238301:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238362:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238329:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131583:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131458:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131529:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131540:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131461:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131485:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131499:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131486:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121145644644:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0967.jpeg; IMG_0966.jpeg",
-      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate"
+      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
+      "completion_branch": "codex/bil39-routes-completion-20261025",
+      "completion_sha": "056deb35526349c59b6bb1f89fabbaff6075f84d"
     },
     {
       "ID": "BIL-06",
@@ -111,7 +117,7 @@
       "private_reference_names": "IMG_0968.jpeg; IMG_0964.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-07",
@@ -130,7 +136,7 @@
       "private_reference_names": "IMG_0964.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-08",
@@ -149,7 +155,7 @@
       "private_reference_names": "IMG_0970.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-09",
@@ -166,7 +172,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443046/job/121111982809:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121111982975:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252379:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252368:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252342:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252361:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252371:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252323:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252367:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252351:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315387:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315399:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315449:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315508:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315400:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179749:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179768:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179796:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179769:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179746:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179747:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005472:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005510:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005462:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005455:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005509:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005502:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005536:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005533:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121122999101:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0965.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-reliability-completion-20261025",
+      "completion_sha": "cbb51fa62f648ec260fe9bca221e82015a6d7760"
     },
     {
       "ID": "BIL-10",
@@ -183,7 +191,9 @@
       "test_files": "test/app/router/bil39_pop_scope_return_test.dart;test/app/router/bil39_safe_return_widget_test.dart;test/bil39_routes_regression_contract_test.dart;test/features/connected_health/steps_history_navigation_test.dart;test/features/wellness/bil39_session_video_return_test.dart;test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570031/job/121133556553:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570039/job/121133556698:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121133556534:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980192:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980181:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980209:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980185:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980198:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980201:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980174:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980152:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365268:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365345:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365325:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365382:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365417:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238431:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238332:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238344:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238301:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238362:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238329:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131583:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131458:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131529:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131540:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131461:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131485:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131499:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131486:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121145644644:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0972.jpeg",
-      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate"
+      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
+      "completion_branch": "codex/bil39-routes-completion-20261025",
+      "completion_sha": "056deb35526349c59b6bb1f89fabbaff6075f84d"
     },
     {
       "ID": "BIL-11",
@@ -200,7 +210,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121146156896:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786855/job/121146156680:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020711:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020838:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147021094:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020993:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020540:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0977.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-meal-completion-20261025",
+      "completion_sha": "3468db2a98b03bc2a6c151d920f073180fbb0def"
     },
     {
       "ID": "BIL-12",
@@ -217,7 +229,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443046/job/121111982809:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121111982975:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252379:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252368:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252342:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252361:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252371:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252323:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252367:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252351:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315387:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315399:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315449:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315508:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315400:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179749:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179768:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179796:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179769:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179746:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179747:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005472:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005510:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005462:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005455:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005509:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005502:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005536:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005533:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121122999101:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0960.jpeg (مرجع سابق فقط لهذه العائلة من المشاكل)",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-reliability-completion-20261025",
+      "completion_sha": "cbb51fa62f648ec260fe9bca221e82015a6d7760"
     },
     {
       "ID": "BIL-13",
@@ -228,7 +242,7 @@
       "branch": "bil39/myplan-20261025",
       "source_sha": "3a6745fd2f7911e47f1b3c7089083efe442492f0",
       "code_review_status": "REVIEWED_VISUAL_COMPLETION_IN_PROGRESS",
-      "implemented": "Worker artwork and metrics preserved; actual Arabic contrast failures fixed in tabs, collapsed exercises and session checkbox; 28 actual renderings visually reviewed",
+      "implemented": "Reviewed worker artwork/metrics preserved; Arabic contrast fixed; user-requested adjacent navigation and fixed photographic focal crop implemented; 229 exact-SHA tests passed",
       "missing": "Commit reviewed intended golden changes, full MyPlan tests, integrated/native visual validation",
       "status": "BLOCKED_PENDING_INTEGRATED_EXACT_SHA",
       "test_files": "test/features/smart_plan/bil_smart_plan_page_test.dart;test/features/smart_plan/bil_smart_plan_visual_surface_test.dart",
@@ -236,7 +250,7 @@
       "private_reference_names": "R2-01; R2-02; R2-03",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-myplan-completion-20261025",
-      "completion_sha": null
+      "completion_sha": "1e60aaf19f73bf25ba87447c5f7d4eb29b3d9240"
     },
     {
       "ID": "BIL-14",
@@ -253,7 +267,9 @@
       "test_files": "test/app/router/bil39_pop_scope_return_test.dart;test/app/router/bil39_safe_return_widget_test.dart;test/bil39_routes_regression_contract_test.dart;test/features/connected_health/steps_history_navigation_test.dart;test/features/wellness/bil39_session_video_return_test.dart;test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570031/job/121133556553:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570039/job/121133556698:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121133556534:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980192:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980181:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980209:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980185:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980198:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980201:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980174:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980152:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365268:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365345:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365325:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365382:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365417:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238431:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238332:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238344:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238301:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238362:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238329:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131583:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131458:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131529:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131540:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131461:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131485:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131499:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131486:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121145644644:COMPLETED:FAILURE",
       "private_reference_names": "R2-08",
-      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate"
+      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
+      "completion_branch": "codex/bil39-routes-completion-20261025",
+      "completion_sha": "056deb35526349c59b6bb1f89fabbaff6075f84d"
     },
     {
       "ID": "BIL-15",
@@ -270,7 +286,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121146156896:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786855/job/121146156680:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020711:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020838:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147021094:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020993:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020540:COMPLETED:FAILURE",
       "private_reference_names": "",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-meal-completion-20261025",
+      "completion_sha": "3468db2a98b03bc2a6c151d920f073180fbb0def"
     },
     {
       "ID": "BIL-16",
@@ -287,7 +305,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121146156896:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786855/job/121146156680:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020711:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020838:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147021094:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020993:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020540:COMPLETED:FAILURE",
       "private_reference_names": "",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-meal-completion-20261025",
+      "completion_sha": "3468db2a98b03bc2a6c151d920f073180fbb0def"
     },
     {
       "ID": "BIL-17",
@@ -304,7 +324,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121146156896:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786855/job/121146156680:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020711:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020838:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147021094:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020993:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020540:COMPLETED:FAILURE",
       "private_reference_names": "",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-meal-completion-20261025",
+      "completion_sha": "3468db2a98b03bc2a6c151d920f073180fbb0def"
     },
     {
       "ID": "BIL-18",
@@ -321,7 +343,9 @@
       "test_files": "test/app/router/bil39_pop_scope_return_test.dart;test/app/router/bil39_safe_return_widget_test.dart;test/bil39_routes_regression_contract_test.dart;test/features/connected_health/steps_history_navigation_test.dart;test/features/wellness/bil39_session_video_return_test.dart;test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570031/job/121133556553:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570039/job/121133556698:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121133556534:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980192:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980181:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980209:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980185:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980198:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980201:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980174:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980152:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365268:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365345:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365325:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365382:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365417:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238431:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238332:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238344:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238301:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238362:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238329:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131583:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131458:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131529:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131540:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131461:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131485:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131499:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131486:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121145644644:COMPLETED:FAILURE",
       "private_reference_names": "",
-      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate"
+      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
+      "completion_branch": "codex/bil39-routes-completion-20261025",
+      "completion_sha": "056deb35526349c59b6bb1f89fabbaff6075f84d"
     },
     {
       "ID": "BIL-19",
@@ -338,7 +362,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443046/job/121111982809:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121111982975:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252379:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252368:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252342:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252361:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252371:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252323:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252367:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121113252351:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315387:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315399:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315449:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315508:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121114315400:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179749:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179768:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179796:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179769:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179746:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121115179747:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005472:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005510:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005462:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005455:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005509:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005502:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005536:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121116005533:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40174443072/job/121122999101:COMPLETED:FAILURE",
       "private_reference_names": "",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-reliability-completion-20261025",
+      "completion_sha": "cbb51fa62f648ec260fe9bca221e82015a6d7760"
     },
     {
       "ID": "BIL-20",
@@ -355,7 +381,9 @@
       "test_files": "test/app/router/bil39_pop_scope_return_test.dart;test/app/router/bil39_safe_return_widget_test.dart;test/bil39_routes_regression_contract_test.dart;test/features/connected_health/steps_history_navigation_test.dart;test/features/wellness/bil39_session_video_return_test.dart;test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570031/job/121133556553:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181570039/job/121133556698:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121133556534:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980192:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980181:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980209:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980185:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980198:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980201:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980174:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121134980152:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365268:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365345:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365325:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365382:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121136365417:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238431:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238332:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238344:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238301:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238362:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121137238329:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131583:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131458:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131529:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131540:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131461:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131485:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131499:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121138131486:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40181569994/job/121145644644:COMPLETED:FAILURE",
       "private_reference_names": "",
-      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate"
+      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
+      "completion_branch": "codex/bil39-routes-completion-20261025",
+      "completion_sha": "056deb35526349c59b6bb1f89fabbaff6075f84d"
     },
     {
       "ID": "BIL-21",
@@ -366,13 +394,15 @@
       "branch": "bil39/crystal-20261025",
       "source_sha": "4253c3abf653d958535b25b5d14d36b5edd14702",
       "code_review_status": "PARTIAL_IMPLEMENTATION_CONFIRMED",
-      "implemented": "New crystal component/shared secondary back only; broad 411-candidate arrow inventory not closed",
+      "implemented": "84 scoped tests passed on worker source; full scan preserved 639 candidates, including 486 lib rows in 207 files; all-arrow closure remains incomplete",
       "missing": "Classify and migrate remaining eligible arrows; preserve 88 exclusions/protected purchase CTA; review affected goldens and native routes",
       "status": "BLOCKED_PENDING_INTEGRATED_EXACT_SHA",
       "test_files": "test/bil_crystal_arrow_test.dart;test/bil_crystal_calendar_video_test.dart;test/bil_crystal_purchase_cta_isolation_test.dart",
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482873/job/121145258584:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482936/job/121145310947:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121146926463:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482873/job/121145258756:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199551:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199583:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199617:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199593:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199553:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199546:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199610:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148199586:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970823:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970754:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970863:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970745:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121148970758:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121149879863:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121149879980:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185482871/job/121149879107:COMPLETED:FAILURE",
       "private_reference_names": "IMG_0960.jpeg; IMG_0962.png; R2-01_MyPlan_Today.jpeg; R2-08_Steps_PageBeforeHistory.jpeg",
-      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate"
+      "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
+      "completion_branch": "codex/bil39-crystal-completion-20261025",
+      "completion_sha": "fcfa4fea25124b38e696f5a9af965b6cd9342e00"
     },
     {
       "ID": "BIL-22",
@@ -389,7 +419,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121146156896:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786855/job/121146156680:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020711:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020838:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147021094:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020993:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020540:COMPLETED:FAILURE",
       "private_reference_names": "R2-04_MealPlanner_Week.jpeg; R2-05_MealPlanner_GroceryList.png; R2-07_MealPlanner_Preferences.png",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-meal-completion-20261025",
+      "completion_sha": "3468db2a98b03bc2a6c151d920f073180fbb0def"
     },
     {
       "ID": "BIL-23",
@@ -406,7 +438,9 @@
       "exact_sha_ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121146156896:COMPLETED:FAILURE;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786855/job/121146156680:COMPLETED:SUCCESS;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020711:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020838:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147021094:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020993:COMPLETED:SKIPPED;https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40185786851/job/121147020540:COMPLETED:FAILURE",
       "private_reference_names": "R2-03_MyPlan_ReviewMeals.jpeg; R2-04_MealPlanner_Week.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
-      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence"
+      "missing": "Scoped code review, failing/pending checks, current-source visual/native and integration evidence",
+      "completion_branch": "codex/bil39-meal-completion-20261025",
+      "completion_sha": "3468db2a98b03bc2a6c151d920f073180fbb0def"
     },
     {
       "ID": "BIL-24",
@@ -425,7 +459,7 @@
       "private_reference_names": "IMG_0993.jpeg; IMG_0970.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-25",
@@ -444,7 +478,7 @@
       "private_reference_names": "IMG_0993.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-26",
@@ -463,7 +497,7 @@
       "private_reference_names": "IMG_0993.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "BIL-27",
@@ -474,7 +508,7 @@
       "branch": "bil39/myplan-20261025",
       "source_sha": "3a6745fd2f7911e47f1b3c7089083efe442492f0",
       "code_review_status": "REVIEWED_VISUAL_COMPLETION_IN_PROGRESS",
-      "implemented": "Worker artwork and metrics preserved; actual Arabic contrast failures fixed in tabs, collapsed exercises and session checkbox; 28 actual renderings visually reviewed",
+      "implemented": "Reviewed worker artwork/metrics preserved; Arabic contrast fixed; user-requested adjacent navigation and fixed photographic focal crop implemented; 229 exact-SHA tests passed",
       "missing": "Commit reviewed intended golden changes, full MyPlan tests, integrated/native visual validation",
       "status": "BLOCKED_PENDING_INTEGRATED_EXACT_SHA",
       "test_files": "test/features/smart_plan/bil_smart_plan_page_test.dart;test/features/smart_plan/bil_smart_plan_visual_surface_test.dart",
@@ -482,7 +516,7 @@
       "private_reference_names": "IMG_0993.jpeg; IMG_0970.jpeg; IMG_0985.jpeg; IMG_0984.jpeg; IMG_0983.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-myplan-completion-20261025",
-      "completion_sha": null
+      "completion_sha": "1e60aaf19f73bf25ba87447c5f7d4eb29b3d9240"
     },
     {
       "ID": "COACH-ADD-01",
@@ -501,7 +535,7 @@
       "private_reference_names": "IMG_0916.jpeg;IMG_0918.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-02",
@@ -520,7 +554,7 @@
       "private_reference_names": "IMG_0917.jpeg;IMG_0909.png",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-03",
@@ -539,7 +573,7 @@
       "private_reference_names": "IMG_0919.jpeg;IMG_0908.jpeg;IMG_0910.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-04",
@@ -558,7 +592,7 @@
       "private_reference_names": "IMG_0919.jpeg;IMG_0920.jpeg;IMG_0921.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-05",
@@ -577,7 +611,7 @@
       "private_reference_names": "IMG_0908.jpeg;IMG_0910.jpeg;IMG_0912.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-06",
@@ -596,7 +630,7 @@
       "private_reference_names": "IMG_0911.jpeg;IMG_0916.jpeg;IMG_0917.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-07",
@@ -615,7 +649,7 @@
       "private_reference_names": "IMG_0914.jpeg;IMG_0915.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-08",
@@ -634,7 +668,7 @@
       "private_reference_names": "IMG_0913.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-09",
@@ -653,7 +687,7 @@
       "private_reference_names": "IMG_0919.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     },
     {
       "ID": "COACH-ADD-10",
@@ -672,7 +706,7 @@
       "private_reference_names": "IMG_0908.jpeg;IMG_0910.jpeg;IMG_0919.jpeg;IMG_0920.jpeg;IMG_0922.jpeg",
       "evidence_scope": "Worker/source evidence only; no frozen integrated candidate",
       "completion_branch": "codex/bil39-coach-completion-20261025",
-      "completion_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a"
+      "completion_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2"
     }
   ],
   "additional_18_coach_scenarios": [
@@ -865,7 +899,8 @@
       "ExistingDocumentation": "CLOUD-COACH-02 proposals; client COACH-ADD-03",
       "VerifiedCurrentCodeStatus": "Not implemented as deterministic server validation by PR15",
       "MandatoryAcceptanceEvidence": "Test success-zero, >0, failed read, timeout, denied, missing and truncated summary; no false zero",
-      "StatusAtPreservation": "REQUIRED_NOT_VERIFIED"
+      "StatusAtPreservation": "REQUIRED_NOT_VERIFIED",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     },
     {
       "ID": "CC-1009-02",
@@ -874,7 +909,8 @@
       "ExistingDocumentation": "CLOUD-COACH-02 read-only proposal",
       "VerifiedCurrentCodeStatus": "Not implemented by PR15; prompt instruction only",
       "MandatoryAcceptanceEvidence": "Fixture with count>0 and Arabic model reply falsely stating no records; must block/correct BEFORE response, without another billable provider call",
-      "StatusAtPreservation": "REQUIRED_NOT_IMPLEMENTED"
+      "StatusAtPreservation": "REQUIRED_NOT_IMPLEMENTED",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     },
     {
       "ID": "CC-1009-03",
@@ -883,7 +919,8 @@
       "ExistingDocumentation": "CLOUD-COACH-02",
       "VerifiedCurrentCodeStatus": "Not implemented as deterministic reply/spoken_reply check by PR15",
       "MandatoryAcceptanceEvidence": "Probe Arabic/English denial variations in BOTH reply and spoken_reply; ensure safe fallback and no invented numbers",
-      "StatusAtPreservation": "REQUIRED_NOT_IMPLEMENTED"
+      "StatusAtPreservation": "REQUIRED_NOT_IMPLEMENTED",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     },
     {
       "ID": "CC-1009-04",
@@ -892,7 +929,8 @@
       "ExistingDocumentation": "CLOUD-COACH-01 and -02; COACH-ADD-05",
       "VerifiedCurrentCodeStatus": "Unsolicited Smart Plan proposed-action filter implemented in PR15 draft; numeric verification unproven",
       "MandatoryAcceptanceEvidence": "Answer bounded month/year summaries from synthetic owned rows; keep missing days unknown; no plan proposal or write; legitimate plan request still allowed",
-      "StatusAtPreservation": "PARTIALLY_SOURCE_IMPLEMENTED"
+      "StatusAtPreservation": "PARTIALLY_SOURCE_IMPLEMENTED",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     },
     {
       "ID": "CC-1009-05",
@@ -901,7 +939,9 @@
       "ExistingDocumentation": "CLOUD-COACH-01 test proposals; -02 staging gate",
       "VerifiedCurrentCodeStatus": "9 synthetic intent cases source; native Deno, full provider and rollback rehearsal unproven",
       "MandatoryAcceptanceEvidence": "Deno native, mocked full handler, bilingual negatives, isolated staging, previous live version/hash/rollback receipt before any authorized deploy",
-      "StatusAtPreservation": "REQUIRED_NOT_FULLY_TESTED"
+      "StatusAtPreservation": "REQUIRED_NOT_FULLY_TESTED",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result",
+      "remaining": "Deployed isolated staging and rollback rehearsal not performed; published v131 source and identity preserved read-only"
     },
     {
       "ID": "CC-1009-06",
@@ -910,7 +950,9 @@
       "ExistingDocumentation": "Photo IMG_1009; additional coach appendix",
       "VerifiedCurrentCodeStatus": "Neither hypothesis proven",
       "MandatoryAcceptanceEvidence": "Test both mock branches separately; no user raw logs; preserve UNRESOLVED until evidence",
-      "StatusAtPreservation": "UNRESOLVED_CAUSE"
+      "StatusAtPreservation": "UNRESOLVED_CAUSE",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result",
+      "remaining": "Historical 6:50 initial cause remains unresolved; no claim that client or provider was conclusively responsible"
     },
     {
       "ID": "CC-1009-07",
@@ -919,7 +961,8 @@
       "ExistingDocumentation": "Cloud appendix; CLOUD-COACH-02",
       "VerifiedCurrentCodeStatus": "Safeguard required; not certified for PR15",
       "MandatoryAcceptanceEvidence": "Denied-consent/owner switch A→B→A/missing JWT and partial provider context tests; no raw personal logs",
-      "StatusAtPreservation": "REQUIRED_SECURITY_GATE"
+      "StatusAtPreservation": "REQUIRED_SECURITY_GATE",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     },
     {
       "ID": "CC-1009-08",
@@ -928,7 +971,8 @@
       "ExistingDocumentation": "COACH-ADD-01..10, PR21",
       "VerifiedCurrentCodeStatus": "Cloud PR15 scope deliberately excludes local intercepts",
       "MandatoryAcceptanceEvidence": "Flutter smoke on client routing, plus server mocked request; no duplicate implementation",
-      "StatusAtPreservation": "REQUIRED_INTEGRATION_GATE"
+      "StatusAtPreservation": "REQUIRED_INTEGRATION_GATE",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     },
     {
       "ID": "CC-1009-09",
@@ -937,7 +981,8 @@
       "ExistingDocumentation": "CLOUD-COACH-02",
       "VerifiedCurrentCodeStatus": "Existing answer quality validator guards some unverified actions, but not verified full interaction",
       "MandatoryAcceptanceEvidence": "Mock proposed_actions, save confirmations, retry/5xx and credit reconciliation; no real charges",
-      "StatusAtPreservation": "REQUIRED_INTEGRATION_GATE"
+      "StatusAtPreservation": "REQUIRED_INTEGRATION_GATE",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     },
     {
       "ID": "CC-1009-10",
@@ -946,7 +991,8 @@
       "ExistingDocumentation": "Cloud source PR15, original BIL39 restrictions",
       "VerifiedCurrentCodeStatus": "PR15 draft unmerged and not deployed; v131 only historical observation",
       "MandatoryAcceptanceEvidence": "Read-only live identity check; pin SHA/hash; stage isolated; obtain explicit new owner production approval",
-      "StatusAtPreservation": "BLOCKED_PENDING_EXPLICIT_CLOUD_APPROVAL"
+      "StatusAtPreservation": "BLOCKED_PENDING_EXPLICIT_CLOUD_APPROVAL",
+      "current_source_evidence": "cloud and coach source proofs above; not a deployed or final integrated result"
     }
   ],
   "supplemental_scopes": [
@@ -994,27 +1040,131 @@
     }
   ],
   "source_completion_evidence": {
+    "coach_directory": {
+      "branch": "codex/bil39-coach-completion-20261025",
+      "source_sha": "66663f44617d93af860cb0ba65da3bf0e6f2131a",
+      "passed": 1244,
+      "skipped": 0,
+      "scope": "Complete Coach directory plus intent, media overlay and release manifest; source before later user-requested tab colour change",
+      "log_name": "coach-exact-commit-directory-tests-v3.jsonl",
+      "log_sha256": "dd9992992415ff90b8d7b1c10bc7f882029729815145724428e4721ecc2dce14",
+      "ci_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40190553462",
+      "final_integrated_acceptance": false
+    },
+    "coach_latest_overview": {
+      "branch": "codex/bil39-coach-completion-20261025",
+      "source_sha": "344af32a7f83a4be102fdabab86a1bca01d879e2",
+      "passed": 12,
+      "skipped": 0,
+      "scope": "Real Overview and conversation SQLite restore/draft/navigation fixtures; AR/EN, Light/Dark, text 100/200%; robot+label kept, blue fill removed per user",
+      "log_name": "coach-overview-no-blue-exact-commit.jsonl",
+      "log_sha256": "3a015c24c2c4046531292972d1a5e5b274bed6a780e6187e980b22945614aa81",
+      "ci_url": null,
+      "final_integrated_acceptance": false
+    },
+    "myplan_latest": {
+      "branch": "codex/bil39-myplan-completion-20261025",
+      "source_sha": "1e60aaf19f73bf25ba87447c5f7d4eb29b3d9240",
+      "passed": 229,
+      "skipped": 0,
+      "scope": "Complete Smart Plan directory including reviewed goldens, same-photo RTL/LTR pixel regression and adjacent navigation at 320px/200%",
+      "log_name": "myplan-user-adjustments-exact-commit.jsonl",
+      "log_sha256": "b81db839b69cbc34f3c0525893793d17c9ef86413262b8bba4a1c37441e8b9ea",
+      "ci_url": null,
+      "final_integrated_acceptance": false
+    },
+    "meal": {
+      "branch": "codex/bil39-meal-completion-20261025",
+      "source_sha": null,
+      "passed": 33,
+      "skipped": 0,
+      "scope": "Working-tree full Meal Planner tests before commits 5fe0579d and 3468db2a; not falsely attributed to the committed SHA",
+      "log_name": "meal-focused-completion.jsonl",
+      "log_sha256": "ddb6d2ead22ede4d1a76db9c1ce624e2e8ab4c191a8e091b609303d9f54f9630",
+      "ci_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40191293772",
+      "final_integrated_acceptance": false
+    },
+    "routes": {
+      "branch": "codex/bil39-routes-completion-20261025",
+      "source_sha": "b654acf5a7e8f27dd998013ff185fc47adabd38e",
+      "passed": 29,
+      "skipped": 0,
+      "scope": "Safe return, lifecycle, steps, video session, cold deeplink and release manifest; later commit is documentation only",
+      "log_name": "routes-exact-focus.jsonl",
+      "log_sha256": "4de1ac7d1673f6631e14ad0de0c2764e15a20c4209bfc88b42f000ed689d21d2",
+      "ci_url": null,
+      "final_integrated_acceptance": false
+    },
+    "reliability": {
+      "branch": "codex/bil39-reliability-completion-20261025",
+      "source_sha": "319a82cd116d143a683a535223c4ffe33ce11008",
+      "passed": 23,
+      "skipped": 0,
+      "scope": "Profile loading/ownership and Smart Plan failure/read-only/locale/release guards; later commit documentation only",
+      "log_name": "reliability-exact-focus.jsonl",
+      "log_sha256": "801493d44a6bc83d00fab920764f359dc32d749120ead85f33c6396f8c127671",
+      "ci_url": null,
+      "final_integrated_acceptance": false
+    },
+    "crystal": {
+      "branch": "codex/bil39-crystal-completion-20261025",
+      "source_sha": "4253c3abf653d958535b25b5d14d36b5edd14702",
+      "passed": 84,
+      "skipped": 0,
+      "scope": "Shared component, synthetic calendar/video, real secondary back and protected CTA fixture; does not close all-arrow inventory",
+      "log_name": "crystal-scope-tests.jsonl",
+      "log_sha256": "bca9ebf5562ba8f337ce5aad8d98d643da808d8e1a89d27fe31384dd1fcd7219",
+      "ci_url": null,
+      "final_integrated_acceptance": false
+    },
     "cloud": {
       "branch": "codex/bil39-cloud-completion-20261025",
-      "sha": "9c2c7d259daa0a9538c36376fc12b9768f189943",
-      "ci": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40187927852",
-      "tests_passed": 164,
-      "scope": "isolated typed handler/source; no production or live-provider approval"
+      "source_sha": "9c2c7d259daa0a9538c36376fc12b9768f189943",
+      "passed": 164,
+      "skipped": 0,
+      "scope": "Typed real handler with isolated external boundaries; exact-SHA CI passed, no Production/live-Gemini proof",
+      "log_name": "cloud-exact-commit-tests-v2.log",
+      "log_sha256": "43797ae557505d940a1f64f89bf4fb0bdcc83ee646a319f63362cf4ab0001393",
+      "ci_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40187927852",
+      "final_integrated_acceptance": false
     },
-    "video": {
+    "video_source": {
       "branch": "codex/bil39-video-source-completion-20261025",
-      "local_tests_passed": 68,
-      "scope": "isolated Workers emulation; no deployed staging/production or app wiring proof"
+      "source_sha": "847f161c5cf2f4d34d77ed7345416c40cf0ad085",
+      "passed": 68,
+      "skipped": 0,
+      "scope": "Isolated Worker source/HTML and protected MP4 MIME/authorization tests; exact-SHA CI passed; not deployed staging",
+      "log_name": "video-mime-full-isolated.log",
+      "log_sha256": "93af1de7bfdbebfd64c987399dd30016f74c07bb9f111698b3c95caf7e29f0ef",
+      "ci_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40190311537",
+      "final_integrated_acceptance": false
     }
   },
   "hard_blockers": [
-    "Crystal remaining arrow inventory not completed",
-    "Native iPhone/iPad and Android 26/29/33/34/35/36 evidence missing for final candidate",
-    "Physical acceptance missing for final candidate",
-    "No exact-SHA integrated candidate or final full QA",
-    "Isolated deployed staging not proven; existing staging points at production",
-    "All overlap resolutions and final independent review pending"
+    "Crystal all-arrow migration and per-occurrence/native proof incomplete (639 candidate rows preserved, not automatically accepted)",
+    "Video app source-link wiring remains gated on an actually isolated deployed route",
+    "Existing Workers staging points at production; it was not used",
+    "No final integrated candidate, semantic resolution of four overlaps or final exact-SHA full QA",
+    "No final-candidate native iPhone/iPad and Android 26/29/33/34/35/36 or physical acceptance",
+    "No final independent review/signing/TestFlight39; protected iOS38 and Production unchanged"
   ],
   "private_original_photos": "35 hashed originals preserved privately; not committed",
-  "prohibited_actions_performed": []
+  "prohibited_actions_performed": [],
+  "completion_branch_heads": {
+    "coach": "344af32a7f83a4be102fdabab86a1bca01d879e2",
+    "myplan": "1e60aaf19f73bf25ba87447c5f7d4eb29b3d9240",
+    "meal": "3468db2a98b03bc2a6c151d920f073180fbb0def",
+    "routes": "056deb35526349c59b6bb1f89fabbaff6075f84d",
+    "reliability": "cbb51fa62f648ec260fe9bca221e82015a6d7760",
+    "crystal": "fcfa4fea25124b38e696f5a9af965b6cd9342e00",
+    "video-source": "847f161c5cf2f4d34d77ed7345416c40cf0ad085",
+    "cloud": "9c2c7d259daa0a9538c36376fc12b9768f189943",
+    "qa": "11b41b956a21da9113a2cc88be02023357cce264"
+  },
+  "user_approved_ui_decisions": [
+    "Preserve current robot+Coach label; no further icon family change after user approved the current appearance",
+    "Remove only the selected Coach tab blue fill",
+    "Keep session Previous/Next adjacent and equally wide",
+    "Same photographic subject visible in Arabic and English without changing RTL content layout"
+  ]
 }
