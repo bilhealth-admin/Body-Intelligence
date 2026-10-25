@@ -226,7 +226,10 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
         return;
       }
       _updateMealPlannerState(() {
-        _readSnapshot = {...expected, _MealPlannerPageState._groceryChecksKey: encoded};
+        _readSnapshot = {
+          ...expected,
+          _MealPlannerPageState._groceryChecksKey: encoded,
+        };
       });
     } catch (_) {
       if (!_isCurrent(epoch, repository)) return;
@@ -235,7 +238,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
           ..clear()
           ..addAll(before);
       });
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

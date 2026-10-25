@@ -48,7 +48,10 @@ void main() {
       expect(plannerSource, contains('repository.mutateIfUnchanged('));
       expect(plannerSource, contains('isCurrent: () => _isCurrent'));
       expect(plannerSource, contains('_readSnapshot == null'));
-      expect(plannerSource, contains('remove: [_MealPlannerPageState._groceryChecksKey]'));
+      expect(
+        plannerSource,
+        contains('remove: [_MealPlannerPageState._groceryChecksKey]'),
+      );
       expect(
         plannerSource,
         contains('A failed write leaves the previous saved week intact.'),
