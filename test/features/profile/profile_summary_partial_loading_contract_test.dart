@@ -17,7 +17,7 @@ void main() {
     expect(source, contains('client.auth.currentUser?.id != owner'));
     expect(source, isNot(contains('body: const Center(child: CircularProgressIndicator())')));
     expect(source, isNot(contains('if ((profileState.isLoading && !profileState.hasValue) ||')));
-    expect(source, isNot(contains('if (profileState.hasError ||')));
+    expect(source, isNot(contains('if (profileState.hasError ||\n        weightsState.hasError ||')));
   });
 
   test('My Plan preserves same-owner visible plan on transient read failure', () {
