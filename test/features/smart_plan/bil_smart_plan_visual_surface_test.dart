@@ -115,9 +115,9 @@ void main() {
         MaterialApp(
           home: Builder(
             builder: (context) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(variant.$2),
-              ),
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(variant.$2)),
               child: Directionality(
                 textDirection: variant.$4,
                 child: const Scaffold(

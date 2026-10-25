@@ -31,18 +31,18 @@ extension _BilSmartPlanProgressSections on _BilSmartPlanPageState {
           ),
           const SizedBox(height: 14),
           BilSmartPlanMetricPair(
-          first: BilSmartPlanMetric(
-            label: _t('Confirmed', 'المؤكدة'),
-            value: done.toString(),
-            icon: Icons.check_circle_outline_rounded,
+            first: BilSmartPlanMetric(
+              label: _t('Confirmed', 'المؤكدة'),
+              value: done.toString(),
+              icon: Icons.check_circle_outline_rounded,
+            ),
+            second: BilSmartPlanMetric(
+              label: _t('Scheduled', 'المجدولة'),
+              value: scheduled.toString(),
+              icon: Icons.calendar_today_rounded,
+            ),
           ),
-          second: BilSmartPlanMetric(
-            label: _t('Scheduled', 'المجدولة'),
-            value: scheduled.toString(),
-            icon: Icons.calendar_today_rounded,
-          ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             _t(
               'Nutrition suggestions do not count as actual intake. Review the diary for recorded food.',
