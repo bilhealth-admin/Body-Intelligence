@@ -134,13 +134,30 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 38 candidate manifest', () {
+  test('iOS38 manifest selection remains explicit and defaults to strict CI', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
-        'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md',
+        r'BIL_RELEASE_MANIFEST_PATH: ${{ '
+        'inputs.internal_testflight_existing_evidence && '
+        "'docs/release/BIL_IOS38_INTERNAL_TESTFLIGHT_FREEZE_2026-10-23.md' "
+        "|| 'docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md' }}",
+      ),
+    );
+    expect(
+      source,
+      contains(
+        '        type: boolean\n'
+        '        default: false\n',
+      ),
+      reason: 'The prior internal-only authorization is never the default.',
+    );
+    expect(
+      source,
+      contains(
+        r"BIL_VALIDATION_MODE: ${{ inputs.internal_testflight_existing_evidence "
+        "&& 'owner_authorized_internal_prior_app_evidence' || 'all_exact_source_ci' }}",
       ),
     );
     expect(
