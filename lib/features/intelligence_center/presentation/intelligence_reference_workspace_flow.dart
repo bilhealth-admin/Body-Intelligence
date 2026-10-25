@@ -41,6 +41,46 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
     }
   }
 
+  Future<void> _showCoachToolsSheet() async {
+    if (!mounted || _referenceNavigating) return;
+    // Tools is a chooser, not an alias for Today's diary.
+    final selection = await showBilPearlBottomSheet<String>(
+      context: context,
+      isDismissible: true,
+      enableDrag: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                tr('Coach tools', 'أدوات المدرب'),
+                style: Theme.of(sheetContext).textTheme.titleLarge,
+              ),
+              for (final entry in <(IconData, String, String)>[
+                (Icons.monitor_weight_outlined, tr('Weight history', 'سجل الوزن'), '/weight-history'),
+                (Icons.restaurant_outlined, tr('Food diary', 'سجل الطعام'), '/daily-log'),
+                (Icons.insights_outlined, tr('Nutrition analysis', 'تحليل التغذية'), '/analytics/nutrition'),
+                (Icons.bedtime_outlined, tr('Sleep', 'النوم'), '/connected-health/sleep'),
+                (Icons.settings_outlined, tr('Coach settings', 'إعدادات المدرب'), '/settings/ai-coach'),
+              ])
+                ListTile(
+                  leading: Icon(entry.$1),
+                  title: Text(entry.$2),
+                  onTap: () => Navigator.of(sheetContext).pop(entry.$3),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (!mounted || selection == null) return;
+    await _openCoachWorkspaceRoute(selection);
+  }
+
   Future<void> _navigateReference(int index) async {
     if (_referenceNavigating || sending || !conversationReady) return;
     _referenceNavigating = true;
@@ -87,6 +127,14 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
         snapshot: snapshot,
         now: ref.read(intelligenceConversationClockProvider)(),
         onChat: () => _updateState(() => _referenceOverview = false),
+        onExit: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/dashboard');
+          }
+        },
+        onTools: () => unawaited(_showCoachToolsSheet()),
         onRoute: (route) => unawaited(_openCoachWorkspaceRoute(route)),
         onQuickAdd: () => unawaited(_navigateReference(2)),
         onPhoto: () {
