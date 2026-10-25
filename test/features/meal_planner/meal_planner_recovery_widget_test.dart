@@ -267,12 +267,8 @@ void main() {
       await tester.tap(find.text('Retry'));
       await tester.pumpAndSettle();
       expect(tester.widget<OutlinedButton>(share).onPressed, isNotNull);
-      expect(
-        tester.widget<CheckboxListTile>(
-          find.widgetWithText(CheckboxListTile, 'Onion'),
-        ).value,
-        isTrue,
-      );
+      final onionTile = find.widgetWithText(CheckboxListTile, 'Onion');
+      expect(tester.widget<CheckboxListTile>(onionTile).value, isTrue);
     },
   );
 
