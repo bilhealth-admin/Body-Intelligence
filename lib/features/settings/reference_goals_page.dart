@@ -4,6 +4,7 @@ import 'fitness_goal_progress_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../app/router/bil_safe_return_button.dart';
 
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
@@ -445,7 +446,13 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
       builder: (context) => PopScope(
         canPop: !saving,
         child: Scaffold(
-          appBar: AppBar(centerTitle: true, title: Text(c('Goals'))),
+          appBar: AppBar(
+            centerTitle: true,
+            leading: saving
+                ? const IconButton(onPressed: null, icon: BackButtonIcon())
+                : const BilSafeReturnButton(fallbackLocation: '/dashboard'),
+            title: Text(c('Goals')),
+          ),
           body: profileState.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, _) => Center(
