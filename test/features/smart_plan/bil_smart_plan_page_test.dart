@@ -896,13 +896,14 @@ void main() {
         );
         await repo.save(before, expectedRevision: initial.revision);
         await pump(tester, locale, 320, 2);
-        final meal = find.byIcon(Icons.restaurant_menu_rounded).first;
+        final mealIcons = find.byIcon(Icons.restaurant_menu_rounded);
         await tester.scrollUntilVisible(
-          meal,
+          mealIcons,
           170,
           scrollable: find.byType(Scrollable).first,
         );
         await tester.pumpAndSettle();
+        final meal = mealIcons.first;
         expect(meal, findsOneWidget);
         await tester.tap(meal);
         final schedule = find.byKey(
@@ -1072,6 +1073,8 @@ void main() {
     );
     testWidgets('Smart Plan $locale glass layout Golden', (tester) async {
       await pump(tester, locale, 390, 1);
+      // Wait for the actual bundled artwork before auditing rendered pixels.
+      await settleVisualAssetImages(tester);
       final semantics = tester.ensureSemantics();
       try {
         await expectLater(tester, meetsGuideline(textContrastGuideline));

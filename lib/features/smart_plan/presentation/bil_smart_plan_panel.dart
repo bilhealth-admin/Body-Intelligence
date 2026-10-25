@@ -204,8 +204,7 @@ class BilSmartPlanMetric extends StatelessWidget {
               if (icon != null) const SizedBox(height: 6),
               Text(
                 label,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                // Full localized metric labels must remain visible at 200% text.
                 style: styles.labelMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),

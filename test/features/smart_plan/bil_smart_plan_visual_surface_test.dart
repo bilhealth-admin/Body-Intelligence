@@ -218,7 +218,7 @@ void main() {
           child: MediaQuery(
             data: MediaQueryData(
               size: const Size(320, 720),
-              textScaler: TextScaler.linear(1.5),
+              textScaler: TextScaler.linear(2),
             ),
             child: Scaffold(
               body: ListView(
@@ -244,6 +244,10 @@ void main() {
     );
     expect(find.text('التمارين المجدولة للأسبوع الحالي'), findsOneWidget);
     expect(find.text('3 / 5'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('الجلسات المؤكدة')).maxLines,
+      isNull,
+    );
     expect(tester.takeException(), isNull);
   });
 }
