@@ -32,6 +32,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       _boundRepository = next;
       _readSnapshot = null;
       _preferences = const MealPlanPreferences();
+      _planPreferences = const MealPlanPreferences();
       _dietaryPreferences = const DietaryPreferences();
       _plan = null;
       _checkedGrocery.clear();
@@ -83,6 +84,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       if (!_isCurrent(epoch, repository)) return;
       _updateMealPlannerState(() {
         _preferences = preferences;
+        _planPreferences = preferences;
         _plan = plan;
         _checkedGrocery
           ..clear()
@@ -160,6 +162,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       }
       _updateMealPlannerState(() {
         _plan = plan;
+        _planPreferences = preferences;
         _checkedGrocery.clear();
         _readSnapshot = {
           ...expected,

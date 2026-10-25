@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/meal_planner/domain/meal_plan.dart';
+import 'package:body_intelligence_log/features/meal_planner/services/meal_plan_engine.dart';
 import 'package:body_intelligence_log/features/meal_planner/presentation/meal_planner_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:drift/native.dart';
@@ -412,6 +413,77 @@ void main() {
       expect(repo.attemptedMutations, 1);
       expect(await repo.get(_checksKey), '["Carrot"]');
       expect(await db.select(db.meals).get(), isEmpty);
+    },
+  );
+
+
+  testWidgets(
+    'draft servings do not change saved grocery quantities before commit',
+    (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      final repo = _ControlledRepository(db);
+      addTearDown(() => _dispose(tester, db));
+      await _seed(repo, 'lentil_soup');
+      await _pumpPlanner(tester, repo);
+
+      String displayedAmount(String ingredient) {
+        final tile = tester.widget<CheckboxListTile>(
+          find.widgetWithText(CheckboxListTile, ingredient),
+        );
+        return (tile.subtitle! as Text).data!;
+      }
+
+      await tester.tap(find.text('Grocery list'));
+      await tester.pumpAndSettle();
+      final originalCarrotAmount = displayedAmount('Carrot');
+
+      await tester.ensureVisible(find.text('Preferences'));
+      await tester.tap(find.text('Preferences'));
+      await tester.pumpAndSettle();
+      tester.widget<Slider>(find.byType(Slider).last).onChanged!(6);
+      await tester.pumpAndSettle();
+
+      // A draft change must not silently change shopping quantities for
+      // the persisted week, or write altered preferences before Generate.
+      await tester.ensureVisible(find.text('Grocery list'));
+      await tester.tap(find.text('Grocery list'));
+      await tester.pumpAndSettle();
+      expect(displayedAmount('Carrot'), originalCarrotAmount);
+      expect(await repo.get('mealPlanner.preferences.v1'), isNull);
+      expect(await repo.get(_weekKey), _plan('lentil_soup').encode());
+      expect(repo.attemptedMutations, 0);
+
+      // Explicit generation atomically establishes the new plan snapshot.
+      await tester.ensureVisible(find.text('Week'));
+      await tester.tap(find.text('Week'));
+      await tester.pumpAndSettle();
+      final generate = find.byKey(const Key('generate-weekly-meal-plan'));
+      await tester.ensureVisible(generate);
+      await tester.tap(generate);
+      await tester.pumpAndSettle();
+      final encodedPreferences = await repo.get('mealPlanner.preferences.v1');
+      expect(encodedPreferences, isNotNull);
+      final committedPreferences = MealPlanPreferences.fromJson(
+        jsonDecode(encodedPreferences!) as Map<String, dynamic>,
+      );
+      expect(committedPreferences.servings, 6);
+      final committedPlan = WeeklyMealPlan.decode((await repo.get(_weekKey))!);
+      final grocery = const MealPlanEngine().groceryList(
+        committedPlan,
+        committedPreferences,
+      );
+      expect(grocery, isNotEmpty);
+      final firstItem = grocery.entries.toList()
+        ..sort((a, b) => a.key.compareTo(b.key));
+      await tester.ensureVisible(find.text('Grocery list'));
+      await tester.tap(find.text('Grocery list'));
+      await tester.pumpAndSettle();
+      final amount = firstItem.first.value;
+      final expectedText = amount == amount.roundToDouble()
+          ? '${amount.toInt()}'
+          : amount.toStringAsFixed(1);
+      expect(displayedAmount(firstItem.first.key), expectedText);
+      expect(repo.attemptedMutations, 1);
     },
   );
 

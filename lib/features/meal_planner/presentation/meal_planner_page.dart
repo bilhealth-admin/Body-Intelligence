@@ -33,6 +33,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   static const _groceryChecksKey = 'mealPlanner.groceryChecks.v1';
   final _engine = const MealPlanEngine();
   MealPlanPreferences _preferences = const MealPlanPreferences();
+  // Snapshot used to generate the saved week. Form edits are draft-only.
+  MealPlanPreferences _planPreferences = const MealPlanPreferences();
   DietaryPreferences _dietaryPreferences = const DietaryPreferences();
   WeeklyMealPlan? _plan;
   var _loading = true;
@@ -272,7 +274,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   Widget _grocery(_PlannerCopy copy) {
     final plan = _plan;
     if (plan == null) return Center(child: Text(copy.text('generateFirst')));
-    final items = _engine.groceryList(plan, _preferences).entries.toList()
+    final items = _engine.groceryList(plan, _planPreferences).entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -531,7 +533,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 const SizedBox(height: 12),
                 ...recipe.ingredients.entries.map(
                   (item) => Text(
-                    '• ${item.key}: ${_amount(item.value * _preferences.servings)}',
+                    '• ${item.key}: ${_amount(item.value * _planPreferences.servings)}',
                   ),
                 ),
                 if (details != null) ...[
