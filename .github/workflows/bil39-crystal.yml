@@ -59,8 +59,8 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          dart format test/bil_crystal_arrow_test.dart test/bil_crystal_purchase_cta_isolation_test.dart
-          git diff -- test/bil_crystal_arrow_test.dart test/bil_crystal_purchase_cta_isolation_test.dart
+          dart format test/bil_crystal_arrow_test.dart test/bil_crystal_calendar_video_test.dart test/bil_crystal_purchase_cta_isolation_test.dart
+          git diff -- test/bil_crystal_arrow_test.dart test/bil_crystal_calendar_video_test.dart test/bil_crystal_purchase_cta_isolation_test.dart
       - name: Resolve dependencies
         run: flutter pub get
       - name: Analyze full Dart source

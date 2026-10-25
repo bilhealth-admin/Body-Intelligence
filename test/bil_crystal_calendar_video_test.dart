@@ -37,9 +37,7 @@ class _CalendarVideoFixtureState extends State<_CalendarVideoFixture> {
                   IconButton(
                     key: const Key('calendar-previous'),
                     tooltip: 'Previous month',
-                    onPressed: month > 0
-                        ? () => setState(() => month--)
-                        : null,
+                    onPressed: month > 0 ? () => setState(() => month--) : null,
                     icon: const BilCrystalArrow(
                       child: Icon(Icons.chevron_left_rounded),
                     ),
@@ -48,9 +46,7 @@ class _CalendarVideoFixtureState extends State<_CalendarVideoFixture> {
                   IconButton(
                     key: const Key('calendar-next'),
                     tooltip: 'Next month',
-                    onPressed: month < 1
-                        ? () => setState(() => month++)
-                        : null,
+                    onPressed: month < 1 ? () => setState(() => month++) : null,
                     icon: const BilCrystalArrow(
                       child: Icon(Icons.chevron_right_rounded),
                     ),
@@ -64,9 +60,7 @@ class _CalendarVideoFixtureState extends State<_CalendarVideoFixture> {
                   IconButton(
                     key: const Key('video-previous'),
                     tooltip: 'Previous video',
-                    onPressed: video > 0
-                        ? () => setState(() => video--)
-                        : null,
+                    onPressed: video > 0 ? () => setState(() => video--) : null,
                     icon: const BilCrystalArrow(
                       child: Icon(Icons.chevron_left_rounded),
                     ),
@@ -75,9 +69,7 @@ class _CalendarVideoFixtureState extends State<_CalendarVideoFixture> {
                   IconButton(
                     key: const Key('video-next'),
                     tooltip: 'Next video',
-                    onPressed: video < 1
-                        ? () => setState(() => video++)
-                        : null,
+                    onPressed: video < 1 ? () => setState(() => video++) : null,
                     icon: const BilCrystalArrow(
                       child: Icon(Icons.chevron_right_rounded),
                     ),
@@ -134,9 +126,11 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          final caseId = width.toInt().toString() +
-              (dark ? '_dark' : '_light') +
-              (rtl ? '_rtl' : '_ltr');
+          final caseId = [
+            width.toInt().toString(),
+            dark ? 'dark' : 'light',
+            rtl ? 'rtl' : 'ltr',
+          ].join('_');
           expect(find.byKey(_bubble), findsNWidgets(4));
 
           final nextMonth = find.byKey(const Key('calendar-next'));
@@ -165,9 +159,7 @@ void main() {
           expect(node.getSemanticsData().tooltip, 'Next month');
           await _capture(tester, 'rest_$caseId');
 
-          final touch = await tester.startGesture(
-            tester.getCenter(nextMonth),
-          );
+          final touch = await tester.startGesture(tester.getCenter(nextMonth));
           await tester.pump();
           expect(find.byKey(_bubble), findsNWidgets(4));
           await _capture(tester, 'pressed_$caseId');
