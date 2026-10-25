@@ -105,8 +105,7 @@ void main() {
         );
 
         final rect = tester.getRect(arrow);
-        final caseId =
-            (dark ? 'dark' : 'light') + '_' + (rtl ? 'rtl' : 'ltr');
+        final caseId = (dark ? 'dark' : 'light') + '_' + (rtl ? 'rtl' : 'ltr');
         await _capture(tester, 'rest_$caseId');
 
         final gesture = await tester.startGesture(tester.getCenter(arrow));
