@@ -65,6 +65,7 @@ const productionServices: RuntimeServices = {
 interface DeliveryPolicy {
   readonly cacheControl: string;
   readonly publicMedia?: RecipeImageObject | RecipeThumbnailObject;
+  readonly requiredMimeType?: "video/mp4";
   readonly varyAuthorization: boolean;
 }
 
@@ -79,6 +80,16 @@ const publicWorkoutPreviewPolicy = {
 const protectedWorkoutPolicy = {
   cacheControl: "private, max-age=31536000, immutable",
   varyAuthorization: true,
+} satisfies DeliveryPolicy;
+// A .mp4 route must never stream an R2 object labelled HTML or another MIME.
+// This is fail-closed only; it does not bypass authentication or entitlements.
+const publicWorkoutVideoPolicy = {
+  ...publicWorkoutPreviewPolicy,
+  requiredMimeType: "video/mp4",
+} satisfies DeliveryPolicy;
+const protectedWorkoutVideoPolicy = {
+  ...protectedWorkoutPolicy,
+  requiredMimeType: "video/mp4",
 } satisfies DeliveryPolicy;
 
 export default {
@@ -148,7 +159,9 @@ async function handleRequest(
         request,
         env.WORKOUTS,
         objectKey,
-        publicWorkoutPreviewPolicy,
+        videoKey.test(objectKey)
+          ? publicWorkoutVideoPolicy
+          : publicWorkoutPreviewPolicy,
         env,
       );
     }
@@ -188,7 +201,9 @@ async function handleRequest(
       request,
       env.WORKOUTS,
       objectKey,
-      protectedWorkoutPolicy,
+      videoKey.test(objectKey)
+        ? protectedWorkoutVideoPolicy
+        : protectedWorkoutPolicy,
       env,
     );
   } catch (error) {
@@ -448,6 +463,13 @@ function objectMatchesPolicy(
   object: R2Object,
   policy: DeliveryPolicy,
 ): boolean {
+  if (policy.requiredMimeType !== undefined) {
+    const mediaMime = object.httpMetadata?.contentType
+      ?.split(";", 1)[0]
+      ?.trim()
+      .toLowerCase();
+    if (mediaMime !== policy.requiredMimeType) return false;
+  }
   const expected = policy.publicMedia;
   if (expected === undefined) return true;
   const contentType = object.httpMetadata?.contentType
