@@ -433,6 +433,11 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   Widget build(BuildContext context) {
     if (widget.privacyOnly) return _privacySurface();
     final scheme = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final tabInk = dark ? BilPearlFinish.darkInk : BilPearlFinish.lightInk;
+    final tabSelectedFill = dark
+        ? const Color(0xFF0B6CB2)
+        : const Color(0xFF07518F);
     final plan = _plan;
     return Scaffold(
       appBar: AppBar(
@@ -629,10 +634,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                 key: ValueKey('bil-smart-plan-tab-${tab.$1}'),
                                 style: TextButton.styleFrom(
                                   foregroundColor: _tab == tab.$1
-                                      ? scheme.onPrimary
-                                      : scheme.onSurfaceVariant,
+                                      ? Colors.white
+                                      : tabInk,
                                   backgroundColor: _tab == tab.$1
-                                      ? scheme.primary
+                                      ? tabSelectedFill
                                       : Colors.transparent,
                                   minimumSize: const Size(48, 44),
                                   padding: const EdgeInsets.symmetric(

@@ -24,7 +24,7 @@ double _contrast(Color foreground, Color background) {
 }
 
 void main() {
-  test('My Plan visual metrics have localized copy in all production languages', () {
+  test('My Plan visual metrics cover all 25 locales', () {
     expect(SmartPlanVisualRuntimeCopy.balanced, isTrue);
     for (final source in SmartPlanVisualRuntimeCopy.sources) {
       for (final locale in BilLocalePolicy.productionTags) {
@@ -55,6 +55,25 @@ void main() {
       expect(BilSmartPlanArt.forWorkout('push-a'), contains('strength'));
     },
   );
+
+  test('My Plan tab ink meets AA on dark and light palettes', () {
+    expect(
+      _contrast(Colors.white, const Color(0xFF07518F)),
+      greaterThanOrEqualTo(4.5),
+    );
+    expect(
+      _contrast(Colors.white, const Color(0xFF0B6CB2)),
+      greaterThanOrEqualTo(4.5),
+    );
+    expect(
+      _contrast(BilPearlFinish.lightInk, BilPearlFinish.lightCanvas),
+      greaterThanOrEqualTo(4.5),
+    );
+    expect(
+      _contrast(BilPearlFinish.darkInk, BilPearlFinish.darkCanvas),
+      greaterThanOrEqualTo(4.5),
+    );
+  });
 
   test('the trailing image scrim meets AA in light and dark worst cases', () {
     // Darkest possible underlying light photo and lightest dark photo.

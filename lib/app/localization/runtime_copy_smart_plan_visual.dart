@@ -3,8 +3,7 @@ import 'bil_locale_policy.dart';
 /// Presentation-only metric copy for My Plan (BIL-13/BIL-27).
 /// Counts come from the existing plan data; these strings do not change it.
 abstract final class SmartPlanVisualRuntimeCopy {
-  static const onlyConfirmed =
-      'Only confirmed sessions count as completed.';
+  static const onlyConfirmed = 'Only confirmed sessions count as completed.';
   static const scheduled = 'Scheduled';
   static const daysInPlan = 'Days in plan';
   static const scheduledWorkouts = 'Scheduled workouts';
@@ -137,13 +136,15 @@ abstract final class SmartPlanVisualRuntimeCopy {
     return translations[normalized.split('-').first] ?? translations['en'];
   }
 
-  static bool get balanced => values.keys.toSet().containsAll(sources) &&
-      sources.every(
-        (source) => BilLocalePolicy.productionTags.every((tag) {
-          final translated = values[source]?[tag];
-          return translated != null &&
-              translated.trim().isNotEmpty &&
-              (tag == 'en' || translated != source);
-        }),
-      );
+  static bool get balanced {
+    if (!values.keys.toSet().containsAll(sources)) return false;
+    for (final source in sources) {
+      for (final tag in BilLocalePolicy.productionTags) {
+        final translated = values[source]?[tag];
+        if (translated == null || translated.trim().isEmpty) return false;
+        if (tag != 'en' && translated == source) return false;
+      }
+    }
+    return true;
+  }
 }
