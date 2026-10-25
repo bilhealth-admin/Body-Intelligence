@@ -53,7 +53,9 @@ void main() {
     );
   });
 
-  test('BIL39 short weight history follow-ups never become a plan or write', () {
+  test(
+    'BIL39 short weight history follow-ups never become a plan or write',
+    () {
     for (final (prior, reply) in <(String, String)>[
       ('اطلع على سجل أوزاني', 'شهر'),
       ('Review my weight history', 'last month'),
@@ -87,7 +89,8 @@ void main() {
       ),
       'لا أريد خطة',
     );
-  });
+    },
+  );
 
   test('BIL39 review buttons never authorize unsolicited Smart Plan actions', () {
     for (final question in <String>[
