@@ -405,4 +405,82 @@ void main() {
     expect(find.byKey(_bubble), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  // Exercises the actual production secondary AppBar, not only synthetic
+  // icon fixtures. It must preserve native direction, hit geometry and its
+  // caller callback while the glass remains at rest/press/cancel/release.
+  for (final width in <double>[320, 390, 430, 768]) {
+    for (final dark in [false, true]) {
+      for (final rtl in [false, true]) {
+        testWidgets(
+          'real SecondaryPageAppBar retains its glass at rest width=$width dark=$dark rtl=$rtl',
+          (tester) async {
+            tester.view.physicalSize = Size(width, 1024);
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.reset);
+            var backTaps = 0;
+
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: ThemeData(
+                  brightness: dark ? Brightness.dark : Brightness.light,
+                ),
+                home: Directionality(
+                  textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+                  child: Scaffold(
+                    appBar: SecondaryPageAppBar(
+                      title: const Text('BIL'),
+                      showDashboardAction: false,
+                      onBack: () => backTaps++,
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+
+            final button = find.byKey(const Key('secondary-page-back'));
+            final crystal = find.descendant(
+              of: button,
+              matching: find.byKey(_bubble),
+            );
+            final glyph = find.descendant(
+              of: button,
+              matching: find.byType(BackButtonIcon),
+            );
+            expect(button, findsOneWidget);
+            expect(crystal, findsOneWidget);
+            expect(glyph, findsOneWidget);
+            expect(tester.getSize(crystal), const Size(48, 48));
+            expect(tester.getSize(button).width, greaterThanOrEqualTo(44));
+            expect(tester.getSize(button).height, greaterThanOrEqualTo(44));
+            expect(tester.widget<IconButton>(button).tooltip, 'Back');
+            expect(
+              Directionality.of(tester.element(glyph)),
+              rtl ? TextDirection.rtl : TextDirection.ltr,
+            );
+
+            final initialButtonRect = tester.getRect(button);
+            final initialBubbleRect = tester.getRect(crystal);
+            final touch = await tester.startGesture(tester.getCenter(button));
+            await tester.pump();
+            expect(crystal, findsOneWidget);
+            expect(backTaps, 0);
+            await touch.cancel();
+            await tester.pumpAndSettle();
+            expect(backTaps, 0);
+            expect(tester.getRect(crystal), initialBubbleRect);
+
+            await tester.tap(button);
+            await tester.pumpAndSettle();
+            expect(backTaps, 1);
+            expect(crystal, findsOneWidget);
+            expect(tester.getRect(button), initialButtonRect);
+            expect(tester.getRect(crystal), initialBubbleRect);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+  }
 }
