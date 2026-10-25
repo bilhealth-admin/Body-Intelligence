@@ -66,138 +66,142 @@ void main() {
     }
   }
 
-  testWidgets('disabled arrow still has a resting crystal and cannot activate', (
-    tester,
-  ) async {
-    var taps = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: IconButton(
-            key: const Key('disabled-crystal-arrow'),
-            onPressed: null,
-            icon: const BilCrystalArrow(
-              child: Icon(Icons.chevron_right_rounded),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(_bubble), findsOneWidget);
-    await tester.tap(
-      find.byKey(const Key('disabled-crystal-arrow')),
-      warnIfMissed: false,
-    );
-    await tester.pumpAndSettle();
-    expect(taps, 0);
-    expect(find.byKey(_bubble), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('secondary-page back uses the crystal and keeps its callback', (
-    tester,
-  ) async {
-    var taps = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: SecondaryPageAppBar(
-            title: const Text('Settings'),
-            onBack: () => taps++,
-          ),
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final button = find.byKey(const Key('secondary-page-back'));
-    final buttonRect = tester.getRect(button);
-    expect(find.byKey(_bubble), findsOneWidget);
-    final bubbleRect = tester.getRect(find.byKey(_bubble));
-
-    await tester.tap(button);
-    await tester.pumpAndSettle();
-
-    expect(taps, 1);
-    expect(find.byKey(_bubble), findsOneWidget);
-    expect(tester.getRect(button), buttonRect);
-    expect(tester.getRect(find.byKey(_bubble)), bubbleRect);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('high-contrast crystal uses a stronger visible border', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(highContrast: true),
-          child: const Center(
+  testWidgets(
+    'disabled arrow still has a resting crystal and cannot activate',
+    (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
             child: IconButton(
+              key: const Key('disabled-crystal-arrow'),
               onPressed: null,
-              icon: BilCrystalArrow(
-                child: Icon(Icons.chevron_left_rounded),
+              icon: const BilCrystalArrow(
+                child: Icon(Icons.chevron_right_rounded),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    final surface = tester.widget<DecoratedBox>(find.byKey(_bubble));
-    final decoration = surface.decoration as BoxDecoration;
-    expect(decoration.border, isNotNull);
-    expect(decoration.border!.top.width, 1.5);
-    expect(find.byKey(_bubble), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      expect(find.byKey(_bubble), findsOneWidget);
+      await tester.tap(
+        find.byKey(const Key('disabled-crystal-arrow')),
+        warnIfMissed: false,
+      );
+      await tester.pumpAndSettle();
+      expect(taps, 0);
+      expect(find.byKey(_bubble), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
-  testWidgets('crystal does not replace button semantics or keyboard action', (
-    tester,
-  ) async {
-    final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    final focus = FocusNode();
-    addTearDown(focus.dispose);
-    var taps = 0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: IconButton(
-            key: const Key('semantic-crystal-arrow'),
-            focusNode: focus,
-            tooltip: 'Go forward',
-            onPressed: () => taps++,
-            icon: const BilCrystalArrow(
-              child: Icon(Icons.arrow_forward_rounded),
+  testWidgets(
+    'secondary-page back uses the crystal and keeps its callback',
+    (tester) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            appBar: SecondaryPageAppBar(
+              title: const Text('Settings'),
+              onBack: () => taps++,
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(_bubble), findsOneWidget);
-    final node = tester.getSemantics(
-      find.byKey(const Key('semantic-crystal-arrow')),
-    );
-    expect(node.hasFlag(SemanticsFlag.isButton), isTrue);
-    expect(node.label, 'Go forward');
+      final button = find.byKey(const Key('secondary-page-back'));
+      final buttonRect = tester.getRect(button);
+      expect(find.byKey(_bubble), findsOneWidget);
+      final bubbleRect = tester.getRect(find.byKey(_bubble));
 
-    focus.requestFocus();
-    await tester.pump();
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-    expect(find.byKey(_bubble), findsOneWidget);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.enter);
-    await tester.pumpAndSettle();
+      await tester.tap(button);
+      await tester.pumpAndSettle();
 
-    expect(taps, 1);
-    expect(find.byKey(_bubble), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+      expect(taps, 1);
+      expect(find.byKey(_bubble), findsOneWidget);
+      expect(tester.getRect(button), buttonRect);
+      expect(tester.getRect(find.byKey(_bubble)), bubbleRect);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'high-contrast crystal uses a stronger visible border',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(highContrast: true),
+            child: const Center(
+              child: IconButton(
+                onPressed: null,
+                icon: BilCrystalArrow(
+                  child: Icon(Icons.chevron_left_rounded),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final surface = tester.widget<DecoratedBox>(find.byKey(_bubble));
+      final decoration = surface.decoration as BoxDecoration;
+      expect(decoration.border, isNotNull);
+      expect(decoration.border!.top.width, 1.5);
+      expect(find.byKey(_bubble), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'crystal does not replace button semantics or keyboard action',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      addTearDown(semantics.dispose);
+      final focus = FocusNode();
+      addTearDown(focus.dispose);
+      var taps = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: IconButton(
+              key: const Key('semantic-crystal-arrow'),
+              focusNode: focus,
+              tooltip: 'Go forward',
+              onPressed: () => taps++,
+              icon: const BilCrystalArrow(
+                child: Icon(Icons.arrow_forward_rounded),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(_bubble), findsOneWidget);
+      final node = tester.getSemantics(
+        find.byKey(const Key('semantic-crystal-arrow')),
+      );
+      expect(node.hasFlag(SemanticsFlag.isButton), isTrue);
+      expect(node.label, 'Go forward');
+
+      focus.requestFocus();
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(find.byKey(_bubble), findsOneWidget);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      expect(taps, 1);
+      expect(find.byKey(_bubble), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
