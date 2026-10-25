@@ -52,6 +52,7 @@ import 'runtime_copy_coach_quick_prompts.dart';
 import 'runtime_copy_invalid_route.dart';
 import 'runtime_copy_quality_feedback.dart';
 import 'runtime_copy_smart_plan.dart';
+import 'runtime_copy_smart_plan_recovery.dart';
 
 /// Reviewed runtime copy used by legacy call-sites that still pass an English
 /// sentence instead of a typed key. Every entry is complete in the five
@@ -80,6 +81,8 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final recovery = SmartPlanRecoveryRuntimeCopy.resolve(english, localeTag);
+    if (recovery != null) return recovery;
     final coachClosure = ClosureCoachRuntimeCopy.resolve(english, localeTag);
     if (coachClosure != null) return coachClosure;
     final foodClosure = ClosureFoodRuntimeCopy.resolve(english, localeTag);
@@ -289,6 +292,7 @@ abstract final class RuntimeCopy {
         ClosureReviewRuntimeCopy.balanced &&
         HealthDeviceStatusCopy.balanced &&
         SleepScheduleRuntimeCopy.balanced &&
+        SmartPlanRecoveryRuntimeCopy.balanced &&
         ReleaseClosureRuntimeCopy.balanced &&
         FoodLogRuntimeCopy.balanced &&
         ProfileRuntimeCopy.balanced &&
