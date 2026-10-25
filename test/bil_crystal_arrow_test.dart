@@ -181,8 +181,9 @@ void main() {
       find.byKey(const Key('semantic-crystal-arrow')),
     );
     expect(node.flagsCollection.isButton, isTrue);
-    debugPrint('CRYSTAL_SEMANTICS_NODE: ${node.toStringDeep()}');
-    expect(node.label, 'Go forward');
+    // Flutter 3.44.6 exposes IconButton.tooltip in the SemanticsData
+    // tooltip field, not label. Keep the role and keyboard checks strict.
+    expect(node.getSemanticsData().tooltip, 'Go forward');
 
     focus.requestFocus();
     await tester.pump();
