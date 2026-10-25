@@ -560,7 +560,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     super.dispose();
   }
 
-  bool _referenceOverview = false;
+  // Authorized Coach opens on Overview, not a blank conversation.
+  // History is still loaded and retained by the existing owner-scoped store.
+  bool _referenceOverview = true;
   bool _referenceNavigating = false;
 
   @override
