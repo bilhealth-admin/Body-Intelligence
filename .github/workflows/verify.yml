@@ -110,7 +110,11 @@ jobs:
             'lib/features/notifications/services/inactivity_reminder_coordinator.dart',
             'test/app/router/audited_route_return_source_contract_test.dart',
             'test/app/router/notification_return_navigation_test.dart',
-            'test/features/community/community_reference_navigation_test.dart'
+            'test/features/community/community_reference_navigation_test.dart',
+            'lib/app/theme/bil_navigation_press_style.dart',
+            'lib/shared/widgets/bil_crystal_arrow.dart',
+            'lib/shared/widgets/secondary_page_app_bar.dart',
+            'test/bil_crystal_arrow_test.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets
