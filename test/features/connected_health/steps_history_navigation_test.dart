@@ -80,6 +80,45 @@ void main() {
     expect(find.byType(StepsHistoryPage), findsNothing);
   });
 
+
+  testWidgets('Steps history push Back ignores a rapid duplicate tap', (
+    tester,
+  ) async {
+    await _pumpHistoryRouter(
+      tester,
+      initialLocation: '/connected-health/steps',
+    );
+    await tester.tap(find.text('Open step history'));
+    await tester.pumpAndSettle();
+    final back = tester.widget<BackButton>(
+      find.byKey(const Key('bil-safe-return')),
+    );
+    back.onPressed!();
+    back.onPressed!();
+    await tester.pumpAndSettle();
+    expect(find.text('Open step history'), findsOneWidget);
+    expect(find.byType(StepsHistoryPage), findsNothing);
+  });
+
+  testWidgets('RTL cold Steps history ignores an untrusted return query', (
+    tester,
+  ) async {
+    await _pumpHistoryRouter(
+      tester,
+      initialLocation:
+          '/connected-health/steps/history?next=https%3A%2F%2Foutside.example',
+      locale: const Locale('ar'),
+    );
+    expect(
+      Directionality.of(tester.element(find.byType(StepsHistoryPage))),
+      TextDirection.rtl,
+    );
+    await tester.tap(find.byKey(const Key('bil-safe-return')));
+    await tester.pumpAndSettle();
+    expect(find.text('Open step history'), findsOneWidget);
+    expect(find.byType(StepsHistoryPage), findsNothing);
+  });
+
   testWidgets('step history renders HealthKit daily totals and no fake days', (
     tester,
   ) async {
@@ -146,6 +185,7 @@ void main() {
 Future<void> _pumpHistoryRouter(
   WidgetTester tester, {
   required String initialLocation,
+  Locale locale = const Locale('en'),
 }) async {
   final router = GoRouter(
     initialLocation: initialLocation,
@@ -178,7 +218,7 @@ Future<void> _pumpHistoryRouter(
       ],
       child: MaterialApp.router(
         routerConfig: router,
-        locale: const Locale('en'),
+        locale: locale,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
