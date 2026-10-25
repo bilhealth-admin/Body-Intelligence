@@ -44,6 +44,13 @@ abstract final class BilNavigationPressStyle {
     );
   }
 
-  static Widget backIcon(BuildContext context) =>
-      const BilCrystalArrow(child: Icon(Icons.chevron_left_rounded));
+  /// A back chevron points toward the leading edge in both text directions.
+  /// This helper is not used by the protected purchase CTA.
+  static Widget backIcon(BuildContext context) => BilCrystalArrow(
+    child: Icon(
+      Directionality.of(context) == TextDirection.rtl
+          ? Icons.chevron_right_rounded
+          : Icons.chevron_left_rounded,
+    ),
+  );
 }

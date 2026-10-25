@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:body_intelligence_log/app/theme/bil_navigation_press_style.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:body_intelligence_log/shared/widgets/secondary_page_app_bar.dart';
 
@@ -199,6 +200,41 @@ void main() {
     // Explicitly close this handle after all strict assertions.
     semantics.dispose();
   });
+
+  for (final rtl in [false, true]) {
+    testWidgets('backIcon keeps a visible directional crystal rtl=$rtl', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+            child: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: BilNavigationPressStyle.backIcon(context),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final glyph = find.descendant(
+        of: find.byType(BilCrystalArrow),
+        matching: find.byType(Icon),
+      );
+      expect(glyph, findsOneWidget);
+      expect(
+        tester.widget<Icon>(glyph).icon,
+        rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+      );
+      expect(find.byKey(_bubble), findsOneWidget);
+      expect(tester.getSize(find.byKey(_bubble)), const Size(48, 48));
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   // Isolated component matrix: these checks do not claim that every feature
   // route has already migrated to BilCrystalArrow.
