@@ -18,6 +18,12 @@ class _BilSafeReturnButtonState extends State<BilSafeReturnButton> {
 
   void _handleBack() {
     if (_navigationPending) return;
+    // Navigator.pop does not consult PopScope's canPop flag. Respect an
+    // unsaved editor or in-progress save on both warm and cold routes.
+    if (ModalRoute.of(context)?.popDisposition ==
+        RoutePopDisposition.doNotPop) {
+      return;
+    }
     _navigationPending = true;
     final navigator = Navigator.of(context);
     if (navigator.canPop()) {
