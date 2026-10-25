@@ -106,6 +106,46 @@ void main() {
     );
   });
 
+  test('failed writes never expose storage paths or owner identifiers', () {
+    final fault = StateError(
+      'write failed /synthetic/owner-A/token=synthetic-secret',
+    );
+    expect(classifySmartPlanWriteFailure(fault), 'arbitrary_failure');
+    expect(
+      classifySmartPlanWriteFailure(
+        StateError('smart_plan_revision_conflict'),
+      ),
+      'smart_plan_revision_conflict',
+    );
+    expect(
+      classifySmartPlanWriteFailure(
+        StateError('smart_plan_owner_changed'),
+      ),
+      'smart_plan_owner_changed',
+    );
+    for (final code in [
+      'no_verified_workout',
+      'sync_conflict',
+      'requires_review',
+    ]) {
+      expect(classifySmartPlanWriteFailure(StateError(code)), code);
+    }
+    expect(
+      classifySmartPlanWriteFailure(
+        StateError('sync_conflict details=owner-A'),
+      ),
+      'arbitrary_failure',
+    );
+    String en(String english, String arabic) => english;
+    final copy = smartPlanLoadFailureMessage(
+      classifySmartPlanWriteFailure(fault),
+      en,
+    );
+    expect(copy, 'Action not completed. Please review saved data and retry.');
+    expect(copy, isNot(contains('owner-A')));
+    expect(copy, isNot(contains('synthetic-secret')));
+  });
+
   test('untrusted errors cannot leak owner identifiers in recovery text', () {
     String en(String english, String arabic) => english;
     final copy = smartPlanLoadFailureMessage(

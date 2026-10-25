@@ -15,5 +15,10 @@ void main() {
       contains("throw StateError('smart_plan_catalog_unavailable');"),
     );
     expect(source, contains("'refresh', 'export', 'report'"));
+    // A stale A→B→A save must not overwrite the current owner's UI.
+    expect(source, contains('epoch != _ownerEpoch) return;'));
+    // Repository errors must not be echoed to a member.
+    expect(source, contains('classifySmartPlanWriteFailure(error)'));
+    expect(source, isNot(contains('_error = error.toString();')));
   });
 }

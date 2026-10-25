@@ -365,7 +365,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
           : _reviewingDraft
           ? await repository.activateDraft(next)
           : await repository.save(next, expectedRevision: prior);
-      if (!mounted || _owner != owner) return;
+      if (!mounted || _owner != owner || epoch != _ownerEpoch) return;
       setState(() {
         _plan = saved;
         _reviewingDraft = replacing;
@@ -375,10 +375,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
       ref.invalidate(coachContextSnapshotProvider);
       _returnReceipt(saved);
     } on Object catch (error) {
-      if (!mounted || _owner != owner) return;
+      if (!mounted || _owner != owner || epoch != _ownerEpoch) return;
       setState(() {
         _busy = false;
-        _error = error.toString();
+        _error = classifySmartPlanWriteFailure(error);
       });
       // Keep the failure visible. Reload is explicit and must not erase it.
     }

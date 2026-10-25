@@ -32,6 +32,36 @@ String classifySmartPlanLoadFailure(
   return 'smart_plan_storage_unavailable';
 }
 
+/// Stable, non-sensitive error codes for a failed plan save.
+/// Unlike a read failure, an unsuccessful write must never claim the persisted
+/// plan was read, repaired or replaced. Only known conflicts stay specific.
+String classifySmartPlanWriteFailure(Object error) {
+  final code = classifySmartPlanLoadFailure(error, duringCatalog: false);
+  if (code == 'smart_plan_owner_mismatch' ||
+      code == 'smart_plan_owner_changed' ||
+      code == 'smart_plan_revision_conflict') {
+    return code;
+  }
+  // Retain actionable copy for known domain failures only. Exception text,
+  // paths and account identifiers are never used as a rendered message.
+  const knownSaveCodes = <String>{
+    'smart_plan_catalog_unavailable',
+    'sync_conflict',
+    'during_sync',
+    'reopen_day_first',
+    'workout_receipt',
+    'undo_conflict',
+    'report_not_sent',
+    'export_failed',
+    'verified_subscription_required',
+    'no_verified_workout',
+    'home_strength_recovery_days_required',
+    'requires_review',
+  };
+  final message = error is StateError ? error.message : '';
+  return knownSaveCodes.contains(message) ? message : 'arbitrary_failure';
+}
+
 /// Presentation-only recovery copy. This function never returns a raw error,
 /// storage path, account identifier, or underlying exception message.
 /// Keeping the mapping separate preserves the 700-line page architecture gate.
