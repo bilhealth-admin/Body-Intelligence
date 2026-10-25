@@ -1,0 +1,36 @@
+name: BIL39 strict QA harness only (NOT release validation)
+on:
+  push:
+    branches: [bil39/strict-qa-20261025]
+    paths:
+      - 'tools/qa/bil39_release_gate.py'
+      - 'tools/qa/test_bil39_release_gate.py'
+      - 'tools/qa/bil39_snapshot_20261025.json'
+      - '.github/workflows/bil39_strict_qa.yml'
+      - 'docs/qa_next/BIL39_STRICT_QA_20261025.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strict-receipt-tests-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Unit-test fail-closed receipts (synthetic, not Flutter)
+        run: python3 -m unittest discover -s tools/qa -p 'test_bil39_release_gate.py' -v
+      - name: Audit evidence without claiming BIL39 is verified
+        run: |
+          python3 tools/qa/bil39_release_gate.py --snapshot tools/qa/bil39_snapshot_20261025.json --audit-only --output /tmp/bil39-strict-qa.json
+          cat /tmp/bil39-strict-qa.json >> "$GITHUB_STEP_SUMMARY"
+          echo "This job certifies only the QA evidence guard. It does NOT certify any candidate, emulator, device or build39." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload machine-readable audit result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil39-strict-evidence-guard-only
+          path: /tmp/bil39-strict-qa.json
+          if-no-files-found: warn
+          retention-days: 21
