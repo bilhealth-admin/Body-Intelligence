@@ -110,7 +110,12 @@ jobs:
             'lib/features/notifications/services/inactivity_reminder_coordinator.dart',
             'test/app/router/audited_route_return_source_contract_test.dart',
             'test/app/router/notification_return_navigation_test.dart',
-            'test/features/community/community_reference_navigation_test.dart'
+            'test/features/community/community_reference_navigation_test.dart',
+            'lib/features/meal_planner/presentation/meal_planner_page.dart',
+            'lib/features/meal_planner/presentation/meal_planner_copy.dart',
+            'lib/features/daily_log/daily_log_navigation_actions.dart',
+            'test/features/meal_planner/meal_planner_e2e_contract_test.dart',
+            'test/features/meal_planner/meal_planner_recovery_contract_test.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets
