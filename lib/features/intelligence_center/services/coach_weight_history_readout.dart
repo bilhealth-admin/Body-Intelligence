@@ -47,11 +47,18 @@ class CoachWeightHistoryReadout {
         : null;
 
     // Do not trust storage ordering, and never count nonsensical values.
+    final tomorrow = DateTime(
+      now.toLocal().year,
+      now.toLocal().month,
+      now.toLocal().day + 1,
+    );
     final entries = snapshot.weights
-        .where((point) =>
-            point.kg.isFinite &&
-            point.kg > 0 &&
-            point.at.isBefore(now.add(const Duration(days: 1))))
+        .where(
+          (point) =>
+              point.kg.isFinite &&
+              point.kg > 0 &&
+              point.at.toLocal().isBefore(tomorrow),
+        )
         .toList(growable: true)
       ..sort((a, b) => a.at.compareTo(b.at));
 
