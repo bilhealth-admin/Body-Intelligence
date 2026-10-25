@@ -618,7 +618,7 @@ extension _BilSmartPlanActions on _BilSmartPlanPageState {
     }
   }
 
-  Future<void> _openExercise(String id) async {
+  Future<void> _openExercise(String id, {bool returnToSession = false}) async {
     try {
       final route = await const BilSmartPlanCatalog().exerciseRoute(
         id,
@@ -626,7 +626,13 @@ extension _BilSmartPlanActions on _BilSmartPlanPageState {
             ? 'home-training'
             : 'gym-six-month',
       );
-      if (mounted) await context.push(route);
+      if (mounted) {
+        // Only a live Smart Plan session skips the discovery library on Back.
+        // Standalone catalog links retain their normal browsing behavior.
+        await context.push(
+          returnToSession ? '$route&returnToSession=1' : route,
+        );
+      }
     } on Object catch (error) {
       if (mounted) _mutate(() => _error = error.toString());
     }
@@ -662,7 +668,7 @@ extension _BilSmartPlanActions on _BilSmartPlanPageState {
             checkAccess: check,
             loadItems: (locale) =>
                 manager.loadWorkoutLibraryItems(locale: locale),
-            openExercise: _openExercise,
+            openExercise: (id) => _openExercise(id, returnToSession: true),
           ),
         ),
       );

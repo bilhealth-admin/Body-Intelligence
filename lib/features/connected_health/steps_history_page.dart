@@ -3,6 +3,7 @@ import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show NumberFormat;
+import '../../app/router/bil_safe_return_button.dart';
 
 import '../../app/localization/app_localizations.dart';
 import 'connected_health_copy.dart';
@@ -45,7 +46,12 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
 
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
-        appBar: AppBar(title: Text(t('Steps', 'الخطوات'))),
+        appBar: AppBar(
+          leading: const BilSafeReturnButton(
+            fallbackLocation: '/connected-health/steps',
+          ),
+          title: Text(t('Steps', 'الخطوات')),
+        ),
         body: RefreshIndicator(
           onRefresh: () => ref.read(connectedHealthProvider.notifier).refresh(),
           child: ListView(

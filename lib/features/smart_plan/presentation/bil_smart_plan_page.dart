@@ -39,6 +39,7 @@ import '../domain/bil_smart_plan_review.dart';
 import '../services/bil_smart_plan_catalog.dart';
 import '../services/bil_smart_plan_prescriptions.dart';
 import 'bil_smart_plan_panel.dart';
+import 'bil_smart_plan_load_failure.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/bil_smart_plan_phase_copy.dart';
 import '../../wellness/domain/wellness_content_pack.dart';
@@ -111,6 +112,11 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
 
   String _t(String en, String ar) => _smartPlanText(context, en, ar);
 
+  /// Keep a recovered same-owner plan visible, but prohibit writes until the
+  /// source and supporting catalog pass an explicit fresh read.
+  bool get _unverifiedPlanReadOnly =>
+      _plan != null && _catalogBlocked && _error != null;
+
   Future<T?> _reviewSurface<T>(Future<T?> Function() show) async {
     setState(() => _reviewDepth++);
     try {
@@ -137,69 +143,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
     }
   }
 
-  String _failureText() {
-    final code = _error ?? '';
-    if (code.contains('revision_conflict') ||
-        code.contains('sync_conflict') ||
-        code.contains('during_sync')) {
-      return _t(
-        'Your plan changed. Refresh and review it before trying again.',
-        'تغيّرت الخطة. حدّثها وراجعها قبل إعادة المحاولة.',
-      );
-    }
-    if (code.contains('reopen_day_first')) {
-      return _t(
-        'Reopen this day in your diary before recording activity.',
-        'أعد فتح هذا اليوم في دفتر الأنشطة قبل تسجيل التمرين.',
-      );
-    }
-    if (code.contains('workout_receipt') || code.contains('undo_conflict')) {
-      return _t(
-        'This activity cannot be undone here because its original record is unavailable or has changed. Review your activity diary.',
-        'لا يمكن التراجع هنا لأن السجل الأصلي غير متاح أو تغيّر. راجع دفتر الأنشطة.',
-      );
-    }
-    if (code.contains('report_not_sent')) {
-      return _t(
-        'The report was not sent. Please try again.',
-        'لم يُرسل البلاغ. حاول مجددًا.',
-      );
-    }
-    if (code.contains('export_failed')) {
-      return _t(
-        'The export could not be opened. Please try again.',
-        'تعذّر فتح التصدير. حاول مجددًا.',
-      );
-    }
-    if (code.contains('verified_subscription_required')) {
-      return _t(
-        'Your subscription could not be verified. Refresh your access and try again.',
-        'تعذّر التحقق من الاشتراك. حدّث حالة وصولك وحاول مجددًا.',
-      );
-    }
-    if (code.contains('no_verified_workout')) {
-      return _t(
-        'No source-backed session fits these choices. Allow more session time or review your equipment and experience. Your saved plan has not changed.',
-        'لا توجد جلسة موثقة تناسب هذه الخيارات. أتح وقتًا أطول أو راجع المعدات والخبرة. لم تتغير خطتك المحفوظة.',
-      );
-    }
-    if (code.contains('home_strength_recovery_days_required')) {
-      return _t(
-        'Home strength sessions need recovery days. Choose up to 3 sessions per week and review the draft.',
-        'تحتاج جلسات القوة المنزلية إلى أيام للتعافي. اختر حتى 3 جلسات أسبوعيًا وراجع المسودة.',
-      );
-    }
-    if (code.contains('requires_review')) {
-      return _t(
-        'This plan needs a safety review. Review your age, dietary restrictions and training availability before continuing.',
-        'تحتاج هذه الخطة لمراجعة السلامة. راجع العمر وقيود الطعام وتوفر التدريب قبل المتابعة.',
-      );
-    }
-    return _t(
-      'Action not completed. Please review saved data and retry.',
-      'لم تكتمل العملية. راجع البيانات المحفوظة وحاول مجددًا.',
-    );
-  }
+  String _failureText() => smartPlanLoadFailureMessage(_error ?? '', _t);
 
   String? get _owner => ref.read(verifiedEntitlementOwnerIdProvider);
 
@@ -212,6 +156,9 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   }
 
   void _checkAccess() {
+    if (_unverifiedPlanReadOnly) {
+      throw StateError('smart_plan_catalog_unavailable');
+    }
     if (widget.privacyOnly) {
       throw StateError('smart_plan_verified_subscription_required');
     }
@@ -278,7 +225,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   Future<void> _load() async {
     final generation = ++_loadGeneration;
     final owner = _owner;
-    if (owner == null) {
+    final currentLocalOwner = ref
+        .read(preferencesRepositoryProvider)
+        .localOwnerId;
+    if (owner == null || currentLocalOwner != owner) {
       if (mounted) {
         setState(() {
           _busy = false;
@@ -288,8 +238,18 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
       }
       return;
     }
+    if (mounted) {
+      setState(() {
+        _busy = true;
+        _error = null;
+      });
+    }
+    BilSmartPlan? readPlan;
+    var planRead = false;
     try {
       final plan = await _repository.readFor(owner);
+      readPlan = plan;
+      planRead = true;
       if (!mounted || _owner != owner || generation != _loadGeneration) return;
       var catalogBlocked = false;
       if (plan != null) {
@@ -349,11 +309,34 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
         });
       }
     } on Object catch (error) {
-      if (!mounted || _owner != owner || generation != _loadGeneration) return;
+      if (!mounted ||
+          _owner != owner ||
+          generation != _loadGeneration ||
+          ref.read(preferencesRepositoryProvider).localOwnerId != owner) {
+        return;
+      }
+      // Sanitize the failure: do not show raw repository/exception contents.
+      // A successful local read may still fail later during catalog/dietary
+      // verification. In that case keep the recovered plan in memory, while
+      // withholding actions until a fresh verification succeeds.
+      final failureCode = classifySmartPlanLoadFailure(
+        error,
+        duringCatalog: planRead,
+      );
+      debugPrint('BIL My Plan recoverable load failure: $failureCode');
       setState(() {
-        _plan = null;
+        if (failureCode == 'smart_plan_owner_mismatch' ||
+            failureCode == 'smart_plan_owner_changed') {
+          _plan = null;
+          _catalogBlocked = true;
+        } else {
+          if (readPlan != null) _plan = readPlan;
+          // Retain the previous same-owner plan on a transient storage error,
+          // but do not act on a copy that has not just passed validation.
+          if (_plan != null) _catalogBlocked = true;
+        }
         _busy = false;
-        _error = error.toString();
+        _error = failureCode;
       });
     }
   }
@@ -398,6 +381,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   }
 
   void _selectMenu(String action) {
+    if (_unverifiedPlanReadOnly &&
+        !const {'refresh', 'export', 'report'}.contains(action)) {
+      return;
+    }
     switch (action) {
       case 'new-draft':
         unawaited(_createPlan());
@@ -433,6 +420,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
     if (widget.privacyOnly) return _privacySurface();
     final scheme = Theme.of(context).colorScheme;
     final plan = _plan;
+    final readOnly = _unverifiedPlanReadOnly;
     return Scaffold(
       appBar: AppBar(
         title: Text(_t('My Plan', 'خطتي')),
@@ -446,22 +434,26 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
             itemBuilder: (_) => [
               if (plan != null) ...[
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'new-draft',
                   child: Text(_t('Create another draft', 'إنشاء مسودة أخرى')),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'review-draft',
                   child: Text(
                     _t('Review pending draft', 'مراجعة المسودة المعلقة'),
                   ),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'approved-plan',
                   child: Text(
                     _t('Current saved plan', 'الخطة المحفوظة الحالية'),
                   ),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'previous-plans',
                   child: Text(
                     _t(
@@ -471,10 +463,12 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                   ),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'memory',
                   child: Text(_t('Coach plan memory', 'ذاكرة الخطة للمدرب')),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'extended-memory',
                   child: Text(
                     _t('Coach context details', 'تفاصيل سياق المدرب'),
@@ -482,6 +476,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                 ),
                 if (plan.status == BilPlanStatus.active)
                   PopupMenuItem(
+                    enabled: !readOnly,
                     value: 'pause',
                     child: Text(_t('Pause plan', 'إيقاف مؤقت')),
                   ),
@@ -495,6 +490,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                 ),
                 const PopupMenuDivider(),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'delete',
                   child: Text(_t('Delete plan', 'حذف الخطة')),
                 ),
@@ -504,10 +500,12 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                 'BIL_SMART_PLAN_CLOUD_ENABLED',
               )) ...[
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'sync',
                   child: Text(_t('Sync plan', 'مزامنة الخطة')),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'revoke',
                   child: Text(_t('Stop backup', 'إيقاف النسخ')),
                 ),
@@ -527,7 +525,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 760),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 children: [
                   if (_busy && _reviewDepth == 0) _loadingPanel(),
                   if (_error != null)
@@ -593,10 +591,16 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                     if (_catalogBlocked)
                       _panel(
                         child: Text(
-                          _t(
-                            'Your saved plan needs review because the exercise catalog or dietary restrictions changed. Its contents will not be suggested until reviewed. You can export or delete it from Plan options.',
-                            'تحتاج خطتك المحفوظة للمراجعة بسبب تغير كتالوج التمارين أو قيود الطعام. لن تُعرض مقترحاتها قبل المراجعة. يمكنك تصديرها أو حذفها من خيارات الخطة.',
-                          ),
+                          _error == 'smart_plan_catalog_unavailable' ||
+                                  _error == 'smart_plan_storage_unavailable'
+                              ? _t(
+                                  'Your previous plan is shown read-only until its data can be verified. Retry to restore full access.',
+                                  'تظهر خطتك السابقة للقراءة فقط حتى التحقق من بياناتها. أعد المحاولة لاستعادة الوصول الكامل.',
+                                )
+                              : _t(
+                                  'Your saved plan needs review because the exercise catalog or dietary restrictions changed. Its contents will not be suggested until reviewed. You can export or delete it from Plan options.',
+                                  'تحتاج خطتك المحفوظة للمراجعة بسبب تغير كتالوج التمارين أو قيود الطعام. لن تُعرض مقترحاتها قبل المراجعة. يمكنك تصديرها أو حذفها من خيارات الخطة.',
+                                ),
                           key: const ValueKey('bil-smart-plan-catalog-review'),
                         ),
                       ),
@@ -643,7 +647,13 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                   ),
                                 ),
                                 onPressed: () => setState(() => _tab = tab.$1),
-                                child: Text(tab.$2),
+                                child: Text(
+                                  tab.$2,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                             ),
                         ],

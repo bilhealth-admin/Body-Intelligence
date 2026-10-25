@@ -36,6 +36,11 @@ void main() {
       'diet_vegetarian',
       'diet_highProtein',
       'estimateNotice',
+      'sourceLabel',
+      'sourceBody',
+      'retry',
+      'loadFailed',
+      'generateFailed',
     ]) {
       expect(RegExp("'$key':").allMatches(source).length, 5, reason: key);
     }

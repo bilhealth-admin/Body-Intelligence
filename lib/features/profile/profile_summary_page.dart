@@ -1,4 +1,4 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -18,6 +18,7 @@ import '../commerce/providers/commerce_providers.dart';
 import '../community/data/community_repository.dart';
 import '../settings/reference_settings_copy.dart';
 import '../weight/providers/weight_provider.dart';
+import 'providers/profile_auth_identity_provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'profile_summary_locale_copy.dart';
 import '../../shared/widgets/bil_account_avatar.dart';
@@ -25,15 +26,24 @@ import '../visual_2026/bil_calm_visual_scope.dart';
 
 final profileFriendsCountProvider = FutureProvider<int?>((ref) async {
   if (!AppEnvironment.cloudConfigured) return null;
+  // An account switch must invalidate a pending friendship read. Never expose
+  // an old owner's friendship count on the newly signed-in profile.
+  final owner = ref.watch(profileAuthIdentityProvider).value?.ownerId;
+  if (owner == null) return null;
   final client = Supabase.instance.client;
-  if (client.auth.currentUser == null) return null;
+  if (client.auth.currentUser?.id != owner) return null;
   final rows = await CommunityRepository(client).loadFriendshipsWithProfiles();
+  if (!ref.mounted || client.auth.currentUser?.id != owner) return null;
   return rows.where((row) => row['status'] == 'accepted').length;
 });
 
 final profileMemberSinceProvider = Provider<DateTime?>((ref) {
   if (!AppEnvironment.cloudConfigured) return null;
-  final value = Supabase.instance.client.auth.currentUser?.createdAt;
+  final owner = ref.watch(profileAuthIdentityProvider).value?.ownerId;
+  if (owner == null) return null;
+  final client = Supabase.instance.client;
+  if (client.auth.currentUser?.id != owner) return null;
+  final value = client.auth.currentUser?.createdAt;
   return value == null ? null : DateTime.tryParse(value);
 });
 
@@ -93,6 +103,11 @@ class ProfileSummaryPage extends ConsumerWidget {
             '\u062a\u0639\u062f\u064a\u0644 \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a',
         'kg': '\u0643\u062c\u0645',
         'lb': '\u0631\u0637\u0644',
+        'Loading profile…': 'جارٍ تحميل الملف الشخصي…',
+        'Loading profile is taking longer than expected.':
+            'تحميل الملف الشخصي يستغرق وقتًا أطول من المعتاد.',
+        'Some profile details are unavailable.':
+            'بعض تفاصيل الملف غير متاحة حاليًا.',
       },
     };
     final authored = clean[code]?[key];
@@ -117,11 +132,12 @@ class ProfileSummaryPage extends ConsumerWidget {
     final systemState = ref.watch(measurementSystemProvider);
     final friendsState = ref.watch(profileFriendsCountProvider);
     final nameState = ref.watch(displayNameProvider);
-    final photoUrl = ref.watch(profileAvatarStateProvider).url;
+    final avatar = ref.watch(profileAvatarStateProvider);
+    final photoUrl = avatar.url;
     final profile = profileState.value;
     final weights = weightsState.value;
     final storedName = nameState.value;
-    final photo = ref.watch(profileAvatarStateProvider).bytes;
+    final photo = avatar.bytes;
     final memberSince = ref.watch(profileMemberSinceProvider);
     final friends = friendsState.value;
     final subscription = ref.watch(verifiedSubscriptionAccessProvider);
@@ -148,61 +164,6 @@ class ProfileSummaryPage extends ConsumerWidget {
     final weightUnit = _copy(context, UnitConverter.weightUnit(system));
     final colors = Theme.of(context).colorScheme;
 
-    if (profileState.hasError ||
-        weightsState.hasError ||
-        systemState.hasError ||
-        friendsState.hasError ||
-        nameState.hasError) {
-      return BilCalmVisualScope(
-        builder: (context) => Scaffold(
-          appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline_rounded, size: 42),
-                  const SizedBox(height: 12),
-                  Text(
-                    _copy(context, 'Profile data could not be loaded.'),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: () {
-                      ref.invalidate(userProfileProvider);
-                      ref.invalidate(weightHistoryProvider);
-                      ref.invalidate(measurementSystemProvider);
-                      ref.invalidate(profileFriendsCountProvider);
-                      ref.invalidate(displayNameProvider);
-                      ref.invalidate(profilePhotoProvider);
-                    },
-                    icon: const BilGlassPressFeedback(
-                      child: Icon(Icons.refresh_rounded),
-                    ),
-                    label: Text(_copy(context, 'Retry')),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    if ((profileState.isLoading && !profileState.hasValue) ||
-        (weightsState.isLoading && !weightsState.hasValue) ||
-        (systemState.isLoading && !systemState.hasValue) ||
-        (friendsState.isLoading && !friendsState.hasValue) ||
-        (nameState.isLoading && !nameState.hasValue)) {
-      return BilCalmVisualScope(
-        builder: (context) => Scaffold(
-          appBar: AppBar(title: Text(_copy(context, 'BIL member'))),
-          body: const Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
         backgroundColor: colors.surfaceContainerLowest,
@@ -215,7 +176,11 @@ class ProfileSummaryPage extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  _Avatar(photo: photo, networkUrl: photoUrl),
+                  _Avatar(
+                    photo: photo,
+                    networkUrl: photoUrl,
+                    ownerId: avatar.owner,
+                  ),
                   const SizedBox(width: 20),
                   Expanded(
                     child: Column(
@@ -250,6 +215,59 @@ class ProfileSummaryPage extends ConsumerWidget {
                 ],
               ),
             ),
+            if (profileState.hasError ||
+                (profileState.isLoading && !profileState.hasValue))
+              ProfilePrimaryLoadNotice(
+                key: ValueKey('bil-profile-loading:${avatar.owner ?? 'local'}'),
+                failed: profileState.hasError,
+                onRetry: () => ref.invalidate(userProfileProvider),
+                loadingText: _copy(context, 'Loading profile…'),
+                slowText: _copy(
+                  context,
+                  'Loading profile is taking longer than expected.',
+                ),
+                errorText: _copy(context, 'Profile data could not be loaded.'),
+                retryText: _copy(context, 'Retry'),
+              ),
+            if (weightsState.hasError ||
+                systemState.hasError ||
+                friendsState.hasError ||
+                nameState.hasError)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _copy(context, 'Some profile details are unavailable.'),
+                      ),
+                    ),
+                    TextButton(
+                      key: const ValueKey('bil-profile-details-retry'),
+                      onPressed: () {
+                        if (weightsState.hasError) {
+                          ref.invalidate(weightHistoryProvider);
+                        }
+                        if (systemState.hasError) {
+                          ref.invalidate(measurementSystemProvider);
+                        }
+                        if (friendsState.hasError) {
+                          ref.invalidate(profileFriendsCountProvider);
+                        }
+                        if (nameState.hasError) {
+                          ref.invalidate(displayNameProvider);
+                        }
+                      },
+                      child: Text(_copy(context, 'Retry')),
+                    ),
+                  ],
+                ),
+              ),
             const Divider(height: 1),
             Container(
               color: colors.surface,
@@ -257,7 +275,9 @@ class ProfileSummaryPage extends ConsumerWidget {
               child: Row(
                 children: [
                   _Metric(
-                    value: weightChangeValue ?? '\u2014',
+                    value: weightsState.isLoading && !weightsState.hasValue
+                        ? '…'
+                        : weightChangeValue ?? '\u2014',
                     unit: weightUnit,
                     label: _copy(context, 'Weight change'),
                     semanticValue: weightChangeValue == null
@@ -297,9 +317,7 @@ class ProfileSummaryPage extends ConsumerWidget {
                 child: TextButton.icon(
                   onPressed: () =>
                       ref.invalidate(verifiedSubscriptionStateProvider),
-                  icon: const BilGlassPressFeedback(
-                    child: Icon(Icons.refresh_rounded),
-                  ),
+                  icon: const Icon(Icons.refresh_rounded),
                   label: Text(context.strings.text('Retry subscription check')),
                 ),
               ),
@@ -312,9 +330,7 @@ class ProfileSummaryPage extends ConsumerWidget {
                       child: TextButton.icon(
                         onPressed: () =>
                             ref.invalidate(verifiedSubscriptionStateProvider),
-                        icon: const BilGlassPressFeedback(
-                          child: Icon(Icons.refresh_rounded),
-                        ),
+                        icon: const Icon(Icons.refresh_rounded),
                         label: Text(
                           context.strings.text('Retry subscription check'),
                         ),
@@ -365,14 +381,123 @@ class ProfileSummaryPage extends ConsumerWidget {
   }
 }
 
-class _Avatar extends StatelessWidget {
-  const _Avatar({required this.photo, required this.networkUrl});
-  final Uint8List? photo;
-  final String? networkUrl;
+/// A bounded, recoverable state for the *primary* profile read. Secondary
+/// sources always render independently in the summary and never reach here.
+class ProfilePrimaryLoadNotice extends StatefulWidget {
+  const ProfilePrimaryLoadNotice({
+    super.key,
+    required this.failed,
+    required this.onRetry,
+    required this.loadingText,
+    required this.slowText,
+    required this.errorText,
+    required this.retryText,
+  });
+
+  final bool failed;
+  final VoidCallback onRetry;
+  final String loadingText;
+  final String slowText;
+  final String errorText;
+  final String retryText;
 
   @override
-  Widget build(BuildContext context) =>
-      BilAccountAvatar(radius: 42, photoBytes: photo, networkUrl: networkUrl);
+  State<ProfilePrimaryLoadNotice> createState() =>
+      _ProfilePrimaryLoadNoticeState();
+}
+
+class _ProfilePrimaryLoadNoticeState extends State<ProfilePrimaryLoadNotice> {
+  Timer? _slowTimer;
+  bool _slow = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.failed) _startTimer();
+  }
+
+  void _startTimer() {
+    _slowTimer?.cancel();
+    _slowTimer = Timer(const Duration(seconds: 12), () {
+      if (mounted && !widget.failed) setState(() => _slow = true);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfilePrimaryLoadNotice oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.failed && !widget.failed) {
+      _slow = false;
+      _startTimer();
+    } else if (!oldWidget.failed && widget.failed) {
+      _slowTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _slowTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final needsRetry = widget.failed || _slow;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      child: Row(
+        children: [
+          if (needsRetry)
+            const Icon(Icons.info_outline_rounded, size: 20)
+          else
+            const SizedBox.square(
+              dimension: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              widget.failed
+                  ? widget.errorText
+                  : _slow
+                  ? widget.slowText
+                  : widget.loadingText,
+            ),
+          ),
+          if (needsRetry)
+            TextButton(
+              key: const ValueKey('bil-profile-primary-retry'),
+              onPressed: () {
+                setState(() => _slow = false);
+                if (!widget.failed) _startTimer();
+                widget.onRetry();
+              },
+              child: Text(widget.retryText),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({
+    required this.photo,
+    required this.networkUrl,
+    required this.ownerId,
+  });
+  final Uint8List? photo;
+  final String? networkUrl;
+  final String? ownerId;
+
+  @override
+  Widget build(BuildContext context) => BilAccountAvatar(
+    key: ValueKey('bil-profile-avatar:${ownerId ?? 'local'}'),
+    radius: 42,
+    ownerId: ownerId,
+    photoBytes: photo,
+    networkUrl: networkUrl,
+  );
 }
 
 class _Metric extends StatelessWidget {
