@@ -3,7 +3,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final source = ['meal_planner_page.dart', 'meal_planner_copy.dart']
+  final source = [
+    'meal_planner_page.dart',
+    'meal_planner_copy.dart',
+    'meal_planner_persistence.dart',
+  ]
       .map(
         (name) => File(
           'lib/features/meal_planner/presentation/$name',
@@ -41,6 +45,8 @@ void main() {
       'retry',
       'loadFailed',
       'generateFailed',
+      'planChanged',
+      'missingRecipe',
     ]) {
       expect(RegExp("'$key':").allMatches(source).length, 5, reason: key);
     }

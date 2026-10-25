@@ -115,7 +115,9 @@ jobs:
             'lib/features/meal_planner/presentation/meal_planner_copy.dart',
             'lib/features/daily_log/daily_log_navigation_actions.dart',
             'test/features/meal_planner/meal_planner_e2e_contract_test.dart',
-            'test/features/meal_planner/meal_planner_recovery_contract_test.dart'
+            'test/features/meal_planner/meal_planner_recovery_contract_test.dart',
+            'lib/features/meal_planner/presentation/meal_planner_persistence.dart',
+            'test/features/meal_planner/meal_planner_recovery_widget_test.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets
@@ -165,6 +167,7 @@ jobs:
           flutter test --no-pub --timeout=2m
           test/features/meal_planner/meal_planner_e2e_contract_test.dart
           test/features/meal_planner/meal_planner_recovery_contract_test.dart
+          test/features/meal_planner/meal_planner_recovery_widget_test.dart
 
   p0:
     # The critical data/journal and Vision/architecture suites must pass

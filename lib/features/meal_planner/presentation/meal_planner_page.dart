@@ -2,6 +2,11 @@ import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:convert';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../app/environment/app_environment.dart';
+import '../../../data/repositories/preferences_repository.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +18,7 @@ import '../services/meal_plan_engine.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
 
 part 'meal_planner_copy.dart';
+part 'meal_planner_persistence.dart';
 
 class MealPlannerPage extends ConsumerStatefulWidget {
   const MealPlannerPage({super.key});
@@ -32,6 +38,11 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   var _loading = true;
   var _saving = false;
   var _loadInFlight = false;
+  var _grocerySaveInFlight = false;
+  var _reviewLogNavigating = false;
+  var _loadEpoch = 0;
+  PreferencesRepository? _boundRepository;
+  Map<String, String?>? _readSnapshot;
   String? _loadError;
   String? _saveError;
   final _checkedGrocery = <String>{};
@@ -39,104 +50,25 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   @override
   void initState() {
     super.initState();
+    _boundRepository = ref.read(preferencesRepositoryProvider);
     _load();
-  }
-
-  Future<void> _load({bool retry = false}) async {
-    if (_loadInFlight) return;
-    _loadInFlight = true;
-    if (retry && mounted) {
-      setState(() {
-        _loading = _plan == null;
-        _loadError = null;
-      });
-    }
-    try {
-      final repository = ref.read(preferencesRepositoryProvider);
-      final values = await Future.wait([
-        repository.get(_preferencesKey),
-        repository.get(_planKey),
-        repository.get(_groceryChecksKey),
-      ]);
-      final dietary = await ref
-          .read(dietaryPreferencesRepositoryProvider)
-          .read();
-      if (!mounted) return;
-      setState(() {
-        final preferences = values[0];
-        _dietaryPreferences = dietary;
-        final plan = values[1];
-        if (preferences != null) {
-          _preferences = MealPlanPreferences.fromJson(
-            jsonDecode(preferences) as Map<String, dynamic>,
-          );
-        }
-        if (plan != null) _plan = WeeklyMealPlan.decode(plan);
-        final checks = values[2];
-        if (checks != null) {
-          _checkedGrocery
-            ..clear()
-            ..addAll((jsonDecode(checks) as List).cast<String>());
-        }
-        _loading = false;
-        _loadError = null;
-      });
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _loadError = 'loadFailed';
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _loadInFlight = false);
-      } else {
-        _loadInFlight = false;
-      }
-    }
-  }
-
-  Future<void> _generate() async {
-    if (_saving) return;
-    final preferences = _preferences;
-    final dietaryPreferences = _dietaryPreferences;
-    setState(() {
-      _saving = true;
-      _saveError = null;
-    });
-    try {
-      final plan = _engine.generate(
-        preferences,
-        dietaryPreferences: dietaryPreferences,
-      );
-      final repository = ref.read(preferencesRepositoryProvider);
-      // Preferences, the new plan, and grocery-check reset are one durable
-      // transaction. A failed write leaves the previous saved week intact.
-      await repository.mutate(
-        set: {
-          _preferencesKey: jsonEncode(preferences.toJson()),
-          _planKey: plan.encode(),
-        },
-        remove: [_groceryChecksKey],
-      );
-      if (!mounted) return;
-      setState(() {
-        _plan = plan;
-        _checkedGrocery.clear();
-        _saveError = null;
-      });
-    } catch (_) {
-      if (mounted) setState(() => _saveError = 'generateFailed');
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final language = Localizations.localeOf(context).languageCode;
     final copy = _PlannerCopy(language);
+    final activeRepository = ref.watch(preferencesRepositoryProvider);
+    if (!identical(activeRepository, _boundRepository) ||
+        !_isActiveRepository(activeRepository)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _adoptRepository(activeRepository);
+      });
+      return Scaffold(
+        appBar: AppBar(title: Text(copy.text('title'))),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -261,12 +193,25 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ),
         if (_saveError != null) ...[
           const SizedBox(height: 12),
-          _recoverableError(copy, _saveError!, () => _generate()),
+          _recoverableError(
+            copy,
+            _saveError!,
+            () => _saveError == 'planChanged'
+                ? _load(retry: true)
+                : _generate(),
+          ),
         ],
         const SizedBox(height: 18),
         FilledButton.icon(
           key: const Key('generate-weekly-meal-plan'),
-          onPressed: _saving ? null : _generate,
+          onPressed: _saving ||
+                  _grocerySaveInFlight ||
+                  _loadInFlight ||
+                  _loadError != null ||
+                  _saveError == 'planChanged' ||
+                  _readSnapshot == null
+              ? null
+              : _generate,
           icon: const Icon(Icons.auto_awesome_outlined),
           label: Text(_saving ? copy.text('saving') : copy.text('generate')),
         ),
@@ -291,7 +236,15 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ] else ...[
           const SizedBox(height: 20),
           ...plan.meals.map((meal) {
-            final recipe = recipeById(meal.recipeId)!;
+            final recipe = recipeById(meal.recipeId);
+            if (recipe == null) {
+              return BilPearlMaterialCard(
+                child: ListTile(
+                  title: Text(copy.text('missingRecipe')),
+                  subtitle: Text(copy.day(meal.day)),
+                ),
+              );
+            }
             return BilPearlMaterialCard(
               child: ListTile(
                 leading: CircleAvatar(child: Text('${meal.day + 1}')),
@@ -336,7 +289,10 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ...items.map(
           (item) => CheckboxListTile(
             value: _checkedGrocery.contains(item.key),
-            onChanged: _saving
+            onChanged: _saving ||
+                    _grocerySaveInFlight ||
+                    _loadInFlight ||
+                    _loadError != null
                 ? null
                 : (checked) => _toggleGrocery(item.key, checked == true),
             controlAffinity: ListTileControlAffinity.leading,
@@ -346,32 +302,6 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ),
       ],
     );
-  }
-
-  Future<void> _toggleGrocery(String key, bool checked) async {
-    final wasChecked = _checkedGrocery.contains(key);
-    setState(() {
-      checked ? _checkedGrocery.add(key) : _checkedGrocery.remove(key);
-    });
-    try {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set(_groceryChecksKey, jsonEncode(_checkedGrocery.toList()..sort()));
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        wasChecked ? _checkedGrocery.add(key) : _checkedGrocery.remove(key);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _PlannerCopy(
-              Localizations.localeOf(context).languageCode,
-            ).text('saveFailed'),
-          ),
-        ),
-      );
-    }
   }
 
   Future<void> _shareGrocery(
@@ -412,8 +342,18 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         Text(copy.text('prepBody')),
         const SizedBox(height: 12),
         ...plan.meals.map((meal) {
-          final recipe = recipeById(meal.recipeId)!;
-          final details = plannerRecipeDetails[recipe.id]!;
+          final recipe = recipeById(meal.recipeId);
+          final details = recipe == null
+              ? null
+              : plannerRecipeDetails[recipe.id];
+          if (recipe == null || details == null) {
+            return BilPearlMaterialCard(
+              child: ListTile(
+                title: Text(copy.text('missingRecipe')),
+                subtitle: Text(copy.day(meal.day)),
+              ),
+            );
+          }
           return BilPearlMaterialCard(
             child: ExpansionTile(
               title: Text('${copy.day(meal.day)} — ${recipe.title}'),
@@ -458,7 +398,10 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: _saving
+          onChanged: _saving ||
+                  _grocerySaveInFlight ||
+                  _loadInFlight ||
+                  _loadError != null
               ? null
               : (value) => setState(
                   () => _preferences = MealPlanPreferences(
@@ -481,7 +424,10 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: _saving
+          onChanged: _saving ||
+                  _grocerySaveInFlight ||
+                  _loadInFlight ||
+                  _loadError != null
               ? null
               : (value) => setState(
                   () => _preferences = MealPlanPreferences(
@@ -501,7 +447,10 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 10,
           max: 60,
           divisions: 10,
-          onChanged: _saving
+          onChanged: _saving ||
+                  _grocerySaveInFlight ||
+                  _loadInFlight ||
+                  _loadError != null
               ? null
               : (value) => setState(
                   () => _preferences = MealPlanPreferences(
@@ -518,7 +467,10 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 1,
           max: 8,
           divisions: 7,
-          onChanged: _saving
+          onChanged: _saving ||
+                  _grocerySaveInFlight ||
+                  _loadInFlight ||
+                  _loadError != null
               ? null
               : (value) => setState(
                   () => _preferences = MealPlanPreferences(
@@ -540,9 +492,14 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
     showBilPearlBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-        child: Column(
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.8,
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+            child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -590,13 +547,21 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
             ],
             const SizedBox(height: 16),
             FilledButton(
-              onPressed: () {
+              onPressed: _reviewLogNavigating
+                  ? null
+                  : () async {
+                final repository = _boundRepository;
+                if (repository == null || !_isActiveRepository(repository)) {
+                  return;
+                }
+                _reviewLogNavigating = true;
                 Navigator.of(sheetContext).pop();
                 // The planner catalog is not the diary's canonical food
                 // catalog. Let the user choose a matching food and confirm
                 // its portion in the diary; never log a recipe automatically.
-                context.push(
-                  Uri(
+                try {
+                  await context.push(
+                    Uri(
                     path: '/daily-log',
                     queryParameters: {
                       'action': 'food',
@@ -604,8 +569,11 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                       'meal': recipe.meal.toLowerCase(),
                       'query': recipe.title,
                     },
-                  ).toString(),
-                );
+                    ).toString(),
+                  );
+                } finally {
+                  _reviewLogNavigating = false;
+                }
               },
               child: Text(copy.text('reviewLog')),
             ),
@@ -616,6 +584,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
+            ),
+          ),
         ),
       ),
     );

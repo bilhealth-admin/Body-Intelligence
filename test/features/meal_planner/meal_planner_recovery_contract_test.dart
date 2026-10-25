@@ -3,9 +3,16 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final plannerSource = File(
-    'lib/features/meal_planner/presentation/meal_planner_page.dart',
-  ).readAsStringSync();
+  final plannerSource = [
+    'meal_planner_page.dart',
+    'meal_planner_persistence.dart',
+  ]
+      .map(
+        (name) => File(
+          'lib/features/meal_planner/presentation/$name',
+        ).readAsStringSync(),
+      )
+      .join('\n');
   final copySource = File(
     'lib/features/meal_planner/presentation/meal_planner_copy.dart',
   ).readAsStringSync();
@@ -40,7 +47,9 @@ void main() {
       expect(plannerSource, contains("_saveError = 'generateFailed'"));
       expect(plannerSource, contains("if (_loadError != null)"));
       expect(plannerSource, contains("if (_saveError != null)"));
-      expect(plannerSource, contains('repository.mutate('));
+      expect(plannerSource, contains('repository.mutateIfUnchanged('));
+      expect(plannerSource, contains('isCurrent: () => _isCurrent'));
+      expect(plannerSource, contains('_readSnapshot == null'));
       expect(plannerSource, contains('remove: [_groceryChecksKey]'));
       expect(
         plannerSource,
@@ -63,6 +72,8 @@ void main() {
         'retry',
         'loadFailed',
         'generateFailed',
+        'planChanged',
+        'missingRecipe',
       ]) {
         expect(RegExp("'$key':").allMatches(copySource).length, 5, reason: key);
       }
