@@ -832,8 +832,13 @@ void main() {
         final open = find.byKey(
           const ValueKey('bil-smart-plan-replace-session'),
         );
-        await tester.ensureVisible(open);
+        await tester.scrollUntilVisible(
+          open,
+          170,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
+        expect(open, findsOneWidget);
         await tester.tap(open);
         final field = find.byKey(
           const ValueKey('bil-smart-plan-alternative-session'),
@@ -891,9 +896,17 @@ void main() {
         );
         await repo.save(before, expectedRevision: initial.revision);
         await pump(tester, locale, 320, 2);
-        final meal = find.byIcon(Icons.restaurant_menu_rounded).first;
-        await tester.ensureVisible(meal);
+        final targetSlot = before.days.first.meals.first.slot.name;
+        // A stable row key lets scrollUntilVisible build the offscreen tile.
+        // A .first finder throws before the 320px/200% scroll can start.
+        final meal = find.byKey(ValueKey('bil-smart-plan-meal-$targetSlot'));
+        await tester.scrollUntilVisible(
+          meal,
+          170,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
+        expect(meal, findsOneWidget);
         await tester.tap(meal);
         final schedule = find.byKey(
           const ValueKey('bil-smart-plan-meal-schedule'),
@@ -1062,6 +1075,8 @@ void main() {
     );
     testWidgets('Smart Plan $locale glass layout Golden', (tester) async {
       await pump(tester, locale, 390, 1);
+      // Wait for the actual bundled artwork before auditing rendered pixels.
+      await settleVisualAssetImages(tester);
       final semantics = tester.ensureSemantics();
       try {
         await expectLater(tester, meetsGuideline(textContrastGuideline));

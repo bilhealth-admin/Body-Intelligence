@@ -26,12 +26,16 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
       ),
     ),
   );
-  Widget _panel({required Widget child}) => BilSmartPlanPanel(
+  Widget _panel({required Widget child, String? artwork}) => BilSmartPlanPanel(
     margin: const EdgeInsets.only(bottom: 12),
+    artwork: artwork,
     child: Padding(padding: const EdgeInsets.all(16), child: child),
   );
 
   Widget _today(BilSmartPlan plan) {
+    final labelInk = Theme.of(context).brightness == Brightness.dark
+        ? BilPearlFinish.darkInk
+        : BilPearlFinish.lightInk;
     final day = plan.onDate(
       _requestedDay ?? ref.read(bilSmartPlanClockProvider)(),
     );
@@ -49,22 +53,27 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _panel(
+          artwork: day.workout == null
+              ? BilSmartPlanArt.recovery
+              : BilSmartPlanArt.forWorkout(day.workout!.templateId),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                _requestedDay != null &&
+              BilSmartPlanSectionTitle(
+                title:
+                    _requestedDay != null &&
                         BilPlanDate.iso(_requestedDay!) !=
                             BilPlanDate.iso(
                               ref.read(bilSmartPlanClockProvider)(),
                             )
                     ? _t('Selected day', 'اليوم المختار')
                     : _t('Today', 'اليوم'),
-                style: Theme.of(context).textTheme.titleLarge,
+                subtitle: day.date,
+                icon: day.workout == null
+                    ? Icons.self_improvement_rounded
+                    : Icons.fitness_center_rounded,
               ),
-              const SizedBox(height: 6),
-              Text(day.date, style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               if (day.workout == null)
                 Text(
                   _t(
@@ -75,7 +84,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
               else ...[
                 Text(
                   _workoutTitle(day.workout!.templateId),
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -94,6 +105,10 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                 const SizedBox(height: 8),
                 ExpansionTile(
                   key: const ValueKey('bil-smart-plan-workout-steps'),
+                  textColor: labelInk,
+                  collapsedTextColor: labelInk,
+                  iconColor: labelInk,
+                  collapsedIconColor: labelInk,
                   title: Text(
                     _t('Exercises in this session', 'تمارين هذه الجلسة'),
                   ),
@@ -167,22 +182,22 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
         ),
         if (day.meals.isNotEmpty)
           _panel(
+            artwork: BilSmartPlanArt.meals,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _t('Suggested meals', 'الوجبات المقترحة'),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _t(
+                BilSmartPlanSectionTitle(
+                  title: _t('Suggested meals', 'الوجبات المقترحة'),
+                  subtitle: _t(
                     'Suggestions are not meal log entries.',
                     'الاقتراحات لا تعني أن الوجبات تم تناولها أو تسجيلها.',
                   ),
+                  icon: Icons.restaurant_rounded,
                 ),
+                const SizedBox(height: 12),
                 for (final meal in day.meals)
                   ListTile(
+                    key: ValueKey('bil-smart-plan-meal-${meal.slot.name}'),
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.restaurant_menu_rounded),
                     onTap: _busy ? null : () => _reviewMeal(day, meal),
@@ -260,34 +275,47 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
     final visible = plan.days.skip(first).take(7).toList(growable: false);
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              key: const ValueKey('bil-smart-plan-previous-week'),
-              onPressed: first <= 0 ? null : () => _mutate(() => _weekOffset--),
-              icon: Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_right_rounded
-                    : Icons.chevron_left_rounded,
+        _panel(
+          artwork: BilSmartPlanArt.schedule,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                key: const ValueKey('bil-smart-plan-previous-week'),
+                onPressed: first <= 0
+                    ? null
+                    : () => _mutate(() => _weekOffset--),
+                icon: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_right_rounded
+                      : Icons.chevron_left_rounded,
+                ),
               ),
-            ),
-            Text(_t('Week ', 'الأسبوع ') + (_weekOffset + 1).toString()),
-            IconButton(
-              key: const ValueKey('bil-smart-plan-next-week'),
-              onPressed: first + 7 >= plan.days.length
-                  ? null
-                  : () => _mutate(() => _weekOffset++),
-              icon: Icon(
-                Directionality.of(context) == TextDirection.rtl
-                    ? Icons.chevron_left_rounded
-                    : Icons.chevron_right_rounded,
+              Text(
+                _t('Week ', 'الأسبوع ') + (_weekOffset + 1).toString(),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
-            ),
-          ],
+              IconButton(
+                key: const ValueKey('bil-smart-plan-next-week'),
+                onPressed: first + 7 >= plan.days.length
+                    ? null
+                    : () => _mutate(() => _weekOffset++),
+                icon: Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left_rounded
+                      : Icons.chevron_right_rounded,
+                ),
+              ),
+            ],
+          ),
         ),
         for (final day in visible)
           _panel(
+            artwork: day.workout == null
+                ? BilSmartPlanArt.recovery
+                : BilSmartPlanArt.forWorkout(day.workout!.templateId),
             child: ListTile(
               contentPadding: EdgeInsets.zero,
               leading: Icon(
@@ -295,7 +323,12 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                     ? Icons.self_improvement_rounded
                     : Icons.fitness_center_outlined,
               ),
-              title: Text(day.date),
+              title: Text(
+                day.date,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
               subtitle: Text(
                 day.workout == null
                     ? _t('Rest / recovery', 'راحة / استشفاء')
@@ -451,13 +484,24 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
           shrinkWrap: true,
           padding: const EdgeInsets.all(20),
           children: [
-            Text(day.date, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            Text(
-              day.workout == null
-                  ? _t('Recovery day', 'يوم راحة')
-                  : _workoutTitle(day.workout!.templateId),
+            BilSmartPlanPanel(
+              artwork: day.workout == null
+                  ? BilSmartPlanArt.recovery
+                  : BilSmartPlanArt.forWorkout(day.workout!.templateId),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: BilSmartPlanSectionTitle(
+                  title: day.workout == null
+                      ? _t('Recovery day', 'يوم راحة')
+                      : _workoutTitle(day.workout!.templateId),
+                  subtitle: day.date,
+                  icon: day.workout == null
+                      ? Icons.self_improvement_rounded
+                      : Icons.fitness_center_rounded,
+                ),
+              ),
             ),
+            const SizedBox(height: 12),
             for (final id in day.workout?.exerciseIds ?? const <String>[])
               ListTile(
                 onTap: () {
@@ -496,185 +540,4 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
       ),
     );
   }
-
-  Widget _progress(BilSmartPlan plan) {
-    final week = BilSmartPlanWeekReview(
-      plan,
-      ref.read(bilSmartPlanClockProvider)(),
-    );
-    final done = plan.days
-        .where((day) => day.workout?.completed == true)
-        .length;
-    final scheduled = plan.days.where((day) => day.workout != null).length;
-    return _panel(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _t('Training progress', 'تقدم التدريب'),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(value: plan.workoutCompletion),
-          const SizedBox(height: 10),
-          Text(
-            '$done / $scheduled${_t(' confirmed sessions', ' جلسات مؤكدة')}',
-          ),
-          const SizedBox(height: 12),
-          Text(
-            _t(
-              'Nutrition suggestions do not count as actual intake. Review the diary for recorded food.',
-              'الوجبات المقترحة لا تُحسب كطعام مأكول. راجع سجل الطعام للاستهلاك الفعلي.',
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            _t('Last seven days', 'آخر سبعة أيام'),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${_t('Confirmed sessions: ', 'جلسات مؤكدة: ')}${week.confirmed} / ${week.scheduled}',
-          ),
-          Text(
-            '${_t('Past sessions awaiting confirmation: ', 'جلسات سابقة دون تأكيد: ')}${week.unconfirmedPast}',
-          ),
-          Text(
-            _t(
-              'An unconfirmed session may simply be unrecorded. Review it before changing your schedule.',
-              'قد تكون الجلسة غير المؤكدة غير مسجلة فقط. راجعها قبل تعديل جدولك.',
-            ),
-          ),
-          if (plan.days.any((day) => day.phase.startsWith('gym-month-'))) ...[
-            const SizedBox(height: 16),
-            ExpansionTile(
-              title: Text(
-                _t('Plan phases and review', 'مراحل الخطة والمراجعة'),
-              ),
-              subtitle: Text(
-                _t(
-                  'Source guidance does not automatically change your approved training frequency.',
-                  'إرشادات المصدر لا تغيّر عدد جلساتك المعتمد تلقائيًا.',
-                ),
-              ),
-              children: [
-                for (final phaseId in plan.days.map((day) => day.phase).toSet())
-                  FutureBuilder<Map<String, String>?>(
-                    future: const BilSmartPlanPrescriptions().phase(phaseId),
-                    builder: (context, snapshot) {
-                      final phase = snapshot.data;
-                      if (phase == null) return const SizedBox.shrink();
-                      final locale = BilLocalePolicy.canonicalTag(
-                        Localizations.localeOf(context),
-                      );
-                      return Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              smartPlanSourcePhaseText(phase['name']!, locale),
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            Text(
-                              smartPlanSourcePhaseText(
-                                phase['progression']!,
-                                locale,
-                              ),
-                            ),
-                            Text(
-                              smartPlanSourcePhaseText(
-                                phase['deload']!,
-                                locale,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-              ],
-            ),
-          ],
-          if (plan.changes.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            ExpansionTile(
-              key: const ValueKey('bil-smart-plan-revision-history'),
-              title: Text(_t('Plan revision history', 'سجل إصدارات الخطة')),
-              subtitle: Text(
-                _t(
-                  'Compare recent confirmed changes. Previous versions are read only.',
-                  'قارن التعديلات المؤكدة الأخيرة. الإصدارات السابقة للقراءة فقط.',
-                ),
-              ),
-              children: [
-                for (final change in plan.changes)
-                  ListTile(
-                    title: Text(
-                      '${change.revision} · ${_changeReason(change.reason)}',
-                    ),
-                    subtitle: Text(BilPlanDate.iso(change.at.toLocal())),
-                    trailing: const Icon(Icons.compare_arrows_rounded),
-                    onTap: () => _showRevision(plan, change.revision),
-                  ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _overview(BilSmartPlan plan) => _panel(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.calendar_month_outlined,
-              color: _smartPlanActionInk(context),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _horizonName(plan.horizon),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    plan.startDate,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _statusName(plan.status),
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: _smartPlanActionInk(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text(_t('A clear plan, one day at a time.', 'خطتك واضحة، يومًا بيوم.')),
-        if (!_catalogBlocked &&
-            (plan.status == BilPlanStatus.draft ||
-                plan.status == BilPlanStatus.paused)) ...[
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            onPressed: _busy ? null : () => _changeStatus(BilPlanStatus.active),
-            icon: const Icon(Icons.check_circle_outline),
-            label: Text(_t('Approve and activate', 'اعتماد وتفعيل')),
-          ),
-        ],
-      ],
-    ),
-  );
 }

@@ -46,6 +46,7 @@ import '../../wellness/services/wellness_content_pack_manager.dart';
 
 part 'bil_smart_plan_actions.dart';
 part 'bil_smart_plan_sections.dart';
+part 'bil_smart_plan_progress_sections.dart';
 part 'bil_smart_plan_privacy_surface.dart';
 part 'bil_smart_plan_creation_sheet.dart';
 part 'bil_smart_plan_session.dart';
@@ -431,7 +432,11 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   @override
   Widget build(BuildContext context) {
     if (widget.privacyOnly) return _privacySurface();
-    final scheme = Theme.of(context).colorScheme;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final tabInk = dark ? BilPearlFinish.darkInk : BilPearlFinish.lightInk;
+    final tabSelectedFill = dark
+        ? const Color(0xFF0B6CB2)
+        : const Color(0xFF07518F);
     final plan = _plan;
     return Scaffold(
       appBar: AppBar(
@@ -527,7 +532,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 760),
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 children: [
                   if (_busy && _reviewDepth == 0) _loadingPanel(),
                   if (_error != null)
@@ -628,10 +633,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                 key: ValueKey('bil-smart-plan-tab-${tab.$1}'),
                                 style: TextButton.styleFrom(
                                   foregroundColor: _tab == tab.$1
-                                      ? scheme.onPrimary
-                                      : scheme.onSurfaceVariant,
+                                      ? Colors.white
+                                      : tabInk,
                                   backgroundColor: _tab == tab.$1
-                                      ? scheme.primary
+                                      ? tabSelectedFill
                                       : Colors.transparent,
                                   minimumSize: const Size(48, 44),
                                   padding: const EdgeInsets.symmetric(
@@ -643,7 +648,18 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                   ),
                                 ),
                                 onPressed: () => setState(() => _tab = tab.$1),
-                                child: Text(tab.$2),
+                                child: Text(
+                                  tab.$2,
+                                  // Keep ink explicit for the real RTL/LTR
+                                  // contrast guideline, not just palette tests.
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: _tab == tab.$1
+                                        ? Colors.white
+                                        : tabInk,
+                                  ),
+                                ),
                               ),
                             ),
                         ],
