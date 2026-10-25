@@ -40,9 +40,7 @@ abstract final class BilNavigationPressStyle {
       overlayColor: foreground.withValues(alpha: .08),
       minimumSize: const Size(48, 48),
       padding: EdgeInsets.zero,
-      shape: const CircleBorder(
-        side: BorderSide(color: Colors.transparent),
-      ),
+      shape: const CircleBorder(side: BorderSide(color: Colors.transparent)),
     );
   }
 

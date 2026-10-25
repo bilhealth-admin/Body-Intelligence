@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 /// responsible for hit testing, activation, navigation, and semantics. The
 /// crystal is visible at rest as well as during and after activation.
 class BilCrystalArrow extends StatelessWidget {
-  const BilCrystalArrow({
-    required this.child,
-    super.key,
-  });
+  const BilCrystalArrow({required this.child, super.key});
 
   static const double diameter = 48;
 
@@ -55,23 +52,26 @@ class BilCrystalArrow extends StatelessWidget {
                   end: Alignment.bottomRight,
                   colors: dark
                       ? [
-                          const Color(0xFF243A50)
-                              .withValues(alpha: solid ? 1 : .86),
-                          const Color(0xFF15283C)
-                              .withValues(alpha: solid ? 1 : .74),
+                          const Color(
+                            0xFF243A50,
+                          ).withValues(alpha: solid ? 1 : .86),
+                          const Color(
+                            0xFF15283C,
+                          ).withValues(alpha: solid ? 1 : .74),
                         ]
                       : [
                           Colors.white.withValues(alpha: solid ? 1 : .88),
-                          const Color(0xFFE4F2FC)
-                              .withValues(alpha: solid ? 1 : .74),
+                          const Color(
+                            0xFFE4F2FC,
+                          ).withValues(alpha: solid ? 1 : .74),
                         ],
                 ),
                 border: Border.all(
                   color: solid
                       ? theme.colorScheme.onSurface
                       : dark
-                          ? Colors.white.withValues(alpha: .24)
-                          : Colors.white.withValues(alpha: .94),
+                      ? Colors.white.withValues(alpha: .24)
+                      : Colors.white.withValues(alpha: .94),
                   width: solid ? 1.5 : .9,
                 ),
               ),
