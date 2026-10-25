@@ -48,6 +48,10 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
         kind: BilFeatureEntryKind.videos,
         child: BilWorkoutRoutinesPage(
           initialItemId: state.uri.queryParameters['item'],
+          // A forged cold/warm deep link must not impersonate a live session.
+          returnToCallerAfterInitialItem:
+              state.uri.queryParameters['returnToSession'] == '1' &&
+              state.extra == true,
         ),
       ),
     ),

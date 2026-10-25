@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/router/bil_safe_return_button.dart';
 import 'connected_health_copy.dart';
 import 'connected_health_model.dart';
 import 'connected_health_daily_history.dart';
@@ -64,7 +65,12 @@ class ConnectedHealthSignalDetailPage extends ConsumerWidget {
         )
         .toList();
     return Scaffold(
-      appBar: AppBar(title: Text(context.strings.text(title))),
+      appBar: AppBar(
+        leading: const BilSafeReturnButton(
+          fallbackLocation: '/connected-health',
+        ),
+        title: Text(context.strings.text(title)),
+      ),
       body: health.isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
