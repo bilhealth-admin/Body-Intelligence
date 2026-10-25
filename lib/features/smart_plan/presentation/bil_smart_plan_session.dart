@@ -609,40 +609,70 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                                             ),
                                       ),
                                     ),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: [
-                                        OutlinedButton(
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor:
-                                                _smartPlanActionInk(context),
-                                          ),
-                                          onPressed: _step == 0
-                                              ? null
-                                              : () => setState(() => _step--),
-                                          child: Text(
-                                            t(
-                                              'Previous exercise',
-                                              'التمرين السابق',
-                                            ),
-                                          ),
-                                        ),
-                                        if (_step + 1 < items.length)
-                                          FilledButton(
-                                            key: const ValueKey(
-                                              'bil-smart-plan-session-next',
-                                            ),
-                                            onPressed: () =>
-                                                setState(() => _step++),
-                                            child: Text(
-                                              t(
-                                                'Next exercise',
-                                                'التمرين التالي',
+                                    IntrinsicHeight(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              style: OutlinedButton.styleFrom(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 12,
+                                                    ),
+                                                minimumSize: const Size(0, 48),
+                                                foregroundColor:
+                                                    _smartPlanActionInk(
+                                                      context,
+                                                    ),
+                                              ),
+                                              onPressed: _step == 0
+                                                  ? null
+                                                  : () =>
+                                                        setState(() => _step--),
+                                              child: Text(
+                                                t(
+                                                  'Previous exercise',
+                                                  'التمرين السابق',
+                                                ),
+                                                textAlign: TextAlign.center,
                                               ),
                                             ),
                                           ),
-                                      ],
+                                          if (_step + 1 < items.length) ...[
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: FilledButton(
+                                                style: FilledButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 12,
+                                                      ),
+                                                  minimumSize: const Size(
+                                                    0,
+                                                    48,
+                                                  ),
+                                                ),
+                                                key: const ValueKey(
+                                                  'bil-smart-plan-session-next',
+                                                ),
+                                                onPressed: () =>
+                                                    setState(() => _step++),
+                                                child: Text(
+                                                  t(
+                                                    'Next exercise',
+                                                    'التمرين التالي',
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),

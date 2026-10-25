@@ -780,6 +780,7 @@ void main() {
           before.encode(),
         );
         if (_capturePlanGoldens) {
+          await settleVisualAssetImages(tester);
           await expectLater(
             find.byType(BilSmartPlanPage),
             matchesGoldenFile('goldens/smart_plan_pending_$locale.png'),
@@ -1031,6 +1032,7 @@ void main() {
         );
         expect(tester.takeException(), isNull);
         if (_capturePlanGoldens) {
+          await settleVisualAssetImages(tester);
           await expectLater(
             find.byType(MaterialApp),
             matchesGoldenFile('goldens/smart_plan_${locale}_report.png'),

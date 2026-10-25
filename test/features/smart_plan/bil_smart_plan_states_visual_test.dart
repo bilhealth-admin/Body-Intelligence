@@ -215,6 +215,7 @@ void main() {
             }
             expect(tester.takeException(), isNull);
             final capture = find.byKey(const ValueKey('state-capture'));
+            await settleVisualAssetImages(tester);
             if (Platform.environment['BIL_CAPTURE_SMART_PLAN_GOLDENS'] != '0') {
               final boundary = tester.renderObject<RenderRepaintBoundary>(
                 capture,

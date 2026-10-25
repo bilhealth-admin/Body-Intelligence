@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
+import '../../../app/theme/bil_flagship_tokens.dart';
 
 /// Scoped My Plan artwork: these assets are already bundled with BIL.
 /// Covers are atmospheric category art, never a claim that a particular
@@ -29,7 +30,7 @@ abstract final class BilSmartPlanArt {
 }
 
 /// The same pearl radius, stroke and shadow as Coach Overview.
-/// Optional artwork is muted with an opaque, directional scrim and omitted
+/// Optional artwork is muted with an opaque scrim and omitted
 /// entirely for high-contrast users. No network image, BackdropFilter,
 /// expensive per-row blur, interaction interception, or extra semantics.
 class BilSmartPlanPanel extends StatelessWidget {
@@ -68,7 +69,10 @@ class BilSmartPlanPanel extends StatelessWidget {
                           child: Image.asset(
                             artwork!,
                             fit: BoxFit.cover,
-                            alignment: AlignmentDirectional.centerEnd,
+                            // Photography has a fixed focal point. Mirroring
+                            // the crop in RTL can show an empty window instead
+                            // of the subject; only the content layout follows RTL.
+                            alignment: Alignment.centerRight,
                             cacheWidth: 560,
                             filterQuality: FilterQuality.low,
                             errorBuilder: (context, error, stack) =>
@@ -83,8 +87,8 @@ class BilSmartPlanPanel extends StatelessWidget {
                       child: DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: AlignmentDirectional.centerStart,
-                            end: AlignmentDirectional.centerEnd,
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                             stops: const [0, .6, 1],
                             colors: [
                               scrim.withValues(alpha: .98),
@@ -137,7 +141,13 @@ class BilSmartPlanSectionTitle extends StatelessWidget {
             color: scheme.primary.withValues(alpha: .10),
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Icon(icon, size: 21, color: scheme.primary),
+          child: Icon(
+            icon,
+            size: 21,
+            color: scheme.brightness == Brightness.light
+                ? BilFlagshipTokens.navy800
+                : scheme.primary,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
