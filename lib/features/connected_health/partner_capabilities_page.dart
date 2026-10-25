@@ -28,7 +28,9 @@ class PartnerCapabilitiesPage extends ConsumerWidget {
     final launcher = ref.read(partnerSetupLauncherProvider);
     return Scaffold(
       appBar: AppBar(
-        leading: const BilSafeReturnButton(fallbackLocation: '/connected-health'),
+        leading: const BilSafeReturnButton(
+          fallbackLocation: '/connected-health',
+        ),
         title: Text(_text(context, 'Connection capabilities')),
       ),
       body: ListView(
