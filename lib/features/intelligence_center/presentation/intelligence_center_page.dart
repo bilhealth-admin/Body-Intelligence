@@ -164,6 +164,7 @@ part 'intelligence_conversation_voice_transcript.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_media_confirmation.dart';
 part 'intelligence_query_flow.dart';
+part 'intelligence_query_guard_flow.dart';
 part 'intelligence_smart_plan_flow.dart';
 part 'intelligence_query_retry.dart';
 part 'intelligence_query_decision.dart';
@@ -328,6 +329,10 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void initState() {
     super.initState();
+    if (widget.startWithVisionCapture ||
+        (widget.initialBarcode?.trim().isNotEmpty ?? false)) {
+      _referenceOverview = false;
+    }
     entryWelcomeTimer = Timer(bilFeatureEntryDuration, () {
       if (mounted) setState(() => entryWelcomeVisible = false);
     });
@@ -401,9 +406,13 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   void didUpdateWidget(covariant IntelligenceCenterPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialBarcode != widget.initialBarcode) {
+      if (widget.initialBarcode?.trim().isNotEmpty == true) {
+        _updateState(() => _referenceOverview = false);
+      }
       _applyInitialBarcode(widget.initialBarcode);
     }
     if (!oldWidget.startWithVisionCapture && widget.startWithVisionCapture) {
+      _updateState(() => _referenceOverview = false);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _analyzeFoodImageInChat();
       });
