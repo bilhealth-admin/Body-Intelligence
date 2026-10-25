@@ -44,13 +44,9 @@ abstract final class BilNavigationPressStyle {
     );
   }
 
-  /// A back chevron points toward the leading edge in both text directions.
-  /// This helper is not used by the protected purchase CTA.
-  static Widget backIcon(BuildContext context) => BilCrystalArrow(
-    child: Icon(
-      Directionality.of(context) == TextDirection.rtl
-          ? Icons.chevron_right_rounded
-          : Icons.chevron_left_rounded,
-    ),
-  );
+  /// Flutter mirrors this glyph once in RTL (matchTextDirection: true).
+  /// Do not swap to chevron_right in RTL: that would mirror it twice.
+  /// The protected purchase CTA does not use this back icon helper.
+  static Widget backIcon(BuildContext context) =>
+      const BilCrystalArrow(child: Icon(Icons.chevron_left_rounded));
 }

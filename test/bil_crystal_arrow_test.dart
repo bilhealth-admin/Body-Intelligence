@@ -202,7 +202,7 @@ void main() {
   });
 
   for (final rtl in [false, true]) {
-    testWidgets('backIcon keeps a visible directional crystal rtl=$rtl', (
+    testWidgets('backIcon uses one SDK RTL mirror and keeps crystal rtl=$rtl', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -226,9 +226,11 @@ void main() {
         matching: find.byType(Icon),
       );
       expect(glyph, findsOneWidget);
+      expect(tester.widget<Icon>(glyph).icon, Icons.chevron_left_rounded);
+      expect(tester.widget<Icon>(glyph).icon!.matchTextDirection, isTrue);
       expect(
-        tester.widget<Icon>(glyph).icon,
-        rtl ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+        Directionality.of(tester.element(glyph)),
+        rtl ? TextDirection.rtl : TextDirection.ltr,
       );
       expect(find.byKey(_bubble), findsOneWidget);
       expect(tester.getSize(find.byKey(_bubble)), const Size(48, 48));
