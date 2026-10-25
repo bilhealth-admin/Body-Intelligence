@@ -727,7 +727,10 @@ void main() {
           );
           await tester.pump(const Duration(milliseconds: 30));
         }
-        expect(find.byKey(const Key('coach-reference-workspace')), findsOneWidget);
+        expect(
+          find.byKey(const Key('coach-reference-workspace')),
+          findsOneWidget,
+        );
         expect(chatEntry, findsOneWidget);
         await tester.ensureVisible(chatEntry);
         expect(chatEntry.hitTestable(), findsOneWidget);
