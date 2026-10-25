@@ -13,6 +13,7 @@ import { validateCoachFoodBoundaries } from "./coach_food_safety.ts";
 import { validateCoachHealthBoundaries } from "./coach_health_safety.ts";
 import { verifiedWeightProposalCopy } from "./coach_verified_weight_proposal.ts";
 import { verifiedWorkoutReviewCopy } from "./coach_workout_review_copy.ts";
+import { correctWeightRecordAbsence } from "./coach_weight_truth.ts";
 import { decodeCoachToolArguments } from "./coach_tool_arguments.ts";
 import {
   disclosedGeminiEndpoint,
@@ -1318,6 +1319,7 @@ export async function handler(
     let provider = providerCall.provider;
     const servedModel = providerCall.model;
     failureStage = "gemini_response_validation";
+    let qualityRecovery: "verified_workout_review" | "weight_record_truth" | null = null;
     const decode = (data: Record<string, unknown>) => {
       const candidate = requireSafeGeminiCandidate(data);
       const content = candidate.content as Record<string, unknown> | undefined;
@@ -1326,7 +1328,8 @@ export async function handler(
       );
       let preliminary: Record<string, unknown> | null = null;
       try {
-        preliminary = JSON.parse(text);
+        preliminary = JSON.parse(text.trim().replace(/^```(?:json)?\s*/i, "")
+          .replace(/\s*```$/, ""));
       } catch {
         // The existing strict parser owns malformed-response diagnostics.
       }
@@ -1338,6 +1341,33 @@ export async function handler(
         const prose = `${preliminary.reply}\n${preliminary.spoken_reply}`;
         validateCoachHealthBoundaries(prose, messages, context);
         validateCoachFoodBoundaries(prose, messages, context);
+        const correction = correctWeightRecordAbsence({
+          reply: preliminary.reply,
+          spoken_reply: preliminary.spoken_reply,
+        }, context, locale);
+        if (correction !== null) {
+          if (!preliminary.reply.trim() || preliminary.reply.length > 8000) {
+            throw new Error("malformed_response");
+          }
+          if (!spokenWithinComfortableTurn(preliminary.spoken_reply) ||
+            /[\r\n*_#]/.test(preliminary.spoken_reply)) {
+            throw new Error("malformed_spoken_response");
+          }
+          if (typeof preliminary.requires_health_citation !== "boolean") {
+            throw new Error("malformed_health_citation_classification");
+          }
+          validateCoachAnswerQuality({
+            reply: preliminary.reply,
+            spoken_reply: preliminary.spoken_reply,
+            proposed_actions: [],
+          }, messages, context);
+          // Discard all provider prose and proposals. Validate app-owned facts
+          // through the unchanged strict parser and final safety gates. No
+          // citation-repair request or additional credit reservation is made.
+          qualityRecovery = "weight_record_truth";
+          return parseModelJson(JSON.stringify(correction), false,
+            citationCatalogVersion, body.smart_plan_tools_version === 1 ? 1 : 0);
+        }
         failureStage = "gemini_response_validation";
       }
       return parseModelJson(
@@ -1348,7 +1378,6 @@ export async function handler(
       );
     };
     let result: ReturnType<typeof parseModelJson>;
-    let qualityRecovery: "verified_workout_review" | null = null;
     try {
       result = decode(provider.data);
     } catch (error) {
@@ -1431,9 +1460,11 @@ export async function handler(
     }
     // Cloud proposals are not execution receipts. Drop any Smart Plan tool
     // that the member did not directly request, regardless of model wording.
-    result.proposed_actions = filterSmartPlanActionsForTurn(
-      messages, result.proposed_actions, smartPlanActions,
-    );
+    if (qualityRecovery !== "verified_workout_review") {
+      result.proposed_actions = filterSmartPlanActionsForTurn(
+        messages, result.proposed_actions, smartPlanActions,
+      );
+    }
     failureStage = "answer_quality_validation";
     try {
       validateCoachAnswerQuality(result, messages, context);

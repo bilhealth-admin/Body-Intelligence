@@ -1,10 +1,11 @@
 import { coachTurnFocus } from "./coach_conversation_scope.ts";
+import type { CoachTurn } from "./coach_conversation_scope.ts";
 
 export type CoachThinkingLevel = "LOW" | "MEDIUM" | "HIGH";
 
 /** Routing metadata only. This never grants a tool permission or a write. */
 export function coachReasoningFor(
-  messages: ReadonlyArray<{ role: string; content: string }>,
+  messages: ReadonlyArray<CoachTurn>,
 ): { level: CoachThinkingLevel; task: "read" | "analysis" | "planning" } {
   const normalize = (value: string) =>
     value.toLowerCase()
