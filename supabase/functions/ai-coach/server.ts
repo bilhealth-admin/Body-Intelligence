@@ -4,6 +4,10 @@ import {
   coachReasoningFor,
   independentGeminiFallback,
 } from "./coach_reasoning.ts";
+import {
+  coachTurnFocusInstruction,
+  filterSmartPlanActionsForTurn,
+} from "./coach_conversation_scope.ts";
 import { isPureCoachRecordInteraction, validateCoachAnswerQuality } from "./coach_answer_quality.ts";
 import { validateCoachFoodBoundaries } from "./coach_food_safety.ts";
 import { validateCoachHealthBoundaries } from "./coach_health_safety.ts";
@@ -1283,6 +1287,7 @@ export async function handler(
     const model = modelFor();
     const providerContext = context;
     const outputLanguage = languageInstruction(locale);
+    const focusInstruction = coachTurnFocusInstruction(messages);
     const healthCitationContract =
       `For any substantive health, nutrition, hydration, sleep, weight, pregnancy, BMI, waist, or physical-activity recommendation, distinguish general education from the member's own records, name the supporting organization inline, and return the exact supporting allow-listed IDs in citations. Only make numeric health claims supported by BIL's approved in-app reference catalog. Never invent a citation, study, URL, dose, threshold, or reference. If the approved catalog does not support a requested numeric claim, say that you do not have a verified in-app source and recommend checking with a qualified clinician. The app renders the validated citations directly below this answer. The evidence JSON field remains limited to the user's bounded context fields and must never be used as a substitute for scientific citations. ${
         healthCitationCatalogContract(citationCatalogVersion)
@@ -1294,7 +1299,7 @@ export async function handler(
         JSON.stringify(providerContext)
       }</context>`;
     const toolArgumentContract = toolContractForCapability(body.smart_plan_tools_version);
-    const system = `${toolArgumentContract} ${healthCitationContract} ${systemCore}`;
+    const system = `${toolArgumentContract} ${healthCitationContract} ${systemCore} ${focusInstruction}`;
     const contents = messages.map((message) => ({
       role: message.role === "assistant" ? "model" : "user",
       parts: [{ text: message.content }],
@@ -1424,6 +1429,11 @@ export async function handler(
         result.proposed_actions.push(recoveredAction);
       }
     }
+    // Cloud proposals are not execution receipts. Drop any Smart Plan tool
+    // that the member did not directly request, regardless of model wording.
+    result.proposed_actions = filterSmartPlanActionsForTurn(
+      messages, result.proposed_actions, smartPlanActions,
+    );
     failureStage = "answer_quality_validation";
     try {
       validateCoachAnswerQuality(result, messages, context);
