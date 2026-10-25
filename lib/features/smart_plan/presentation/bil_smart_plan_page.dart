@@ -39,6 +39,7 @@ import '../domain/bil_smart_plan_review.dart';
 import '../services/bil_smart_plan_catalog.dart';
 import '../services/bil_smart_plan_prescriptions.dart';
 import 'bil_smart_plan_panel.dart';
+import 'bil_smart_plan_load_failure.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/bil_smart_plan_phase_copy.dart';
 import '../../wellness/domain/wellness_content_pack.dart';
@@ -139,6 +140,37 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
 
   String _failureText() {
     final code = _error ?? '';
+    if (code == 'sign_in_required') {
+      return _t(
+        'Sign in to access your saved plan. No plan data has been deleted.',
+        'سجّل الدخول لعرض خطتك المحفوظة. لم تُحذف بيانات الخطة.',
+      );
+    }
+    if (code == 'smart_plan_owner_mismatch' ||
+        code == 'smart_plan_owner_changed') {
+      return _t(
+        'The active account changed. Reopen My Plan to view the correct account.',
+        'تغيّر الحساب النشط. افتح خطتي مجددًا لعرض بيانات الحساب الصحيح.',
+      );
+    }
+    if (code == 'smart_plan_storage_unavailable') {
+      return _t(
+        'Your saved plan could not be read from this device. Retry; an existing plan has not been overwritten.',
+        'تعذّرت قراءة خطتك المحفوظة من هذا الجهاز. أعد المحاولة؛ لم تُستبدل الخطة الموجودة.',
+      );
+    }
+    if (code == 'smart_plan_saved_data_invalid') {
+      return _t(
+        'The saved plan data could not be opened safely. Review the issue before changing your plan.',
+        'تعذّر فتح بيانات الخطة المحفوظة بأمان. راجع المشكلة قبل تعديل الخطة.',
+      );
+    }
+    if (code == 'smart_plan_catalog_unavailable') {
+      return _t(
+        'Your plan is saved, but its supporting information could not be checked. Retry before editing it.',
+        'خطتك محفوظة، لكن تعذّر التحقق من بياناتها المساندة. أعد المحاولة قبل تعديلها.',
+      );
+    }
     if (code.contains('revision_conflict') ||
         code.contains('sync_conflict') ||
         code.contains('during_sync')) {
@@ -278,7 +310,8 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   Future<void> _load() async {
     final generation = ++_loadGeneration;
     final owner = _owner;
-    if (owner == null) {
+    final currentLocalOwner = ref.read(preferencesRepositoryProvider).localOwnerId;
+    if (owner == null || currentLocalOwner != owner) {
       if (mounted) {
         setState(() {
           _busy = false;
@@ -288,8 +321,18 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
       }
       return;
     }
+    if (mounted) {
+      setState(() {
+        _busy = true;
+        _error = null;
+      });
+    }
+    BilSmartPlan? readPlan;
+    var planRead = false;
     try {
       final plan = await _repository.readFor(owner);
+      readPlan = plan;
+      planRead = true;
       if (!mounted || _owner != owner || generation != _loadGeneration) return;
       var catalogBlocked = false;
       if (plan != null) {
@@ -349,11 +392,34 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
         });
       }
     } on Object catch (error) {
-      if (!mounted || _owner != owner || generation != _loadGeneration) return;
+      if (!mounted ||
+          _owner != owner ||
+          generation != _loadGeneration ||
+          ref.read(preferencesRepositoryProvider).localOwnerId != owner) {
+        return;
+      }
+      // Sanitize the failure: do not show raw repository/exception contents.
+      // A successful local read may still fail later during catalog/dietary
+      // verification. In that case keep the recovered plan in memory, while
+      // withholding actions until a fresh verification succeeds.
+      final failureCode = classifySmartPlanLoadFailure(
+        error,
+        duringCatalog: planRead,
+      );
+      debugPrint('BIL My Plan recoverable load failure: $failureCode');
       setState(() {
-        _plan = null;
+        if (failureCode == 'smart_plan_owner_mismatch' ||
+            failureCode == 'smart_plan_owner_changed') {
+          _plan = null;
+          _catalogBlocked = true;
+        } else {
+          if (readPlan != null) _plan = readPlan;
+          // Retain the previous same-owner plan on a transient storage error,
+          // but do not act on a copy that has not just passed validation.
+          if (_plan != null) _catalogBlocked = true;
+        }
         _busy = false;
-        _error = error.toString();
+        _error = failureCode;
       });
     }
   }
@@ -593,10 +659,16 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                     if (_catalogBlocked)
                       _panel(
                         child: Text(
-                          _t(
-                            'Your saved plan needs review because the exercise catalog or dietary restrictions changed. Its contents will not be suggested until reviewed. You can export or delete it from Plan options.',
-                            'تحتاج خطتك المحفوظة للمراجعة بسبب تغير كتالوج التمارين أو قيود الطعام. لن تُعرض مقترحاتها قبل المراجعة. يمكنك تصديرها أو حذفها من خيارات الخطة.',
-                          ),
+                          _error == 'smart_plan_catalog_unavailable' ||
+                                  _error == 'smart_plan_storage_unavailable'
+                              ? _t(
+                                  'Your previous plan is shown read-only until its data can be verified. Retry to restore full access.',
+                                  'تظهر خطتك السابقة للقراءة فقط حتى التحقق من بياناتها. أعد المحاولة لاستعادة الوصول الكامل.',
+                                )
+                              : _t(
+                                  'Your saved plan needs review because the exercise catalog or dietary restrictions changed. Its contents will not be suggested until reviewed. You can export or delete it from Plan options.',
+                                  'تحتاج خطتك المحفوظة للمراجعة بسبب تغير كتالوج التمارين أو قيود الطعام. لن تُعرض مقترحاتها قبل المراجعة. يمكنك تصديرها أو حذفها من خيارات الخطة.',
+                                ),
                           key: const ValueKey('bil-smart-plan-catalog-review'),
                         ),
                       ),
