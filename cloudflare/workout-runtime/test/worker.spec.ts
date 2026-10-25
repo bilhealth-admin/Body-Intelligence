@@ -231,6 +231,37 @@ describe("workout runtime Worker", () => {
     expect(conditionalHead.status).toBe(304);
   });
 
+  it("fails closed for the exact Premium curl media key if R2 supplies HTML", async () => {
+    const bicepsCurlKey =
+      "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-biceps-curl-technique.mp4";
+    expect(approvedObjects.keys).toContain(bicepsCurlKey);
+    expect(freePreviews.videoObjectKeys).not.toContain(bicepsCurlKey);
+    mockAuthenticated(true);
+    await env.WORKOUTS.put(bicepsCurlKey, "<html>wrong object metadata</html>", {
+      httpMetadata: { contentType: "text/html" },
+    });
+    for (const request of [
+      incoming(`/v2/objects/${bicepsCurlKey}`, {
+        method: "HEAD",
+        headers: { authorization: `Bearer ${hs256Token}` },
+      }),
+      incoming(`/v2/objects/${bicepsCurlKey}`, {
+        headers: {
+          authorization: `Bearer ${hs256Token}`,
+          range: "bytes=0-9",
+        },
+      }),
+      incoming(`/v2/objects/${bicepsCurlKey}`, {
+        headers: { authorization: `Bearer ${hs256Token}` },
+      }),
+    ]) {
+      const response = await dispatch(request);
+      expect(response.status).toBe(502);
+      expect(response.headers.get("content-type")).toContain("application/json");
+      expect(response.headers.get("cache-control")).toBe("no-store");
+    }
+  });
+
   it("returns 403 when authentication succeeds without a premium grant", async () => {
     mockAuthenticated(false);
     const response = await dispatch(
