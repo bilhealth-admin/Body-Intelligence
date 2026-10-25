@@ -90,6 +90,14 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
 
   void _leaveMealDetail() {
     if (widget.focusMealEntry) {
+      if (widget.initialAction == 'food') {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/meal-planner');
+        }
+        return;
+      }
       context.go(widget.returnPath ?? '/daily-log');
       return;
     }
@@ -133,6 +141,17 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     initialActionInFlight = action;
     try {
       switch (action) {
+        case 'food':
+          // Review/log is a search-and-review flow, not a write operation.
+          _updateState(() {
+            selectedFood = null;
+            mealSearchActive = true;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted || !mealSearchActive) return;
+            _focusMealEntry();
+            _openFoodSearchAfterBuild();
+          });
         case 'barcode':
           await _scanBarcode();
         case 'voice':
