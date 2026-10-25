@@ -369,5 +369,4 @@ void main() {
     expect(find.byKey(_bubble), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
-
 }
