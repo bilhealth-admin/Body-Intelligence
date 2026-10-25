@@ -33,35 +33,45 @@ void main() {
     expect(navigationSource, contains("context.go('/meal-planner')"));
   });
 
-  test('load and generation failures expose recovery without partial plan writes', () {
-    expect(plannerSource, contains("_loadError = 'loadFailed'"));
-    expect(plannerSource, contains("_saveError = 'generateFailed'"));
-    expect(plannerSource, contains("if (_loadError != null)"));
-    expect(plannerSource, contains("if (_saveError != null)"));
-    expect(plannerSource, contains('repository.mutate('));
-    expect(plannerSource, contains('remove: [_groceryChecksKey]'));
-    expect(
-      plannerSource,
-      contains('A failed write leaves the previous saved week intact.'),
-    );
-  });
+  test(
+    'load and generation failures expose recovery without partial plan writes',
+    () {
+      expect(plannerSource, contains("_loadError = 'loadFailed'"));
+      expect(plannerSource, contains("_saveError = 'generateFailed'"));
+      expect(plannerSource, contains("if (_loadError != null)"));
+      expect(plannerSource, contains("if (_saveError != null)"));
+      expect(plannerSource, contains('repository.mutate('));
+      expect(plannerSource, contains('remove: [_groceryChecksKey]'));
+      expect(
+        plannerSource,
+        contains('A failed write leaves the previous saved week intact.'),
+      );
+    },
+  );
 
-  test('planner tabs scroll and plan provenance is explicit in five locales', () {
-    expect(plannerSource, contains('isScrollable: true'));
-    expect(plannerSource, contains('tabAlignment: TabAlignment.start'));
-    for (final locale in const ['en', 'ar', 'fr', 'es', 'tr']) {
-      expect(copySource, contains("'$locale': {"), reason: locale);
-    }
-    for (final key in const [
-      'sourceLabel',
-      'sourceBody',
-      'retry',
-      'loadFailed',
-      'generateFailed',
-    ]) {
-      expect(RegExp("'$key':").allMatches(copySource).length, 5, reason: key);
-    }
-    expect(copySource, contains('neither plan is automatically merged'));
-    expect(copySource, contains('لا تُدمج الخطتان تلقائيًا'));
-  });
+  test(
+    'planner tabs scroll and plan provenance is explicit in five locales',
+    () {
+      expect(plannerSource, contains('isScrollable: true'));
+      expect(plannerSource, contains('tabAlignment: TabAlignment.start'));
+      for (final locale in const ['en', 'ar', 'fr', 'es', 'tr']) {
+        expect(copySource, contains("'$locale': {"), reason: locale);
+      }
+      for (final key in const [
+        'sourceLabel',
+        'sourceBody',
+        'retry',
+        'loadFailed',
+        'generateFailed',
+      ]) {
+        expect(
+          RegExp("'$key':").allMatches(copySource).length,
+          5,
+          reason: key,
+        );
+      }
+      expect(copySource, contains('neither plan is automatically merged'));
+      expect(copySource, contains('لا تُدمج الخطتان تلقائيًا'));
+    },
+  );
 }
