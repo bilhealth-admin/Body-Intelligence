@@ -629,7 +629,9 @@ extension _BilSmartPlanActions on _BilSmartPlanPageState {
       if (mounted) {
         // Only a live Smart Plan session skips the discovery library on Back.
         // Standalone catalog links retain their normal browsing behavior.
-        await context.push(returnToSession ? '$route&returnToSession=1' : route);
+        await context.push(
+          returnToSession ? '$route&returnToSession=1' : route,
+        );
       }
     } on Object catch (error) {
       if (mounted) _mutate(() => _error = error.toString());
