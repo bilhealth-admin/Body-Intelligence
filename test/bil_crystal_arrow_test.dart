@@ -181,6 +181,7 @@ void main() {
       find.byKey(const Key('semantic-crystal-arrow')),
     );
     expect(node.flagsCollection.isButton, isTrue);
+    debugPrint('CRYSTAL_SEMANTICS_NODE: ${node.toStringDeep()}');
     expect(node.label, 'Go forward');
 
     focus.requestFocus();
