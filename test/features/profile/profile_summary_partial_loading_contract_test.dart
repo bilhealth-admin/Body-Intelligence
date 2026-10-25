@@ -15,9 +15,14 @@ void main() {
     expect(source, contains('profileFriendsCountProvider'));
     expect(source, contains('profileAuthIdentityProvider'));
     expect(source, contains('client.auth.currentUser?.id != owner'));
-    expect(source, isNot(contains('body: const Center(child: CircularProgressIndicator())')));
-    expect(source, isNot(contains('if ((profileState.isLoading && !profileState.hasValue) ||')));
-    expect(source, isNot(contains('if (profileState.hasError ||\n        weightsState.hasError ||')));
+    const oldSpinner = 'body: const Center(child: CircularProgressIndicator())';
+    const oldLoadingGate =
+        'if ((profileState.isLoading && !profileState.hasValue) ||';
+    const oldErrorGate =
+        'if (profileState.hasError ||\\n        weightsState.hasError ||';
+    expect(source, isNot(contains(oldSpinner)));
+    expect(source, isNot(contains(oldLoadingGate)));
+    expect(source, isNot(contains(oldErrorGate)));
   });
 
   test('My Plan preserves same-owner visible plan on transient read failure', () {
@@ -29,7 +34,13 @@ void main() {
     expect(source, contains('if (readPlan != null) _plan = readPlan;'));
     expect(source, contains('if (_plan != null) _catalogBlocked = true;'));
     expect(source, contains("failureCode == 'smart_plan_owner_mismatch'"));
-    expect(source, contains('ref.read(preferencesRepositoryProvider).localOwnerId != owner'));
-    expect(source, isNot(contains('_plan = null;\n        _busy = false;\n        _error = error.toString();')));
+    const ownerGuard =
+        'ref.read(preferencesRepositoryProvider).localOwnerId != owner';
+    expect(source, contains(ownerGuard));
+    const oldDestructiveCatch =
+        '_plan = null;\\n'
+        '        _busy = false;\\n'
+        '        _error = error.toString();';
+    expect(source, isNot(contains(oldDestructiveCatch)));
   });
 }

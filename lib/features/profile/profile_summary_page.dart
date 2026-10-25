@@ -1,4 +1,3 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -19,8 +18,8 @@ import '../commerce/providers/commerce_providers.dart';
 import '../community/data/community_repository.dart';
 import '../settings/reference_settings_copy.dart';
 import '../weight/providers/weight_provider.dart';
-import 'providers/user_profile_provider.dart';
 import 'providers/profile_auth_identity_provider.dart';
+import 'providers/user_profile_provider.dart';
 import 'profile_summary_locale_copy.dart';
 import '../../shared/widgets/bil_account_avatar.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
@@ -105,8 +104,10 @@ class ProfileSummaryPage extends ConsumerWidget {
         'kg': '\u0643\u062c\u0645',
         'lb': '\u0631\u0637\u0644',
         'Loading profile…': 'جارٍ تحميل الملف الشخصي…',
-        'Loading profile is taking longer than expected.': 'تحميل الملف الشخصي يستغرق وقتًا أطول من المعتاد.',
-        'Some profile details are unavailable.': 'بعض تفاصيل الملف غير متاحة حاليًا.',
+        'Loading profile is taking longer than expected.':
+            'تحميل الملف الشخصي يستغرق وقتًا أطول من المعتاد.',
+        'Some profile details are unavailable.':
+            'بعض تفاصيل الملف غير متاحة حاليًا.',
       },
     };
     final authored = clean[code]?[key];
@@ -175,7 +176,11 @@ class ProfileSummaryPage extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  _Avatar(photo: photo, networkUrl: photoUrl, ownerId: avatar.owner),
+                  _Avatar(
+                    photo: photo,
+                    networkUrl: photoUrl,
+                    ownerId: avatar.owner,
+                  ),
                   const SizedBox(width: 20),
                   Expanded(
                     child: Column(
