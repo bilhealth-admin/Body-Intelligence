@@ -3,6 +3,7 @@ import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../smart_plan/services/bil_smart_plan_coach.dart';
 import '../services/coach_request_intent.dart';
+import '../services/coach_weight_history_readout.dart';
 import '../../smart_plan/data/bil_smart_plan_repository.dart';
 import '../../smart_plan/domain/bil_smart_plan.dart';
 import '../../smart_plan/services/bil_smart_plan_catalog.dart';
