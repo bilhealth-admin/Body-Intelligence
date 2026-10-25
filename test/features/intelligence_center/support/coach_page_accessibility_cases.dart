@@ -86,6 +86,7 @@ void registerCoachAccessibilityCases() {
         await tester.pumpAndSettle();
         router.go('/intelligence-center');
         await tester.pumpAndSettle();
+        await openCoachConversationFromOverview(tester);
         await _settleBoundedBrief(tester);
         expectSingleIntroduction();
         await _unmount(tester);
@@ -167,6 +168,7 @@ void registerCoachAccessibilityCases() {
     await tester.pumpAndSettle();
     router.go('/intelligence-center');
     await tester.pumpAndSettle();
+    await openCoachConversationFromOverview(tester);
     expect(find.textContaining('Good morning'), findsNothing);
     expect(
       find.byKey(const ValueKey('coach-message-text-fixture-7')).hitTestable(),

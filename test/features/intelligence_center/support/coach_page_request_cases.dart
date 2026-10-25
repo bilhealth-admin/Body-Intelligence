@@ -428,7 +428,9 @@ void registerCoachRequestCases() {
 
     final initialAssistantCount = assistantMessages().length;
 
-    await _send(tester, gateway, question: 'Analyze my weight this week');
+    // Weight history now resolves locally. This scenario must exercise two
+    // actual cloud turns, so retain its service-failure assertions there.
+    await _send(tester, gateway, question: 'Explain balanced nutrition');
     gateway.replies[0].complete(failure);
     await tester.pumpAndSettle();
     final afterFirst = assistantMessages();

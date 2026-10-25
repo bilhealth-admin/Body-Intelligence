@@ -25,6 +25,7 @@ Future<void> openCoachConversationFromOverview(WidgetTester tester) async {
   final open = find.byKey(const Key('coach-workspace-open-chat'));
   expect(open, findsOneWidget);
   await tester.ensureVisible(open);
+  await tester.pumpAndSettle();
   await tester.tap(open);
   await tester.pumpAndSettle();
   expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);

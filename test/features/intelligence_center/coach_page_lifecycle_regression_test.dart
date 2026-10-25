@@ -171,6 +171,9 @@ Future<GoRouter> _mount(
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+    // Drift schedules stream-cache cleanup with Timer.run; a microtask-only
+    // pump cannot drain it when an earlier assertion prevented normal unmount.
+    await tester.pump(Duration.zero);
   });
   final fixtureTheme =
       (dark
