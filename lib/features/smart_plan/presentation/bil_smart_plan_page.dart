@@ -570,7 +570,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                 if (plan.status == BilPlanStatus.active)
                   PopupMenuItem(
                     enabled: !readOnly,
-                  value: 'pause',
+                    value: 'pause',
                     child: Text(_t('Pause plan', 'إيقاف مؤقت')),
                   ),
                 PopupMenuItem(

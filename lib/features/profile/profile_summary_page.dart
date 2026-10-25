@@ -317,9 +317,7 @@ class ProfileSummaryPage extends ConsumerWidget {
                 child: TextButton.icon(
                   onPressed: () =>
                       ref.invalidate(verifiedSubscriptionStateProvider),
-                  icon: const BilGlassPressFeedback(
-                    child: Icon(Icons.refresh_rounded),
-                  ),
+                  icon: const Icon(Icons.refresh_rounded),
                   label: Text(context.strings.text('Retry subscription check')),
                 ),
               ),
@@ -332,9 +330,7 @@ class ProfileSummaryPage extends ConsumerWidget {
                       child: TextButton.icon(
                         onPressed: () =>
                             ref.invalidate(verifiedSubscriptionStateProvider),
-                        icon: const BilGlassPressFeedback(
-                          child: Icon(Icons.refresh_rounded),
-                        ),
+                        icon: const Icon(Icons.refresh_rounded),
                         label: Text(
                           context.strings.text('Retry subscription check'),
                         ),
