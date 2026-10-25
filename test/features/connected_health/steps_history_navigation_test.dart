@@ -26,8 +26,14 @@ void main() {
       File('lib/app/router/app_community_routes.dart').readAsStringSync(),
     ].join('\n');
 
-    expect(settings, contains("context.push('/connected-health/steps/history')"));
-    expect(settings, isNot(contains("context.go('/connected-health/steps/history')")));
+    expect(
+      settings,
+      contains("context.push('/connected-health/steps/history')"),
+    );
+    expect(
+      settings,
+      isNot(contains("context.go('/connected-health/steps/history')")),
+    );
     expect(
       dashboard,
       contains("context.push('/connected-health/steps/history')"),
@@ -43,7 +49,10 @@ void main() {
   testWidgets('Steps history Back restores the calling screen after push', (
     tester,
   ) async {
-    await _pumpHistoryRouter(tester, initialLocation: '/connected-health/steps');
+    await _pumpHistoryRouter(
+      tester,
+      initialLocation: '/connected-health/steps',
+    );
     await tester.tap(find.text('Open step history'));
     await tester.pumpAndSettle();
     expect(find.byType(StepsHistoryPage), findsOneWidget);
