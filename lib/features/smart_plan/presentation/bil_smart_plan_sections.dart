@@ -197,6 +197,7 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                 const SizedBox(height: 12),
                 for (final meal in day.meals)
                   ListTile(
+                    key: ValueKey('bil-smart-plan-meal-${meal.slot.name}'),
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.restaurant_menu_rounded),
                     onTap: _busy ? null : () => _reviewMeal(day, meal),

@@ -896,15 +896,16 @@ void main() {
         );
         await repo.save(before, expectedRevision: initial.revision);
         await pump(tester, locale, 320, 2);
-        final mealIcons = find.byIcon(Icons.restaurant_menu_rounded);
-        // Every suggested meal has this icon; target the exact row we tap.
+        final targetSlot = before.days.first.meals.first.slot.name;
+        // A stable row key lets scrollUntilVisible build the offscreen tile.
+        // A .first finder throws before the 320px/200% scroll can start.
+        final meal = find.byKey(ValueKey('bil-smart-plan-meal-$targetSlot'));
         await tester.scrollUntilVisible(
-          mealIcons.first,
+          meal,
           170,
           scrollable: find.byType(Scrollable).first,
         );
         await tester.pumpAndSettle();
-        final meal = mealIcons.first;
         expect(meal, findsOneWidget);
         await tester.tap(meal);
         final schedule = find.byKey(
