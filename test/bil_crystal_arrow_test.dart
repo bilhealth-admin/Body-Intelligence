@@ -211,9 +211,7 @@ void main() {
             textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
             child: Builder(
               builder: (context) => Scaffold(
-                body: Center(
-                  child: BilNavigationPressStyle.backIcon(context),
-                ),
+                body: Center(child: BilNavigationPressStyle.backIcon(context)),
               ),
             ),
           ),
