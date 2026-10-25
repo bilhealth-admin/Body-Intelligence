@@ -185,4 +185,5 @@ extension _IntelligenceQueryGuardFlow on _IntelligenceCenterPageState {
       confidence: 1,
       modality: message.modality,
     );
-  }}
+  }
+}

@@ -689,8 +689,6 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       }
     }
   }
-
 }
-
 
 enum _RemoteAiConsentChoice { granted, declined, failed, alreadyOpen }
