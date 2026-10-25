@@ -1123,10 +1123,11 @@
       "passed": 164,
       "skipped": 0,
       "scope": "Typed real handler with isolated external boundaries; exact-SHA CI passed, no Production/live-Gemini proof",
-      "log_name": "cloud-exact-commit-tests-v2.log",
-      "log_sha256": "43797ae557505d940a1f64f89bf4fb0bdcc83ee646a319f63362cf4ab0001393",
+      "log_name": "cloud-exact-ci-40187927852.log",
+      "log_sha256": "bdf6ea6c36ccb56425ed1b75dc989877d4b890f40e8b489b168558bd40a865fd",
       "ci_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40187927852",
-      "final_integrated_acceptance": false
+      "final_integrated_acceptance": false,
+      "log_kind": "Actual exact-SHA GitHub job log; not the earlier local working-tree run"
     },
     "video_source": {
       "branch": "codex/bil39-video-source-completion-20261025",
@@ -1134,10 +1135,11 @@
       "passed": 68,
       "skipped": 0,
       "scope": "Isolated Worker source/HTML and protected MP4 MIME/authorization tests; exact-SHA CI passed; not deployed staging",
-      "log_name": "video-mime-full-isolated.log",
-      "log_sha256": "93af1de7bfdbebfd64c987399dd30016f74c07bb9f111698b3c95caf7e29f0ef",
+      "log_name": "video-exact-ci-40190311537.log",
+      "log_sha256": "111edd41ad4134f41de5907c966623c6eaec9e628b3f1cd19ae9f348342dd363",
       "ci_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40190311537",
-      "final_integrated_acceptance": false
+      "final_integrated_acceptance": false,
+      "log_kind": "Actual exact-SHA GitHub job log; not the earlier local working-tree run"
     }
   },
   "hard_blockers": [
