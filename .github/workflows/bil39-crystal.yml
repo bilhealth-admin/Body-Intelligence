@@ -12,6 +12,7 @@ on:
       - test/bil_crystal_calendar_video_test.dart
       - test/bil_crystal_purchase_cta_isolation_test.dart
       - tool/audit_bil_crystal_arrows.py
+      - tool/test_audit_bil_crystal_arrows.py
   workflow_dispatch:
 
 permissions:
@@ -65,6 +66,8 @@ jobs:
         run: flutter pub get
       - name: Analyze full Dart source
         run: flutter analyze --no-pub
+      - name: Verify scanner includes directional asset references and native images
+        run: python3 -m unittest tool/test_audit_bil_crystal_arrows.py
       - name: Generate occurrence candidate inventory (read-only)
         run: python3 tool/audit_bil_crystal_arrows.py --root . --output build/bil39_crystal_arrow_candidates.csv
       - name: Crystal + legacy-payment-isolation + back navigation widgets

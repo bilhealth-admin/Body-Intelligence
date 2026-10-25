@@ -12,8 +12,13 @@ import re
 from collections import Counter
 from pathlib import Path
 
-SOURCE_DIRS = ("lib", "ios", "android", "macos", "windows", "linux", "test", "integration_test")
+SOURCE_DIRS = ("lib", "ios", "android", "macos", "windows", "linux", "test", "integration_test", "assets")
 EXTENSIONS = {".dart", ".swift", ".kt", ".java", ".m", ".mm", ".xml", ".storyboard", ".xib"}
+ASSET_EXTENSIONS = {".svg", ".png", ".webp", ".jpg", ".jpeg", ".gif", ".pdf", ".json", ".avif"}
+ASSET_NAME_PATTERN = re.compile(
+    r"(?:arrow|chevron|caret|back|forward|expand|collapse|next|previous|dropdown|disclosure)",
+    re.IGNORECASE,
+)
 SKIP_DIRS = {
     ".dart_tool", ".git", "build", "DerivedData", "Pods", "Carthage",
     "node_modules", ".gradle", "Flutter", "GeneratedPluginRegistrant",
@@ -28,6 +33,10 @@ PATTERNS = (
     )),
     ("SF_SYMBOL", re.compile(
         r"(?:systemName\s*:\s*|Image\s*\(\s*systemName\s*:\s*)[\"'](?:arrow|chevron|caret|return|arrowshape|line\.3\.horizontal)[^\"']*[\"']",
+        re.IGNORECASE,
+    )),
+    ("ASSET_REFERENCE", re.compile(
+        r"\b(?:assets?/|(?:\.\./)*assets?/)[\w./-]*(?:arrow|chevron|caret|back|forward|expand|collapse|next|previous)[\w./-]*",
         re.IGNORECASE,
     )),
     ("ANDROID_RESOURCE", re.compile(
@@ -50,13 +59,32 @@ def language_for(path: Path) -> str:
     }.get(path.suffix.lower(), "unknown")
 
 
+def directional_asset(path: Path, root: Path) -> bool:
+    """Find named Flutter/iOS/Android assets without decoding binary media."""
+    parts = tuple(part.lower() for part in path.relative_to(root).parts)
+    in_assets = (
+        parts[0] == "assets"
+        or any(
+            part.endswith(".xcassets") or part.startswith(("drawable", "mipmap"))
+            for part in parts[:-1]
+        )
+    )
+    return (
+        in_assets
+        and path.suffix.lower() in ASSET_EXTENSIONS
+        and ASSET_NAME_PATTERN.search(path.stem) is not None
+    )
+
+
 def source_files(root: Path):
     for directory in SOURCE_DIRS:
         base = root / directory
         if not base.exists():
             continue
         for path in base.rglob("*"):
-            if not path.is_file() or path.suffix.lower() not in EXTENSIONS:
+            if not path.is_file():
+                continue
+            if path.suffix.lower() not in EXTENSIONS and not directional_asset(path, root):
                 continue
             relative_parts = path.relative_to(root).parts
             if any(part in SKIP_DIRS for part in relative_parts):
@@ -83,6 +111,23 @@ def main() -> int:
         scanned_files += 1
         relative = path.relative_to(root).as_posix()
         protected_file = relative == PROTECTED_COMMERCE_PATH
+        if directional_asset(path, root):
+            counts["ASSET_FILENAME"] += 1
+            rows.append({
+                "file": relative,
+                "line": 0,
+                "language": "asset",
+                "candidate_types": "ASSET_FILENAME",
+                "source_excerpt": path.name,
+                "protected_payment_file": "NO",
+                "manual_review_required": "YES",
+                "verified_crystal_state": "UNVERIFIED",
+                "click_back_and_rtl_ltr_proof": "UNVERIFIED",
+            })
+            # This is a source-name candidate only, never visual/runtime proof.
+            # Do not try to decode PNG/WebP/SVG/asset-catalog bytes as text.
+            if path.suffix.lower() not in EXTENSIONS:
+                continue
         try:
             lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
         except OSError:
