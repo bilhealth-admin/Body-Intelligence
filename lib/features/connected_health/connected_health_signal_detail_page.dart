@@ -66,7 +66,9 @@ class ConnectedHealthSignalDetailPage extends ConsumerWidget {
         .toList();
     return Scaffold(
       appBar: AppBar(
-        leading: const BilSafeReturnButton(fallbackLocation: '/connected-health'),
+        leading: const BilSafeReturnButton(
+          fallbackLocation: '/connected-health',
+        ),
         title: Text(context.strings.text(title)),
       ),
       body: health.isLoading
