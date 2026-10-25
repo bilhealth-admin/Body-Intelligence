@@ -73,10 +73,7 @@ void main() {
       'Review my nutrition',
     ]) {
       expect(
-        resolveCoachWeightHistoryFollowUp(
-          'شهر',
-          previousUserRequest: prior,
-        ),
+        resolveCoachWeightHistoryFollowUp('شهر', previousUserRequest: prior),
         'شهر',
       );
     }
