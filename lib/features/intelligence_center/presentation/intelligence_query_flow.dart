@@ -270,6 +270,40 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         final healthContext = await healthContextFuture;
         final coachContext = await coachContextFuture;
         if (!mounted || generation != requestGeneration) return;
+        if (isCoachWeightHistoryReadRequest(text) &&
+            coachContext.weightReadStatus != CoachWeightReadStatus.verified) {
+          // A repository timeout or missing analytics permission never proves
+          // that the diary is empty. Do not bill for a speculative AI answer.
+          localHealthHandled = true;
+          final copy = coachContext.weightReadStatus ==
+                  CoachWeightReadStatus.withheld
+              ? intelligenceTextFor(
+                  questionLocale,
+                  'Weight history is not available to Coach under your current context-sharing settings. No records were changed.',
+                  'سجل الوزن غير متاح للمدرب وفق إعدادات مشاركة السياق الحالية. لم يتغير أي سجل.',
+                )
+              : intelligenceTextFor(
+                  questionLocale,
+                  'I could not verify your weight history right now. This does not mean that you have no records. Please retry the read.',
+                  'تعذّر التحقق من سجل أوزانك الآن، وهذا لا يعني عدم وجود سجلات. يرجى إعادة محاولة القراءة.',
+                );
+          final notice = IntelligenceMessage(
+            id: 'coach-weight-read-unavailable-${DateTime.now().microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.coach,
+            text: copy,
+            createdAt: DateTime.now(),
+            evidence: const ['local-weight-context-read-status'],
+            confidence: 1,
+          );
+          _updateState(() {
+            messages.add(notice);
+            animatedResponseIds.add(notice.id);
+          });
+          _scrollToLatest();
+          unawaited(_saveConversation());
+          return;
+        }
         final activeEngine = IntelligenceCenterEngine(
           localApi: ModelBackedLocalCoachApi(
             gateway: bindCoachCloudRequest(
