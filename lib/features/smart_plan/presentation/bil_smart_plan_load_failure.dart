@@ -1,3 +1,10 @@
+/// Write actions require a present plan with verified backing data.
+/// A catalog validation block is read-only even when no exception is shown.
+bool shouldBlockUnverifiedSmartPlanWrites({
+  required bool hasPlan,
+  required bool catalogBlocked,
+}) => hasPlan && catalogBlocked;
+
 /// Classifies loading failures without leaking storage details or identifiers.
 ///
 /// Stage separation matters: reading the local plan is independent from

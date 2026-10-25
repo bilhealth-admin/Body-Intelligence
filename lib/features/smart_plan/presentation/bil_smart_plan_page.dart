@@ -114,8 +114,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
 
   /// Keep a recovered same-owner plan visible, but prohibit writes until the
   /// source and supporting catalog pass an explicit fresh read.
-  bool get _unverifiedPlanReadOnly =>
-      _plan != null && _catalogBlocked && _error != null;
+  bool get _unverifiedPlanReadOnly => shouldBlockUnverifiedSmartPlanWrites(
+    hasPlan: _plan != null,
+    catalogBlocked: _catalogBlocked,
+  );
 
   Future<T?> _reviewSurface<T>(Future<T?> Function() show) async {
     setState(() => _reviewDepth++);
@@ -241,6 +243,8 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
     if (mounted) {
       setState(() {
         _busy = true;
+        // A previous snapshot is not writable while a fresh read is pending.
+        if (_plan != null) _catalogBlocked = true;
         _error = null;
       });
     }

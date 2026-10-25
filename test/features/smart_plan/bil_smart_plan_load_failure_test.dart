@@ -116,4 +116,28 @@ void main() {
     expect(copy, isNot(contains('owner-A')));
     expect(copy, isNot(contains('synthetic-secret')));
   });
+
+  test('catalog failures and in-flight retries remain read-only', () {
+    expect(
+      shouldBlockUnverifiedSmartPlanWrites(
+        hasPlan: true,
+        catalogBlocked: true,
+      ),
+      isTrue,
+    );
+    expect(
+      shouldBlockUnverifiedSmartPlanWrites(
+        hasPlan: true,
+        catalogBlocked: false,
+      ),
+      isFalse,
+    );
+    expect(
+      shouldBlockUnverifiedSmartPlanWrites(
+        hasPlan: false,
+        catalogBlocked: true,
+      ),
+      isFalse,
+    );
+  });
 }

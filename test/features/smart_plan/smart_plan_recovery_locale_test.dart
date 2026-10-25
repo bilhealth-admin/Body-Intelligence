@@ -4,25 +4,27 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_smart_plan_r
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('BIL-09 recovery copy covers all 25 locales with no English fallback', () {
+  test('BIL-09 recovery copy covers all 25 locales', () {
     expect(SmartPlanRecoveryRuntimeCopy.sources, hasLength(6));
     expect(SmartPlanRecoveryRuntimeCopy.balanced, isTrue);
     for (final source in SmartPlanRecoveryRuntimeCopy.sources) {
       for (final tag in BilLocalePolicy.productionTags) {
         final native = SmartPlanRecoveryRuntimeCopy.resolve(source, tag);
-        expect(native, isNotNull, reason: '$tag: $source');
-        expect(native!.trim(), isNotEmpty, reason: '$tag: $source');
-        expect(RuntimeCopy.resolve(source, tag), native, reason: '$tag: $source');
+        final context = '$tag: $source';
+        expect(native, isNotNull, reason: context);
+        expect(native!.trim(), isNotEmpty, reason: context);
+        expect(RuntimeCopy.resolve(source, tag), native, reason: context);
         if (tag != 'en') {
-          expect(native, isNot(source), reason: '$tag: $source');
+          expect(native, isNot(source), reason: context);
         }
       }
     }
   });
 
-  test('BIL-09 unlisted recovery keys and locales stay unrecognized', () {
-    expect(SmartPlanRecoveryRuntimeCopy.resolve('not a recovery message', 'fr'), isNull);
-    expect(SmartPlanRecoveryRuntimeCopy.resolve(
-      SmartPlanRecoveryRuntimeCopy.sources.first, 'not-a-locale'), isNull);
+  test('BIL-09 unknown recovery sources and locales do not resolve', () {
+    final unknown = SmartPlanRecoveryRuntimeCopy.resolve('unknown', 'fr');
+    expect(unknown, isNull);
+    final source = SmartPlanRecoveryRuntimeCopy.sources.first;
+    expect(SmartPlanRecoveryRuntimeCopy.resolve(source, 'xx'), isNull);
   });
 }
