@@ -34,15 +34,11 @@ void main() {
             verifiedEntitlementOwnerIdProvider.overrideWithValue(
               'synthetic-owner',
             ),
-            userProfileProvider.overrideWith(
-              (ref) => Stream.value(null),
-            ),
+            userProfileProvider.overrideWith((ref) => Stream.value(null)),
             displayNameProvider.overrideWith(
               (ref) => Stream.value('Synthetic member'),
             ),
-            weightHistoryProvider.overrideWith(
-              (ref) => const Stream.empty(),
-            ),
+            weightHistoryProvider.overrideWith((ref) => const Stream.empty()),
             measurementSystemProvider.overrideWith(
               (ref) => Stream.value(MeasurementSystem.metric),
             ),
@@ -50,15 +46,11 @@ void main() {
               (ref) => friendsPending.future,
             ),
             profileMemberSinceProvider.overrideWithValue(null),
-            profilePhotoProvider.overrideWith(
-              (ref) => Stream.value(null),
-            ),
+            profilePhotoProvider.overrideWith((ref) => Stream.value(null)),
             profilePhotoMetadataProvider.overrideWith(
               (ref) => Stream.value(<String, String>{}),
             ),
-            profilePhotoPublicUrlProvider.overrideWith(
-              (ref) async => null,
-            ),
+            profilePhotoPublicUrlProvider.overrideWith((ref) async => null),
             verifiedSubscriptionAccessProvider.overrideWithValue(
               AsyncData(
                 SubscriptionState(

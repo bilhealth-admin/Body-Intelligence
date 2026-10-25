@@ -310,8 +310,9 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   Future<void> _load() async {
     final generation = ++_loadGeneration;
     final owner = _owner;
-    final currentLocalOwner =
-        ref.read(preferencesRepositoryProvider).localOwnerId;
+    final currentLocalOwner = ref
+        .read(preferencesRepositoryProvider)
+        .localOwnerId;
     if (owner == null || currentLocalOwner != owner) {
       if (mounted) {
         setState(() {

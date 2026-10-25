@@ -22,15 +22,22 @@ void main() {
     tester,
   ) async {
     var retries = 0;
-    await tester.pumpWidget(
-      notice(failed: false, onRetry: () => retries++),
-    );
+    await tester.pumpWidget(notice(failed: false, onRetry: () => retries++));
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.byKey(const ValueKey('bil-profile-primary-retry')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('bil-profile-primary-retry')),
+      findsNothing,
+    );
 
     await tester.pump(const Duration(seconds: 13));
-    expect(find.text('Loading is taking longer than expected.'), findsOneWidget);
-    expect(find.byKey(const ValueKey('bil-profile-primary-retry')), findsOneWidget);
+    expect(
+      find.text('Loading is taking longer than expected.'),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('bil-profile-primary-retry')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('bil-profile-primary-retry')));
     await tester.pump();
@@ -45,13 +52,19 @@ void main() {
     var retries = 0;
     await tester.pumpWidget(notice(failed: true, onRetry: () => retries++));
     expect(find.text('Profile data could not be loaded.'), findsOneWidget);
-    expect(find.byKey(const ValueKey('bil-profile-primary-retry')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('bil-profile-primary-retry')),
+      findsOneWidget,
+    );
 
     await tester.tap(find.byKey(const ValueKey('bil-profile-primary-retry')));
     expect(retries, 1);
     await tester.pumpWidget(notice(failed: false, onRetry: () => retries++));
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     await tester.pump(const Duration(seconds: 13));
-    expect(find.byKey(const ValueKey('bil-profile-primary-retry')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('bil-profile-primary-retry')),
+      findsOneWidget,
+    );
   });
 }
