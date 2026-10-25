@@ -18,6 +18,7 @@ import {
 } from "./recipe-thumbnails";
 import approvedObjects from "../../../artifacts/workout_media/cloudflare_runtime_v2/protected_object_keys_v2.json";
 import freePreviews from "../../../artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json";
+import { workoutSourceInformation } from "./source-pages";
 
 const protectedObjectPrefix = "/v2/objects/";
 const videoKey = /^workouts\/v1\/(?:home|gym-six-month)\/movements\/[a-z0-9]+(?:-[a-z0-9]+)*\.mp4$/;
@@ -103,6 +104,8 @@ async function handleRequest(
         allow: "GET, HEAD, OPTIONS",
       });
     }
+    const sourceInformation = workoutSourceInformation(url.pathname, request.method);
+    if (sourceInformation !== null) return sourceInformation;
     const publicManifest = resolvePublicManifest(url.pathname, env);
     if (publicManifest !== null) {
       return serveR2(

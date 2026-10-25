@@ -1,0 +1,51 @@
+{
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-24",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "name": "bil39-local-parent",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [],
+  "vars": {
+    "ALLOWED_ORIGIN": "https://bil39-local-ui.invalid",
+    "PUBLIC_MANIFEST_KEY": "workouts/v2/catalog/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json",
+    "SUPABASE_URL": "https://bil39-local-parent-auth.invalid",
+    "SUPABASE_PUBLISHABLE_KEY": "bil39-local-parent-publishable"
+  },
+  "r2_buckets": [
+    {
+      "binding": "WORKOUTS",
+      "bucket_name": "bil39-local-parent-workouts"
+    },
+    {
+      "binding": "RECIPES",
+      "bucket_name": "bil39-local-parent-recipes"
+    }
+  ],
+  "env": {
+    "staging": {
+      "name": "bil39-local-staging",
+      "workers_dev": true,
+      "preview_urls": false,
+      "routes": [],
+      "vars": {
+        "ALLOWED_ORIGIN": "https://bil39-local-ui.invalid",
+        "PUBLIC_MANIFEST_KEY": "workouts/v2/catalog/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json",
+        "SUPABASE_URL": "https://bil39-local-staging-auth.invalid",
+        "SUPABASE_PUBLISHABLE_KEY": "bil39-local-staging-publishable"
+      },
+      "r2_buckets": [
+        {
+          "binding": "WORKOUTS",
+          "bucket_name": "bil39-local-staging-workouts"
+        },
+        {
+          "binding": "RECIPES",
+          "bucket_name": "bil39-local-staging-recipes"
+        }
+      ]
+    }
+  }
+}

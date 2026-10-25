@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:staging-isolation": "node --test scripts/verify-staging-isolation.test.mjs",
     "types": "wrangler types",
-    "types:check": "wrangler types --check"
+    "types:check": "wrangler types --check",
+    "test:bil39-isolated": "node scripts/verify-bil39-local-qa.mjs && vitest run --config vitest.bil39.config.ts"
   },
   "dependencies": {
     "jose": "6.2.10"
