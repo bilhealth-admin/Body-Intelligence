@@ -48,6 +48,8 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
         kind: BilFeatureEntryKind.videos,
         child: BilWorkoutRoutinesPage(
           initialItemId: state.uri.queryParameters['item'],
+          returnToCallerAfterInitialItem:
+              state.uri.queryParameters['returnToSession'] == '1',
         ),
       ),
     ),
