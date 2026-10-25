@@ -22,6 +22,25 @@ class CoachLanguageResolver {
   }) {
     final value = input.trim();
     final uiTag = _canonicalTag(uiLocale);
+    // An explicit response-language preference is not a setting for the
+    // application's UI. Recognize colloquial chat requests before using the
+    // interface language as fallback (e.g. "can u talking en lang").
+    final chatPreference = value.toLowerCase().replaceAll(
+      RegExp('[أإآٱ]'), 'ا',
+    );
+    if (RegExp(
+      r'\b(?:reply|respond|answer|speak|talk|talking)\b.*\b(?:english|en lang)\b|'
+      r'\b(?:in english|english please)\b|'
+      r'(?:رد|احكي|تكلم|اتكلم|جاوب).*(?:بالانجليزي|انجليزي)',
+    ).hasMatch(chatPreference)) {
+      return const CoachLanguageResolution(languageTag: 'en', detected: true);
+    }
+    if (RegExp(
+      r'\b(?:reply|respond|answer|speak|talk)\b.*\b(?:arabic)\b|'
+      r'(?:رد|احكي|تكلم|اتكلم|جاوب).*(?:بالعربي|بالعربية|عربي)',
+    ).hasMatch(chatPreference)) {
+      return const CoachLanguageResolution(languageTag: 'ar', detected: true);
+    }
     final spokenTag = _supportedLanguageHint(detectedLanguageTag);
     if (spokenTag != null) {
       return CoachLanguageResolution(languageTag: spokenTag, detected: true);
