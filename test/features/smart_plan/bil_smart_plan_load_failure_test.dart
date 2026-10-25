@@ -111,36 +111,36 @@ void main() {
       'write failed /synthetic/owner-A/token=synthetic-secret',
     );
     expect(classifySmartPlanWriteFailure(fault), 'arbitrary_failure');
+
+    final revisionFault = StateError('smart_plan_revision_conflict');
     expect(
-      classifySmartPlanWriteFailure(
-        StateError('smart_plan_revision_conflict'),
-      ),
+      classifySmartPlanWriteFailure(revisionFault),
       'smart_plan_revision_conflict',
     );
+    final ownerFault = StateError('smart_plan_owner_changed');
     expect(
-      classifySmartPlanWriteFailure(
-        StateError('smart_plan_owner_changed'),
-      ),
+      classifySmartPlanWriteFailure(ownerFault),
       'smart_plan_owner_changed',
     );
-    for (final code in [
+
+    const knownDomainCodes = <String>{
       'no_verified_workout',
       'sync_conflict',
       'requires_review',
-    ]) {
+    };
+    for (final code in knownDomainCodes) {
       expect(classifySmartPlanWriteFailure(StateError(code)), code);
     }
+
+    final partialMatchFault = StateError('sync_conflict details=owner-A');
     expect(
-      classifySmartPlanWriteFailure(
-        StateError('sync_conflict details=owner-A'),
-      ),
+      classifySmartPlanWriteFailure(partialMatchFault),
       'arbitrary_failure',
     );
+
     String en(String english, String arabic) => english;
-    final copy = smartPlanLoadFailureMessage(
-      classifySmartPlanWriteFailure(fault),
-      en,
-    );
+    final reason = classifySmartPlanWriteFailure(fault);
+    final copy = smartPlanLoadFailureMessage(reason, en);
     expect(copy, 'Action not completed. Please review saved data and retry.');
     expect(copy, isNot(contains('owner-A')));
     expect(copy, isNot(contains('synthetic-secret')));
