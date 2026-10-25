@@ -74,9 +74,7 @@ Future<GoRouter> _pumpRoutes(
         path: '/goals',
         builder: (context, state) => Scaffold(
           appBar: AppBar(
-            leading: const BilSafeReturnButton(
-              fallbackLocation: '/dashboard',
-            ),
+            leading: const BilSafeReturnButton(fallbackLocation: '/dashboard'),
             title: const Text('Goals fixture'),
           ),
           body: const Center(child: Text('Goals content')),
