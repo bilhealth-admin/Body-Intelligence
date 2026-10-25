@@ -112,6 +112,11 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
 
   String _t(String en, String ar) => _smartPlanText(context, en, ar);
 
+  /// Keep a recovered same-owner plan visible, but prohibit writes until the
+  /// source and supporting catalog pass an explicit fresh read.
+  bool get _unverifiedPlanReadOnly =>
+      _plan != null && _catalogBlocked && _error != null;
+
   Future<T?> _reviewSurface<T>(Future<T?> Function() show) async {
     setState(() => _reviewDepth++);
     try {
@@ -244,6 +249,9 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   }
 
   void _checkAccess() {
+    if (_unverifiedPlanReadOnly) {
+      throw StateError('smart_plan_catalog_unavailable');
+    }
     if (widget.privacyOnly) {
       throw StateError('smart_plan_verified_subscription_required');
     }
@@ -466,6 +474,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   }
 
   void _selectMenu(String action) {
+    if (_unverifiedPlanReadOnly &&
+        !const {'refresh', 'export', 'report'}.contains(action)) {
+      return;
+    }
     switch (action) {
       case 'new-draft':
         unawaited(_createPlan());
@@ -501,6 +513,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
     if (widget.privacyOnly) return _privacySurface();
     final scheme = Theme.of(context).colorScheme;
     final plan = _plan;
+    final readOnly = _unverifiedPlanReadOnly;
     return Scaffold(
       appBar: AppBar(
         title: Text(_t('My Plan', 'خطتي')),
@@ -514,22 +527,26 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
             itemBuilder: (_) => [
               if (plan != null) ...[
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'new-draft',
                   child: Text(_t('Create another draft', 'إنشاء مسودة أخرى')),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'review-draft',
                   child: Text(
                     _t('Review pending draft', 'مراجعة المسودة المعلقة'),
                   ),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'approved-plan',
                   child: Text(
                     _t('Current saved plan', 'الخطة المحفوظة الحالية'),
                   ),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'previous-plans',
                   child: Text(
                     _t(
@@ -539,10 +556,12 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                   ),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'memory',
                   child: Text(_t('Coach plan memory', 'ذاكرة الخطة للمدرب')),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'extended-memory',
                   child: Text(
                     _t('Coach context details', 'تفاصيل سياق المدرب'),
@@ -550,7 +569,8 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                 ),
                 if (plan.status == BilPlanStatus.active)
                   PopupMenuItem(
-                    value: 'pause',
+                    enabled: !readOnly,
+                  value: 'pause',
                     child: Text(_t('Pause plan', 'إيقاف مؤقت')),
                   ),
                 PopupMenuItem(
@@ -563,6 +583,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                 ),
                 const PopupMenuDivider(),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'delete',
                   child: Text(_t('Delete plan', 'حذف الخطة')),
                 ),
@@ -572,10 +593,12 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                 'BIL_SMART_PLAN_CLOUD_ENABLED',
               )) ...[
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'sync',
                   child: Text(_t('Sync plan', 'مزامنة الخطة')),
                 ),
                 PopupMenuItem(
+                  enabled: !readOnly,
                   value: 'revoke',
                   child: Text(_t('Stop backup', 'إيقاف النسخ')),
                 ),
