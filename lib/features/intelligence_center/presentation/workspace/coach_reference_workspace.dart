@@ -184,7 +184,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                               paidLabel
                                   ? BilStoreCopy.text(
                                       Localizations.localeOf(context).toLanguageTag(),
-                                      access!.plan == CommercePlan.premiumAiCoach
+                                      access.plan == CommercePlan.premiumAiCoach
                                           ? 'premium_ai_coach'
                                           : 'premium',
                                     )
