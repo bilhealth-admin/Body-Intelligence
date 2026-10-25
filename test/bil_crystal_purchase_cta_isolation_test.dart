@@ -81,11 +81,34 @@ void main() {
 
         final cta = find.byKey(_purchaseKey);
         expect(cta, findsOneWidget);
-        final arrow = find.descendant(
+        // This legacy component preserves arrow_forward_rounded in its
+        // source, but BilGlassPressFeedback renders chevron_right_rounded.
+        // Check BOTH contracts rather than searching for a non-rendered Icon.
+        final legacyFeedback = find.descendant(
           of: cta,
-          matching: find.byIcon(Icons.arrow_forward_rounded),
+          matching: find.byType(BilGlassPressFeedback),
+        );
+        expect(legacyFeedback, findsOneWidget);
+        final sourceIcon = tester.widget<BilGlassPressFeedback>(legacyFeedback).child;
+        expect(sourceIcon, isA<Icon>());
+        final original = sourceIcon as Icon;
+        expect(original.icon, Icons.arrow_forward_rounded);
+        expect(original.color, const Color(0xFF06121D));
+        expect(original.size, 20);
+
+        final arrow = find.descendant(
+          of: legacyFeedback,
+          matching: find.byIcon(Icons.chevron_right_rounded),
         );
         expect(arrow, findsOneWidget);
+        expect(
+          find.descendant(
+            of: cta,
+            matching: find.byIcon(Icons.arrow_forward_rounded),
+          ),
+          findsNothing,
+          reason: 'Legacy glyph modernizer must remain active for checkout.',
+        );
         final icon = tester.widget<Icon>(arrow);
         expect(icon.color, const Color(0xFF06121D));
         expect(icon.size, 20);
