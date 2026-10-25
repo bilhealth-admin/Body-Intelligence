@@ -394,6 +394,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<MealPlanDiet>(
+          key: ValueKey<MealPlanDiet>(_preferences.diet),
           initialValue: _preferences.diet,
           decoration: InputDecoration(labelText: copy.text('diet')),
           items: MealPlanDiet.values
@@ -421,6 +422,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<MealPlanBudget>(
+          key: ValueKey<MealPlanBudget>(_preferences.budget),
           initialValue: _preferences.budget,
           decoration: InputDecoration(labelText: copy.text('budget')),
           items: MealPlanBudget.values

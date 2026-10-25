@@ -317,6 +317,67 @@ void main() {
     },
   );
 
+  testWidgets(
+    'retry reload updates visible Preferences dropdowns without stale selections',
+    (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      final repo = _ControlledRepository(db);
+      addTearDown(() => _dispose(tester, db));
+      await _seed(repo, 'lentil_soup');
+      await _pumpPlanner(tester, repo);
+
+      // Another session changes both planner preferences and grocery checks.
+      // The first grocery toggle must reject its stale snapshot, then retry
+      // must update even dropdowns that were already mounted.
+      await repo.set(
+        'mealPlanner.preferences.v1',
+        jsonEncode(
+          const MealPlanPreferences(
+            diet: MealPlanDiet.highProtein,
+            budget: MealPlanBudget.value,
+          ).toJson(),
+        ),
+      );
+      await repo.set(_checksKey, '["Carrot"]');
+
+      await tester.tap(find.text('Grocery list'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(CheckboxListTile, 'Carrot'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('could not load'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Preferences'));
+      await tester.tap(find.text('Preferences'));
+      await tester.pumpAndSettle();
+      final dietField = find.byType(DropdownButtonFormField<MealPlanDiet>);
+      final budgetField = find.byType(DropdownButtonFormField<MealPlanBudget>);
+      expect(
+        tester.state<FormFieldState<MealPlanDiet>>(dietField).value,
+        MealPlanDiet.balanced,
+      );
+      expect(
+        tester.state<FormFieldState<MealPlanBudget>>(budgetField).value,
+        MealPlanBudget.standard,
+      );
+
+      // No spinner/remount of TabBarView when the existing week is present:
+      // stale FormFieldState.value would remain visible without ValueKey.
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.state<FormFieldState<MealPlanDiet>>(dietField).value,
+        MealPlanDiet.highProtein,
+      );
+      expect(
+        tester.state<FormFieldState<MealPlanBudget>>(budgetField).value,
+        MealPlanBudget.value,
+      );
+      expect(repo.attemptedMutations, 1);
+      expect(await repo.get(_checksKey), '["Carrot"]');
+      expect(await db.select(db.meals).get(), isEmpty);
+    },
+  );
+
   testWidgets('A to B to A delayed reads never render the other account plan', (
     tester,
   ) async {
