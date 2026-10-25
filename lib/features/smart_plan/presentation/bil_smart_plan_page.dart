@@ -432,7 +432,6 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   @override
   Widget build(BuildContext context) {
     if (widget.privacyOnly) return _privacySurface();
-    final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final tabInk = dark ? BilPearlFinish.darkInk : BilPearlFinish.lightInk;
     final tabSelectedFill = dark
