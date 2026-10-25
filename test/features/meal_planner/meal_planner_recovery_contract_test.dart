@@ -3,16 +3,14 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final plannerSource = [
-    'meal_planner_page.dart',
-    'meal_planner_persistence.dart',
-  ]
-      .map(
-        (name) => File(
-          'lib/features/meal_planner/presentation/$name',
-        ).readAsStringSync(),
-      )
-      .join('\n');
+  final plannerSource =
+      ['meal_planner_page.dart', 'meal_planner_persistence.dart']
+          .map(
+            (name) => File(
+              'lib/features/meal_planner/presentation/$name',
+            ).readAsStringSync(),
+          )
+          .join('\n');
   final copySource = File(
     'lib/features/meal_planner/presentation/meal_planner_copy.dart',
   ).readAsStringSync();
@@ -50,7 +48,7 @@ void main() {
       expect(plannerSource, contains('repository.mutateIfUnchanged('));
       expect(plannerSource, contains('isCurrent: () => _isCurrent'));
       expect(plannerSource, contains('_readSnapshot == null'));
-      expect(plannerSource, contains('remove: [_groceryChecksKey]'));
+      expect(plannerSource, contains('remove: [_MealPlannerPageState._groceryChecksKey]'));
       expect(
         plannerSource,
         contains('A failed write leaves the previous saved week intact.'),

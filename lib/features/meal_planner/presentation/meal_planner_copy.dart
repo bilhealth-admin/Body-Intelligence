@@ -28,8 +28,10 @@ const _copy = <String, Map<String, String>>{
     'retry': 'Retry',
     'loadFailed':
         'Meal Planner could not load its saved data. Your existing plan has not been replaced. Retry before making changes.',
-    'missingRecipe': 'A saved recipe is no longer available. Your plan was not changed.',
-    'planChanged': 'Saved planner data changed elsewhere. Reload it before creating a new week.',
+    'missingRecipe':
+        'A saved recipe is no longer available. Your plan was not changed.',
+    'planChanged':
+        'Saved planner data changed elsewhere. Reload it before creating a new week.',
     'generateFailed':
         'The new week could not be saved. Your previous plan is kept; try again.',
     'empty': 'Set your preferences, then build your first week.',
@@ -97,7 +99,8 @@ const _copy = <String, Map<String, String>>{
     'loadFailed':
         'تعذر تحميل بيانات مخطط الوجبات المحفوظة. لم تُستبدل خطتك الحالية. أعد التحميل قبل إجراء أي تغيير.',
     'missingRecipe': 'وصفة محفوظة لم تعد متاحة. لم تُعدّل خطتك.',
-    'planChanged': 'تغيّرت بيانات المخطط المحفوظة. أعد تحميلها قبل إنشاء أسبوع جديد.',
+    'planChanged':
+        'تغيّرت بيانات المخطط المحفوظة. أعد تحميلها قبل إنشاء أسبوع جديد.',
     'generateFailed':
         'تعذر حفظ الأسبوع الجديد. احتُفظ بالخطة السابقة؛ حاول مرة أخرى.',
     'empty': 'اضبط تفضيلاتك ثم أنشئ أسبوعك الأول.',
@@ -161,8 +164,10 @@ const _copy = <String, Map<String, String>>{
     'retry': 'Réessayer',
     'loadFailed':
         'Meal Planner n’a pas pu charger les données enregistrées. Votre plan existant n’a pas été remplacé. Réessayez avant toute modification.',
-    'missingRecipe': 'Une recette enregistrée n’est plus disponible. Le plan reste inchangé.',
-    'planChanged': 'Le plan a changé ailleurs. Rechargez-le avant de créer une nouvelle semaine.',
+    'missingRecipe':
+        'Une recette enregistrée n’est plus disponible. Le plan reste inchangé.',
+    'planChanged':
+        'Le plan a changé ailleurs. Rechargez-le avant de créer une nouvelle semaine.',
     'generateFailed':
         'La nouvelle semaine n’a pas pu être enregistrée. Votre plan précédent est conservé ; réessayez.',
     'empty': 'Réglez vos préférences puis créez votre semaine.',
@@ -226,8 +231,10 @@ const _copy = <String, Map<String, String>>{
     'retry': 'Reintentar',
     'loadFailed':
         'Meal Planner no pudo cargar los datos guardados. Tu plan actual no se ha reemplazado. Reintenta la carga antes de modificarlo.',
-    'missingRecipe': 'Una receta guardada ya no está disponible. Tu plan no se modificó.',
-    'planChanged': 'Los datos guardados cambiaron en otro lugar. Vuelve a cargarlos antes de crear una semana.',
+    'missingRecipe':
+        'Una receta guardada ya no está disponible. Tu plan no se modificó.',
+    'planChanged':
+        'Los datos guardados cambiaron en otro lugar. Vuelve a cargarlos antes de crear una semana.',
     'generateFailed':
         'No se pudo guardar la nueva semana. Se conserva tu plan anterior; vuelve a intentarlo.',
     'empty': 'Configura tus preferencias y crea tu semana.',
@@ -291,8 +298,10 @@ const _copy = <String, Map<String, String>>{
     'retry': 'Yeniden dene',
     'loadFailed':
         'Meal Planner kayıtlı verileri yükleyemedi. Mevcut planınız değiştirilmedi. Değişiklik yapmadan önce yeniden yükleyin.',
-    'missingRecipe': 'Kayıtlı bir tarif artık mevcut değil. Planınız değiştirilmedi.',
-    'planChanged': 'Kayıtlı plan başka yerde değiştirildi. Yeni hafta oluşturmadan önce yeniden yükleyin.',
+    'missingRecipe':
+        'Kayıtlı bir tarif artık mevcut değil. Planınız değiştirilmedi.',
+    'planChanged':
+        'Kayıtlı plan başka yerde değiştirildi. Yeni hafta oluşturmadan önce yeniden yükleyin.',
     'generateFailed':
         'Yeni hafta kaydedilemedi. Önceki planınız korunuyor; yeniden deneyin.',
     'empty': 'Tercihlerinizi ayarlayıp ilk haftanızı oluşturun.',

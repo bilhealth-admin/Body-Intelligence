@@ -27,7 +27,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       return;
     }
     // The previous owner's asynchronous work must never populate this page.
-    setState(() {
+    _updateMealPlannerState(() {
       _loadEpoch++;
       _boundRepository = next;
       _readSnapshot = null;
@@ -52,16 +52,16 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
     final epoch = ++_loadEpoch;
     _loadInFlight = true;
     if (retry) {
-      setState(() {
+      _updateMealPlannerState(() {
         _loading = _plan == null;
         _loadError = null;
       });
     }
     try {
       final values = await Future.wait([
-        repository.get(_preferencesKey),
-        repository.get(_planKey),
-        repository.get(_groceryChecksKey),
+        repository.get(_MealPlannerPageState._preferencesKey),
+        repository.get(_MealPlannerPageState._planKey),
+        repository.get(_MealPlannerPageState._groceryChecksKey),
         repository.get(DietaryPreferences.storageKey),
         repository.get('dietApproach'),
       ]);
@@ -72,9 +72,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
           : MealPlanPreferences.fromJson(
               jsonDecode(values[0]!) as Map<String, dynamic>,
             );
-      final plan = values[1] == null
-          ? null
-          : WeeklyMealPlan.decode(values[1]!);
+      final plan = values[1] == null ? null : WeeklyMealPlan.decode(values[1]!);
       final checks = values[2] == null
           ? <String>{}
           : (jsonDecode(values[2]!) as List).cast<String>().toSet();
@@ -83,7 +81,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
         legacyApproach: values[4],
       );
       if (!_isCurrent(epoch, repository)) return;
-      setState(() {
+      _updateMealPlannerState(() {
         _preferences = preferences;
         _plan = plan;
         _checkedGrocery
@@ -91,9 +89,9 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
           ..addAll(checks);
         _dietaryPreferences = dietary;
         _readSnapshot = {
-          _preferencesKey: values[0],
-          _planKey: values[1],
-          _groceryChecksKey: values[2],
+          _MealPlannerPageState._preferencesKey: values[0],
+          _MealPlannerPageState._planKey: values[1],
+          _MealPlannerPageState._groceryChecksKey: values[2],
           DietaryPreferences.storageKey: values[3],
           'dietApproach': values[4],
         };
@@ -103,7 +101,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       });
     } catch (_) {
       if (_isCurrent(epoch, repository)) {
-        setState(() {
+        _updateMealPlannerState(() {
           _loading = false;
           _loadError = 'loadFailed';
         });
@@ -111,7 +109,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
     } finally {
       if (_loadEpoch == epoch) {
         _loadInFlight = false;
-        if (mounted) setState(() {});
+        if (mounted) _updateMealPlannerState(() {});
       }
     }
   }
@@ -131,7 +129,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
     final preferences = _preferences;
     final dietaryPreferences = _dietaryPreferences;
     final expected = Map<String, String?>.from(_readSnapshot!);
-    setState(() {
+    _updateMealPlannerState(() {
       _saving = true;
       _saveError = null;
     });
@@ -149,35 +147,35 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       final committed = await repository.mutateIfUnchanged(
         expected: expected,
         set: {
-          _preferencesKey: storedPreferences,
-          _planKey: storedPlan,
+          _MealPlannerPageState._preferencesKey: storedPreferences,
+          _MealPlannerPageState._planKey: storedPlan,
         },
-        remove: [_groceryChecksKey],
+        remove: [_MealPlannerPageState._groceryChecksKey],
         isCurrent: () => _isCurrent(epoch, repository),
       );
       if (!_isCurrent(epoch, repository)) return;
       if (!committed) {
-        setState(() => _saveError = 'planChanged');
+        _updateMealPlannerState(() => _saveError = 'planChanged');
         return;
       }
-      setState(() {
+      _updateMealPlannerState(() {
         _plan = plan;
         _checkedGrocery.clear();
         _readSnapshot = {
           ...expected,
-          _preferencesKey: storedPreferences,
-          _planKey: storedPlan,
-          _groceryChecksKey: null,
+          _MealPlannerPageState._preferencesKey: storedPreferences,
+          _MealPlannerPageState._planKey: storedPlan,
+          _MealPlannerPageState._groceryChecksKey: null,
         };
         _saveError = null;
       });
     } catch (_) {
       if (_isCurrent(epoch, repository)) {
-        setState(() => _saveError = 'generateFailed');
+        _updateMealPlannerState(() => _saveError = 'generateFailed');
       }
     } finally {
       if (_isCurrent(epoch, repository)) {
-        setState(() => _saving = false);
+        _updateMealPlannerState(() => _saving = false);
       }
     }
   }
@@ -198,7 +196,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
     final nextChecks = Set<String>.from(before);
     checked ? nextChecks.add(key) : nextChecks.remove(key);
     final encoded = jsonEncode(nextChecks.toList()..sort());
-    setState(() {
+    _updateMealPlannerState(() {
       _grocerySaveInFlight = true;
       _checkedGrocery
         ..clear()
@@ -209,15 +207,17 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       // taps from restoring an old grocery list or a replaced plan.
       final committed = await repository.mutateIfUnchanged(
         expected: {
-          _planKey: expected[_planKey],
-          _groceryChecksKey: expected[_groceryChecksKey],
+          _MealPlannerPageState._planKey:
+              expected[_MealPlannerPageState._planKey],
+          _MealPlannerPageState._groceryChecksKey:
+              expected[_MealPlannerPageState._groceryChecksKey],
         },
-        set: {_groceryChecksKey: encoded},
+        set: {_MealPlannerPageState._groceryChecksKey: encoded},
         isCurrent: () => _isCurrent(epoch, repository),
       );
       if (!_isCurrent(epoch, repository)) return;
       if (!committed) {
-        setState(() {
+        _updateMealPlannerState(() {
           _checkedGrocery
             ..clear()
             ..addAll(before);
@@ -225,19 +225,17 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
         });
         return;
       }
-      setState(() {
-        _readSnapshot = {
-          ...expected,
-          _groceryChecksKey: encoded,
-        };
+      _updateMealPlannerState(() {
+        _readSnapshot = {...expected, _MealPlannerPageState._groceryChecksKey: encoded};
       });
     } catch (_) {
       if (!_isCurrent(epoch, repository)) return;
-      setState(() {
+      _updateMealPlannerState(() {
         _checkedGrocery
           ..clear()
           ..addAll(before);
       });
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -249,7 +247,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
       );
     } finally {
       if (_isCurrent(epoch, repository)) {
-        setState(() => _grocerySaveInFlight = false);
+        _updateMealPlannerState(() => _grocerySaveInFlight = false);
       }
     }
   }

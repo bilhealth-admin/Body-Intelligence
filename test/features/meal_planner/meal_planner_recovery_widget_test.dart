@@ -10,6 +10,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,7 +22,7 @@ final _ownerRepositoryProvider = StateProvider<PreferencesRepository?>(
 );
 
 final class _ControlledRepository extends PreferencesRepository {
-  _ControlledRepository(AppDatabase database) : super(database);
+  _ControlledRepository(super.database);
 
   bool offline = false;
   bool rejectMutation = false;
@@ -74,9 +75,7 @@ Future<void> _pumpPlanner(
   await tester.binding.setSurfaceSize(size);
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [
-        preferencesRepositoryProvider.overrideWithValue(repository),
-      ],
+      overrides: [preferencesRepositoryProvider.overrideWithValue(repository)],
       child: router == null
           ? MaterialApp(
               locale: locale,
@@ -150,9 +149,11 @@ void main() {
       await _pumpPlanner(tester, repo);
       expect(find.text('Red lentil soup'), findsNothing);
       expect(
-        tester.widget<FilledButton>(
-          find.byKey(const Key('generate-weekly-meal-plan')),
-        ).onPressed,
+        tester
+            .widget<FilledButton>(
+              find.byKey(const Key('generate-weekly-meal-plan')),
+            )
+            .onPressed,
         isNull,
       );
       expect(await repo.get(_weekKey), _plan('lentil_soup').encode());
@@ -298,58 +299,57 @@ void main() {
     },
   );
 
-  testWidgets(
-    'A to B to A delayed reads never render the other account plan',
-    (tester) async {
-      final dbA = AppDatabase.forTesting(
-        NativeDatabase.memory(),
-        localOwnerId: 'owner-A',
-      );
-      final dbB = AppDatabase.forTesting(
-        NativeDatabase.memory(),
-        localOwnerId: 'owner-B',
-      );
-      final a = _ControlledRepository(dbA);
-      final b = _ControlledRepository(dbB);
-      await _seed(a, 'lentil_soup');
-      await _seed(b, 'yogurt_oats');
-      a.readGate = Completer<void>();
-      final container = ProviderContainer(
-        overrides: [
-          _ownerRepositoryProvider.overrideWith((ref) => a),
-          preferencesRepositoryProvider.overrideWith(
-            (ref) => ref.watch(_ownerRepositoryProvider)!,
-          ),
-        ],
-      );
-      addTearDown(() async {
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
-        container.dispose();
-        await dbA.close();
-        await dbB.close();
-        await tester.binding.setSurfaceSize(null);
-      });
-      await tester.binding.setSurfaceSize(const Size(390, 844));
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: const MaterialApp(home: MealPlannerPage()),
+  testWidgets('A to B to A delayed reads never render the other account plan', (
+    tester,
+  ) async {
+    final dbA = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+      localOwnerId: 'owner-A',
+    );
+    final dbB = AppDatabase.forTesting(
+      NativeDatabase.memory(),
+      localOwnerId: 'owner-B',
+    );
+    final a = _ControlledRepository(dbA);
+    final b = _ControlledRepository(dbB);
+    await _seed(a, 'lentil_soup');
+    await _seed(b, 'yogurt_oats');
+    a.readGate = Completer<void>();
+    final container = ProviderContainer(
+      overrides: [
+        _ownerRepositoryProvider.overrideWith((ref) => a),
+        preferencesRepositoryProvider.overrideWith(
+          (ref) => ref.watch(_ownerRepositoryProvider)!,
         ),
-      );
+      ],
+    );
+    addTearDown(() async {
+      await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
-      container.read(_ownerRepositoryProvider.notifier).state = b;
-      await tester.pumpAndSettle();
-      expect(find.text('Yogurt oat bowl'), findsOneWidget);
-      container.read(_ownerRepositoryProvider.notifier).state = a;
-      await tester.pump();
-      expect(find.text('Yogurt oat bowl'), findsNothing);
-      a.readGate!.complete();
-      await tester.pumpAndSettle();
-      expect(find.text('Red lentil soup'), findsOneWidget);
-      expect(find.text('Yogurt oat bowl'), findsNothing);
-      expect(a.attemptedMutations, 0);
-      expect(b.attemptedMutations, 0);
-    },
-  );
+      container.dispose();
+      await dbA.close();
+      await dbB.close();
+      await tester.binding.setSurfaceSize(null);
+    });
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: MealPlannerPage()),
+      ),
+    );
+    await tester.pump();
+    container.read(_ownerRepositoryProvider.notifier).state = b;
+    await tester.pumpAndSettle();
+    expect(find.text('Yogurt oat bowl'), findsOneWidget);
+    container.read(_ownerRepositoryProvider.notifier).state = a;
+    await tester.pump();
+    expect(find.text('Yogurt oat bowl'), findsNothing);
+    a.readGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.text('Red lentil soup'), findsOneWidget);
+    expect(find.text('Yogurt oat bowl'), findsNothing);
+    expect(a.attemptedMutations, 0);
+    expect(b.attemptedMutations, 0);
+  });
 }

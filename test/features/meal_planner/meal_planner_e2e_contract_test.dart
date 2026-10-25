@@ -3,17 +3,18 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final source = [
-    'meal_planner_page.dart',
-    'meal_planner_copy.dart',
-    'meal_planner_persistence.dart',
-  ]
-      .map(
-        (name) => File(
-          'lib/features/meal_planner/presentation/$name',
-        ).readAsStringSync(),
-      )
-      .join('\n');
+  final source =
+      [
+            'meal_planner_page.dart',
+            'meal_planner_copy.dart',
+            'meal_planner_persistence.dart',
+          ]
+          .map(
+            (name) => File(
+              'lib/features/meal_planner/presentation/$name',
+            ).readAsStringSync(),
+          )
+          .join('\n');
 
   test('planner has one durable producer-storage-consumer path', () {
     expect(source, contains("'mealPlanner.preferences.v1'"));

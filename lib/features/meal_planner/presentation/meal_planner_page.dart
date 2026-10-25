@@ -47,6 +47,11 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   String? _saveError;
   final _checkedGrocery = <String>{};
 
+  void _updateMealPlannerState(VoidCallback update) {
+    if (!mounted) return;
+    setState(update);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -196,15 +201,15 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           _recoverableError(
             copy,
             _saveError!,
-            () => _saveError == 'planChanged'
-                ? _load(retry: true)
-                : _generate(),
+            () =>
+                _saveError == 'planChanged' ? _load(retry: true) : _generate(),
           ),
         ],
         const SizedBox(height: 18),
         FilledButton.icon(
           key: const Key('generate-weekly-meal-plan'),
-          onPressed: _saving ||
+          onPressed:
+              _saving ||
                   _grocerySaveInFlight ||
                   _loadInFlight ||
                   _loadError != null ||
@@ -289,7 +294,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         ...items.map(
           (item) => CheckboxListTile(
             value: _checkedGrocery.contains(item.key),
-            onChanged: _saving ||
+            onChanged:
+                _saving ||
                     _grocerySaveInFlight ||
                     _loadInFlight ||
                     _loadError != null
@@ -398,7 +404,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: _saving ||
+          onChanged:
+              _saving ||
                   _grocerySaveInFlight ||
                   _loadInFlight ||
                   _loadError != null
@@ -424,7 +431,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: _saving ||
+          onChanged:
+              _saving ||
                   _grocerySaveInFlight ||
                   _loadInFlight ||
                   _loadError != null
@@ -447,7 +455,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 10,
           max: 60,
           divisions: 10,
-          onChanged: _saving ||
+          onChanged:
+              _saving ||
                   _grocerySaveInFlight ||
                   _loadInFlight ||
                   _loadError != null
@@ -467,7 +476,8 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 1,
           max: 8,
           divisions: 7,
-          onChanged: _saving ||
+          onChanged:
+              _saving ||
                   _grocerySaveInFlight ||
                   _loadInFlight ||
                   _loadError != null
@@ -500,90 +510,91 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
             child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              recipe.title,
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            ...recipe.ingredients.entries.map(
-              (item) => Text(
-                '• ${item.key}: ${_amount(item.value * _preferences.servings)}',
-              ),
-            ),
-            if (details != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                '${copy.text('prep')}: ${details.prepMinutes} ${copy.text('minutes')} • '
-                '${copy.text('cook')}: ${recipe.minutes} ${copy.text('minutes')}',
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '${details.calories.toStringAsFixed(0)} kcal • '
-                'P ${details.protein.toStringAsFixed(0)} g • '
-                'C ${details.carbs.toStringAsFixed(0)} g • '
-                'F ${details.fat.toStringAsFixed(0)} g',
-              ),
-              Text(
-                '${copy.text('fiber')} ${details.fiber.toStringAsFixed(0)} g • '
-                '${copy.text('sugar')} ${details.sugar.toStringAsFixed(0)} g • '
-                '${copy.text('sodium')} ${details.sodium.toStringAsFixed(0)} mg • '
-                '${copy.text('potassium')} ${details.potassium.toStringAsFixed(0)} mg',
-              ),
-              const SizedBox(height: 12),
-              ...details.steps.indexed.map(
-                (step) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Text('${step.$1 + 1}. ${step.$2}'),
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  recipe.title,
+                  style: Theme.of(context).textTheme.headlineSmall,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                copy.text('estimateNotice'),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _reviewLogNavigating
-                  ? null
-                  : () async {
-                final repository = _boundRepository;
-                if (repository == null || !_isActiveRepository(repository)) {
-                  return;
-                }
-                _reviewLogNavigating = true;
-                Navigator.of(sheetContext).pop();
-                // The planner catalog is not the diary's canonical food
-                // catalog. Let the user choose a matching food and confirm
-                // its portion in the diary; never log a recipe automatically.
-                try {
-                  await context.push(
-                    Uri(
-                    path: '/daily-log',
-                    queryParameters: {
-                      'action': 'food',
-                      'focus': 'meal',
-                      'meal': recipe.meal.toLowerCase(),
-                      'query': recipe.title,
-                    },
-                    ).toString(),
-                  );
-                } finally {
-                  _reviewLogNavigating = false;
-                }
-              },
-              child: Text(copy.text('reviewLog')),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              copy.text('logNotice'),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
+                const SizedBox(height: 12),
+                ...recipe.ingredients.entries.map(
+                  (item) => Text(
+                    '• ${item.key}: ${_amount(item.value * _preferences.servings)}',
+                  ),
+                ),
+                if (details != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    '${copy.text('prep')}: ${details.prepMinutes} ${copy.text('minutes')} • '
+                    '${copy.text('cook')}: ${recipe.minutes} ${copy.text('minutes')}',
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${details.calories.toStringAsFixed(0)} kcal • '
+                    'P ${details.protein.toStringAsFixed(0)} g • '
+                    'C ${details.carbs.toStringAsFixed(0)} g • '
+                    'F ${details.fat.toStringAsFixed(0)} g',
+                  ),
+                  Text(
+                    '${copy.text('fiber')} ${details.fiber.toStringAsFixed(0)} g • '
+                    '${copy.text('sugar')} ${details.sugar.toStringAsFixed(0)} g • '
+                    '${copy.text('sodium')} ${details.sodium.toStringAsFixed(0)} mg • '
+                    '${copy.text('potassium')} ${details.potassium.toStringAsFixed(0)} mg',
+                  ),
+                  const SizedBox(height: 12),
+                  ...details.steps.indexed.map(
+                    (step) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text('${step.$1 + 1}. ${step.$2}'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    copy.text('estimateNotice'),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: _reviewLogNavigating
+                      ? null
+                      : () async {
+                          final repository = _boundRepository;
+                          if (repository == null ||
+                              !_isActiveRepository(repository)) {
+                            return;
+                          }
+                          _reviewLogNavigating = true;
+                          Navigator.of(sheetContext).pop();
+                          // The planner catalog is not the diary's canonical food
+                          // catalog. Let the user choose a matching food and confirm
+                          // its portion in the diary; never log a recipe automatically.
+                          try {
+                            await context.push(
+                              Uri(
+                                path: '/daily-log',
+                                queryParameters: {
+                                  'action': 'food',
+                                  'focus': 'meal',
+                                  'meal': recipe.meal.toLowerCase(),
+                                  'query': recipe.title,
+                                },
+                              ).toString(),
+                            );
+                          } finally {
+                            _reviewLogNavigating = false;
+                          }
+                        },
+                  child: Text(copy.text('reviewLog')),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  copy.text('logNotice'),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
             ),
           ),
         ),
