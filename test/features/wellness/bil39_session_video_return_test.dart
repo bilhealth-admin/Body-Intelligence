@@ -74,10 +74,7 @@ void main() {
   testWidgets('BIL-10 cold session-flag link cannot pop a missing caller', (
     tester,
   ) async {
-    await _mount(
-      tester,
-      initialLocation: _movementRoute(fromSession: true),
-    );
+    await _mount(tester, initialLocation: _movementRoute(fromSession: true));
     expect(find.byType(BilWorkoutRoutineDetailsPage), findsOneWidget);
 
     await tester.pageBack();
@@ -145,9 +142,8 @@ Future<GoRouter> _mount(
               ),
               FilledButton(
                 key: const Key('fixture-open-library'),
-                onPressed: () => planContext.push(
-                  _movementRoute(fromSession: false),
-                ),
+                onPressed: () =>
+                    planContext.push(_movementRoute(fromSession: false)),
                 child: const Text('Browse movement'),
               ),
             ],

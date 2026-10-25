@@ -43,11 +43,6 @@ jobs:
           test/app/router/bil39_pop_scope_return_test.dart
           test/features/wellness/bil39_session_video_return_test.dart
           test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart
-      - name: Show official pinned Dart formatting patch on failure (diagnostic only)
-        if: failure()
-        run: |
-          dart format --output=write test/features/wellness/bil39_session_video_return_test.dart
-          git --no-pager diff -- test/features/wellness/bil39_session_video_return_test.dart
       - name: Analyze full Flutter source
         run: flutter analyze --no-pub
       - name: Run real navigation and bad-path widget regressions
