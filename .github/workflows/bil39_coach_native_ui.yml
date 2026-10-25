@@ -1,0 +1,112 @@
+name: BIL39 Native Coach Presentation
+on:
+  push:
+    branches: [bil39/integration-20261025, bil39/native-coach-ui-20261025]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bil39-coach-native-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  swiftui:
+    name: Native SwiftUI Coach Markdown (${{ matrix.device }})
+    runs-on: macos-15
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [iPhone, iPad]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Install the application-pinned Flutter SDK for bridge type checking
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Type-check the actual SwiftUI platform bridge against Flutter and iOS
+        shell: bash
+        run: |
+          flutter precache --ios
+          framework=$(python3 - <<'PY'
+          import os, pathlib, platform, plistlib
+          root = pathlib.Path(os.environ['FLUTTER_ROOT']) / 'bin/cache/artifacts/engine/ios/Flutter.xcframework'
+          data = plistlib.loads((root / 'Info.plist').read_bytes())
+          matches = [entry for entry in data['AvailableLibraries']
+                     if entry.get('SupportedPlatformVariant') == 'simulator'
+                     and platform.machine() in entry['SupportedArchitectures']]
+          if len(matches) != 1:
+              raise RuntimeError('Exact Flutter simulator framework is unavailable')
+          print(root / matches[0]['LibraryIdentifier'])
+          PY
+          )
+          xcrun swiftc -typecheck -swift-version 5 \
+            -sdk "$(xcrun --sdk iphonesimulator --show-sdk-path)" \
+            -target "$(uname -m)-apple-ios15.0-simulator" -F "$framework" \
+            ios/Runner/BILCoachMarkdownDocument.swift \
+            ios/Runner/BILCoachMarkdownView.swift \
+            ios/Runner/BILCoachMarkdownBridge.swift
+      - name: Prepare isolated exact-source UI test package and simulator
+        shell: bash
+        env:
+          BIL39_DEVICE: ${{ matrix.device }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil, subprocess
+          root = pathlib.Path.cwd()
+          package = pathlib.Path(os.environ['RUNNER_TEMP']) / ('bil39-swiftui-' + os.environ['BIL39_DEVICE'])
+          sources = package / 'Sources/BILCoachPresentation'
+          tests = package / 'Tests/BILCoachPresentationTests'
+          sources.mkdir(parents=True)
+          tests.mkdir(parents=True)
+          files = [root / 'ios/Runner/BILCoachMarkdownDocument.swift', root / 'ios/Runner/BILCoachMarkdownView.swift']
+          for source in files:
+              shutil.copy2(source, sources / source.name)
+          fixtures = root / 'tools/qa/swift/coach_presentation'
+          shutil.copy2(fixtures / 'Package.swift', package / 'Package.swift')
+          shutil.copy2(fixtures / 'CoachMarkdownTests.swift', tests / 'CoachMarkdownTests.swift')
+          inventory = json.loads(subprocess.check_output(['xcrun', 'simctl', 'list', 'devices', 'available', '-j']))
+          candidates = [device for runtime, devices in inventory['devices'].items() if '.iOS-' in runtime
+                        for device in devices if device.get('isAvailable') and device['name'].startswith(os.environ['BIL39_DEVICE'])]
+          if not candidates:
+              raise RuntimeError('Required real iOS simulator is unavailable')
+          device = candidates[0]
+          if device['state'] != 'Booted':
+              subprocess.run(['xcrun', 'simctl', 'boot', device['udid']], check=True)
+          subprocess.run(['xcrun', 'simctl', 'bootstatus', device['udid'], '-b'], check=True)
+          receipt = {'source_sha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
+                     'files': {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest() for path in files},
+                     'device': device, 'scope': 'Real Foundation/SwiftUI component and UIKit render; no cloud or model calls'}
+          (package / 'source.json').write_text(json.dumps(receipt, indent=2))
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('BIL39_SWIFTUI_PACKAGE=' + str(package) + '\n')
+              env.write('BIL39_SWIFTUI_DEVICE=' + device['udid'] + '\n')
+          PY
+      - name: Execute actual Foundation and SwiftUI tests on iOS
+        shell: bash
+        run: |
+          set -o pipefail
+          cd "$BIL39_SWIFTUI_PACKAGE"
+          xcodebuild -version
+          xcodebuild -scheme BILCoachPresentation \
+            -destination "platform=iOS Simulator,id=$BIL39_SWIFTUI_DEVICE" \
+            -derivedDataPath "$BIL39_SWIFTUI_PACKAGE/DerivedData" \
+            -resultBundlePath "$BIL39_SWIFTUI_PACKAGE/Coach.xcresult" \
+            CODE_SIGNING_ALLOWED=NO test 2>&1 | tee "$BIL39_SWIFTUI_PACKAGE/xcodebuild.log"
+          xcrun xcresulttool export attachments \
+            --path "$BIL39_SWIFTUI_PACKAGE/Coach.xcresult" \
+            --output-path "$BIL39_SWIFTUI_PACKAGE/captures"
+      - name: Preserve native results and original visual evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil39-coach-swiftui-${{ matrix.device }}-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/bil39-swiftui-${{ matrix.device }}/source.json
+            ${{ runner.temp }}/bil39-swiftui-${{ matrix.device }}/xcodebuild.log
+            ${{ runner.temp }}/bil39-swiftui-${{ matrix.device }}/Coach.xcresult
+            ${{ runner.temp }}/bil39-swiftui-${{ matrix.device }}/captures
+          if-no-files-found: error
+          retention-days: 30
