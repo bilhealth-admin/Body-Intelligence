@@ -1,3 +1,5 @@
+import { coachTurnFocus } from "./coach_conversation_scope.ts";
+
 export type CoachThinkingLevel = "LOW" | "MEDIUM" | "HIGH";
 
 /** Routing metadata only. This never grants a tool permission or a write. */
@@ -9,6 +11,10 @@ export function coachReasoningFor(
       .replace(/[أإآٱ]/gu, "ا").replace(/[\u064B-\u065F\u0670ـ]/gu, "")
       .replace(/\s+/gu, " ").trim();
   const latest = normalize(messages.at(-1)?.content ?? "");
+  // Reading a month of weight records is analysis, not plan authoring.
+  if (coachTurnFocus(messages) === "weight_history") {
+    return { level: "MEDIUM", task: "analysis" };
+  }
   // A short slot reply inherits only the nearest explicit USER task. An
   // assistant offer or injected context must never increase data authority.
   let text = latest;
