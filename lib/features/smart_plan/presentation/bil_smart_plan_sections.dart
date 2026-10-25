@@ -33,6 +33,9 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
   );
 
   Widget _today(BilSmartPlan plan) {
+    final labelInk = Theme.of(context).brightness == Brightness.dark
+        ? BilPearlFinish.darkInk
+        : BilPearlFinish.lightInk;
     final day = plan.onDate(
       _requestedDay ?? ref.read(bilSmartPlanClockProvider)(),
     );
@@ -102,6 +105,10 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                 const SizedBox(height: 8),
                 ExpansionTile(
                   key: const ValueKey('bil-smart-plan-workout-steps'),
+                  textColor: labelInk,
+                  collapsedTextColor: labelInk,
+                  iconColor: labelInk,
+                  collapsedIconColor: labelInk,
                   title: Text(
                     _t('Exercises in this session', 'تمارين هذه الجلسة'),
                   ),

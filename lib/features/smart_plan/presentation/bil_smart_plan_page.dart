@@ -650,9 +650,14 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                                 onPressed: () => setState(() => _tab = tab.$1),
                                 child: Text(
                                   tab.$2,
-                                  style: const TextStyle(
+                                  // Keep ink explicit for the real RTL/LTR
+                                  // contrast guideline, not just palette tests.
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
+                                    color: _tab == tab.$1
+                                        ? Colors.white
+                                        : tabInk,
                                   ),
                                 ),
                               ),

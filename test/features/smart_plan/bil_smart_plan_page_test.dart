@@ -897,8 +897,9 @@ void main() {
         await repo.save(before, expectedRevision: initial.revision);
         await pump(tester, locale, 320, 2);
         final mealIcons = find.byIcon(Icons.restaurant_menu_rounded);
+        // Every suggested meal has this icon; target the exact row we tap.
         await tester.scrollUntilVisible(
-          mealIcons,
+          mealIcons.first,
           170,
           scrollable: find.byType(Scrollable).first,
         );
