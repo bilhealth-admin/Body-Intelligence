@@ -458,14 +458,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: _saving ? null : (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: value!,
-              budget: _preferences.budget,
-              maxMinutes: _preferences.maxMinutes,
-              servings: _preferences.servings,
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: value!,
+                    budget: _preferences.budget,
+                    maxMinutes: _preferences.maxMinutes,
+                    servings: _preferences.servings,
+                  ),
+                ),
         ),
         const SizedBox(height: 16),
         DropdownButtonFormField<MealPlanBudget>(
@@ -479,14 +481,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 ),
               )
               .toList(),
-          onChanged: _saving ? null : (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: _preferences.diet,
-              budget: value!,
-              maxMinutes: _preferences.maxMinutes,
-              servings: _preferences.servings,
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: _preferences.diet,
+                    budget: value!,
+                    maxMinutes: _preferences.maxMinutes,
+                    servings: _preferences.servings,
+                  ),
+                ),
         ),
         const SizedBox(height: 16),
         Text(
@@ -497,14 +501,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 10,
           max: 60,
           divisions: 10,
-          onChanged: _saving ? null : (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: _preferences.diet,
-              budget: _preferences.budget,
-              maxMinutes: value.round(),
-              servings: _preferences.servings,
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: _preferences.diet,
+                    budget: _preferences.budget,
+                    maxMinutes: value.round(),
+                    servings: _preferences.servings,
+                  ),
+                ),
         ),
         Text('${copy.text('servings')}: ${_preferences.servings}'),
         Slider(
@@ -512,14 +518,16 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           min: 1,
           max: 8,
           divisions: 7,
-          onChanged: _saving ? null : (value) => setState(
-            () => _preferences = MealPlanPreferences(
-              diet: _preferences.diet,
-              budget: _preferences.budget,
-              maxMinutes: _preferences.maxMinutes,
-              servings: value.round(),
-            ),
-          ),
+          onChanged: _saving
+              ? null
+              : (value) => setState(
+                  () => _preferences = MealPlanPreferences(
+                    diet: _preferences.diet,
+                    budget: _preferences.budget,
+                    maxMinutes: _preferences.maxMinutes,
+                    servings: value.round(),
+                  ),
+                ),
         ),
         const SizedBox(height: 12),
         Text(copy.text('safety'), style: Theme.of(context).textTheme.bodySmall),

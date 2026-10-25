@@ -64,11 +64,7 @@ void main() {
         'loadFailed',
         'generateFailed',
       ]) {
-        expect(
-          RegExp("'$key':").allMatches(copySource).length,
-          5,
-          reason: key,
-        );
+        expect(RegExp("'$key':").allMatches(copySource).length, 5, reason: key);
       }
       expect(copySource, contains('neither plan is automatically merged'));
       expect(copySource, contains('لا تُدمج الخطتان تلقائيًا'));
