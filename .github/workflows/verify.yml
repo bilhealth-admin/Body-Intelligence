@@ -153,6 +153,14 @@ jobs:
           test/features/settings/more_latest_weight_test.dart
           test/features/settings/more_premium_polish_contract_test.dart
 
+      - name: Verify Meal Planner recovery and Review & log
+        if: ${{ success() }}
+        shell: pwsh
+        run: >
+          flutter test --no-pub --timeout=2m
+          test/features/meal_planner/meal_planner_e2e_contract_test.dart
+          test/features/meal_planner/meal_planner_recovery_contract_test.dart
+
   p0:
     # The critical data/journal and Vision/architecture suites must pass
     # before running expensive visual suites or the eight complete shards.
