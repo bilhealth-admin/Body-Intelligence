@@ -77,6 +77,22 @@ bool isCoachPlanNegated(String input) {
   ).hasMatch(text);
 }
 
+/// Model-suggested Smart Plan actions are only presentable when the member
+/// explicitly requested a plan operation. Review/analysis questions cannot
+/// create or launch a plan as an unsolicited side effect.
+bool coachAllowsSuggestedPlanAction(String input) {
+  if (isCoachPlanNegated(input) || isCoachWeightHistoryReadRequest(input)) {
+    return false;
+  }
+  final intent = classifyCoachRequest(input);
+  return intent.createsPlan ||
+      const <CoachRequestKind>{
+        CoachRequestKind.todayPlan,
+        CoachRequestKind.revisePlan,
+        CoachRequestKind.completeWorkout,
+      }.contains(intent.kind);
+}
+
 CoachRequestIntent classifyCoachRequest(String input) {
   final text = normalizeCoachMeaning(input);
   bool has(String pattern) => RegExp(pattern).hasMatch(text);
