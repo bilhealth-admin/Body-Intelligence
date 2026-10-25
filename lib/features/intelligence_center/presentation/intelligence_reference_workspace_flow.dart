@@ -61,11 +61,31 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
                 style: Theme.of(sheetContext).textTheme.titleLarge,
               ),
               for (final entry in <(IconData, String, String)>[
-                (Icons.monitor_weight_outlined, tr('Weight history', 'سجل الوزن'), '/weight-history'),
-                (Icons.restaurant_outlined, tr('Food diary', 'سجل الطعام'), '/daily-log'),
-                (Icons.insights_outlined, tr('Nutrition analysis', 'تحليل التغذية'), '/analytics/nutrition'),
-                (Icons.bedtime_outlined, tr('Sleep', 'النوم'), '/connected-health/sleep'),
-                (Icons.settings_outlined, tr('Coach settings', 'إعدادات المدرب'), '/settings/ai-coach'),
+                (
+                  Icons.monitor_weight_outlined,
+                  tr('Weight history', 'سجل الوزن'),
+                  '/weight-history',
+                ),
+                (
+                  Icons.restaurant_outlined,
+                  tr('Food diary', 'سجل الطعام'),
+                  '/daily-log',
+                ),
+                (
+                  Icons.insights_outlined,
+                  tr('Nutrition analysis', 'تحليل التغذية'),
+                  '/analytics/nutrition',
+                ),
+                (
+                  Icons.bedtime_outlined,
+                  tr('Sleep', 'النوم'),
+                  '/connected-health/sleep',
+                ),
+                (
+                  Icons.settings_outlined,
+                  tr('Coach settings', 'إعدادات المدرب'),
+                  '/settings/ai-coach',
+                ),
               ])
                 ListTile(
                   leading: Icon(entry.$1),
