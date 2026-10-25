@@ -1,6 +1,24 @@
 part of 'intelligence_center_page.dart';
 
 extension _IntelligenceQueryGuardFlow on _IntelligenceCenterPageState {
+  // Inherit only the immediately preceding weight-read topic, never a plan,
+  // diary write, older chat, or another owner-scoped conversation.
+  String _resolvedWeightHistoryReadQuestion(String text) {
+    if (isCoachWeightHistoryReadRequest(text)) return text;
+    final users = messages.reversed
+        .where((message) => message.role == IntelligenceMessageRole.user)
+        .take(2)
+        .toList(growable: false);
+    if (users.length != 2 || users.first.text != text) return text;
+    final previous = users.last;
+    final age = DateTime.now().difference(previous.createdAt);
+    if (age.isNegative || age > const Duration(minutes: 5)) return text;
+    return resolveCoachWeightHistoryFollowUp(
+      text,
+      previousUserRequest: previous.text,
+    );
+  }
+
   IntelligenceAction? _latestPendingAction() {
     for (final message in messages.reversed) {
       for (final action in message.actionLinks.reversed) {

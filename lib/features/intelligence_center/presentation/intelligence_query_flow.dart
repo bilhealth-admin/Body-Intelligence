@@ -10,7 +10,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     // All supported locales still use the general Coach flow. This
     // deterministic in-chat readout is limited to reviewed Arabic/English copy.
     if (!locale.startsWith('ar') && !locale.startsWith('en')) return false;
-    if (!isCoachWeightHistoryReadRequest(questionText)) return false;
+    final readQuestion = _resolvedWeightHistoryReadQuestion(questionText);
+    if (!isCoachWeightHistoryReadRequest(readQuestion)) return false;
 
     final ownerAtStart = conversationPreferences.localOwnerId;
     final epoch = conversationPersistenceEpoch;
@@ -39,7 +40,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           )
         : CoachWeightHistoryReadout.build(
             snapshot: snapshot,
-            question: questionText,
+            question: readQuestion,
             languageTag: locale,
             now: ref.read(intelligenceConversationClockProvider)(),
           ).message;

@@ -53,6 +53,42 @@ void main() {
     );
   });
 
+  test('BIL39 short weight history follow-ups never become a plan or write', () {
+    for (final (prior, reply) in <(String, String)>[
+      ('اطلع على سجل أوزاني', 'شهر'),
+      ('Review my weight history', 'last month'),
+      ('حلل وزن القياسات المسجلة', 'اسبوعين'),
+      ('Show my weight chart', 'two weeks'),
+    ]) {
+      final resolved = resolveCoachWeightHistoryFollowUp(
+        reply,
+        previousUserRequest: prior,
+      );
+      expect(isCoachWeightHistoryReadRequest(resolved), isTrue);
+      expect(classifyCoachRequest(resolved).createsPlan, isFalse);
+    }
+    for (final prior in <String>[
+      'أريد خطة تمارين شهرية',
+      'سجل وجبتي',
+      'Review my nutrition',
+    ]) {
+      expect(
+        resolveCoachWeightHistoryFollowUp(
+          'شهر',
+          previousUserRequest: prior,
+        ),
+        'شهر',
+      );
+    }
+    expect(
+      resolveCoachWeightHistoryFollowUp(
+        'لا أريد خطة',
+        previousUserRequest: 'اطلع على سجل أوزاني',
+      ),
+      'لا أريد خطة',
+    );
+  });
+
   test('BIL39 review buttons never authorize unsolicited Smart Plan actions', () {
     for (final question in <String>[
       'Review my day from my saved BIL data and tell me the most useful next step.',

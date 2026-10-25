@@ -66,6 +66,26 @@ bool isCoachWeightHistoryReadRequest(String input) {
   ).hasMatch(text);
 }
 
+/// Interpret a short time-window follow-up only for the immediately prior
+/// verified weight-read topic. It never authorizes a write or plan draft.
+String resolveCoachWeightHistoryFollowUp(
+  String current, {
+  required String? previousUserRequest,
+}) {
+  if (previousUserRequest == null ||
+      !isCoachWeightHistoryReadRequest(previousUserRequest)) {
+    return current;
+  }
+  final period = normalizeCoachMeaning(current);
+  if (!RegExp(
+    r'^(?:last |for )?(?:week|two weeks|2 weeks|14 days|month|one month|30 days|year|'
+    r'اسبوع|الاسبوع|اسبوعين|شهر|الشهر|شهر واحد|عام|سنه|سنة|اخر شهر|اخر اسبوعين)$',
+  ).hasMatch(period)) {
+    return current;
+  }
+  return 'weight history $period';
+}
+
 /// Negating or correcting an assistant's plan suggestion is not permission
 /// to create a draft or launch a native editor.
 bool isCoachPlanNegated(String input) {
