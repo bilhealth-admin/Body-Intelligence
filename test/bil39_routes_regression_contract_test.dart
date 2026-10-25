@@ -39,27 +39,24 @@ void main() {
     expect(history, contains("fallbackLocation: '/connected-health/steps'"));
   });
 
-  test(
-    'BIL-20 direct health and language routes have fixed fallback paths',
-    () {
-      final routes = <String, String>{
-        'lib/features/connected_health/connected_health_signal_detail_page.dart':
-            '/connected-health',
-        'lib/features/connected_health/partner_capabilities_page.dart':
-            '/connected-health',
-        'lib/features/settings/language_settings_page.dart': '/settings',
-      };
-      for (final entry in routes.entries) {
-        final source = File(entry.key).readAsStringSync();
-        expect(source, contains('BilSafeReturnButton('), reason: entry.key);
-        expect(
-          source,
-          contains("fallbackLocation: '${entry.value}'"),
-          reason: entry.key,
-        );
-      }
-    },
-  );
+  test('BIL-20 direct health and language routes have fixed fallback paths', () {
+    final routes = <String, String>{
+      'lib/features/connected_health/connected_health_signal_detail_page.dart':
+          '/connected-health',
+      'lib/features/connected_health/partner_capabilities_page.dart':
+          '/connected-health',
+      'lib/features/settings/language_settings_page.dart': '/settings',
+    };
+    for (final entry in routes.entries) {
+      final source = File(entry.key).readAsStringSync();
+      expect(source, contains('BilSafeReturnButton('), reason: entry.key);
+      expect(
+        source,
+        contains("fallbackLocation: '${entry.value}'"),
+        reason: entry.key,
+      );
+    }
+  });
 
   test('BIL-10 only Smart Plan session media returns past the library', () {
     final actions = File(

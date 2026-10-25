@@ -110,11 +110,7 @@ jobs:
             'lib/features/notifications/services/inactivity_reminder_coordinator.dart',
             'test/app/router/audited_route_return_source_contract_test.dart',
             'test/app/router/notification_return_navigation_test.dart',
-            'test/features/community/community_reference_navigation_test.dart',
-            'lib/features/connected_health/steps_settings_page.dart',
-            'lib/features/wellness/presentation/bil_workout_routines_page.dart',
-            'test/bil39_routes_regression_contract_test.dart',
-            'test/features/connected_health/steps_history_navigation_test.dart'
+            'test/features/community/community_reference_navigation_test.dart'
           )
           dart format @formatTargets
           git diff -- @formatTargets

@@ -94,6 +94,7 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
   final CustomRoutineWriter? customRoutineWriter;
   final GymPlanLoader? gymPlanLoader;
   final String? initialItemId;
+
   /// Set only for verified movement opened from an active Smart Plan session.
   /// Normal library browsing and ordinary deep links are unaffected.
   final bool returnToCallerAfterInitialItem;
