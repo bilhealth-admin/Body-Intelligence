@@ -43,6 +43,7 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
 
   Future<void> _showCoachToolsSheet() async {
     if (!mounted || _referenceNavigating) return;
+    final localeTag = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
     // Tools is a chooser, not an alias for Today's diary.
     final selection = await showBilPearlBottomSheet<String>(
       context: context,
@@ -57,7 +58,7 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                tr('Coach tools', 'أدوات المدرب'),
+                CoachToolsLocaleCopy.resolve('Coach tools', localeTag),
                 style: Theme.of(sheetContext).textTheme.titleLarge,
               ),
               for (final entry in <(IconData, String, String)>[
@@ -68,12 +69,12 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
                 ),
                 (
                   Icons.restaurant_outlined,
-                  tr('Food diary', 'سجل الطعام'),
+                  CoachToolsLocaleCopy.resolve('Food diary', localeTag),
                   '/daily-log',
                 ),
                 (
                   Icons.insights_outlined,
-                  tr('Nutrition analysis', 'تحليل التغذية'),
+                  CoachToolsLocaleCopy.resolve('Nutrition analysis', localeTag),
                   '/analytics/nutrition',
                 ),
                 (

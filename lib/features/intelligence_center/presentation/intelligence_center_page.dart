@@ -10,6 +10,7 @@ import '../../smart_plan/services/bil_smart_plan_catalog.dart';
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'coach_thinking_status.dart';
+import 'coach_tools_locale_copy.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
