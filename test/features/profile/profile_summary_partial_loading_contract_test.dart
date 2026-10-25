@@ -19,7 +19,7 @@ void main() {
     const oldLoadingGate =
         'if ((profileState.isLoading && !profileState.hasValue) ||';
     const oldErrorGate =
-        'if (profileState.hasError ||\\n        weightsState.hasError ||';
+        'if (profileState.hasError ||\n        weightsState.hasError ||';
     expect(source, isNot(contains(oldSpinner)));
     expect(source, isNot(contains(oldLoadingGate)));
     expect(source, isNot(contains(oldErrorGate)));
@@ -38,8 +38,8 @@ void main() {
         'ref.read(preferencesRepositoryProvider).localOwnerId != owner';
     expect(source, contains(ownerGuard));
     const oldDestructiveCatch =
-        '_plan = null;\\n'
-        '        _busy = false;\\n'
+        '_plan = null;\n'
+        '        _busy = false;\n'
         '        _error = error.toString();';
     expect(source, isNot(contains(oldDestructiveCatch)));
   });
