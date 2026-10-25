@@ -64,6 +64,13 @@ final class CoachMarkdownTests: XCTestCase {
     XCTAssertTrue(blocks.contains { String($0.text.characters).contains("unfinished") })
   }
 
+  func testArabicParagraphAfterATableIsNotDiscardedByParsing() {
+    let text = "| التمرين | المجموعات | التكرارات |\n| --- | --- | --- |\n| حركة محفوظة | 3 | 8–12 |\n\nوزنك ⁦60 kg⁩ — English 🥗"
+    let blocks = BILCoachMarkdownDocument.blocks(text)
+    XCTAssertEqual(String(blocks.last!.text.characters), "وزنك ⁦60 kg⁩ — English 🥗")
+    XCTAssertNil(blocks.last!.table)
+  }
+
   #if canImport(UIKit)
   @MainActor func testActualSwiftUISurfacesInBothLanguagesThemesAndTextSizes() async throws {
     for arabic in [false, true] {
@@ -94,6 +101,16 @@ final class CoachMarkdownTests: XCTestCase {
           XCTAssertGreaterThan(observedHeight, 100, "Real SwiftUI layout did not report its content height: \(name)")
           host.view.frame.size.height = observedHeight
           host.view.layoutIfNeeded()
+          // A real UIHostingController adopts window safe-area changes on a
+          // later layout pass. Wait for that pass and require stable native
+          // height before capturing, rather than certifying a clipped image.
+          try await Task.sleep(nanoseconds: 100_000_000)
+          let settledHeight = observedHeight
+          host.view.frame.size.height = settledHeight
+          host.view.layoutIfNeeded()
+          try await Task.sleep(nanoseconds: 100_000_000)
+          XCTAssertEqual(observedHeight, settledHeight, accuracy: 0.5,
+            "Native content height must stabilize before capture: \(name)")
           let image = UIGraphicsImageRenderer(bounds: host.view.bounds).image { context in
             host.view.layer.render(in: context.cgContext)
           }

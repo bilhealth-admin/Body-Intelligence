@@ -37,6 +37,10 @@ struct BILCoachMarkdownView: View {
     }
     .frame(maxWidth: .infinity, alignment: .topLeading)
     .fixedSize(horizontal: false, vertical: true)
+    // Flutter already owns the screen safe area and keyboard. This view is
+    // embedded inside a message, so UIKit window insets must not clip its
+    // final paragraph or add a second status-bar inset to the native body.
+    .ignoresSafeArea(.container)
     .coordinateSpace(name: "bil-coach-markdown")
     .foregroundColor(textColor)
     .tint(linkColor)
