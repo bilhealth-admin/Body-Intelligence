@@ -254,10 +254,23 @@ void main() {
         Directionality.of(tester.element(find.byType(TabBar))),
         TextDirection.rtl,
       );
+      // A 320px RTL screen does not initially build the offscreen recipe.
+      // Scroll the actual Week ListView rather than tapping a missing child.
+      final weekScroll = find.descendant(
+        of: find.byType(ListView).first,
+        matching: find.byType(Scrollable),
+      );
+      await tester.scrollUntilVisible(
+        find.text('Red lentil soup'),
+        160,
+        scrollable: weekScroll,
+      );
       await tester.tap(find.text('Red lentil soup'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.text('راجع وسجّل'), findsOneWidget);
+      await tester.ensureVisible(find.text('راجع وسجّل'));
+      await tester.pumpAndSettle();
+      expect(find.text('راجع وسجّل').hitTestable(), findsOneWidget);
     },
   );
 
@@ -290,6 +303,11 @@ void main() {
       await _pumpPlanner(tester, repo, router: router);
       await tester.tap(find.text('Red lentil soup'));
       await tester.pumpAndSettle();
+      // Recipe details are intentionally scrollable; the consent button
+      // sits below the fold and must be brought on-screen for a real tap.
+      await tester.ensureVisible(find.text('Review and log'));
+      await tester.pumpAndSettle();
+      expect(find.text('Review and log').hitTestable(), findsOneWidget);
       await tester.tap(find.text('Review and log'));
       await tester.pumpAndSettle();
       expect(find.text('REVIEW_ONLY:food:Red lentil soup'), findsOneWidget);
