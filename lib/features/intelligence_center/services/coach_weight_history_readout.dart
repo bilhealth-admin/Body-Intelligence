@@ -38,6 +38,10 @@ class CoachWeightHistoryReadout {
     ).hasMatch(normalized)
         ? 365
         : RegExp(
+            r'\b(?:two weeks|2 weeks|14 days|fortnight)\b|اسبوعين|اسبوعان|14 يوم',
+          ).hasMatch(normalized)
+        ? 14
+        : RegExp(
             r'\b(?:month|30 days|four weeks)\b|شهر|ثلاثين يوم|30 يوم',
           ).hasMatch(normalized)
         ? 30

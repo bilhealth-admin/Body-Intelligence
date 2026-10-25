@@ -108,6 +108,26 @@ void main() {
     );
   });
 
+  test('two weeks means 14 days in Arabic and English, never 7', () {
+    for (final question in <String>['آخر أسبوعين', 'last two weeks']) {
+      final result = CoachWeightHistoryReadout.build(
+        snapshot: _fixture(
+          weights: [
+            CoachWeightPoint(at: DateTime.utc(2026, 10, 10), kg: 90),
+            CoachWeightPoint(at: DateTime.utc(2026, 10, 17), kg: 89),
+            CoachWeightPoint(at: DateTime.utc(2026, 10, 23), kg: 88),
+          ],
+        ),
+        question: question,
+        languageTag: question.startsWith('آخر') ? 'ar' : 'en',
+        now: now,
+      );
+      expect(result.recordCount, 3, reason: question);
+      expect(result.comparableCount, 2, reason: question);
+      expect(result.changeKg, closeTo(-1, 0.001), reason: question);
+    }
+  });
+
   test('missing dates are not imputed to a recent period', () {
     final result = CoachWeightHistoryReadout.build(
       snapshot: _fixture(

@@ -1,0 +1,40 @@
+name: BIL39 Coach format diagnostic (temporary, read-only)
+on:
+  push:
+    branches:
+      - bil39/coach_app-20261025
+    paths:
+      - .github/workflows/bil39_coach_format_diagnostics.yml
+permissions:
+  contents: read
+jobs:
+  show-coach-dart-format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact Coach branch commit
+        uses: actions/checkout@v4
+      - name: Install project's official Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.6'
+          channel: stable
+          cache: true
+      - name: Render exact formatter changes without pushing
+        shell: bash
+        run: |
+          set -euo pipefail
+          targets=(
+            lib/features/intelligence_center/presentation/intelligence_query_flow.dart
+            lib/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart
+            lib/features/intelligence_center/services/coach_language_resolver.dart
+            lib/features/intelligence_center/services/coach_weight_history_readout.dart
+            lib/features/intelligence_center/services/local_coach_command_parser.dart
+            test/features/intelligence_center/bil39_coach_routing_regression_test.dart
+            test/features/intelligence_center/bil39_coach_weight_readout_test.dart
+          )
+          dart format "${targets[@]}"
+          echo __BIL39_COACH_SDK_FORMAT_PATCH_BEGIN__
+          git --no-pager diff -- "${targets[@]}"
+          echo __BIL39_COACH_SDK_FORMAT_PATCH_END__
+          git status --short
