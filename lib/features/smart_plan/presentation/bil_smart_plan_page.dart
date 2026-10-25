@@ -46,6 +46,7 @@ import '../../wellness/services/wellness_content_pack_manager.dart';
 
 part 'bil_smart_plan_actions.dart';
 part 'bil_smart_plan_sections.dart';
+part 'bil_smart_plan_progress_sections.dart';
 part 'bil_smart_plan_privacy_surface.dart';
 part 'bil_smart_plan_creation_sheet.dart';
 part 'bil_smart_plan_session.dart';
