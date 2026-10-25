@@ -89,7 +89,8 @@ void main() {
           matching: find.byType(BilGlassPressFeedback),
         );
         expect(legacyFeedback, findsOneWidget);
-        final sourceIcon = tester.widget<BilGlassPressFeedback>(legacyFeedback).child;
+        final feedback = tester.widget<BilGlassPressFeedback>(legacyFeedback);
+        final sourceIcon = feedback.child;
         expect(sourceIcon, isA<Icon>());
         final original = sourceIcon as Icon;
         expect(original.icon, Icons.arrow_forward_rounded);
