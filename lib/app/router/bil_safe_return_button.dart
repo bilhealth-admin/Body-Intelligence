@@ -33,8 +33,6 @@ class _BilSafeReturnButtonState extends State<BilSafeReturnButton> {
   }
 
   @override
-  Widget build(BuildContext context) => BackButton(
-    key: const Key('bil-safe-return'),
-    onPressed: _handleBack,
-  );
+  Widget build(BuildContext context) =>
+      BackButton(key: const Key('bil-safe-return'), onPressed: _handleBack);
 }

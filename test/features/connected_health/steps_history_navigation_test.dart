@@ -80,10 +80,7 @@ void main() {
     expect(find.byType(StepsHistoryPage), findsNothing);
   });
 
-
-  testWidgets('Steps history push Back ignores a rapid duplicate tap', (
-    tester,
-  ) async {
+  testWidgets('Steps history ignores rapid duplicate Back', (tester) async {
     await _pumpHistoryRouter(
       tester,
       initialLocation: '/connected-health/steps',
@@ -100,9 +97,7 @@ void main() {
     expect(find.byType(StepsHistoryPage), findsNothing);
   });
 
-  testWidgets('RTL cold Steps history ignores an untrusted return query', (
-    tester,
-  ) async {
+  testWidgets('RTL cold history rejects unsafe return URL', (tester) async {
     await _pumpHistoryRouter(
       tester,
       initialLocation:

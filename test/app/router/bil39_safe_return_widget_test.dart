@@ -5,9 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
-  testWidgets('LTR warm Goals Back preserves the caller after rapid taps', (
-    tester,
-  ) async {
+  testWidgets('LTR warm Goals ignores double Back', (tester) async {
     final router = await _pumpRoutes(tester, initialLocation: '/dashboard');
     await tester.tap(find.byKey(const Key('fixture-open-goals')));
     await tester.pumpAndSettle();
@@ -23,9 +21,7 @@ void main() {
     expect(router.canPop(), isFalse);
   });
 
-  testWidgets('LTR cold Goals Back returns to a fixed safe destination', (
-    tester,
-  ) async {
+  testWidgets('LTR cold Goals uses safe fallback', (tester) async {
     final router = await _pumpRoutes(tester, initialLocation: '/goals');
     expect(find.text('Goals content'), findsOneWidget);
     await tester.tap(find.byKey(const Key('bil-safe-return')));
@@ -35,9 +31,7 @@ void main() {
     expect(find.text('Goals content'), findsNothing);
   });
 
-  testWidgets('RTL cold Goals rejects an untrusted return query', (
-    tester,
-  ) async {
+  testWidgets('RTL cold Goals rejects unsafe return URL', (tester) async {
     final router = await _pumpRoutes(
       tester,
       initialLocation: '/goals?next=https%3A%2F%2Foutside.example%2Fpath',
