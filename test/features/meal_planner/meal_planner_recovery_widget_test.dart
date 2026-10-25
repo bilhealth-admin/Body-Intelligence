@@ -72,6 +72,7 @@ Future<void> _pumpPlanner(
   Size size = const Size(390, 844),
   Locale locale = const Locale('en'),
   GoRouter? router,
+  bool settle = true,
 }) async {
   await tester.binding.setSurfaceSize(size);
   await tester.pumpWidget(
@@ -100,7 +101,7 @@ Future<void> _pumpPlanner(
             ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) await tester.pumpAndSettle();
 }
 
 Future<void> _dispose(WidgetTester tester, AppDatabase database) async {
@@ -112,6 +113,48 @@ Future<void> _dispose(WidgetTester tester, AppDatabase database) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets(
+    'a stalled read expires without accepting its late result or changing the saved week',
+    (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      final repo = _ControlledRepository(db);
+      await _seed(repo, 'lentil_soup');
+      final original = await repo.get(_weekKey);
+      final held = Completer<void>();
+      repo.readGate = held;
+      addTearDown(() async {
+        if (!held.isCompleted) held.complete();
+        await _dispose(tester, db);
+      });
+      await _pumpPlanner(tester, repo, settle: false);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      await tester.pump(const Duration(seconds: 12));
+      await tester.pump();
+      expect(find.text('Retry'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      final generate = find.byKey(const Key('generate-weekly-meal-plan'));
+      expect(tester.widget<FilledButton>(generate).onPressed, isNull);
+      expect(repo.attemptedMutations, 0);
+      expect(await PreferencesRepository(db).get(_weekKey), original);
+      held.complete();
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Retry'),
+        findsOneWidget,
+        reason: 'A late expired read cannot silently clear the error.',
+      );
+      repo.readGate = null;
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(find.text('Retry'), findsNothing);
+      expect(find.text('Red lentil soup'), findsOneWidget);
+      expect(tester.widget<FilledButton>(generate).onPressed, isNotNull);
+      expect(repo.attemptedMutations, 0);
+      expect(await repo.get(_weekKey), original);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
     'offline saved week cannot be overwritten until successful retry',
@@ -415,7 +458,6 @@ void main() {
       expect(await db.select(db.meals).get(), isEmpty);
     },
   );
-
 
   testWidgets(
     'draft servings do not change saved grocery quantities before commit',

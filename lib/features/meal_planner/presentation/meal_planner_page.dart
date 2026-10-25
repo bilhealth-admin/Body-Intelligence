@@ -1,6 +1,7 @@
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,6 +29,7 @@ class MealPlannerPage extends ConsumerStatefulWidget {
 }
 
 class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
+  static const _readTimeout = Duration(seconds: 12);
   static const _preferencesKey = 'mealPlanner.preferences.v1';
   static const _planKey = 'mealPlanner.week.v1';
   static const _groceryChecksKey = 'mealPlanner.groceryChecks.v1';

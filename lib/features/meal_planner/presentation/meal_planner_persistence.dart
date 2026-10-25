@@ -65,7 +65,7 @@ extension _MealPlannerPersistence on _MealPlannerPageState {
         repository.get(_MealPlannerPageState._groceryChecksKey),
         repository.get(DietaryPreferences.storageKey),
         repository.get('dietApproach'),
-      ]);
+      ]).timeout(_MealPlannerPageState._readTimeout);
       // Decode everything before one commit. A malformed final key cannot
       // partially install a new plan, dietary values, or grocery checks.
       final preferences = values[0] == null
