@@ -117,27 +117,15 @@ void main() {
     expect(copy, isNot(contains('synthetic-secret')));
   });
 
-  test('catalog failures and in-flight retries remain read-only', () {
-    expect(
-      shouldBlockUnverifiedSmartPlanWrites(
-        hasPlan: true,
-        catalogBlocked: true,
-      ),
-      isTrue,
-    );
-    expect(
-      shouldBlockUnverifiedSmartPlanWrites(
-        hasPlan: true,
-        catalogBlocked: false,
-      ),
-      isFalse,
-    );
-    expect(
-      shouldBlockUnverifiedSmartPlanWrites(
-        hasPlan: false,
-        catalogBlocked: true,
-      ),
-      isFalse,
-    );
+  test('catalog failures and retries remain read-only', () {
+    for (final hasPlan in [true, false]) {
+      for (final catalogBlocked in [true, false]) {
+        final blocked = shouldBlockUnverifiedSmartPlanWrites(
+          hasPlan: hasPlan,
+          catalogBlocked: catalogBlocked,
+        );
+        expect(blocked, hasPlan && catalogBlocked);
+      }
+    }
   });
 }
