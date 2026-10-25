@@ -71,11 +71,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                             interactionEnabled: conversationReady,
                             onBack: () {
                               questionFocus.unfocus();
-                              if (context.canPop()) {
-                                context.pop();
-                              } else {
-                                context.go('/dashboard');
-                              }
+                              _updateState(() => _referenceOverview = true);
                             },
                             onHistory: () =>
                                 unawaited(_openConversationHistory()),

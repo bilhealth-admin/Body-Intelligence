@@ -22,6 +22,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     required this.snapshot,
     required this.now,
     required this.onChat,
+    this.onExit,
+    this.onTools,
     required this.onRoute,
     required this.onQuickAdd,
     required this.onPhoto,
@@ -31,6 +33,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
   final CoachContextSnapshot? snapshot;
   final DateTime now;
   final VoidCallback onChat;
+  final VoidCallback? onExit;
+  final VoidCallback? onTools;
   final ValueChanged<String> onRoute;
   final VoidCallback onQuickAdd;
   final VoidCallback onPhoto;
@@ -44,7 +48,11 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     final muted = scheme.onSurfaceVariant;
     String t(String en, String arabic) => intelligenceText(context, en, arabic);
     final access = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
+    // Same server-authoritative quota decision as the existing Coach gate.
+    // Verified paid Boost can grant Coach access without a subscription.
     final unlocked =
+        ref.watch(aiCoachCreditAccessProvider).asData?.value == true;
+    final paidLabel =
         access != null &&
         access.authority == EntitlementAuthority.verifiedServer &&
         access.plan != CommercePlan.free &&
@@ -132,11 +140,8 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                 children: [
                   IconButton(
                     key: const Key('coach-workspace-back-to-chat'),
-                    tooltip: t(
-                      'Back to Coach conversation',
-                      'العودة إلى محادثة المدرب',
-                    ),
-                    onPressed: onChat,
+                    tooltip: t('Back', 'رجوع'),
+                    onPressed: onExit ?? onChat,
                     icon: BilGlassPressFeedback(
                       child: Icon(
                         ar
@@ -178,12 +183,19 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
-                              BilStoreCopy.text(
-                                Localizations.localeOf(context).toLanguageTag(),
-                                access.plan == CommercePlan.premiumAiCoach
-                                    ? 'premium_ai_coach'
-                                    : 'premium',
-                              ),
+                              paidLabel
+                                  ? BilStoreCopy.text(
+                                      Localizations.localeOf(
+                                        context,
+                                      ).toLanguageTag(),
+                                      access.plan == CommercePlan.premiumAiCoach
+                                          ? 'premium_ai_coach'
+                                          : 'premium',
+                                    )
+                                  : t(
+                                      'Verified AI Boost access',
+                                      'وصول موثق عبر AI Boost',
+                                    ),
                               key: const Key('coach-workspace-plan-label'),
                               style: TextStyle(
                                 color: scheme.onPrimaryContainer,
@@ -220,7 +232,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                 child: Row(
                   children: [
                     for (final item in <(String, String)>[
-                      (t('Chat', 'المحادثة'), 'chat'),
+                      (t('Coach', 'المدرب'), 'coach'),
                       (t('Insights', 'تحليلات'), '/analytics'),
                       (t('Plan', 'الخطة'), '/plan'),
                       (t('Progress', 'التقدم'), '/history'),
@@ -232,10 +244,10 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                         child: TextButton(
                           key: Key('coach-workspace-tab-${item.$2}'),
                           style: TextButton.styleFrom(
-                            foregroundColor: item.$2 == 'chat'
+                            foregroundColor: item.$2 == 'coach'
                                 ? Colors.white
                                 : muted,
-                            backgroundColor: item.$2 == 'chat'
+                            backgroundColor: item.$2 == 'coach'
                                 ? _blue
                                 : Colors.transparent,
                             padding: const EdgeInsets.symmetric(
@@ -247,22 +259,45 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(11),
                             ),
                           ),
-                          onPressed: item.$2 == 'chat'
-                              ? onChat
+                          onPressed: item.$2 == 'coach'
+                              ? () {}
+                              : item.$2 == '/daily-log'
+                              ? (onTools ?? () => onRoute('/daily-log'))
                               : () => onRoute(item.$2),
-                          child: Text(
-                            item.$1,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (item.$2 == 'coach') ...[
+                                const Icon(Icons.smart_toy_outlined, size: 18),
+                                const SizedBox(width: 6),
+                              ],
+                              Text(
+                                item.$1,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TextButton.icon(
+                  key: const Key('coach-workspace-open-chat'),
+                  onPressed: onChat,
+                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
+                  label: Text(
+                    t('Open Coach conversation', 'افتح محادثة المدرب'),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final columns =

@@ -232,10 +232,26 @@ Future<void> _mount(
       ),
     ),
   );
+  // The default Coach entry is Overview. The media bridge explicitly enters
+  // the conversation before testing its original barcode/photo contract.
+  final chatEntry = find.byKey(const Key('coach-workspace-open-chat'));
   final field = find.byKey(
     const Key('ai-coach-question-field'),
     skipOffstage: false,
   );
+  // Route mounting is asynchronous. Wait for the actual Overview or Chat,
+  // rather than assuming the first router frame already contains either.
+  for (var turn = 0; turn < 30; turn++) {
+    await _drain(tester);
+    if (chatEntry.evaluate().isNotEmpty || field.evaluate().isNotEmpty) {
+      break;
+    }
+  }
+  if (chatEntry.evaluate().isNotEmpty) {
+    expect(find.byKey(const Key('coach-reference-workspace')), findsOneWidget);
+    await tester.tap(chatEntry);
+    await _drain(tester);
+  }
   for (var turn = 0; turn < 30; turn++) {
     await _drain(tester);
     if (field.evaluate().length == 1 &&

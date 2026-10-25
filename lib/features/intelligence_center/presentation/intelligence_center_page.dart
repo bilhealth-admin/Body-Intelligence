@@ -3,12 +3,14 @@ import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../smart_plan/services/bil_smart_plan_coach.dart';
 import '../services/coach_request_intent.dart';
+import '../services/coach_weight_history_readout.dart';
 import '../../smart_plan/data/bil_smart_plan_repository.dart';
 import '../../smart_plan/domain/bil_smart_plan.dart';
 import '../../smart_plan/services/bil_smart_plan_catalog.dart';
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'coach_thinking_status.dart';
+import 'coach_tools_locale_copy.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -163,6 +165,7 @@ part 'intelligence_conversation_voice_transcript.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_media_confirmation.dart';
 part 'intelligence_query_flow.dart';
+part 'intelligence_query_guard_flow.dart';
 part 'intelligence_smart_plan_flow.dart';
 part 'intelligence_query_retry.dart';
 part 'intelligence_query_decision.dart';
@@ -327,6 +330,10 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void initState() {
     super.initState();
+    if (widget.startWithVisionCapture ||
+        (widget.initialBarcode?.trim().isNotEmpty ?? false)) {
+      _referenceOverview = false;
+    }
     entryWelcomeTimer = Timer(bilFeatureEntryDuration, () {
       if (mounted) setState(() => entryWelcomeVisible = false);
     });
@@ -400,9 +407,13 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   void didUpdateWidget(covariant IntelligenceCenterPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialBarcode != widget.initialBarcode) {
+      if (widget.initialBarcode?.trim().isNotEmpty == true) {
+        _updateState(() => _referenceOverview = false);
+      }
       _applyInitialBarcode(widget.initialBarcode);
     }
     if (!oldWidget.startWithVisionCapture && widget.startWithVisionCapture) {
+      _updateState(() => _referenceOverview = false);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _analyzeFoodImageInChat();
       });
@@ -560,7 +571,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     super.dispose();
   }
 
-  bool _referenceOverview = false;
+  // Authorized Coach opens on Overview, not a blank conversation.
+  // History is still loaded and retained by the existing owner-scoped store.
+  bool _referenceOverview = true;
   bool _referenceNavigating = false;
 
   @override

@@ -46,9 +46,96 @@ String normalizeCoachMeaning(String input) {
   return text.replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
+/// Read-only history/chart intent. A weight diary must never be inferred
+/// to be a Smart Plan just because the user said "جدول" or "شهر".
+bool isCoachWeightHistoryReadRequest(String input) {
+  final text = normalizeCoachMeaning(input);
+  final weight = RegExp(
+    r'\b(?:weights?|weigh|weighing|measurements?)\b|وزن|وزني|اوزاني|اوزان|نزولي|قياسات الجسم',
+  ).hasMatch(text);
+  if (!weight) return false;
+  // An explicit check-in is a different, confirmation-gated health command.
+  if (RegExp(
+    r'^(?:سجل|ادخل|دخللي|حط|اكتب|دير)\s+(?:لي\s+)?(?:وزني|الوزن)',
+  ).hasMatch(text)) {
+    return false;
+  }
+  return RegExp(
+    r'\b(?:history|records?|trend|timeline|chart|table|compare|review|analy[sz]e|view|show|past|last)\b|'
+    r'اوزاني|اوزان|سجل|القياسات|قياساتي|جدول|تاريخ|قارن|قارنلي|حلل|اطلع|اعرض|استعرض|وريني|نزولي',
+  ).hasMatch(text);
+}
+
+/// Interpret a short time-window follow-up only for the immediately prior
+/// verified weight-read topic. It never authorizes a write or plan draft.
+String resolveCoachWeightHistoryFollowUp(
+  String current, {
+  required String? previousUserRequest,
+}) {
+  if (previousUserRequest == null ||
+      !isCoachWeightHistoryReadRequest(previousUserRequest)) {
+    return current;
+  }
+  final period = normalizeCoachMeaning(current);
+  // A short read acknowledgement inherits only the preceding weight topic.
+  // Preserve its explicit date range rather than silently reading all time.
+  if (const <String>{
+    'اطلع',
+    'اعرض',
+    'وريني',
+    'استعرض',
+    'show',
+    'show it',
+    'view',
+    'go ahead',
+  }.contains(period)) {
+    return previousUserRequest;
+  }
+  if (!RegExp(
+    r'^(?:last |for )?(?:week|two weeks|2 weeks|14 days|month|one month|30 days|year|'
+    r'اسبوع|الاسبوع|اسبوعين|شهر|الشهر|شهر واحد|عام|سنه|سنة|اخر شهر|اخر اسبوعين)$',
+  ).hasMatch(period)) {
+    return current;
+  }
+  return 'weight history $period';
+}
+
+/// Negating or correcting an assistant's plan suggestion is not permission
+/// to create a draft or launch a native editor.
+bool isCoachPlanNegated(String input) {
+  final text = normalizeCoachMeaning(input);
+  return RegExp(
+    r'^(?:لا|ما|مش|مو|ليس|no|not|do not|dont|don.t)\s+'
+    r'(?:(?:اريد|بدي|ابي|ابغى|عايز|want|need|create|make|open)\s+)?'
+    r'(?:خطه|خطة|جدول|برنامج|plan|schedule)',
+  ).hasMatch(text);
+}
+
+/// Model-suggested Smart Plan actions are only presentable when the member
+/// explicitly requested a plan operation. Review/analysis questions cannot
+/// create or launch a plan as an unsolicited side effect.
+bool coachAllowsSuggestedPlanAction(String input) {
+  if (isCoachPlanNegated(input) || isCoachWeightHistoryReadRequest(input)) {
+    return false;
+  }
+  final intent = classifyCoachRequest(input);
+  return intent.createsPlan ||
+      const <CoachRequestKind>{
+        CoachRequestKind.todayPlan,
+        CoachRequestKind.revisePlan,
+        CoachRequestKind.completeWorkout,
+      }.contains(intent.kind);
+}
+
 CoachRequestIntent classifyCoachRequest(String input) {
   final text = normalizeCoachMeaning(input);
   bool has(String pattern) => RegExp(pattern).hasMatch(text);
+  if (isCoachWeightHistoryReadRequest(input)) {
+    return const CoachRequestIntent(CoachRequestKind.savedData);
+  }
+  if (isCoachPlanNegated(input)) {
+    return const CoachRequestIntent(CoachRequestKind.information);
+  }
   final plan = has(r'\bplans?\b|خط[ةه]|خطتي|برنامج|جدول');
   final training = has(
     r'\b(workouts?|training|exercise|gym)\b|تمرين|تمارين|تدريب|جيم',
