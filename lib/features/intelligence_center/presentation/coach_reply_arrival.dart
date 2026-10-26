@@ -12,12 +12,14 @@ class CoachReplyArrival extends StatefulWidget {
     required this.messageId,
     required this.animate,
     required this.child,
+    this.onPresentationReady,
     super.key,
   });
 
   final String messageId;
   final bool animate;
   final Widget child;
+  final VoidCallback? onPresentationReady;
 
   @override
   State<CoachReplyArrival> createState() => _CoachReplyArrivalState();
@@ -36,6 +38,8 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   bool _awaitingFirstPaint = false;
   String? _lastMetricsSignature;
   Timer? _metricLayoutDebounce;
+  String? _reportedVisibleFor;
+  bool _visibilityNoticeQueued = false;
 
   bool get _reduceMotion =>
       MediaQuery.disableAnimationsOf(context) ||
@@ -55,6 +59,28 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
       begin: const Offset(0, .008),
       end: Offset.zero,
     ).animate(_opacity);
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) _noticeVisibleAfterPaint();
+    });
+  }
+
+  void _noticeVisibleAfterPaint() {
+    if (widget.onPresentationReady == null ||
+        _visibilityNoticeQueued ||
+        _reportedVisibleFor == widget.messageId) {
+      return;
+    }
+    _visibilityNoticeQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _visibilityNoticeQueued = false;
+      if (!mounted || _awaitingFirstPaint || _opacity.value < .99) {
+        return;
+      }
+      if (_reportedVisibleFor != widget.messageId) {
+        _reportedVisibleFor = widget.messageId;
+        widget.onPresentationReady?.call();
+      }
+    });
   }
 
   @override
@@ -72,6 +98,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
       _metricLayoutDebounce?.cancel();
       _metricLayoutDebounce = null;
       _handledMessageId = null;
+      _reportedVisibleFor = null;
       _awaitingLayoutFor = null;
       _awaitingFirstPaint = false;
       _layoutGeneration++;
@@ -230,10 +257,13 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   }
 
   @override
-  Widget build(BuildContext context) => FadeTransition(
-    key: ValueKey('coach-reply-arrival-fade-${widget.messageId}'),
-    alwaysIncludeSemantics: true,
-    opacity: _opacity,
-    child: SlideTransition(position: _position, child: widget.child),
-  );
+  Widget build(BuildContext context) {
+    _noticeVisibleAfterPaint();
+    return FadeTransition(
+      key: ValueKey('coach-reply-arrival-fade-${widget.messageId}'),
+      alwaysIncludeSemantics: true,
+      opacity: _opacity,
+      child: SlideTransition(position: _position, child: widget.child),
+    );
+  }
 }

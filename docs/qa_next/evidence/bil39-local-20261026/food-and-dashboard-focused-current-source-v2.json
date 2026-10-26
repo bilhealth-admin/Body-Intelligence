@@ -1,0 +1,30 @@
+{
+  "classification": "local_focused_only_not_full_suite_or_signed39",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "passed": 22,
+  "failed": 0,
+  "completed": {
+    "success": true,
+    "type": "done",
+    "time": 21083
+  },
+  "source_unchanged": true,
+  "log_sha256": "6c89a453765c2597030079370347d0bf2bb3c1a5c8e195d820b3815792468d0c",
+  "scoped_analyze": {
+    "items": 6,
+    "issues": 0,
+    "log": "food-and-dashboard-scoped-analyze-v1.log"
+  },
+  "native39": "not_installed_or_tested",
+  "signed39": "not_built",
+  "full_root": "not_repeated_under_user_hold",
+  "files": [
+    "lib/features/daily_log/food_log_page.dart",
+    "lib/features/daily_log/food_log_actions.dart",
+    "lib/features/dashboard/domain/dashboard_intelligence_composer.dart",
+    "lib/features/dashboard/widgets/dashboard_grid.dart",
+    "test/features/daily_log/food_log_serving_validation_test.dart",
+    "test/features/dashboard/domain/dashboard_intelligence_composer_test.dart",
+    "test/features/dashboard/composition/dashboard_deleted_food_round_trip_test.dart"
+  ]
+}

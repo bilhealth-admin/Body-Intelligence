@@ -104,6 +104,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     PurchaseDetails purchase, {
     required _StorePurchaseEventOrigin origin,
     required _StoreTransactionAttempt? transactionAttempt,
+    bool waitForNativeFinish = false,
   }) async {
     var transactionSettled = false;
     var acknowledgementScheduled = false;
@@ -179,17 +180,23 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       notifyListeners();
       if (verifiedReceipt) {
         acknowledgementScheduled = true;
-        unawaited(
-          _finishVerifiedNativeReceipt(
-            purchase,
-            visit: _storeVisit.capture(),
-            generation: _purchaseEventGeneration,
-            benefitRevision: verifiedBenefitRevision,
-            active: verifiedActive,
-            trace: checkoutTrace,
-            transactionAttempt: transactionAttempt,
-          ),
+        final finishing = _finishVerifiedNativeReceipt(
+          purchase,
+          visit: _storeVisit.capture(),
+          generation: _purchaseEventGeneration,
+          benefitRevision: verifiedBenefitRevision,
+          active: verifiedActive,
+          trace: checkoutTrace,
+          transactionAttempt: transactionAttempt,
         );
+        // Checkout preflight must observe the completion of this exact,
+        // already verified transaction before re-reading unfinished history.
+        // Ordinary callbacks still publish benefits without blocking the queue.
+        if (waitForNativeFinish) {
+          await finishing;
+        } else {
+          unawaited(finishing);
+        }
       }
     } finally {
       if (transactionAttempt != null && !acknowledgementScheduled) {

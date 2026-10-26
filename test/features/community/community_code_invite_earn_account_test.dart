@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -521,7 +522,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Replace code'));
       await tester.pump();
       expect(repository.rotations, [_a]);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
       const nextCode = 'cccccccccccccccccccccccccccccccc';
       pending.complete(
         CommunityPublicCode.fromJson({
@@ -537,7 +538,7 @@ void main() {
         find.text('Your BIL Code is unavailable right now. Try again.'),
         findsNothing,
       );
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(tester.widget<OutlinedButton>(rotate).onPressed, isNotNull);
       final share = find.byKey(const Key('community-bil-code-share'));
       await tester.ensureVisible(share);
@@ -584,7 +585,7 @@ void main() {
       expect(find.byKey(const Key('community-bil-code-qr')), findsNothing);
       expect(share, findsNothing);
       expect(lost.codeReads, 2);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
       // A tap queued by the previous frame must not share the invalidated code.
       oldShare();
       await tester.pump();
@@ -595,7 +596,7 @@ void main() {
       expect(find.text('@current_rotated_a'), findsOneWidget);
       expect(find.text('@member_a'), findsNothing);
       expect(find.byKey(const Key('community-bil-code-qr')), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(
         find.text('Your BIL Code is unavailable right now. Try again.'),
         findsNothing,
@@ -653,7 +654,7 @@ void main() {
         findsNothing,
       );
       expect(find.text('Invitation unavailable'), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(repository.previewReads, 2);
       expect(repository.accepts, isEmpty);
       expect(tester.takeException(), isNull);
@@ -742,12 +743,12 @@ void main() {
         await tester.tap(find.widgetWithText(FilledButton, 'Replace code'));
         await tester.pump();
         expect(repository.rotations, [_a]);
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
         await accounts.recover(_b);
         if (returnToA) await accounts.recover(_a);
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 20));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         expect(
           find.text(returnToA ? '@member_a' : '@member_b'),
           findsOneWidget,

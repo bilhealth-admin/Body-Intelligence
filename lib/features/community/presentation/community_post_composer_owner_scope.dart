@@ -151,5 +151,5 @@ class _CommunityComposerEntryConfirmedState
 
   @override
   Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: CircularProgressIndicator()));
+      const Scaffold(body: Center(child: BilFeatureWelcomeStatus()));
 }

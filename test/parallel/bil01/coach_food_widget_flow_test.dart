@@ -26,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/coach_conversation_entry.dart';
 
 void main() {
   testWidgets(
@@ -115,6 +116,7 @@ void main() {
         await tester.pump();
         await tester.pump(Duration.zero);
         await tester.pumpWidget(h.app());
+        await openCoachConversationFromOverview(tester);
         // The Coach keeps an ambient animation alive after restoring a
         // verified receipt. Wait for the restored receipt itself rather than
         // requiring every unrelated animation to settle.
@@ -423,6 +425,7 @@ Future<void> _withFoodCoach(
   );
   try {
     await tester.pumpWidget(harness.app());
+    await openCoachConversationFromOverview(tester);
     await _pumpUntil(
       tester,
       () => find

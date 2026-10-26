@@ -1,5 +1,7 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -266,7 +268,7 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
             future: _code,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               final code = snapshot.data;
               if (snapshot.hasError || code == null) {
@@ -347,9 +349,9 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
                     icon: _rotationSubmitted
                         ? const SizedBox.square(
                             dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           )
-                        : const BilGlassPressFeedback(
+                        : const BilNavigationFeedback(
                             child: Icon(Icons.refresh_rounded),
                           ),
                     label: Text(
@@ -639,7 +641,7 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
             future: _member,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               if (snapshot.hasError) {
                 return _CodeUnavailable(
@@ -730,7 +732,7 @@ class _MemberRelationshipAction extends StatelessWidget {
       icon: requesting
           ? const SizedBox.square(
               dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: BilFeatureWelcomeStatus(),
             )
           : const Icon(Icons.person_add_alt_1_rounded),
       label: Text(communityText(context, 'Add Friend', 'إضافة صديق')),

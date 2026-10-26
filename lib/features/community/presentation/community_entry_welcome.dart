@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 
 import 'community_copy.dart';
@@ -217,9 +218,8 @@ class CommunityEntryWelcome extends StatelessWidget {
                       icon: saving
                           ? const SizedBox.square(
                               dimension: 20,
-                              child: CircularProgressIndicator(
+                              child: BilFeatureWelcomeStatus(
                                 color: Colors.white,
-                                strokeWidth: 2,
                               ),
                             )
                           : const Icon(Icons.qr_code_2_rounded, size: 23),

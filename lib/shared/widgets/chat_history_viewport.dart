@@ -1,4 +1,6 @@
-import 'bil_glass_press_feedback.dart';
+import 'dart:async';
+
+import 'bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 /// For a reversed history list (newest item at offset zero).
@@ -12,6 +14,7 @@ class ChatHistoryViewport extends StatefulWidget {
     required this.latestMessageId,
     this.centerJumpButton = false,
     this.latestTargetOffset,
+    this.onLatestRequested,
     super.key,
   });
   final ScrollController controller;
@@ -22,6 +25,10 @@ class ChatHistoryViewport extends StatefulWidget {
   /// Optional measured reading start for a newest item taller than the viewport.
   /// Other chats retain their existing newest-end behavior by default.
   final double Function(ScrollPosition position)? latestTargetOffset;
+
+  /// A page may reuse its own measured, reduced-motion-aware scroll behavior.
+  /// Other chats use the same bounded soft scroll to their latest end.
+  final VoidCallback? onLatestRequested;
 
   @override
   State<ChatHistoryViewport> createState() => _ChatHistoryViewportState();
@@ -142,74 +149,111 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
   }
 
   @override
-  Widget build(BuildContext context) =>
-      NotificationListener<ScrollNotification>(
-        onNotification: _onScroll,
-        child: NotificationListener<ScrollMetricsNotification>(
-          onNotification: (notification) {
-            if (notification.depth == 0 && _followingLatest) _queuePin();
-            return false;
-          },
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              widget.child,
-              Positioned(
-                bottom: 10,
-                left: widget.centerJumpButton ? 0 : null,
-                right: widget.centerJumpButton ? 0 : 12,
-                child: AnimatedBuilder(
-                  animation: widget.controller,
-                  builder: (context, _) {
-                    if (_nearLatest) return const SizedBox.shrink();
-                    final scheme = Theme.of(context).colorScheme;
-                    final button = Material(
-                      elevation: 5,
-                      shadowColor: scheme.shadow.withValues(alpha: .18),
-                      color: scheme.surface,
-                      shape: CircleBorder(
-                        side: BorderSide(
-                          color: scheme.outlineVariant.withValues(alpha: .55),
-                          width: .8,
-                        ),
-                      ),
-                      child: IconButton(
-                        key: const ValueKey('chat-jump-to-latest'),
-                        tooltip: _latestMessageLabel(
-                          Localizations.localeOf(context),
-                        ),
-                        onPressed: () {
-                          _interactionGeneration++;
-                          _followingLatest = true;
-                          if (widget.controller.hasClients &&
-                              widget.controller.position.hasContentDimensions) {
-                            widget.controller.jumpTo(
-                              _latestTarget(widget.controller.position),
-                            );
-                          }
-                          _queuePin(force: true);
-                        },
-                        style: IconButton.styleFrom(
-                          foregroundColor: scheme.onSurface,
-                          minimumSize: const Size.square(42),
-                          maximumSize: const Size.square(42),
-                          padding: EdgeInsets.zero,
-                        ),
-                        icon: const BilGlassPressFeedback(
-                          child: Icon(Icons.arrow_downward_rounded, size: 23),
-                        ),
-                      ),
-                    );
-                    return widget.centerJumpButton
-                        ? Center(child: button)
-                        : button;
-                  },
-                ),
-              ),
-            ],
+  Widget build(
+    BuildContext context,
+  ) => NotificationListener<ScrollNotification>(
+    onNotification: _onScroll,
+    child: NotificationListener<ScrollMetricsNotification>(
+      onNotification: (notification) {
+        if (notification.depth == 0 && _followingLatest) _queuePin();
+        return false;
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          widget.child,
+          Positioned(
+            bottom: 10,
+            left: widget.centerJumpButton ? 0 : null,
+            right: widget.centerJumpButton ? 0 : 12,
+            child: AnimatedBuilder(
+              animation: widget.controller,
+              builder: (context, _) {
+                if (_nearLatest) return const SizedBox.shrink();
+                final scheme = Theme.of(context).colorScheme;
+                final button = Material(
+                  elevation: 5,
+                  shadowColor: scheme.shadow.withValues(alpha: .18),
+                  color: scheme.surface,
+                  shape: CircleBorder(
+                    side: BorderSide(
+                      color: scheme.outlineVariant.withValues(alpha: .55),
+                      width: .8,
+                    ),
+                  ),
+                  child: IconButton(
+                    key: const ValueKey('chat-jump-to-latest'),
+                    tooltip: _latestMessageLabel(
+                      Localizations.localeOf(context),
+                    ),
+                    onPressed: () {
+                      _interactionGeneration++;
+                      final onLatestRequested = widget.onLatestRequested;
+                      if (onLatestRequested != null) {
+                        // Let the page's animated scroll settle before
+                        // metric notifications may pin its position. A
+                        // user's drag still cancels following immediately.
+                        _followingLatest = false;
+                        onLatestRequested();
+                        return;
+                      }
+                      if (widget.controller.hasClients &&
+                          widget.controller.position.hasContentDimensions) {
+                        final controller = widget.controller;
+                        final target = _latestTarget(controller.position);
+                        final reduceMotion =
+                            MediaQuery.disableAnimationsOf(context) ||
+                            View.of(context)
+                                .platformDispatcher
+                                .accessibilityFeatures
+                                .reduceMotion;
+                        if (!reduceMotion) {
+                          _followingLatest = false;
+                          final generation = _interactionGeneration;
+                          unawaited(
+                            controller
+                                .animateTo(
+                                  target,
+                                  duration: const Duration(milliseconds: 280),
+                                  curve: Curves.easeOutCubic,
+                                )
+                                .whenComplete(() {
+                                  if (!mounted ||
+                                      _disposed ||
+                                      generation != _interactionGeneration ||
+                                      controller != widget.controller) {
+                                    return;
+                                  }
+                                  _followingLatest = _nearLatest;
+                                  if (_followingLatest) _queuePin();
+                                }),
+                          );
+                          return;
+                        }
+                        _followingLatest = true;
+                        controller.jumpTo(target);
+                      }
+                      _queuePin(force: true);
+                    },
+                    style: IconButton.styleFrom(
+                      foregroundColor: scheme.onSurface,
+                      minimumSize: const Size.square(42),
+                      maximumSize: const Size.square(42),
+                      padding: EdgeInsets.zero,
+                    ),
+                    icon: const BilNavigationFeedback(
+                      child: Icon(Icons.arrow_downward_rounded, size: 23),
+                    ),
+                  ),
+                );
+                return widget.centerJumpButton ? Center(child: button) : button;
+              },
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 }
 
 String _latestMessageLabel(Locale locale) =>

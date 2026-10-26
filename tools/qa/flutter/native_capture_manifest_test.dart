@@ -22,6 +22,50 @@ const _ios =
     'feature-splashes-native/$_name.png';
 
 void main() {
+  test(
+    'conversation and checkout names are bounded by the actual capture matrix',
+    () {
+      expect(isNativeCaptureName('bil39-community-ar-dark-2x-sent'), isTrue);
+      expect(isNativeCaptureName('bil39-community-en-light-1x-reply'), isTrue);
+      expect(isNativeCaptureName('bil39-store-ar-light-2x-pending'), isTrue);
+      for (final name in [
+        'bil39-community-fr-dark-2x-sent',
+        'bil39-community-en-light-3x-reply',
+        '../bil39-store-ar-light-2x-pending',
+        'bil39-store-ar-light-2x-pending/other',
+        'bil39-store-ar-light-1x-pending',
+      ]) {
+        expect(isNativeCaptureName(name), isFalse);
+      }
+    },
+  );
+  test('BIL39 native plan names allow only the reviewed capture matrix', () {
+    for (final environment in ['home', 'gym']) {
+      for (final locale in ['ar', 'en']) {
+        for (final brightness in ['light', 'dark']) {
+          for (final scale in [1, 2]) {
+            for (final phase in ['warmup', 'session']) {
+              expect(
+                isNativeCaptureName(
+                  'bil39-plan-$environment-$locale-$brightness-${scale}x-$phase',
+                ),
+                isTrue,
+              );
+            }
+          }
+        }
+      }
+    }
+    for (final invalid in [
+      'bil39-plan-home-ar-dark-3x-session',
+      'bil39-plan-home-fr-dark-1x-session',
+      'bil39-plan-unknown-en-light-1x-session',
+      '../bil39-plan-home-ar-dark-1x-session',
+      'bil39-plan-home-ar-dark-1x-session/other',
+    ]) {
+      expect(isNativeCaptureName(invalid), isFalse);
+    }
+  });
   late Uint8List original;
   NativeCaptureManifest manifest({String? path, String platform = 'android'}) =>
       NativeCaptureManifest.fromPng(

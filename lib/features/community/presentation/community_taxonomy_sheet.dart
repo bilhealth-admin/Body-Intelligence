@@ -1,5 +1,5 @@
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -291,7 +291,7 @@ class _Link extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ActionChip(
-    avatar: BilGlassPressFeedback(child: Icon(icon, size: 18)),
+    avatar: BilNavigationFeedback(child: Icon(icon, size: 18)),
     label: Text(label),
     onPressed: onPressed,
   );

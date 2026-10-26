@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "checked_at_utc": "2026-10-26T19:01:18.780Z",
+  "scope": "Uncommitted BIL39 source; focused local checks, no native39 runtime claim",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "change": "Recoverable Objective-C audio exceptions log a fixed code, never exception.reason or exception.name. Return behavior unchanged.",
+  "result": {
+    "passed": 26,
+    "failed": 0,
+    "skipped": 0,
+    "done": {
+      "success": true,
+      "type": "done",
+      "time": 13660
+    },
+    "cases": [
+      "UIScene native presenters never depend on AppDelegate.window",
+      "iOS permission and camera lifecycle operations are race safe",
+      "Apple capabilities and iOS-native interaction contracts stay enabled",
+      "HealthKit reads remain indeterminate and are not denied by write status",
+      "ad-hoc builds default to the development environment profile",
+      "default cloud and AI are ready without remote overrides",
+      "omitted payment opt-in fails closed with ready dependencies",
+      "payment opt-in requires every commerce dependency",
+      "compiled commerce flag respects explicit payment and legal readiness",
+      "structured logger redacts health and identity attributes",
+      "analytics and crash boundaries make no upload claim",
+      "Apple AI consent copy is complete across all 25 locales",
+      "Apple app-owned privacy manifest matches the linked-data boundary",
+      "app-owned Community UUID relationships are disclosed as Contacts",
+      "source evidence supports search, support, performance and diagnostics",
+      "cloud, community, HealthKit and AI disclosures match active code",
+      "public and in-app policies contain the reconciled privacy wording",
+      "third-party AI consent is explicit and enforced before transmission",
+      "public site has no beacons and iOS source has no ATT prompt",
+      "iOS purpose strings match weight-only writes and current photo uses",
+      "advertising reuses the existing 18+ product boundary",
+      "development uses official test banners and production stays disabled",
+      "production AdMob identity rejects placeholders and mixed owners",
+      "AdGate allows only Free in reviewed non-sensitive placement",
+      "health logging and unknown age remain ad-free",
+      "unverified entitlement can never request an ad"
+    ]
+  },
+  "source_hashes": {
+    "ios/Runner/BILObjCExceptionCatcher.m": "d6d2184a5623f5cbe23676f8721d47c15fc50340d09905984e59b352866ff4e3",
+    "test/apple_preparation/ios_native_runtime_safety_contract_test.dart": "341b01c2df7d2e7588d2d94b21b83087c25775cc46196ccd4d2e294a80db29d6"
+  },
+  "test_log_sha256": "c0ecacaba79f83c4d36478768eca4aee78b023774e8ae90ff368ca008ab6f284",
+  "analyze": {
+    "issues": 0,
+    "log_sha256": "0b2cbe73c9c55d088863ce3480232818b9a5d6aacd8b05b8cce9d31daf9db714"
+  },
+  "pending": [
+    "macOS Objective-C compilation and native39 execution"
+  ]
+}

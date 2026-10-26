@@ -71,9 +71,9 @@ extension _CommunityMemberProfileActivityMedia
                 icon: _loadingMore
                     ? const SizedBox.square(
                         dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
-                    : const BilGlassPressFeedback(
+                    : const BilNavigationFeedback(
                         child: Icon(Icons.expand_more_rounded),
                       ),
                 label: Text(
@@ -117,7 +117,7 @@ extension _CommunityMemberProfileActivityMedia
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.all(36),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: BilFeatureWelcomeStatus()),
           ),
         ),
       ];
@@ -171,9 +171,9 @@ extension _CommunityMemberProfileActivityMedia
                 icon: state.replyLoading
                     ? const SizedBox.square(
                         dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
-                    : const BilGlassPressFeedback(
+                    : const BilNavigationFeedback(
                         child: Icon(Icons.expand_more_rounded),
                       ),
                 label: Text(
@@ -221,7 +221,7 @@ extension _CommunityMemberProfileActivityMedia
         SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.all(36),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: BilFeatureWelcomeStatus()),
           ),
         ),
       ];
@@ -296,9 +296,9 @@ extension _CommunityMemberProfileActivityMedia
                 icon: state.likeLoading
                     ? const SizedBox.square(
                         dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
-                    : const BilGlassPressFeedback(
+                    : const BilNavigationFeedback(
                         child: Icon(Icons.expand_more_rounded),
                       ),
                 label: Text(
@@ -325,9 +325,9 @@ extension _CommunityMemberProfileActivityMedia
           icon: _loadingMore
               ? const SizedBox.square(
                   dimension: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: BilFeatureWelcomeStatus(),
                 )
-              : const BilGlassPressFeedback(
+              : const BilNavigationFeedback(
                   child: Icon(Icons.expand_more_rounded),
                 ),
           label: Text(communityText(context, 'Load more', 'تحميل المزيد')),
@@ -346,7 +346,7 @@ extension _CommunityMemberProfileActivityMedia
       padding: const EdgeInsets.all(40),
       child: Column(
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 48)),
+          BilNavigationFeedback(child: Icon(icon, size: 48)),
           const SizedBox(height: 12),
           Text(text, textAlign: TextAlign.center),
         ],
@@ -364,7 +364,7 @@ extension _CommunityMemberProfileActivityMedia
         child: FilledButton.icon(
           key: key,
           onPressed: onRetry,
-          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
+          icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
         ),
       ),

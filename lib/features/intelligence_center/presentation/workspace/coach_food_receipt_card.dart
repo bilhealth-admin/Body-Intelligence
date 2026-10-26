@@ -1,5 +1,6 @@
+import '../../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../../shared/widgets/bil_pearl_popup_menu.dart';
-import '../../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../data/repositories/meal_repository.dart';
@@ -213,10 +214,7 @@ class _CoachFoodReceiptCardState extends State<CoachFoodReceiptCard> {
           if (_busy)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
-              child: LinearProgressIndicator(
-                minHeight: 2,
-                color: CoachFoodCardPalette.blue,
-              ),
+              child: BilFeatureWelcomeStatus(color: CoachFoodCardPalette.blue),
             ),
           if (!restricted &&
               widget.commit.kind != CoachMealCommandKind.remove) ...[
@@ -252,7 +250,7 @@ class _CoachFoodReceiptCardState extends State<CoachFoodReceiptCard> {
                 spacing: 6,
                 children: [
                   Text(copy.dailyLog),
-                  const BilGlassPressFeedback(
+                  const BilNavigationFeedback(
                     child: Icon(Icons.arrow_forward, size: 16),
                   ),
                 ],

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/community_food_input.dart';
@@ -194,7 +195,7 @@ class _CommunityFoodSubmissionSheetState
                 icon: _submitting
                     ? const SizedBox.square(
                         dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : const Icon(Icons.fact_check_outlined),
                 label: Text(

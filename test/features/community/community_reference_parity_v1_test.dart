@@ -563,7 +563,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(const Key('community-profile-follow-action')),
-          matching: find.text('Following'),
+          matching: find.text('Unfollow'),
         ),
         findsOneWidget,
       );

@@ -30,6 +30,37 @@ void main() {
     );
   });
 
+  test('review is not the navigation verb view inside another word', () {
+    for (final input in [
+      'Review my day from my saved BIL data and tell me the most useful next step.',
+      'Review today’s nutrition from my saved BIL data. What stands out and what should I focus on next?',
+      'Explain my recorded sleep trend and what it may mean for today, without inventing missing data.',
+      'Based on my selected BIL context, what is the single best thing to focus on next and why?',
+      'Give me an overview of my progress',
+      'Preview the proposed workout without opening another screen',
+      'My goals show improvement',
+      'راجع يومي من بيانات BIL المحفوظة وأخبرني بأكثر خطوة مفيدة الآن.',
+    ]) {
+      expect(
+        policy.isDirectNavigationRequest(input, weightHistory),
+        isFalse,
+        reason: input,
+      );
+    }
+    for (final input in [
+      'View my weight history',
+      'Please open my weight history.',
+      'Go to my weight history',
+      'افتح سجل أوزاني',
+    ]) {
+      expect(
+        policy.isDirectNavigationRequest(input, weightHistory),
+        isTrue,
+        reason: input,
+      );
+    }
+  });
+
   test('short follow-up open commands can reuse the latest safe action', () {
     expect(policy.isContextualOpenFollowUp('Open it.'), isTrue);
     expect(policy.isContextualOpenFollowUp('افتحها'), isTrue);

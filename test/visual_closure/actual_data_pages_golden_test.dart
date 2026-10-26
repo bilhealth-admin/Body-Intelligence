@@ -714,6 +714,28 @@ void main() {
       name: 'ai_coach_conversation_phone',
       prepare: (tester) async {
         expect(find.byType(Scaffold), findsOneWidget);
+        // An authorized Coach first lands on Overview. This golden explicitly
+        // captures the conversation surface, so use the visible Chat action.
+        final chatEntry = find.byKey(const Key('coach-workspace-open-chat'));
+        for (
+          var attempt = 0;
+          attempt < 60 && chatEntry.evaluate().isEmpty;
+          attempt++
+        ) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 30)),
+          );
+          await tester.pump(const Duration(milliseconds: 30));
+        }
+        expect(
+          find.byKey(const Key('coach-reference-workspace')),
+          findsOneWidget,
+        );
+        expect(chatEntry, findsOneWidget);
+        await tester.ensureVisible(chatEntry);
+        expect(chatEntry.hitTestable(), findsOneWidget);
+        await tester.tap(chatEntry);
+        await tester.pumpAndSettle();
         final field = find.byKey(const Key('ai-coach-question-field'));
         // Wait for either permitted opening instead of requiring a synthetic
         // welcome when the Coach renders an evidence-backed daily brief.

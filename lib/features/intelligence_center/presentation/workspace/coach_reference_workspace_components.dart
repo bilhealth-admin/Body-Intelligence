@@ -116,7 +116,7 @@ class _TimelineRow extends StatelessWidget {
               shape: BoxShape.circle,
               color: Theme.of(context).colorScheme.primaryContainer,
             ),
-            child: BilGlassPressFeedback(
+            child: BilNavigationFeedback(
               child: Icon(
                 icon,
                 size: 17,
@@ -148,7 +148,7 @@ class _TimelineRow extends StatelessWidget {
               ],
             ),
           ),
-          const BilGlassPressFeedback(
+          const BilNavigationFeedback(
             child: Icon(
               Icons.chevron_right_rounded,
               size: 15,

@@ -8,7 +8,7 @@ import 'package:body_intelligence_log/features/daily_log/daily_body_context_copy
 import 'package:body_intelligence_log/features/daily_log/domain/daily_body_context_codec.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_today_sections.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
-import 'package:body_intelligence_log/shared/widgets/bil_glass_press_feedback.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_navigation_feedback.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -141,7 +141,16 @@ void main() {
           ),
           findsNothing,
         );
-        expect(tile.trailing, isA<BilGlassPressFeedback>());
+        // BIL39 deliberately replaces press-only navigation decoration. Keep
+        // the real route, localized/private text and hit-target checks below.
+        expect(tile.trailing, isA<BilNavigationFeedback>());
+        expect(
+          find.descendant(
+            of: find.byWidget(tile.trailing!),
+            matching: find.byKey(const Key('bil-crystal-arrow-bubble')),
+          ),
+          findsOneWidget,
+        );
         expect(
           find.descendant(
             of: find.byWidget(tile.trailing!),

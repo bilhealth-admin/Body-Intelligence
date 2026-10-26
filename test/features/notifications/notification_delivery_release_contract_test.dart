@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -197,7 +198,7 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(tester.widget<SwitchListTile>(master).value, isFalse);
         expect(tester.renderObject(find.byType(ListView)), same(body));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         expect(gateway.permissionRequests, 1);
         permission.complete(false);
         await tester.pumpAndSettle();
@@ -226,7 +227,7 @@ void main() {
           isTrue,
         );
         expect(tester.renderObject(find.byType(ListView)), same(body));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         expect(
           gateway.activationNotifications,
           0,

@@ -1,7 +1,10 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../app/theme/bil_navigation_press_style.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -24,6 +27,7 @@ import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../domain/static_workout_artwork.dart';
+import '../domain/workout_source_link.dart';
 import '../domain/gym_six_month_plan.dart';
 import '../domain/wellness_content_pack.dart';
 import '../domain/workout_routine_contract.dart';
@@ -84,6 +88,7 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
     this.gymPlanLoader,
     this.offline = false,
     this.initialItemId,
+    this.returnToCallerAfterInitialItem = false,
   });
 
   final WellnessContentPackManager? manager;
@@ -93,6 +98,10 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
   final CustomRoutineWriter? customRoutineWriter;
   final GymPlanLoader? gymPlanLoader;
   final String? initialItemId;
+
+  /// Set only for verified movement opened from an active Smart Plan session.
+  /// Normal library browsing and ordinary deep links are unaffected.
+  final bool returnToCallerAfterInitialItem;
 
   /// Set by the owning connectivity provider. Installed packs remain usable
   /// while this is true; no remote availability is inferred by this page.
@@ -378,7 +387,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
             onPressed: () => context.canPop()
                 ? context.pop()
                 : context.go('/wellness-library'),
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
           ),
           title: Text(
             wellnessWorkoutVideosAndRoutinesTitle(context),
@@ -413,7 +422,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                 'إدارة الحزم الموثقة',
               ),
               onPressed: () => context.push('/wellness/content-packs'),
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.download_for_offline_outlined),
               ),
             ),
@@ -429,7 +438,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
           ),
         ),
         body: future == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: BilFeatureWelcomeStatus())
             : FutureBuilder<List<WellnessContentItem>>(
                 future: future,
                 builder: (context, snapshot) {
@@ -516,6 +525,16 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     if (mounted) setState(() {});
   }
 
+  Future<void> _openInitialItemDetails(WellnessContentItem item) async {
+    await _openDetails(item);
+    if (!mounted || !widget.returnToCallerAfterInitialItem) return;
+    // Only unwind our own library route after its detail has closed. Do not
+    // pop another destination if the user navigated away while it was open.
+    if (ModalRoute.of(context)?.isCurrent == true && context.canPop()) {
+      context.pop();
+    }
+  }
+
   void _scheduleInitialItem(List<WellnessContentItem> items) {
     if (_initialItemHandled) return;
     final requested = widget.initialItemId?.trim();
@@ -554,7 +573,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
       }
       // A deep link opens its requested detail, never an unsolicited paywall.
       // The detail retains its real content gate and explicit upgrade action.
-      _openDetails(item);
+      unawaited(_openInitialItemDetails(item));
     });
   }
 

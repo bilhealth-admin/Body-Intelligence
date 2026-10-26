@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
@@ -157,7 +158,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
           ],
         ),
         body: profileAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: BilFeatureWelcomeStatus()),
           error: (_, _) => Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -182,7 +183,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
               return Center(child: Text(t('Complete your profile first.')));
             }
             if (dietaryAsync.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: BilFeatureWelcomeStatus());
             }
             if (dietaryAsync.hasError) {
               return Center(
@@ -234,7 +235,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
             );
             final settingAsync = ref.watch(planSettingProvider(profile.uuid));
             if (settingAsync.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: BilFeatureWelcomeStatus());
             }
             final setting = settingAsync.value;
             if (!initialized) {

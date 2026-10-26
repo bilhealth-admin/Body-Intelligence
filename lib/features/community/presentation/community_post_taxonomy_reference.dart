@@ -81,7 +81,7 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
       ),
       child: Row(
         children: [
-          BilGlassPressFeedback(
+          BilNavigationFeedback(
             child: Icon(
               CommunityTaxonomySheet.iconForSlug(topic.slug),
               size: 20,
@@ -103,7 +103,7 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
             style: Theme.of(context).textTheme.labelMedium,
           ),
           const SizedBox(width: 4),
-          BilGlassPressFeedback(
+          BilNavigationFeedback(
             child: Icon(
               Directionality.of(context) == TextDirection.rtl
                   ? Icons.chevron_left_rounded
@@ -147,7 +147,7 @@ class _CommunityPostTaxonomyReference extends StatelessWidget {
             style: Theme.of(context).textTheme.labelMedium,
           ),
           const SizedBox(width: 4),
-          BilGlassPressFeedback(
+          BilNavigationFeedback(
             child: Icon(
               Directionality.of(context) == TextDirection.rtl
                   ? Icons.chevron_left_rounded

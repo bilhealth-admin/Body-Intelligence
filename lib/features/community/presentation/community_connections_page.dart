@@ -1,7 +1,9 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'community_report_sheet.dart';
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'community_messages_page.dart' show CommunityMessageOwnerVisit;
 import 'package:flutter/material.dart';
@@ -348,7 +350,7 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                     })
                     .toList(growable: false);
                 if (visibleRows.isEmpty) {
-                  return RefreshIndicator(
+                  return BilRefreshIndicator(
                     onRefresh: _refreshConnections,
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -361,7 +363,7 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                     ),
                   );
                 }
-                return RefreshIndicator(
+                return BilRefreshIndicator(
                   onRefresh: _refreshConnections,
                   child: ListView.separated(
                     padding: const EdgeInsets.all(16),
@@ -381,6 +383,14 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                       final busy = _busyConnections.contains(row.id);
                       return BilPearlMaterialCard(
                         child: ListTile(
+                          key: Key('community-connection-profile-$otherId'),
+                          onTap: () async {
+                            if (visit?.isCurrent != true || busy) return;
+                            await context.push('/community/profile/$otherId');
+                            if (mounted && visit!.isCurrent) {
+                              await _refreshConnections();
+                            }
+                          },
                           leading: BilAccountAvatar(
                             radius: 20,
                             networkUrl: avatar,

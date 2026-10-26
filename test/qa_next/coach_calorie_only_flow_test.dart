@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/coach_conversation_entry.dart';
 
 const _calorieAction = Key(
   'ai-coach-action-sheet-quickAddMacros-calorie-only-2026-10-01-lunch-1905',
@@ -81,6 +82,7 @@ void main() {
           await tester.pump(Duration.zero);
           await tester.pumpWidget(h.app());
           await tester.pumpAndSettle();
+          await openCoachConversationFromOverview(tester);
           expect(await h.database.select(h.database.mealItems).get(), [saved]);
           expect(
             (await h.receipts()).single['operation_id'],
@@ -269,6 +271,7 @@ Future<void> _withCoach(
   try {
     await tester.pumpWidget(h.app());
     await tester.pumpAndSettle();
+    await openCoachConversationFromOverview(tester);
     await body(h);
   } finally {
     await tester.pumpWidget(const SizedBox.shrink());

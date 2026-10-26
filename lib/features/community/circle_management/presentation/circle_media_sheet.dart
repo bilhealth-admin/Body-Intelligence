@@ -160,7 +160,7 @@ class _CircleMediaFormState extends State<_CircleMediaForm> {
               'يمكن لمدير الدائرة المخوّل فقط تغيير الصور.',
             ),
           ),
-        if (controller.circleLoading) const LinearProgressIndicator(),
+        if (controller.circleLoading) const BilFeatureWelcomeStatus(),
         if (controller.circleError != null)
           _ManagementNotice(
             text: circleManagementText(

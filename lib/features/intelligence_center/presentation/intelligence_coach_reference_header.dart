@@ -80,7 +80,7 @@ class _CoachHero extends StatelessWidget {
                     width: backSize,
                     height: backSize,
                   ),
-                  icon: BilGlassPressFeedback(
+                  icon: BilNavigationFeedback(
                     child: Icon(
                       Directionality.of(context) == TextDirection.rtl
                           ? Icons.chevron_right_rounded
@@ -163,7 +163,7 @@ class _CoachHeaderAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox.square(
     dimension: size,
-    child: BilGlassPressFeedback(
+    child: BilNavigationFeedback(
       always: true,
       child: IconButton(
         tooltip: label,

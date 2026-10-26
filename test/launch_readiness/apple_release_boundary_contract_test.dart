@@ -117,7 +117,6 @@ void main() {
       'NSHealthShareUsageDescription',
       'NSHealthUpdateUsageDescription',
       'NSBluetoothAlwaysUsageDescription',
-      'NSBluetoothPeripheralUsageDescription',
     ]) {
       expect(info, contains('<key>$key</key>'));
       for (final locale in <String>['en', 'ar']) {
@@ -127,6 +126,17 @@ void main() {
         expect(localized, contains('"$key"'), reason: '$locale missing $key');
       }
     }
+    // Apple requires the Always key for iOS13+. The legacy Peripheral key
+    // is needed only below iOS13; BIL's complete target set is iOS15+.
+    final deploymentTargets = RegExp(r'IPHONEOS_DEPLOYMENT_TARGET = ([0-9.]+);')
+        .allMatches(
+          File('ios/Runner.xcodeproj/project.pbxproj').readAsStringSync(),
+        );
+    expect(deploymentTargets, isNotEmpty);
+    for (final target in deploymentTargets) {
+      expect(double.parse(target.group(1)!), greaterThanOrEqualTo(13));
+    }
+    expect(info, isNot(contains('NSBluetoothPeripheralUsageDescription')));
     expect(
       info,
       matches(RegExp(r'<key>ITSAppUsesNonExemptEncryption</key>\s*<false/>')),

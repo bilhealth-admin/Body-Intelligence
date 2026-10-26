@@ -279,7 +279,7 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                 IconButton(
                   tooltip: communityText(context, 'Refresh', 'تحديث'),
                   onPressed: _refresh,
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.refresh_rounded),
                   ),
                 ),
@@ -291,13 +291,13 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
             future: _drafts,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               if (snapshot.hasError) {
                 return Center(
                   child: FilledButton.icon(
                     onPressed: _refresh,
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.refresh_rounded),
                     ),
                     label: Text(
@@ -339,7 +339,7 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                   ),
                 );
               }
-              return RefreshIndicator(
+              return BilRefreshIndicator(
                 onRefresh: _refresh,
                 child: ListView.builder(
                   key: const Key('community-drafts-list'),
@@ -357,11 +357,9 @@ extension _CommunityDraftsRendering on _CommunityDraftsSheetState {
                               icon: _loadingMore
                                   ? const SizedBox.square(
                                       dimension: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
+                                      child: BilFeatureWelcomeStatus(),
                                     )
-                                  : BilGlassPressFeedback(
+                                  : BilNavigationFeedback(
                                       child: Icon(
                                         _loadMoreFailed
                                             ? Icons.refresh_rounded

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:body_intelligence_log/shared/widgets/bil_striped_progress.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -156,7 +157,8 @@ void main() {
     );
     final state = tester.element(find.byType(BilStripedProgress));
     expect((state as StatelessElement).widget, isA<BilStripedProgress>());
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.byType(ClipRRect), findsNothing);
     final semantics = tester.ensureSemantics();
     expect(

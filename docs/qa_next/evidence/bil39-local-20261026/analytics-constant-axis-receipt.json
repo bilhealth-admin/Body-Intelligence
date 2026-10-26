@@ -1,0 +1,72 @@
+{
+  "recorded_at": "2026-10-26T15:39:17.201Z",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "candidate_sha": null,
+  "dirty_tree": true,
+  "defect": "DEVICE38-015",
+  "symptom": "Single 80 kg measurement renders vertical ticks 80.0, 80.5, 80.0; axis contradicts plotted scale.",
+  "fix": "Expand both degenerate range bounds around their center, and share the same bounds with labels and painter.",
+  "red": {
+    "log": "analytics-constant-axis-red-v2.jsonl",
+    "behavioral_failures": 2,
+    "distinct_range_passes": 1,
+    "earlier_red_v1": "invalid localization harness; not behavioral evidence"
+  },
+  "green": {
+    "log": "analytics-constant-axis-green-v4.jsonl",
+    "passed": 38,
+    "failed": 0,
+    "skipped": 0
+  },
+  "analyze": {
+    "log": "analytics-constant-axis-analyze-v2.log",
+    "issues": 0
+  },
+  "limitations": [
+    "Native39 not installed or tested.",
+    "Green-v2 was interrupted because the capture harness hung; it is not a passing result.",
+    "Green-v3 behavioral pass used Ahem capture; visual evidence superseded by v4 with real fonts and BIL theme.",
+    "Full11048 predated this fix; no comprehensive rerun or build."
+  ],
+  "source_after": [
+    {
+      "path": "lib/features/analytics/widgets/analytics_weight_trend_chart.dart",
+      "sha256": "d15cb333ff73a318b34ed66c0f879d25fc4bf16b1cab61f84bc23722e467d42b"
+    },
+    {
+      "path": "test/features/analytics/analytics_weight_constant_axis_test.dart",
+      "sha256": "9543c93037711d43864bc55a6b4e0f0c9d4706649eb1f8ca3dcd284ec637792b"
+    },
+    {
+      "path": "test/p3_e5_001_analytics_weight_chart_test.dart",
+      "sha256": "1f7a1100c36378207d126bffaf677b806de4588c5d07f6e4a6481d538c6d703e"
+    }
+  ],
+  "log_sha256": "0afb2daa6ada88f3476852ef86e8de46908635cb9f5fddce938a4b023afbfcdb",
+  "visual_review": [
+    {
+      "file": "weight-axis-en-light.png",
+      "visually_reviewed": true,
+      "sha256": "e1a3dc8029e7c259f4f333a1f102d158c8573ecd9cff6f626c55b57bff20c0b5"
+    },
+    {
+      "file": "weight-axis-en-dark.png",
+      "visually_reviewed": true,
+      "sha256": "c8e039dafcc3f77219ab5a6cfc02e01b5bc281529110a3dfafd2da60b6caef8b"
+    },
+    {
+      "file": "weight-axis-ar-light.png",
+      "visually_reviewed": true,
+      "sha256": "07d130f52cc1ea26c7cc13584a941a88a92886e8e244a3ae9a438db42fec0c3d"
+    },
+    {
+      "file": "weight-axis-ar-dark.png",
+      "visually_reviewed": true,
+      "sha256": "7f6cfccdb0bbafa3985a621a10243af919c8cf068929f4f48c71c05e0af690c6"
+    }
+  ],
+  "device_evidence": {
+    "file": "screens/341-coach-overview-insights.png",
+    "sha256": "787e9a3f10f4858678464bbfdc3cbfb83c86795d94e3c7ff6564a53622d8dddc"
+  }
+}

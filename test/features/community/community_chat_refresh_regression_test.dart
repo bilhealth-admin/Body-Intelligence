@@ -1,8 +1,11 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_people_page.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_reply_arrival.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_sent_message_arrival.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -14,6 +17,8 @@ class _ChatRepository extends CommunityRepository {
   final List<CommunityMessage> messages;
   Completer<List<CommunityMessage>>? pendingLoad;
   Completer<void>? pendingSend;
+  bool appendSentMessage = false;
+  int sendCalls = 0;
   @override
   String get currentUserId => '11111111-1111-4111-8111-111111111111';
   @override
@@ -47,8 +52,21 @@ class _ChatRepository extends CommunityRepository {
   }) => sendMessage(recipientId, body);
 
   @override
-  Future<void> sendMessage(String id, String body) =>
-      pendingSend?.future ?? Future.value();
+  Future<void> sendMessage(String id, String body) async {
+    sendCalls++;
+    await (pendingSend?.future ?? Future.value());
+    if (appendSentMessage) {
+      messages.add(
+        CommunityMessage(
+          id: 'accepted-own-$sendCalls',
+          senderId: currentUserId,
+          recipientId: id,
+          body: body,
+          createdAt: DateTime(2026, 10, 26, 12, sendCalls),
+        ),
+      );
+    }
+  }
 }
 
 Widget _chat(_ChatRepository repository) => MaterialApp(
@@ -69,6 +87,95 @@ void main() {
   });
   tearDown(() async {
     await client.dispose();
+  });
+  testWidgets('accepted DM travels to its own bubble without a second send', (
+    tester,
+  ) async {
+    final repository = _ChatRepository(client)..appendSentMessage = true;
+    addTearDown(repository.changes.close);
+    await tester.pumpWidget(_chat(repository));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Accepted outgoing text');
+    await tester.tap(find.byKey(const Key('community-chat-send')));
+    for (var frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    final arrival = find.byType(CoachSentMessageArrival);
+    expect(arrival, findsOneWidget);
+    expect(tester.widget<CoachSentMessageArrival>(arrival).origin, isNotNull);
+    final flight = find.byKey(const ValueKey('coach-sent-message-flight'));
+    expect(flight, findsOneWidget);
+    final history = find.byKey(const Key('community-message-history'));
+    expect(
+      tester.getRect(arrival).width,
+      lessThan(tester.getRect(history).width),
+    );
+    expect(repository.sendCalls, 1);
+    expect(find.text('Accepted outgoing text'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(flight, findsNothing);
+    expect(repository.sendCalls, 1);
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      '',
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('new DM uses Coach entrance once without replaying history', (
+    tester,
+  ) async {
+    final repository = _ChatRepository(
+      client,
+      messages: [
+        CommunityMessage(
+          id: 'history',
+          senderId: '22222222-2222-4222-8222-222222222222',
+          recipientId: '11111111-1111-4111-8111-111111111111',
+          body: 'Visible historical text',
+          createdAt: DateTime(2026, 10, 25),
+        ),
+      ],
+    );
+    addTearDown(repository.changes.close);
+    await tester.pumpWidget(_chat(repository));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<CoachReplyArrival>(find.byType(CoachReplyArrival)).animate,
+      isFalse,
+    );
+    repository.messages.add(
+      CommunityMessage(
+        id: 'new-incoming',
+        senderId: '22222222-2222-4222-8222-222222222222',
+        recipientId: repository.currentUserId,
+        body: 'New incoming text',
+        createdAt: DateTime(2026, 10, 26),
+      ),
+    );
+    repository.changes.add(null);
+    for (var frame = 0; frame < 8; frame++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      if (find.text('New incoming text').evaluate().isNotEmpty) break;
+    }
+    expect(find.text('New incoming text'), findsOneWidget);
+    final arrivals = tester.widgetList<CoachReplyArrival>(
+      find.byType(CoachReplyArrival),
+    );
+    expect(arrivals.where((row) => row.animate).length, 1);
+    final fade = find.byWidgetPredicate(
+      (widget) =>
+          widget is FadeTransition &&
+          widget.key is ValueKey<String> &&
+          (widget.key as ValueKey<String>).value.endsWith(':new-incoming'),
+    );
+    expect(tester.widget<FadeTransition>(fade).opacity.value, lessThan(1));
+    await tester.pumpAndSettle();
+    expect(tester.widget<FadeTransition>(fade).opacity.value, 1);
+    expect(repository.sendCalls, 0);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
   });
   testWidgets(
     'friend chat opens at latest and leaves an older-reading user in place',
@@ -120,6 +227,15 @@ void main() {
         find.byKey(const Key('chat-jump-to-latest')).hitTestable(),
         findsOneWidget,
       );
+      await tester.tap(find.byKey(const Key('chat-jump-to-latest')));
+      await tester.pump();
+      expect(historyController.offset, closeTo(readingOffset, .5));
+      await tester.pump(const Duration(milliseconds: 16));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(historyController.offset, inExclusiveRange(0, readingOffset));
+      await tester.pumpAndSettle();
+      expect(historyController.offset, closeTo(0, .5));
+      expect(find.text('New incoming message'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
     },
@@ -139,7 +255,7 @@ void main() {
       await tester.pump();
       expect(find.text('Previously loaded message'), findsOneWidget);
       expect(find.byType(SelectableText), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       repository.pendingLoad!.complete([]);
       await tester.pumpAndSettle();
       await tester.pumpWidget(const SizedBox.shrink());

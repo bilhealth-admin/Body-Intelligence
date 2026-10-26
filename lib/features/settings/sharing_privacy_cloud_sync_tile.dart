@@ -67,7 +67,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
               secondary: _saving
                   ? const SizedBox.square(
                       dimension: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: BilFeatureWelcomeStatus(),
                     )
                   : const BilSemanticIconBadge(
                       kind: BilSemanticIconKind.cloudSync,
@@ -80,7 +80,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
                 leading: syncing
                     ? const SizedBox.square(
                         dimension: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : const BilSemanticIconBadge(
                         kind: BilSemanticIconKind.synchronization,

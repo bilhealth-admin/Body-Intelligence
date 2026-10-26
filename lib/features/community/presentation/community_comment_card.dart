@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/bil_pearl_finish.dart';
@@ -111,10 +112,13 @@ class CommunityCommentText extends StatelessWidget {
               child: TextButton.icon(
                 key: Key('community-comment-expand-$identity'),
                 onPressed: onToggle,
-                icon: Icon(
-                  expanded
-                      ? Icons.expand_less_rounded
-                      : Icons.expand_more_rounded,
+                icon: BilCrystalArrow(
+                  extent: 36,
+                  child: Icon(
+                    expanded
+                        ? Icons.expand_less_rounded
+                        : Icons.expand_more_rounded,
+                  ),
                 ),
                 label: Text(
                   communityText(

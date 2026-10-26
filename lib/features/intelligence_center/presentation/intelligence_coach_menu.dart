@@ -177,7 +177,7 @@ class _CoachMenuTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       minLeadingWidth: 24,
-      leading: BilGlassPressFeedback(
+      leading: BilNavigationFeedback(
         child: Icon(
           icon,
           color: destructive ? scheme.error : scheme.onSurfaceVariant,
@@ -197,7 +197,7 @@ class _CoachMenuTile extends StatelessWidget {
           context,
         ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
       ),
-      trailing: BilGlassPressFeedback(
+      trailing: BilNavigationFeedback(
         child: Icon(
           Icons.chevron_right_rounded,
           color: scheme.outline,
@@ -336,7 +336,7 @@ extension _CoachQuickPromptMenu on _IntelligenceCenterPageState {
                 for (var index = 0; index < prompts.length; index++)
                   ListTile(
                     key: Key('ai-coach-prompt-$index'),
-                    leading: BilGlassPressFeedback(
+                    leading: BilNavigationFeedback(
                       child: Icon(
                         prompts[index].icon,
                         color: Theme.of(

@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,21 +14,23 @@ class CommunityReturnButton extends StatelessWidget {
   final String fallbackLocation;
 
   @override
-  Widget build(BuildContext context) => BackButton(
-    key: const Key('community-safe-return'),
-    onPressed: () {
-      final navigator = Navigator.of(context);
-      if (navigator.canPop()) {
-        // Also works for Community subpages pushed with MaterialPageRoute.
-        navigator.pop();
-        return;
-      }
-      final router = GoRouter.of(context);
-      if (router.canPop()) {
-        router.pop();
-        return;
-      }
-      router.go(fallbackLocation);
-    },
+  Widget build(BuildContext context) => BilCrystalArrow(
+    child: BackButton(
+      key: const Key('community-safe-return'),
+      onPressed: () {
+        final navigator = Navigator.of(context);
+        if (navigator.canPop()) {
+          // Also works for Community subpages pushed with MaterialPageRoute.
+          navigator.pop();
+          return;
+        }
+        final router = GoRouter.of(context);
+        if (router.canPop()) {
+          router.pop();
+          return;
+        }
+        router.go(fallbackLocation);
+      },
+    ),
   );
 }

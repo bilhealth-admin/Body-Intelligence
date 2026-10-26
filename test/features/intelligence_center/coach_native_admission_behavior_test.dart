@@ -1,3 +1,5 @@
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -451,6 +453,7 @@ Future<_Fixture> _mount(
       ),
     ),
   );
+  await openCoachConversationFromOverview(tester);
   await tester.pumpAndSettle();
   return fixture;
 }

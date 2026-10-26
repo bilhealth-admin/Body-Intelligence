@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 import '../../../app/localization/app_localizations.dart';
 
@@ -48,7 +50,7 @@ Widget nutritionDestinationFields(
       onTap: !enabled
           ? null
           : () async {
-              final picked = await showDatePicker(
+              final picked = await showBilCrystalDatePicker(
                 context: context,
                 initialDate: date,
                 firstDate: DateTime(date.year < 2000 ? date.year : 2000),
@@ -75,6 +77,11 @@ Widget nutritionDestinationFields(
           : (value) {
               if (value != null) onType(value);
             },
+
+      icon: const BilCrystalArrow(
+        extent: 36,
+        child: Icon(Icons.keyboard_arrow_down_rounded),
+      ),
     ),
   ],
 );

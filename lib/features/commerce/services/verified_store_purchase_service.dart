@@ -98,6 +98,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   int _queuedPurchaseUpdates = 0;
   int _purchaseEventGeneration = 0;
   bool _restoring = false;
+  Future<void>? _nativeRestoreOperation;
   bool _restoreOwnershipConflict = false;
   bool _checkoutPreflightInFlight = false;
   bool _disposed = false;
@@ -142,6 +143,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   bool get configured => AppEnvironment.commerceConfigured;
   bool get hasPendingVerifiedFinish => _pendingVerifiedFinishes.isNotEmpty;
+  bool get isRestoring => _restoring;
   bool get busy =>
       _restoring ||
       _checkoutPreflightInFlight ||
@@ -149,6 +151,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       state == VerifiedStoreState.purchasePending;
   bool get canStartPurchase =>
       !busy &&
+      _nativeRestoreOperation == null &&
       canStartStorePurchase(
         state: state,
         productAvailable: products.isNotEmpty,
@@ -313,7 +316,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     // The button and service both guard this boundary. Keeping the service
     // idempotent prevents a second UI event from overwriting the truthful
     // pending state while the native sheet is opening.
-    if (_disposed || busy) return;
+    if (_disposed || busy || _nativeRestoreOperation != null) return;
     final user = Supabase.instance.client.auth.currentUser;
     var product = productFor(plan, term: term);
     if (user == null ||
@@ -336,22 +339,29 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       return;
     }
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      final reconciled = await _reconcileAppleUnfinishedBeforePurchase(
-        product.id,
-      );
-      if (!reconciled ||
-          _disposed ||
-          Supabase.instance.client.auth.currentUser?.id != user.id) {
-        return;
-      }
-      // Restore may refresh state and native catalog ownership. Re-read the
-      // selected product before opening a new transaction.
-      product = productFor(plan, term: term);
-      if (product == null) {
-        state = VerifiedStoreState.failed;
-        messageCode = 'purchase_unavailable';
-        notifyListeners();
-        return;
+      _checkoutPreflightInFlight = true;
+      notifyListeners();
+      try {
+        final reconciled = await _reconcileAppleUnfinishedBeforePurchase(
+          product.id,
+        );
+        if (!reconciled ||
+            _disposed ||
+            Supabase.instance.client.auth.currentUser?.id != user.id) {
+          return;
+        }
+        // Restore may refresh state and native catalog ownership. Re-read the
+        // selected product before opening a new transaction.
+        product = productFor(plan, term: term);
+        if (product == null) {
+          state = VerifiedStoreState.failed;
+          messageCode = 'purchase_unavailable';
+          notifyListeners();
+          return;
+        }
+      } finally {
+        _checkoutPreflightInFlight = false;
+        if (!_disposed) notifyListeners();
       }
     }
 

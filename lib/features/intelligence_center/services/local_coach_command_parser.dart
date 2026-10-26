@@ -461,12 +461,39 @@ class LocalCoachCommandParser {
   }
 
   String? _requestedLocale(String value) {
+    // Talking to the Coach in another language is not a request to mutate
+    // application language. Only explicit app/interface setting changes may
+    // produce the set_language action.
+    final conversationLanguage = _contains(value, const [
+      'reply',
+      'respond',
+      'answer',
+      'speak',
+      'talk',
+      'talking',
+      'رد ',
+      'جاوب',
+      'اتكلم',
+      'تكلم',
+      'احكي',
+    ]);
+    final appLanguage = _contains(value, const [
+      'app language',
+      'application language',
+      'interface language',
+      'language settings',
+      'لغة التطبيق',
+      'لغة الواجهة',
+      'لغة الإعدادات',
+      'لغه التطبيق',
+    ]);
+    if (conversationLanguage && !appLanguage) return null;
     if (!_contains(value, const ['language', 'لغة', 'اللغه', 'غير اللغة'])) {
       return null;
     }
     const variants = <String, List<String>>{
       'ar': ['arabic', 'العربي', 'عربي'],
-      'en': ['english', 'الانجليزي', 'إنجليزي'],
+      'en': ['english', 'الانجليزي', 'انجليزي'],
       'fr': ['french', 'الفرنسي', 'فرنسي'],
       'es': ['spanish', 'الاسباني', 'إسباني'],
       'tr': ['turkish', 'التركي', 'تركي'],

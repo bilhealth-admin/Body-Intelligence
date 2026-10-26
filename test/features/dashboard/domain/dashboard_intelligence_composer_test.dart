@@ -103,4 +103,37 @@ void main() {
 
     expect(result.bestAction.type, isNot(BestActionType.protein));
   });
+
+  test(
+    'empty meal containers do not count as recorded food or nutrition days',
+    () {
+      final seed = input();
+      final emptyMeal = DashboardMealInput(
+        at: now,
+        dayKey: todayKey,
+        items: const [],
+      );
+      final result = composer.compose(
+        DashboardIntelligenceInput(
+          now: now,
+          profile: seed.profile,
+          weights: const [],
+          todayMeals: [emptyMeal],
+          todayWater: const [],
+          allMeals: [emptyMeal],
+          allWater: const [],
+          insightContexts: const [],
+          allContexts: const [],
+          memories: const [],
+          skippedWeightToday: false,
+        ),
+      );
+      expect(result.dailyReturn.hasMeals, isFalse);
+      expect(result.loggingStreak, 0);
+      expect(result.weeklyReview.nutritionDays, 0);
+      expect(result.calorieByDay, isEmpty);
+      expect(result.nutrition.hasItems, isFalse);
+      expect(emptyMeal.items, isEmpty);
+    },
+  );
 }

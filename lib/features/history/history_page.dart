@@ -1,5 +1,7 @@
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -111,7 +113,7 @@ class HistoryPage extends ConsumerWidget {
                           ).formatMediumDate(selectedDate),
                         ),
                         onTap: () async {
-                          final picked = await showDatePicker(
+                          final picked = await showBilCrystalDatePicker(
                             context: dialogContext,
                             initialDate: selectedDate,
                             firstDate: DateTime(2000),
@@ -148,6 +150,11 @@ class HistoryPage extends ConsumerWidget {
                         onChanged: (next) => setDialogState(
                           () => measurementContext =
                               next ?? 'differentConditions',
+                        ),
+
+                        icon: const BilCrystalArrow(
+                          extent: 36,
+                          child: Icon(Icons.keyboard_arrow_down_rounded),
                         ),
                       ),
                     ],

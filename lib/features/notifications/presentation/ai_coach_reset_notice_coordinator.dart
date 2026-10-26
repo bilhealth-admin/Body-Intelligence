@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -267,9 +268,7 @@ class _AiCoachResetNoticeCoordinatorState
                                       icon: _dismissing
                                           ? const SizedBox.square(
                                               dimension: 18,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
+                                              child: BilFeatureWelcomeStatus(),
                                             )
                                           : const Icon(Icons.close_rounded),
                                     ),
@@ -308,7 +307,7 @@ class _AiCoachResetNoticeCoordinatorState
                                               ),
                                             ],
                                           ),
-                                          child: BilGlassPressFeedback(
+                                          child: BilNavigationFeedback(
                                             child: Icon(
                                               presentation.icon,
                                               color: Colors.white,

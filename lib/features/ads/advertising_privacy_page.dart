@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -488,9 +489,9 @@ class _AdvertisingPrivacyPageState
                 trailing: _umpBusy
                     ? const SizedBox.square(
                         dimension: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
-                    : const BilGlassPressFeedback(
+                    : const BilNavigationFeedback(
                         child: Icon(Icons.chevron_right_rounded),
                       ),
                 onTap: _umpBusy ? null : _showUmpPrivacyOptions,
@@ -517,7 +518,7 @@ class _AdvertisingPrivacyPageState
           if (_umpBusy)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
-              child: LinearProgressIndicator(),
+              child: BilFeatureWelcomeStatus(),
             ),
           if (!providerConfigured)
             BilPearlMaterialCard(

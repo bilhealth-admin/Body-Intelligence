@@ -1,6 +1,9 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -497,7 +500,7 @@ class WeeklyReportPage extends ConsumerWidget {
             child: Text(_t(context, 'title')),
           ),
           leading: IconButton(
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/settings'),
           ),
@@ -518,7 +521,7 @@ class WeeklyReportPage extends ConsumerWidget {
                 ref.read(selectedWeeklyReportDateProvider.notifier).state =
                     selected.subtract(const Duration(days: 7));
               },
-              icon: BilGlassPressFeedback(
+              icon: BilNavigationFeedback(
                 child: Icon(
                   Directionality.of(context) == TextDirection.rtl
                       ? Icons.chevron_right_rounded
@@ -545,7 +548,7 @@ class WeeklyReportPage extends ConsumerWidget {
                           : candidate;
                     }
                   : null,
-              icon: BilGlassPressFeedback(
+              icon: BilNavigationFeedback(
                 child: Icon(
                   Directionality.of(context) == TextDirection.rtl
                       ? Icons.chevron_left_rounded
@@ -561,7 +564,7 @@ class WeeklyReportPage extends ConsumerWidget {
             .when(
               skipLoadingOnRefresh: true,
               skipLoadingOnReload: true,
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: BilFeatureWelcomeStatus()),
               error: (_, _) => _Message(
                 _t(context, 'read_error'),
                 onRetry: () => ref.invalidate(weeklyReportProvider),

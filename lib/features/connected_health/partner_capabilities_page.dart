@@ -1,7 +1,8 @@
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/router/bil_safe_return_button.dart';
 import 'package:qr/qr.dart' as qr;
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,7 +27,12 @@ class PartnerCapabilitiesPage extends ConsumerWidget {
     final entries = ref.watch(partnerIntegrationRegistryProvider);
     final launcher = ref.read(partnerSetupLauncherProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(_text(context, 'Connection capabilities'))),
+      appBar: AppBar(
+        leading: const BilSafeReturnButton(
+          fallbackLocation: '/connected-health',
+        ),
+        title: Text(_text(context, 'Connection capabilities')),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -186,7 +192,7 @@ class _CapabilityTile extends StatelessWidget {
                     OutlinedButton.icon(
                       key: Key('partner-official-setup-${entry.id}'),
                       onPressed: () => launcher(verifiedSetupUri),
-                      icon: const BilGlassPressFeedback(
+                      icon: const BilNavigationFeedback(
                         child: Icon(Icons.open_in_new_rounded),
                       ),
                       label: Text(setupCopy.text(PartnerSetupCopy.openGuide)),

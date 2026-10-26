@@ -13,9 +13,9 @@ extension _DashboardPreferencesSignOut on _DashboardPreferencesPageState {
       leading: _signingOut || !sessionReady
           ? const SizedBox.square(
               dimension: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: BilFeatureWelcomeStatus(),
             )
-          : const BilGlassPressFeedback(
+          : const BilNavigationFeedback(
               child: Icon(Icons.logout_rounded, color: Color(0xFFD92D3A)),
             ),
       title: Text(

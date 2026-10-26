@@ -232,6 +232,93 @@ void main() {
     }
   }
 
+  for (final width in [320.0, 414.0]) {
+    for (final locale in [const Locale('en'), const Locale('ar')]) {
+      for (final brightness in Brightness.values) {
+        testWidgets('largest-text dock retains full labels and actions '
+            '${width.toInt()} ${locale.languageCode} ${brightness.name}', (
+          tester,
+        ) async {
+          final semantics = tester.ensureSemantics();
+          try {
+            final captureKey = GlobalKey();
+            final selected = <int>[];
+            await _mount(
+              tester,
+              width: width,
+              locale: locale,
+              brightness: brightness,
+              scale: 3.2,
+              captureKey: captureKey,
+              onSelected: selected.add,
+            );
+            final navigation = tester.getRect(
+              find.byKey(const Key('bil-reference-navigation')),
+            );
+            expect(navigation.top, greaterThan(300));
+            final fullSize = MediaQuery.textScalerOf(
+              tester.element(find.byType(BilReferenceBottomBar)),
+            );
+            expect(fullSize.scale(10), 32);
+            // Constrained navigation labels must not grow into columns of
+            // isolated letters. Their full-size counterpart remains available.
+            final firstLabel = tester.renderObject<RenderParagraph>(
+              find.byKey(const Key('bil-reference-nav-label-0')),
+            );
+            expect(firstLabel.textScaler.scale(10), lessThanOrEqualTo(20));
+            final community = find.byKey(const Key('bil-reference-nav-3'));
+            await tester.longPress(community);
+            await tester.pumpAndSettle();
+            final preview = find.byKey(
+              const Key('bil-reference-nav-preview-3'),
+            );
+            expect(preview, findsOneWidget);
+            final tooltip = tester.widget<Tooltip>(preview);
+            expect(tooltip.message, isNotEmpty);
+            expect(find.text(tooltip.message!), findsNWidgets(2));
+            expect(selected, isEmpty);
+            Tooltip.dismissAllToolTips();
+            await tester.pumpAndSettle();
+            for (var index = 0; index < 5; index++) {
+              final action = find.byKey(Key('bil-reference-nav-$index'));
+              final label = find.byKey(Key('bil-reference-nav-label-$index'));
+              final text = tester.widget<Text>(label);
+              final bounds = tester.getRect(action);
+              final labelBounds = tester.getRect(label);
+              expect(text.maxLines, isNull);
+              expect(text.overflow, isNot(TextOverflow.ellipsis));
+              expect(labelBounds.left, greaterThanOrEqualTo(bounds.left));
+              expect(labelBounds.right, lessThanOrEqualTo(bounds.right));
+              expect(labelBounds.bottom, lessThanOrEqualTo(bounds.bottom));
+              expect(bounds.width, greaterThanOrEqualTo(48));
+              expect(tester.getSemantics(action).label, contains(text.data!));
+              await tester.tap(action);
+              await tester.pump();
+            }
+            expect(selected, [0, 1, 2, 3, 4]);
+            expect(tester.takeException(), isNull);
+            await _capture(
+              tester,
+              captureKey,
+              'dock_max_${width.toInt()}_${locale.languageCode}_${brightness.name}',
+              {
+                'locale': locale.toLanguageTag(),
+                'brightness': brightness.name,
+                'viewport_width_dp': width,
+                'linear_text_scale_stress': 3.2,
+                'height_dp': navigation.height,
+                'all_five_actions_activated': true,
+                'native_ios_scaling_parity_claimed': false,
+              },
+            );
+          } finally {
+            semantics.dispose();
+          }
+        });
+      }
+    }
+  }
+
   for (final locale in AppLocalizations.supportedLocales) {
     testWidgets(
       'all five labels remain complete at 200% in ${locale.toLanguageTag()}',

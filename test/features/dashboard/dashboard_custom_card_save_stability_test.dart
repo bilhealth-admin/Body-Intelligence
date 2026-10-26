@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -122,8 +123,8 @@ void main() {
             const Duration(seconds: 2),
           ]) {
             await tester.pump(elapsed);
-            expect(find.byType(LinearProgressIndicator), findsNothing);
-            expect(find.byType(CircularProgressIndicator), findsNothing);
+            expect(bilWaitingIndicators(), findsNothing);
+            expect(bilWaitingIndicators(), findsNothing);
             expect(
               find.byKey(Key('dashboard-section-$section-saving')),
               findsNothing,
@@ -177,7 +178,7 @@ void main() {
           );
           repository.release.complete();
           await tester.pumpAndSettle();
-          expect(find.byType(CircularProgressIndicator), findsNothing);
+          expect(bilWaitingIndicators(), findsNothing);
           if (failSave) {
             // An unsuccessful write cannot navigate away or clear the draft.
             expect(find.byType(DashboardPreferencesPage), findsOneWidget);

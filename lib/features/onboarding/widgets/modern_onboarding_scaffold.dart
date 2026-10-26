@@ -1,8 +1,11 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../app/theme/bil_navigation_press_style.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../shared/widgets/bil_wordmark.dart';
 import '../onboarding_runtime_copy.dart';
@@ -61,202 +64,205 @@ class ModernOnboardingScaffold extends StatelessWidget {
           : const Color(0xFF071B46),
     );
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
-    return Theme(
-      data: baseTheme.copyWith(colorScheme: scheme),
-      child: Scaffold(
-        backgroundColor: scheme.surface,
-        body: SafeArea(
-          child: FocusTraversalGroup(
-            policy: OrderedTraversalPolicy(),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 620),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(
-                            key: const Key('onboarding-identity-surface'),
-                            height: 32,
-                            child: const BilFullWordmark(
-                              key: Key('onboarding-wordmark'),
-                              height: 28,
-                              alignment: Alignment.center,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          _SegmentedProgress(
-                            step: step,
-                            total: totalSteps,
-                            reducedMotion: reducedMotion,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        key: ValueKey<String>('onboarding-scroll-$step'),
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Theme(
+        data: baseTheme.copyWith(colorScheme: scheme),
+        child: Scaffold(
+          backgroundColor: scheme.surface,
+          body: SafeArea(
+            child: FocusTraversalGroup(
+              policy: OrderedTraversalPolicy(),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 620),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Semantics(
-                              header: true,
-                              child: Text(
-                                title,
-                                key: const Key('onboarding-step-title'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -.7,
-                                      height: 1.12,
-                                    ),
+                            SizedBox(
+                              key: const Key('onboarding-identity-surface'),
+                              height: 32,
+                              child: const BilFullWordmark(
+                                key: Key('onboarding-wordmark'),
+                                height: 28,
+                                alignment: Alignment.center,
                               ),
                             ),
-                            if (subtitle case final subtitle?) ...[
-                              const SizedBox(height: 10),
-                              Text(
-                                subtitle,
-                                style: Theme.of(context).textTheme.bodyLarge
-                                    ?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      height: 1.45,
-                                    ),
-                              ),
-                            ],
-                            if (artwork case final artwork?) ...[
-                              const SizedBox(height: 18),
-                              artwork,
-                            ],
-                            const SizedBox(height: 24),
-                            FocusTraversalOrder(
-                              key: const Key('onboarding-step-input-content'),
-                              order: const NumericFocusOrder(1),
-                              child: body,
+                            const SizedBox(height: 10),
+                            _SegmentedProgress(
+                              step: step,
+                              total: totalSteps,
+                              reducedMotion: reducedMotion,
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: scheme.surface,
-                        border: Border(
-                          top: BorderSide(color: scheme.outlineVariant),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final textScale = MediaQuery.textScalerOf(
-                              context,
-                            ).scale(1);
-                            final stackActions =
-                                textScale >= 1.6 || constraints.maxWidth < 330;
-                            final back = FocusTraversalOrder(
-                              order: const NumericFocusOrder(2),
-                              child: IconButton.filledTonal(
-                                style: BilNavigationPressStyle.neutralBubble(
-                                  context,
-                                ),
-                                key: const Key('onboarding-back'),
-                                tooltip: _copy(context, 'Back'),
-                                onPressed: busy ? null : onBack,
-                                icon: const BilGlassPressFeedback(
-                                  child: Icon(Icons.arrow_back_rounded),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          key: ValueKey<String>('onboarding-scroll-$step'),
+                          keyboardDismissBehavior:
+                              ScrollViewKeyboardDismissBehavior.onDrag,
+                          padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Semantics(
+                                header: true,
+                                child: Text(
+                                  title,
+                                  key: const Key('onboarding-step-title'),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: -.7,
+                                        height: 1.12,
+                                      ),
                                 ),
                               ),
-                            );
-                            final skip = onSkip == null
-                                ? null
-                                : FocusTraversalOrder(
-                                    order: const NumericFocusOrder(3),
-                                    child: TextButton(
-                                      key: const Key('onboarding-skip'),
-                                      onPressed: busy ? null : onSkip,
-                                      child: Text(
-                                        _copy(context, 'Skip'),
-                                        textAlign: TextAlign.center,
+                              if (subtitle case final subtitle?) ...[
+                                const SizedBox(height: 10),
+                                Text(
+                                  subtitle,
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                        height: 1.45,
                                       ),
-                                    ),
-                                  );
-                            final next = FocusTraversalOrder(
-                              order: const NumericFocusOrder(4),
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: 52,
                                 ),
-                                child: FilledButton(
-                                  key: const Key('onboarding-next'),
-                                  style: nextPending
-                                      ? FilledButton.styleFrom(
-                                          disabledBackgroundColor:
-                                              scheme.primary,
-                                          disabledForegroundColor:
-                                              scheme.onPrimary,
-                                        )
-                                      : null,
-                                  onPressed: busy || !nextEnabled
-                                      ? null
-                                      : onNext,
-                                  child: busy
-                                      ? const SizedBox.square(
-                                          dimension: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : Text(
-                                          nextLabel ??
-                                              _copy(context, 'Continue'),
+                              ],
+                              if (artwork case final artwork?) ...[
+                                const SizedBox(height: 18),
+                                artwork,
+                              ],
+                              const SizedBox(height: 24),
+                              FocusTraversalOrder(
+                                key: const Key('onboarding-step-input-content'),
+                                order: const NumericFocusOrder(1),
+                                child: body,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: scheme.surface,
+                          border: Border(
+                            top: BorderSide(color: scheme.outlineVariant),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final textScale = MediaQuery.textScalerOf(
+                                context,
+                              ).scale(1);
+                              final stackActions =
+                                  textScale >= 1.6 ||
+                                  constraints.maxWidth < 330;
+                              final back = FocusTraversalOrder(
+                                order: const NumericFocusOrder(2),
+                                child: IconButton.filledTonal(
+                                  style: BilNavigationPressStyle.neutralBubble(
+                                    context,
+                                  ),
+                                  key: const Key('onboarding-back'),
+                                  tooltip: _copy(context, 'Back'),
+                                  onPressed: busy ? null : onBack,
+                                  icon: const BilNavigationFeedback(
+                                    child: Icon(Icons.arrow_back_rounded),
+                                  ),
+                                ),
+                              );
+                              final skip = onSkip == null
+                                  ? null
+                                  : FocusTraversalOrder(
+                                      order: const NumericFocusOrder(3),
+                                      child: TextButton(
+                                        key: const Key('onboarding-skip'),
+                                        onPressed: busy ? null : onSkip,
+                                        child: Text(
+                                          _copy(context, 'Skip'),
                                           textAlign: TextAlign.center,
                                         ),
-                                ),
-                              ),
-                            );
-                            if (stackActions) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Row(
-                                    children: [
-                                      back,
-                                      if (skip != null) ...[
-                                        const SizedBox(width: 8),
-                                        Expanded(child: skip),
-                                      ],
-                                    ],
+                                      ),
+                                    );
+                              final next = FocusTraversalOrder(
+                                order: const NumericFocusOrder(4),
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minHeight: 52,
                                   ),
-                                  const SizedBox(height: 8),
-                                  next,
+                                  child: FilledButton(
+                                    key: const Key('onboarding-next'),
+                                    style: nextPending
+                                        ? FilledButton.styleFrom(
+                                            disabledBackgroundColor:
+                                                scheme.primary,
+                                            disabledForegroundColor:
+                                                scheme.onPrimary,
+                                          )
+                                        : null,
+                                    onPressed: busy || !nextEnabled
+                                        ? null
+                                        : onNext,
+                                    child: busy
+                                        ? const SizedBox.square(
+                                            dimension: 20,
+                                            child: BilFeatureWelcomeStatus(),
+                                          )
+                                        : Text(
+                                            nextLabel ??
+                                                _copy(context, 'Continue'),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                  ),
+                                ),
+                              );
+                              if (stackActions) {
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        back,
+                                        if (skip != null) ...[
+                                          const SizedBox(width: 8),
+                                          Expanded(child: skip),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    next,
+                                  ],
+                                );
+                              }
+                              return Row(
+                                children: [
+                                  back,
+                                  if (skip != null) ...[
+                                    const SizedBox(width: 8),
+                                    skip,
+                                  ],
+                                  const SizedBox(width: 12),
+                                  Expanded(child: next),
                                 ],
                               );
-                            }
-                            return Row(
-                              children: [
-                                back,
-                                if (skip != null) ...[
-                                  const SizedBox(width: 8),
-                                  skip,
-                                ],
-                                const SizedBox(width: 12),
-                                Expanded(child: next),
-                              ],
-                            );
-                          },
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

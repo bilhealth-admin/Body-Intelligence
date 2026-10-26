@@ -397,7 +397,7 @@ void main() {
 
   test('third-party AI consent is explicit and enforced before transmission', () {
     final coachUi = File(
-      'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
+      'lib/features/intelligence_center/presentation/intelligence_query_guard_flow.dart',
     ).readAsStringSync();
     final coachConsentCoordinator = File(
       'lib/features/intelligence_center/services/remote_ai_consent_coordinator.dart',

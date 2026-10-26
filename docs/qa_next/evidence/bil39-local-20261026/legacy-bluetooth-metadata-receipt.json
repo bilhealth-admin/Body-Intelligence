@@ -1,0 +1,49 @@
+{
+  "schema": "bil39.legacy_bluetooth_description_cleanup.v1",
+  "behavior": "Remove the deprecated pre-iOS13 purpose-description key from39 metadata. Keep the actual Bluetooth capability, lazy native request, and modern localized Always description.",
+  "source": "https://developer.apple.com/documentation/bundleresources/information-property-list/nsbluetoothperipheralusagedescription",
+  "metadata_files": 26,
+  "source_hashes": {
+    "ios/Runner/Info.plist": "5f0c3a36a08ee53e850d06223eec18a696e9399d86d0f918a9cfe9939d78be1b",
+    "ios/Runner/ar.lproj/InfoPlist.strings": "e77e8f3e75dd7bc7c17c15c9f14e9572bc47d3bb4e58dd01cac90b908a5a947b",
+    "ios/Runner/bn.lproj/InfoPlist.strings": "88ef61f023ac413f0d9edbc9db03aab0892c70e949b816b7e262d6cd41fb4101",
+    "ios/Runner/de.lproj/InfoPlist.strings": "b28feeee3f7c94a55188d6dbaf72c013dd458da4d599e095444b67089e7e5cb1",
+    "ios/Runner/en.lproj/InfoPlist.strings": "7367b8aeb952a39732c3f90978fa12a0a7fcf13bd5d2892804b3436e454fef24",
+    "ios/Runner/es.lproj/InfoPlist.strings": "94b44ecb2fe3d4f8d0fd512645f61cb038b5ea40bf5d6ef75b82ccfb083f274f",
+    "ios/Runner/fa.lproj/InfoPlist.strings": "693a2d796797c8d2f2c87f18d0a5ec731b82815b2ffddb175fd388af95c13647",
+    "ios/Runner/fr.lproj/InfoPlist.strings": "36f735e3e65cbaa2284bb6070fb0b0fdef3f42016afe77e15a2f1812d4cdbf0f",
+    "ios/Runner/hi.lproj/InfoPlist.strings": "68702f228365ed43d972f6486d0c1c4a10e191c324820e710dc32e028d10d8e4",
+    "ios/Runner/id.lproj/InfoPlist.strings": "a17b52333ec7f9d0e7f3cf064649dab4036b437d649f30c6fd055f60df35343c",
+    "ios/Runner/it.lproj/InfoPlist.strings": "f3286b363fa5942d7ac3aed8905dea13eac635c297a293c3e5d0a7810b0c031e",
+    "ios/Runner/ja.lproj/InfoPlist.strings": "6ff1b549d5128a339a5ec5a380a450d1c6d157930f79ea6282ef5f625f1a0f3a",
+    "ios/Runner/ko.lproj/InfoPlist.strings": "7466a08665ed121bd40f141ba645aff82ffb8412b23e0fb9e767364833ddb453",
+    "ios/Runner/ms.lproj/InfoPlist.strings": "b3ab42199aa00d2da01b2d08837cfe3e5f42447f382e04d9af1b220146fb703d",
+    "ios/Runner/nl.lproj/InfoPlist.strings": "45ed399d534429fe483d3e2fbe2fff3378e80bd18e9e694568989d0a399e5efc",
+    "ios/Runner/pl.lproj/InfoPlist.strings": "350987e8b7762b9f6145b48c7e3d7b9ebcdf69cd47e615aa04c887ff1a1a49d1",
+    "ios/Runner/pt-BR.lproj/InfoPlist.strings": "58b9c5dc4501c82f1f5131578e63b8df14ab45fd611082a7f9f6d9a8cf2cdf32",
+    "ios/Runner/pt-PT.lproj/InfoPlist.strings": "d0dd2b5a9a65d138c3d23efe3bbcfd91594e924c73e20c77ca2414fc728fe343",
+    "ios/Runner/ru.lproj/InfoPlist.strings": "ad00b581bb6f98ab9ebc9fcc512379e35783069afbb4bd2cf7ce27f1aee729bc",
+    "ios/Runner/th.lproj/InfoPlist.strings": "daa3e22fc7ba0f3c21c7a5d5b45758406d827905f5e4ec36bc79f4383cc06705",
+    "ios/Runner/tr.lproj/InfoPlist.strings": "9af99a3575fff5de298ca69fee6c1e4e0f5d8cb0105a319774249c45b96675b2",
+    "ios/Runner/uk.lproj/InfoPlist.strings": "141b1c7e0809878e9c0bdd06713d210dd2cc218cc2030e3b5a390770a04a3048",
+    "ios/Runner/ur.lproj/InfoPlist.strings": "bcb74c96f6e2fb4b3aa4464b4034314fc200a4a221feda54a543143b6b2f3a4d",
+    "ios/Runner/vi.lproj/InfoPlist.strings": "78638819c63bf33356a6e44e74123d4bad81203379a3a1320c2657b547960839",
+    "ios/Runner/zh-Hans.lproj/InfoPlist.strings": "730138c9505cd5982df7938bb1e07278b0642af43d3d917a7f1e4ac45a25f600",
+    "ios/Runner/zh-Hant.lproj/InfoPlist.strings": "b12429aee06d832b82ab00ea1b139bc1ba1922f620fe61d7815f738bacb99967"
+  },
+  "source_deployment_targets": [
+    "15.0"
+  ],
+  "installed38_unchanged": true,
+  "tests": {
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "log": "ios-legacy-description-cleanup-v1.jsonl",
+    "sha256": "388a40956b4a4ce56df75738e92791bca05529bab25bdc4f1b57b55716c74dd2",
+    "analyze_issues": 0,
+    "analyze_sha256": "5dc78e5233a1047b28519f3a01d6954ec811476dc3db6bf9b101ba64630d63a3"
+  },
+  "test_contract_change": "Retained modern mandatory purpose keys and all25locale checks; replaced obsolete-key equality/presence with forbidden-legacy checks and mandatory deployment>=13. No tests deleted, no security guard disabled.",
+  "native39_bundle_verified": false
+}

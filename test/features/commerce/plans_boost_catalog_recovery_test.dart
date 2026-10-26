@@ -21,6 +21,7 @@ class _BoostNative extends Fake implements InAppPurchase {
   String price = '2.49';
   int launches = 0, queries = 0;
   bool finishFails = false;
+  bool launchFails = false;
   @override
   Future<void> completePurchase(PurchaseDetails purchase) async {
     if (finishFails) throw StateError('fixture finish failure');
@@ -52,6 +53,7 @@ class _BoostNative extends Fake implements InAppPurchase {
     expect(autoConsume, isFalse);
     expect(purchaseParam.productDetails.price, price);
     launches++;
+    if (launchFails) throw StateError('native launch result unavailable');
     return false;
   }
 }
@@ -62,6 +64,69 @@ class _SubscriptionLane extends VerifiedStorePurchaseService {
 }
 
 void main() {
+  testWidgets(
+    'Plans re-entry keeps unresolved Boost visible without repeating purchase',
+    (tester) async {
+      final native = _BoostNative()..launchFails = true;
+      final subscription = _SubscriptionLane()
+        ..products = {StoreCatalogConfiguration.aiBoost: native.product}
+        ..state = VerifiedStoreState.ready;
+      final boost = AiBoostPurchaseService(
+        purchase: native,
+        owner: () => 'catalog-owner',
+        ownerChanges: const Stream.empty(),
+        verify: (_, _) async => false,
+        reconcile: () async => [],
+      );
+      await boost.initialize();
+      await boost.purchaseBoost();
+      expect(boost.errorCode, 'purchase_status_unknown');
+      final scope = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue('catalog-owner'),
+          appSubscriptionPurchaseFactoryProvider.overrideWithValue(
+            () => subscription,
+          ),
+          appBoostPurchaseFactoryProvider.overrideWithValue(() => boost),
+        ],
+      );
+      addTearDown(() async {
+        await native.updates.close();
+      });
+      Widget page() => UncontrolledProviderScope(
+        container: scope,
+        child: const MaterialApp(
+          home: BilStorePlansPage(initialFocus: 'boost'),
+        ),
+      );
+      await tester.pumpWidget(page());
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpWidget(page());
+      await tester.pumpAndSettle();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('store-continue-verification')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<InkWell>(find.byKey(const Key('store-purchase-cta')))
+            .onTap,
+        isNull,
+      );
+      expect(native.launches, 1);
+      expect(boost.verifiedCreditsRevision, 0);
+      await tester.pumpWidget(const SizedBox.shrink());
+      scope.dispose();
+      await tester.pump();
+    },
+    variant: const TargetPlatformVariant({TargetPlatform.iOS}),
+  );
+
   testWidgets(
     'actual Plans inactive Boost never advertises success while native finish retries',
     (tester) async {

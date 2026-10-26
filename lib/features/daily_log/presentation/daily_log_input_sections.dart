@@ -1,4 +1,6 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -88,6 +90,8 @@ class DailyExerciseSection extends StatelessWidget {
         shape: const Border(),
         collapsedShape: const Border(),
         childrenPadding: const EdgeInsets.all(16),
+
+        trailing: const BilCrystalExpansionIndicator(),
         children: [
           browseButton,
           if (structuredExerciseNames.isNotEmpty) ...[
@@ -210,9 +214,9 @@ class DailyWaterSection extends StatelessWidget {
       icon: saving
           ? const SizedBox.square(
               dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: BilFeatureWelcomeStatus(),
             )
-          : BilGlassPressFeedback(
+          : BilNavigationFeedback(
               child: Icon(
                 BilSemanticIcons.spec(
                   BilSemanticIconKind.water,
@@ -255,7 +259,7 @@ class DailyWaterSection extends StatelessWidget {
                   side: BorderSide(
                     color: Theme.of(context).colorScheme.outlineVariant,
                   ),
-                  avatar: BilGlassPressFeedback(
+                  avatar: BilNavigationFeedback(
                     child: Icon(
                       BilSemanticIcons.spec(
                         BilSemanticIconKind.water,
@@ -297,7 +301,7 @@ class DailyWaterSection extends StatelessWidget {
                   ),
               ],
             ),
-            loading: () => const LinearProgressIndicator(),
+            loading: () => const BilFeatureWelcomeStatus(),
             error: (_, _) => ActionableErrorState(
               title: tr('Water data unavailable', 'بيانات الماء غير متاحة'),
               onRetry: onRetry,
@@ -360,7 +364,7 @@ class DailyWaterShortcut extends StatelessWidget {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: const BilGlassPressFeedback(
+      trailing: const BilNavigationFeedback(
         child: Icon(Icons.chevron_right_rounded),
       ),
       onTap: onTap,
@@ -455,6 +459,8 @@ class DailyBodyContextSection extends StatelessWidget {
                       'تم اختيار ${selected.length}',
                     ),
             ),
+
+            trailing: const BilCrystalExpansionIndicator(),
             children: [
               GridView.builder(
                 shrinkWrap: true,
@@ -559,7 +565,7 @@ class _BodyContextTile extends StatelessWidget {
                 fit: BoxFit.cover,
                 semanticLabel: label,
                 errorBuilder: (_, _, _) => Center(
-                  child: BilGlassPressFeedback(
+                  child: BilNavigationFeedback(
                     child: Icon(
                       bodyContextIcon(option),
                       size: 34,
@@ -570,7 +576,7 @@ class _BodyContextTile extends StatelessWidget {
               )
             else
               Center(
-                child: BilGlassPressFeedback(
+                child: BilNavigationFeedback(
                   child: Icon(
                     bodyContextIcon(option),
                     size: 34,

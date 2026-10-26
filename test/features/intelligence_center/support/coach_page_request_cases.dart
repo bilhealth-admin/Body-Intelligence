@@ -273,10 +273,7 @@ void registerCoachRequestCases() {
               enabled: false,
             );
             expect(
-              find.descendant(
-                of: send,
-                matching: find.byType(CircularProgressIndicator),
-              ),
+              find.descendant(of: send, matching: bilWaitingIndicators()),
               findsNothing,
             );
             await tester.enterText(
@@ -428,7 +425,9 @@ void registerCoachRequestCases() {
 
     final initialAssistantCount = assistantMessages().length;
 
-    await _send(tester, gateway, question: 'Analyze my weight this week');
+    // Weight history now resolves locally. This scenario must exercise two
+    // actual cloud turns, so retain its service-failure assertions there.
+    await _send(tester, gateway, question: 'Explain balanced nutrition');
     gateway.replies[0].complete(failure);
     await tester.pumpAndSettle();
     final afterFirst = assistantMessages();
@@ -535,6 +534,9 @@ void registerCoachRequestCases() {
       identical(state, tester.state(find.byType(IntelligenceCenterPage))),
       isFalse,
     );
+    // A new owner gets its own default Overview. Enter through its real action
+    // before asserting that the previous owner's draft did not cross accounts.
+    await openCoachConversationFromOverview(tester);
     expect(
       tester
           .widget<TextField>(find.byKey(const Key('ai-coach-question-field')))
@@ -684,7 +686,7 @@ void registerCoachRequestCases() {
     expect(
       find.descendant(
         of: find.byKey(const Key('ai-coach-send-button')),
-        matching: find.byType(CircularProgressIndicator),
+        matching: bilWaitingIndicators(),
       ),
       findsNothing,
     );

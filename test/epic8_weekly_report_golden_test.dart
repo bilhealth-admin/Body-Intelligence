@@ -3,6 +3,7 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -269,7 +270,7 @@ void main() {
     expect(find.byKey(const Key('weekly-report-calendar')), findsOneWidget);
     await tester.tap(find.byKey(const Key('weekly-report-calendar')));
     await tester.pumpAndSettle();
-    expect(find.byType(DatePickerDialog), findsOneWidget);
+    expect(find.byType(BilCrystalDatePickerDialog), findsOneWidget);
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     await tester.ensureVisible(

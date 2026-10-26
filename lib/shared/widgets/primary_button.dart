@@ -1,3 +1,4 @@
+import 'bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -27,10 +28,7 @@ class PrimaryButton extends StatelessWidget {
             ? const SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
+                child: BilFeatureWelcomeStatus(color: Colors.white),
               )
             : Icon(icon ?? Icons.check),
         label: Text(text),

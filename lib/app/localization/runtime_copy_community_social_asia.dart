@@ -51,6 +51,8 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'آپ کا BIL کوڈ دستیاب نہیں۔ سائن اِن کریں، اپنا کمیونٹی پروفائل مکمل کریں، پھر دوبارہ کوشش کریں۔',
     'آپ کا پرانا کوڈ کام کرنا بند کر دے گا۔ دوستوں کو نیا کوڈ درکار ہوگا۔',
     'یہ آپ ہیں',
+    "دوست کو ہٹائیں؟",
+    "پیروی ختم کریں",
   ],
   'fa': <String>[
     '@{handle} را در BIL اضافه کنید: {uri}',
@@ -102,6 +104,8 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'کد BIL شما در دسترس نیست. وارد حساب شوید، نمایه انجمن خود را تکمیل کنید و دوباره امتحان کنید.',
     'کد قدیمی شما از کار خواهد افتاد. دوستانتان به کد جدید نیاز خواهند داشت.',
     'این شما هستید',
+    "حذف دوست؟",
+    "لغو دنبال‌کردن",
   ],
   'hi': <String>[
     'BIL पर @{handle} को जोड़ें: {uri}',
@@ -153,6 +157,8 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'आपका BIL कोड उपलब्ध नहीं है। साइन इन करें, अपनी समुदाय प्रोफ़ाइल पूरी करें और फिर कोशिश करें।',
     'आपका पुराना कोड काम करना बंद कर देगा। मित्रों को नए कोड की आवश्यकता होगी।',
     'यह आप हैं',
+    "मित्र हटाएँ?",
+    "फ़ॉलो करना बंद करें",
   ],
   'id': <String>[
     'Tambahkan @{handle} di BIL: {uri}',
@@ -204,6 +210,8 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'Kode BIL Anda tidak tersedia. Masuk, lengkapi profil Komunitas Anda, lalu coba lagi.',
     'Kode lama Anda akan berhenti berfungsi. Teman perlu menggunakan kode yang baru.',
     'Ini Anda',
+    "Hapus teman?",
+    "Berhenti mengikuti",
   ],
   'ms': <String>[
     'Tambah @{handle} di BIL: {uri}',
@@ -255,6 +263,8 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'Kod BIL anda tidak tersedia. Log masuk, lengkapkan profil Komuniti anda dan cuba lagi.',
     'Kod lama anda akan berhenti berfungsi. Rakan perlu menggunakan kod baharu.',
     'Ini anda',
+    "Alih keluar rakan?",
+    "Nyahikut",
   ],
   'bn': <String>[
     'BIL-এ @{handle}-কে যোগ করুন: {uri}',
@@ -306,5 +316,7 @@ const _communitySocialAsiaRows = <String, List<String>>{
     'আপনার BIL কোড অনুপলভ্য। সাইন ইন করুন, কমিউনিটি প্রোফাইল সম্পূর্ণ করুন এবং আবার চেষ্টা করুন।',
     'আপনার পুরোনো কোড কাজ করা বন্ধ করবে। বন্ধুদের নতুন কোডটি লাগবে।',
     'এটি আপনি',
+    "বন্ধুকে সরাবেন?",
+    "অনুসরণ বন্ধ করুন",
   ],
 };

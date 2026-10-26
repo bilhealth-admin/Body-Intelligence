@@ -209,7 +209,7 @@ class _ContextFocusCard extends StatelessWidget {
               key: Key('ai-coach-context-${option.$1.name}'),
               contentPadding: EdgeInsets.zero,
               controlAffinity: ListTileControlAffinity.trailing,
-              secondary: BilGlassPressFeedback(
+              secondary: BilNavigationFeedback(
                 child: Icon(
                   option.$2,
                   size: 22,

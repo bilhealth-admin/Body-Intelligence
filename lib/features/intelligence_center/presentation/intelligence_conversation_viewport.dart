@@ -18,13 +18,9 @@ extension _IntelligenceConversationViewport on _IntelligenceCenterPageState {
         .where((message) => !message.id.startsWith('welcome'))
         .toList(growable: false);
     final showOpeningSurface = dailyBrief != null || openingMessage != null;
-    // Suggested actions belong to the available-context introduction, not to
-    // message history. Pending/failed context must not advertise saved data.
-    final showStarters =
-        dailyBrief != null &&
-        !visibleMessages.any(
-          (message) => message.role == IntelligenceMessageRole.user,
-        );
+    // Keep the opening surface as one scrollable row after the first turn.
+    // Pending/failed context still must not advertise saved data.
+    final showStarters = dailyBrief != null;
     final ids = <String>[
       // One anchored identity for the welcome transcript and its data-backed
       // replacement prevents refreshes from resetting the reading position.

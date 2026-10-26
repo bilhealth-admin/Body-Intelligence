@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -232,7 +233,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
                     onPressed: _openAppleAccessInstructions,
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.open_in_new_rounded),
                     ),
                     label: Text(copy.appleAccessLearnMore),
@@ -295,7 +296,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                 alignment: AlignmentDirectional.centerStart,
                 child: TextButton.icon(
                   onPressed: _submitting ? null : _openSubscriptionManagement,
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.open_in_new_rounded),
                   ),
                   label: Text(copy.manageSubscription),
@@ -322,7 +323,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                 icon: _submitting
                     ? const SizedBox.square(
                         dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : const Icon(Icons.delete_forever_outlined),
                 label: Text(copy.submit),

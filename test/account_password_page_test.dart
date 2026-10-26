@@ -1,3 +1,4 @@
+import 'support/bil_waiting_indicators.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
@@ -97,7 +98,7 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('save-account-password')));
     expect(calls, 1);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
     pending.complete();
     await tester.pump();
     expect(find.text('Password updated securely.'), findsOneWidget);

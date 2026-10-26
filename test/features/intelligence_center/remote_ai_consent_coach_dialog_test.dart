@@ -221,6 +221,14 @@ class _ConsentDialogBoundary {
           result = {
             'credits': {'total_remaining': 0},
           };
+        case '/rest/v1/rpc/bil_get_my_admin_subscription':
+          expectSync(request.method, 'POST');
+          result = null; // Verified absence, never a fabricated paid grant.
+        case '/rest/v1/bil_ai_closed_test_grants':
+        case '/rest/v1/bil_subscriptions':
+          expectSync(request.method, 'GET');
+          expectSync(request.url.queryParameters['owner_id'], 'eq.$owner');
+          result = <Object?>[];
         case '/rest/v1/rpc/bil_gold_balance_v1':
           result = {'balance': 0};
         case '/rest/v1/bil_coach_memories':

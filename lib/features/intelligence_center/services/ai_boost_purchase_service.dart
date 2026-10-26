@@ -248,7 +248,10 @@ final class AiBoostPurchaseService extends ChangeNotifier {
             ),
             autoConsume: false,
           )
-          .timeout(launchTimeout);
+          // Apple authentication belongs to the purchase lifecycle, which
+          // can outlast a catalog/network lookup. The pending deadline still
+          // bounds the UI and keeps an unknown outcome from being recharged.
+          .timeout(pendingTimeout);
       checkoutTrace?.mark(StorePurchaseStage.nativeLaunchReturned);
       if (!_current(owner, generation) || started) return;
       _watchdog?.cancel();

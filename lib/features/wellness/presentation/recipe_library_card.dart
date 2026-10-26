@@ -286,7 +286,7 @@ class _RecipeFactCell extends StatelessWidget {
         children: [
           Row(
             children: [
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(icon, size: 14, color: scheme.onSurfaceVariant),
               ),
               const SizedBox(width: 5),
@@ -321,7 +321,7 @@ class _RecipeFactCell extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
             child: Row(
               children: [
-                BilGlassPressFeedback(
+                BilNavigationFeedback(
                   child: Icon(icon, size: 14, color: scheme.onSurfaceVariant),
                 ),
                 const SizedBox(width: 5),
@@ -459,7 +459,7 @@ class _RecipeDetailFact extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(icon, size: 16, color: scheme.onPrimaryContainer),
               ),
               const SizedBox(width: 6),
@@ -603,7 +603,7 @@ class _RecipeFallbackArtwork extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: BilGlassPressFeedback(
+                child: BilNavigationFeedback(
                   child: Icon(icon, color: palette.$1, size: 29),
                 ),
               ),

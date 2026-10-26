@@ -1,6 +1,9 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../nutrition/presentation/food_translation_attribution.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import '../dashboard/widgets/first_food_days_guide.dart';
 import 'dart:async';
@@ -325,10 +328,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             height: 56,
                             child: Align(
                               alignment: AlignmentDirectional.centerStart,
-                              child: BackButton(
-                                onPressed: mutationBusy
-                                    ? null
-                                    : _returnFromSelectedFoodToSearch,
+                              child: BilCrystalArrow(
+                                child: BackButton(
+                                  onPressed: mutationBusy
+                                      ? null
+                                      : _returnFromSelectedFoodToSearch,
+                                ),
                               ),
                             ),
                           ),
@@ -351,11 +356,13 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             constraints: const BoxConstraints(minHeight: 64),
                             child: Row(
                               children: [
-                                BackButton(
-                                  key: const Key('daily-meal-detail-back'),
-                                  onPressed: mutationBusy
-                                      ? null
-                                      : _leaveMealDetail,
+                                BilCrystalArrow(
+                                  child: BackButton(
+                                    key: const Key('daily-meal-detail-back'),
+                                    onPressed: mutationBusy
+                                        ? null
+                                        : _leaveMealDetail,
+                                  ),
                                 ),
                                 const SizedBox(width: 6),
                                 Expanded(
@@ -564,19 +571,21 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                   height: 56,
                                   child: Align(
                                     alignment: AlignmentDirectional.centerStart,
-                                    child: BackButton(
-                                      onPressed: mutationBusy
-                                          ? null
-                                          : () {
-                                              if (context.canPop()) {
-                                                context.pop();
-                                              } else {
-                                                context.go(
-                                                  widget.returnPath ??
-                                                      '/dashboard',
-                                                );
-                                              }
-                                            },
+                                    child: BilCrystalArrow(
+                                      child: BackButton(
+                                        onPressed: mutationBusy
+                                            ? null
+                                            : () {
+                                                if (context.canPop()) {
+                                                  context.pop();
+                                                } else {
+                                                  context.go(
+                                                    widget.returnPath ??
+                                                        '/dashboard',
+                                                  );
+                                                }
+                                              },
+                                      ),
                                     ),
                                   ),
                                 ),

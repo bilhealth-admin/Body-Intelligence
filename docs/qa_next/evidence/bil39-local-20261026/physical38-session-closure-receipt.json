@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "checked_at_utc": "2026-10-26T19:39:18.347Z",
+  "scope": "Bounded physical38 discovery session concluded; not exhaustive app or native39 certification",
+  "phone_can_be_disconnected_for_this_phase": true,
+  "physical39_acceptance": false,
+  "permissions_changed": false,
+  "purchases_in_this_followup": 0,
+  "gemini_requests_in_this_followup": 0,
+  "restoration": {
+    "dynamic_type_before": 0.2727272727272727,
+    "maximum_temporarily_tested": 1,
+    "dynamic_type_restored": 0.2727272727272727,
+    "app_appearance_before": "light",
+    "dark_temporarily_tested": true,
+    "app_appearance_restored": "light",
+    "readback_sha256": "69dae2c82799855fc8943e01fd0d95efd127965e484ab6e90a63907ecfc8febe",
+    "appearance_screenshot_sha256": "e426dfcfeedc8c338dfda700dbab8bc97304996cf65551dda734997bf8aaa5a4"
+  },
+  "native_accessibility": {
+    "screen": "Advertising privacy",
+    "supported_tests": [
+      "Contrast",
+      "HitRegion",
+      "TextClipped"
+    ],
+    "reported_issues": 0,
+    "readable_elements": 7,
+    "audit_sha256": "a5338d955b09046ec0b16f3a9625b7955c763aae07dc722e474e6078745f932f",
+    "items_sha256": "a266aeafa0fe55f94503eb1e03962301b91f4707c0696416469500d4d6b1a41f",
+    "whole_app_claim": false
+  },
+  "active_display_counter": {
+    "samples": 38,
+    "gesture_overlapping_samples": 17,
+    "values": [
+      7,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      60,
+      10,
+      60,
+      60,
+      60,
+      60,
+      60
+    ],
+    "scope": "Device-wide one-second display counts with BIL More foreground and timestamped scrolls. Start/stop intervals included; not app frame-time/jank or all-screen performance proof.",
+    "raw_sha256": "e564bfe73e1595af8aa22e718fba10749826cea1438659d2136e2e15fc92dfda",
+    "interaction_ledger_sha256": "8423b896cbd8b55d3c91af39ebef207a18424642aaaea7bbb0261ea13e46e5da"
+  },
+  "latest_diagnostics": {
+    "new_report_process": "com.apple.Preferences",
+    "event": "CPU usage",
+    "action_taken": "none",
+    "cpu_seconds": 90,
+    "duration_seconds": 90.33,
+    "not_BIL": true,
+    "causal_attribution_to_BIL": false,
+    "report_sha256": "49893d769477f19eb7072f3d949526590a7c397d14a8ad7244295f75d1ce98bf"
+  },
+  "remaining": [
+    "Current39 native purchase/Restore, SwiftUI and navigation acceptance.",
+    "Historical iPad bootstrap cause unresolved until reproduced with useful native diagnostics.",
+    "Full frozen candidate and same-SHA CI not yet complete."
+  ]
+}

@@ -1,6 +1,8 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_pearl_alert_dialog.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -104,7 +106,7 @@ class _PreferenceRoute extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     title: Text(_diaryText(context, label)),
-    trailing: const BilGlassPressFeedback(
+    trailing: const BilNavigationFeedback(
       child: Icon(Icons.chevron_right_rounded),
     ),
     onTap: () => context.push(route),
@@ -283,7 +285,7 @@ class _DiarySearchTabState extends ConsumerState<ReferenceDiarySearchTabPage> {
             appBar: AppBar(
               title: Text(_diaryText(context, 'Default search tab')),
             ),
-            body: const Center(child: CircularProgressIndicator()),
+            body: const Center(child: BilFeatureWelcomeStatus()),
           )
         : error != null
         ? Scaffold(
@@ -293,7 +295,7 @@ class _DiarySearchTabState extends ConsumerState<ReferenceDiarySearchTabPage> {
             body: Center(
               child: FilledButton.icon(
                 onPressed: _load,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 label: Text(context.strings.text('Retry')),
@@ -492,12 +494,12 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
     child: Scaffold(
       appBar: AppBar(title: Text(_diaryText(context, 'Diary sharing'))),
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: BilFeatureWelcomeStatus())
           : error != null
           ? Center(
               child: FilledButton.icon(
                 onPressed: _loadSharing,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 label: Text(context.strings.text('Retry')),
@@ -532,7 +534,7 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
                 if (saving)
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                    child: LinearProgressIndicator(),
+                    child: BilFeatureWelcomeStatus(),
                   ),
               ],
             ),
@@ -638,12 +640,12 @@ class _MealNamesState extends ConsumerState<ReferenceMealNamesPage> {
         ],
       ),
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: BilFeatureWelcomeStatus())
           : loadError != null
           ? Center(
               child: FilledButton.icon(
                 onPressed: _load,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 label: Text(context.strings.text('Retry')),

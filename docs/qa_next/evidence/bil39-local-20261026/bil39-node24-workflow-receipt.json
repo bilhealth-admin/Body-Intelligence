@@ -1,0 +1,51 @@
+{
+  "schema": "bil39.node24_workflow_pins.v1",
+  "observed_warning_job": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40032026579/job/120682354218",
+  "observed_warning": "Node.js20 forced to24 for old upload-artifact pin; punycode and url.parse deprecations in old action",
+  "measured_step_seconds": {
+    "checkout": 120,
+    "apple_validation": 71,
+    "apple_upload": 64,
+    "apple_processing": 216,
+    "artifact_preservation": 2
+  },
+  "causality": "The warning is not demonstrated to cause the multi-minute delay; measured time is predominantly checkout and Apple operations.",
+  "changed_workflows": [
+    {
+      "path": ".github/workflows/bil39_cloud_source_qa.yml",
+      "before_sha256": "71ec671d6c017a3ce76f7754b1675ba90de12c110f199902c6864a41fd038018",
+      "after_sha256": "45481e086bd8c08d1bb62a6d56392f13ccf9372646b5b38a12f4f637d5c06e7f"
+    },
+    {
+      "path": ".github/workflows/bil39_video_source_qa.yml",
+      "before_sha256": "8bbb4e1f7dc128a236f9436e6c373bb5846d1d8d940b59afd1f91d0c53a135e4",
+      "after_sha256": "270c3cbfa60be69e89e83625fa98f73678ed21ff787ccfa37579e71ef52471e5"
+    },
+    {
+      "path": ".github/workflows/bil39_internal_testflight.yml",
+      "before_sha256": "015148ed177b7fb7d85fd4756b0056b6addb9f55a6f254150452228c3c9fdd26",
+      "after_sha256": "14b1ebe398cc7e0e5766f21973b795e13579a48d845ae5afd2373fb339d746f9"
+    }
+  ],
+  "action_pins": {
+    "upload_artifact": "cf430e030ddbb5b0abf93d22962f4752f3646cd9",
+    "setup_node": "48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e",
+    "import_codesign_certs": "77ba2a2a8f5cfc8c405ebf3159f767c323e238f9"
+  },
+  "primary_sources": [
+    "https://raw.githubusercontent.com/actions/upload-artifact/cf430e030ddbb5b0abf93d22962f4752f3646cd9/action.yml",
+    "https://raw.githubusercontent.com/actions/setup-node/48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e/action.yml",
+    "https://raw.githubusercontent.com/apple-actions/import-codesign-certs/77ba2a2a8f5cfc8c405ebf3159f767c323e238f9/action.yml"
+  ],
+  "unchanged": "Job bodies, signing inputs, exact-source/identity/crypto/cloud gates and internal-only submission boundary",
+  "compatibility": "Artifact v7 default remains ZIP; signing action retains the two P12 inputs and adds post-job keychain cleanup.",
+  "tests": {
+    "passed": 20,
+    "failed": 0,
+    "scope": "synthetic actual pre-signing and IPA identity guard execution, not macOS keychain execution",
+    "log": "bil39-node24-workflows-focused-v3.log",
+    "sha256": "618a12ad724446cc5c3b349ac4478198736261736ab04bf108eb76e2205a4f05"
+  },
+  "actual_ci_run_dispatched": false,
+  "macos_signing_and_warning_free_acceptance_pending": true
+}

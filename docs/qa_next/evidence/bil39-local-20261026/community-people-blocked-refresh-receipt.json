@@ -1,0 +1,22 @@
+{
+  "scope": "LOCAL_FOCUSED_NOT_SIGNED39",
+  "passed": 76,
+  "failed": 0,
+  "skipped": 0,
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "source_dirty": true,
+  "source_after_sha256": {
+    "lib/features/community/presentation/community_people_page.dart": "7542aa3d51178d1147d344b99866d7fa0dfb3bf76cfd9136404b39cf68e03fd8",
+    "test/features/community/community_chat_auth_session_test.dart": "70679a4dc29d34b1a80b82f6e7485146bacd899a2f06b0c7241c4cd817f7c05c",
+    "test/features/community/community_relationship_delivery_cases.dart": "98b5cb5654b8912b9c338c9400d0752953b1881c4e7e4d4ff5bca5d990bfacee"
+  },
+  "log_sha256": "a8d8251cc7de11546e58f8bd5c8237c3443ce16f7e857f82d5c8ee2460cc790a",
+  "red": "community-people-blocked-refresh-red.jsonl",
+  "green": "community-people-blocked-refresh-green-v2.jsonl",
+  "analyze": {
+    "items": 2,
+    "issues": 0
+  },
+  "signed_device_acceptance": false,
+  "pending_preservation_regression": "community-people-pending-preservation-red.jsonl"
+}

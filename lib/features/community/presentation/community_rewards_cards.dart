@@ -147,7 +147,7 @@ class _QuestCard extends StatelessWidget {
                   icon: claiming
                       ? const SizedBox.square(
                           dimension: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: BilFeatureWelcomeStatus(),
                         )
                       : const Icon(Icons.redeem_rounded),
                   label: Text(
@@ -333,7 +333,7 @@ class _RewardsMessageState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 52)),
+          BilNavigationFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 14),
           Text(
             title,
@@ -346,7 +346,7 @@ class _RewardsMessageState extends StatelessWidget {
             const SizedBox(height: 18),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),

@@ -20,7 +20,7 @@ extension _CommunityPostComposerOptionFields
         final topics = snapshot.data ?? const <CommunityTopic>[];
         if (topics.isEmpty) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const LinearProgressIndicator();
+            return const BilFeatureWelcomeStatus();
           }
           return Text(
             communityText(
@@ -39,7 +39,7 @@ extension _CommunityPostComposerOptionFields
               FilterChip(
                 key: Key('community-composer-topic-${topic.slug}'),
                 selected: widget.draft.topicSlugs.contains(topic.slug),
-                avatar: BilGlassPressFeedback(
+                avatar: BilNavigationFeedback(
                   child: Icon(
                     CommunityTaxonomySheet.iconForSlug(topic.slug),
                     size: 16,
@@ -88,7 +88,7 @@ extension _CommunityPostComposerOptionFields
             .toList(growable: false);
         if (snapshot.connectionState != ConnectionState.done &&
             circles.isEmpty) {
-          return const LinearProgressIndicator();
+          return const BilFeatureWelcomeStatus();
         }
         if (circles.isEmpty) {
           return Text(
@@ -117,7 +117,7 @@ extension _CommunityPostComposerOptionFields
               ChoiceChip(
                 key: Key('community-composer-circle-${circle.slug}'),
                 selected: widget.draft.circleSlug == circle.slug,
-                avatar: BilGlassPressFeedback(
+                avatar: BilNavigationFeedback(
                   child: Icon(_circleIcon(circle.slug), size: 16),
                 ),
                 label: Text(_circleTitle(context, circle.slug)),
@@ -250,7 +250,7 @@ extension _CommunityPostComposerOptionFields
           icon: _mentionSearching
               ? const SizedBox.square(
                   dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: BilFeatureWelcomeStatus(),
                 )
               : const Icon(Icons.search_rounded),
         ),

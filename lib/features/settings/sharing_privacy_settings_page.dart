@@ -1,7 +1,8 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'dart:async';
 
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -318,7 +319,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 loading: () => null,
                 error: (_, _) => Text(context.strings.text('Unavailable')),
               ),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/settings/diary/sharing'),
@@ -333,7 +334,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
               ),
               title: Text(context.strings.text('Community profile')),
               subtitle: Text(_privacyText(context, 'Profile visibility')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/community/profile'),
@@ -344,7 +345,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
               ),
               title: Text(context.strings.text('Friends and requests')),
               subtitle: Text(_privacyText(context, 'Allow people to find me')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/community/connections'),
@@ -355,7 +356,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 kind: BilSemanticIconKind.legal,
               ),
               title: Text(_privacyText(context, 'Terms of service')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/legal/terms'),
@@ -365,7 +366,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 kind: BilSemanticIconKind.privacy,
               ),
               title: Text(_privacyText(context, 'Privacy policy')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/legal/privacy'),
@@ -375,7 +376,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 kind: BilSemanticIconKind.support,
               ),
               title: Text(_privacyText(context, 'Trust & support')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/trust-support'),
@@ -387,7 +388,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
               title: Text(
                 _privacyText(context, 'Manage personalization preferences'),
               ),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/advertising-privacy'),
@@ -399,7 +400,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 appleIconOverride: Icons.mail_outline_rounded,
               ),
               title: Text(_privacyText(context, 'Email settings')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/settings/email'),
@@ -409,7 +410,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 kind: BilSemanticIconKind.support,
               ),
               title: Text(_privacyText(context, 'Contact support')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => launchUrl(
@@ -422,7 +423,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 kind: BilSemanticIconKind.export,
               ),
               title: Text(_privacyText(context, 'Export my data')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/settings/local-export'),
@@ -433,7 +434,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
                 kind: BilSemanticIconKind.export,
               ),
               title: Text(_privacyText(context, 'Saved plan data')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/smart-plan?privacy=1'),

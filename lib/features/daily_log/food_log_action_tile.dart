@@ -19,7 +19,7 @@ extension _FoodLogActionTilePresentation on _FoodLogPageState {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(icon, size: 22, color: const Color(0xFF1677D2)),
               ),
               const SizedBox(height: 5),

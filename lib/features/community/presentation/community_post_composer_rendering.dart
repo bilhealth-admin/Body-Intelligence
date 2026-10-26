@@ -245,7 +245,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
               icon: _voiceCapturing
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: BilFeatureWelcomeStatus(),
                     )
                   : const Icon(Icons.mic_none_rounded, size: 20),
             ),

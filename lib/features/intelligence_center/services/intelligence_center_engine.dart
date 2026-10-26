@@ -39,7 +39,7 @@ class IntelligenceCenterEngine {
         _looksUrgent(normalized) ||
         _looksLikeDiagnosis(normalized) ||
         question.length > 500 ||
-        const CoachSpeechPolicy().isSleepQuestion(question);
+        const CoachSpeechPolicy().isGeneralSleepDurationQuestion(question);
   }
 
   bool isGreetingQuestion(String question) =>
@@ -552,7 +552,9 @@ class IntelligenceCenterEngine {
     String question,
     String locale,
   ) {
-    if (!const CoachSpeechPolicy().isSleepQuestion(question)) return null;
+    if (!const CoachSpeechPolicy().isGeneralSleepDurationQuestion(question)) {
+      return null;
+    }
     final text = intelligenceTextFor(
       locale,
       'Most adults need 7–9 hours of sleep each night.',

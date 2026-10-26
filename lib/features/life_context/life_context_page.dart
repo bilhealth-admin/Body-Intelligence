@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
@@ -121,7 +122,7 @@ class LifeContextPage extends ConsumerWidget {
         label: Text(tr(context, 'Add context', 'إضافة سياق')),
       ),
       body: entries.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BilFeatureWelcomeStatus()),
         error: (error, _) => Center(
           child: Text(
             tr(

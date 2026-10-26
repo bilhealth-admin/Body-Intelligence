@@ -1,3 +1,4 @@
+import '../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -920,13 +921,13 @@ void _registerPrivateMessageActions(SupabaseClient Function() client) {
             await tester.pump();
             expect(repo.sendCalls, 1);
             expect(tester.widget<IconButton>(send).onPressed, isNull);
-            final spinner = tester.widget<CircularProgressIndicator>(
+            final spinner = tester.widget<BilFeatureWelcomeStatus>(
               find.descendant(
                 of: send,
-                matching: find.byType(CircularProgressIndicator),
+                matching: find.byType(BilFeatureWelcomeStatus),
               ),
             );
-            expect(spinner.valueColor?.value, CommunitySapphire.navy);
+            expect(spinner.color, CommunitySapphire.navy);
             await tester.tap(send);
             await tester.pump();
             expect(repo.sendCalls, 1);

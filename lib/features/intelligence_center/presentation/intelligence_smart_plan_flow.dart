@@ -6,6 +6,11 @@ extension _SmartPlanCoachFlow on _IntelligenceCenterPageState {
       : null;
 
   Future<bool> _answerSmartPlanIntent(String text, String locale) async {
+    // A weight-chart/report request (including a correction of an unwanted
+    // plan) must reach the verified read path, never the Smart Plan editor.
+    if (isCoachWeightHistoryReadRequest(text) || isCoachPlanNegated(text)) {
+      return false;
+    }
     final recentUsers = messages
         .where(
           (m) =>

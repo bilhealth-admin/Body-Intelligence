@@ -227,6 +227,11 @@ class _CircleCreateFormState extends State<_CircleCreateForm> {
                           'اختر الخصوصية.',
                         )
                       : null,
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -272,6 +277,11 @@ class _CircleCreateFormState extends State<_CircleCreateForm> {
                           'اختر طريقة الانضمام.',
                         )
                       : null,
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(

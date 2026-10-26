@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'bil_pearl_feature_welcome.dart';
 
 enum BilProgressTone { calories, carbs, fat, protein }
 
@@ -61,7 +62,14 @@ class BilStripedProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final value = child.value;
-    if (value == null || !value.isFinite || value <= 0) return child;
+    if (value == null) {
+      return BilFeatureWelcomeStatus(
+        key: child.key,
+        color: child.valueColor?.value ?? child.color,
+        label: child.semanticsLabel,
+      );
+    }
+    if (!value.isFinite || value <= 0) return child;
     final theme = Theme.of(context);
     final progressTheme = ProgressIndicatorTheme.of(context);
     final originalColor = child.valueColor?.value ?? child.color;

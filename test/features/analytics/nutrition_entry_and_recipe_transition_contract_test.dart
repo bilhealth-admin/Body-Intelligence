@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import '../../support/production_no_transition_route.dart';
 
 void main() {
   test('nutrition empty state opens canonical food log and fixed arrows', () {
@@ -27,14 +29,15 @@ void main() {
     );
   });
 
-  test('recipe library route does not expose dashboard during transition', () {
-    final routes = File(
-      'lib/app/router/app_wellness_routes.dart',
-    ).readAsStringSync();
-
-    expect(routes, contains("path: '/wellness/recipes'"));
-    expect(routes, contains('pageBuilder: (_, state) => NoTransitionPage('));
-  });
+  testWidgets(
+    'recipe library route does not expose dashboard during transition',
+    (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: SizedBox(key: Key('route-factory-host'))),
+      );
+      expectProductionNoTransitionRoute(tester, '/wellness/recipes');
+    },
+  );
 
   test('AI Coach entry owns a timed welcome surface', () {
     final page = [

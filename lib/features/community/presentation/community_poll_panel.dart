@@ -185,7 +185,7 @@ class _CommunityPollPanelState extends State<_CommunityPollPanel> {
                 icon: _voting
                     ? const SizedBox.square(
                         dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : const Icon(Icons.how_to_vote_outlined),
                 label: Text(communityText(context, 'Vote', 'تصويت')),

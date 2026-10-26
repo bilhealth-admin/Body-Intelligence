@@ -1,4 +1,5 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -152,7 +153,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
                   const BilFullWordmark(height: 48),
                   const SizedBox(height: 28),
                   if (!_failed) ...[
-                    const CircularProgressIndicator(),
+                    const BilFeatureWelcomeStatus(),
                     const SizedBox(height: 20),
                     Text(
                       tr(
@@ -181,7 +182,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
                     FilledButton.icon(
                       key: const Key('auth-callback-retry'),
                       onPressed: _retrying ? null : _retry,
-                      icon: const BilGlassPressFeedback(
+                      icon: const BilNavigationFeedback(
                         child: Icon(Icons.refresh_rounded),
                       ),
                       label: Text(tr('Try again', 'حاول مرة أخرى')),

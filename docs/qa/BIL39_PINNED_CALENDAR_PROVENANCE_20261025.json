@@ -1,0 +1,18 @@
+{
+  "sdk_version": "3.44.6",
+  "upstream_files": {
+    "calendar_date_picker.dart": "8f70c3ef4e7c57474d060e882277846c54c55ebf0227fbe11c1e2ce085708dc7",
+    "date_picker.dart": "db4bae3057cca3a0c503e4cb1722735b2a1c93aa1b4a82824e3ded87eeeaa4d5"
+  },
+  "adaptations": [
+    "Public SDK imports, unique class/function names and part organization",
+    "Three existing calendar glyphs wrapped only in BilCrystalArrow",
+    "Date arithmetic, locale, keyboard and restoration logic retained from pinned SDK",
+    "Single-date dialog only; no range picker added",
+    "Inline month/year indicator reserves 40px to prevent the glass covering the label",
+    "Date numeral and month/year FittedBox scale down only when needed to keep complete labels at large text; semantics, dates and hit areas retained",
+    "Public header adds only the optional standard widget key; verifier normalizes that exact parameter",
+    "Dialog delegates presentation to the existing BilPearlMaterialDialog; all SDK constructor arguments and date logic remain verified by AST equivalence",
+    "Deprecated SDK typedef/property aliases use their exact supported WidgetStatesController and Color.a equivalents"
+  ]
+}

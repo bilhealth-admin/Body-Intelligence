@@ -1,3 +1,5 @@
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -221,6 +223,7 @@ void main() {
           ),
         );
         await tester.pumpWidget(app());
+        await openCoachConversationFromOverview(tester);
         await settle();
         await _until(
           tester,
@@ -439,6 +442,7 @@ void main() {
             await tester.pumpWidget(const SizedBox.shrink());
             await settle();
             await tester.pumpWidget(app());
+            await openCoachConversationFromOverview(tester);
             await settle();
             await _until(
               tester,

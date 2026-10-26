@@ -1,4 +1,4 @@
-import 'bil_glass_press_feedback.dart';
+import 'bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../app/theme/bil_flagship_motion.dart';
 import '../../app/theme/bil_flagship_tokens.dart';
@@ -69,7 +69,7 @@ class BilGradientButton extends StatelessWidget {
       ),
       icon: icon == null
           ? const SizedBox.shrink()
-          : BilGlassPressFeedback(child: Icon(icon)),
+          : BilNavigationFeedback(child: Icon(icon)),
       label: Text(label),
     ),
   );
@@ -121,7 +121,7 @@ class BilChoiceCard<T> extends StatelessWidget {
             child: Row(
               children: [
                 if (icon != null) ...[
-                  BilGlassPressFeedback(
+                  BilNavigationFeedback(
                     child: Icon(icon, color: selected ? scheme.primary : null),
                   ),
                   const SizedBox(width: BilFlagshipTokens.space12),

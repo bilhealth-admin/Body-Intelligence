@@ -1,0 +1,24 @@
+{
+  "classification": "LINE_ENDINGS_ONLY_EVIDENCE_AND_VENDOR_LICENSE_NO_LOGIC_OR_RESULT_CHANGES",
+  "utc": "2026-10-26T21:47:32.600Z",
+  "files": [
+    {
+      "path": "docs/qa_next/evidence/bil39-local-20261026/cloud-integrated-current-source-20261026-receipt.json",
+      "original_sha256": "11d23cd99568fa8da7e7b99a0aec361e3958c6d5f4ea34d0a3a805271675b48b",
+      "normalized_sha256": "60e09aabcd25b7024cac5d4d30b7d1edaac17e14bfacc2f7abf55ad411299d66",
+      "change": "CRLF to LF only",
+      "all_non_line_ending_characters_preserved": true,
+      "original_preserved_privately": true
+    },
+    {
+      "path": "lib/shared/widgets/calendar/LICENSE.flutter",
+      "original_sha256": "a3a9fd82f800a47377f7d3f60c60a5c91cae0495be8f329031e1448ce0f5dab9",
+      "normalized_sha256": "a598db94b6290ffbe10b5ecf911057b6a943351c727fdda9e5f2891d68700a20",
+      "change": "CRLF to LF only",
+      "all_non_line_ending_characters_preserved": true,
+      "original_preserved_privately": true
+    }
+  ],
+  "whitespace_rules_relaxed": false,
+  "calendar_dart_logic_changed": false
+}

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
@@ -229,9 +230,7 @@ class _LegacyAccountGatewayPageState
                                 icon: restoring
                                     ? const SizedBox.square(
                                         dimension: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: BilFeatureWelcomeStatus(),
                                       )
                                     : const Icon(Icons.restore_rounded),
                                 label: Text(

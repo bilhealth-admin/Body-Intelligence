@@ -102,7 +102,7 @@ class _MissingDailyGoalCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const BilGlassPressFeedback(
+            const BilNavigationFeedback(
               child: Icon(Icons.chevron_right_rounded),
             ),
           ],
@@ -532,7 +532,7 @@ class _ReferenceMacrosCard extends StatelessWidget {
                   height: 34,
                 ),
                 padding: EdgeInsets.zero,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.swap_horiz_rounded, size: 20),
                 ),
               ),
@@ -659,7 +659,7 @@ class _CircularNutrientCard extends StatelessWidget {
               ),
             ),
             if (onTap != null)
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(
                   Icons.arrow_forward_rounded,
                   color: Theme.of(context).colorScheme.primary,

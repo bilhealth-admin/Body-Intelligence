@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import '../../support/dart_library_source.dart';
+
 import 'package:body_intelligence_log/features/community/domain/community_referral.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -55,9 +57,9 @@ void main() {
       'lib/features/community/data/community_repository.dart',
       'lib/features/community/data/community_repository_discovery_mixin.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
-    final people = File(
+    final people = readDartLibrarySource(
       'lib/features/community/presentation/community_people_page.dart',
-    ).readAsStringSync();
+    );
 
     final routeStart = router.indexOf("path: '/community/invite/:token'");
     expect(routeStart, greaterThanOrEqualTo(0));

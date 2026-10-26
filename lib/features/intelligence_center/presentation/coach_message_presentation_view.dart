@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../domain/coach_message_presentation.dart';
@@ -255,6 +256,8 @@ class _Nutrition extends StatelessWidget {
             tilePadding: EdgeInsets.zero,
             childrenPadding: EdgeInsets.zero,
             title: Text(copy.details, style: theme.textTheme.bodyMedium),
+
+            trailing: const BilCrystalExpansionIndicator(),
             children: [
               _MetricGrid(
                 metrics: column.metrics
@@ -313,6 +316,8 @@ class _Comparison extends StatelessWidget {
           subtitle: Text(
             '${presentation.columns.length} ${copy.tr('recorded periods', 'فترات مسجلة')}',
           ),
+
+          trailing: const BilCrystalExpansionIndicator(),
           children: [
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -373,6 +378,8 @@ class _Comparison extends StatelessWidget {
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 title: Text(copy.difference),
+
+                trailing: const BilCrystalExpansionIndicator(),
                 children: [
                   for (final id in ids)
                     if (_delta(id) case final value?)

@@ -12,7 +12,7 @@ extension _BilSmartPlanPrivacySurface on _BilSmartPlanPageState {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                if (_busy && _reviewDepth == 0) const LinearProgressIndicator(),
+                if (_busy && _reviewDepth == 0) const BilFeatureWelcomeStatus(),
                 _panel(
                   child: Text(
                     _t(

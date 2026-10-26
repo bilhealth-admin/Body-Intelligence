@@ -1,4 +1,5 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -310,8 +311,7 @@ class _LoginPageState extends State<LoginPage> {
                                   child: loading
                                       ? const SizedBox.square(
                                           dimension: 21,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.2,
+                                          child: BilFeatureWelcomeStatus(
                                             color: Colors.white,
                                           ),
                                         )
@@ -527,10 +527,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: busy
                     ? SizedBox.square(
                         dimension: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: scheme.primary,
-                        ),
+                        child: BilFeatureWelcomeStatus(color: scheme.primary),
                       )
                     : SizedBox(width: 28, child: Center(child: brand)),
               ),
@@ -663,7 +660,7 @@ class _AuthTopBar extends StatelessWidget {
                   key: backKey,
                   tooltip: authEntryText(context, AuthEntryCopyKey.back),
                   onPressed: onBack,
-                  icon: BilGlassPressFeedback(
+                  icon: BilNavigationFeedback(
                     child: Icon(
                       Directionality.of(context) == TextDirection.rtl
                           ? Icons.arrow_forward_ios_rounded

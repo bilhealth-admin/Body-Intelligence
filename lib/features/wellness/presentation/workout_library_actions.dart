@@ -112,9 +112,7 @@ extension _WorkoutLibraryActions on _WorkoutLibraryPageState {
                           child: sheetSaving
                               ? const SizedBox.square(
                                   dimension: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: BilFeatureWelcomeStatus(),
                                 )
                               : Text(tr('Save', 'حفظ')),
                         ),
@@ -278,6 +276,11 @@ extension _WorkoutLibraryActions on _WorkoutLibraryPageState {
                       setDialogState(() => category = value);
                     }
                   },
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
               ],
             ),
@@ -337,7 +340,7 @@ extension _WorkoutLibraryActions on _WorkoutLibraryPageState {
                 child: dialogSaving
                     ? const SizedBox.square(
                         dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : Text(tr('Save', 'حفظ')),
               ),

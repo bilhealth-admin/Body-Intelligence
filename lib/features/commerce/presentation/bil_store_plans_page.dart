@@ -84,7 +84,40 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       _catalog = null;
     }
     (widget.store ?? _ownedStore)?.addListener(_onStoreChanged);
+    _seedPendingPurchaseFeedback();
     _load();
+  }
+
+  void _seedPendingPurchaseFeedback() {
+    final store = widget.store ?? _ownedStore;
+    if (store != null &&
+        (store.state == VerifiedStoreState.purchasePending ||
+            const {
+              'purchase_status_unknown',
+              'verification_failed',
+              'restore_verification_failed',
+              'store_finish_pending',
+              'purchase_owned_by_another_account',
+            }.contains(store.messageCode))) {
+      final feedback = _purchaseFeedbackFor(store);
+      _purchaseFeedbackKey = feedback.$1;
+      _purchaseFeedbackIsError = feedback.$2;
+    }
+    final boost = _sharedBoost;
+    if (boost != null &&
+        (boost.state == AiBoostPurchaseState.pending ||
+            const {
+              'purchase_status_unknown',
+              'verification_failed',
+              'store_finish_pending',
+            }.contains(boost.errorCode)) &&
+        store?.messageCode != 'purchase_owned_by_another_account') {
+      _onBoostChanged();
+    }
+    // Catalog initialization may intentionally emit no event for an existing
+    // unresolved operation. Seed only actionable pending verification here;
+    // historical reconciliation errors must not accuse a fresh Free visitor
+    // of making a failed purchase merely by reopening Plans.
   }
 
   void _onBoostChanged() {
@@ -181,6 +214,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     // and fail-closed until the native transaction is resolved or restored.
     final feedback = _purchaseFeedbackKey;
     if (!mounted ||
+        _restoring ||
+        (widget.store ?? _ownedStore)?.isRestoring == true ||
         feedback == null ||
         feedback == 'purchase_awaiting_approval' ||
         feedback == 'purchase_in_progress' ||
@@ -199,6 +234,12 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
 
   (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
     final code = store.messageCode;
+    // A verified receipt can arrive while AppStore.sync is still pending.
+    // Preserve the valid benefit, but never call the Restore operation done
+    // until its own lifecycle settles.
+    if (store.isRestoring && store.state != VerifiedStoreState.failed) {
+      return ('restore_checking', false);
+    }
     final key = switch (code) {
       'purchase_pending' => 'purchase_awaiting_approval',
       'restore_pending' => 'restore_checking',
@@ -285,18 +326,34 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
 
   Future<void> _restorePurchases() async {
     final catalog = _catalog;
-    if (catalog == null || _restoring) return;
-    setState(() => _restoring = true);
+    final store = widget.store ?? _ownedStore;
+    if (catalog == null || _restoring || store?.busy == true) return;
+    setState(() {
+      _restoring = true;
+      _purchaseFeedbackKey = 'restore_checking';
+      _purchaseFeedbackIsError = false;
+    });
     var messageKey = 'restore_checked';
     try {
-      await catalog.restorePurchases().timeout(const Duration(seconds: 20));
-      final store = widget.store ?? _ownedStore;
+      final operation = catalog.restorePurchases();
+      try {
+        await operation.timeout(const Duration(seconds: 20));
+      } on TimeoutException {
+        if (store?.isRestoring != true) rethrow;
+        // The page's observation deadline cannot declare a still-running
+        // native restore failed. Await this same operation; the service owns
+        // its existing bounded deadline, owner fences and late callbacks.
+        // Never invoke restore again or start a purchase here.
+        await operation;
+      }
       if (store != null) _syncOwnershipConflict(store);
       messageKey = switch (store?.messageCode) {
         'subscription_verified' => 'restore_verified',
         'no_restorable_purchases' => 'restore_none',
         'authentication_required' => 'restore_sign_in',
         'restore_failed' => 'restore_failed',
+        'purchase_status_unknown' ||
+        'store_finish_pending' => 'purchase_verification_unavailable',
         'purchase_owned_by_another_account' =>
           'purchase_owned_by_another_account',
         'restore_verification_failed' ||
@@ -311,7 +368,21 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       messageKey = 'restore_failed';
     }
     if (!mounted) return;
-    setState(() => _restoring = false);
+    setState(() {
+      _restoring = false;
+      // The routine completed check already has its existing SnackBar below.
+      // Keep unresolved/verified transaction outcomes persistent, without
+      // duplicating this transient acknowledgement above the purchase CTA.
+      _purchaseFeedbackKey = messageKey == 'restore_checked'
+          ? null
+          : messageKey;
+      _purchaseFeedbackIsError = const {
+        'restore_failed',
+        'restore_timeout',
+        'restore_verification_failed',
+        'purchase_owned_by_another_account',
+      }.contains(messageKey);
+    });
     final locale = Localizations.localeOf(context).toLanguageTag();
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()

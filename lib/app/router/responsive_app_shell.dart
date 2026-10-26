@@ -1,4 +1,4 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../../features/community/presentation/community_attention_scope.dart';
 import 'dart:ui';
 
@@ -12,6 +12,7 @@ import '../theme/bil_navigation_icons.dart';
 import '../../shared/widgets/bil_wordmark.dart';
 import '../../shared/widgets/bil_reference_bottom_bar.dart';
 import 'bil_quick_add_presenter.dart';
+import 'bil_primary_navigation.dart';
 import '../../shared/widgets/first_use_guide_anchor.dart';
 
 part 'responsive_app_shell_top_navigation.dart';
@@ -149,10 +150,10 @@ class ResponsiveAppShell extends StatelessWidget {
     void navigate(int next) {
       if (next == 1 && index != 1) {
         final origin = Uri.encodeComponent(paths[index]);
-        context.go('/daily-log?from=$origin');
+        bilSelectPrimaryRoute(context, '/daily-log?from=$origin');
         return;
       }
-      context.go(paths[next]);
+      bilSelectPrimaryRoute(context, paths[next]);
     }
 
     Future<void> quickAdd() async {
@@ -251,16 +252,7 @@ class ResponsiveAppShell extends StatelessWidget {
                           quickAdd();
                           return;
                         }
-                        final target = BilReferenceBottomBar.routes[next];
-                        final activePath = GoRouter.of(
-                          context,
-                        ).routerDelegate.currentConfiguration.uri.path;
-                        // Tabs select the canonical shell root. Replacing the
-                        // top imperative route can retain an external/detail
-                        // stack and a stale tab closure after a modal return.
-                        if (activePath == target) return;
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        context.go(target);
+                        bilSelectPrimaryTab(context, next);
                       },
                     ),
                   ),
@@ -357,7 +349,7 @@ class _GlassQuickAdd extends StatelessWidget {
           IconButton(
             tooltip: context.strings.text('Quick Add'),
             onPressed: onTap,
-            icon: BilGlassPressFeedback(
+            icon: BilNavigationFeedback(
               child: Icon(
                 BilNavigationIcons.quickAdd(Theme.of(context).platform),
                 key: const Key('shell-quick-add-icon'),

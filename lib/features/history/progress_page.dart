@@ -1,5 +1,7 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -454,7 +456,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                       onPressed: saving
                           ? null
                           : () async {
-                              final picked = await showDatePicker(
+                              final picked = await showBilCrystalDatePicker(
                                 context: sheetContext,
                                 initialDate: selectedDate,
                                 firstDate: DateTime(2000),
@@ -567,7 +569,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                       icon: saving
                           ? const SizedBox.square(
                               dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: BilFeatureWelcomeStatus(),
                             )
                           : const Icon(Icons.check_rounded),
                       label: Text(copy.saveMeasurement),
@@ -616,7 +618,7 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
               const SizedBox(height: 14),
               FilledButton.tonalIcon(
                 onPressed: onRetry,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 label: Text(copy.retry),

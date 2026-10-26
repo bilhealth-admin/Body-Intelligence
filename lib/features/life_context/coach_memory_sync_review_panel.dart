@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
@@ -51,7 +52,7 @@ class _CoachMemorySyncReviewPanelState
                           'تحتاج بعض المعلومات إلى مزامنة أو اختيار بين نسختي الجهاز والسحابة. تُحفظ معلوماتك المحلية إلى أن تراجعها.',
                         ),
                       ),
-                      if (_busy) const LinearProgressIndicator(),
+                      if (_busy) const BilFeatureWelcomeStatus(),
                       for (final issue in issues.where(
                         (i) => i.state == 'conflict',
                       ))

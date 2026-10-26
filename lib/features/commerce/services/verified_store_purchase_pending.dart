@@ -47,12 +47,23 @@ extension VerifiedStorePurchasePending on VerifiedStorePurchaseService {
     }
     if (!_disposed &&
         _storeVisit.isCurrent(visit) &&
-        _pendingVerifiedFinishes.isEmpty &&
-        state == VerifiedStoreState.verified) {
-      messageCode = lastVerifiedProductId == StoreCatalogConfiguration.aiBoost
-          ? 'ai_boost_verified'
-          : 'subscription_verified';
-      notifyListeners();
+        _pendingVerifiedFinishes.isEmpty) {
+      if (state == VerifiedStoreState.verified) {
+        messageCode = lastVerifiedProductId == StoreCatalogConfiguration.aiBoost
+            ? 'ai_boost_verified'
+            : 'subscription_verified';
+        notifyListeners();
+      } else if (state == VerifiedStoreState.ready &&
+          messageCode == 'store_finish_pending') {
+        // An inactive verified receipt has no paid benefit to restore, but its
+        // successful acknowledgement must release the old checkout blocker.
+        // Only replace this finish marker: newer rejection/pending states keep
+        // their own feedback and no entitlement or credit is granted here.
+        messageCode = entitlement?.grantsPaidAccess == true
+            ? 'subscription_verified'
+            : 'no_restorable_purchases';
+        notifyListeners();
+      }
     }
   }
 

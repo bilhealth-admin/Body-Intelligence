@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/localization/app_localizations.dart';
@@ -86,12 +87,10 @@ class PremiumCollectionItemGate extends ConsumerWidget {
                         child: checking
                             ? const SizedBox.square(
                                 dimension: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: BilFeatureWelcomeStatus(),
                               )
                             : unavailable
-                            ? const BilGlassPressFeedback(
+                            ? const BilNavigationFeedback(
                                 child: Icon(Icons.refresh_rounded),
                               )
                             : showLabel

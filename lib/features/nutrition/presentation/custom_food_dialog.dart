@@ -349,7 +349,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
             child: saving
                 ? const SizedBox.square(
                     dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: BilFeatureWelcomeStatus(),
                   )
                 : Text(t('Save')),
           ),

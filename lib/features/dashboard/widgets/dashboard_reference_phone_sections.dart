@@ -184,7 +184,7 @@ class _DiscoverTile extends StatelessWidget {
               fit: BoxFit.contain,
               alignment: Alignment.topCenter,
               errorBuilder: (_, _, _) => Center(
-                child: BilGlassPressFeedback(
+                child: BilNavigationFeedback(
                   child: Icon(
                     fallbackIcon,
                     size: 40,
@@ -260,12 +260,9 @@ class _DiscoverTile extends StatelessWidget {
                         ? const SizedBox.square(
                             key: Key('dashboard-discover-access-checking'),
                             dimension: 15,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.8,
-                              color: Colors.white,
-                            ),
+                            child: BilFeatureWelcomeStatus(color: Colors.white),
                           )
-                        : const BilGlassPressFeedback(
+                        : const BilNavigationFeedback(
                             child: Icon(
                               Icons.arrow_forward_rounded,
                               size: 15,
@@ -359,7 +356,7 @@ class _ReferenceAiCoachCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const BilGlassPressFeedback(
+              const BilNavigationFeedback(
                 child: Icon(
                   Icons.arrow_forward_rounded,
                   color: Color(0xFFC8F3FF),
@@ -439,7 +436,7 @@ class _CompactIntelligenceCard extends StatelessWidget {
               icon: const Icon(Icons.info_outline_rounded),
             )
           else
-            const BilGlassPressFeedback(
+            const BilNavigationFeedback(
               child: Icon(Icons.chevron_right_rounded),
             ),
         ],

@@ -23,6 +23,9 @@ void main() {
     final exceptionCatcher = File(
       'ios/Runner/BILObjCExceptionCatcher.h',
     ).readAsStringSync();
+    final exceptionImplementation = File(
+      'ios/Runner/BILObjCExceptionCatcher.m',
+    ).readAsStringSync();
     final bridgingHeader = File(
       'ios/Runner/Runner-Bridging-Header.h',
     ).readAsStringSync();
@@ -49,6 +52,12 @@ void main() {
     expect(speech, contains('BILPerformObjCExceptionCatching'));
     expect(speech, contains('format: nil'));
     expect(exceptionCatcher, contains('BILPerformObjCExceptionCatching'));
+    expect(exceptionImplementation, isNot(contains('exception.reason')));
+    expect(exceptionImplementation, isNot(contains('exception.name')));
+    expect(
+      exceptionImplementation,
+      contains('Recoverable native audio exception.'),
+    );
     expect(bridgingHeader, contains('BILObjCExceptionCatcher.h'));
     expect(xcodeProject, contains('BILObjCExceptionCatcher.m in Sources'));
     expect(camera, contains('_serializeCameraOperation'));

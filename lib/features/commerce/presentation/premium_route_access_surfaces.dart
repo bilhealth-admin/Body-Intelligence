@@ -39,7 +39,7 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    BilGlassPressFeedback(
+                    BilNavigationFeedback(
                       child: Icon(
                         Icons.sync_problem_rounded,
                         size: 42,
@@ -64,7 +64,7 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
                     FilledButton.tonalIcon(
                       key: const ValueKey('premium-route-access-retry'),
                       onPressed: onRetry,
-                      icon: const BilGlassPressFeedback(
+                      icon: const BilNavigationFeedback(
                         child: Icon(Icons.refresh_rounded),
                       ),
                       label: Text(context.strings.text('Try again')),

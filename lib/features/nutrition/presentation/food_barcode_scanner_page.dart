@@ -1,4 +1,6 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -142,7 +144,9 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
           enableBackButton: true,
           // The installed SDK accepts Icon here. Shared SDK arrow feedback
           // decorates the enabled button without changing that contract.
-          backButtonIcon: const Icon(Icons.chevron_left_rounded),
+          backButtonIcon: const BilCrystalActionIcon(
+            Icons.chevron_left_rounded,
+          ),
         ),
         isShowFlashIcon: false,
         delayMillis: 350,
@@ -413,7 +417,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
                 icon: analyzingImage
                     ? const SizedBox.square(
                         dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : const Icon(Icons.image_search_rounded),
               ),
@@ -489,7 +493,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
                   if (starting)
                     const ColoredBox(
                       color: Color(0x66000000),
-                      child: Center(child: CircularProgressIndicator()),
+                      child: Center(child: BilFeatureWelcomeStatus()),
                     ),
                   if (startError != null)
                     _ScannerError(
@@ -557,7 +561,7 @@ class _WindowsScannerLauncher extends StatelessWidget {
               icon: starting
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: BilFeatureWelcomeStatus(),
                     )
                   : const Icon(Icons.camera_alt_outlined),
               label: Text(
@@ -634,7 +638,7 @@ class _ScannerError extends StatelessWidget {
               const SizedBox(height: 16),
               FilledButton.icon(
                 onPressed: onRetry,
-                icon: const BilGlassPressFeedback(child: Icon(Icons.refresh)),
+                icon: const BilNavigationFeedback(child: Icon(Icons.refresh)),
                 label: Text(context.strings.text('Try again')),
               ),
             ],

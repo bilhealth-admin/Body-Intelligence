@@ -220,7 +220,7 @@ class _SectionTitle extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        BilGlassPressFeedback(
+        BilNavigationFeedback(
           child: Icon(icon, color: scheme.onSurfaceVariant, size: 22),
         ),
         const SizedBox(width: 11),
@@ -256,7 +256,7 @@ class _CapabilityChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(
+          BilNavigationFeedback(
             child: Icon(icon, size: 17, color: scheme.primary),
           ),
           const SizedBox(width: 6),
@@ -287,7 +287,7 @@ class _ConsentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SwitchListTile.adaptive(
     contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-    secondary: BilGlassPressFeedback(
+    secondary: BilNavigationFeedback(
       child: Icon(
         icon,
         size: 22,

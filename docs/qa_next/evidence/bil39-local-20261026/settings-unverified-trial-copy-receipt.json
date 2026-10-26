@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "checked_at_utc": "2026-10-26T19:39:18.337Z",
+  "status": "LOCAL_PASS_NATIVE39_PENDING",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "physical38_evidence": {
+    "light_screenshot_sha256": "02b88e9d1538be7378b68af8afe8c856198b3aa80c9a2ecb4bbf4bb299f11af9",
+    "dark_screenshot_sha256": "42e8586ee35c867135d7b251f2fcbe4529d5132beefff9165e3a85577dd3e863",
+    "observation": "Settings shows unconditional Start7-day free trial for a Free/expired test account before any verified offer eligibility."
+  },
+  "change": "Reference Settings entry now uses existing localized Explore Premium, routing to existing Plans; verified offers remain authoritative. No price, subscription, entitlement or protected purchase CTA change.",
+  "test_result": {
+    "passed": 24,
+    "failed": 0,
+    "skipped": 0,
+    "done": {
+      "success": true,
+      "type": "done",
+      "time": 17798
+    },
+    "cases": [
+      "neutral upsell label is localized in every supported locale",
+      "Settings never promises unverified trial: en inactive",
+      "verified Premium never receives a second Premium upsell",
+      "sign-out failure is translated in every supported locale",
+      "premium labels and AdGate consume verified entitlement only",
+      "server entitlement fails closed before Supabase is initialized",
+      "verified entitlement follows the Supabase owner lifecycle",
+      "dashboard keeps local truth visible while entitlement resolves",
+      "signed-out action opens login and never signs out",
+      "closed-test grant is a server-owned Premium AI Coach overlay",
+      "Settings never promises unverified trial: en expired",
+      "free Settings uses the same Premium identity and action as More",
+      "Settings never promises unverified trial: ar inactive",
+      "safety and legal copy describe the current published product",
+      "shared account identity syncs edits and stays offline safe",
+      "Settings never promises unverified trial: ar expired",
+      "trial and locked-card copy is complete in all 25 locales",
+      "watch sync stays free and fitness-device actions require verified Premium",
+      "destination glass names the hidden feature without inventing a trial",
+      "discover destinations preserve Android back navigation",
+      "sign-out waits for success and ignores duplicate taps",
+      "failed sign-out preserves page and permits retry",
+      "reference settings are persisted and routed",
+      "session switch changes sign-out to sign-in without reopening page"
+    ]
+  },
+  "new_behavior": "English/Arabic inactive and expired Free accounts see neutral entry; actual tap opens Plans exactly once.25-locale label resolution checked.",
+  "legacy_test_change": "Old Settings fixture required the unconditional trial promise. Its expected copy was corrected to match the demonstrated defect and strengthened by four route-level regressions; no safety assertions removed.",
+  "source_hashes": {
+    "lib/features/settings/reference_settings_home_page.dart": "0c801ede4c3e4f548c24cf4381a0e59e4985adf076a3a21993cb0e0bd3f522c5",
+    "test/features/settings/pre_release_settings_contradictions_test.dart": "2e409b0cce76ff47aa595172c428820cc5b7db6698ace017f50f873d938963f0",
+    "test/features/settings/settings_unverified_trial_upsell_test.dart": "43757efbfb24e4e7509669c22fb7be79bdb6c1e46a4eb766bfcb354cc02b2bbb"
+  },
+  "red_log_sha256": "fef0e89caa4c1dbcd15892488c2807d3873552fb8a61dec65c123d884d0957e9",
+  "green_log_sha256": "bba53e6b4956bf954d14f549f70aafda09108b562e904140a2f71770bca5b9de",
+  "analyze": {
+    "issues": 0,
+    "log_sha256": "fee901a631e736eb4816e90059670c79d201d952ddaccbe55263fd68cdf74449"
+  }
+}

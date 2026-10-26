@@ -1,5 +1,5 @@
 import 'bil_pearl_feature_welcome.dart';
-import 'bil_glass_press_feedback.dart';
+import 'bil_navigation_feedback.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -329,7 +329,7 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
                                 side: const BorderSide(color: Colors.white60),
                               ),
                               onPressed: _retake,
-                              icon: const BilGlassPressFeedback(
+                              icon: const BilNavigationFeedback(
                                 child: Icon(Icons.refresh_rounded),
                               ),
                               label: Text(
@@ -453,7 +453,7 @@ class _CameraErrorPanel extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(context.strings.text('Retry')),

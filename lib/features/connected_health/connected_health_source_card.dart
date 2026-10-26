@@ -56,9 +56,9 @@ class _HealthSourceCard extends ConsumerWidget {
               icon: snapshot.isBusy
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: BilFeatureWelcomeStatus(),
                     )
-                  : const BilGlassPressFeedback(
+                  : const BilNavigationFeedback(
                       child: Icon(Icons.sync_rounded),
                     ),
               label: Text(
@@ -108,6 +108,8 @@ class _HealthSourceCard extends ConsumerWidget {
             tilePadding: EdgeInsets.zero,
             childrenPadding: EdgeInsets.zero,
             title: Text(tr('Manage fitness sources', 'إدارة مصادر اللياقة')),
+
+            trailing: const BilCrystalExpansionIndicator(),
             children: [
               if (!kIsWeb &&
                   defaultTargetPlatform == TargetPlatform.iOS &&

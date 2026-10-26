@@ -292,7 +292,7 @@ class _WeeklyEvidenceTile extends StatelessWidget {
             color: color.withValues(alpha: .13),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: BilGlassPressFeedback(
+          child: BilNavigationFeedback(
             child: Icon(icon, color: color, size: 20),
           ),
         ),
@@ -345,7 +345,7 @@ class _Section extends StatelessWidget {
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           child: Row(
             children: [
-              BilGlassPressFeedback(child: Icon(icon)),
+              BilNavigationFeedback(child: Icon(icon)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -416,7 +416,7 @@ class _ResponsiveAction extends StatelessWidget {
     final content = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        BilGlassPressFeedback(child: Icon(icon)),
+        BilNavigationFeedback(child: Icon(icon)),
         const SizedBox(width: 10),
         Flexible(
           child: Text(

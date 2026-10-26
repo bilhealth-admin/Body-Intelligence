@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,7 +36,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/settings'),
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
           ),
           title: Text(
             wellnessCopy(context, 'BIL wellness library', 'مكتبة BIL الصحية'),
@@ -48,7 +49,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
                 'إدارة حزم المحتوى',
               ),
               onPressed: () => context.push('/wellness/content-packs'),
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.download_for_offline_outlined),
               ),
             ),
@@ -297,7 +298,7 @@ class _WellnessExperienceCard extends StatelessWidget {
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     onPressed: () => context.push(item.route),
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.arrow_forward_rounded),
                     ),
                     label: Text(item.action),

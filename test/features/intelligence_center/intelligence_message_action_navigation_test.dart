@@ -1,3 +1,5 @@
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -91,6 +93,7 @@ void main() {
         ),
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     final chip = find.byKey(const Key('ai-coach-action-navigate-open-goals'));
@@ -166,6 +169,7 @@ void main() {
           ),
         ),
       );
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       await tester.enterText(

@@ -47,7 +47,7 @@ class _LinkRow extends StatelessWidget {
   Widget build(BuildContext context) => ListTile(
     title: Text(title),
     subtitle: subtitle == null ? null : Text(subtitle!),
-    trailing: const BilGlassPressFeedback(
+    trailing: const BilNavigationFeedback(
       child: Icon(Icons.chevron_right_rounded),
     ),
     onTap: onTap,
@@ -109,7 +109,7 @@ class _PremiumRow extends ConsumerWidget {
         enabled: true,
         title: Text(title),
         subtitle: Text(subtitle),
-        trailing: BilGlassPressFeedback(
+        trailing: BilNavigationFeedback(
           child: Icon(
             Icons.chevron_right_rounded,
             color: Theme.of(context).colorScheme.onSurfaceVariant,

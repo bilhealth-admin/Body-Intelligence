@@ -86,6 +86,7 @@ void registerCoachAccessibilityCases() {
         await tester.pumpAndSettle();
         router.go('/intelligence-center');
         await tester.pumpAndSettle();
+        await openCoachConversationFromOverview(tester);
         await _settleBoundedBrief(tester);
         expectSingleIntroduction();
         await _unmount(tester);
@@ -167,6 +168,7 @@ void registerCoachAccessibilityCases() {
     await tester.pumpAndSettle();
     router.go('/intelligence-center');
     await tester.pumpAndSettle();
+    await openCoachConversationFromOverview(tester);
     expect(find.textContaining('Good morning'), findsNothing);
     expect(
       find.byKey(const ValueKey('coach-message-text-fixture-7')).hitTestable(),
@@ -181,7 +183,15 @@ void registerCoachAccessibilityCases() {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(database.close);
       final gateway = _HeldGateway();
-      await _mount(tester, database: database, gateway: gateway);
+      // Exercise the fallback greeting explicitly. The available-context
+      // opening brief now stays in history after sending, as tested separately.
+      await _mount(
+        tester,
+        database: database,
+        gateway: gateway,
+        briefLoader: () =>
+            Future.error(StateError('controlled brief unavailable')),
+      );
       await _send(tester, gateway);
       gateway.finish();
       await tester.pumpAndSettle();

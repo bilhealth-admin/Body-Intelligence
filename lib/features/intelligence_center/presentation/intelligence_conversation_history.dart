@@ -230,6 +230,7 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
   Future<void> _openConversationHistory({bool deleteMode = false}) async {
     if (!mounted ||
         !conversationReady ||
+        conversationRestarting ||
         conversationHistoryOpening ||
         foodImageFlowOpening) {
       return;
@@ -407,6 +408,11 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
       if (mounted) await _showConversationHistory(deleteMode: false);
       return;
     }
+    if (selection == '__new__') {
+      _cancelCurrentCoachRequest();
+      await _startNewConversation();
+      return;
+    }
     if (deleteMode) {
       final selected = history.firstWhere((entry) => entry['id'] == selection);
       await _deleteConversation(selection, title: '${selected['title'] ?? ''}');
@@ -420,25 +426,6 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
     if (!mounted) return;
     await _invalidatePendingConversationSaves();
     if (!mounted) return;
-    if (selection == '__new__') {
-      activeConversationId = null;
-      await repository.mutate(
-        set: <String, String>{
-          _conversationHistoryKey: encodeCoachConversationHistory(
-            conversations: history,
-            activeConversationId: null,
-            originalRaw: await repository.get(_conversationHistoryKey),
-          ),
-        },
-        remove: const <String>{
-          'intelligenceConversationV1',
-          'intelligenceConversationContextV1',
-          _activeConversationIdKey,
-        },
-      );
-      await _loadConversation();
-      return;
-    }
     Map<String, Object?>? selected;
     for (final entry in history) {
       if (entry['id'] == selection) {
@@ -462,6 +449,123 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
       ),
     });
     await _loadConversation();
+  }
+
+  /// Shared by History and the explicit newest-edge pull. An unread archive,
+  /// failed write or changed owner never clears the visible conversation.
+  Future<void> _startNewConversation() async {
+    if (!mounted ||
+        !conversationReady ||
+        conversationRestarting ||
+        sending ||
+        listening ||
+        voiceCaptureStarting ||
+        voiceSubmitPending ||
+        voiceMode != _CoachVoiceMode.idle ||
+        foodImageFlowOpening) {
+      return;
+    }
+    final id = activeConversationId;
+    if (id == null) return;
+    final repository = conversationPreferences;
+    final database = ref.read(databaseProvider);
+    final witness = ref.read(coachNativeOwnerWitnessProvider);
+    var retired = false;
+    var epoch = conversationPersistenceEpoch;
+    String encodeTranscript() => jsonEncode(
+      messages
+          .where((message) => !message.id.startsWith('welcome'))
+          .map((message) => message.toJson())
+          .toList(growable: false),
+    );
+    final transcript = encodeTranscript();
+    final subscription = witness?.changes.listen((owner) {
+      if (owner != database.localOwnerId) retired = true;
+    }, onError: (Object _, StackTrace _) => retired = true);
+    bool current() =>
+        mounted &&
+        !retired &&
+        conversationPersistenceEpoch == epoch &&
+        activeConversationId == id &&
+        encodeTranscript() == transcript &&
+        identical(ref.read(databaseProvider), database) &&
+        (witness == null || witness.readOwner() == database.localOwnerId);
+    bool archivedTranscriptMatches(String? raw) =>
+        decodeCoachConversationHistory(raw).conversations.any(
+          (entry) =>
+              entry['id'] == id && jsonEncode(entry['messages']) == transcript,
+        );
+    _updateState(() => conversationRestarting = true);
+    questionFocus.unfocus();
+    try {
+      await _archiveCurrentConversation(<Map<String, Object?>>[]);
+      if (!current()) return;
+      final archivedRaw = await repository.get(_conversationHistoryKey);
+      if (!current()) return;
+      if (!archivedTranscriptMatches(archivedRaw)) {
+        throw StateError('conversation_archive_readback_mismatch');
+      }
+      final previousTranscript = await repository.get(
+        'intelligenceConversationV1',
+      );
+      final previousActiveId = await repository.get(_activeConversationIdKey);
+      if (!current()) return;
+      // Retire queued snapshots before the atomic switch. New best-effort
+      // saves are paused while this operation owns the conversation.
+      await _invalidatePendingConversationSaves();
+      epoch = conversationPersistenceEpoch;
+      if (!current()) return;
+      final archive = decodeCoachConversationHistory(archivedRaw);
+      final switched = await repository.mutateIfUnchanged(
+        expected: <String, String?>{
+          _conversationHistoryKey: archivedRaw,
+          'intelligenceConversationV1': previousTranscript,
+          _activeConversationIdKey: previousActiveId,
+        },
+        set: <String, String>{
+          _conversationHistoryKey: encodeCoachConversationHistory(
+            conversations: archive.conversations,
+            activeConversationId: null,
+            originalRaw: archivedRaw,
+          ),
+        },
+        remove: const <String>{
+          'intelligenceConversationV1',
+          'intelligenceConversationContextV1',
+          _activeConversationIdKey,
+        },
+        isCurrent: current,
+      );
+      if (!current()) return;
+      if (!switched) throw StateError('conversation_changed_before_restart');
+      final readback = await Future.wait([
+        repository.get(_conversationHistoryKey),
+        repository.get('intelligenceConversationV1'),
+        repository.get(_activeConversationIdKey),
+        repository.get('intelligenceConversationContextV1'),
+      ]);
+      if (!current()) return;
+      if (!archivedTranscriptMatches(readback[0]) ||
+          decodeCoachConversationHistory(readback[0]).activeConversationId !=
+              null ||
+          readback[1] != null ||
+          readback[2] != null ||
+          readback[3] != null) {
+        throw StateError('conversation_restart_readback_mismatch');
+      }
+      activeConversationId = null;
+      activeConversationTitle = null;
+      await _loadConversation();
+    } on Object {
+      if (mounted && current()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('Try again', 'أعد المحاولة'))),
+        );
+      }
+    } finally {
+      await subscription?.cancel();
+      if (mounted) _updateState(() => conversationRestarting = false);
+    }
   }
 
   Future<void> _archiveCurrentConversation(

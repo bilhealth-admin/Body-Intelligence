@@ -7,7 +7,7 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
     if (visit == null ||
         profile == null ||
         profile.isSelf ||
-        (_relationshipBusy || _memberSafetyBusy) ||
+        (_relationshipBusy || _memberSafetyBusy || _followBusy) ||
         !const {'report', 'block'}.contains(action)) {
       return;
     }
@@ -100,13 +100,73 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
     if (repository == null ||
         profile == null ||
         profile.isSelf ||
-        _relationshipBusy) {
+        _relationshipBusy ||
+        _followBusy ||
+        _memberSafetyBusy ||
+        (profile.relationship == CommunityRelationshipStatus.none &&
+            !profile.allowFriendRequests)) {
       return;
     }
     _setProfileState(() => _relationshipBusy = true);
     try {
       await visit!.run(() async {
-        await repository.requestFriend(profile.userId);
+        final relationship = profile.relationship;
+        if (relationship == CommunityRelationshipStatus.none) {
+          await repository.requestFriend(profile.userId);
+        } else if (const {
+          CommunityRelationshipStatus.pending,
+          CommunityRelationshipStatus.incoming,
+          CommunityRelationshipStatus.accepted,
+        }.contains(relationship)) {
+          bool? response;
+          if (relationship != CommunityRelationshipStatus.pending) {
+            response = await _reviewProfileFriendship(visit, profile);
+            visit.check();
+            if (response == null) return;
+          }
+          // The profile projection has no friendship ID. Resolve exactly the
+          // viewer/target row before issuing an ID-based mutation.
+          final rows = await repository.loadFriendshipsWithProfiles();
+          visit.check();
+          final matches = rows
+              .where((row) {
+                final outgoing =
+                    row['requester_id'] == visit.ownerId &&
+                    row['addressee_id'] == profile.userId;
+                final incoming =
+                    row['requester_id'] == profile.userId &&
+                    row['addressee_id'] == visit.ownerId;
+                return row['other_user_id'] == profile.userId &&
+                    row['id'] is String &&
+                    (row['id'] as String).isNotEmpty &&
+                    switch (relationship) {
+                      CommunityRelationshipStatus.pending =>
+                        outgoing && row['status'] == 'pending',
+                      CommunityRelationshipStatus.incoming =>
+                        incoming && row['status'] == 'pending',
+                      CommunityRelationshipStatus.accepted =>
+                        (outgoing || incoming) && row['status'] == 'accepted',
+                      _ => false,
+                    };
+              })
+              .toList(growable: false);
+          if (matches.length != 1) {
+            throw StateError('Friendship is no longer available');
+          }
+          final id = matches.single['id'] as String;
+          switch (relationship) {
+            case CommunityRelationshipStatus.pending:
+              await repository.cancelFriendRequest(id);
+            case CommunityRelationshipStatus.incoming:
+              await repository.respondToFriendship(id, accept: response!);
+            case CommunityRelationshipStatus.accepted:
+              await repository.removeFriendship(id);
+            default:
+              return;
+          }
+        } else {
+          return;
+        }
         visit.check();
         final refreshed = await repository.loadProfileOverview(profile.userId);
         visit.check();
@@ -123,6 +183,53 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
     }
   }
 
+  Future<bool?> _reviewProfileFriendship(
+    _CommunityProfileVisit visit,
+    CommunityProfileOverview profile,
+  ) {
+    final incoming =
+        profile.relationship == CommunityRelationshipStatus.incoming;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => visit.guard(
+        BilPearlMaterialAlertDialog(
+          title: Text(
+            incoming
+                ? communityText(context, 'Review request', 'مراجعة الطلب')
+                : communityText(context, 'Remove friend?', 'إزالة الصديق؟'),
+          ),
+          content: Text(profile.displayName),
+          actions: [
+            TextButton(
+              key: const Key('community-profile-relationship-cancel'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(communityText(context, 'Cancel', 'إلغاء')),
+            ),
+            if (incoming)
+              TextButton(
+                key: const Key('community-profile-reject-request'),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text(communityText(context, 'Decline', 'رفض')),
+              ),
+            FilledButton(
+              key: Key(
+                incoming
+                    ? 'community-profile-accept-request'
+                    : 'community-profile-remove-friend',
+              ),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                incoming
+                    ? communityText(context, 'Accept', 'قبول')
+                    : communityText(context, 'Remove friend', 'إزالة الصديق'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _toggleFollow() async {
     final visit = _captureProfileVisit();
     final repository = visit?.repository;
@@ -131,9 +238,13 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
         profile == null ||
         profile.isSelf ||
         _followBusy ||
+        _relationshipBusy ||
+        _memberSafetyBusy ||
         (!profile.viewerFollows && !profile.allowFollows)) {
       return;
     }
+    final metadataGeneration = ++_followMetadataGeneration;
+    CommunityProfileOverview? verifiedProfile;
     _setProfileState(() => _followBusy = true);
     try {
       await visit!.run(() async {
@@ -143,15 +254,10 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
           await repository.follow(profile.userId);
         }
         visit.check();
-        final values = await Future.wait<Object>([
-          repository.loadProfileOverview(profile.userId),
-          repository.loadCommunityCreatorProfile(profile.userId),
-        ]);
+        final refreshed = await repository.loadProfileOverview(profile.userId);
         visit.check();
-        _setProfileState(() {
-          _profile = values[0] as CommunityProfileOverview;
-          _creator = values[1] as CommunityCreatorProfile;
-        });
+        _setProfileState(() => _profile = refreshed);
+        verifiedProfile = refreshed;
       });
     } on CommunityOwnerOperationCancelled {
       // A completed old mutation must not start follow-up reads as a new owner.
@@ -161,6 +267,39 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
       if (visit?.isCurrent() == true) {
         _setProfileState(() => _followBusy = false);
       }
+    }
+    final verified = verifiedProfile;
+    if (verified != null && visit?.isCurrent() == true) {
+      unawaited(
+        _refreshCreatorAfterFollow(visit!, verified, metadataGeneration),
+      );
+    }
+  }
+
+  Future<void> _refreshCreatorAfterFollow(
+    _CommunityProfileVisit visit,
+    CommunityProfileOverview verified,
+    int generation,
+  ) async {
+    bool isCurrent() =>
+        visit.isCurrent() &&
+        generation == _followMetadataGeneration &&
+        identical(_profile, verified);
+    if (!isCurrent()) return;
+    try {
+      await visit.run(() async {
+        if (!isCurrent()) return;
+        final creator = await visit.repository.loadCommunityCreatorProfile(
+          verified.userId,
+        );
+        visit.check();
+        if (!isCurrent()) return;
+        _setProfileState(() => _creator = creator);
+      });
+    } on CommunityOwnerOperationCancelled {
+      // Metadata belongs only to the verified relationship's original visit.
+    } on Object {
+      // Optional metadata never holds the verified relationship button busy.
     }
   }
 
@@ -181,6 +320,20 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
         ),
       ),
     );
+    if (!visit.isCurrent()) return;
+    try {
+      await visit.run(() async {
+        final refreshed = await visit.repository.loadProfileOverview(
+          profile.userId,
+        );
+        visit.check();
+        _setProfileState(() => _profile = refreshed);
+      });
+    } on CommunityOwnerOperationCancelled {
+      // The closed sheet cannot refresh a later owner's profile.
+    } on Object {
+      if (visit.isCurrent()) _showFailure();
+    }
   }
 
   Future<void> _managePost(CommunityPost post, String action) async {

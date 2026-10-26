@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../../shared/widgets/bil_controller_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,14 +88,14 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
     return state.when(
       loading: () => Scaffold(
         appBar: AppBar(title: Text(title)),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(child: BilFeatureWelcomeStatus()),
       ),
       error: (_, _) => Scaffold(
         appBar: AppBar(title: Text(title)),
         body: Center(
           child: FilledButton.icon(
             onPressed: () => ref.invalidate(verifiedSubscriptionStateProvider),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(_copy(context, 'Retry subscription check')),
@@ -112,7 +113,7 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
                 key: const Key('premium-feature-entitlement-retry'),
                 onPressed: () =>
                     ref.invalidate(verifiedSubscriptionStateProvider),
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 label: Text(_copy(context, 'Retry subscription check')),
@@ -161,11 +162,11 @@ class MealCalorieGoalsPage extends ConsumerWidget {
         body: ref
             .watch(mealCalorieGoalsProvider)
             .when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: BilFeatureWelcomeStatus()),
               error: (_, _) => Center(
                 child: TextButton.icon(
                   onPressed: () => ref.invalidate(mealCalorieGoalsProvider),
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.refresh_rounded),
                   ),
                   label: Text(_copy(context, 'Retry')),
@@ -197,7 +198,7 @@ class MealCalorieGoalsPage extends ConsumerWidget {
                             ? _copy(context, 'No meal goal')
                             : '${goals[meal]!.toStringAsFixed(0)} kcal',
                       ),
-                      trailing: const BilGlassPressFeedback(
+                      trailing: const BilNavigationFeedback(
                         child: Icon(Icons.chevron_right_rounded),
                       ),
                       onTap: () =>
@@ -296,7 +297,7 @@ class MealCalorieGoalsPage extends ConsumerWidget {
                     ),
                     decoration: const InputDecoration(suffixText: 'kcal'),
                   ),
-                  if (saving) const LinearProgressIndicator(),
+                  if (saving) const BilFeatureWelcomeStatus(),
                   if (error != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -348,11 +349,11 @@ class _MealMacroDisplayPageState extends ConsumerState<MealMacroDisplayPage> {
           body: ref
               .watch(mealMacroDisplayProvider)
               .when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: BilFeatureWelcomeStatus()),
                 error: (_, _) => Center(
                   child: TextButton.icon(
                     onPressed: () => ref.invalidate(mealMacroDisplayProvider),
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.refresh_rounded),
                     ),
                     label: Text(_copy(context, 'Retry')),
@@ -389,7 +390,7 @@ class _MealMacroDisplayPageState extends ConsumerState<MealMacroDisplayPage> {
                         ],
                       ),
                     ),
-                    if (saving) const LinearProgressIndicator(),
+                    if (saving) const BilFeatureWelcomeStatus(),
                     if (saveError != null)
                       ListTile(
                         leading: const Icon(Icons.error_outline_rounded),

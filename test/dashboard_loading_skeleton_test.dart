@@ -1,3 +1,4 @@
+import 'support/bil_waiting_indicators.dart';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -27,7 +28,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(bilWaitingIndicators(), findsNothing);
     expect(
       find.byWidgetPredicate(
         (widget) =>
@@ -81,7 +82,7 @@ void main() {
       // AlwaysScrollableScrollPhysics). The observable edge behavior below is
       // the contract, matching More without coupling the test to wrapper order.
       expect(find.byType(RefreshIndicator), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
 
       await tester.drag(target, const Offset(0, 300));
       await tester.pump();

@@ -260,7 +260,7 @@ class _WorkoutHistoryError extends StatelessWidget {
         const SizedBox(height: 14),
         OutlinedButton.icon(
           onPressed: onRetry,
-          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
+          icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(wellnessCopy(context, 'Retry', 'إعادة المحاولة')),
         ),
       ],

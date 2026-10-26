@@ -35,7 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.3.2
-  go_router: ^17.3.0
+  go_router: 17.3.0
   drift: ^2.34.2
   sqlite3: ^3.4.0
   path_provider: ^2.1.6
@@ -86,6 +86,8 @@ dependencies:
   connectivity_plus: 7.1.0
 
 dev_dependencies:
+  # Already-locked AST library for the pinned SDK date-logic equivalence gate.
+  analyzer: 12.1.0
   flutter_test:
     sdk: flutter
   integration_test:
@@ -118,6 +120,10 @@ dev_dependencies:
 # Keep Supabase deep links on the audited current release. Its Android module
 # consumes the host app's audited AGP toolchain configured under android/.
 dependency_overrides:
+  # Keep the existing Flutter UI libraries while backporting the audited
+  # upstream 18.1.1 ShellRoute page/navigator key collision fix.
+  go_router:
+    path: tool/vendor_go_router
   app_links:
     path: tool/vendor_app_links
   # BIL creates and reads only unencrypted report ZIPs. The upstream archive

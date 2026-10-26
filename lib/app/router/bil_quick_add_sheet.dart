@@ -1,4 +1,4 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/widgets/bil_wordmark.dart';
@@ -319,7 +319,7 @@ class _PrimaryQuickAction extends StatelessWidget {
             width: 32,
             height: 32,
             alignment: Alignment.center,
-            child: BilGlassPressFeedback(
+            child: BilNavigationFeedback(
               child: Icon(icon, key: iconKey, color: foregroundColor, size: 20),
             ),
           ),
@@ -375,7 +375,7 @@ class _QuickActionTile extends StatelessWidget {
             SizedBox(
               width: 36,
               height: 36,
-              child: BilGlassPressFeedback(
+              child: BilNavigationFeedback(
                 child: Icon(key: iconKey, icon, color: color, size: 20),
               ),
             ),
@@ -391,7 +391,7 @@ class _QuickActionTile extends StatelessWidget {
                 ),
               ),
             ),
-            BilGlassPressFeedback(
+            BilNavigationFeedback(
               child: Icon(
                 Directionality.of(context) == TextDirection.rtl
                     ? Icons.chevron_left_rounded

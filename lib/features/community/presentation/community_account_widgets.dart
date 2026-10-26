@@ -139,13 +139,13 @@ class _CommunityProfileHeader extends StatelessWidget {
                 if (snapshot.connectionState != ConnectionState.done)
                   const Padding(
                     padding: EdgeInsets.only(top: 12),
-                    child: LinearProgressIndicator(),
+                    child: BilFeatureWelcomeStatus(),
                   ),
                 if (snapshot.hasError)
                   TextButton.icon(
                     key: const Key('community-account-profile-retry'),
                     onPressed: onRefresh,
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.refresh_rounded),
                     ),
                     label: Text(
@@ -222,7 +222,7 @@ class _CommunityProfileMetric extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            BilGlassPressFeedback(
+            BilNavigationFeedback(
               child: Icon(icon, size: 18, color: scheme.primary),
             ),
             const SizedBox(height: 4),

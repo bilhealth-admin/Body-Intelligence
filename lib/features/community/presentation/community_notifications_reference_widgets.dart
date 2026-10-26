@@ -43,7 +43,7 @@ extension _CommunityNotificationsReferenceWidgets
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                BilGlassPressFeedback(
+                BilNavigationFeedback(
                   child: Icon(icon, size: 18, color: scheme.primary),
                 ),
                 const SizedBox(width: 6),
@@ -134,7 +134,7 @@ extension _CommunityNotificationsReferenceWidgets
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: BilGlassPressFeedback(
+            child: BilNavigationFeedback(
               child: Icon(palette.$2, size: 21, color: palette.$3),
             ),
           );

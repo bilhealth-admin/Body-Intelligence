@@ -69,6 +69,21 @@ void main() {
             await tester.pump();
             debugPrint('BIL_FEATURE_CASE stage=after_2200');
             expect(title, findsNothing);
+            expect(
+              find.byKey(const ValueKey('coach-reference-workspace')),
+              findsOneWidget,
+            );
+            expect(
+              find.byKey(const ValueKey('ai-coach-question-field')),
+              findsNothing,
+            );
+            final openChat = find.byKey(
+              const ValueKey('coach-workspace-open-chat'),
+            );
+            await tester.ensureVisible(openChat);
+            await tester.tap(openChat);
+            await tester.pumpAndSettle();
+            expect(title, findsNothing, reason: 'Entry hold is not replayed.');
             expect(find.byKey(const ValueKey('ai-coach-hero')), findsOneWidget);
             expect(tester.takeException(), isNull);
             debugPrint('BIL_FEATURE_CASE stage=body_pass');

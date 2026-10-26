@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -95,7 +96,7 @@ class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard> {
             ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
             : PremiumDesignTokens.cardPaddingLarge,
         child: state.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: BilFeatureWelcomeStatus()),
           error: (_, _) => ConnectedHealthErrorContent(
             languageCode: Localizations.localeOf(context).toLanguageTag(),
             onRetry: () => ref.read(connectedHealthProvider.notifier).refresh(),
@@ -260,7 +261,7 @@ class _ConnectedHealthContent extends StatelessWidget {
                   snapshot.status == ConnectedHealthStatus.degraded)
                 OutlinedButton.icon(
                   onPressed: onSync,
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.sync_rounded),
                   ),
                   label: Text(tr('Sync now', 'تحديث الساعة')),
@@ -660,11 +661,8 @@ class _DashboardSyncReading extends StatelessWidget {
           )
         : null,
     icon: syncing
-        ? const SizedBox.square(
-            dimension: 17,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        : BilGlassPressFeedback(
+        ? const SizedBox.square(dimension: 17, child: BilFeatureWelcomeStatus())
+        : BilNavigationFeedback(
             child: Icon(Icons.sync_rounded, size: compact ? 14 : 17),
           ),
     label: Text(

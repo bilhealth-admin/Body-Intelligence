@@ -1,3 +1,4 @@
+import 'support/bil_waiting_indicators.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -67,7 +68,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('private analytics'), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(find.byType(ListView), findsOneWidget);
       expect(find.textContaining('private analytics'), findsNothing);
     },
@@ -191,13 +192,13 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AppBar), findsOneWidget);
       expect(find.byType(ListView), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
 
       container.invalidate(weightHistoryProvider);
       await tester.pump();
       expect(find.byType(AppBar), findsOneWidget);
       expect(find.byType(ListView), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
     },
   );
 }

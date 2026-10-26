@@ -1,5 +1,6 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import '../providers/cloud_restore_conflict_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +29,7 @@ class _ConflictControlsState
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ListTile(
-          leading: const BilGlassPressFeedback(
+          leading: const BilNavigationFeedback(
             child: Icon(Icons.compare_arrows),
           ),
           title: Text(
@@ -43,7 +44,7 @@ class _ConflictControlsState
           onTap: busy || syncing ? null : _review,
           key: const Key('cloud-restore-review-conflicts'),
         ),
-        if (busy) const LinearProgressIndicator(),
+        if (busy) const BilFeatureWelcomeStatus(),
         if (message != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),

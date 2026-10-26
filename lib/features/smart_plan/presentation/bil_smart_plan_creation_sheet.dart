@@ -123,6 +123,11 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                 ],
                 onChanged: (value) =>
                     setState(() => horizon = value ?? horizon),
+
+                icon: const BilCrystalArrow(
+                  extent: 36,
+                  child: Icon(Icons.keyboard_arrow_down_rounded),
+                ),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<BilPlanFocus>(
@@ -147,6 +152,11 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                   ),
                 ],
                 onChanged: (value) => setState(() => focus = value ?? focus),
+
+                icon: const BilCrystalArrow(
+                  extent: 36,
+                  child: Icon(Icons.keyboard_arrow_down_rounded),
+                ),
               ),
               if (focus != BilPlanFocus.nutrition) ...[
                 const SizedBox(height: 16),
@@ -173,6 +183,11 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                       sessions = 3;
                     }
                   }),
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<BilPlanExperience>(
@@ -196,6 +211,11 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                     ),
                   ],
                   onChanged: (value) => setState(() => experience = value),
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -225,6 +245,11 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                       DropdownMenuItem(value: time, child: Text(time)),
                   ],
                   onChanged: (value) => setState(() => preferredTime = value),
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 if (environment == BilPlanEnvironment.home) ...[
                   const SizedBox(height: 16),
@@ -309,6 +334,11 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                     ),
                   ],
                   onChanged: (value) => setState(() => diet = value ?? diet),
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
               CheckboxListTile(
                 value: confirmedPreferences,

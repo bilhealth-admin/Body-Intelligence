@@ -1,0 +1,142 @@
+{
+  "schema": "bil39.reviewed.user.visual.adjustments.v1",
+  "base_before_adjustments": "bef122a3aade5f2564eedf7fc83530bbe85b1a10",
+  "user_requests": [
+    "Keep Previous and Next adjacent with equal widths",
+    "Show the same photographic subject in Arabic as English; preserve RTL content"
+  ],
+  "source_behavior": [
+    "Equal-width, equal-height session navigation that wraps text inside each adjacent button",
+    "Fixed photographic crop and scrim independent of text direction",
+    "Darker existing BIL navy for light-mode section icons after actual 2.883 contrast failure; original threshold retained"
+  ],
+  "real_behavior_proof": [
+    "320px at 200% text: next and previous remain adjacent and navigate forward/back to original movement",
+    "Actual pixel comparison: RTL and LTR decorative backgrounds match and differ from a plain panel",
+    "Visible asset decoding is awaited before screenshots and contrast checks"
+  ],
+  "before_review_result": {
+    "passed": 206,
+    "failed": 23,
+    "all_failures": "Reviewed intended golden deltas only"
+  },
+  "review_scope": "All 23 affected actual rendered viewports visually inspected; no native-device or final integrated acceptance claimed",
+  "changed_golden_files": [
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_390.png",
+      "previous_sha256": "50a612673117badade83423436f115b2f45b3a96d444c8c783b4e009083d9cd7",
+      "reviewed_render_sha256": "55e7194cb5c35a65d642b14b98ffa89de1129b32937e52ca0ae10728f01c4453"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_memory.png",
+      "previous_sha256": "81a6af55d9a5e45358a7868271161b8ce58ced569e762f01b2d551fe21f13e31",
+      "reviewed_render_sha256": "f94e8f39628a9d870674e4bc73dae1f56869edf80e45f14262dcc0a11398add8"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_report.png",
+      "previous_sha256": "9aee664a6d2e1549ed7ddbad0e38b8f1d39e3df6f98692e99fe9533c01ed24f5",
+      "reviewed_render_sha256": "2a2b685fa85ce116526c0fc51295067f4f03d9b20f80c1518ef0249b9de1a3de"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_390.png",
+      "previous_sha256": "b45a2c1ab688d6c59ffd225c0b62680e68293241426b68958d6344c7258bbc51",
+      "reviewed_render_sha256": "800b9087a4aef4afd5dde3cde3d42c86670ab154e68bdeb6392f49e1254beee7"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_memory.png",
+      "previous_sha256": "395fc8fb21472d6d0b4d4754668208663110f7ddde0235956f220b5f5c77fc5a",
+      "reviewed_render_sha256": "3de00123d3b7ee22a420e9e8c634b1956727835dfd5637b2b0fb8265e32b6ec7"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_report.png",
+      "previous_sha256": "d22c21d20168e8d4fce236d9b06c9d4ff99f76f31c7299761031fc6110f19a75",
+      "reviewed_render_sha256": "b861166605d1fe04602a877435bb585ccee0f9f761b17cfe3e2563ddc5a46270"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_dark.png",
+      "previous_sha256": "46579f2d576a451a1da4e8cdd61bc3fc05c6fd93abea9fb188ad5bf2de0f3e41",
+      "reviewed_render_sha256": "2d21bd69c1850a03bae13609e2ca21b377a8a58f36fb7646e8a0113066e3e1e4"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_light.png",
+      "previous_sha256": "7b331c50a224c7a6b3c39f009bf93f3d9b7db578c945c31d45078fc146022813",
+      "reviewed_render_sha256": "4af1f64a0a0de4d53bb906abb9e028c48f4a3afa02a1f980307bbffb2d4b301c"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_dark.png",
+      "previous_sha256": "87a0496aee5abb29bf151406ae0d32fa0cd5cfb9f29f076360b8d10dcd23ce47",
+      "reviewed_render_sha256": "f380011eab926313d0c9b7604001a34ebbf5adbbf009e20d9662278cf94b50c6"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_light.png",
+      "previous_sha256": "0fa61558d71b2be19db23c2a27ad63f360d6081019e11c6a2b07d4520dd83b41",
+      "reviewed_render_sha256": "b599b4fbaadb20cd87e655e5eeed0ee4e2ab15e06da169bee94df7f3c5e73b20"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_ar_dark.png",
+      "previous_sha256": "e6f94d007a0e4725be4a42f10f850c1e1e3368eb3ba4fc1239fae0c69512def0",
+      "reviewed_render_sha256": "ba28a7b4b0b009dd6efd3760adf82a8688cf41a156acefa402558e012f752ab8"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_ar_light.png",
+      "previous_sha256": "d1824e68ddc6ea24e7966e14be79050405c963f0206b1cfc9ddd3999515a658c",
+      "reviewed_render_sha256": "63240184ae229cc11a71ef3eda8784cb5467b9b378d74046e6c4dddac6ad46b4"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_ar.png",
+      "previous_sha256": "03d2078aad6ad3c8632888dcd1b1b206722c7f6ee828bec87002db56049a8b26",
+      "reviewed_render_sha256": "4574bc904a3d75d00555988de1b7193075ad63b69b814195f98bc8c1a5d7bef8"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_en.png",
+      "previous_sha256": "98eb70524945b595e43ab6e21ee3647e32573112cc40ba9249633a644c6c69c4",
+      "reviewed_render_sha256": "eefaa4f74a6871605359240350e7180c7b98d49f3bb78ca4ad82776542445a7a"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_dark.png",
+      "previous_sha256": "f9c35ab1573e7965da4598a786603e322710faa2c9d78de2bbdb62b559f38592",
+      "reviewed_render_sha256": "c2485870601263d07dd2c27cf44cdf969ad80fcc43aed2dab56dbec257e60f66"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_light.png",
+      "previous_sha256": "5c42c9e834372c858679bc73a308e74834c92143d05a0862cc07d72f38b0f3e1",
+      "reviewed_render_sha256": "84e9be435c889efc92ce7789b127d41f248c39cac115c96e840988e0a1b79e82"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_en_light.png",
+      "previous_sha256": "6a0f0b5982c3d7d7f5d63d13d3a0a1ac22982c1f9639f2640b59e8a1d10a7938",
+      "reviewed_render_sha256": "57f82ff5af49713a545d2296eab3595ebf52dddf47c03a432f9a6ef5afc578b4"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_dark.png",
+      "previous_sha256": "fd641fd5abff09d71ab46f64a6fcc7cc1a5b31cf47442e30580099f8dd3e06ee",
+      "reviewed_render_sha256": "6e006f16d292bb22b497ce43668bf6849d3861a42aedc4a74b3736ec79e3fe89"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_light.png",
+      "previous_sha256": "5d29f2987548ac6ebb0e732ec3296f18e227bed902a4e9eb52bb6fc91ee17947",
+      "reviewed_render_sha256": "5117d80007918caab2e0400bc681dfdb672e6600ac1b4984c45b145f3fd05c92"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_dark.png",
+      "previous_sha256": "7dd5d04c3135697e89c966327648aca95e7a30af55b21a3466a278b58d684cde",
+      "reviewed_render_sha256": "640dab56174b0c8d221adc269a065f26e0b582338c7aa6c86366ff8f827d10df"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_light.png",
+      "previous_sha256": "b8e064bad253a67cc9eae5ac66c092d73290b4f8f048961f6450fbac98d5cacf",
+      "reviewed_render_sha256": "6247f4d550b13c2d823ea86b97c8af40d0c8d2c6ad41061b5818db5966822f19"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_dark.png",
+      "previous_sha256": "78dbf30e18fd9859af8d5a31abe8e07055446eeb55cad953944b32af43b4fd71",
+      "reviewed_render_sha256": "12dff3cb53af2e76def79fcc2623631612f99166b55c7542ef7db21bc761bd42"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_light.png",
+      "previous_sha256": "065e628893abdeaaaafb83632d79cf4e1b7106f21b7ecd002f3175cd04a07d88",
+      "reviewed_render_sha256": "e191213b26ed3698dca0b67d2d0a4bb7f53442f3d241216d80588a8e710c72d2"
+    }
+  ],
+  "test_safety": "No comparator/tolerance, accessibility threshold, original receipt or ownership assertion was removed"
+}

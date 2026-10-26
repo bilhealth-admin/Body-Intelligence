@@ -41,7 +41,7 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
     final now = DateTime.now();
     final latestEligible = BilAdultEligibility.latestEligibleBirthDate(on: now);
     final current = dateOfBirth ?? DateTime(now.year - age);
-    final selected = await showDatePicker(
+    final selected = await showBilCrystalDatePicker(
       context: context,
       initialDate: current.isAfter(latestEligible) ? latestEligible : current,
       firstDate: DateTime(now.year - 120),

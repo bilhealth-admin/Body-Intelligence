@@ -15,6 +15,8 @@ class _MessageBubble extends StatelessWidget {
     this.onAction,
     this.actionPhases = const <String, _CoachActionExecutionPhase>{},
     this.animateReveal = false,
+    this.sentFrom,
+    this.onSentArrivalFinished,
     this.richContent,
     required this.expectedOwnerKey,
     required this.ownerVisitIsCurrent,
@@ -35,6 +37,8 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<IntelligenceAction>? onAction;
   final Map<String, _CoachActionExecutionPhase> actionPhases;
   final bool animateReveal;
+  final Rect? sentFrom;
+  final VoidCallback? onSentArrivalFinished;
   final Widget? richContent;
   final String expectedOwnerKey;
   final bool Function() ownerVisitIsCurrent;
@@ -49,63 +53,77 @@ class _MessageBubble extends StatelessWidget {
     if (user) {
       return Align(
         alignment: Alignment.centerRight,
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 720),
-          margin: const EdgeInsets.only(left: 32, bottom: 18),
-          padding: const EdgeInsetsDirectional.fromSTEB(16, 11, 16, 12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                scheme.primaryContainer,
-                scheme.primaryContainer.withValues(alpha: .84),
+        child: CoachSentMessageArrival(
+          key: ValueKey('coach-sent-arrival-${message.id}'),
+          origin: sentFrom,
+          text: message.text,
+          direction: _messageTextDirection(message.text),
+          style:
+              _coachConversationActionStyle(
+                context,
+                color: scheme.onPrimaryContainer,
+              )?.copyWith(height: 1.4) ??
+              const TextStyle(fontSize: 14),
+          visitIsCurrent: ownerVisitIsCurrent,
+          onFinished: onSentArrivalFinished ?? () {},
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 720),
+            margin: const EdgeInsets.only(left: 32, bottom: 18),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 11, 16, 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  scheme.primaryContainer,
+                  scheme.primaryContainer.withValues(alpha: .84),
+                ],
+              ),
+              border: Border.all(
+                color: scheme.primary.withValues(alpha: .26),
+                width: .7,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(22),
+                topRight: Radius.circular(22),
+                bottomLeft: Radius.circular(22),
+                bottomRight: Radius.circular(6),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                CoachMessageText(
+                  key: ValueKey('coach-message-text-${message.id}'),
+                  text: message.text,
+                  createdAt: message.createdAt,
+                  alignEnd: true,
+                  textDirection: _messageTextDirection(message.text),
+                  style: _coachConversationActionStyle(
+                    context,
+                    color: scheme.onPrimaryContainer,
+                  )?.copyWith(height: 1.4),
+                ),
+                if (onCopy != null)
+                  IconButton(
+                    key: Key('ai-coach-copy-${message.id}'),
+                    tooltip: intelligenceText(
+                      context,
+                      'Copy message',
+                      'نسخ الرسالة',
+                    ),
+                    onPressed: onCopy,
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 36,
+                      height: 36,
+                    ),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.copy_rounded, size: 18),
+                  ),
               ],
             ),
-            border: Border.all(
-              color: scheme.primary.withValues(alpha: .26),
-              width: .7,
-            ),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(22),
-              topRight: Radius.circular(22),
-              bottomLeft: Radius.circular(22),
-              bottomRight: Radius.circular(6),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              CoachMessageText(
-                key: ValueKey('coach-message-text-${message.id}'),
-                text: message.text,
-                createdAt: message.createdAt,
-                alignEnd: true,
-                textDirection: _messageTextDirection(message.text),
-                style: _coachConversationActionStyle(
-                  context,
-                  color: scheme.onPrimaryContainer,
-                )?.copyWith(height: 1.4),
-              ),
-              if (onCopy != null)
-                IconButton(
-                  key: Key('ai-coach-copy-${message.id}'),
-                  tooltip: intelligenceText(
-                    context,
-                    'Copy message',
-                    'نسخ الرسالة',
-                  ),
-                  onPressed: onCopy,
-                  visualDensity: VisualDensity.compact,
-                  constraints: const BoxConstraints.tightFor(
-                    width: 36,
-                    height: 36,
-                  ),
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.copy_rounded, size: 18),
-                ),
-            ],
           ),
         ),
       );
@@ -125,11 +143,16 @@ class _MessageBubble extends StatelessWidget {
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(13),
-        decoration: BilPearlFinish.panel(
-          context,
-          radius: BorderRadius.circular(18),
-          shadow: false,
-        ),
+        decoration:
+            coachUsesNativeMarkdown &&
+                message.presentation == null &&
+                richContent == null
+            ? null
+            : BilPearlFinish.panel(
+                context,
+                radius: BorderRadius.circular(18),
+                shadow: false,
+              ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -148,15 +171,28 @@ class _MessageBubble extends StatelessWidget {
                     expectedOwnerKey: expectedOwnerKey,
                     ownerVisitIsCurrent: ownerVisitIsCurrent,
                     copy: presentationCopy,
-                    textBuilder: (text) => CoachMessageText(
-                      key: ValueKey('coach-message-text-${message.id}'),
-                      text: text,
-                      createdAt: message.createdAt,
-                      textDirection: _messageTextDirection(text),
-                      style: _coachConversationBodyStyle(context),
-                      animateReveal: false,
-                      showTime: false,
-                    ),
+                    textBuilder: (text) {
+                      final fallback = CoachMessageText(
+                        key: ValueKey('coach-message-text-${message.id}'),
+                        text: text,
+                        createdAt: message.createdAt,
+                        textDirection: _messageTextDirection(text),
+                        style: _coachConversationBodyStyle(context),
+                        animateReveal: false,
+                        showTime: false,
+                      );
+                      if (!coachUsesNativeMarkdown) return fallback;
+                      return CoachNativeMarkdown(
+                        key: ValueKey('coach-native-markdown-${message.id}'),
+                        text: text,
+                        direction: _messageTextDirection(text),
+                        style:
+                            _coachConversationBodyStyle(context) ??
+                            const TextStyle(fontSize: 16),
+                        visitIsCurrent: ownerVisitIsCurrent,
+                        fallback: fallback,
+                      );
+                    },
                   ),
                   ?richContent,
                   const SizedBox(height: 4),
@@ -331,7 +367,7 @@ class _MessageBubble extends StatelessWidget {
                       child: TextButton.icon(
                         key: const Key('ai-coach-retry'),
                         onPressed: onRetry,
-                        icon: const BilGlassPressFeedback(
+                        icon: const BilNavigationFeedback(
                           child: Icon(Icons.refresh_rounded, size: 18),
                         ),
                         label: Text(
@@ -359,7 +395,7 @@ class _MessageBubble extends StatelessWidget {
                                   color: Color(0xFF697178),
                                 ),
                               )
-                            : const BilGlassPressFeedback(
+                            : const BilNavigationFeedback(
                                 child: Icon(Icons.undo_rounded, size: 18),
                               ),
                         label: Text(intelligenceText(context, 'Undo', 'تراجع')),
@@ -454,7 +490,7 @@ class _CoachMessageActionControl extends StatelessWidget {
                     dimension: 18,
                     child: BilFeatureWelcomeStatus(color: Color(0xFF697178)),
                   )
-                : BilGlassPressFeedback(
+                : BilNavigationFeedback(
                     child: Icon(_iconForAction(action.type), size: 18),
                   ),
             label: Text(
@@ -484,7 +520,7 @@ class _CoachMessageActionControl extends StatelessWidget {
                 'ai-coach-action-retry-${action.type.name}-${action.id}',
               ),
               onPressed: onPressed,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded, size: 17),
               ),
               label: Text(
@@ -596,7 +632,7 @@ class _ActionSheet extends StatelessWidget {
                   iconOverride: _iconForAction(action.type),
                   appleIconOverride: _iconForAction(action.type),
                 ),
-                null => BilGlassPressFeedback(
+                null => BilNavigationFeedback(
                   child: Icon(_iconForAction(action.type)),
                 ),
               },

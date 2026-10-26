@@ -89,7 +89,7 @@ class _NutritionGoalBook extends StatelessWidget {
               width: 600,
               child: SingleChildScrollView(
                 child: snapshot == null
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: BilFeatureWelcomeStatus())
                     : Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -101,6 +101,8 @@ class _NutritionGoalBook extends StatelessWidget {
                                 '${_nutritionGoalText(context, entry.value)} · ${snapshot.goals[entry.key]!.unit}',
                               ),
                               childrenPadding: const EdgeInsets.all(12),
+
+                              trailing: const BilCrystalExpansionIndicator(),
                               children: [
                                 _GoalSourceDetails(
                                   goal: snapshot.goals[entry.key]!,

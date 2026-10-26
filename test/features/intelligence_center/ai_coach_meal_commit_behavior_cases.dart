@@ -22,6 +22,7 @@ void _coachMealCommitBehaviorCases() {
             settingsService: AppSettingsService(store: _MemorySettingsStore()),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         await _submitNextTool(
           tester,
@@ -78,6 +79,7 @@ void _coachMealCommitBehaviorCases() {
             settingsService: AppSettingsService(store: _MemorySettingsStore()),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         await _submitNextTool(
           tester,
@@ -166,6 +168,7 @@ void _coachMealCommitBehaviorCases() {
             settingsService: AppSettingsService(store: _MemorySettingsStore()),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         await _openNextToolAction(
           tester,
@@ -230,6 +233,7 @@ void _coachMealCommitBehaviorCases() {
             ),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         await _openNextToolAction(
           tester,
@@ -284,6 +288,7 @@ void _coachMealCommitBehaviorCases() {
             settingsService: AppSettingsService(store: _MemorySettingsStore()),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         await _submitNextTool(
           tester,
@@ -359,6 +364,7 @@ void _coachMealCommitBehaviorCases() {
             settingsService: AppSettingsService(store: _MemorySettingsStore()),
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
         await _submitNextTool(
           tester,

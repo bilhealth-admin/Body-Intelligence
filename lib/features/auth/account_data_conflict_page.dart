@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -128,12 +129,11 @@ class _AccountDataConflictPageState extends State<AccountDataConflictPage> {
                           icon: signingOut
                               ? const SizedBox.square(
                                   dimension: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                                  child: BilFeatureWelcomeStatus(
                                     color: Colors.white,
                                   ),
                                 )
-                              : const BilGlassPressFeedback(
+                              : const BilNavigationFeedback(
                                   child: Icon(Icons.logout_rounded),
                                 ),
                           label: Text(

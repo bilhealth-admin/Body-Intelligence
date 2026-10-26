@@ -9,7 +9,7 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
     final online = controller.onlineCount;
     if (channel == null) {
       if (controller.loadingDirectory) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: BilFeatureWelcomeStatus());
       }
       return _empty(
         controller.directoryError == null
@@ -61,6 +61,7 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
 
   Widget _transcript(CommunityChannel channel) {
     final controller = _controller;
+    final presentationVisit = _visitKey;
     final rows = controller.messages;
     final policyError =
         controller.sendError is ChannelFailure &&
@@ -83,7 +84,7 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
           action: TextButton.icon(
             key: const Key('bil07-reconnect'),
             onPressed: controller.reconnect,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(_copy(CommunityChannelsCopyKey.reconnect)),
@@ -118,7 +119,7 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
       if (controller.loadingMessages && rows.isEmpty)
         const Padding(
           padding: EdgeInsets.all(24),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: BilFeatureWelcomeStatus()),
         )
       else if (rows.isEmpty && controller.messagesError == null)
         Padding(
@@ -144,6 +145,8 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
           '${controller.ownerId}:${widget.channelId}:$_binding:'
           '${controller.visitGeneration}',
       enabled: controller.isCurrent && controller.foreground && channel.canRead,
+      isRowPainted: _messagePresentation.isPainted,
+      paintChanges: _messagePresentation,
       retryKey: _readRetry,
       unreadIds: controller.unreadIds,
       onSeen: (ids) => _markSeen(controller, ids),
@@ -151,7 +154,7 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
         key: ValueKey(('bil07-history', _visitKey)),
         controller: _history,
         latestMessageId: rows.isEmpty ? null : rows.last.id,
-        child: RefreshIndicator(
+        child: BilRefreshIndicator(
           onRefresh: () => _refresh(controller),
           child: ListView.builder(
             key: const Key('bil07-message-history'),
@@ -200,6 +203,9 @@ extension _CommunityChannelTranscript on _CommunityChannelsViewState {
                 message: message,
                 ownerId: controller.ownerId!,
                 viewportMarker: marker(message.id),
+                presentation: _messagePresentation,
+                visitIsCurrent: () =>
+                    _current(controller) && _visitKey == presentationVisit,
                 onSafety: widget.repository is CommunityChannelSafetyRepository
                     ? (message) =>
                           unawaited(_messageSafety(controller, message))

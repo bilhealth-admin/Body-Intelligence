@@ -1,5 +1,6 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,22 +22,22 @@ class ExerciseCalorieSettingsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(copy.title), centerTitle: true),
       body: preferences.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BilFeatureWelcomeStatus()),
         error: (_, _) => Center(
           child: FilledButton.icon(
             onPressed: () => ref.invalidate(exerciseCaloriePreferencesProvider),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(_retryLabel(locale)),
           ),
         ),
         data: (value) => energy.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: BilFeatureWelcomeStatus()),
           error: (_, _) => Center(
             child: FilledButton.icon(
               onPressed: () => ref.invalidate(connectedHealthProvider),
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(_retryLabel(locale)),

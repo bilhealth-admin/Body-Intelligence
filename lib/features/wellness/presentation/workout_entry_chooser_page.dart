@@ -1,4 +1,4 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -225,7 +225,7 @@ class _ExercisePathCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  BilGlassPressFeedback(
+                  BilNavigationFeedback(
                     child: Icon(
                       Directionality.of(context) == TextDirection.rtl
                           ? Icons.chevron_left_rounded

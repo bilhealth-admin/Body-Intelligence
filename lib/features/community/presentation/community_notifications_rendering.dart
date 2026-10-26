@@ -11,7 +11,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             showBilQuickAdd(context, originPath: '/community/notifications'),
           );
         } else {
-          context.go(BilReferenceBottomBar.routes[index]);
+          bilSelectPrimaryTab(context, index);
         }
       },
     ),
@@ -41,7 +41,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done &&
             !snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: BilFeatureWelcomeStatus());
         }
         if (snapshot.hasError) {
           return _CenteredUpdatesState(
@@ -58,7 +58,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             ),
             action: FilledButton.icon(
               onPressed: _retry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
@@ -90,7 +90,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
             ),
             action: FilledButton.icon(
               onPressed: () => context.push('/login'),
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.login_rounded),
               ),
               label: Text(communityText(context, 'Sign in', 'تسجيل الدخول')),
@@ -120,7 +120,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
           enabled: !_loadingFirst && !_loadingMore && !_markingPageSeen,
           retryKey: _loadGeneration,
           onSeen: (ids) => _markVisibleActivityRead(persisted, ids),
-          builder: (context, marker) => RefreshIndicator(
+          builder: (context, marker) => BilRefreshIndicator(
             onRefresh: () async {
               _retry();
               try {
@@ -176,7 +176,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                   )._attentionActions(context, updates),
                 if (_loadingFirst) ...[
                   const SizedBox(height: 28),
-                  const Center(child: CircularProgressIndicator()),
+                  const Center(child: BilFeatureWelcomeStatus()),
                 ] else if (filteredNotifications.isEmpty &&
                     updates.isEmpty) ...[
                   const SizedBox(height: 72),
@@ -216,9 +216,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                         icon: _markingPageSeen
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: BilFeatureWelcomeStatus(),
                               )
                             : const Icon(Icons.more_horiz_rounded, size: 20),
                       ),
@@ -254,11 +252,9 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
                         icon: _loadingMore
                             ? const SizedBox.square(
                                 dimension: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: BilFeatureWelcomeStatus(),
                               )
-                            : const BilGlassPressFeedback(
+                            : const BilNavigationFeedback(
                                 child: Icon(Icons.expand_more_rounded),
                               ),
                         label: Text(
@@ -296,7 +292,7 @@ class _CenteredUpdatesState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(
+          BilNavigationFeedback(
             child: Icon(
               icon,
               size: 52,

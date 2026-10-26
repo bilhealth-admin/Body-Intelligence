@@ -1,3 +1,6 @@
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -17,6 +20,10 @@ import 'package:body_intelligence_log/features/wellness/domain/wellness_content_
 import 'package:body_intelligence_log/features/wellness/domain/gym_six_month_plan.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/bil_workout_routines_page.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_media_cache.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_discovery_catalog_repository.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_release_catalog_repository.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_discovery_localizer.dart';
+import 'package:body_intelligence_log/features/wellness/presentation/workout_video_group_copy.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -177,6 +184,106 @@ void main() {
       ]);
     },
   );
+
+  for (final tag in ['en', 'ar']) {
+    testWidgets('actual bench details show required equipment in $tag', (
+      tester,
+    ) async {
+      // Asset decoding uses real engine/file IO; keep it outside FakeAsync.
+      final discovery = (await tester.runAsync(() async {
+        return const WorkoutDiscoveryCatalogRepository().parse(
+          await rootBundle.loadString(
+            WorkoutDiscoveryCatalogRepository.assetPath,
+          ),
+          await const WorkoutReleaseCatalogRepository().load(),
+        );
+      }))!;
+      final source = discovery.singleWhere(
+        (item) =>
+            item.stableId ==
+            'gym-six-month:resistance-upper-body-bench-push-up-technique',
+      );
+      final item = WorkoutDiscoveryLocalizer.fromDiscovery(
+        discovery,
+      ).localize(source, tag);
+      final cache = _RecordingMediaCache();
+      await tester.pumpWidget(
+        _TestApp(
+          locale: Locale(tag),
+          entitlementLoader: () async =>
+              _verifiedPaidState(CommercePlan.premium),
+          child: BilWorkoutRoutineDetailsPage(
+            item: item,
+            initiallySaved: false,
+            onToggleSaved: () async {},
+            mediaCache: cache,
+            offline: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final label = tag == 'en' ? 'stable bench' : 'عدد عناصر المعدات: 1';
+      await tester.ensureVisible(find.text(label));
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(Chip, label), findsOneWidget);
+      expect(find.text('none'), findsNothing);
+      expect(find.text('دون معدات'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('routine builder translates internal group labels in $tag', (
+      tester,
+    ) async {
+      // Asset decoding uses real engine/file IO; keep it outside FakeAsync.
+      final discovery = (await tester.runAsync(() async {
+        return const WorkoutDiscoveryCatalogRepository().parse(
+          await rootBundle.loadString(
+            WorkoutDiscoveryCatalogRepository.assetPath,
+          ),
+          await const WorkoutReleaseCatalogRepository().load(),
+        );
+      }))!;
+      final source = discovery.singleWhere(
+        (item) =>
+            item.stableId ==
+            'gym-six-month:resistance-upper-body-bench-push-up-technique',
+      );
+      final item = WorkoutDiscoveryLocalizer.fromDiscovery(
+        discovery,
+      ).localize(source, tag);
+      await tester.pumpWidget(
+        _TestApp(
+          locale: Locale(tag),
+          entitlementLoader: () async =>
+              _verifiedPaidState(CommercePlan.premium),
+          child: BilWorkoutRoutinesPage(loader: (_) async => [item]),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(Tab).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('build-custom-routine')));
+      await tester.pumpAndSettle();
+      final tile = find.widgetWithText(CheckboxListTile, item.title);
+      expect(tile, findsOneWidget);
+      expect(
+        find.descendant(
+          of: tile,
+          matching: find.text(
+            workoutVideoGroupTitleForTag(tag, item.category!),
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text(item.category!), findsNothing);
+      final preferences = await SharedPreferences.getInstance();
+      expect(
+        preferences.getStringList('bil.custom_workout_routines.v1'),
+        isNull,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('custom routine saves two movements and survives rebuild', (
     tester,
@@ -808,6 +915,65 @@ void main() {
       );
     }
   });
+  for (final outcome in ['opened', 'unavailable', 'exception']) {
+    testWidgets(
+      'actual source button opens public HTML without playback or diary mutation: $outcome',
+      (tester) async {
+        final previousLauncher = UrlLauncherPlatform.instance;
+        final launcher = _SourceLauncher(outcome);
+        UrlLauncherPlatform.instance = launcher;
+        addTearDown(() => UrlLauncherPlatform.instance = previousLauncher);
+        var logs = 0;
+        final source = Uri.parse(
+          'https://workouts.bilhealth.com/v2/objects/workouts/v1/home/movements/balance-coordination-airplane-balance-supported.mp4',
+        );
+        final item = _workoutForCategory(
+          'source-link-qa',
+          'Strength',
+          sourceUrl: source,
+        );
+        await tester.pumpWidget(
+          _TestApp(
+            child: BilWorkoutRoutinesPage(
+              loader: (_) async => [item],
+              onLogWorkout: (_) async {
+                logs++;
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final card = find.byKey(const ValueKey('workout-card-source-link-qa'));
+        await tester.ensureVisible(card);
+        await tester.pumpAndSettle();
+        await tester.tap(card);
+        await tester.pumpAndSettle();
+        final button = find.byKey(const Key('workout-original-source-link'));
+        await tester.ensureVisible(button);
+        await tester.pumpAndSettle();
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        expect(launcher.urls, [
+          'https://workouts.bilhealth.com/v2/source/workouts/v1/home/movements/balance-coordination-airplane-balance-supported.mp4',
+        ]);
+        expect(launcher.modes, [PreferredLaunchMode.externalApplication]);
+        expect(
+          item.sourceUrl,
+          source,
+          reason: 'The signed catalog playback/source pin remains unchanged.',
+        );
+        expect(logs, 0);
+        expect(button, findsOneWidget);
+        if (outcome != 'opened') {
+          expect(
+            find.textContaining('cannot be opened safely'),
+            findsOneWidget,
+          );
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }
 
 class _TestApp extends StatelessWidget {
@@ -986,6 +1152,7 @@ WellnessContentItem _workoutForCategory(
   String id,
   String category, {
   String? title,
+  Uri? sourceUrl,
   WellnessWorkoutAudience audience = WellnessWorkoutAudience.all,
   WellnessWorkoutPresenter presenter = WellnessWorkoutPresenter.neutral,
   bool syntheticPreview = false,
@@ -999,7 +1166,7 @@ WellnessContentItem _workoutForCategory(
   title: title ?? '$category routine',
   description: 'A verified routine with a promotional category cover.',
   publisher: 'BIL Health',
-  sourceUrl: Uri.parse('https://bilhealth.com/workouts/$id'),
+  sourceUrl: sourceUrl ?? Uri.parse('https://bilhealth.com/workouts/$id'),
   licenseName: 'BIL licensed original',
   verified: true,
   durationMinutes: 20,
@@ -1029,3 +1196,21 @@ WellnessContentItem _workoutForCategory(
   reviewedAt: DateTime.utc(2026, 8, 1),
   safetyReviewed: true,
 );
+
+class _SourceLauncher extends UrlLauncherPlatform {
+  _SourceLauncher(this.outcome);
+  final String outcome;
+  @override
+  LinkDelegate? get linkDelegate => null;
+  final urls = <String>[];
+  final modes = <PreferredLaunchMode>[];
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    urls.add(url);
+    modes.add(options.mode);
+    if (outcome == 'exception') {
+      throw PlatformException(code: 'synthetic-browser-failure');
+    }
+    return outcome == 'opened';
+  }
+}

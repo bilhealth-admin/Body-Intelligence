@@ -1,0 +1,1827 @@
+{
+  "schema": "bil.workout-source-information.v1",
+  "sources": [
+    {
+      "name": "bil-workouts-home-v1-v1.json",
+      "sha256": "bc3ca8b55a28e94bc9faeee5f220f2966a0cd9f1776e297d00e1f8137fe17567"
+    },
+    {
+      "name": "bil-workouts-gym-six-month-v1-v1.json",
+      "sha256": "6c21ef8df8c6303fef7c03b283caa8ff098e3a85ac6efc6860d48ffe50ce39b5"
+    }
+  ],
+  "entries": {
+    "workouts/v1/gym-six-month/movements/core-stability-bear-plank-shoulder-tap-technique.mp4": {
+      "title": "Bear plank shoulder tap",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-bent-knee-leg-lower-technique.mp4": {
+      "title": "Bent-knee leg lower",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-bicycle-crunch-technique.mp4": {
+      "title": "Bicycle crunch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-bird-dog-technique.mp4": {
+      "title": "Bird dog",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-dead-bug-technique.mp4": {
+      "title": "Dead bug",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-forearm-plank-technique.mp4": {
+      "title": "Forearm plank",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-glute-bridge-march-technique.mp4": {
+      "title": "Glute bridge march",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-half-kneeling-pallof-press-technique.mp4": {
+      "title": "Half-kneeling Pallof press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-high-plank-technique.mp4": {
+      "title": "High plank",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-hollow-tuck-hold-technique.mp4": {
+      "title": "Hollow-body tuck hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-modified-curl-up-technique.mp4": {
+      "title": "Modified curl-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-quadruped-knee-hover-technique.mp4": {
+      "title": "Quadruped knee hover",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-reverse-crunch-technique.mp4": {
+      "title": "Reverse crunch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-side-plank-knees-technique.mp4": {
+      "title": "Side plank from knees",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-side-plank-technique.mp4": {
+      "title": "Side plank",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-slow-mountain-climber-technique.mp4": {
+      "title": "Slow mountain climber",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-standing-pallof-press-technique.mp4": {
+      "title": "Standing Pallof press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-suitcase-carry-march-technique.mp4": {
+      "title": "Suitcase carry march",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-supine-heel-tap-technique.mp4": {
+      "title": "Supine heel tap",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/core-stability-tabletop-toe-tap-technique.mp4": {
+      "title": "Tabletop toe tap",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-adductor-rock-back-gentle-flow.mp4": {
+      "title": "Adductor rock-back",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-ankle-dorsiflexion-rock-gentle-flow.mp4": {
+      "title": "Ankle dorsiflexion rock",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-cat-cow-gentle-flow.mp4": {
+      "title": "Cat-cow",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-doorway-chest-stretch-gentle-flow.mp4": {
+      "title": "Doorway chest stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-figure-four-hip-stretch-gentle-flow.mp4": {
+      "title": "Figure-four hip stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-half-kneeling-hip-flexor-stretch-gentle-flow.mp4": {
+      "title": "Half-kneeling hip-flexor stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-neck-rotation-gentle-flow.mp4": {
+      "title": "Neck rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-ninety-ninety-hip-switch-gentle-flow.mp4": {
+      "title": "Ninety-ninety hip switch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-quadruped-thoracic-rotation-gentle-flow.mp4": {
+      "title": "Quadruped thoracic rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-scapular-controlled-rotation-gentle-flow.mp4": {
+      "title": "Scapular controlled rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-seated-hamstring-stretch-gentle-flow.mp4": {
+      "title": "Seated hamstring stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-seated-spinal-rotation-gentle-flow.mp4": {
+      "title": "Seated spinal rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-shoulder-circles-gentle-flow.mp4": {
+      "title": "Shoulder circles",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-side-lying-open-book-gentle-flow.mp4": {
+      "title": "Side-lying open book",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-standing-calf-stretch-gentle-flow.mp4": {
+      "title": "Standing calf stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-standing-hip-controlled-rotation-gentle-flow.mp4": {
+      "title": "Standing hip controlled rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-standing-quadriceps-stretch-gentle-flow.mp4": {
+      "title": "Standing quadriceps stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-supported-deep-squat-hold-gentle-flow.mp4": {
+      "title": "Supported deep-squat hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-wall-angel-gentle-flow.mp4": {
+      "title": "Wall angel",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/mobility-flexibility-wrist-mobility-circles-gentle-flow.mp4": {
+      "title": "Wrist mobility circles",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/recovery-beginner-wrist-extensor-stretch-gentle.mp4": {
+      "title": "Wrist extensor stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/recovery-beginner-wrist-flexor-stretch-gentle.mp4": {
+      "title": "Wrist flexor stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-battle-rope-alternating-wave-technique.mp4": {
+      "title": "Battle-rope alternating wave",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-bear-crawl-technique.mp4": {
+      "title": "Bear crawl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-dumbbell-deadlift-to-row-technique.mp4": {
+      "title": "Dumbbell deadlift to row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-dumbbell-front-rack-march-technique.mp4": {
+      "title": "Dumbbell front-rack march",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-dumbbell-squat-to-press-technique.mp4": {
+      "title": "Dumbbell squat to press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-dumbbell-thruster-technique.mp4": {
+      "title": "Dumbbell thruster",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-farmer-carry-technique.mp4": {
+      "title": "Farmer carry",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-half-kneeling-cable-chop-technique.mp4": {
+      "title": "Half-kneeling cable chop",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-half-kneeling-cable-lift-technique.mp4": {
+      "title": "Half-kneeling cable lift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-inchworm-walkout-technique.mp4": {
+      "title": "Inchworm walkout",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-kettlebell-deadlift-technique.mp4": {
+      "title": "Kettlebell deadlift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-medicine-ball-squat-press-technique.mp4": {
+      "title": "Medicine-ball squat to press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-partial-turkish-get-up-technique.mp4": {
+      "title": "Partial Turkish get-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-renegade-row-knees-technique.mp4": {
+      "title": "Renegade row from knees",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-reverse-lunge-to-curl-technique.mp4": {
+      "title": "Reverse lunge to curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-sandbag-bear-hug-squat-technique.mp4": {
+      "title": "Sandbag bear-hug squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-step-back-burpee-technique.mp4": {
+      "title": "Step-back burpee",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-step-up-to-knee-drive-technique.mp4": {
+      "title": "Step-up to knee drive",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-suitcase-carry-technique.mp4": {
+      "title": "Suitcase carry",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-full-body-suitcase-deadlift-technique.mp4": {
+      "title": "Suitcase deadlift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-band-hamstring-curl-technique.mp4": {
+      "title": "Band hamstring curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-bodyweight-squat-technique.mp4": {
+      "title": "Bodyweight squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-box-squat-technique.mp4": {
+      "title": "Box squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-clamshell-technique.mp4": {
+      "title": "Clamshell",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-dumbbell-romanian-deadlift-technique.mp4": {
+      "title": "Dumbbell Romanian deadlift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-forward-lunge-technique.mp4": {
+      "title": "Forward lunge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-glute-bridge-technique.mp4": {
+      "title": "Glute bridge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-goblet-squat-technique.mp4": {
+      "title": "Goblet squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-heel-elevated-squat-technique.mp4": {
+      "title": "Heel-elevated squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-hip-thrust-technique.mp4": {
+      "title": "Hip thrust",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-lateral-band-walk-technique.mp4": {
+      "title": "Lateral band walk",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-lateral-lunge-technique.mp4": {
+      "title": "Lateral lunge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-reverse-lunge-technique.mp4": {
+      "title": "Reverse lunge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-seated-calf-raise-technique.mp4": {
+      "title": "Seated calf raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-single-leg-sit-to-stand-technique.mp4": {
+      "title": "Single-leg sit-to-stand",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-split-squat-technique.mp4": {
+      "title": "Split squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-standing-calf-raise-technique.mp4": {
+      "title": "Standing calf raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-step-up-technique.mp4": {
+      "title": "Step-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-sumo-squat-technique.mp4": {
+      "title": "Sumo squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-lower-body-wall-sit-technique.mp4": {
+      "title": "Wall sit",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-band-pull-apart-technique.mp4": {
+      "title": "Band pull-apart",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-bench-push-up-technique.mp4": {
+      "title": "Bench push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-chest-supported-dumbbell-row-technique.mp4": {
+      "title": "Chest-supported dumbbell row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-bench-press-technique.mp4": {
+      "title": "Dumbbell bench press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-biceps-curl-technique.mp4": {
+      "title": "Dumbbell biceps curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-floor-press-technique.mp4": {
+      "title": "Dumbbell floor press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-front-raise-technique.mp4": {
+      "title": "Dumbbell front raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-lateral-raise-technique.mp4": {
+      "title": "Dumbbell lateral raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-dumbbell-reverse-fly-technique.mp4": {
+      "title": "Dumbbell reverse fly",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-hammer-curl-technique.mp4": {
+      "title": "Hammer curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-incline-push-up-technique.mp4": {
+      "title": "Incline push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-knee-push-up-technique.mp4": {
+      "title": "Knee push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-one-arm-dumbbell-row-technique.mp4": {
+      "title": "One-arm dumbbell row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-overhead-triceps-extension-technique.mp4": {
+      "title": "Overhead triceps extension",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-resistance-band-chest-press-technique.mp4": {
+      "title": "Resistance-band chest press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-resistance-band-row-technique.mp4": {
+      "title": "Resistance-band row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-scapular-wall-slide-technique.mp4": {
+      "title": "Scapular wall slide",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-seated-dumbbell-shoulder-press-technique.mp4": {
+      "title": "Seated dumbbell shoulder press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-standing-dumbbell-shoulder-press-technique.mp4": {
+      "title": "Standing dumbbell shoulder press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/gym-six-month/movements/resistance-upper-body-triceps-kickback-technique.mp4": {
+      "title": "Triceps kickback",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-airplane-balance-supported.mp4": {
+      "title": "Airplane balance",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-alternating-balance-march-supported.mp4": {
+      "title": "Alternating balance march",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-backward-line-walk-supported.mp4": {
+      "title": "Backward line walk",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-clock-reach-supported.mp4": {
+      "title": "Clock reach",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-forward-step-hold-supported.mp4": {
+      "title": "Forward step and hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-heel-to-toe-walk-supported.mp4": {
+      "title": "Heel-to-toe walk",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-heel-walk-supported.mp4": {
+      "title": "Heel walk",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-lateral-step-hold-supported.mp4": {
+      "title": "Lateral step and hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-low-step-over-drill-supported.mp4": {
+      "title": "Low step-over drill",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-reverse-step-hold-supported.mp4": {
+      "title": "Reverse step and hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-side-leg-raise-hold-supported.mp4": {
+      "title": "Side-leg raise hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-single-leg-calf-raise-supported.mp4": {
+      "title": "Single-leg calf raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-single-leg-forward-reach-supported.mp4": {
+      "title": "Single-leg forward reach",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-single-leg-hinge-reach-supported.mp4": {
+      "title": "Single-leg hinge reach",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-single-leg-stance-supported.mp4": {
+      "title": "Single-leg stance",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-standing-knee-lift-hold-supported.mp4": {
+      "title": "Standing knee-lift hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-supported-tree-pose-supported.mp4": {
+      "title": "Supported tree pose",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-supported-warrior-three-supported.mp4": {
+      "title": "Supported warrior-three balance",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-tandem-stance-supported.mp4": {
+      "title": "Tandem stance",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/balance-coordination-toe-walk-supported.mp4": {
+      "title": "Toe walk",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-burpee-technique.mp4": {
+      "title": "Burpee",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-butt-kicks-technique.mp4": {
+      "title": "Butt kicks",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-fast-feet-technique.mp4": {
+      "title": "Fast feet",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-forward-back-line-hop-technique.mp4": {
+      "title": "Forward-back line hop",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-high-knees-technique.mp4": {
+      "title": "High knees",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-jump-rope-technique.mp4": {
+      "title": "Jump rope",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-jumping-jack-technique.mp4": {
+      "title": "Jumping jack",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-lateral-line-hop-technique.mp4": {
+      "title": "Lateral line hop",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-lateral-shuffle-technique.mp4": {
+      "title": "Lateral shuffle",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-mountain-climber-technique.mp4": {
+      "title": "Mountain climber",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-plank-jack-technique.mp4": {
+      "title": "Plank jack",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-power-knee-drive-technique.mp4": {
+      "title": "Power knee drive",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-seal-jack-technique.mp4": {
+      "title": "Seal jack",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-short-shuttle-run-technique.mp4": {
+      "title": "Short shuttle run",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-skater-jump-technique.mp4": {
+      "title": "Skater jump",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-speed-skater-technique.mp4": {
+      "title": "Speed skater",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-split-jack-technique.mp4": {
+      "title": "Split jack",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-squat-jump-technique.mp4": {
+      "title": "Squat jump",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-squat-thrust-technique.mp4": {
+      "title": "Squat thrust",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-conditioning-tuck-jump-technique.mp4": {
+      "title": "Tuck jump",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-alternating-heel-dig-steady.mp4": {
+      "title": "Alternating heel dig",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-alternating-knee-lift-steady.mp4": {
+      "title": "Alternating knee lift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-boxer-step-steady.mp4": {
+      "title": "Boxer step",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-forward-toe-tap-steady.mp4": {
+      "title": "Forward toe tap",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-grapevine-step-steady.mp4": {
+      "title": "Grapevine step",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-hamstring-curl-step-steady.mp4": {
+      "title": "Hamstring curl step",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-low-impact-burpee-steady.mp4": {
+      "title": "Low-impact burpee",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-low-impact-shadow-boxing-steady.mp4": {
+      "title": "Low-impact shadow boxing",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-low-impact-skater-step-steady.mp4": {
+      "title": "Low-impact skater step",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-low-impact-step-jack-steady.mp4": {
+      "title": "Low-impact step jack",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-mambo-step-steady.mp4": {
+      "title": "Mambo step",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-march-in-place-steady-paid-pilot.mp4": {
+      "title": "March in place",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-march-in-place-steady.mp4": {
+      "title": "March in place",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-side-dance-step-steady.mp4": {
+      "title": "Side-to-side dance step",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-side-knee-pull-steady.mp4": {
+      "title": "Side knee pull",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-side-step-reach-steady.mp4": {
+      "title": "Side step and reach",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-stair-march-steady.mp4": {
+      "title": "Stair march",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-standing-mountain-climber-steady.mp4": {
+      "title": "Standing mountain climber",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-standing-walkout-steady.mp4": {
+      "title": "Standing walkout",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-step-touch-steady.mp4": {
+      "title": "Step touch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/cardio-low-impact-v-step-steady.mp4": {
+      "title": "V-step",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-bear-plank-shoulder-tap-technique.mp4": {
+      "title": "Bear plank shoulder tap",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-bent-knee-leg-lower-technique.mp4": {
+      "title": "Bent-knee leg lower",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-bird-dog-technique.mp4": {
+      "title": "Bird dog",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-dead-bug-technique.mp4": {
+      "title": "Dead bug",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-forearm-plank-technique.mp4": {
+      "title": "Forearm plank",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-glute-bridge-march-technique.mp4": {
+      "title": "Glute bridge march",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-half-kneeling-pallof-press-technique.mp4": {
+      "title": "Half-kneeling Pallof press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-high-plank-technique.mp4": {
+      "title": "High plank",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-hollow-tuck-hold-technique.mp4": {
+      "title": "Hollow-body tuck hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-modified-curl-up-technique.mp4": {
+      "title": "Modified curl-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-quadruped-knee-hover-technique.mp4": {
+      "title": "Quadruped knee hover",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-reverse-crunch-technique.mp4": {
+      "title": "Reverse crunch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-side-plank-knees-technique.mp4": {
+      "title": "Side plank from knees",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-side-plank-technique.mp4": {
+      "title": "Side plank",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-slow-mountain-climber-technique.mp4": {
+      "title": "Slow mountain climber",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-standing-pallof-press-technique.mp4": {
+      "title": "Standing Pallof press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-suitcase-carry-march-technique.mp4": {
+      "title": "Suitcase carry march",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-supine-heel-tap-technique.mp4": {
+      "title": "Supine heel tap",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/core-stability-tabletop-toe-tap-technique.mp4": {
+      "title": "Tabletop toe tap",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-air-squat-standard-7s-original.mp4": {
+      "title": "Air squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-air-squat-standard.mp4": {
+      "title": "Air squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-bench-triceps-dip-standard.mp4": {
+      "title": "Bench triceps dip",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-bird-dog-standard.mp4": {
+      "title": "Bird dog",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-bodyweight-hip-hinge-standard.mp4": {
+      "title": "Bodyweight hip hinge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-chair-squat-standard.mp4": {
+      "title": "Chair squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-counter-incline-push-up-standard.mp4": {
+      "title": "Counter incline push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-dead-bug-standard.mp4": {
+      "title": "Dead bug",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-forearm-plank-standard.mp4": {
+      "title": "Forearm plank",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-glute-bridge-standard.mp4": {
+      "title": "Glute bridge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-knee-push-up-standard.mp4": {
+      "title": "Knee push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-prone-back-extension-standard.mp4": {
+      "title": "Prone back extension",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-prone-y-raise-standard.mp4": {
+      "title": "Prone Y raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-reverse-lunge-standard.mp4": {
+      "title": "Reverse lunge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-side-plank-knees-standard.mp4": {
+      "title": "Side plank from knees",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-stair-step-up-standard.mp4": {
+      "title": "Stair step-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-standard-push-up-standard.mp4": {
+      "title": "Standard push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-standing-calf-raise-standard.mp4": {
+      "title": "Standing calf raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-standing-good-morning-standard.mp4": {
+      "title": "Standing good morning",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-wall-push-up-standard.mp4": {
+      "title": "Wall push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/home-bodyweight-wall-sit-standard.mp4": {
+      "title": "Wall sit",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-adductor-rock-back-gentle-flow.mp4": {
+      "title": "Adductor rock-back",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-ankle-dorsiflexion-rock-gentle-flow.mp4": {
+      "title": "Ankle dorsiflexion rock",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-cat-cow-gentle-flow.mp4": {
+      "title": "Cat-cow",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-doorway-chest-stretch-gentle-flow.mp4": {
+      "title": "Doorway chest stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-figure-four-hip-stretch-gentle-flow.mp4": {
+      "title": "Figure-four hip stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-half-kneeling-hip-flexor-stretch-gentle-flow.mp4": {
+      "title": "Half-kneeling hip-flexor stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-neck-rotation-gentle-flow.mp4": {
+      "title": "Neck rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-ninety-ninety-hip-switch-gentle-flow.mp4": {
+      "title": "Ninety-ninety hip switch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-quadruped-thoracic-rotation-gentle-flow.mp4": {
+      "title": "Quadruped thoracic rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-scapular-controlled-rotation-gentle-flow.mp4": {
+      "title": "Scapular controlled rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-seated-hamstring-stretch-gentle-flow.mp4": {
+      "title": "Seated hamstring stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-seated-spinal-rotation-gentle-flow.mp4": {
+      "title": "Seated spinal rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-shoulder-circles-gentle-flow.mp4": {
+      "title": "Shoulder circles",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-side-lying-open-book-gentle-flow.mp4": {
+      "title": "Side-lying open book",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-standing-calf-stretch-gentle-flow.mp4": {
+      "title": "Standing calf stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-standing-hip-controlled-rotation-gentle-flow.mp4": {
+      "title": "Standing hip controlled rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-standing-quadriceps-stretch-gentle-flow.mp4": {
+      "title": "Standing quadriceps stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-supported-deep-squat-hold-gentle-flow.mp4": {
+      "title": "Supported deep-squat hold",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-wall-angel-gentle-flow.mp4": {
+      "title": "Wall angel",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/mobility-flexibility-wrist-mobility-circles-gentle-flow.mp4": {
+      "title": "Wrist mobility circles",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-ankle-circles-gentle.mp4": {
+      "title": "Ankle circles",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-box-breathing-gentle.mp4": {
+      "title": "Box breathing",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-diaphragmatic-breathing-gentle.mp4": {
+      "title": "Diaphragmatic breathing",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-four-six-breathing-gentle.mp4": {
+      "title": "Four-six breathing",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-gentle-neck-side-tilt-gentle.mp4": {
+      "title": "Gentle neck side tilt",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-legs-up-wall-breathing-gentle.mp4": {
+      "title": "Legs-up-wall breathing",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-lower-trunk-rotation-gentle.mp4": {
+      "title": "Lower-trunk rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-reclined-figure-four-gentle.mp4": {
+      "title": "Reclined figure-four stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-seated-calf-pump-gentle.mp4": {
+      "title": "Seated calf pump",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-seated-side-bend-gentle.mp4": {
+      "title": "Seated side bend",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-seated-thoracic-rotation-gentle.mp4": {
+      "title": "Seated thoracic rotation",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-shoulder-shrug-release-gentle.mp4": {
+      "title": "Shoulder shrug release",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-supine-hamstring-stretch-gentle.mp4": {
+      "title": "Supine hamstring stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-supine-knee-to-chest-gentle.mp4": {
+      "title": "Supine knee-to-chest",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-supine-pelvic-tilt-gentle.mp4": {
+      "title": "Supine pelvic tilt",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-supine-relaxed-breathing-gentle.mp4": {
+      "title": "Supine relaxed breathing",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-supported-childs-pose-gentle.mp4": {
+      "title": "Supported child's pose",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-supported-standing-reach-gentle.mp4": {
+      "title": "Supported standing reach",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-wrist-extensor-stretch-gentle.mp4": {
+      "title": "Wrist extensor stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/recovery-beginner-wrist-flexor-stretch-gentle.mp4": {
+      "title": "Wrist flexor stretch",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-bear-crawl-technique.mp4": {
+      "title": "Bear crawl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-dumbbell-deadlift-to-row-technique.mp4": {
+      "title": "Dumbbell deadlift to row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-dumbbell-squat-to-press-technique.mp4": {
+      "title": "Dumbbell squat to press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-farmer-carry-technique.mp4": {
+      "title": "Farmer carry",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-half-kneeling-cable-chop-technique.mp4": {
+      "title": "Half-kneeling cable chop",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-half-kneeling-cable-lift-technique.mp4": {
+      "title": "Half-kneeling cable lift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-inchworm-walkout-technique.mp4": {
+      "title": "Inchworm walkout",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-kettlebell-deadlift-technique.mp4": {
+      "title": "Kettlebell deadlift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-renegade-row-knees-technique.mp4": {
+      "title": "Renegade row from knees",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-reverse-lunge-to-curl-technique.mp4": {
+      "title": "Reverse lunge to curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-step-up-to-knee-drive-technique.mp4": {
+      "title": "Step-up to knee drive",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-suitcase-carry-technique.mp4": {
+      "title": "Suitcase carry",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-full-body-suitcase-deadlift-technique.mp4": {
+      "title": "Suitcase deadlift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-band-hamstring-curl-technique.mp4": {
+      "title": "Band hamstring curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-bodyweight-squat-technique.mp4": {
+      "title": "Bodyweight squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-box-squat-technique.mp4": {
+      "title": "Box squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-clamshell-technique.mp4": {
+      "title": "Clamshell",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-dumbbell-romanian-deadlift-technique.mp4": {
+      "title": "Dumbbell Romanian deadlift",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-forward-lunge-technique.mp4": {
+      "title": "Forward lunge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-glute-bridge-technique.mp4": {
+      "title": "Glute bridge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-goblet-squat-technique.mp4": {
+      "title": "Goblet squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-heel-elevated-squat-technique.mp4": {
+      "title": "Heel-elevated squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-hip-thrust-technique.mp4": {
+      "title": "Hip thrust",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-lateral-band-walk-technique.mp4": {
+      "title": "Lateral band walk",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-lateral-lunge-technique.mp4": {
+      "title": "Lateral lunge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-reverse-lunge-technique.mp4": {
+      "title": "Reverse lunge",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-seated-calf-raise-technique.mp4": {
+      "title": "Seated calf raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-single-leg-sit-to-stand-technique.mp4": {
+      "title": "Single-leg sit-to-stand",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-split-squat-technique.mp4": {
+      "title": "Split squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-standing-calf-raise-technique.mp4": {
+      "title": "Standing calf raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-step-up-technique.mp4": {
+      "title": "Step-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-sumo-squat-technique.mp4": {
+      "title": "Sumo squat",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-lower-body-wall-sit-technique.mp4": {
+      "title": "Wall sit",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-band-pull-apart-technique.mp4": {
+      "title": "Band pull-apart",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-bench-push-up-continuous.mp4": {
+      "title": "Bench push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-bench-push-up-paused.mp4": {
+      "title": "Bench push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-bench-push-up-reduced-load.mp4": {
+      "title": "Bench push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-bench-push-up-slow-eccentric.mp4": {
+      "title": "Bench push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-bench-push-up-technique-paid-pilot.mp4": {
+      "title": "Bench push up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-bench-push-up-technique.mp4": {
+      "title": "Bench push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-chest-supported-dumbbell-row-technique.mp4": {
+      "title": "Chest-supported dumbbell row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-dumbbell-bench-press-technique.mp4": {
+      "title": "Dumbbell bench press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-dumbbell-biceps-curl-technique.mp4": {
+      "title": "Dumbbell biceps curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-dumbbell-floor-press-technique.mp4": {
+      "title": "Dumbbell floor press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-dumbbell-front-raise-technique.mp4": {
+      "title": "Dumbbell front raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-dumbbell-lateral-raise-technique.mp4": {
+      "title": "Dumbbell lateral raise",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-dumbbell-reverse-fly-technique.mp4": {
+      "title": "Dumbbell reverse fly",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-hammer-curl-technique.mp4": {
+      "title": "Hammer curl",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-incline-push-up-slow-eccentric.mp4": {
+      "title": "Incline push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-incline-push-up-technique.mp4": {
+      "title": "Incline push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-knee-push-up-technique.mp4": {
+      "title": "Knee push-up",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-one-arm-dumbbell-row-technique.mp4": {
+      "title": "One-arm dumbbell row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-overhead-triceps-extension-technique.mp4": {
+      "title": "Overhead triceps extension",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-resistance-band-chest-press-technique.mp4": {
+      "title": "Resistance-band chest press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-resistance-band-row-technique.mp4": {
+      "title": "Resistance-band row",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-scapular-wall-slide-technique.mp4": {
+      "title": "Scapular wall slide",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-seated-dumbbell-shoulder-press-technique.mp4": {
+      "title": "Seated dumbbell shoulder press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-standing-dumbbell-shoulder-press-technique.mp4": {
+      "title": "Standing dumbbell shoulder press",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    },
+    "workouts/v1/home/movements/resistance-upper-body-triceps-kickback-technique.mp4": {
+      "title": "Triceps kickback",
+      "publisher": "BIL Health",
+      "syntheticPerformer": true,
+      "termsUrl": "https://www.bilhealth.com/terms"
+    }
+  }
+}

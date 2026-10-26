@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -50,7 +51,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(repository.daySaveAttempts, 1);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
 
     repository.pendingDaySave!.completeError(
       StateError('simulated local storage failure'),

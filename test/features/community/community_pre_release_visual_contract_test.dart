@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -431,6 +432,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('Loading...'), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
   });
 }

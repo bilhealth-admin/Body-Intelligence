@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,7 +41,7 @@ class NutritionPathwaysPage extends ConsumerWidget {
               context.go('/dashboard');
             }
           },
-          icon: const BackButtonIcon(),
+          icon: const BilCrystalArrow(child: BackButtonIcon()),
         ),
         title: Text(
           nutritionText(context, 'Nutrition pathways', 'المسارات الغذائية'),
@@ -265,7 +266,7 @@ class _PlanRow extends StatelessWidget {
               compact: true,
             ),
             const SizedBox(width: 7),
-            BilGlassPressFeedback(
+            BilNavigationFeedback(
               child: Icon(
                 selected
                     ? Icons.check_circle_rounded

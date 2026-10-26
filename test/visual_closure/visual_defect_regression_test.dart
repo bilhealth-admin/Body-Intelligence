@@ -790,8 +790,13 @@ void main() {
     expect(settings, contains("copy('Active')"));
     expect(settings, isNot(contains("copy('Start 7-day free trial')")));
     expect(referenceSettings, contains("copy('BIL Premium')"));
-    expect(referenceSettings, contains("copy('Start 7-day free trial')"));
-    expect(referenceSettings, isNot(contains("copy('Explore Premium')")));
+    // Offer eligibility belongs to the verified store-backed Plans page.
+    // A Settings entry cannot promise an unverified seven-day trial.
+    expect(
+      referenceSettings,
+      isNot(contains("copy('Start 7-day free trial')")),
+    );
+    expect(referenceSettings, contains("copy('Explore Premium')"));
     expect(
       RegExp("_text\\(context, 'Premium'\\)").allMatches(quickAdd).length,
       0,

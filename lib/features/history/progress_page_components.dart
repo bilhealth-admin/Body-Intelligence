@@ -52,7 +52,7 @@ class _ProgressSelector extends StatelessWidget {
                 ],
               ),
             ),
-            BilGlassPressFeedback(
+            BilNavigationFeedback(
               child: Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: 18,

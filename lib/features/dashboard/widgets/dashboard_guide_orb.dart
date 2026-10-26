@@ -180,7 +180,7 @@ class _MealStudioAction extends StatelessWidget {
                   ],
                 ),
               ),
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(Icons.arrow_forward_rounded, color: scheme.primary),
               ),
             ],

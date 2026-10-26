@@ -57,11 +57,11 @@ class _MealsTab extends ConsumerWidget {
         ),
         const SizedBox(height: 14),
         if (history.isLoading && !history.hasValue)
-          const Center(child: CircularProgressIndicator()),
+          const Center(child: BilFeatureWelcomeStatus()),
         if (history.hasError)
           TextButton.icon(
             onPressed: () => ref.invalidate(myMealHistoryProvider),
-            icon: const BilGlassPressFeedback(child: Icon(Icons.refresh)),
+            icon: const BilNavigationFeedback(child: Icon(Icons.refresh)),
             label: Text(
               t(
                 'Could not load meals. Retry',
@@ -116,8 +116,7 @@ class _MealsTab extends ConsumerWidget {
             return ref
                 .watch(myMealHistoryProvider)
                 .when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(child: BilFeatureWelcomeStatus()),
                   error: (_, _) => Center(
                     child: TextButton(
                       onPressed: () => ref.invalidate(myMealHistoryProvider),

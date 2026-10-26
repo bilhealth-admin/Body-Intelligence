@@ -161,7 +161,7 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
       leading: _CommunityNavigationGlyph(icon: icon, value: value),
       title: Text(communityText(context, english, arabic)),
       subtitle: subtitle == null ? null : Text(subtitle),
-      trailing: BilGlassPressFeedback(
+      trailing: BilNavigationFeedback(
         child: Icon(
           Directionality.of(context) == TextDirection.rtl
               ? Icons.chevron_left_rounded

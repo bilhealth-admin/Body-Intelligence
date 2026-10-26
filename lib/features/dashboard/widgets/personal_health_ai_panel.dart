@@ -1,4 +1,4 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
@@ -355,7 +355,7 @@ class _UnifiedAiCardState extends State<_UnifiedAiCard> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          BilGlassPressFeedback(
+                          BilNavigationFeedback(
                             child: Icon(
                               icons[index],
                               size: 15,
@@ -555,7 +555,7 @@ class _AiSignalRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BilGlassPressFeedback(
+          BilNavigationFeedback(
             child: Icon(icon, size: 20, color: scheme.primary),
           ),
           const SizedBox(width: PremiumDesignTokens.spaceSm),

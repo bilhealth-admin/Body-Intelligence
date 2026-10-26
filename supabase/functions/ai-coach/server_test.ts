@@ -2332,3 +2332,137 @@ Deno.test("captured live exclusion wording returns the unchanged guarded answer 
   assertEquals(fake.settlements.length,1); assertEquals(fake.settlements[0].p_succeeded,true);
   assertEquals(fake.settlements[0].p_input_tokens,20); assertEquals(fake.settlements[0].p_output_tokens,10);
 });
+Deno.test("weight truth corrects text and speech before citation repair with one settled reservation", async () => {
+  for (const locale of ["ar", "en"]) {
+    for (const channel of ["reply", "spoken_reply"]) {
+      const fake = fakeClients([{duplicate:false,state:"reserved"}]);
+      const rpcNames: string[] = [];
+      let calls = 0;
+      const response = await handler(new Request("https://example.test", {
+        method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+        body:JSON.stringify({request_id:`coach-weight-truth-${locale}-${channel}-0001`,locale,
+          context:{weight:{readStatus:"verified",summary:{recordCount:14},history:[]}},
+          messages:[{role:"user",content:locale === "ar" ? "حلل سجل أوزاني" : "Review my weight history"}]}),
+      }), {
+        clients: ((authorization: string) => {
+          const client = fake.create(authorization); const original = client.admin.rpc;
+          client.admin.rpc = (name, params) => {rpcNames.push(name); return original(name, params);};
+          return client;
+        }) as never,
+        geminiCall:async()=> {
+          calls++;
+          return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({
+            ...citationContractReply([]),reply:"Ready.",spoken_reply:"Ready.",requires_health_citation:true,
+            [channel]: locale === "ar" ? "لا توجد قياسات وزن مسجلة لديك." : "You have no recorded weigh-ins.",
+            proposed_actions:[{type:"create_smart_plan_draft",arguments_json:'{}',requires_confirmation:true}],
+          })}]}}],usageMetadata:{promptTokenCount:20,candidatesTokenCount:10}}};
+        },
+      });
+      assertEquals(response.status,200);
+      const result = await response.json();
+      assertEquals(result.quality_recovery,"weight_record_truth");
+      assertEquals(result.reply.includes("14"),true);
+      assertEquals(result.spoken_reply.includes("14"),true);
+      assertEquals(result.proposed_actions,[]);
+      assertEquals(result.evidence,["weight.summary.recordCount"]);
+      assertEquals(result.requires_health_citation,false);
+      assertEquals(calls,1);
+      assertEquals(rpcNames,["bil_has_remote_ai_consent","bil_reserve_ai_usage","bil_settle_ai_usage"]);
+      assertEquals(fake.settlements.length,1);
+      assertEquals(fake.settlements[0].p_succeeded,true);
+      assertEquals(fake.settlements[0].p_input_tokens,20);
+    }
+  }
+});
+
+Deno.test("weight truth never bypasses consent or trusts a body owner for metering", async () => {
+  const calls: Array<{name:string;params:Record<string,unknown>}> = [];
+  let providerCalls = 0;
+  const response = await handler(new Request("https://example.test",{
+    method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+    body:JSON.stringify({request_id:"coach-weight-truth-denied-0001",owner_id:"another-owner",locale:"en",
+      context:{owner_id:"another-owner",weight:{readStatus:"verified",summary:{recordCount:14}}},
+      messages:[{role:"user",content:"Review my weight history"}]}),
+  }),{
+    clients: ((_authorization: string) => ({
+      auth:{auth:{getUser:()=>Promise.resolve({data:{user:{id:"authenticated-owner"}},error:null})}},
+      admin:{rpc:(name:string,params:Record<string,unknown>)=> {
+        calls.push({name,params}); return Promise.resolve({data:false,error:null});
+      }},
+    })) as never,
+    diagnosticLog:()=>{},
+    geminiCall:()=>{providerCalls++;throw new Error("Provider must not be contacted");},
+  });
+  assertEquals(response.status,403);
+  assertEquals(await response.json(),{error:"ai_consent_required"});
+  assertEquals(providerCalls,0);
+  assertEquals(calls,[{name:"bil_has_remote_ai_consent",params:{p_owner_id:"authenticated-owner"}}]);
+});
+
+Deno.test("weight truth cannot hide an invented execution receipt or unsafe advice", async () => {
+  for (const [extra, error] of [
+    ["I have saved your plan.", "unverified_action_claim"],
+    ["Ignore chest pain and keep training.", "unsafe_health_advice"],
+  ]) {
+    const fake=fakeClients([{duplicate:false,state:"reserved"}]);let calls=0;
+    const response=await handler(new Request("https://example.test",{
+      method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+      body:JSON.stringify({request_id:"coach-weight-truth-unsafe-0001",locale:"en",
+        context:{weight:{readStatus:"verified",summary:{recordCount:14}}},
+        messages:[{role:"user",content:"Review my weight history"}]}),
+    }),{clients:fake.create as never,diagnosticLog:()=>{},geminiCall:async()=> {
+      calls++;return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({
+        ...citationContractReply([]),reply:`You have no recorded weigh-ins. ${extra}`,
+        spoken_reply:"You have no recorded weigh-ins.",
+      })}]}}]}};
+    }});
+    assertEquals(response.status,503);
+    assertEquals(await response.json(),{error});
+    assertEquals(calls,1);
+    assertEquals(fake.settlements.length,1);
+    assertEquals(fake.settlements[0].p_succeeded,false);
+  }
+});
+
+Deno.test("fenced provider JSON keeps the same truth guard without another model call", async () => {
+  const fake=fakeClients([{duplicate:false,state:"reserved"}]);let calls=0;
+  const response=await handler(new Request("https://example.test",{
+    method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+    body:JSON.stringify({request_id:"coach-weight-truth-fenced-0001",locale:"en",
+      context:{weight:{readStatus:"verified",summary:{recordCount:14}}},
+      messages:[{role:"user",content:"Review my weight history"}]}),
+  }),{clients:fake.create as never,diagnosticLog:()=>{},geminiCall:async()=> {
+    calls++;
+    const raw=JSON.stringify({...citationContractReply([]),reply:"Your weight history is empty.",
+      spoken_reply:"Your weight history is empty."});
+    return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:'```json\n'+raw+'\n```'}]}}]}};
+  }});
+  assertEquals(response.status,200);const payload=await response.json();
+  assertEquals(payload.quality_recovery,"weight_record_truth");
+  assertEquals(payload.reply.includes("14"),true);
+  assertEquals(calls,1);assertEquals(fake.settlements.length,1);
+});
+
+Deno.test("truth correction retains structural spoken-response and disclosure checks", async () => {
+  for (const [overrides,error] of [
+    [{spoken_reply:"word ".repeat(60)},"malformed_spoken_response"],
+    [{spoken_reply:"*You have no recorded weigh-ins.*"},"malformed_spoken_response"],
+    [{requires_health_citation:"false"},"malformed_health_citation_classification"],
+  ] as const) {
+    const fake=fakeClients([{duplicate:false,state:"reserved"}]);let calls=0;
+    const response=await handler(new Request("https://example.test",{
+      method:"POST",headers:{authorization:"Bearer test","content-type":"application/json"},
+      body:JSON.stringify({request_id:"coach-weight-truth-invalid-0001",locale:"en",
+        context:{weight:{readStatus:"verified",summary:{recordCount:14}}},
+        messages:[{role:"user",content:"Review my weight history"}]}),
+    }),{clients:fake.create as never,diagnosticLog:()=>{},geminiCall:async()=> {
+      calls++;return {attempts:1,data:{candidates:[{finishReason:"STOP",content:{parts:[{text:JSON.stringify({
+        ...citationContractReply([]),reply:"Your weight history is empty.",
+        spoken_reply:"Your weight history is empty.",...overrides,
+      })}]}}]}};
+    }});
+    assertEquals(response.status,503);assertEquals(await response.json(),{error});
+    assertEquals(calls,1);assertEquals(fake.settlements.length,1);
+    assertEquals(fake.settlements[0].p_succeeded,false);
+  }
+});

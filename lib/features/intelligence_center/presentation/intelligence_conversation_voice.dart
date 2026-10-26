@@ -366,7 +366,6 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       return;
     }
     if (!_canCaptureVoice) return;
-    _updateState(() => introVisible = false);
     if (playCue) {
       await _playVoiceActivationCue(
         isCurrent: () => _voiceRequestCurrent(request, generation),

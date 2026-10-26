@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "checked_at_utc": "2026-10-26T19:01:41.881Z",
+  "scope": "Recovered historical build logs/artifact; not frozen BIL39 validation",
+  "run_url": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40020583706",
+  "run_sha": "c20c1bc6737819b6689bedf130a0f4cf807e275c",
+  "artifact_id": 12533833422,
+  "artifact_zip_sha256": "bc8d631f29b77edc7b30f5d81a6b94bf71d24367d4157260db8f67047261ac8c",
+  "build": {
+    "exit": 0,
+    "seconds": 606.458,
+    "nested_inner_seconds": 568.908,
+    "nested_not_independent_builds": true
+  },
+  "iphone": {
+    "status": "PASS_HISTORICAL",
+    "exit": 0,
+    "total_seconds": 293.329,
+    "first_test_after_seconds": 284.29,
+    "test_summary": "00:10 +4: All tests passed!",
+    "named_cases": 3,
+    "case_scope": [
+      "AES byte compatibility",
+      "encrypted SQLite reopen",
+      "secure key cache owner isolation"
+    ],
+    "raw_summary_includes_framework_teardown": true
+  },
+  "ipad": {
+    "boot_exit": 0,
+    "boot_seconds": 125.67,
+    "driver_status": "CANCELLED_DURING_BOOTSTRAP_WITHOUT_TEST_RESULT",
+    "last_observed_bootstrap_heartbeat_seconds": 1265,
+    "bootstrap_deadline_seconds": 1800,
+    "driver_log_bytes": 0,
+    "cause": "UNRESOLVED; no evidence of AES test failure"
+  },
+  "android": {
+    "initial_api33_crypto_attempt": "Gradle loopback connection failed before tests",
+    "second_api33_crypto_attempt": "PASS: 3 named native cases; assemble924.4s, install4.1s, tests10s",
+    "conversation_attempt_v11": "Gradle daemon disappeared after1866.1s; no tests began; root cause unresolved",
+    "memory_or_jdk_cause_proven": false
+  },
+  "windows_current_probe": {
+    "java": "JDK21",
+    "ipv4": "PASS",
+    "ipv6": "PASS",
+    "network_settings_changed": false,
+    "loopback_failure_currently_reproduced": false
+  },
+  "current_harness": {
+    "build_once_per_entrypoint": true,
+    "drive_exact_binary_on_iphone_and_ipad": true,
+    "signing_reuses_exact_SHA_CI_crypto": true,
+    "timeouts_preserved": true,
+    "code_changed_for_this_investigation": false
+  },
+  "private_evidence_hashes": {
+    "system-crypto-xcode-simulator-build-result.json": "058b152b4fd955ec36f61019aa40c3c7a8bab9e96ae788b25987de388b68ed1d",
+    "system-crypto-simulator-signature.xcode-build-result.json": "5d7a49deb6eabdfe7f254a5d74d53671e32b365602c509191da226f2cdbf49dd",
+    "iphone-system-crypto-drive-result.json": "214660a5e2784da1556516f5763e4748b4eb8313a5cd72ce69603ad5d98e1c78",
+    "iphone-system-crypto.log": "3059d0c88f04468ce54ad6112f3a1a55509b80c0ee3127dff811fa12b886a6fd",
+    "ipad-system-crypto-bootstatus-result.json": "a2fe7531a7c161c7ffe0633b0e6d54d5d6e48ebfdaebfcfc9e804896293111a1"
+  },
+  "remaining": [
+    "Actual iPad driver bootstrap diagnosis needs a fresh failure receipt from native CI if it recurs.",
+    "Frozen BIL39 iPhone/iPad/Android native tests remain required.",
+    "No native signing, build39 or TestFlight39 upload performed."
+  ]
+}

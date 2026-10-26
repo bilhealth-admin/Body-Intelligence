@@ -297,7 +297,7 @@ class _InsightGlass extends StatelessWidget {
                     : const [Color(0xFFBBD9E2), Color(0xFFC8E1E8)],
               ),
             ),
-            child: BilGlassPressFeedback(child: Icon(icon, color: iconColor)),
+            child: BilNavigationFeedback(child: Icon(icon, color: iconColor)),
           ),
           const SizedBox(width: 13),
           Expanded(
@@ -389,11 +389,7 @@ class _Loading extends StatelessWidget {
           weight: FontWeight.w700,
         ),
         const SizedBox(height: 18),
-        const LinearProgressIndicator(
-          minHeight: 7,
-          color: Color(0xFFE5ECF2),
-          backgroundColor: Color(0x35495E72),
-        ),
+        const BilFeatureWelcomeStatus(color: Color(0xFFE5ECF2)),
       ],
     );
   }
@@ -430,7 +426,7 @@ class _Error extends StatelessWidget {
           alignment: AlignmentDirectional.centerStart,
           child: TextButton.icon(
             onPressed: onRetry,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(dashboardFiveLocaleText('Retry', 'إعادة المحاولة')),

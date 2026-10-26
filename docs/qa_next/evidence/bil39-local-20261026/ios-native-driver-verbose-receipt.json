@@ -1,0 +1,20 @@
+{
+  "classification": "DIAGNOSTIC_VISIBILITY_CHANGE_NOT_SIMULATOR_ROOT_CAUSE_CLOSURE",
+  "utc": "2026-10-26T20:35:54.130Z",
+  "source_hashes": {
+    ".github/scripts/bil_ios37_native_integration.sh": "ddd87bbcc11e696bde27a50d5794f333687c6b4b47be98c569c05420d1134f60"
+  },
+  "change": "Add --verbose only to existing flutter drive invocation. Exact-bundle, deadlines, entrypoint, signing and encryption checks unchanged.",
+  "verification": {
+    "scope_tests": 5,
+    "scope_result": "PASS",
+    "scope_log_sha256": "701e652788f94de0f7d353ae9c033f26ba104c80bf4329bffafd9a586d58b722",
+    "git_bash_syntax": "PASS",
+    "installed_flutter_drive_verbose_help": "PASS",
+    "help_log_sha256": "0db1823b7f4129abf46826577634d7956520062c60cc920eb9fc5b80460bf976"
+  },
+  "limitations": [
+    "Historical iPad bootstrap stall cause remains unresolved",
+    "Fresh native simulator run pending"
+  ]
+}

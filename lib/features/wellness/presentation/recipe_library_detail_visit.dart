@@ -33,7 +33,7 @@ class _RecipeLibraryDetailVisitState
         if (current && snapshot.connectionState != ConnectionState.done) {
           return const SizedBox(
             height: 320,
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: BilFeatureWelcomeStatus()),
           );
         }
         if (!current || snapshot.hasError || !snapshot.hasData) {

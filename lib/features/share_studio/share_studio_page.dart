@@ -1,4 +1,5 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -121,7 +122,7 @@ class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
     return Scaffold(
       appBar: SecondaryPageAppBar(title: Text(t('Share Studio'))),
       body: data.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BilFeatureWelcomeStatus()),
         error: (error, _) => Center(
           child: Text(t('Could not prepare sharing data. Try again.')),
         ),
@@ -272,7 +273,7 @@ class _ShareCard extends StatelessWidget {
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(
       children: [
-        BilGlassPressFeedback(child: Icon(icon, color: Colors.white)),
+        BilNavigationFeedback(child: Icon(icon, color: Colors.white)),
         const SizedBox(width: 10),
         Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
       ],

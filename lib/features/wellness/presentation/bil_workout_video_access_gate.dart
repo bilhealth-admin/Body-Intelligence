@@ -25,7 +25,7 @@ class _WorkoutVideoAccessGate extends ConsumerWidget {
       appBar: AppBar(title: Text(item.title)),
       body: Center(
         child: access.isLoading
-            ? const CircularProgressIndicator()
+            ? const BilFeatureWelcomeStatus()
             : Padding(
                 padding: const EdgeInsets.all(24),
                 child: _LockedWorkoutPanel(minimumAccess: item.minimumAccess),

@@ -198,7 +198,7 @@ class _PremiumFeature extends ConsumerWidget {
       subtitle: Text(_diaryText(context, subtitle)),
       trailing: Semantics(
         label: status,
-        child: BilGlassPressFeedback(
+        child: BilNavigationFeedback(
           child: Icon(
             Icons.chevron_right_rounded,
             key: const Key('diary-premium-feature-chevron'),
@@ -306,7 +306,7 @@ class _StoredSwitchState extends ConsumerState<_StoredSwitch> {
           secondary: loading || saving
               ? const SizedBox.square(
                   dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: BilFeatureWelcomeStatus(),
                 )
               : null,
         );
@@ -371,10 +371,7 @@ class _StoredChoiceState extends ConsumerState<_StoredChoice> {
   Widget build(BuildContext context) => ListTile(
     title: Text(_diaryText(context, widget.label)),
     trailing: loading || saving
-        ? const SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
+        ? const SizedBox.square(dimension: 20, child: BilFeatureWelcomeStatus())
         : error != null
         ? TextButton(
             onPressed: _load,

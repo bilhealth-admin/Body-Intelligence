@@ -41,7 +41,7 @@ class _CloudSyncRow extends ConsumerWidget {
         leading: status.isSyncing
             ? const SizedBox.square(
                 dimension: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: BilFeatureWelcomeStatus(),
               )
             : const _MorePremiumIcon(kind: BilSemanticIconKind.cloudSync),
         title: Text(
@@ -103,7 +103,7 @@ class _MoreActionRow extends StatelessWidget {
           label,
           style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w400),
         ),
-        trailing: BilGlassPressFeedback(
+        trailing: BilNavigationFeedback(
           child: Icon(
             Directionality.of(context) == TextDirection.rtl
                 ? Icons.chevron_left_rounded

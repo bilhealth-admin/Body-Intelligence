@@ -25,6 +25,7 @@ void _coachUndoPermissionCases() {
             settingsService: settings,
           ),
         );
+        await openCoachConversationFromOverview(tester);
         await tester.pumpAndSettle();
       }
 

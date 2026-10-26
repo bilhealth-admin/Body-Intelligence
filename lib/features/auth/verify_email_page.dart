@@ -1,4 +1,5 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -379,8 +380,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                               child: loading
                                   ? const SizedBox.square(
                                       dimension: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
+                                      child: BilFeatureWelcomeStatus(
                                         color: Colors.white,
                                       ),
                                     )
@@ -484,7 +484,7 @@ class _VerifyTopBar extends StatelessWidget {
                   key: const Key('verify-email-back'),
                   tooltip: authEntryText(context, AuthEntryCopyKey.back),
                   onPressed: onBack,
-                  icon: BilGlassPressFeedback(
+                  icon: BilNavigationFeedback(
                     child: Icon(
                       Directionality.of(context) == TextDirection.rtl
                           ? Icons.arrow_forward_ios_rounded

@@ -1,0 +1,83 @@
+name: BIL39 isolated video source and protected delivery tests
+on:
+  push:
+    branches: [codex/bil39-video-source-completion-20261025, bil39/integration-20261025]
+    paths:
+      - cloudflare/workout-runtime/**
+      - artifacts/workout_media/cloudflare_runtime_v2/**
+      - .github/workflows/bil39_video_source_qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-public-stream:
+    name: Read-only release-pinned public preview byte-range delivery
+    needs: local-worker-tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - name: Verify actual MP4 range bytes without authentication or writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/qa/bil39-live-public-stream
+          flutter test --no-pub --machine --dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true \
+            test/features/wellness/wellness_video_stream_live_test.dart \
+            2>&1 | tee build/qa/bil39-live-public-stream/events.jsonl
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: bil39-live-public-stream-${{ github.sha }}
+          path: build/qa/bil39-live-public-stream/
+          if-no-files-found: error
+          retention-days: 30
+
+  local-worker-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: 24.18.0
+      - name: Record exact source and verify no production credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "${CLOUDFLARE_API_TOKEN:-}"
+          test -z "${SUPABASE_SERVICE_ROLE_KEY:-}"
+          mkdir -p build/qa/bil39-video-source
+          git rev-parse HEAD > build/qa/bil39-video-source/source-sha.txt
+          node --version > build/qa/bil39-video-source/toolchain.txt
+      - name: Validate source metadata, types and isolated protected delivery
+        working-directory: cloudflare/workout-runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          node scripts/build-source-pages.mjs
+          git diff --exit-code
+          npm run check 2>&1 | tee ../../build/qa/bil39-video-source/check.log
+          npm run test:bil39-isolated 2>&1 | tee ../../build/qa/bil39-video-source/tests.log
+          git diff --exit-code
+      - name: Preserve evidence including failures
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil39-video-source-${{ github.sha }}
+          path: build/qa/bil39-video-source
+          if-no-files-found: error
+          retention-days: 30

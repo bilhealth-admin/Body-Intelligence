@@ -1,9 +1,13 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'fitness_goal_progress_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../app/router/bil_safe_return_button.dart';
 
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
@@ -19,50 +23,10 @@ import '../weight/providers/weight_provider.dart';
 import '../weight/domain/weight_goal_progress.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 part 'reference_goals_components.dart';
+part 'reference_goals_validation.dart';
 
 @visibleForTesting
 String premiumGoalDestination(String featureRoute) => featureRoute;
-@visibleForTesting
-({String? weeklyGoal, double? startingWeight, String? startingDate})
-validateStoredGoalPreferences({
-  required String? weeklyGoal,
-  required String? startingWeight,
-  required String? startingDate,
-  required DateTime now,
-}) {
-  final parsedWeight = double.tryParse(startingWeight ?? '');
-  final dateMatch = RegExp(
-    r'^(\d{4})-(\d{2})-(\d{2})$',
-  ).firstMatch(startingDate ?? '');
-  final year = int.tryParse(dateMatch?.group(1) ?? '');
-  final month = int.tryParse(dateMatch?.group(2) ?? '');
-  final day = int.tryParse(dateMatch?.group(3) ?? '');
-  final parsedDate = year == null || month == null || day == null
-      ? null
-      : DateTime(year, month, day);
-  final canonicalDate =
-      parsedDate != null &&
-      parsedDate.year == year &&
-      parsedDate.month == month &&
-      parsedDate.day == day;
-  final endOfToday = DateTime(now.year, now.month, now.day, 23, 59, 59);
-  final validDate = canonicalDate && !parsedDate.isAfter(endOfToday)
-      ? '${parsedDate.year.toString().padLeft(4, '0')}-'
-            '${parsedDate.month.toString().padLeft(2, '0')}-'
-            '${parsedDate.day.toString().padLeft(2, '0')}'
-      : null;
-  return (
-    weeklyGoal: _weeklyOptions.contains(weeklyGoal) ? weeklyGoal : null,
-    startingWeight:
-        parsedWeight != null &&
-            parsedWeight.isFinite &&
-            parsedWeight >= 20 &&
-            parsedWeight <= 500
-        ? parsedWeight
-        : null,
-    startingDate: validDate,
-  );
-}
 
 class ReferenceGoalsPage extends ConsumerStatefulWidget {
   const ReferenceGoalsPage({super.key});
@@ -303,7 +267,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                     MaterialLocalizations.of(context).formatMediumDate(date),
                   ),
                   onTap: () async {
-                    final selected = await showDatePicker(
+                    final selected = await showBilCrystalDatePicker(
                       context: sheetContext,
                       initialDate: date,
                       firstDate: DateTime(2000),
@@ -445,9 +409,18 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
       builder: (context) => PopScope(
         canPop: !saving,
         child: Scaffold(
-          appBar: AppBar(centerTitle: true, title: Text(c('Goals'))),
+          appBar: AppBar(
+            centerTitle: true,
+            leading: saving
+                ? const IconButton(
+                    onPressed: null,
+                    icon: BilCrystalArrow(child: BackButtonIcon()),
+                  )
+                : const BilSafeReturnButton(fallbackLocation: '/dashboard'),
+            title: Text(c('Goals')),
+          ),
           body: profileState.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: BilFeatureWelcomeStatus()),
             error: (_, _) => Center(
               child: FilledButton(
                 onPressed: () => ref.invalidate(userProfileProvider),
@@ -466,7 +439,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                 );
               }
               if (hydrating || (!hydrated && hydrateError == null)) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               if (hydrateError != null) {
                 return Center(

@@ -62,7 +62,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                         context.go('/wellness-library');
                       }
                     },
-              icon: const BackButtonIcon(),
+              icon: const BilCrystalArrow(child: BackButtonIcon()),
             ),
             title: Text(tr('Sleep', 'النوم')),
             bottom: TabBar(
@@ -167,7 +167,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           const BilPearlMaterialCard(
             child: SizedBox(
               height: 220,
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: BilFeatureWelcomeStatus()),
             ),
           )
         else if (recordError != null)
@@ -333,7 +333,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         );
       }
       if (!snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: BilFeatureWelcomeStatus());
       }
       final cutoff = ref
           .read(sleepNowProvider)()
@@ -444,7 +444,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                     // blank child/white shell seen after returning via the
                     // bottom navigation.
                     onTap: () => context.go('/daily-log'),
-                    trailing: const BilGlassPressFeedback(
+                    trailing: const BilNavigationFeedback(
                       child: Icon(Icons.chevron_right_rounded),
                     ),
                   ),
@@ -777,7 +777,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 48)),
+          BilNavigationFeedback(child: Icon(icon, size: 48)),
           const SizedBox(height: 14),
           Text(title, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
@@ -786,7 +786,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
             const SizedBox(height: 14),
             OutlinedButton.icon(
               onPressed: onRetry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(tr('Retry', 'إعادة المحاولة')),

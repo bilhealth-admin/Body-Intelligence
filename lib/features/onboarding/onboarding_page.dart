@@ -1,4 +1,7 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import '../../app/theme/bil_pearl_finish.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../../shared/widgets/bil_glass_press_feedback.dart';
 import 'dart:async';
 
@@ -557,7 +560,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         body: Center(
           child: Semantics(
             label: t('Restoring your private setup on this device'),
-            child: const CircularProgressIndicator(),
+            child: const BilFeatureWelcomeStatus(),
           ),
         ),
       );
@@ -573,7 +576,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               });
               unawaited(_load());
             },
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(t('Try again')),

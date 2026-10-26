@@ -143,8 +143,8 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: SizedBox(
-              height: 4,
-              child: scheduleSaving ? const LinearProgressIndicator() : null,
+              height: scheduleSaving ? 24 : 4,
+              child: scheduleSaving ? const BilFeatureWelcomeStatus() : null,
             ),
           ),
         ],

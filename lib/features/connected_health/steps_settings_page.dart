@@ -1,5 +1,7 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -169,7 +171,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                   if (dialogSaving)
                     const Padding(
                       padding: EdgeInsets.only(top: 12),
-                      child: LinearProgressIndicator(),
+                      child: BilFeatureWelcomeStatus(),
                     ),
                 ],
               ),
@@ -256,16 +258,18 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
         canPop: !saving,
         child: Scaffold(
           appBar: AppBar(
-            leading: BackButton(
-              onPressed: saving
-                  ? null
-                  : () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('/connected-health');
-                      }
-                    },
+            leading: BilCrystalArrow(
+              child: BackButton(
+                onPressed: saving
+                    ? null
+                    : () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/connected-health');
+                        }
+                      },
+              ),
             ),
             title: Text(t('Steps')),
           ),
@@ -273,7 +277,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
               ? Center(
                   child: Semantics(
                     label: t('Loading step settings'),
-                    child: const CircularProgressIndicator(),
+                    child: const BilFeatureWelcomeStatus(),
                   ),
                 )
               : loadError != null
@@ -285,7 +289,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                       const SizedBox(height: 12),
                       FilledButton.icon(
                         onPressed: _load,
-                        icon: const BilGlassPressFeedback(
+                        icon: const BilNavigationFeedback(
                           child: Icon(Icons.refresh),
                         ),
                         label: Text(t('Retry')),
@@ -320,7 +324,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                           ),
                           if (health.hasError)
                             ListTile(
-                              leading: const BilGlassPressFeedback(
+                              leading: const BilNavigationFeedback(
                                 child: Icon(Icons.refresh),
                               ),
                               title: Text(t('Retry connected sources')),
@@ -366,7 +370,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                         kind: BilSemanticIconKind.progress,
                       ),
                       title: Text(t('View step history')),
-                      trailing: BilGlassPressFeedback(
+                      trailing: BilNavigationFeedback(
                         child: Icon(
                           Directionality.of(context) == TextDirection.rtl
                               ? Icons.chevron_left_rounded
@@ -377,7 +381,8 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                       ),
                       onTap: saving
                           ? null
-                          : () => context.go('/connected-health/steps/history'),
+                          : () =>
+                                context.push('/connected-health/steps/history'),
                     ),
                     ListTile(
                       key: const Key('daily-step-goal'),
@@ -392,7 +397,7 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                             child: Text(goal?.toString() ?? '—'),
                           ),
                           const SizedBox(width: 8),
-                          BilGlassPressFeedback(
+                          BilNavigationFeedback(
                             child: Icon(
                               Directionality.of(context) == TextDirection.rtl
                                   ? Icons.chevron_left_rounded

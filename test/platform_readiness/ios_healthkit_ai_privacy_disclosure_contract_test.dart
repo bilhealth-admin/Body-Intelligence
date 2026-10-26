@@ -16,7 +16,7 @@ void main() {
     ).readAsStringSync();
     final queryFlow = File(
       'lib/features/intelligence_center/presentation/'
-      'intelligence_query_flow.dart',
+      'intelligence_query_guard_flow.dart',
     ).readAsStringSync();
     final consentCoordinator = File(
       'lib/features/intelligence_center/services/'

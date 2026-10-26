@@ -196,7 +196,7 @@ class _CommunityProfileCoverEditor extends StatelessWidget {
               if (busy)
                 const ColoredBox(
                   color: Colors.black26,
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: BilFeatureWelcomeStatus()),
                 ),
             ],
           ),

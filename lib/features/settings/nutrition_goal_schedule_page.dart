@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../../shared/widgets/bil_controller_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,7 +44,7 @@ class _NutritionGoalSchedulePageState
         ),
       ),
       body: schedule.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BilFeatureWelcomeStatus()),
         error: (_, _) => Center(
           child: Text(
             _text(context, NutritionGoalScheduleRuntimeCopy.goalsUnavailable),
@@ -165,11 +166,8 @@ class _NutritionGoalSchedulePageState
             ),
     ),
     trailing: isSaving
-        ? const SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        : const BilGlassPressFeedback(child: Icon(Icons.chevron_right_rounded)),
+        ? const SizedBox.square(dimension: 20, child: BilFeatureWelcomeStatus())
+        : const BilNavigationFeedback(child: Icon(Icons.chevron_right_rounded)),
     onTap: onTap,
   );
 

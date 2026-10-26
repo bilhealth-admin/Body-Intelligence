@@ -387,7 +387,7 @@ class _FoodSignalCard extends StatelessWidget {
                 color: signal.color,
                 borderRadius: BorderRadius.circular(13),
               ),
-              child: BilGlassPressFeedback(
+              child: BilNavigationFeedback(
                 child: Icon(signal.icon, color: Colors.white, size: 20),
               ),
             ),

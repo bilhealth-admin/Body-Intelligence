@@ -383,7 +383,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                           ])
                             PopupMenuItem(value: unit, child: Text(unit)),
                         ],
-                        icon: const BilGlassPressFeedback(
+                        icon: const BilNavigationFeedback(
                           child: Icon(Icons.arrow_drop_down_rounded),
                         ),
                       ),

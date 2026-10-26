@@ -1,5 +1,8 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import '../../../app/localization/bil_written_language_resolver.dart';
 import 'community_attention_scope.dart';
 import 'dart:async';
@@ -379,14 +382,14 @@ class _MessageList extends StatelessWidget {
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done &&
           !snapshot.hasData) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: BilFeatureWelcomeStatus());
       }
       if (snapshot.hasError) {
         return _MessagesLoadError(copy: copy, onRetry: onRetry);
       }
       final rawRows = snapshot.data ?? const <Map<String, dynamic>>[];
       final rows = communityThreadPreviewRows(rawRows, incoming: incoming);
-      return RefreshIndicator(
+      return BilRefreshIndicator(
         onRefresh: onRetry,
         child: rows.isEmpty
             ? ListView(
@@ -412,7 +415,7 @@ class _MessageList extends StatelessWidget {
                       icon: loadingMore
                           ? const SizedBox.square(
                               dimension: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: BilFeatureWelcomeStatus(),
                             )
                           : const Icon(Icons.history_rounded),
                       label: Text(copy.olderMessages),
@@ -553,7 +556,7 @@ class _MessagesSignIn extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => context.push('/login'),
-            icon: const BilGlassPressFeedback(child: Icon(Icons.login_rounded)),
+            icon: const BilNavigationFeedback(child: Icon(Icons.login_rounded)),
             label: Text(copy.signIn),
           ),
         ],
@@ -580,7 +583,7 @@ class _MessagesLoadError extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => onRetry(),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(copy.retry),
@@ -629,7 +632,7 @@ class _PeopleSearchError extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: TextButton.icon(
       onPressed: onRetry,
-      icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
+      icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
       label: Text(copy.retry),
     ),
   );

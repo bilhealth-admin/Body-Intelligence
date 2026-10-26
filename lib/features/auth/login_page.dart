@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -118,7 +119,7 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                       AuthEntryCopyKey.back,
                                     ),
                                     onPressed: () => context.go('/login'),
-                                    icon: const BilGlassPressFeedback(
+                                    icon: const BilNavigationFeedback(
                                       child: Icon(
                                         Icons.arrow_back_rounded,
                                         color: Colors.white,
@@ -256,11 +257,9 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                 icon: loading
                                     ? const SizedBox.square(
                                         dimension: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: BilFeatureWelcomeStatus(),
                                       )
-                                    : const BilGlassPressFeedback(
+                                    : const BilNavigationFeedback(
                                         child: Icon(
                                           Icons.arrow_forward_rounded,
                                         ),
@@ -307,7 +306,7 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
 
   InputDecoration _decoration(String label, IconData icon) => InputDecoration(
     labelText: label,
-    prefixIcon: BilGlassPressFeedback(child: Icon(icon)),
+    prefixIcon: BilNavigationFeedback(child: Icon(icon)),
     filled: true,
     fillColor: const Color(0xFF102337),
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),

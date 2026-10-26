@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -381,7 +382,7 @@ class _WindowsCameraCaptureState extends State<_WindowsCameraCapture> {
         child: error != null
             ? Center(child: Text(error!, textAlign: TextAlign.center))
             : active == null || !active.value.isInitialized
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: BilFeatureWelcomeStatus())
             : ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: CameraPreview(active),
@@ -399,7 +400,7 @@ class _WindowsCameraCaptureState extends State<_WindowsCameraCapture> {
           icon: capturing
               ? const SizedBox.square(
                   dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: BilFeatureWelcomeStatus(),
                 )
               : const Icon(Icons.camera_alt_rounded),
           label: Text(_dashboardText(widget.locale, 'capture')),

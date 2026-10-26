@@ -24,7 +24,7 @@ class _DayHeader extends ConsumerWidget {
           IconButton(
             tooltip: _t(context, 'Previous day'),
             onPressed: () => select(day.subtract(const Duration(days: 1))),
-            icon: BilGlassPressFeedback(
+            icon: BilNavigationFeedback(
               child: Icon(
                 Directionality.of(context) == TextDirection.rtl
                     ? Icons.chevron_right_rounded
@@ -37,7 +37,7 @@ class _DayHeader extends ConsumerWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
               onTap: () async {
-                final picked = await showDatePicker(
+                final picked = await showBilCrystalDatePicker(
                   context: context,
                   initialDate: day,
                   firstDate: DateTime(2000),
@@ -71,7 +71,7 @@ class _DayHeader extends ConsumerWidget {
             onPressed: isToday
                 ? null
                 : () => select(day.add(const Duration(days: 1))),
-            icon: BilGlassPressFeedback(
+            icon: BilNavigationFeedback(
               child: Icon(
                 Directionality.of(context) == TextDirection.rtl
                     ? Icons.chevron_left_rounded

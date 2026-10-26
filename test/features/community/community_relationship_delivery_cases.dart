@@ -26,12 +26,18 @@ class _RelationsRepository extends _EntryRepository {
   _RelationsRepository(super.client);
   List<Map<String, dynamic>> relations = [];
   int relationshipLoads = 0, cancellations = 0;
+  int searches = 0;
+  bool peerHidden = false;
+  bool failRelationshipLoad = false;
+  Completer<List<Map<String, dynamic>>>? relationshipResponse;
   Completer<CommunityFriendRequestStatus>? friendResponse;
   @override
   Stream<void> watchConnectionChanges() => changes.stream;
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async {
     relationshipLoads++;
+    if (failRelationshipLoad) throw StateError('fixture_connection_offline');
+    if (relationshipResponse != null) return relationshipResponse!.future;
     return List.of(relations);
   }
 
@@ -42,16 +48,27 @@ class _RelationsRepository extends _EntryRepository {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> searchProfiles(String query) async => [
-    {
-      'user_id': _peer,
-      'display_name': 'Private peer',
-      'handle': 'private_peer',
-    },
-  ];
+  Future<List<Map<String, dynamic>>> searchProfiles(String query) async {
+    searches++;
+    return [
+      if (!peerHidden)
+        {
+          'user_id': _peer,
+          'display_name': 'Private peer',
+          'handle': 'private_peer',
+        },
+    ];
+  }
+
   @override
-  Future<CommunityFriendRequestStatus> requestFriend(String id) async =>
-      friendResponse?.future ?? CommunityFriendRequestStatus.pending;
+  Future<CommunityFriendRequestStatus> requestFriend(String id) async {
+    if (friendResponse != null) return friendResponse!.future;
+    // Match the real pending receipt: its relationship exists in storage.
+    if (!relations.any((row) => row['other_user_id'] == id)) {
+      relations.add(_friendRow(incoming: false));
+    }
+    return CommunityFriendRequestStatus.pending;
+  }
 }
 
 class _PreviewRepository extends _EntryRepository {
@@ -184,6 +201,191 @@ void _relationshipDeliveryCases(
     expect(find.text('Private peer'), findsNothing);
     expect(tester.takeException(), isNull);
   });
+  _case(
+    'People returning from a blocked profile removes the stale search row',
+    (tester) async {
+      final repo = _RelationsRepository(fixture().client);
+      track(repo);
+      final router = GoRouter(
+        initialLocation: '/people',
+        routes: [
+          GoRoute(
+            path: '/people',
+            builder: (_, _) => CommunityPeoplePage(repository: repo),
+          ),
+          GoRoute(
+            path: '/community/profile/:id',
+            builder: (context, _) => Scaffold(
+              body: TextButton(
+                onPressed: () {
+                  repo.peerHidden = true;
+                  context.pop();
+                },
+                child: const Text('Block fixture peer'),
+              ),
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(_relationshipApp(router: router));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Private peer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Block fixture peer'));
+      await tester.pumpAndSettle();
+      expect(find.text('Private peer'), findsNothing);
+      expect(find.text('No people found.'), findsOneWidget);
+      expect(repo.searches, 2);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  _case('People profile return preserves a still pending request', (
+    tester,
+  ) async {
+    final repo = _RelationsRepository(fixture().client);
+    track(repo);
+    final router = GoRouter(
+      initialLocation: '/people',
+      routes: [
+        GoRoute(
+          path: '/people',
+          builder: (_, _) => CommunityPeoplePage(repository: repo),
+        ),
+        GoRoute(
+          path: '/community/profile/:id',
+          builder: (context, _) => Scaffold(
+            body: TextButton(
+              onPressed: () => context.pop(),
+              child: const Text('Return without changing relationship'),
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(_relationshipApp(router: router));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Send request'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Pending'), findsOneWidget);
+    await tester.tap(find.text('Private peer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Return without changing relationship'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Pending'), findsOneWidget);
+    expect(find.byTooltip('Send request'), findsNothing);
+    expect(repo.searches, 2);
+  });
+  _case('People profile cancellation refreshes the pending search action', (
+    tester,
+  ) async {
+    final repo = _RelationsRepository(fixture().client);
+    track(repo);
+    final router = GoRouter(
+      initialLocation: '/people',
+      routes: [
+        GoRoute(
+          path: '/people',
+          builder: (_, _) => CommunityPeoplePage(repository: repo),
+        ),
+        GoRoute(
+          path: '/community/profile/:id',
+          builder: (context, _) => Scaffold(
+            body: TextButton(
+              onPressed: () async {
+                await repo.cancelFriendRequest(_messageId);
+                if (context.mounted) context.pop();
+              },
+              child: const Text('Cancel fixture request and return'),
+            ),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(_relationshipApp(router: router));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Send request'));
+    await tester.pumpAndSettle();
+    repo.relations = [_friendRow(incoming: false)];
+    expect(find.byTooltip('Pending'), findsOneWidget);
+    await tester.tap(find.text('Private peer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Cancel fixture request and return'));
+    await tester.pumpAndSettle();
+    expect(repo.cancellations, 1);
+    expect(repo.relations, isEmpty);
+    expect(find.byTooltip('Pending'), findsNothing);
+    expect(find.byTooltip('Send request'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+  for (final ownerChanges in [false, true]) {
+    _case(
+      'People profile refresh ${ownerChanges ? 'retires a held result after A B A' : 'failure retains the confirmed pending state'}',
+      (tester) async {
+        final auth = fixture();
+        final repo = _RelationsRepository(auth.client);
+        track(repo);
+        final held = Completer<List<Map<String, dynamic>>>();
+        final router = GoRouter(
+          initialLocation: '/people',
+          routes: [
+            GoRoute(
+              path: '/people',
+              builder: (_, _) => CommunityPeoplePage(repository: repo),
+            ),
+            GoRoute(
+              path: '/community/profile/:id',
+              builder: (context, _) => Scaffold(
+                body: TextButton(
+                  onPressed: () {
+                    if (ownerChanges) {
+                      repo.relationshipResponse = held;
+                    } else {
+                      repo.failRelationshipLoad = true;
+                    }
+                    context.pop();
+                  },
+                  child: const Text('Return to relationship refresh'),
+                ),
+              ),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        addTearDown(() {
+          if (!held.isCompleted) held.complete([]);
+        });
+        await tester.pumpWidget(_relationshipApp(router: router));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Send request'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Private peer'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Return to relationship refresh'));
+        if (ownerChanges) {
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 400));
+          expect(repo.relationshipLoads, 1);
+          await auth.roundTrip();
+          held.complete([_friendRow(incoming: false)]);
+          await tester.pumpAndSettle();
+          expect(find.text('Private peer'), findsNothing);
+          expect(find.byTooltip('Send request'), findsNothing);
+        } else {
+          await tester.pumpAndSettle();
+          expect(find.byTooltip('Pending'), findsOneWidget);
+          expect(find.byTooltip('Send request'), findsNothing);
+          expect(
+            find.text('Could not refresh the connection. Try again.'),
+            findsOneWidget,
+          );
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   _case(
     'empty connections can pull refresh and receive the first live request',
     (tester) async {

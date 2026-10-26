@@ -93,12 +93,12 @@ class _FriendsTabState extends State<_FriendsTab>
             future: _friendships,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               if (snapshot.hasError) return _InlineError(onRetry: _refresh);
               final rows = snapshot.data ?? const [];
               if (rows.isEmpty) {
-                return RefreshIndicator(
+                return BilRefreshIndicator(
                   onRefresh: _refresh,
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -118,7 +118,7 @@ class _FriendsTabState extends State<_FriendsTab>
                   ),
                 );
               }
-              return RefreshIndicator(
+              return BilRefreshIndicator(
                 onRefresh: _refresh,
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),

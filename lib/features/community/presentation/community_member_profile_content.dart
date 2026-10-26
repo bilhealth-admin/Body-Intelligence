@@ -100,9 +100,9 @@ extension _CommunityMemberProfileContentSlivers
                   icon: _loadingMoreReviews
                       ? const SizedBox.square(
                           dimension: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: BilFeatureWelcomeStatus(),
                         )
-                      : const BilGlassPressFeedback(
+                      : const BilNavigationFeedback(
                           child: Icon(Icons.expand_more_rounded),
                         ),
                   label: Text(

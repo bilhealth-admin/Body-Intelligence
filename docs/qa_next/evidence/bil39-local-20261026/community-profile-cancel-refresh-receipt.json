@@ -1,0 +1,90 @@
+{
+  "recorded_at": "2026-10-26T16:48:15.830Z",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "candidate_sha": null,
+  "dirty_source": true,
+  "native38": {
+    "sent_pending_and_cancelled_in_requests": true,
+    "cloud_readbacks": {
+      "before": [
+        {
+          "request_fingerprint": "ed4823fa98e5898da22e8409051cfbf9",
+          "status": "pending",
+          "created_at": "2026-10-26 16:19:20.895711+00"
+        }
+      ],
+      "after": [
+        {
+          "read_at": "2026-10-26 16:28:31.706525+00",
+          "requests": 0,
+          "blocks": 0,
+          "follows": 0
+        }
+      ]
+    },
+    "images": [
+      {
+        "name": "378-community-owned-peer-result.png",
+        "sha256": "e938b9ad3f578d33a59d894d78a09921b35ff02d3893a095c832cca5df7c4a27"
+      },
+      {
+        "name": "379-community-request-from-search.png",
+        "sha256": "0e89ac6716d60ff46335f90f3783bf537b3a9973b3f86c99019a7240416ea3c6"
+      },
+      {
+        "name": "384-friends-request-management.png",
+        "sha256": "3e92c9fc9b0368803c5520adacf9b2e263cbf6d4f86f639407ee18cf44c15200"
+      },
+      {
+        "name": "385-friends-outgoing-request-tab.png",
+        "sha256": "b7b010a3d63c1b0e9316e4da8a28e917d2605c0a5b8e56b3d66a4fd033b4cd52"
+      },
+      {
+        "name": "386-friend-request-cancel-result.png",
+        "sha256": "e6d61538542d8506971787584ced9fb4709a93a6ab026f1f7ebe37907f08f4fa"
+      }
+    ]
+  },
+  "source39_defect": {
+    "id": "BIL39-RELATION-RETURN",
+    "description": "After profile cancellation, People retained the previously pending request and disabled its action; found by focused behavioral regression, not on an installed39.",
+    "fix": "After guarded profile return, refresh identity search and read owner-scoped authoritative relationships; clear pending only after verified absence, preserve on read failure, retire A-B-A results. Show read error immediately rather than behind previous success snackbar."
+  },
+  "red": {
+    "file": "community-profile-cancel-refresh-red.jsonl",
+    "failed": 1,
+    "assertion": "Pending remains after fixture cancels actual stored relationship."
+  },
+  "green": {
+    "file": "community-profile-cancel-refresh-green-v3.jsonl",
+    "passed": 79,
+    "failed": 0,
+    "skipped": 0,
+    "new_cases": [
+      "confirmed cancellation refresh",
+      "read failure retains pending",
+      "held result rejected after real A-B-A"
+    ]
+  },
+  "analyze": {
+    "file": "community-profile-cancel-refresh-analyze-v1.log",
+    "issues": 0
+  },
+  "source_after": [
+    {
+      "path": "lib/features/community/presentation/community_people_page.dart",
+      "sha256": "42b4d7648525ff3c3498ef7b1c13701ca202d059b174e075bc31c9e6a619e1fb"
+    },
+    {
+      "path": "test/features/community/community_relationship_delivery_cases.dart",
+      "sha256": "057a7ac2147387c689281993251426c952e4d05d5f7fc8093ec9a321ab2ce298"
+    }
+  ],
+  "test_log_sha256": "09665a2cdc86261e303612a11ee6ab4a056e4a41510809532152994458010bb2",
+  "limits": [
+    "Full11048 predates these changes.",
+    "No signed39/device39 acceptance.",
+    "Green-v2 failure exposed queued error feedback and was fixed without relaxing assertion.",
+    "79 supersedes76 on the earlier source."
+  ]
+}

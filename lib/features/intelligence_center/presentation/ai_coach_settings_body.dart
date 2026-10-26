@@ -48,7 +48,7 @@ extension _AiCoachSettingsBody on _AiCoachSettingsPageState {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: contextError == null
-                ? const LinearProgressIndicator()
+                ? const BilFeatureWelcomeStatus()
                 : TextButton(
                     onPressed: () =>
                         ref.invalidate(coachSettingsContextProvider),
@@ -150,7 +150,7 @@ extension _AiCoachSettingsBody on _AiCoachSettingsPageState {
         const SizedBox(height: 12),
         if (received == null)
           usageLoading
-              ? const LinearProgressIndicator()
+              ? const BilFeatureWelcomeStatus()
               : _errorState(usageError)
         else
           _TokenHero(
@@ -223,7 +223,7 @@ extension _AiCoachSettingsBody on _AiCoachSettingsPageState {
         if (received != null)
           TextButton.icon(
             onPressed: _manageSubscription,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.open_in_new_rounded, size: 18),
             ),
             label: Text(

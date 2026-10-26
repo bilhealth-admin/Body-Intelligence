@@ -1,0 +1,1660 @@
+{
+  "receipt": "full-local-after-device-fixes-v3-receipt.json",
+  "sourceFingerprint": "bbf5879f02a8bce359aaabf39b0772c38e588feb21752483017300933f183595",
+  "cases": [
+    {
+      "id": "BIL-01",
+      "requirement": "BIL member لا يعرض الملف ويقف على التحميل",
+      "suites": [
+        {
+          "path": "test/features/profile/profile_primary_loading_notice_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_widget_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_load_failure_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_readonly_action_contract_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
+          "executed": true,
+          "passed": 24,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/smart_plan_recovery_locale_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-02",
+      "requirement": "التصميم الزجاجي لأزرار الرجوع غير متّسق",
+      "suites": [
+        {
+          "path": "test/bil_crystal_arrow_test.dart",
+          "executed": true,
+          "passed": 47,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil_crystal_calendar_video_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil_crystal_purchase_cta_isolation_test.dart",
+          "executed": true,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-03",
+      "requirement": "Check nutrition يفتح My Plan بدل مراجعة التغذية ويظهر Retry",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-04",
+      "requirement": "Next best focus يدعي عدم وجود أهداف/مدخلات رغم وجود أهداف محفوظة",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-05",
+      "requirement": "Open requested screen يفتح Goals دون زر رجوع صالح",
+      "suites": [
+        {
+          "path": "test/app/router/bil39_pop_scope_return_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/app/router/bil39_safe_return_widget_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil39_routes_regression_contract_test.dart",
+          "executed": true,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/connected_health/steps_history_navigation_test.dart",
+          "executed": true,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/bil39_session_video_return_test.dart",
+          "executed": true,
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-06",
+      "requirement": "Review my day يفشل برسالة AI Coach temporarily unavailable",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-07",
+      "requirement": "Explain sleep لا يقدم النتيجة المتوقعة - واقعة تحتاج لقطة مخصصة",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-08",
+      "requirement": "تبويب Tools داخل نظرة AI Coach يفتح Today/سجل اليوم",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-09",
+      "requirement": "My Plan يعرض خطأ عامًا Retry بلا سبب مفهوم",
+      "suites": [
+        {
+          "path": "test/features/profile/profile_primary_loading_notice_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_widget_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_load_failure_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_readonly_action_contract_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
+          "executed": true,
+          "passed": 24,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/smart_plan_recovery_locale_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-10",
+      "requirement": "العودة من فيديو التمرين تدخل مكتبة الفيديو قبل العودة لجلسة التدريب",
+      "suites": [
+        {
+          "path": "test/app/router/bil39_pop_scope_return_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/app/router/bil39_safe_return_widget_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil39_routes_regression_contract_test.dart",
+          "executed": true,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/connected_health/steps_history_navigation_test.dart",
+          "executed": true,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/bil39_session_video_return_test.dart",
+          "executed": true,
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-11",
+      "requirement": "Review and log في Meal Planner يفتح شاشة بيضاء",
+      "suites": [
+        {
+          "path": "test/features/meal_planner/meal_planner_e2e_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_contract_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_widget_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-12",
+      "requirement": "الصورة الشخصية تتأخر/تغيب أحيانًا في أول دخول",
+      "suites": [
+        {
+          "path": "test/features/profile/profile_primary_loading_notice_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_widget_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_load_failure_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_readonly_action_contract_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
+          "executed": true,
+          "passed": 24,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/smart_plan_recovery_locale_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-13",
+      "requirement": "طلب polish بصري لـ My Plan وبطاقاته",
+      "suites": [
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_page_test.dart",
+          "executed": true,
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_visual_surface_test.dart",
+          "executed": true,
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-14",
+      "requirement": "View step history تفتح شاشة بلا رجوع صالح",
+      "suites": [
+        {
+          "path": "test/app/router/bil39_pop_scope_return_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/app/router/bil39_safe_return_widget_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil39_routes_regression_contract_test.dart",
+          "executed": true,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/connected_health/steps_history_navigation_test.dart",
+          "executed": true,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/bil39_session_video_return_test.dart",
+          "executed": true,
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-15",
+      "requirement": "Action=food في Review and log غير مدعوم",
+      "suites": [
+        {
+          "path": "test/features/meal_planner/meal_planner_e2e_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_contract_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_widget_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-16",
+      "requirement": "فشل تحميل Meal Planner يختفي بصمت",
+      "suites": [
+        {
+          "path": "test/features/meal_planner/meal_planner_e2e_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_contract_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_widget_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-17",
+      "requirement": "مولد وحفظ Meal Planner غير محمي بالكامل ضد الفشل",
+      "suites": [
+        {
+          "path": "test/features/meal_planner/meal_planner_e2e_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_contract_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_widget_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-18",
+      "requirement": "اختبار Steps يفرض go ويحجب اختبار Back",
+      "suites": [
+        {
+          "path": "test/app/router/bil39_pop_scope_return_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/app/router/bil39_safe_return_widget_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil39_routes_regression_contract_test.dart",
+          "executed": true,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/connected_health/steps_history_navigation_test.dart",
+          "executed": true,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/bil39_session_video_return_test.dart",
+          "executed": true,
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-19",
+      "requirement": "Profile summary ينتظر مزودات بيانات ثانوية قبل الرسم",
+      "suites": [
+        {
+          "path": "test/features/profile/profile_primary_loading_notice_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/profile/profile_summary_partial_loading_widget_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_load_failure_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_readonly_action_contract_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
+          "executed": true,
+          "passed": 24,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/smart_plan_recovery_locale_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-20",
+      "requirement": "فحص صفحات root/deep-link بلا fallback return",
+      "suites": [
+        {
+          "path": "test/app/router/bil39_pop_scope_return_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/app/router/bil39_safe_return_widget_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil39_routes_regression_contract_test.dart",
+          "executed": true,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/connected_health/steps_history_navigation_test.dart",
+          "executed": true,
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/bil39_session_video_return_test.dart",
+          "executed": true,
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/wellness/workout_deep_link_no_automatic_paywall_test.dart",
+          "executed": true,
+          "passed": 1,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-21",
+      "requirement": "الكريستالة الدائمة لكل سهم باستثناء سهم الدفع في الخطط",
+      "suites": [
+        {
+          "path": "test/bil_crystal_arrow_test.dart",
+          "executed": true,
+          "passed": 47,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil_crystal_calendar_video_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/bil_crystal_purchase_cta_isolation_test.dart",
+          "executed": true,
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-22",
+      "requirement": "قصّ عناوين تبويبات Meal Planner على iPhone",
+      "suites": [
+        {
+          "path": "test/features/meal_planner/meal_planner_e2e_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_contract_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_widget_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-23",
+      "requirement": "احتمال لبس بين Suggested meals في My Plan وخطة Meal Planner Week",
+      "suites": [
+        {
+          "path": "test/features/meal_planner/meal_planner_e2e_contract_test.dart",
+          "executed": true,
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_contract_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/meal_planner/meal_planner_recovery_widget_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-24",
+      "requirement": "AI Coach default landing should be Overview",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-25",
+      "requirement": "Rename Coach Overview Chat tab to Robot icon + Coach",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-26",
+      "requirement": "Preserve AI Coach credit/subscription entitlement gate and existing plans presentation",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "BIL-27",
+      "requirement": "Full My Plan redesign parity with AI Coach Overview width/type/cards/vitality, not selective cards",
+      "suites": [
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_page_test.dart",
+          "executed": true,
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/smart_plan/bil_smart_plan_visual_surface_test.dart",
+          "executed": true,
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-01",
+      "requirement": "Weight history requests diverted to Food V2",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-02",
+      "requirement": "Weight table interpreted as Smart Plan draft",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-03",
+      "requirement": "False definitive no weight records",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-04",
+      "requirement": "Arabic weight context projection",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-05",
+      "requirement": "Personal trend response lacks numeric data",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-06",
+      "requirement": "Follow-up loses intent",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-07",
+      "requirement": "Conversation English vs app locale",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-08",
+      "requirement": "Unverified write claim or target as measurement",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-09",
+      "requirement": "Health read suggestion not execution",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    },
+    {
+      "id": "COACH-ADD-10",
+      "requirement": "Timeout privacy telemetry and good-chart regression",
+      "suites": [
+        {
+          "path": "test/features/intelligence_center/bil39_coach_routing_regression_test.dart",
+          "executed": true,
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_tools_locale_test.dart",
+          "executed": true,
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/bil39_coach_weight_readout_test.dart",
+          "executed": true,
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/features/intelligence_center/coach_review_actions_regression_test.dart",
+          "executed": true,
+          "passed": 41,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/parallel/bil02/coach_media_page_overlay_test.dart",
+          "executed": true,
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        {
+          "path": "test/visual_closure/actual_data_pages_golden_test.dart",
+          "executed": true,
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "coverageStatus": "ALL_REFERENCED_DART_SUITES_EXECUTED_PASS",
+      "acceptance": "LOCAL_BEHAVIOR_ONLY_NOT_FINAL_NATIVE_OR_EXACT_SHA_CI"
+    }
+  ]
+}

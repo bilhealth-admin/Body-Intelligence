@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "redacted": true,
+  "scope": "One authorized physical38 explanatory request, genuine Gemini, candidate cloud132; not exhaustive provider/fallback/failure certification",
+  "version": 132,
+  "status": "ACTIVE",
+  "runtime_bundle_sha256": "2eb04d4a2a3092e4572cbc41e2adb2e0ea49164b11f45ebdd227ea45450c992c",
+  "runtime_files_match": true,
+  "runtime_files_count": 15,
+  "request_count": 1,
+  "provider": "gemini",
+  "model": "gemini-3.8-flash",
+  "latency_ms": 10209,
+  "http_status": 200,
+  "credit_actual": 70,
+  "reserved_after": 0,
+  "confirmed_health_write": false,
+  "manual_grant": false,
+  "private_original_sha256": "ac62d217f8e42f02a823987ce17a8f6d3cceecc878fda1a64ea0622d0fd8e6fd",
+  "native_answer_sha256": "12a98f0b3a6149a5553ad768b68615a215c297c76c28d773337c952e179c4b8e",
+  "limits": "One authorized real request on physical38; not all fallback/failure paths or native39 proof."
+}

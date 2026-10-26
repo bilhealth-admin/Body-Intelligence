@@ -1,5 +1,5 @@
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -97,7 +97,7 @@ class _SourceCard extends StatelessWidget {
       key: ValueKey('health-source-${source.id}'),
       button: true,
       label: arabic
-          ? 'فتح المصدر الأصلي: ${source.title}'
+          ? 'فتح المصدر الأصلي: ${source.arabicTitle ?? source.title}'
           : Localizations.localeOf(context).languageCode == 'en'
           ? 'Open original source: ${source.title}'
           : '${context.strings.text('Source')}: ${source.title}',
@@ -113,7 +113,9 @@ class _SourceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      source.title,
+                      arabic
+                          ? source.arabicTitle ?? source.title
+                          : source.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -124,10 +126,22 @@ class _SourceCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text(context.strings.text(source.shortDescription)),
+                    Text(
+                      context.strings.text(
+                        arabic
+                            ? source.arabicShortDescription ??
+                                  source.shortDescription
+                            : source.shortDescription,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     Text(
-                      context.strings.text(source.methodologyNote),
+                      context.strings.text(
+                        arabic
+                            ? source.arabicMethodologyNote ??
+                                  source.methodologyNote
+                            : source.methodologyNote,
+                      ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -136,7 +150,7 @@ class _SourceCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const BilGlassPressFeedback(
+              const BilNavigationFeedback(
                 child: Icon(Icons.open_in_new_rounded),
               ),
             ],

@@ -1,5 +1,6 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,7 +85,7 @@ class DiaryDateNavigator extends StatelessWidget {
               ),
             ),
           ),
-          const BilGlassPressFeedback(
+          const BilNavigationFeedback(
             child: Icon(Icons.arrow_drop_down_rounded, size: 24),
           ),
         ],
@@ -95,7 +96,7 @@ class DiaryDateNavigator extends StatelessWidget {
             key: const Key('daily-log-back'),
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onPressed: onBack,
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
           )
         : const SizedBox(width: 48);
     final previous = IconButton(
@@ -105,7 +106,7 @@ class DiaryDateNavigator extends StatelessWidget {
       // Material chevrons mirror themselves with Directionality. Selecting an
       // RTL-specific glyph here mirrored it a second time, so the Arabic
       // previous/next controls appeared to move in the opposite direction.
-      icon: const BilGlassPressFeedback(
+      icon: const BilNavigationFeedback(
         child: Icon(Icons.chevron_left_rounded),
       ),
     );
@@ -113,7 +114,7 @@ class DiaryDateNavigator extends StatelessWidget {
       key: const Key('daily-log-next'),
       tooltip: _summaryText(context, 'next'),
       onPressed: onNext,
-      icon: const BilGlassPressFeedback(
+      icon: const BilNavigationFeedback(
         child: Icon(Icons.chevron_right_rounded),
       ),
     );

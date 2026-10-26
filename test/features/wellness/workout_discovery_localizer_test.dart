@@ -39,6 +39,30 @@ void main() {
     );
   });
 
+  test(
+    'bench support is never localized as no equipment in any production language',
+    () {
+      final localizer = WorkoutDiscoveryLocalizer.fromDiscovery(discovery);
+      final bench = discovery.singleWhere(
+        (item) =>
+            item.stableId ==
+            'gym-six-month:resistance-upper-body-bench-push-up-technique',
+      );
+      expect(localizer.localize(bench, 'en').equipment, ['stable bench']);
+      for (final tag in WorkoutDiscoverySafeCopy.supportedTags) {
+        final localized = localizer.localize(bench, tag);
+        final copy = WorkoutDiscoverySafeCopy.forTag(tag);
+        expect(localized.equipment, [copy.equipmentCount(1)], reason: tag);
+        expect(
+          localized.equipment,
+          isNot(contains(copy.noEquipment)),
+          reason: tag,
+        );
+        expect(localized.videoMedia!.sha256, bench.videoMedia!.sha256);
+      }
+    },
+  );
+
   test('all 302 IDs resolve under the explicit owner-approved name policy', () {
     final localizer = WorkoutDiscoveryLocalizer.fromDiscovery(discovery);
     expect(

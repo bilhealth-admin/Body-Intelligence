@@ -40,7 +40,7 @@ class _ConnectionsUnavailable extends StatelessWidget {
               FilledButton.icon(
                 key: const Key('community-connections-add-friends'),
                 onPressed: () => context.push('/login'),
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.login_rounded),
                 ),
                 label: Text(copy.signIn),
@@ -74,7 +74,7 @@ class _ConnectionsLoadError extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(copy.retry),
@@ -98,7 +98,7 @@ class _ConnectionsLoading extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(),
+          const BilFeatureWelcomeStatus(),
           const SizedBox(height: 14),
           Text(label, textAlign: TextAlign.center),
         ],

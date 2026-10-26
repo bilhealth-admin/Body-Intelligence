@@ -1,5 +1,6 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -204,7 +205,7 @@ class _CommunityInviteLandingPageState
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done &&
             !snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: BilFeatureWelcomeStatus());
         }
         if (snapshot.hasError) {
           return _InviteState(
@@ -221,7 +222,7 @@ class _CommunityInviteLandingPageState
             ),
             action: FilledButton.icon(
               onPressed: _retry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
@@ -321,9 +322,7 @@ class _CommunityInviteLandingPageState
                           icon: _accepting
                               ? const SizedBox.square(
                                   dimension: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: BilFeatureWelcomeStatus(),
                                 )
                               : const Icon(Icons.check_circle_outline_rounded),
                           label: Text(
@@ -399,7 +398,7 @@ class _InviteState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 52)),
+          BilNavigationFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 14),
           Text(
             title,

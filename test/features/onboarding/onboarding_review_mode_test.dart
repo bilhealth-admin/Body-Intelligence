@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -231,10 +232,7 @@ void main() {
       const Color(0xFF1D4ED8),
     );
     expect(
-      find.descendant(
-        of: next,
-        matching: find.byType(CircularProgressIndicator),
-      ),
+      find.descendant(of: next, matching: bilWaitingIndicators()),
       findsNothing,
     );
     expect(

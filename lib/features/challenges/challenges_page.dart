@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
 import 'package:go_router/go_router.dart';
@@ -142,7 +143,7 @@ class ChallengesPage extends ConsumerWidget {
         label: Text(t('Start challenge')),
       ),
       body: rows.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BilFeatureWelcomeStatus()),
         error: (error, _) =>
             Center(child: Text(t('Could not load challenges. Try again.'))),
         data: (items) => ListView(
@@ -380,7 +381,7 @@ class _ChallengeTile extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: progress.when(
-          loading: () => const LinearProgressIndicator(),
+          loading: () => const BilFeatureWelcomeStatus(),
           error: (error, _) =>
               Text(t('Could not calculate challenge progress.')),
           data: (value) {

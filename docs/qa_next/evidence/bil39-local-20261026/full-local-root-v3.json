@@ -1,0 +1,28 @@
+{
+  "classification": "FULL_LOCAL_TEST_ROOT_NOT_DEVICE_OR_TESTFLIGHT_CERTIFICATION",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "command": [
+    "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+    "test",
+    "--no-pub",
+    "--dart-define=BIL_PAYMENTS_ENABLED=true",
+    "--dart-define=BIL_LIVE_WORKOUT_STREAM_CHECK=true",
+    "--concurrency=2",
+    "--timeout=2m",
+    "--reporter",
+    "json"
+  ],
+  "fingerprint_before": "bbf5879f02a8bce359aaabf39b0772c38e588feb21752483017300933f183595",
+  "fingerprint_after": "bbf5879f02a8bce359aaabf39b0772c38e588feb21752483017300933f183595",
+  "source_stable": true,
+  "exit_code": 0,
+  "terminal_success": true,
+  "passed": 11048,
+  "skipped": [],
+  "failed": [],
+  "duration_seconds": 20059.3,
+  "log_sha256": "62619e6737e578bdba186969fba32f5cd0abf8cad3db961a80ed7c1effe157a6",
+  "source_files": 11602,
+  "utc": "2026-10-26T11:24:22.499248+00:00",
+  "status": "PASS"
+}

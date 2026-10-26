@@ -26,6 +26,7 @@ extension _OwnedStorePurchase on VerifiedStorePurchaseService {
     required _StorePurchaseEventOrigin origin,
     required _StoreTransactionAttempt? transactionAttempt,
     StoreAccountSnapshot? expectedVisit,
+    bool waitForNativeFinish = false,
   }) async {
     final visit = expectedVisit ?? _storeVisit.capture();
     if (visit.ownerId == null || !_storeVisit.isCurrent(visit) || _disposed) {
@@ -43,6 +44,7 @@ extension _OwnedStorePurchase on VerifiedStorePurchaseService {
           purchase,
           origin: origin,
           transactionAttempt: transactionAttempt,
+          waitForNativeFinish: waitForNativeFinish,
         ),
       );
     } on CommunityOwnerOperationCancelled {

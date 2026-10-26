@@ -13,8 +13,10 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'dart:convert';
 import 'dart:io';
 import 'smart_plan_copy_sources.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_smart_plan_visual.dart';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_smart_plan_recovery.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_profile.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_polish.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_actions.dart';
@@ -131,6 +133,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     File('lib/features/auth/auth_five_locale_copy.dart').readAsString(),
   ])).join('\n');
   final catalogKeys = <String>{
+    ...SmartPlanVisualRuntimeCopy.sources,
     ...ClosureAccessRuntimeCopy.sources,
     ...ClosureCoachRuntimeCopy.sources,
     ...ClosureFoodRuntimeCopy.sources,
@@ -146,6 +149,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
         .map((match) => _unescapeDartSingle(match.group(1)!)),
     ...ProfileRuntimeCopy.values.keys,
     ...ReleaseClosureRuntimeCopy.sources,
+    ...SmartPlanRecoveryRuntimeCopy.sources,
     ...ReleasePolishRuntimeCopy.sources,
     ...ReleaseActionRuntimeCopy.sources,
     ...FoodActionRuntimeCopy.sources,

@@ -45,7 +45,7 @@ final class BilSmartPlanPrescriptions {
   static const homeAssetPath =
       'artifacts/workout_media/home_smart_plan_prescriptions_v1.json';
   static const homeArtifactSha256 =
-      '9b312a4d02abff12f25935c7bfe03e006d19231655271f6bc08fdae6598679f3';
+      '6c9489fdf0dd54e837c148ee8eb635304c09a5eb2086dade4d00549b8a0e05c6';
   static Future<Map<String, dynamic>>? _homeCached;
   static Map<String, dynamic>? _homeData;
 

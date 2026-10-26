@@ -582,14 +582,14 @@ void _memoryOwnerSyncCases() {
       await tester.tap(find.text('Cancel'));
       await tester.runAsync(() async {
         final until = DateTime.now().add(const Duration(seconds: 10));
-        while (find.byType(LinearProgressIndicator).evaluate().isNotEmpty &&
+        while (bilWaitingIndicators().evaluate().isNotEmpty &&
             DateTime.now().isBefore(until)) {
           await tester.pump(const Duration(milliseconds: 20));
           await Future<void>.delayed(const Duration(milliseconds: 10));
         }
       });
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.byType(LinearProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(
         (await tester.runAsync(store.repository.readLocal))!.single['text'],
         'Local evening preference',

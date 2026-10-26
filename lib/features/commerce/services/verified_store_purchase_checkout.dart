@@ -129,6 +129,7 @@ extension _VerifiedStorePurchaseCheckout on VerifiedStorePurchaseService {
           details,
           origin: _StorePurchaseEventOrigin.reconciliation,
           transactionAttempt: null,
+          waitForNativeFinish: true,
         );
         if (_disposed ||
             state == VerifiedStoreState.failed ||

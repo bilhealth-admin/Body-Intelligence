@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../community/presentation/community_attention_scope.dart';
 import 'dart:async';
 import 'dart:typed_data';
@@ -317,13 +318,10 @@ class _PremiumMembershipLink extends StatelessWidget {
                 if (isChecking)
                   SizedBox.square(
                     dimension: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: gold,
-                    ),
+                    child: BilFeatureWelcomeStatus(color: gold),
                   )
                 else
-                  BilGlassPressFeedback(
+                  BilNavigationFeedback(
                     child: Icon(
                       isRetry ? Icons.refresh_rounded : directionalIcon,
                       size: 18,
@@ -479,7 +477,7 @@ class _ProfileSummary extends StatelessWidget {
                     ],
                   ),
                 ),
-                BilGlassPressFeedback(
+                BilNavigationFeedback(
                   child: Icon(
                     Directionality.of(context) == TextDirection.rtl
                         ? Icons.chevron_left_rounded
@@ -600,7 +598,7 @@ class _MoreRow extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
               ],
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(
                   Directionality.of(context) == TextDirection.rtl
                       ? Icons.chevron_left_rounded

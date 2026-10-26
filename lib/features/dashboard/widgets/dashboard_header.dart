@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:ui';
 import 'dart:math' as math;
 
@@ -198,7 +199,7 @@ class _CoachConversationEntry extends StatelessWidget {
                   suffixIcon: IconButton(
                     tooltip: _dashboardHeaderText(locale, 'open'),
                     onPressed: () => context.push('/intelligence-center'),
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.arrow_forward_rounded, size: 20),
                     ),
                   ),

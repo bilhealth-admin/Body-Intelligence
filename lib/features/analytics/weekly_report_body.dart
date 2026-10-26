@@ -29,7 +29,7 @@ class _Body extends ConsumerWidget {
           onChooseWeek: () async {
             final selected = ref.read(selectedWeeklyReportDateProvider);
             final today = ref.read(weeklyReportClockProvider)();
-            final picked = await showDatePicker(
+            final picked = await showBilCrystalDatePicker(
               context: context,
               initialDate: selected.isAfter(today) ? today : selected,
               firstDate: DateTime(2010),
@@ -68,7 +68,7 @@ class _Body extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         if (verifiedSubscription.isLoading)
-          const LinearProgressIndicator(key: Key('weekly-entitlement-loading'))
+          const BilFeatureWelcomeStatus(key: Key('weekly-entitlement-loading'))
         else if (verifiedSubscription.hasError)
           ListTile(
             key: const Key('weekly-entitlement-error'),
@@ -171,7 +171,7 @@ class _Body extends ConsumerWidget {
                   children: [
                     const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: BilFeatureWelcomeStatus(),
                     ),
                     const SizedBox(width: 10),
                     Expanded(child: Text(_t(context, 'checking_subscription'))),

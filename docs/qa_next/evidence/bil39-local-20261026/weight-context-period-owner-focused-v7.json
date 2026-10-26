@@ -1,0 +1,31 @@
+{
+  "classification": "FOCUSED_LOCAL_AFTER_FULL_ROOT_NOT_NATIVE_OR_FINAL_SHA",
+  "at": "2026-10-26T12:08:39.665Z",
+  "results": {
+    "passed": 41,
+    "failed": [],
+    "skipped": 0,
+    "terminal": true,
+    "errors": []
+  },
+  "log_sha256": "a9592dc9e2f630beb7296dea9be738a9683b950058f151d1c004458c3934d9a2",
+  "source_files": {
+    "lib/features/intelligence_center/services/coach_context_reader.dart": "461bcc750ee638f05dfd3a81ecc4afffe0da38792bced766bd469d1739fdf36b",
+    "lib/features/intelligence_center/services/coach_weight_history_readout.dart": "c011ea0e10e73ce9ce66dff49dab3e50c373f4860217992f0e08ff9c3cb806f8",
+    "lib/features/intelligence_center/presentation/intelligence_query_flow.dart": "d41f6bf439beaa29c9db06dad6455886b43cfc9e55e0ab768e94a91213536897",
+    "lib/features/intelligence_center/presentation/intelligence_action_flow.dart": "160142c64847f03c8352a15a97453e54f9bd5c4698395645f554c3f9654f4f7a",
+    "lib/features/intelligence_center/presentation/intelligence_center_page.dart": "b8e50417bdd211f68ac7ebd46d48c2d8decdad25f029e75cf0a20dbe1eb9b7d9",
+    "test/features/intelligence_center/bil39_weight_context_faults_test.dart": "be6766f26b8945df32c13a107bab14d91ed256d92f832ed6291f3bb644fc77d2",
+    "test/features/intelligence_center/bil39_weight_period_boundary_test.dart": "d56081f5231a3ac312ddab2ce9d086dcced5104c96d3e88dc8543a8a41795a8d",
+    "test/features/intelligence_center/coach_context_reader_owner_test.dart": "0b39afc32f3d32a3601684a1dcfdc595933315b2f84d5f9f9c3b431066af95fb"
+  },
+  "analyze": {
+    "result": "No issues found",
+    "items": 6,
+    "seconds": 225.7,
+    "log_sha256": "ad88a6d33ae00f7978ec4ee55d8d4c2058d12a9fb47339350650a1fa4c583f3e"
+  },
+  "prior_full_root": "full-local-root-v3.json",
+  "full_root_covers_these_later_changes": false,
+  "build_and_comprehensive_retest_held_by_user": true
+}

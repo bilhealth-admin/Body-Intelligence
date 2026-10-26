@@ -1,5 +1,7 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/wellness_content_pack.dart';
@@ -36,7 +38,7 @@ class _WellnessContentPacksPageState extends State<WellnessContentPacksPage> {
         future: state,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: BilFeatureWelcomeStatus());
           }
           if (snapshot.hasError) {
             return _MessageState(
@@ -71,7 +73,7 @@ class _WellnessContentPacksPageState extends State<WellnessContentPacksPage> {
               ),
             );
           }
-          return RefreshIndicator(
+          return BilRefreshIndicator(
             onRefresh: () async => _reload(),
             child: ListView.separated(
               padding: const EdgeInsets.all(20),
@@ -156,7 +158,7 @@ class _PackCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              BilGlassPressFeedback(child: Icon(_icon(pack.type))),
+              BilNavigationFeedback(child: Icon(_icon(pack.type))),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -196,7 +198,7 @@ class _PackCard extends StatelessWidget {
             icon: busy
                 ? const SizedBox.square(
                     dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: BilFeatureWelcomeStatus(),
                   )
                 : Icon(
                     installed == null
@@ -249,7 +251,7 @@ class _MessageState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 52)),
+          BilNavigationFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 16),
           Text(
             title,

@@ -38,7 +38,7 @@ extension _CommunityFeedRendering on _FeedTabState {
                 }
                 return false;
               },
-              child: RefreshIndicator(
+              child: BilRefreshIndicator(
                 onRefresh: _refreshSelectedFeed,
                 child: Semantics(
                   key: const Key('community-public-feed'),
@@ -141,9 +141,18 @@ extension _CommunityFeedRendering on _FeedTabState {
                         SliverToBoxAdapter(
                           child: SizedBox(
                             key: const Key('community-refresh-slot'),
+                            // Keep the existing feed anchor stable while the
+                            // full-size Splash glyph paints in this rail.
                             height: 3,
                             child: (loading && matched) || _cacheRefreshing
-                                ? const LinearProgressIndicator()
+                                ? const OverflowBox(
+                                    minHeight: 24,
+                                    maxHeight: 24,
+                                    child: SizedBox.square(
+                                      dimension: 24,
+                                      child: BilFeatureWelcomeStatus(),
+                                    ),
+                                  )
                                 : const SizedBox.shrink(),
                           ),
                         ),
@@ -247,11 +256,9 @@ extension _CommunityFeedRendering on _FeedTabState {
                                   icon: _loadingMore
                                       ? const SizedBox.square(
                                           dimension: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
+                                          child: BilFeatureWelcomeStatus(),
                                         )
-                                      : const BilGlassPressFeedback(
+                                      : const BilNavigationFeedback(
                                           child: Icon(
                                             Icons.expand_more_rounded,
                                           ),

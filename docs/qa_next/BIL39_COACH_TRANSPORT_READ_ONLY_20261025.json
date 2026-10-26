@@ -1,0 +1,25 @@
+{
+  "checked_at": "2026-10-25T17:28:51.230Z",
+  "function": "ai-coach",
+  "version": 131,
+  "checksum": "29c96fa980f9d5ed4cb31807b778f45843166a5866e5aec828815052b426d917",
+  "read_only": true,
+  "transport": {
+    "generate_content": true,
+    "stream_generate_content": false,
+    "sse_content_type": false,
+    "readable_stream": false,
+    "json_response": true
+  },
+  "source_lines": [
+    {
+      "line": 249,
+      "excerpt": "new Response(JSON.stringify(body), {"
+    },
+    {
+      "line": 928,
+      "excerpt": "const url = `${endpoint}/models/${encodeURIComponent(model)}:generateContent`;"
+    }
+  ],
+  "conclusion": "Current deployed handler returns complete validated JSON; this UI change must not simulate streaming or alter the cloud contract."
+}

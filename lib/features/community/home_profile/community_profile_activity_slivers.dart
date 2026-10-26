@@ -388,6 +388,11 @@ extension _CommunityMemberProfilePrimaryContent
                         _setProfileState(() => _momentFilter = value);
                       }
                     },
+
+                    icon: const BilCrystalArrow(
+                      extent: 36,
+                      child: Icon(Icons.keyboard_arrow_down_rounded),
+                    ),
                   ),
                 ),
               Icon(

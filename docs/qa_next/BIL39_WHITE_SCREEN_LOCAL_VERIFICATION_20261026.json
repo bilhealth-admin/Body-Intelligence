@@ -1,0 +1,80 @@
+{
+  "scope": "Local source verification of BIL39 white-screen and navigation fixes; not native signed39/TestFlight/exact-SHA CI approval",
+  "branch": "bil39/integration-20261025",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "candidate_sha": null,
+  "release_approval": false,
+  "regression": {
+    "classification": "LOCAL_BEHAVIOR_NOT_NATIVE_OR_EXACT_COMMIT_CI",
+    "branch": "bil39/integration-20261025",
+    "base_sha": "155b079696430919f8272df934371f033fb11be2",
+    "source_fingerprint_before": "9722e828179cb32c5e62b0fe7762acee07c2af49b54f56b3b669ea24b058dd54",
+    "source_fingerprint_after": "9722e828179cb32c5e62b0fe7762acee07c2af49b54f56b3b669ea24b058dd54",
+    "source_unchanged": true,
+    "scopes": [
+      "test/app/router",
+      "test/features/meal_planner",
+      "test/features/community/community_profile_primary_navigation_test.dart",
+      "test/responsive_shell_test.dart",
+      "test/responsive_shell_accessibility_test.dart",
+      "test/app_router_invalid_route_test.dart",
+      "test/app_router_plan_navigation_guard_test.dart",
+      "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart"
+    ],
+    "command": [
+      "G:\\BIL_Toolchains\\Flutter\\flutter\\bin\\flutter.bat",
+      "test",
+      "--no-pub",
+      "--dart-define=BIL_PAYMENTS_ENABLED=true",
+      "--concurrency=1",
+      "--reporter",
+      "json",
+      "test/app/router",
+      "test/features/meal_planner",
+      "test/features/community/community_profile_primary_navigation_test.dart",
+      "test/responsive_shell_test.dart",
+      "test/responsive_shell_accessibility_test.dart",
+      "test/app_router_invalid_route_test.dart",
+      "test/app_router_plan_navigation_guard_test.dart",
+      "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart",
+      "test/features/intelligence_center/ai_coach_settings_verified_credit_refresh_test.dart"
+    ],
+    "exit_code": 0,
+    "terminal_success": true,
+    "passing_cases": 365,
+    "failed_cases": 0,
+    "skipped_cases": 0,
+    "duration_seconds": 181.41,
+    "log_sha256": "2e5830e2a2c0e508dfedb895f3ed0063359e735c7c8ad5e43e10a3cdc7dca37b",
+    "utc": "2026-10-26T02:04:16.884475+00:00",
+    "status": "PASS"
+  },
+  "analysis": {
+    "classification": "FULL_LOCAL_ANALYSIS_UNCOMMITTED_SOURCE_NOT_EXACT_SHA_CI",
+    "status": "PASS",
+    "command": "flutter analyze --no-pub",
+    "log_sha256": "9db70030e8c96b466ad3701e816634e0e5289df13750a079aba02bf0452cf494",
+    "current_input_hashes": {
+      "analysis_options.yaml": "ca3f220cea1b74529d72f5316c350c9544b437a4ec54597dc7a330d4ff0c16ce",
+      "pubspec.yaml": "a62c132e5aaf1822003e70d7f22ddceb6c3e8b328ea52201bff193b6a8f037fb",
+      "pubspec.lock": "5b094039daf0ef93a21b0b71358bf29f72f2e0da0d99732cc088a05eb50303fa",
+      "lib/app/router/app_router.dart": "f17d675cc1d951e4b7d54e88cc325fb27c1d6d7a15addfb6b10227b5680826f2",
+      "lib/app/router/bil_primary_navigation.dart": "a555fea4aec7b109c4d551ff5331bf857112255a97546ae580c78e86c73108e8",
+      "lib/app/router/responsive_app_shell.dart": "3ad75b3b6f4c2c2fcd0c5e5d7909f6415dcc5c7857493ec47b4a64a449b2ed71",
+      "lib/features/meal_planner/presentation/meal_planner_page.dart": "e2d8073163b34534a92279d7df7f0134d3481b7cfb202eed7c8371deb0879135",
+      "tool/vendor_go_router/lib/src/match.dart": "936682d01aa0d0e3738b15c3a9f71236ec5e47f60ced09291a04c3f6bdc80a77",
+      "tool/vendor_go_router/lib/src/builder.dart": "5c4168677008219a904fe7e6afb64f7aacbf5f41175a771a56edfb0e353a4215",
+      "tool/vendor_go_router/analysis_options.yaml": "b755461ddd30e909782206f14656243d88f2cebb710b002b6aa8fd175ae739ea",
+      "tool/vendor_go_router/upstream_analysis_options.yaml": "3c2419591d0c2fa9834c6daa29aef12032c8ff064cf3c91ac919646d9d683de4",
+      "integration_test/native_feature_splashes_conversations.dart": "c9eedc5e0fd5c06bfcf2db5e8110e515eface6d1d56ec239790e28f2683e7c7a"
+    },
+    "vendor_policy": "Exact frozen tagged upstream analysis rules, with strict casts/inference/raw types and public API docs; application analyzer unchanged."
+  },
+  "remaining": [
+    "Complete full local test root",
+    "Native integrated visual/device proof",
+    "Clean integration commit and exact-SHA final CI",
+    "Signed internal TestFlight39 after all gates"
+  ]
+}

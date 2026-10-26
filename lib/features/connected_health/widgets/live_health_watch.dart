@@ -1,4 +1,4 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -620,7 +620,7 @@ class _WatchMetric extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            BilGlassPressFeedback(
+            BilNavigationFeedback(
               child: Icon(
                 icon,
                 color: color,

@@ -1,0 +1,99 @@
+{
+  "schema": "bil39.integration.intake.v1",
+  "protected_base": "155b079696430919f8272df934371f033fb11be2",
+  "method": "Pinned three-way source patches; one clean final commit only after local validation; no PR24 or protected ref mutation",
+  "sources": [
+    {
+      "stream": "routes",
+      "branch": "codex/bil39-routes-completion-20261025",
+      "sha": "056deb35526349c59b6bb1f89fabbaff6075f84d",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "4d7dd3bcdde894229e6bc1149627b99d8146163017fd6fb15c25b26865c2d58b",
+      "status": "APPLIED_CLEAN"
+    },
+    {
+      "stream": "reliability",
+      "branch": "codex/bil39-reliability-completion-20261025",
+      "sha": "cbb51fa62f648ec260fe9bca221e82015a6d7760",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "b3e499e4b4fc2cab50036116931e6c73a9371890d54feb425123c430d7f4a1e7",
+      "status": "APPLIED_CLEAN"
+    },
+    {
+      "stream": "meal",
+      "branch": "codex/bil39-meal-completion-20261025",
+      "sha": "3468db2a98b03bc2a6c151d920f073180fbb0def",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "8578bf60161463c1786133334177e5dd2ff8e2b7be49676d3e23d015db3a629b",
+      "status": "APPLIED_CLEAN"
+    },
+    {
+      "stream": "coach",
+      "branch": "codex/bil39-coach-completion-20261025",
+      "sha": "344af32a7f83a4be102fdabab86a1bca01d879e2",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "fbc58602e21dcaf24f06f97ca6a2f2bbbc531d22036c6c899347f6d01a71c2aa",
+      "status": "APPLIED_CLEAN"
+    },
+    {
+      "stream": "myplan",
+      "branch": "codex/bil39-myplan-completion-20261025",
+      "sha": "1e60aaf19f73bf25ba87447c5f7d4eb29b3d9240",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "7752fdfaf39ef9286a5501752fa600ef9ebd1dac98cc662c97fa9c5e065a9eec",
+      "status": "APPLIED_RESOLVED_BOTH_TRANSLATION_REGISTRIES"
+    },
+    {
+      "stream": "crystal",
+      "branch": "codex/bil39-crystal-completion-20261025",
+      "sha": "fcfa4fea25124b38e696f5a9af965b6cd9342e00",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "646add8115df2904edb92d46fab9cfee1a33d29800e0ae57b6d528bc1a8a50df",
+      "status": "APPLIED_RESOLVED_BOTH_VERIFY_FORMAT_LISTS"
+    },
+    {
+      "stream": "cloud",
+      "branch": "codex/bil39-cloud-completion-20261025",
+      "sha": "9c2c7d259daa0a9538c36376fc12b9768f189943",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "b91ba57c02e8a1ba6d1f1dbd95a16b8cf5865de46456ae0532784ed364f9de61",
+      "status": "APPLIED_CLEAN"
+    },
+    {
+      "stream": "video-source",
+      "branch": "codex/bil39-video-source-completion-20261025",
+      "sha": "847f161c5cf2f4d34d77ed7345416c40cf0ad085",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "ec6df3af2f3751a0e871c0188a6871d9326a124adfd50f8a8cce734818951cc8",
+      "status": "APPLIED_CLEAN"
+    },
+    {
+      "stream": "qa",
+      "branch": "codex/bil39-qa-completion-20261025",
+      "sha": "fb2732359d9f39acfd9dfd3c16e24ad61eb33790",
+      "base": "155b079696430919f8272df934371f033fb11be2",
+      "patch_sha256": "07d1a37f19c3ba90101dc2b177e7c23b9b80223102cf85270edbe14f7e6a6466",
+      "status": "APPLIED_CLEAN"
+    }
+  ],
+  "resolved_conflicts": [
+    {
+      "file": "lib/app/localization/runtime_copy.dart",
+      "decision": "Keep both recovery and visual imports and both ordered resolver calls"
+    },
+    {
+      "file": ".github/workflows/verify.yml",
+      "decision": "Keep both Meal and Crystal format targets; preserve all existing checks"
+    }
+  ],
+  "automatic_merges_requiring_semantic_checks": [
+    "lib/features/smart_plan/presentation/bil_smart_plan_page.dart",
+    "tool/localization/locale_fallback_closure.dart",
+    "test/features/smart_plan/bil_smart_plan_states_visual_test.dart"
+  ],
+  "line_endings_normalized": [
+    "docs/qa/BIL39_CRYSTAL_OCCURRENCE_REGISTER_20261025.csv",
+    "docs/qa_next/BIL39_MYPLAN_REVIEWED_GOLDENS_20261025.json"
+  ],
+  "status": "ASSEMBLED_UNCOMMITTED_NOT_VALIDATED"
+}

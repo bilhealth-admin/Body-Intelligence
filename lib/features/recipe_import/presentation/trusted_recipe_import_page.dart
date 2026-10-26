@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,7 +112,7 @@ class _TrustedRecipeImportPageState
           centerTitle: true,
         ),
         body: _loading && _draft == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: BilFeatureWelcomeStatus())
             : _retired
             ? Center(child: Text(_error!))
             : _draft == null
@@ -227,6 +229,8 @@ class _TrustedRecipeImportPageState
         ExpansionTile(
           leading: const Icon(Icons.menu_book_outlined, size: 19),
           title: Text(_text('Source')),
+
+          trailing: const BilCrystalExpansionIndicator(),
           children: [
             ListTile(
               title: SelectableText(recipe.nutrition!.provenance.source),

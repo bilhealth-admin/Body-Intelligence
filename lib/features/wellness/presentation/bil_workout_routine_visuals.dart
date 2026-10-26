@@ -39,7 +39,7 @@ class _WorkoutCoverPlaceholder extends StatelessWidget {
           colors: [colors.primaryContainer, colors.tertiaryContainer],
         ),
       ),
-      child: BilGlassPressFeedback(
+      child: BilNavigationFeedback(
         child: Icon(
           _categoryIcon(category),
           size: 74,

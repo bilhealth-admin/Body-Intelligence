@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B13910250000000000000006 /* BILCoachMarkdownBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13910250000000000000005 /* BILCoachMarkdownBridge.swift */; };
+		B13910250000000000000004 /* BILCoachMarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13910250000000000000003 /* BILCoachMarkdownView.swift */; };
+		B13910250000000000000002 /* BILCoachMarkdownDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = B13910250000000000000001 /* BILCoachMarkdownDocument.swift */; };
 		B11210120000000000000002 /* BILCommunityTranslationBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B11210120000000000000001 /* BILCommunityTranslationBridge.swift */; };
 		A1B2C3D41F00000100000002 /* BILGlobalHealthBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41F00000100000001 /* BILGlobalHealthBridge.swift */; };
 		A1B2C3D41F00000100000004 /* BILFitnessBleBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41F00000100000003 /* BILFitnessBleBridge.swift */; };
@@ -57,6 +60,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B13910250000000000000005 /* BILCoachMarkdownBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILCoachMarkdownBridge.swift; sourceTree = "<group>"; };
+		B13910250000000000000003 /* BILCoachMarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILCoachMarkdownView.swift; sourceTree = "<group>"; };
+		B13910250000000000000001 /* BILCoachMarkdownDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILCoachMarkdownDocument.swift; sourceTree = "<group>"; };
 		B11210120000000000000001 /* BILCommunityTranslationBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILCommunityTranslationBridge.swift; sourceTree = "<group>"; };
 		A1B2C3D41F00000100000001 /* BILGlobalHealthBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILGlobalHealthBridge.swift; sourceTree = "<group>"; };
 		A1B2C3D41F00000100000003 /* BILFitnessBleBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILFitnessBleBridge.swift; sourceTree = "<group>"; };
@@ -178,6 +184,9 @@
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
+				B13910250000000000000005 /* BILCoachMarkdownBridge.swift */,
+				B13910250000000000000003 /* BILCoachMarkdownView.swift */,
+				B13910250000000000000001 /* BILCoachMarkdownDocument.swift */,
 				A1B2C3D41F00000100000001 /* BILGlobalHealthBridge.swift */,
 				A1B2C3D41F00000100000003 /* BILFitnessBleBridge.swift */,
 				B11210120000000000000001 /* BILCommunityTranslationBridge.swift */,
@@ -429,6 +438,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				B13910250000000000000006 /* BILCoachMarkdownBridge.swift in Sources */,
+				B13910250000000000000004 /* BILCoachMarkdownView.swift in Sources */,
+				B13910250000000000000002 /* BILCoachMarkdownDocument.swift in Sources */,
 				A1B2C3D41F00000100000002 /* BILGlobalHealthBridge.swift in Sources */,
 				A1B2C3D41F00000100000004 /* BILFitnessBleBridge.swift in Sources */,
 				B11210120000000000000002 /* BILCommunityTranslationBridge.swift in Sources */,

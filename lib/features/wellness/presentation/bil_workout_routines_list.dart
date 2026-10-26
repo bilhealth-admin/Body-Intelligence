@@ -659,7 +659,7 @@ class _MetaLabel extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        BilGlassPressFeedback(child: Icon(icon, size: 17)),
+        BilNavigationFeedback(child: Icon(icon, size: 17)),
         const SizedBox(width: 4),
         Flexible(
           child: Text(

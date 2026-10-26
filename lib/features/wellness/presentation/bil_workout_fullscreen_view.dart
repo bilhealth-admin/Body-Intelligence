@@ -98,7 +98,7 @@ extension _FullscreenWorkoutVideoView on _FullscreenWorkoutVideoPageState {
         liveRegion: true,
         label: _fullscreenVideoCopy(context, 'loading'),
         child: const Center(
-          child: CircularProgressIndicator(color: Colors.white),
+          child: BilFeatureWelcomeStatus(color: Colors.white),
         ),
       );
     }
@@ -158,10 +158,7 @@ extension _FullscreenWorkoutVideoView on _FullscreenWorkoutVideoPageState {
             dimension: 48,
             child: Padding(
               padding: EdgeInsets.all(12),
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2.5,
-              ),
+              child: BilFeatureWelcomeStatus(color: Colors.white),
             ),
           ),
         ),
@@ -191,7 +188,7 @@ extension _FullscreenWorkoutVideoView on _FullscreenWorkoutVideoPageState {
                       context,
                     ).backButtonTooltip,
                     onPressed: () => unawaited(_exit()),
-                    icon: const BackButtonIcon(),
+                    icon: const BilCrystalArrow(child: BackButtonIcon()),
                   ),
                 ),
               ),
@@ -268,7 +265,7 @@ extension _FullscreenWorkoutVideoView on _FullscreenWorkoutVideoPageState {
                     tooltip: playLabel,
                     color: Colors.white,
                     onPressed: () => unawaited(_togglePlayback()),
-                    icon: BilGlassPressFeedback(
+                    icon: BilNavigationFeedback(
                       child: Icon(
                         value.isPlaying
                             ? Icons.pause_rounded
@@ -400,7 +397,7 @@ class _WorkoutVideoError extends StatelessWidget {
                     child: FilledButton.icon(
                       key: const ValueKey('workout-video-fullscreen-retry'),
                       onPressed: () => unawaited(onRetry()),
-                      icon: const BilGlassPressFeedback(
+                      icon: const BilNavigationFeedback(
                         child: Icon(Icons.refresh_rounded),
                       ),
                       label: Text(retryLabel),

@@ -1,5 +1,6 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -197,7 +198,7 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
       future: _post,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: BilFeatureWelcomeStatus());
         }
         if (snapshot.hasError) {
           return Center(
@@ -219,7 +220,7 @@ class _CommunityPostReceiptPageState extends State<CommunityPostReceiptPage> {
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     onPressed: _retry,
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.refresh_rounded),
                     ),
                     label: Text(

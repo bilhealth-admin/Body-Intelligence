@@ -1,5 +1,5 @@
 import 'bil_pearl_material.dart';
-import 'bil_glass_press_feedback.dart';
+import 'bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 class DashboardCard extends StatelessWidget {
@@ -34,7 +34,7 @@ class DashboardCard extends StatelessWidget {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: color.withValues(alpha: 0.15),
-                child: BilGlassPressFeedback(child: Icon(icon, color: color)),
+                child: BilNavigationFeedback(child: Icon(icon, color: color)),
               ),
               const Spacer(),
               Text(

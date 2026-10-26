@@ -1,4 +1,4 @@
-import 'bil_glass_press_feedback.dart';
+import 'bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/theme/bil_flagship_tokens.dart';
@@ -67,7 +67,7 @@ class BilMetricCard extends StatelessWidget {
           Row(
             children: [
               if (icon != null)
-                BilGlassPressFeedback(
+                BilNavigationFeedback(
                   child: Icon(icon, color: _accent, size: 22),
                 ),
               if (icon != null) const SizedBox(width: BilSpacing.sm),
@@ -77,7 +77,7 @@ class BilMetricCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
               ),
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(_trendIcon, color: _accent, size: 20),
               ),
             ],

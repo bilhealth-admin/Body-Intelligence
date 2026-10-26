@@ -1,4 +1,7 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
+import '../../shared/widgets/bil_crystal_arrow.dart';
+import '../../app/theme/bil_navigation_press_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -77,6 +80,29 @@ class _ReferenceSettingsHomePageState
         context,
       ),
       appBar: CupertinoNavigationBar(
+        automaticallyImplyLeading: false,
+        leading: SizedBox.square(
+          dimension: 44,
+          child: Material(
+            type: MaterialType.transparency,
+            child: IconButton.filled(
+              key: const Key('reference-settings-back'),
+              tooltip: CupertinoLocalizations.of(context).backButtonLabel,
+              style: BilNavigationPressStyle.crystalButton(context).copyWith(
+                minimumSize: const WidgetStatePropertyAll(Size(44, 44)),
+                padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+              ),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go('/settings');
+                }
+              },
+              icon: const BilCrystalArrow(extent: 40, child: BackButtonIcon()),
+            ),
+          ),
+        ),
         backgroundColor: CupertinoColors.systemGroupedBackground
             .resolveFrom(context)
             .withValues(alpha: .92),
@@ -152,7 +178,7 @@ class _ReferenceSettingsHomePageState
                   leadingSize: 24,
                   leadingToTitle: 12,
                   leading: _signingOut || !sessionReady
-                      ? const CupertinoActivityIndicator()
+                      ? const BilFeatureWelcomeStatus()
                       : Icon(
                           ownerId == null
                               ? CupertinoIcons.person_crop_circle
@@ -210,7 +236,9 @@ class _ReferenceSettingsHomePageState
                       ),
                       onPressed: () => context.push('/plans'),
                       child: Text(
-                        copy('Start 7-day free trial'),
+                        // This entry has no verified offer or eligibility.
+                        // Only the store-backed Plans flow may promise a trial.
+                        copy('Explore Premium'),
                         style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                     ),
@@ -313,7 +341,7 @@ class _SettingsRow extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ),
-      trailing: BilGlassPressFeedback(
+      trailing: BilNavigationFeedback(
         child: Icon(
           Directionality.of(context) == TextDirection.rtl
               ? CupertinoIcons.chevron_back

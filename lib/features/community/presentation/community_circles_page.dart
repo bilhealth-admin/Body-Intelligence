@@ -327,7 +327,7 @@ class _CommunityCirclesPageState extends State<CommunityCirclesPage> {
                     const SizedBox(height: 8),
                     ListTile(
                       key: Key('community-circle-leave-${circle.slug}'),
-                      leading: const BilGlassPressFeedback(
+                      leading: const BilNavigationFeedback(
                         child: Icon(Icons.logout_rounded),
                       ),
                       title: Text(
@@ -497,7 +497,7 @@ class _CircleMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Chip(
-    avatar: BilGlassPressFeedback(child: Icon(icon, size: 16)),
+    avatar: BilNavigationFeedback(child: Icon(icon, size: 16)),
     label: Text('$value $label'),
   );
 }

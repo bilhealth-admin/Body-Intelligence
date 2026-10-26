@@ -189,7 +189,7 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
       ),
       body: !visit.isCurrent
           ? const _CommunityProfileOwnerChangedBody()
-          : RefreshIndicator(
+          : BilRefreshIndicator(
               onRefresh: () => _refresh(visit),
               child: FutureBuilder<List<CommunityTopic>>(
                 key: ValueKey(visit),
@@ -197,7 +197,7 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done &&
                       !snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: BilFeatureWelcomeStatus());
                   }
                   if (snapshot.hasError) {
                     return ListView(
@@ -207,7 +207,7 @@ class _CommunityTopicsPageState extends State<CommunityTopicsPage> {
                         Center(
                           child: FilledButton.icon(
                             onPressed: () => _refresh(visit),
-                            icon: const BilGlassPressFeedback(
+                            icon: const BilNavigationFeedback(
                               child: Icon(Icons.refresh_rounded),
                             ),
                             label: Text(
@@ -629,13 +629,13 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done &&
                     _posts.isEmpty) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: BilFeatureWelcomeStatus());
                 }
                 if (snapshot.hasError && _posts.isEmpty) {
                   return Center(
                     child: FilledButton.icon(
                       onPressed: () => _refresh(visit),
-                      icon: const BilGlassPressFeedback(
+                      icon: const BilNavigationFeedback(
                         child: Icon(Icons.refresh_rounded),
                       ),
                       label: Text(
@@ -644,7 +644,7 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
                     ),
                   );
                 }
-                return RefreshIndicator(
+                return BilRefreshIndicator(
                   onRefresh: () => _refresh(visit),
                   child: CustomScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -720,11 +720,9 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
                                 icon: _loadingMore
                                     ? const SizedBox.square(
                                         dimension: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: BilFeatureWelcomeStatus(),
                                       )
-                                    : const BilGlassPressFeedback(
+                                    : const BilNavigationFeedback(
                                         child: Icon(Icons.expand_more_rounded),
                                       ),
                                 label: Text(
@@ -951,7 +949,7 @@ class _TopicMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Chip(
-    avatar: BilGlassPressFeedback(child: Icon(icon, size: 16)),
+    avatar: BilNavigationFeedback(child: Icon(icon, size: 16)),
     label: Text('$value $label'),
   );
 }

@@ -1,3 +1,4 @@
+import '../support/bil_waiting_indicators.dart';
 import 'dart:io';
 import 'dart:async';
 
@@ -291,7 +292,7 @@ void main() {
 
         expect(gateway.loadCalls, 1);
         expect(find.byKey(const Key('connected-health-source-card')), findsOne);
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
 
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump();

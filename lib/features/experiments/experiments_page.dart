@@ -1,6 +1,8 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,7 +32,7 @@ class ExperimentsPage extends ConsumerWidget {
     return Scaffold(
       appBar: SecondaryPageAppBar(title: Text(t('BIL experiments'))),
       body: experiments.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: BilFeatureWelcomeStatus()),
         error: (_, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -142,7 +144,7 @@ class ExperimentsPage extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 27,
-                  child: BilGlassPressFeedback(
+                  child: BilNavigationFeedback(
                     child: Icon(preset.icon, size: 27),
                   ),
                 ),
@@ -181,7 +183,7 @@ class ExperimentsPage extends ConsumerWidget {
                   width: double.infinity,
                   child: FilledButton.icon(
                     onPressed: () => Navigator.pop(sheetContext, true),
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.play_arrow_rounded),
                     ),
                     label: Text(t('Start my experiment')),
@@ -411,6 +413,11 @@ class ExperimentsPage extends ConsumerWidget {
                   ],
                   onChanged: (value) =>
                       setState(() => confidence = value ?? confidence),
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(

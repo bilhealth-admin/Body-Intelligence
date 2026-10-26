@@ -1,5 +1,7 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -440,9 +442,9 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
             return Column(
               children: [
                 SizedBox(
-                  height: 3,
+                  height: refreshing ? 24 : 3,
                   child: refreshing
-                      ? const LinearProgressIndicator()
+                      ? const BilFeatureWelcomeStatus()
                       : const SizedBox.shrink(),
                 ),
                 if (snapshot.hasError)
@@ -473,14 +475,14 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
                         onPressed: () => setState(() {
                           usage = _startUsageLoad();
                         }),
-                        icon: const BilGlassPressFeedback(
+                        icon: const BilNavigationFeedback(
                           child: Icon(Icons.refresh_rounded),
                         ),
                       ),
                     ),
                   ),
                 Expanded(
-                  child: RefreshIndicator(
+                  child: BilRefreshIndicator(
                     onRefresh: () async {
                       final fresh = _startUsageLoad();
                       setState(() {
@@ -543,7 +545,7 @@ class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
                   : () => setState(() {
                       usage = _startUsageLoad();
                     }),
-              icon: BilGlassPressFeedback(
+              icon: BilNavigationFeedback(
                 child: Icon(
                   authenticationRequired
                       ? Icons.login_rounded

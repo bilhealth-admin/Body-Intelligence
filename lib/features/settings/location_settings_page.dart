@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:ui';
 
 import 'package:country_picker/country_picker.dart';
@@ -376,7 +377,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
               context.canPop() ? context.pop() : context.go('/settings'),
         ),
         body: loading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: BilFeatureWelcomeStatus())
             : ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -429,7 +430,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                             ),
                             title: Text(l('country')),
                             subtitle: Text(countryName ?? l('chooseCountry')),
-                            trailing: const BilGlassPressFeedback(
+                            trailing: const BilNavigationFeedback(
                               child: Icon(Icons.expand_more_rounded),
                             ),
                             onTap: _pickCountry,
@@ -462,7 +463,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                             onTap: _pickTimezone,
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.schedule_rounded),
-                              suffixIcon: const BilGlassPressFeedback(
+                              suffixIcon: const BilNavigationFeedback(
                                 child: Icon(Icons.expand_more_rounded),
                               ),
                               labelText: l('timezone'),

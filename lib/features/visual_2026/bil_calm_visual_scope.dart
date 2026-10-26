@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../app/theme/bil_pearl_finish.dart';
 import '../../app/theme/bil_feedback_theme.dart';
 
@@ -110,6 +111,11 @@ class BilCalmVisualScope extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.transparent,
+        // The app bar is transparent over a page-owned pearl backdrop. Its
+        // alpha cannot determine the system glyph contrast for that surface.
+        systemOverlayStyle: dark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         foregroundColor: ink,
         centerTitle: true,
         titleTextStyle: typography.titleLarge,

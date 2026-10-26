@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -181,7 +182,7 @@ class _AccountEmailPageState extends State<AccountEmailPage> {
             child: _saving
                 ? const SizedBox.square(
                     dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: BilFeatureWelcomeStatus(),
                   )
                 : Text(
                     _text(

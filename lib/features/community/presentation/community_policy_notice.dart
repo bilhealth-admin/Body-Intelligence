@@ -1,5 +1,6 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/community_content_policy.dart';
@@ -147,10 +148,10 @@ class _NoticeCard extends StatelessWidget {
           if (loading)
             const SizedBox.square(
               dimension: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: BilFeatureWelcomeStatus(),
             )
           else
-            BilGlassPressFeedback(child: Icon(icon, size: 24)),
+            BilNavigationFeedback(child: Icon(icon, size: 24)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

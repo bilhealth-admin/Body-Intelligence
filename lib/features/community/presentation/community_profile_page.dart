@@ -1,5 +1,7 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -291,7 +293,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                 future: _loading,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: BilFeatureWelcomeStatus());
                   }
                   if (snapshot.hasError) {
                     return Center(
@@ -304,7 +306,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                             const SizedBox(height: 16),
                             FilledButton.icon(
                               onPressed: _retryLoad,
-                              icon: const BilGlassPressFeedback(
+                              icon: const BilNavigationFeedback(
                                 child: Icon(Icons.refresh_rounded),
                               ),
                               label: Text(copy.retry),
@@ -365,8 +367,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                                     child: _photoBusy
                                         ? const SizedBox.square(
                                             dimension: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
+                                            child: BilFeatureWelcomeStatus(
                                               color: Colors.white,
                                             ),
                                           )
@@ -466,6 +467,11 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                             : (value) => setState(
                                 () => _visibility = value ?? _visibility,
                               ),
+
+                        icon: const BilCrystalArrow(
+                          extent: 36,
+                          child: Icon(Icons.keyboard_arrow_down_rounded),
+                        ),
                       ),
                       SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
@@ -502,6 +508,11 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                             : (value) => setState(
                                 () => _messages = value ?? _messages,
                               ),
+
+                        icon: const BilCrystalArrow(
+                          extent: 36,
+                          child: Icon(Icons.keyboard_arrow_down_rounded),
+                        ),
                       ),
                       const Divider(height: 32),
                       Text(
@@ -613,9 +624,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                         icon: _saving
                             ? const SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: BilFeatureWelcomeStatus(),
                               )
                             : const Icon(Icons.save_outlined),
                         label: Text(copy.save),

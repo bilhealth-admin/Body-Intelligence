@@ -17,6 +17,277 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'completed history check has one acknowledgement and no stuck status',
+    (tester) async {
+      final catalog = _RecordingCatalog(const [_monthlyOffer]);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            catalog: catalog,
+            productIds: const {'premium.monthly'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final restore = find.text(BilStoreCopy.text('en', 'restore'));
+      await tester.ensureVisible(restore);
+      await tester.pumpAndSettle();
+      await tester.tap(restore);
+      await tester.pumpAndSettle();
+      final acknowledgement = find.text(
+        BilStoreCopy.text('en', 'restore_checked'),
+      );
+      expect(acknowledgement, findsOneWidget);
+      expect(
+        find.descendant(of: find.byType(SnackBar), matching: acknowledgement),
+        findsOneWidget,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'restore_checking')),
+        findsNothing,
+      );
+      expect(catalog.requested, isEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  for (final verifiedEarly in [false, true]) {
+    testWidgets(
+      'Restore keeps one truthful operation beyond UI deadline; verifiedEarly=$verifiedEarly',
+      (tester) async {
+        final store = _HeldRestoreStore();
+        final catalog = _HeldRestoreCatalog(store);
+        addTearDown(store.dispose);
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              home: BilStorePlansPage(
+                store: store,
+                catalog: catalog,
+                productIds: const {'premium.monthly'},
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+        final restore = find.text(BilStoreCopy.text('en', 'restore'));
+        await tester.ensureVisible(restore);
+        await tester.pumpAndSettle();
+        await tester.tap(restore);
+        await tester.pump();
+        if (verifiedEarly) {
+          store.report(VerifiedStoreState.verified, 'subscription_verified');
+          await tester.pump();
+        }
+        expect(
+          find.text(BilStoreCopy.text('en', 'restore_checking')),
+          findsWidgets,
+        );
+        expect(
+          find.text(BilStoreCopy.text('en', 'purchase_in_progress')),
+          findsNothing,
+        );
+        expect(
+          find.text(BilStoreCopy.text('en', 'purchase_verified')),
+          findsNothing,
+        );
+        await tester.pump(const Duration(seconds: 21));
+        await tester.pump();
+        expect(
+          find.text(BilStoreCopy.text('en', 'restore_timeout')),
+          findsNothing,
+        );
+        expect(
+          find.text(BilStoreCopy.text('en', 'restore_verified')),
+          findsNothing,
+        );
+        expect(catalog.restoreCalls, 1);
+        expect(catalog.requested, isEmpty);
+        expect(
+          tester
+              .widget<InkWell>(find.byKey(const Key('store-purchase-cta')))
+              .onTap,
+          isNull,
+        );
+        catalog.complete(verified: verifiedEarly);
+        await tester.pump();
+        await tester.pump();
+        final result = BilStoreCopy.text(
+          'en',
+          verifiedEarly
+              ? 'restore_verified'
+              : 'purchase_verification_unavailable',
+        );
+        expect(find.text(result), findsWidgets);
+        expect(
+          find.text(BilStoreCopy.text('en', 'restore_timeout')),
+          findsNothing,
+        );
+        expect(catalog.restoreCalls, 1);
+        expect(catalog.requested, isEmpty);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  for (final pending in [false, true]) {
+    testWidgets(
+      'Plans re-entry retains ${pending ? 'pending' : 'unknown'} feedback',
+      (tester) async {
+        final store = _PersistedAttemptStore();
+        final catalog = _RecordingCatalog(const [_monthlyOffer]);
+        addTearDown(store.dispose);
+        Widget page() => MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: catalog,
+            productIds: const {'premium.monthly'},
+          ),
+        );
+        await tester.pumpWidget(page());
+        await tester.pump();
+        store.report(
+          pending
+              ? VerifiedStoreState.purchasePending
+              : VerifiedStoreState.failed,
+          pending ? 'purchase_pending' : 'purchase_status_unknown',
+        );
+        await tester.pump();
+        final message = BilStoreCopy.text(
+          'en',
+          pending
+              ? 'purchase_awaiting_approval'
+              : 'purchase_verification_unavailable',
+        );
+        expect(find.text(message), findsOneWidget);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpWidget(page());
+        await tester.pump();
+        expect(
+          find.text(message),
+          findsOneWidget,
+          reason:
+              'route re-entry must not hide a retained unresolved operation',
+        );
+        expect(
+          tester
+              .widget<InkWell>(find.byKey(const Key('store-purchase-cta')))
+              .onTap,
+          isNull,
+        );
+        if (!pending) {
+          expect(
+            find.byKey(const Key('store-continue-verification')),
+            findsOneWidget,
+          );
+        }
+        expect(catalog.requested, isEmpty);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  testWidgets(
+    'fresh Free Plans never presents historical reconciliation as a new purchase failure',
+    (tester) async {
+      final store = _PersistedAttemptStore()
+        ..state = VerifiedStoreState.failed
+        ..messageCode = 'reconciliation_verification_failed';
+      addTearDown(store.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: _RecordingCatalog(const [_monthlyOffer]),
+            productIds: const {'premium.monthly'},
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_error')),
+        findsNothing,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_reconciliation_failed')),
+        findsNothing,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        findsNothing,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'Plans account replacement cannot inherit the retired attempt or conflict',
+    (tester) async {
+      final oldStore = _PersistedAttemptStore()
+        ..state = VerifiedStoreState.failed
+        ..messageCode = 'purchase_status_unknown';
+      final nextStore = _PersistedAttemptStore();
+      final scope = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-a'),
+        ],
+      );
+      addTearDown(() {
+        oldStore.dispose();
+        nextStore.dispose();
+      });
+      Widget page(VerifiedStorePurchaseService service) =>
+          UncontrolledProviderScope(
+            container: scope,
+            child: MaterialApp(
+              home: BilStorePlansPage(
+                store: service,
+                catalog: _RecordingCatalog(const [_monthlyOffer]),
+                productIds: const {'premium.monthly'},
+              ),
+            ),
+          );
+      await tester.pumpWidget(page(oldStore));
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      scope.updateOverrides([
+        verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-b'),
+      ]);
+      await tester.pumpWidget(page(nextStore));
+      await tester.pump();
+      oldStore.report(
+        VerifiedStoreState.failed,
+        'purchase_owned_by_another_account',
+      );
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        findsNothing,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_owned_by_another_account')),
+        findsNothing,
+      );
+      expect(
+        scope.read(purchaseOwnershipConflictStoreProvider).blocked,
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<InkWell>(find.byKey(const Key('store-purchase-cta')))
+            .onTap,
+        isNotNull,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      scope.dispose();
+      await tester.pump();
+    },
+  );
+
   test('extended AI plan summary includes every paid feature above Free', () {
     for (final locale in AppLocalizations.supportedLocales) {
       final code = locale.toLanguageTag();
@@ -864,5 +1135,58 @@ final class _InactiveRestoreCatalog extends _RecordingCatalog {
   @override
   Future<void> restorePurchases() async {
     store.reportFeedback(VerifiedStoreState.ready, 'no_restorable_purchases');
+  }
+}
+
+// Catalog loading deliberately emits no service notification. This reproduces
+// reopening a shared service whose initialize() preserves an unresolved result.
+final class _HeldRestoreStore extends _PersistedAttemptStore {
+  bool restoring = false;
+  @override
+  bool get isRestoring => restoring;
+  @override
+  bool get busy => restoring || super.busy;
+  @override
+  bool get canStartPurchase => !busy && super.canStartPurchase;
+}
+
+final class _HeldRestoreCatalog extends _RecordingCatalog {
+  _HeldRestoreCatalog(this.store) : super(const [_monthlyOffer]);
+  final _HeldRestoreStore store;
+  final _done = Completer<void>();
+  int restoreCalls = 0;
+  @override
+  Future<void> restorePurchases() {
+    restoreCalls++;
+    store.restoring = true;
+    store.report(VerifiedStoreState.purchasePending, 'restore_pending');
+    return _done.future;
+  }
+
+  void complete({required bool verified}) {
+    store.restoring = false;
+    store.report(
+      verified ? VerifiedStoreState.verified : VerifiedStoreState.failed,
+      verified ? 'subscription_verified' : 'purchase_status_unknown',
+    );
+    _done.complete();
+  }
+}
+
+final class _PersistedAttemptStore extends VerifiedStorePurchaseService {
+  _PersistedAttemptStore() {
+    state = VerifiedStoreState.ready;
+  }
+  @override
+  bool get busy => state == VerifiedStoreState.purchasePending;
+  @override
+  bool get canStartPurchase => state == VerifiedStoreState.ready;
+  void report(VerifiedStoreState value, String code) {
+    state = value;
+    messageCode = code;
+    if (code == 'purchase_owned_by_another_account') {
+      ownershipConflictProductId = StoreCatalogConfiguration.premiumMonthly;
+    }
+    notifyListeners();
   }
 }

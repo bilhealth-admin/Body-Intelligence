@@ -87,7 +87,7 @@ class _CommunityCircleDiscoveryHeader extends StatelessWidget {
           ),
         ),
         _actions(context),
-        if (searchStarting) const LinearProgressIndicator(),
+        if (searchStarting) const BilFeatureWelcomeStatus(),
         if (searchUnavailable && !serverSearch)
           Text(
             circleManagementText(
@@ -139,12 +139,12 @@ class _CommunityCircleDiscoveryHeader extends StatelessWidget {
               tooltip: label,
               constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
               onPressed: onPressed,
-              icon: BilGlassPressFeedback(child: Icon(icon)),
+              icon: BilNavigationFeedback(child: Icon(icon)),
             )
           : TextButton.icon(
               key: Key(key),
               onPressed: onPressed,
-              icon: BilGlassPressFeedback(child: Icon(icon)),
+              icon: BilNavigationFeedback(child: Icon(icon)),
               label: Text(label),
             );
       return Wrap(

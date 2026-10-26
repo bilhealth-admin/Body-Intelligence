@@ -325,7 +325,7 @@ class _MealGoalSummary extends StatelessWidget {
                       foregroundColor: theme.colorScheme.onSurface,
                       shape: const CircleBorder(),
                     ),
-                    icon: BilGlassPressFeedback(
+                    icon: BilNavigationFeedback(
                       always: true,
                       child: Container(
                         width: 34,

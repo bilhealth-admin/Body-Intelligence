@@ -1,4 +1,4 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -182,7 +182,7 @@ class _UnifiedMetricCardState extends State<_UnifiedMetricCard> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        BilGlassPressFeedback(
+                        BilNavigationFeedback(
                           child: Icon(item.icon, size: 16, color: item.accent),
                         ),
                         const SizedBox(width: 4),
@@ -241,7 +241,7 @@ class _UnifiedMetricCardState extends State<_UnifiedMetricCard> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          BilGlassPressFeedback(
+                          BilNavigationFeedback(
                             child: Icon(
                               icons[index],
                               size: 15,

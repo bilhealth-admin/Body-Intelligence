@@ -1,0 +1,189 @@
+{
+  "schema": "bil39.local.root-plus-affected-resolution.v1",
+  "utc": "2026-10-26T21:42:52.305Z",
+  "classification": "LOCAL_FULL_ROOT_DISCOVERY_PLUS_SOURCE_STABLE_AFFECTED_CORRECTIONS_NOT_SAME_SHA_CI_OR_NATIVE39",
+  "full_root": {
+    "status": "FAIL",
+    "passed": 11126,
+    "failed": [
+      "DashboardGrid remains below the shared architecture ceiling",
+      "first Coach message remains single-flight and single-rendered",
+      "starter prompts route through the real Coach query path",
+      "bottom microphone owns the live-call state machine",
+      "AI Coach stays pinned to the newest message",
+      "all tracked 25-locale surfaces close English fallback paths",
+      "confirmed visual defects stay closed in production source"
+    ],
+    "skipped": [],
+    "source_stable": true,
+    "fingerprint": "11d354d7c7895d3212973a88a3c1002b5f20065d8da93680c904f2d9c5786b5e",
+    "log_sha256": "ba9afb67f302c91bcbb2078bae91737a76bd61669a21ff75f0fd4a2062cca78c",
+    "seconds": 2861.45
+  },
+  "affected_corrections": {
+    "status": "PASS",
+    "passed": 1535,
+    "failed": [],
+    "skipped": [],
+    "source_stable": true,
+    "fingerprint": "dad8c3b4e9f5f48903db626fdc379e94b4133c1580457603be2c1ec77ffae8c6",
+    "log_sha256": "08dcbc372b12c723fe45f551176116d55e92b2350e66796dd6e5d7fab60b50a3",
+    "seconds": 373.61
+  },
+  "resolved_seven": [
+    {
+      "name": "DashboardGrid remains below the shared architecture ceiling",
+      "outcomes": [
+        {
+          "result": "success",
+          "hidden": false,
+          "skipped": false
+        }
+      ]
+    },
+    {
+      "name": "first Coach message remains single-flight and single-rendered",
+      "outcomes": [
+        {
+          "result": "success",
+          "hidden": false,
+          "skipped": false
+        }
+      ]
+    },
+    {
+      "name": "starter prompts route through the real Coach query path",
+      "outcomes": [
+        {
+          "result": "success",
+          "hidden": false,
+          "skipped": false
+        }
+      ]
+    },
+    {
+      "name": "bottom microphone owns the live-call state machine",
+      "outcomes": [
+        {
+          "result": "success",
+          "hidden": false,
+          "skipped": false
+        }
+      ]
+    },
+    {
+      "name": "AI Coach stays pinned to the newest message",
+      "outcomes": [
+        {
+          "result": "success",
+          "hidden": false,
+          "skipped": false
+        }
+      ]
+    },
+    {
+      "name": "all tracked 25-locale surfaces close English fallback paths",
+      "outcomes": [
+        {
+          "result": "success",
+          "hidden": false,
+          "skipped": false
+        }
+      ]
+    },
+    {
+      "name": "confirmed visual defects stay closed in production source",
+      "outcomes": [
+        {
+          "result": "success",
+          "hidden": false,
+          "skipped": false
+        }
+      ]
+    }
+  ],
+  "real_additional_regression": {
+    "name": "retained starter cannot replace a draft during a pending reply",
+    "red": {
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0,
+      "done": {
+        "success": false,
+        "type": "done",
+        "time": 21251
+      },
+      "cases": [
+        "retained starter cannot replace a draft during a pending reply"
+      ],
+      "log_sha256": "318f1e19032a3061aa6a58325123737101d112354c2b5decef14cd4f188015c0",
+      "expected_draft": "A second question I am still writing.",
+      "actual_before_fix": "Review my day from my saved BIL data and tell me the most useful next step."
+    },
+    "green": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "done": {
+        "success": true,
+        "type": "done",
+        "time": 12689
+      },
+      "cases": [
+        "retained starter cannot replace a draft during a pending reply"
+      ],
+      "log_sha256": "2f2af98b2cd142a2f3bac59e78e320bc727cf8b823ab7a569f79a061943fca75"
+    },
+    "fix": "Busy retained starters return before changing the composer; model instructions, backend, action permissions and purchase gates unchanged."
+  },
+  "product_delta_from_full_run": [
+    {
+      "path": "lib/app/localization/runtime_copy_closure_coach.dart",
+      "before": "53e4b80ae5ac79b95947900fe010fb5eb8dca4762b43d368fb448281842182d7",
+      "after": "3fc1c99de6d58846484559961578c6db433ec732d210430135630668bbf42da2"
+    },
+    {
+      "path": "lib/features/dashboard/widgets/dashboard_grid.dart",
+      "before": "559976e49c4f5955872352a0c8bc05abd76ea6c03448dccfa860a83f1eaf0b90",
+      "after": "e0be4106664b6b46aa1c78c27bc325ccd73b29a7291e90bd315703c9faa39533"
+    },
+    {
+      "path": "lib/features/intelligence_center/presentation/intelligence_action_flow.dart",
+      "before": "160142c64847f03c8352a15a97453e54f9bd5c4698395645f554c3f9654f4f7a",
+      "after": "27ac2a27621e8b446668ec87ab180f55cff919bcd786071612561e32e878d32e"
+    }
+  ],
+  "format_only_dashboard": {
+    "before_split_lines": 701,
+    "after_split_lines": 699,
+    "ast_source_equal": true,
+    "parse_errors": 0,
+    "architecture_threshold_relaxed": false
+  },
+  "contract_reconciliation": {
+    "assertions_deleted_to_hide_failure": false,
+    "reasons": [
+      "Restarting is included in the interaction guard",
+      "Opening introduction is explicitly retained after sending",
+      "Context future remains inside an owner-bound subscribed helper, with all subscriptions closed",
+      "Settings cannot promise an unverified store offer"
+    ],
+    "additional_live_page_regression_added": true
+  },
+  "localization": {
+    "new_action_label": "Start new conversation",
+    "authored_locales": 25,
+    "resolver_cases": 26
+  },
+  "analysis": {
+    "items": 9,
+    "issues": 0,
+    "log_sha256": "53d9274855efdeb65e06f0e3fc84432dc5321e0b980bce51db6f677884a8a727"
+  },
+  "limitations": [
+    "The full root v5 itself remains FAIL; 11126 and1535 must not be added as distinct cases",
+    "Final exact-commit GitHub full/native QA pending",
+    "No new signed39 or TestFlight claim",
+    "Physical38 evidence cannot certify39"
+  ]
+}

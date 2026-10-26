@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,7 +57,7 @@ class _CloudRestoreScopeControlsState
         if (_saving)
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
-            child: LinearProgressIndicator(),
+            child: BilFeatureWelcomeStatus(),
           ),
         if (_failed)
           Padding(

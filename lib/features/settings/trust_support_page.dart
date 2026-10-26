@@ -1,5 +1,5 @@
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -196,7 +196,7 @@ class TrustSupportPage extends StatelessWidget {
                   'راجع الأذونات وحالة الاتصال والقراءات المستوردة.',
                 ),
               ),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/connected-health'),
@@ -217,7 +217,7 @@ class TrustSupportPage extends StatelessWidget {
                   'أنشئ تصديرًا محليًا لنطاق زمني تختاره.',
                 ),
               ),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/settings/local-export'),
@@ -240,7 +240,7 @@ class TrustSupportPage extends StatelessWidget {
                   'افتح مسار طلب الحذف الموثق. تبقى السجلات المحلية منفصلة.',
                 ),
               ),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/help/delete-account'),
@@ -255,7 +255,7 @@ class TrustSupportPage extends StatelessWidget {
                 shape: BoxShape.rectangle,
               ),
               title: Text(tr('Privacy Policy', 'سياسة الخصوصية')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/legal/privacy'),
@@ -270,7 +270,7 @@ class TrustSupportPage extends StatelessWidget {
                 shape: BoxShape.rectangle,
               ),
               title: Text(tr('Terms of Service', 'شروط الخدمة')),
-              trailing: const BilGlassPressFeedback(
+              trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
               ),
               onTap: () => context.push('/legal/terms'),

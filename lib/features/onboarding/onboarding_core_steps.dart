@@ -262,7 +262,7 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
             suffixIcon: IconButton(
               tooltip: t('Country or region'),
               onPressed: _pickCountry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.arrow_drop_down_rounded),
               ),
             ),
@@ -315,7 +315,7 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
     final latest = BilAdultEligibility.latestEligibleBirthDate(on: now);
-    final selected = await showDatePicker(
+    final selected = await showBilCrystalDatePicker(
       context: context,
       initialDate:
           _draft.birthDate ??

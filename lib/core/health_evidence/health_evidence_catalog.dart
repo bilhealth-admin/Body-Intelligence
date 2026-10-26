@@ -21,6 +21,9 @@ final class HealthEvidenceSource {
     required this.shortDescription,
     required this.methodologyNote,
     required this.lastReviewed,
+    this.arabicTitle,
+    this.arabicShortDescription,
+    this.arabicMethodologyNote,
   });
 
   final String id;
@@ -31,6 +34,9 @@ final class HealthEvidenceSource {
   final String shortDescription;
   final String methodologyNote;
   final DateTime lastReviewed;
+  final String? arabicTitle;
+  final String? arabicShortDescription;
+  final String? arabicMethodologyNote;
 }
 
 abstract final class HealthEvidenceIds {
@@ -65,16 +71,19 @@ abstract final class HealthEvidenceCatalog {
   static final List<HealthEvidenceSource> all = List.unmodifiable([
     HealthEvidenceSource(
       id: HealthEvidenceIds.fdaDailyValues,
-      title: 'Daily Values / القيم اليومية المرجعية',
+      title: 'Daily Values',
+      arabicTitle: 'القيم اليومية المرجعية',
       organization: 'FDA',
       url: Uri.parse(
         'https://www.fda.gov/food/nutrition-facts-label/daily-value-nutrition-and-supplement-facts-labels',
       ),
       category: HealthEvidenceCategory.nutrition,
-      shortDescription:
-          'General label references, not personal RDA/AI. مراجع عامة للملصقات، وليست احتياجًا شخصيًا.',
+      shortDescription: 'General label references, not personal RDA/AI.',
+      arabicShortDescription: 'مراجع عامة للملصقات، وليست احتياجًا شخصيًا.',
       methodologyNote:
-          'Editable references, not a supplement dose or treatment. مراجع قابلة للتعديل، وليست جرعات مكملات أو وصفة علاجية.',
+          'Editable references, not a supplement dose or treatment.',
+      arabicMethodologyNote:
+          'مراجع قابلة للتعديل، وليست جرعات مكملات أو وصفة علاجية.',
       lastReviewed: DateTime.utc(2026, 10, 11),
     ),
     _source(

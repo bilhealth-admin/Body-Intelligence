@@ -41,8 +41,8 @@ class PromotionReceiptTest(unittest.TestCase):
                     result = subprocess.run([bash,'-c',script],cwd=ROOT,env=env,capture_output=True,text=True)
                     self.assertEqual(accepted,result.returncode==0,result.stderr)
 
-    def exercise(self, ipa_build='38'):
-        text = (ROOT / '.github/workflows/bil_ios_upload_existing_testflight.yml').read_text(encoding='utf8')
+    def exercise(self, ipa_build='38', *, workflow='bil_ios_upload_existing_testflight.yml', receipt_build=38):
+        text = (ROOT / '.github/workflows' / workflow).read_text(encoding='utf8')
         blocks = re.findall(r"python3 - <<'PY'\n(.*?)\n          PY", text, re.S)
         matched = [b for b in blocks if "identity={'source_sha'" in b]
         self.assertEqual(1, len(matched))
@@ -58,15 +58,19 @@ class PromotionReceiptTest(unittest.TestCase):
                 archive.writestr('Payload/Runner.app/Info.plist',plistlib.dumps(info))
             digest = hashlib.sha256(ipa.read_bytes()).hexdigest()
             receipt = {'status':'SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED','source_sha':HEAD,
-                       'build':38,'ipa_sha256':digest,'ipa_bytes':ipa.stat().st_size}
+                       'build':receipt_build,'ipa_sha256':digest,'ipa_bytes':ipa.stat().st_size,
+                       'native_crypto_runtime_status':'PASS'}
             (delivery/'BIL-ios-build-only-receipt.json').write_text(json.dumps(receipt))
             (delivery/'BIL-source-head.txt').write_text(HEAD)
             (delivery/'BIL-ios-codesign-verify.txt').write_text('SIGNED_IPA_CODESIGN_GATE=PASS')
             (delivery/'BIL-ios-crypto-scan.txt').write_text('SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0')
+            (delivery/'BIL-ios-native-crypto-gate.txt').write_text('NATIVE_CRYPTO_RUNTIME_GATE=PASS')
             (delivery/'BIL-ios-final-artifact-inventory.json').write_text(json.dumps({
-                'status':'FINAL_ARTIFACT_IDENTITY_PASS','build':'38',
+                'status':'FINAL_ARTIFACT_IDENTITY_PASS','build':str(receipt_build),
                 'package':'com.bilhealth.bodyintelligencelog','version':'1.0.0'}))
-            env = dict(os.environ, BIL_IPA_SHA256=digest, BIL_TESTED_SOURCE=HEAD, GITHUB_ENV=str(folder/'env'))
+            env = dict(os.environ, BIL_IPA_SHA256=digest, BIL_TESTED_SOURCE=HEAD,
+                       BIL_VALIDATION_MODE='all_exact_source_ci',
+                       BIL_INTERNAL_TESTFLIGHT='false', GITHUB_ENV=str(folder/'env'))
             result = subprocess.run([sys.executable,'-c',code],cwd=folder,env=env,capture_output=True,text=True)
             identity = evidence/'identity.json'
             return result, json.loads(identity.read_text()) if identity.exists() else None

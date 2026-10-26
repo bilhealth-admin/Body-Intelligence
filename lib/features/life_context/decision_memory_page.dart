@@ -1,5 +1,7 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -79,7 +81,7 @@ class DecisionMemoryPage extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           explicit.when(
-            loading: () => const LinearProgressIndicator(),
+            loading: () => const BilFeatureWelcomeStatus(),
             error: (_, _) => Text(t('Could not load Coach memories.')),
             data: (rows) => rows.isEmpty
                 ? BilPearlMaterialCard(
@@ -97,7 +99,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                         .map(
                           (row) => BilPearlMaterialCard(
                             child: ListTile(
-                              leading: BilGlassPressFeedback(
+                              leading: BilNavigationFeedback(
                                 child: Icon(_memoryKindIcon(row['kind'])),
                               ),
                               title: Text(row['text']?.toString() ?? ''),
@@ -144,7 +146,7 @@ class DecisionMemoryPage extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           memories.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: BilFeatureWelcomeStatus()),
             error: (error, _) =>
                 Text(t('Could not load decision memories. Try again.')),
             data: (rows) {
@@ -186,6 +188,8 @@ class DecisionMemoryPage extends ConsumerWidget {
                           16,
                           16,
                         ),
+
+                        trailing: const BilCrystalExpansionIndicator(),
                         children: [
                           Align(
                             alignment: AlignmentDirectional.centerStart,

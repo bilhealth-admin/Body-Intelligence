@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/features/community/activity_rewards/community_post_receipt_page.dart';
@@ -134,7 +135,7 @@ void main() {
         find.text('This post could not be loaded for the current account.'),
         findsNothing,
       );
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(store.reads, [rewardsOwnerA, rewardsOwnerA]);
       expect(store.mutations, isEmpty);
       expect(auth.requests, isEmpty);
@@ -152,7 +153,7 @@ void main() {
       store.pending = pending;
       await tester.pumpWidget(app());
       await tester.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
       await auth.roundTrip();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 50));
@@ -168,7 +169,7 @@ void main() {
         find.text('Fresh verified receipt for $rewardsOwnerB'),
         findsNothing,
       );
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(store.reads.length, greaterThanOrEqualTo(3));
       expect(store.mutations, isEmpty);
       expect(auth.requests, isEmpty);

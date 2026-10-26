@@ -21,7 +21,7 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
       icon: _savingDraft
           ? const SizedBox.square(
               dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: BilFeatureWelcomeStatus(),
             )
           : const Icon(Icons.save_outlined, size: 19),
       label: Text(
@@ -60,11 +60,8 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
         icon: SizedBox.square(
           dimension: 20,
           child: _publishing
-              ? const CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                )
-              : const BilGlassPressFeedback(
+              ? const BilFeatureWelcomeStatus(color: Colors.white)
+              : const BilNavigationFeedback(
                   child: Icon(Icons.arrow_upward_rounded, size: 20),
                 ),
         ),
@@ -110,9 +107,9 @@ extension _CommunityPostComposerToolbar on _CommunityPostComposerPageState {
               // Reserve progress height without leaving an indeterminate
               // animation ticking invisibly after photos are selected.
               SizedBox(
-                height: 4,
+                height: _publishing ? 24 : 4,
                 child: _publishing
-                    ? const LinearProgressIndicator(
+                    ? const BilFeatureWelcomeStatus(
                         key: Key('community-post-upload-progress'),
                       )
                     : const SizedBox.shrink(),

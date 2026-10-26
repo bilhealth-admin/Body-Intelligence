@@ -12,6 +12,9 @@ bool isNativeCaptureName(String name) {
   for (final pattern in [
     r'^(recipes|videos|sleep|diet|coach|community)-(ar|en)-light-(normal|reduced)-(welcome|released)$',
     r'^coach-(reveal|history)-(ar|en)-light-(normal|reduced)-(first|reading|mid|end)$',
+    r'^bil39-plan-(home|gym)-(ar|en)-(dark|light)-(1|2)x-(warmup|session)$',
+    r'^bil39-community-(ar|en)-(dark|light)-(1|2)x-(reply|sent)$',
+    r'^bil39-store-(ar|en)-(dark|light)-2x-pending$',
   ]) {
     final match = RegExp(pattern).firstMatch(name);
     if (match != null && match.start == 0 && match.end == name.length) {

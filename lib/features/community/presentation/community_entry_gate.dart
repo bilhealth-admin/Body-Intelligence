@@ -1,4 +1,4 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -369,12 +369,12 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
       ),
       body: SafeArea(
         child: _checking
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: BilFeatureWelcomeStatus())
             : _owner == null
             ? Center(
                 child: FilledButton.icon(
                   onPressed: () => context.push('/login'),
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.login_rounded),
                   ),
                   label: Text(
@@ -408,7 +408,7 @@ class _CommunityEntryGateState extends ConsumerState<CommunityEntryGate> {
                       FilledButton.icon(
                         key: const Key('community-entry-retry'),
                         onPressed: _check,
-                        icon: const BilGlassPressFeedback(
+                        icon: const BilNavigationFeedback(
                           child: Icon(Icons.refresh_rounded),
                         ),
                         label: Text(

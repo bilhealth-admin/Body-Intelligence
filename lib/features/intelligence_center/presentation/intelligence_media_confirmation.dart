@@ -122,6 +122,13 @@ extension _CoachMediaConfirmation on _IntelligenceCenterPageState {
                                               );
                                             }
                                           },
+
+                                    icon: const BilCrystalArrow(
+                                      extent: 36,
+                                      child: Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                      ),
+                                    ),
                                   ),
                                   TextButton(
                                     key: const Key('bil02-media-day'),
@@ -135,7 +142,7 @@ extension _CoachMediaConfirmation on _IntelligenceCenterPageState {
                                               return;
                                             }
                                             final changed =
-                                                await showDatePicker(
+                                                await showBilCrystalDatePicker(
                                                   context: dialogContext,
                                                   initialDate: day,
                                                   firstDate: DateTime(2000),

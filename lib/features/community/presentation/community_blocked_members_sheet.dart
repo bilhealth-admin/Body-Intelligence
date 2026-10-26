@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -175,7 +176,7 @@ class _CommunityBlockedMembersSheetState
                 future: _members,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState != ConnectionState.done) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: BilFeatureWelcomeStatus());
                   }
                   if (snapshot.hasError || !snapshot.hasData) {
                     return TextButton.icon(

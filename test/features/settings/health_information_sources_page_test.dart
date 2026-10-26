@@ -6,6 +6,67 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      'FDA source uses $language consistently in text and semantics',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        try {
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: Locale(language),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              home: const HealthInformationSourcesPage(
+                sourceIds: [HealthEvidenceIds.fdaDailyValues],
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final card = find.byKey(
+            const ValueKey('health-source-${HealthEvidenceIds.fdaDailyValues}'),
+          );
+          await tester.scrollUntilVisible(
+            card,
+            150,
+            scrollable: find.byType(Scrollable),
+          );
+          final text = tester
+              .widgetList<Text>(
+                find.descendant(of: card, matching: find.byType(Text)),
+              )
+              .map((widget) => widget.data ?? '')
+              .join('\n');
+          final label = tester.getSemantics(card).label;
+          if (language == 'en') {
+            expect(text, contains('Daily Values'));
+            expect(
+              text,
+              contains('General label references, not personal RDA/AI.'),
+            );
+            expect(RegExp(r'[\u0600-\u06ff]').hasMatch(text + label), isFalse);
+            expect(label, contains('Open original source: Daily Values'));
+          } else {
+            expect(text, contains('القيم اليومية المرجعية'));
+            expect(
+              text,
+              contains('مراجع عامة للملصقات، وليست احتياجًا شخصيًا.'),
+            );
+            expect(
+              label,
+              contains('فتح المصدر الأصلي: القيم اليومية المرجعية'),
+            );
+          }
+          expect(tester.takeException(), isNull);
+        } finally {
+          semantics.dispose();
+        }
+      },
+    );
+  }
   testWidgets('featured citation stays readable and accessible at large text', (
     tester,
   ) async {

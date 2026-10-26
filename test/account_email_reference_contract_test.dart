@@ -1,3 +1,4 @@
+import 'support/bil_waiting_indicators.dart';
 import 'dart:io';
 import 'dart:async';
 
@@ -56,7 +57,7 @@ void main() {
           .enabled,
       isFalse,
     );
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
     pending.complete();
     await tester.pump();
     expect(

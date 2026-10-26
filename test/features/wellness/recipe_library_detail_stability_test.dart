@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
@@ -96,10 +97,7 @@ void main() {
           same(future),
         );
         expect(
-          find.descendant(
-            of: builder,
-            matching: find.byType(CircularProgressIndicator),
-          ),
+          find.descendant(of: builder, matching: bilWaitingIndicators()),
           findsNothing,
         );
         expect(scroll.position.pixels, 100);
@@ -111,10 +109,7 @@ void main() {
           same(future),
         );
         expect(
-          find.descendant(
-            of: builder,
-            matching: find.byType(CircularProgressIndicator),
-          ),
+          find.descendant(of: builder, matching: bilWaitingIndicators()),
           findsNothing,
         );
         await tester.pumpWidget(const SizedBox.shrink());

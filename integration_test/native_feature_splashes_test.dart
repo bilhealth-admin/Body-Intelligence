@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_message.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_native_markdown.dart';
 import 'package:body_intelligence_log/shared/widgets/chat_history_viewport.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -11,16 +12,28 @@ import 'dart:io';
 import 'package:body_intelligence_log/app/environment/app_environment.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/app_router.dart';
-import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
+import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan.dart';
+import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan_engine.dart';
+import 'package:body_intelligence_log/features/smart_plan/presentation/bil_smart_plan_page.dart';
+import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_catalog.dart';
+import 'package:body_intelligence_log/features/wellness/domain/wellness_content_pack.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_discovery_catalog_repository.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_discovery_localizer.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_release_catalog_repository.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_entry_gate.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_welcome.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_people_page.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
+import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
 import 'package:body_intelligence_log/features/intelligence_center/app_commands/coach_health_brief_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
@@ -33,6 +46,7 @@ import 'package:body_intelligence_log/shared/widgets/bil_feature_entry_splash.da
 import 'package:drift/native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,6 +63,8 @@ part 'native_feature_capture.dart';
 part 'native_feature_splashes_coach.dart';
 part 'native_feature_splashes_observer.dart';
 part 'native_feature_splashes_warmup.dart';
+part 'native_feature_splashes_smart_plan.dart';
+part 'native_feature_splashes_conversations.dart';
 
 // Standalone QA entrypoint. Does not call lib/main.dart or initialize cloud,
 // Firebase, purchases, ads, production Auth, First Use, or startup animations.
@@ -60,6 +76,9 @@ const _androidQaEnabled = bool.fromEnvironment('BIL_QA_ANDROID_EMULATOR');
 const _iosQaEnabled = bool.fromEnvironment('BIL_QA_IOS_SIMULATOR');
 const _sceneFilter = String.fromEnvironment('BIL_QA_NATIVE_SCENE');
 const _coachOnly = bool.fromEnvironment('BIL_QA_NATIVE_COACH_ONLY');
+const _conversationOnly = bool.fromEnvironment(
+  'BIL_QA_NATIVE_CONVERSATIONS_ONLY',
+);
 const _kinds = ['recipes', 'videos', 'sleep', 'diet', 'coach', 'community'];
 const _scenes = [
   (language: 'ar', reduced: false, scale: 1.0),
@@ -86,11 +105,20 @@ class _NativeDartNetworkDeny extends HttpOverrides {
 final _dartNetworkDeny = _NativeDartNetworkDeny();
 
 Future<void> _nativeSettle(WidgetTester tester) async {
-  await tester.pumpAndSettle(
-    const Duration(milliseconds: 20),
-    EnginePhase.sendSemanticsUpdate,
-    const Duration(seconds: 3),
-  );
+  try {
+    await tester.pumpAndSettle(
+      const Duration(milliseconds: 20),
+      EnginePhase.sendSemanticsUpdate,
+      const Duration(seconds: 3),
+    );
+  } on FlutterError {
+    debugPrint(
+      'BIL_NATIVE_IDLE_FAILURE callbacks=${tester.binding.transientCallbackCount} '
+      'scheduled=${tester.binding.hasScheduledFrame} phase=${tester.binding.schedulerPhase}',
+    );
+    debugDumpApp();
+    rethrow;
+  }
 }
 
 class _NoCloudTransport extends http.BaseClient {
@@ -268,7 +296,17 @@ void main() {
   setUp(() => _dartNetworkDeny.blockedClientCreations = 0);
   tearDownAll(() => HttpOverrides.global = priorHttpOverrides);
   binding.reportData = {
-    'native_scope': _coachOnly ? 'coach-only' : 'all',
+    'native_scope': _coachOnly
+        ? 'coach-only'
+        : _conversationOnly
+        ? 'conversations-only'
+        : 'all',
+    'smart_plan_native_expected':
+        !_coachOnly && !_conversationOnly && _sceneFilter.isEmpty ? 16 : 0,
+    'community_conversations_expected': !_coachOnly && _sceneFilter.isEmpty
+        ? 8
+        : 0,
+    'store_activity_expected': !_coachOnly && _sceneFilter.isEmpty ? 4 : 0,
     'native_scenes': [
       for (final scene in _scenes)
         if (_sceneFilter.isEmpty ||
@@ -278,7 +316,7 @@ void main() {
     ],
   };
   for (final scene in _scenes) {
-    if (_coachOnly) break;
+    if (_coachOnly || _conversationOnly) break;
     final name =
         '${scene.language}-light-${scene.reduced ? 'reduced' : 'normal'}';
     if (_sceneFilter.isNotEmpty && name != _sceneFilter) continue;
@@ -698,6 +736,8 @@ void main() {
     );
   }
   _registerNativeCoachReveal(binding);
+  _registerNativeSmartPlanSessions(binding);
+  _registerNativeConversationsAndStoreActivity(binding);
 }
 
 // These eight additional cases mount the real production page and renderer.

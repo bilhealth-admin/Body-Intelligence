@@ -24,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/coach_conversation_entry.dart';
 
 Widget _app(
   AppDatabase database, {
@@ -124,6 +125,7 @@ void main() {
     );
     final db = await database(tester);
     await tester.pumpWidget(_app(db));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     final fieldFinder = find.byKey(const Key('ai-coach-question-field'));
@@ -152,6 +154,7 @@ void main() {
       final db = await database(tester);
       final gateway = _BlockingGateway();
       await tester.pumpWidget(_app(db, gateway: gateway));
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       final field = find.byKey(const Key('ai-coach-question-field'));
@@ -206,6 +209,7 @@ void main() {
       final delayed = _DelayedConversationPreferences(db);
 
       await tester.pumpWidget(_app(db, preferences: delayed));
+      await openCoachConversationFromOverview(tester);
       await tester.pump();
       expect(delayed.conversationReadStarted, isTrue);
       await tester.pump(const Duration(milliseconds: 2200));
@@ -269,6 +273,7 @@ void main() {
     final repository = PreferencesRepository(db);
     final delayedWeights = _DelayedWeightRepository(db);
     await tester.pumpWidget(_app(db, weightRepository: delayedWeights));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     delayedWeights.blockNextRead();
@@ -306,6 +311,7 @@ void main() {
     await tester.pumpWidget(
       _app(db, viewInsets: const EdgeInsets.only(bottom: 300)),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     final fieldFinder = find.byKey(const Key('ai-coach-question-field'));
@@ -360,6 +366,7 @@ void main() {
       ).set('intelligenceConversationV1', jsonEncode(stored));
 
       await tester.pumpWidget(_app(db, locale: const Locale('ar')));
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       expect(find.textContaining('BIL did not expose'), findsNothing);
@@ -376,6 +383,7 @@ void main() {
     final db = await database(tester);
     final repository = PreferencesRepository(db);
     await tester.pumpWidget(_app(db));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
     expect(
       find.textContaining('ready for your next useful decision'),
@@ -403,6 +411,7 @@ void main() {
     );
 
     await tester.pumpWidget(_app(db));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     expect(
@@ -417,6 +426,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
     await tester.pumpWidget(_app(db));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     expect(
@@ -467,6 +477,7 @@ void main() {
       expect(imported, hasLength(1));
 
       await tester.pumpWidget(_app(db));
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       await revealOlderMessage(tester, find.text('What is my weight trend?'));
@@ -505,6 +516,7 @@ void main() {
     );
 
     await tester.pumpWidget(_app(db));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     expect(
@@ -550,6 +562,7 @@ void main() {
     );
 
     await tester.pumpWidget(_app(db));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     await revealOlderMessage(tester, find.text('assalamualaikum'));
@@ -584,6 +597,7 @@ void main() {
     final db = await database(tester);
 
     await tester.pumpWidget(_app(db, locale: const Locale('ar')));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     expect(find.byType(TabBar), findsNothing);
@@ -614,6 +628,7 @@ void main() {
       );
 
       await tester.pumpWidget(_app(db));
+      await openCoachConversationFromOverview(tester);
       await tester.pumpAndSettle();
 
       final field = find.byKey(const Key('ai-coach-question-field'));
@@ -686,6 +701,7 @@ void main() {
         reportService: reportService,
       ),
     );
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
 
     final report = find.byKey(const Key('ai-coach-report-reportable-answer'));

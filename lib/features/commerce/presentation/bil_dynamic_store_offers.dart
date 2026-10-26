@@ -1,4 +1,6 @@
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -181,7 +183,8 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
     final selectedOwnershipBlocked =
         selectedOffer != null &&
         widget.blockedPurchaseKinds.contains(selectedOffer.kind);
-    final controlsLocked = widget.loading || widget.purchaseInProgress;
+    final controlsLocked =
+        widget.loading || widget.purchaseInProgress || widget.restoreInProgress;
     return Stack(
       children: [
         Positioned.fill(
@@ -307,14 +310,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        icon: widget.restoreInProgress
-                            ? const SizedBox.square(
-                                dimension: 19,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.2,
-                                ),
-                              )
-                            : const Icon(Icons.restore_rounded, size: 19),
+                        icon: const Icon(Icons.restore_rounded, size: 19),
                         label: Text(
                           _copy(
                             widget.restoreInProgress
@@ -327,7 +323,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                         TextButton.icon(
                           key: const Key('store-continue-verification'),
                           onPressed: widget.onContinueVerification,
-                          icon: const BilGlassPressFeedback(
+                          icon: const BilNavigationFeedback(
                             child: Icon(Icons.refresh_rounded),
                           ),
                           label: Text(widget.continueVerificationLabel!),
@@ -381,7 +377,16 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                   !selectedOwnershipBlocked,
               statusMessage: selectedOwnershipBlocked
                   ? widget.blockedPurchaseMessage
-                  : widget.purchaseStatusMessage,
+                  : widget.purchaseStatusMessage ??
+                        (controlsLocked
+                            ? _copy(
+                                widget.restoreInProgress
+                                    ? 'restore_checking'
+                                    : widget.loading
+                                    ? 'store_loading'
+                                    : 'purchase_in_progress',
+                              )
+                            : null),
               statusIsError: selectedOwnershipBlocked
                   ? true
                   : widget.purchaseStatusIsError,

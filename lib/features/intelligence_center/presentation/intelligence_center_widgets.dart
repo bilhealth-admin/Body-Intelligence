@@ -137,7 +137,7 @@ class _InlineCoachDecision extends StatelessWidget {
                     minimumSize: const Size(0, 40),
                   ),
                   iconAlignment: IconAlignment.end,
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.arrow_forward_rounded, size: 17),
                   ),
                   label: Text(brief.actionLabel),
@@ -398,7 +398,7 @@ class _CoachStarterPrompts extends StatelessWidget {
                 children: [
                   for (final item in prompts)
                     ActionChip(
-                      avatar: BilGlassPressFeedback(
+                      avatar: BilNavigationFeedback(
                         child: Icon(item.icon, size: 17),
                       ),
                       label: Text(item.label),

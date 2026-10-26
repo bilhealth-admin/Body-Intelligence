@@ -1,0 +1,67 @@
+{
+  "classification": "LOCAL_WIDGET_ROUTE_AND_VISUAL_EVIDENCE_NOT_NATIVE39",
+  "utc": "2026-10-26T20:35:54.052Z",
+  "status": "PASS",
+  "behavior": "Explicit existing BIL crystal back control in Cupertino Settings; pushed route pops to More; direct entry goes to /settings; localized direction and accessible 44-point control.",
+  "source_hashes": {
+    "lib/features/settings/reference_settings_home_page.dart": "6b7a69081f30b1e3e589b408d049287a2b8d3835542c026ea8bb87d97d858a60",
+    "test/features/settings/reference_settings_back_navigation_test.dart": "04c30f02520ba4b8c8d026cc787126f3d68929d59e4f19288584bde59ce5d7bb"
+  },
+  "red": {
+    "file": "logs/settings-native-back-red-v1.jsonl",
+    "sha256": "8e9ed438271b44849989b51c2bbcd402a4c91718a63635655b5ffe81d2afc3f8"
+  },
+  "green": {
+    "file": "logs/settings-native-back-green-v4.jsonl",
+    "sha256": "e12b248b54e7a139383f97e02da960f23ee37fc7851cef9f477bafbb1a1327b1",
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "done": {
+      "success": true,
+      "type": "done",
+      "time": 13114
+    },
+    "cases": [
+      "(setUpAll)",
+      "Settings back returns to More: en pushed dark",
+      "Settings back returns to More: en direct dark",
+      "Settings back returns to More: en pushed light",
+      "Settings back returns to More: en direct light",
+      "Settings back returns to More: ar pushed dark",
+      "Settings back returns to More: ar direct dark",
+      "Settings back returns to More: ar pushed light",
+      "Settings back returns to More: ar direct light",
+      "(tearDownAll)"
+    ]
+  },
+  "analyze": {
+    "exit_code": 0,
+    "issues": 0,
+    "items": 2,
+    "seconds": 6.8
+  },
+  "visual": {
+    "reviewed": [
+      "en_light_pushed",
+      "en_dark_direct",
+      "ar_light_pushed",
+      "ar_dark_direct"
+    ],
+    "font_note": "Windows captures explicitly use registered readable evidence fonts. Native iOS system font parity is not certified."
+  },
+  "screenshots": {
+    "bil39-settings-native-back-v4-settings_back_ar_dark_direct.png": "fab548e41cc3fa9b1db73c9ff28bd61c099620167b5b745227f02d95d8800b66",
+    "bil39-settings-native-back-v4-settings_back_ar_dark_pushed.png": "fab548e41cc3fa9b1db73c9ff28bd61c099620167b5b745227f02d95d8800b66",
+    "bil39-settings-native-back-v4-settings_back_ar_light_direct.png": "9c1d73b512573b3c813eac14c5b7b1b254dd3c397be1c3a2435c5d6468157cf9",
+    "bil39-settings-native-back-v4-settings_back_ar_light_pushed.png": "9c1d73b512573b3c813eac14c5b7b1b254dd3c397be1c3a2435c5d6468157cf9",
+    "bil39-settings-native-back-v4-settings_back_en_dark_direct.png": "d796a5fa83a912e1c56f02b99627ec418c4033654c2d4fedbaf169242de2f00d",
+    "bil39-settings-native-back-v4-settings_back_en_dark_pushed.png": "d796a5fa83a912e1c56f02b99627ec418c4033654c2d4fedbaf169242de2f00d",
+    "bil39-settings-native-back-v4-settings_back_en_light_direct.png": "5225fdf995ecb4b982a7b4b00f347a62586b9b366f53c3b388a924aace9e3090",
+    "bil39-settings-native-back-v4-settings_back_en_light_pushed.png": "5225fdf995ecb4b982a7b4b00f347a62586b9b366f53c3b388a924aace9e3090"
+  },
+  "limitations": [
+    "Physical/native39 execution pending",
+    "No App Store or production settings changed"
+  ]
+}

@@ -24,7 +24,7 @@ class _Message extends StatelessWidget {
               FilledButton.tonalIcon(
                 key: const Key('weekly-report-retry'),
                 onPressed: onRetry,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 // A production MaterialApp always installs the BIL delegate,

@@ -1,0 +1,190 @@
+{
+  "recorded_at": "2026-10-26T15:15:33.331Z",
+  "tested_artifact": "physical iPhone TestFlight 1.0.0 (38)",
+  "owner_fingerprint": "e3216e042776847153785c3e7521651e",
+  "cases": {
+    "safety_missing_experience_or_confirmation": "disabled observed",
+    "injury_gate": "passed",
+    "medical_review_gate": "passed",
+    "three_month_combined_draft": "passed",
+    "activation_confirmation": "passed",
+    "rest_day": "passed",
+    "warmup": "passed",
+    "video_play_and_replay": "passed 00:10 end and 00:02 replay",
+    "session_next_previous": "passed without marking movements completed",
+    "empty_workout_duration": "rejected; cancelled without diary write",
+    "progress": "0/40 confirmed sessions",
+    "long_plan_phases": "three source guidance phases displayed",
+    "sync_before_consent": "no remote row",
+    "sync_after_consent": "remote revision 1; 92 days; active plan revision 2; 0 completed workouts",
+    "repeat_sync": "revision remains 1 after confirmed second sync",
+    "stop_backup": "remote payload null; revision 2; local plan retained",
+    "test_plan_cleanup": "local empty state observed after confirmed delete",
+    "movement_back_path": "38 goes movement->library->session; existing BIL-10 fix in 39; signed39 not tested"
+  },
+  "cloud_readbacks": {
+    "before": [],
+    "after": [
+      {
+        "read_at": "2026-10-26 15:06:39.251623+00",
+        "revision": 1,
+        "has_payload": true,
+        "plan_fingerprint": "def776c90b9c428a353994a360ab672f",
+        "status": "active",
+        "horizon": "threeMonths",
+        "plan_revision": "2",
+        "days": 92,
+        "completed_workouts": 0
+      }
+    ],
+    "after_confirmed_repeat": [
+      {
+        "read_at": "2026-10-26 15:08:43.303987+00",
+        "revision": 1,
+        "has_payload": true,
+        "plan_fingerprint": "def776c90b9c428a353994a360ab672f",
+        "status": "active",
+        "horizon": "threeMonths",
+        "plan_revision": "2",
+        "days": 92,
+        "completed_workouts": 0
+      }
+    ],
+    "after_stop_backup": [
+      {
+        "read_at": "2026-10-26 15:12:22.68182+00",
+        "revision": 2,
+        "payload_deleted": true
+      }
+    ]
+  },
+  "images": [
+    {
+      "name": "279-smart-plan-current-resume.png",
+      "sha256": "a8e32592ef2a612757a183b5995972acd853493f2101226073ddac40c9f574c4"
+    },
+    {
+      "name": "282-smart-plan-safety-baseline.png",
+      "sha256": "f1fcff525bc02e2b30f8cac766241675308251aaa8aeed6580ea4b58c48fda7f"
+    },
+    {
+      "name": "285-smart-plan-injury-disabled.png",
+      "sha256": "5a70badee8f6f138c9e3c14748a523d95d44e284f969dac8b46c63e8dc0de69e"
+    },
+    {
+      "name": "289-smart-plan-medical-gate-settled.png",
+      "sha256": "bfc55529310d8fb6c17a30d46afbf2d6cab3a9b18777810f7f3a5d2d9b5ade61"
+    },
+    {
+      "name": "291-smart-plan-draft-result.png",
+      "sha256": "3542f9207bcc3886c1f97f096366fca1b7aa8fcbb56cc9693c0e0f6d8198ab0d"
+    },
+    {
+      "name": "292-smart-plan-draft-schedule.png",
+      "sha256": "2cd141ad34de147c637e8770c3ef11a4381948fc59fb454b9de15ba10f21833b"
+    },
+    {
+      "name": "295-smart-plan-activation-confirm.png",
+      "sha256": "ccad481df04748ac50a3552edbaabd2d94aa21a1008fb89920c8077077386b67"
+    },
+    {
+      "name": "296-smart-plan-active-after-confirm.png",
+      "sha256": "399400fd0f054bb2df1fb1711523cf36774415e7cf854f750a8894286452a77b"
+    },
+    {
+      "name": "297-smart-plan-active-rest-day.png",
+      "sha256": "fe229647171620da40ed86c0dd6327ab694ee171ccc9994d5dfdc195d583867f"
+    },
+    {
+      "name": "300-smart-plan-real-session-start.png",
+      "sha256": "978a4db8012cf7d1c1fe2ccf84d642b01ef1a40012356129757ae62ef4e00f40"
+    },
+    {
+      "name": "303-shoulder-video-settled.png",
+      "sha256": "93bbe3c9941d0ff579f32963dcfbe90c6f71a93575807925b11db754261f699d"
+    },
+    {
+      "name": "304-shoulder-video-replay.png",
+      "sha256": "329bb069b7d8c966a2869c370740233014c66209fb3149b4f9b3cc7f156ae5ef"
+    },
+    {
+      "name": "305-video-return-to-movement.png",
+      "sha256": "fe9991fe4e4b8dd018aff6753dc99b1177d1ec1c0e9a3cee777c51db7c67b91b"
+    },
+    {
+      "name": "306-movement-back-to-warmup.png",
+      "sha256": "6d24d8d902a51963ce3c0d17cc67869310251bb7b2e4a723bcb5973e325b7673"
+    },
+    {
+      "name": "307-library-back-destination.png",
+      "sha256": "2d6c7b1ffcc3277b972c9c994cce37ece5f15eb9337f1b14117776c315b25021"
+    },
+    {
+      "name": "308-smart-plan-exercise-session.png",
+      "sha256": "f0ebbeb3ea603945c995ce934a270f6b0e9842a777b015c99d05bc806e9deba0"
+    },
+    {
+      "name": "309-smart-plan-next-without-completion.png",
+      "sha256": "78ca341e540fa6b2012aba8ad6731385aae2e8776f0d8db4965ba2a729d98219"
+    },
+    {
+      "name": "310-smart-plan-previous-no-log.png",
+      "sha256": "8c38588d696b5f54bacbf258e5351b98a66ee0a88c8a4f1b5a856be85d6cef58"
+    },
+    {
+      "name": "313-session-back-to-plan.png",
+      "sha256": "476056249cbf244b6ad47853b56cd8dedfb14eafee1d8bc5f8319060a78ce57e"
+    },
+    {
+      "name": "314-workout-completion-dialog.png",
+      "sha256": "64a2edd619c3e102d8a5d54edc65cf231daa304aba7817ed244f83ff50f53f9a"
+    },
+    {
+      "name": "316-workout-completion-cancelled.png",
+      "sha256": "a6df1965a511d575f4b72f12766ec9be8870a472ff3c5e336fb420386dd5557e"
+    },
+    {
+      "name": "317-smart-plan-progress-zero-activity.png",
+      "sha256": "b5c27fc6116326ebffd44f6515c657192e5d23c8f04565ae9433bef98f937749"
+    },
+    {
+      "name": "320-smart-plan-phase-guidance.png",
+      "sha256": "c904b46f9990d991cfe08f2c06d1afdad792f58a1010ed330b6d561857183088"
+    },
+    {
+      "name": "322-smart-plan-backup-consent.png",
+      "sha256": "667de95c718d15232cf1f38eb692fe2683463e92015c766ba346d619af15b6d6"
+    },
+    {
+      "name": "323-smart-plan-sync-result.png",
+      "sha256": "2e2578040348a72a69d8415775db6040e98a43110dabf22e42c520a03b8d81e3"
+    },
+    {
+      "name": "326-smart-plan-repeat-sync-confirmed.png",
+      "sha256": "28e878f7f47757b2c6c5914f25ae534c9d0df4bf6cc8a69d6883e301ea6eae08"
+    },
+    {
+      "name": "328-stop-backup-confirm.png",
+      "sha256": "2cc8ad502e427e5eb2a265d7fcca5a66ec987663e720e2d5ca23bdd6931fe851"
+    },
+    {
+      "name": "331-stop-backup-mouse-confirm.png",
+      "sha256": "10e64017b488d388bd564f6580e6071b7569f15eef561b12a22ca6a86ceee218"
+    },
+    {
+      "name": "333-smart-plan-delete-confirm.png",
+      "sha256": "4e5499891a38324145a6cf153ca4d7dcd3c9433ec287cd60a5182c8b5a9fdd71"
+    },
+    {
+      "name": "334-smart-plan-test-plan-deleted.png",
+      "sha256": "8f1cd7ac11b9e3ea1681e6789e3ba0f57ab723b393cc94b0c7226a9b0a3031a6"
+    }
+  ],
+  "limits": [
+    "One 3-month combined gym plan tested on physical38, not every duration/focus combination.",
+    "No completed workout or consumed meal was recorded.",
+    "No signed39 evidence or new comprehensive run.",
+    "Private unrelated notification/screens not distributed as public evidence.",
+    "Direct HID events sometimes did not reach controls; original viewer mouse gestures confirmed actions."
+  ]
+}

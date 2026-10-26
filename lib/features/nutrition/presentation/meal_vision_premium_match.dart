@@ -646,7 +646,7 @@ class _PremiumTrustedMatchDialogState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BilGlassPressFeedback(child: Icon(symbol, color: tint, size: 19)),
+          BilNavigationFeedback(child: Icon(symbol, color: tint, size: 19)),
           const SizedBox(height: 3),
           Text(
             label,

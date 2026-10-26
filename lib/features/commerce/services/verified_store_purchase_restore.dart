@@ -19,14 +19,13 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
     final restoreEventObserved = Completer<void>();
     _restoreEventObserved = restoreEventObserved;
     state = VerifiedStoreState.purchasePending;
-    messageCode = null;
+    messageCode = 'restore_pending';
     notifyListeners();
     try {
       // StoreKit 2's generic restore reads current entitlements but does not
       // itself force a server sync. This is an explicit Restore tap, which is
       // the only appropriate time to ask App Store to synchronize.
-      await _syncAppleStoreForExplicitRestore();
-      await _purchase.restorePurchases();
+      await _coalescedNativeRestore().timeout(pendingTimeout);
       // StoreKit may complete AppStore.sync just before it publishes its
       // restored transaction to the stream. Wait briefly for that callback
       // instead of falsely reporting an empty history; a later callback still
@@ -68,6 +67,17 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
             : 'no_restorable_purchases';
         notifyListeners();
       }
+    } on TimeoutException {
+      if (!_disposed &&
+          _storeVisit.isCurrent(visit) &&
+          state == VerifiedStoreState.purchasePending) {
+        // A native authentication/sync timeout is an unknown result, never
+        // proof that nothing was purchased. Stop the indefinite spinner while
+        // keeping checkout blocked and preserving late receipt callbacks.
+        state = VerifiedStoreState.failed;
+        messageCode = 'purchase_status_unknown';
+        notifyListeners();
+      }
     } on Object {
       if (_disposed ||
           !_isCurrentStoreOwner(restoreOwnerId) ||
@@ -85,6 +95,25 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
       _restoring = false;
       notifyListeners();
     }
+  }
+
+  Future<void> _coalescedNativeRestore() {
+    final running = _nativeRestoreOperation;
+    if (running != null) return running;
+    final visit = _storeVisit.capture();
+    late final Future<void> operation;
+    operation =
+        Future<void>(() async {
+          await _syncAppleStoreForExplicitRestore();
+          if (_disposed || !_storeVisit.isCurrent(visit)) return;
+          await _purchase.restorePurchases();
+        }).whenComplete(() {
+          if (identical(_nativeRestoreOperation, operation)) {
+            _nativeRestoreOperation = null;
+          }
+        });
+    _nativeRestoreOperation = operation;
+    return operation;
   }
 
   Future<void> _syncAppleStoreForExplicitRestore() async {

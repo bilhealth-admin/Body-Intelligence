@@ -46,6 +46,8 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
     }
   }
 
+  void _updateSessionState(VoidCallback change) => setState(change);
+
   Future<List<WellnessContentItem>> _loadSession(String locale) async {
     if (!_allowed()) throw StateError('smart_plan_owner_changed');
     final items = await widget
@@ -90,142 +92,6 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
       ..clear()
       ..addAll(warmupTitles);
     return List.unmodifiable(ordered);
-  }
-
-  Widget _sourceLink(String title, String url) => TextButton.icon(
-    style: TextButton.styleFrom(foregroundColor: _smartPlanActionInk(context)),
-    onPressed: () async {
-      if (!_allowed()) return;
-      var opened = false;
-      try {
-        opened = await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-        );
-      } on Object {
-        opened = false;
-      }
-      if (!opened && mounted && _allowed()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _smartPlanText(
-                context,
-                'The reference could not be opened. Try again.',
-                'تعذّر فتح المرجع. حاول مجددًا.',
-              ),
-            ),
-          ),
-        );
-      }
-    },
-    icon: const Icon(Icons.open_in_new_rounded),
-    label: Text(title),
-  );
-
-  Widget _warmupSurface(String locale) {
-    String t(String en, String ar) => _smartPlanText(context, en, ar);
-    final home = widget.day.workout!.templateId.startsWith('home-');
-    return ListView(
-      key: const ValueKey('bil-smart-plan-warmup-scroll'),
-      padding: const EdgeInsets.all(16),
-      children: [
-        BilSmartPlanPanel(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Icon(Icons.self_improvement_rounded, size: 32),
-                const SizedBox(height: 12),
-                Text(
-                  t('Warm up before your session', 'الإحماء قبل جلستك'),
-                  key: const ValueKey('bil-smart-plan-warmup'),
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  home
-                      ? t(
-                          'Allow at least 6 minutes. Start gently, take longer when needed, and stop if you feel pain or become unwell.',
-                          'خصص 6 دقائق على الأقل. ابدأ بلطف وخذ وقتًا أطول عند الحاجة، وتوقف إذا شعرت بألم أو بتوعك.',
-                        )
-                      : t(
-                          'Prepare with the movements from your BIL source plan. Keep the effort gentle; these are preparation sets, separate from your working sets.',
-                          'استعد بحركات الإحماء من خطة BIL الموثقة. حافظ على جهد خفيف؛ هذه مجموعات تحضيرية منفصلة عن مجموعات التدريب.',
-                        ),
-                ),
-                for (final step in _warmups) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    (locale == 'ar' && step.titleAr != null)
-                        ? step.titleAr!
-                        : step.exerciseId == null
-                        ? (locale == 'ar'
-                              ? step.titleAr ?? step.title
-                              : step.title)
-                        : _warmupTitles[step.exerciseId]!,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(
-                    _rangeForDirection(
-                      locale == 'ar'
-                          ? step.doseAr ??
-                                'مجموعة واحدة بتحكم؛ 6–10 تكرارات أو 20–30 ثانية.'
-                          : step.dose,
-                    ),
-                  ),
-                  if (step.exerciseId != null)
-                    OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: _smartPlanActionInk(context),
-                      ),
-                      onPressed: _opening
-                          ? null
-                          : () async {
-                              if (!_allowed()) return;
-                              setState(() => _opening = true);
-                              try {
-                                await widget.openExercise(step.exerciseId!);
-                              } finally {
-                                if (mounted) setState(() => _opening = false);
-                              }
-                            },
-                      icon: const Icon(Icons.play_circle_outline_rounded),
-                      label: Text(
-                        t('View verified movement', 'عرض الحركة الموثقة'),
-                      ),
-                    ),
-                ],
-                if (home)
-                  _sourceLink(
-                    t('NHS warm-up reference', 'مرجع الإحماء من NHS'),
-                    'https://www.nhs.uk/live-well/exercise/how-to-warm-up-before-exercising/',
-                  ),
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  key: const ValueKey('bil-smart-plan-warmup-continue'),
-                  onPressed: () {
-                    if (_allowed()) setState(() => _warmupReviewed = true);
-                  },
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  label: Text(
-                    t('Continue to exercises', 'المتابعة إلى التمارين'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  t(
-                    'Reviewing this preparation does not record a completed workout.',
-                    'مراجعة الإحماء لا تسجّل تمرينًا مكتملًا.',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   @override
@@ -321,7 +187,7 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                                           ).textTheme.titleMedium,
                                         ),
                                         const SizedBox(height: 16),
-                                        const LinearProgressIndicator(),
+                                        const BilFeatureWelcomeStatus(),
                                       ],
                                     ),
                                   ),
@@ -345,6 +211,9 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                           padding: const EdgeInsets.all(16),
                           children: [
                             BilSmartPlanPanel(
+                              artwork: BilSmartPlanArt.forWorkout(
+                                widget.day.workout!.templateId,
+                              ),
                               child: Padding(
                                 padding: const EdgeInsets.all(20),
                                 child: Column(
@@ -488,6 +357,9 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                                               'الإرشادات والمصادر',
                                             ),
                                           ),
+
+                                          trailing:
+                                              const BilCrystalExpansionIndicator(),
                                           children: [
                                             Text(
                                               t(
@@ -590,42 +462,88 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                                           'I finished this movement',
                                           'أنهيت هذه الحركة',
                                         ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge
+                                            ?.copyWith(
+                                              color:
+                                                  Theme.of(
+                                                        context,
+                                                      ).brightness ==
+                                                      Brightness.dark
+                                                  ? BilPearlFinish.darkInk
+                                                  : BilPearlFinish.lightInk,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                     ),
-                                    Wrap(
-                                      spacing: 8,
-                                      runSpacing: 8,
-                                      children: [
-                                        OutlinedButton(
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor:
-                                                _smartPlanActionInk(context),
-                                          ),
-                                          onPressed: _step == 0
-                                              ? null
-                                              : () => setState(() => _step--),
-                                          child: Text(
-                                            t(
-                                              'Previous exercise',
-                                              'التمرين السابق',
-                                            ),
-                                          ),
-                                        ),
-                                        if (_step + 1 < items.length)
-                                          FilledButton(
-                                            key: const ValueKey(
-                                              'bil-smart-plan-session-next',
-                                            ),
-                                            onPressed: () =>
-                                                setState(() => _step++),
-                                            child: Text(
-                                              t(
-                                                'Next exercise',
-                                                'التمرين التالي',
+                                    IntrinsicHeight(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              key: const ValueKey(
+                                                'bil-smart-plan-session-previous',
+                                              ),
+                                              style: OutlinedButton.styleFrom(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 12,
+                                                    ),
+                                                minimumSize: const Size(0, 48),
+                                                foregroundColor:
+                                                    _smartPlanActionInk(
+                                                      context,
+                                                    ),
+                                              ),
+                                              onPressed: _step == 0
+                                                  ? null
+                                                  : () =>
+                                                        setState(() => _step--),
+                                              child: Text(
+                                                t(
+                                                  'Previous exercise',
+                                                  'التمرين السابق',
+                                                ),
+                                                textAlign: TextAlign.center,
                                               ),
                                             ),
                                           ),
-                                      ],
+                                          if (_step + 1 < items.length) ...[
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: FilledButton(
+                                                style: FilledButton.styleFrom(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 12,
+                                                      ),
+                                                  minimumSize: const Size(
+                                                    0,
+                                                    48,
+                                                  ),
+                                                ),
+                                                key: const ValueKey(
+                                                  'bil-smart-plan-session-next',
+                                                ),
+                                                onPressed: () =>
+                                                    setState(() => _step++),
+                                                child: Text(
+                                                  t(
+                                                    'Next exercise',
+                                                    'التمرين التالي',
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),

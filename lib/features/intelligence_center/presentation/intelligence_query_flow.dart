@@ -1,6 +1,74 @@
 part of 'intelligence_center_page.dart';
 
 extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
+  Future<bool> _readVerifiedWeightHistoryInChat(
+    String questionText,
+    String locale,
+    int generation, {
+    required bool autoSpeakReply,
+  }) async {
+    // All supported locales still use the general Coach flow. This
+    // deterministic in-chat readout is limited to reviewed Arabic/English copy.
+    if (!locale.startsWith('ar') && !locale.startsWith('en')) return false;
+    final readQuestion = _resolvedWeightHistoryReadQuestion(questionText);
+    if (!isCoachWeightHistoryReadRequest(readQuestion)) return false;
+
+    final ownerAtStart = conversationPreferences.localOwnerId;
+    final epoch = conversationPersistenceEpoch;
+    CoachContextSnapshot? snapshot;
+    try {
+      snapshot = await readCoachContextSnapshot(
+        ProviderScope.containerOf(context, listen: false),
+      );
+    } on Object {
+      // A timeout is an unknown dataset, never a verified empty history.
+    }
+    if (!mounted ||
+        generation != requestGeneration ||
+        epoch != conversationPersistenceEpoch ||
+        coachMessageVisitCancelled ||
+        ownerAtStart != conversationPreferences.localOwnerId) {
+      return true;
+    }
+    final text =
+        snapshot != null &&
+            snapshot.weightReadStatus == CoachWeightReadStatus.verified
+        ? CoachWeightHistoryReadout.build(
+            snapshot: snapshot,
+            question: readQuestion,
+            languageTag: locale,
+            now: ref.read(intelligenceConversationClockProvider)(),
+          ).message
+        : CoachWeightHistoryReadout.statusMessage(
+            status:
+                snapshot?.weightReadStatus ?? CoachWeightReadStatus.unavailable,
+            languageTag: locale,
+          );
+    final message = IntelligenceMessage(
+      id: 'coach-verified-weight-${DateTime.now().microsecondsSinceEpoch}',
+      role: IntelligenceMessageRole.bil,
+      kind: IntelligenceMessageKind.coach,
+      text: text,
+      createdAt: DateTime.now(),
+      evidence: const ['owner-scoped-local-weight-history'],
+      confidence: 1,
+      modality: autoSpeakReply
+          ? IntelligenceMessageModality.voice
+          : IntelligenceMessageModality.text,
+    );
+    _updateState(() {
+      messages.add(message);
+      animatedResponseIds.add(message.id);
+    });
+    _scrollToLatest();
+    unawaited(_saveConversation());
+    if (autoSpeakReply) {
+      await _speakCoachText(message.text, locale);
+      await _resumeLiveCallIfNeeded(generation);
+    }
+    return true;
+  }
+
   Future<void> ask({
     CoachInputChannel inputChannel = CoachInputChannel.text,
     String? detectedLanguageTag,
@@ -9,8 +77,18 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     bool autoSpeakReply = false,
     CoachCloudRequest? cloudRequest,
   }) async {
-    if (!mounted) return;
+    if (!mounted || conversationRestarting) return;
     final submittedText = textOverride ?? question.text;
+    // Presentation metadata only; never persisted or sent with the request.
+    Rect? outgoingOrigin;
+    if (addUserMessage &&
+        inputChannel == CoachInputChannel.text &&
+        textOverride == null) {
+      final render = questionFocus.context?.findRenderObject();
+      if (render is RenderBox && render.attached && render.hasSize) {
+        outgoingOrigin = render.localToGlobal(Offset.zero) & render.size;
+      }
+    }
     if (inputChannel == CoachInputChannel.text) {
       // Capture the draft before focus changes and before the voice-media
       // handoff yields. This keeps a just-submitted question stable if the
@@ -28,6 +106,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         ? normalizeCoachVoiceTranscript(rawText)
         : rawText;
     if (!conversationReady ||
+        conversationRestarting ||
         text.isEmpty ||
         sending ||
         consentPromptVisible ||
@@ -65,11 +144,17 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       replyPhase = _CoachReplyPhase.preparing;
       failedRequest = null;
       retryableErrorMessageIds.clear();
-      introVisible = false;
       if (addUserMessage) {
+        final messageId = 'user-${DateTime.now().microsecondsSinceEpoch}';
+        if (outgoingOrigin != null) {
+          if (outgoingMessageOrigins.length >= 64) {
+            outgoingMessageOrigins.remove(outgoingMessageOrigins.keys.first);
+          }
+          outgoingMessageOrigins[messageId] = outgoingOrigin;
+        }
         messages.add(
           IntelligenceMessage(
-            id: 'user-${DateTime.now().microsecondsSinceEpoch}',
+            id: messageId,
             role: IntelligenceMessageRole.user,
             kind: IntelligenceMessageKind.freeQuestion,
             text: text,
@@ -143,6 +228,15 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             ),
           );
         }
+        return;
+      }
+      if (await _readVerifiedWeightHistoryInChat(
+        text,
+        questionLocale,
+        generation,
+        autoSpeakReply: autoSpeakReply,
+      )) {
+        localHealthHandled = true;
         return;
       }
       if (await _answerSmartPlanIntent(text, questionLocale)) {
@@ -260,9 +354,9 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         })();
         final coachContextFuture = (() async {
           try {
-            return await ref
-                .read(coachContextSnapshotProvider.future)
-                .timeout(const Duration(seconds: 8));
+            return await readCoachContextSnapshot(
+              ProviderScope.containerOf(context, listen: false),
+            );
           } on Object {
             return CoachContextSnapshot.empty();
           }
@@ -270,6 +364,40 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         final healthContext = await healthContextFuture;
         final coachContext = await coachContextFuture;
         if (!mounted || generation != requestGeneration) return;
+        if (isCoachWeightHistoryReadRequest(text) &&
+            coachContext.weightReadStatus != CoachWeightReadStatus.verified) {
+          // A repository timeout or missing analytics permission never proves
+          // that the diary is empty. Do not bill for a speculative AI answer.
+          localHealthHandled = true;
+          final copy =
+              coachContext.weightReadStatus == CoachWeightReadStatus.withheld
+              ? intelligenceTextFor(
+                  questionLocale,
+                  'Weight history is not available to Coach under your current context-sharing settings. No records were changed.',
+                  'سجل الوزن غير متاح للمدرب وفق إعدادات مشاركة السياق الحالية. لم يتغير أي سجل.',
+                )
+              : intelligenceTextFor(
+                  questionLocale,
+                  'I could not verify your weight history right now. This does not mean that you have no records. Please retry the read.',
+                  'تعذّر التحقق من سجل أوزانك الآن، وهذا لا يعني عدم وجود سجلات. يرجى إعادة محاولة القراءة.',
+                );
+          final notice = IntelligenceMessage(
+            id: 'coach-weight-read-unavailable-${DateTime.now().microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.coach,
+            text: copy,
+            createdAt: DateTime.now(),
+            evidence: const ['local-weight-context-read-status'],
+            confidence: 1,
+          );
+          _updateState(() {
+            messages.add(notice);
+            animatedResponseIds.add(notice.id);
+          });
+          _scrollToLatest();
+          unawaited(_saveConversation());
+          return;
+        }
         final activeEngine = IntelligenceCenterEngine(
           localApi: ModelBackedLocalCoachApi(
             gateway: bindCoachCloudRequest(
@@ -378,7 +506,16 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
+      // A model suggestion cannot turn "Check nutrition", "Review my day"
+      // or a weight-chart read into a Smart Plan transition.
+      final allowPlanActions = coachAllowsSuggestedPlanAction(text);
       final availableActions = reply.actions
+          .where(
+            (action) =>
+                allowPlanActions ||
+                (action.type != IntelligenceActionType.smartPlan &&
+                    action.type != IntelligenceActionType.openPlan),
+          )
           .map(const CoachActionAdmission().admitProposal)
           .whereType<IntelligenceAction>()
           .toList(growable: false);
@@ -569,192 +706,6 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
       }
     }
-  }
-
-  IntelligenceAction? _latestPendingAction() {
-    for (final message in messages.reversed) {
-      for (final action in message.actionLinks.reversed) {
-        if (!action.isTrusted) continue;
-        final candidate = action.toAction();
-        final binding = const CoachActionAdmission().bind(
-          candidate,
-          requireOperationId: true,
-        );
-        if (binding?.descriptor?.requiresConfirmation == true ||
-            binding?.action.requiresFreshConfirmation == true) {
-          return binding!.action;
-        }
-      }
-    }
-    return null;
-  }
-
-  IntelligenceAction? _latestSafeNavigationAction() {
-    const policy = CoachActionPresentationPolicy();
-    for (final message in messages.reversed) {
-      if (message.role != IntelligenceMessageRole.bil) continue;
-      if (message.modality == IntelligenceMessageModality.system) continue;
-      for (final action in message.actionLinks.reversed) {
-        if (!action.isTrusted) continue;
-        final candidate = action.toAction();
-        if (policy.isNavigation(candidate)) return candidate;
-      }
-      // Pronouns such as "open it" may only bind to the immediately previous
-      // Coach response. Never replay an older screen action by accident.
-      return null;
-    }
-    return null;
-  }
-
-  void _cancelCurrentCoachRequest() {
-    if (listening || voiceCaptureStarting) {
-      unawaited(
-        _stopVoiceCapture(resetMode: voiceMode != _CoachVoiceMode.liveCall),
-      );
-    }
-    requestGeneration += 1;
-    replyDelayTimer?.cancel();
-    _updateState(() {
-      sending = false;
-      replyPhase = _CoachReplyPhase.idle;
-      failedRequest = null;
-    });
-    if (voiceMode == _CoachVoiceMode.liveCall) {
-      liveCallPaused = true;
-    }
-    unawaited(const BilTextToSpeech().stop());
-  }
-
-  Future<_RemoteAiConsentChoice> _offerPersonalIntelligence() {
-    final inFlight = consentChoiceInFlight;
-    if (inFlight != null) return inFlight;
-    final operation = _runPersonalIntelligenceOffer();
-    consentChoiceInFlight = operation;
-    return operation.whenComplete(() {
-      consentChoiceInFlight = null;
-    });
-  }
-
-  Future<_RemoteAiConsentChoice> _runPersonalIntelligenceOffer() async {
-    if (consentPromptVisible || !mounted) {
-      return _RemoteAiConsentChoice.alreadyOpen;
-    }
-    consentPromptVisible = true;
-    try {
-      final client = Supabase.instance.client;
-      final owner = client.auth.currentUser?.id;
-      final database = ref.read(databaseProvider);
-      final preferences = ref.read(preferencesRepositoryProvider);
-      final generation = requestGeneration;
-      final epoch = conversationPersistenceEpoch;
-      final conversationId = activeConversationId;
-      if (owner == null || database.localOwnerId != owner) {
-        return _RemoteAiConsentChoice.failed;
-      }
-      return await CommunityOwnerOperation.run<_RemoteAiConsentChoice>(
-        client: client,
-        ownerId: owner,
-        isCurrentOwner: () =>
-            mounted &&
-            identical(Supabase.instance.client, client) &&
-            generation == requestGeneration &&
-            epoch == conversationPersistenceEpoch &&
-            conversationId == activeConversationId &&
-            identical(ref.read(databaseProvider), database) &&
-            identical(ref.read(preferencesRepositoryProvider), preferences) &&
-            identical(conversationPreferences, preferences),
-        action: (ownerVisit) async {
-          final enabled = await showBilPremiumAiConsentSheet(
-            context: context,
-            title: tr(
-              'Send selected personal data to Google Gemini?',
-              'إرسال بيانات شخصية محددة إلى Google Gemini؟',
-            ),
-            intro: tr(
-              'BIL uses Google Gemini, a third-party AI service operated by Google, only to generate the answer you request.',
-              'يستخدم BIL خدمة Google Gemini، وهي خدمة ذكاء اصطناعي تابعة لجهة خارجية وتديرها Google، فقط لإنشاء الإجابة التي تطلبها.',
-            ),
-            points: [
-              BilPremiumAiConsentPoint(
-                icon: Icons.tune_rounded,
-                title: tr(
-                  'Only the context you choose',
-                  'فقط السياق الذي تختاره',
-                ),
-                body: tr(
-                  'Your question; selected weight, goals and measurements; meals, nutrition, water and preferences; activity and training; sleep and habits; plus up to 12 recent conversation turns.',
-                  'سؤالك؛ وما تختاره من الوزن والأهداف والقياسات؛ والوجبات والتغذية والماء والتفضيلات؛ والنشاط والتدريب؛ والنوم والعادات؛ إضافة إلى ما يصل إلى آخر 12 رسالة.',
-                ),
-              ),
-              BilPremiumAiConsentPoint(
-                icon: Icons.mic_off_rounded,
-                title: tr(
-                  'Your platform handles speech recognition',
-                  'يتولى جهازك أو نظامه التعرّف على الكلام',
-                ),
-                body: tr(
-                  'Your device or platform speech service may process microphone audio under its own terms. When you submit a Coach request, BIL sends Gemini only recognized text, never raw microphone audio.',
-                  'قد تعالج خدمة التعرّف على الكلام في جهازك أو منصتك صوت الميكروفون وفق شروطها. عند إرسال طلب إلى Coach، يرسل BIL إلى Gemini النص المتعرّف عليه فقط، ولا يرسل صوت الميكروفون الخام.',
-                ),
-              ),
-              BilPremiumAiConsentPoint(
-                icon: Icons.verified_user_outlined,
-                title: tr('You stay in control', 'التحكم يبقى بيدك'),
-                body: tr(
-                  'You can decline and keep using local BIL features, or withdraw this consent later in AI Coach settings.',
-                  'يمكنك الرفض ومتابعة استخدام ميزات BIL المحلية، أو سحب هذه الموافقة لاحقًا من إعدادات AI Coach.',
-                ),
-              ),
-            ],
-            allowLabel: tr('Allow & Continue', 'السماح والمتابعة'),
-            declineLabel: tr("Don't Allow", 'عدم السماح'),
-            allowKey: const Key('ai-coach-remote-consent-accept'),
-            declineKey: const Key('ai-coach-remote-consent-decline'),
-          );
-          ownerVisit.check();
-          if (enabled != true) return _RemoteAiConsentChoice.declined;
-          final verified = await sharedRemoteAiConsentCoordinator(
-            client,
-          ).grantAndVerify();
-          ownerVisit.check();
-          return verified
-              ? _RemoteAiConsentChoice.granted
-              : _RemoteAiConsentChoice.failed;
-        },
-      );
-    } on Object {
-      return _RemoteAiConsentChoice.failed;
-    } finally {
-      consentPromptVisible = false;
-    }
-  }
-
-  IntelligenceMessage _presentationSafeMessage(IntelligenceMessage message) {
-    if (message.role == IntelligenceMessageRole.user) return message;
-    final normalized = message.text.toLowerCase();
-    const technicalMarkers = <String>[
-      'local-coach-runtime',
-      'ai context is not accepted',
-      'decision memory evidence',
-      'safety boundary did not approve',
-      'bil did not expose an action',
-      'accepted ai context',
-      'source summary is required',
-      'one best action output',
-    ];
-    if (!technicalMarkers.any(normalized.contains)) return message;
-    return IntelligenceMessage(
-      id: message.id,
-      role: message.role,
-      kind: IntelligenceMessageKind.safety,
-      text: tr(
-        'AI Coach could not complete this reply. Your data was not changed; try again.',
-        'تعذر إكمال هذا الرد الآن. لم تتغير بياناتك؛ أعد المحاولة.',
-      ),
-      createdAt: message.createdAt,
-      confidence: 1,
-      modality: message.modality,
-    );
   }
 }
 

@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -20,6 +21,7 @@ import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_pla
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_prescriptions.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -157,7 +159,19 @@ void main() {
               for (var frame = 0; frame < 10; frame++) {
                 await tester.pump(const Duration(milliseconds: 20));
               }
-              expect(find.byType(LinearProgressIndicator), findsOneWidget);
+              expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
+              expect(find.byIcon(Icons.calendar_month_rounded), findsOneWidget);
+              final indicator = tester.widget<CupertinoActivityIndicator>(
+                find.descendant(
+                  of: find.byType(BilFeatureWelcomeStatus),
+                  matching: find.byType(CupertinoActivityIndicator),
+                ),
+              );
+              expect(indicator.radius, 12);
+              expect(
+                indicator.color,
+                dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
+              );
               expect(
                 find.byKey(const ValueKey('bil-smart-plan-create')),
                 findsNothing,
@@ -167,7 +181,7 @@ void main() {
                 final until = DateTime.now().add(const Duration(seconds: 10));
                 while (DateTime.now().isBefore(until)) {
                   await tester.pump(const Duration(milliseconds: 20));
-                  if (find.byType(LinearProgressIndicator).evaluate().isEmpty &&
+                  if (bilWaitingIndicators().evaluate().isEmpty &&
                       find.byType(BilSmartPlanPage).evaluate().isNotEmpty) {
                     break;
                   }
@@ -178,6 +192,22 @@ void main() {
               if (state == 'error') {
                 expect(
                   find.byKey(const ValueKey('bil-smart-plan-error')),
+                  findsOneWidget,
+                );
+                final recoveryText = tester.widget<Text>(
+                  find.byKey(const ValueKey('bil-smart-plan-error')),
+                );
+                expect(
+                  recoveryText.data,
+                  contains(
+                    ar
+                        ? 'تعذّر فتح بيانات الخطة المحفوظة بأمان.'
+                        : 'The saved plan data could not be opened safely.',
+                  ),
+                );
+                expect(recoveryText.data, isNot(contains('FormatException')));
+                expect(
+                  find.byKey(const ValueKey('bil-smart-plan-retry')),
                   findsOneWidget,
                 );
                 expect(
@@ -215,6 +245,7 @@ void main() {
             }
             expect(tester.takeException(), isNull);
             final capture = find.byKey(const ValueKey('state-capture'));
+            await settleVisualAssetImages(tester);
             if (Platform.environment['BIL_CAPTURE_SMART_PLAN_GOLDENS'] != '0') {
               final boundary = tester.renderObject<RenderRepaintBoundary>(
                 capture,

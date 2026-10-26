@@ -441,9 +441,9 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                             shape: const CircleBorder(),
                           ),
                           onPressed: _sending ? null : _send,
-                          child: const Icon(
-                            Icons.arrow_upward_rounded,
-                            size: 20,
+                          child: const BilCrystalArrow(
+                            extent: 36,
+                            child: Icon(Icons.arrow_upward_rounded, size: 20),
                           ),
                         )
                       : FilledButton.tonalIcon(
@@ -452,9 +452,9 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                             minimumSize: const Size(48, 48),
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                           ),
-                          icon: const Icon(
-                            Icons.arrow_upward_rounded,
-                            size: 20,
+                          icon: const BilCrystalArrow(
+                            extent: 36,
+                            child: Icon(Icons.arrow_upward_rounded, size: 20),
                           ),
                           label: Text(copy.send),
                           onPressed: _sending ? null : _send,
@@ -490,7 +490,7 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
             child: Column(
               children: [
                 if (_sending && !_confirmingReplacement)
-                  const LinearProgressIndicator(),
+                  const BilFeatureWelcomeStatus(),
                 Expanded(
                   child: ListView(
                     key: const Key('community-new-message-scroll'),
@@ -561,7 +561,7 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                             if (snapshot.connectionState !=
                                 ConnectionState.done) {
                               return const Center(
-                                child: CircularProgressIndicator(),
+                                child: BilFeatureWelcomeStatus(),
                               );
                             }
                             if (snapshot.hasError) {

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'support/dart_library_source.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -36,9 +38,9 @@ void main() {
   test(
     'friend discovery exposes safe contacts and live BIL search methods',
     () {
-      final source = File(
+      final source = readDartLibrarySource(
         'lib/features/community/presentation/community_people_page.dart',
-      ).readAsStringSync();
+      );
       expect(source, contains("Key('community-add-from-contacts')"));
       expect(source, contains('No permission was requested.'));
       expect(source, contains("Key('community-add-by-bil-name')"));

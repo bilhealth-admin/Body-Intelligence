@@ -93,13 +93,13 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                       if (snapshot.connectionState != ConnectionState.done &&
                           !snapshot.hasData &&
                           _rows.isEmpty) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: BilFeatureWelcomeStatus());
                       }
                       if (snapshot.hasError && _rows.isEmpty) {
                         return Center(
                           child: FilledButton.tonalIcon(
                             onPressed: () => _setChatState(_reload),
-                            icon: const BilGlassPressFeedback(
+                            icon: const BilNavigationFeedback(
                               child: Icon(Icons.refresh_rounded),
                             ),
                             label: Text(
@@ -121,6 +121,8 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                         ownerId: '${_ownerId}_${_peerId}_$binding',
                         retryKey: _readRetry,
                         enabled: _current(binding),
+                        isRowPainted: _presentation.isPainted,
+                        paintChanges: _presentation,
                         unreadIds: {
                           for (final message in rows)
                             if (message.recipientId == _ownerId &&
@@ -131,7 +133,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                         builder: (context, marker) => ChatHistoryViewport(
                           controller: _historyScroll,
                           latestMessageId: rows.isEmpty ? null : rows.last.id,
-                          child: RefreshIndicator(
+                          child: BilRefreshIndicator(
                             onRefresh: () async {
                               if (!_current(binding)) return;
                               _setChatState(() {
@@ -172,9 +174,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                     icon: _loadingOlder
                                         ? const SizedBox.square(
                                             dimension: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
+                                            child: BilFeatureWelcomeStatus(),
                                           )
                                         : const Icon(Icons.history_rounded),
                                     label: Text(
@@ -188,6 +188,20 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                 }
                                 final message = rows[rows.length - 1 - index];
                                 final mine = message.senderId == _ownerId;
+                                final direction =
+                                    BilWrittenLanguageResolver.directionFor(
+                                      message.body,
+                                      fallback: Directionality.of(context),
+                                    );
+                                final messageStyle =
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.copyWith(
+                                      color: mine
+                                          ? Colors.white
+                                          : CommunitySapphire.ink(context),
+                                    ) ??
+                                    const TextStyle(fontSize: 16);
                                 return KeyedSubtree(
                                   key: ValueKey(message.id),
                                   child: Align(
@@ -195,130 +209,169 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                     alignment: mine
                                         ? AlignmentDirectional.centerEnd
                                         : AlignmentDirectional.centerStart,
-                                    child: CommunityMessageBubble(
+                                    child: BilConversationArrival(
+                                      id: message.id,
+                                      presentation: _presentation,
                                       mine: mine,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          SelectableText(
-                                            message.body,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge
-                                                ?.copyWith(
-                                                  color: mine
-                                                      ? Colors.white
-                                                      : CommunitySapphire.ink(
-                                                          context,
-                                                        ),
-                                                ),
-                                            textDirection:
-                                                BilWrittenLanguageResolver.directionFor(
-                                                  message.body,
-                                                  fallback: Directionality.of(
-                                                    context,
-                                                  ),
-                                                ),
-                                            key: ValueKey(
-                                              'community-message-text-${message.id}',
-                                            ),
+                                      text: message.body,
+                                      direction: direction,
+                                      style: messageStyle,
+                                      outgoingGradient:
+                                          CommunitySapphire.messageGradient(
+                                            context,
                                           ),
-                                          const SizedBox(height: 4),
-                                          Wrap(
-                                            alignment: WrapAlignment.end,
-                                            crossAxisAlignment:
-                                                WrapCrossAlignment.center,
-                                            spacing: 4,
-                                            runSpacing: 4,
-                                            children: [
-                                              if (!mine)
-                                                bilPearlPopupMenuButton<String>(
-                                                  key: Key(
-                                                    'community-message-safety-${message.id}',
-                                                  ),
-                                                  enabled: !_safetyBusy,
-                                                  tooltip: communityText(
-                                                    context,
-                                                    'Message actions',
-                                                    'إجراءات الرسالة',
-                                                  ),
-                                                  onSelected: (action) =>
-                                                      _messageSafety(
-                                                        message,
-                                                        action,
-                                                      ),
-                                                  itemBuilder: (_) => [
-                                                    PopupMenuItem(
-                                                      value: 'report',
-                                                      child: Text(
-                                                        communityText(
-                                                          context,
-                                                          'Report',
-                                                          'إبلاغ',
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    PopupMenuItem(
-                                                      value: 'block',
-                                                      child: Text(
-                                                        communityText(
-                                                          context,
-                                                          'Block member',
-                                                          'حظر العضو',
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              Text(
-                                                TimeOfDay.fromDateTime(
-                                                  message.createdAt.toLocal(),
-                                                ).format(context),
+                                      visitIsCurrent: () => _current(binding),
+                                      child: CommunityMessageBubble(
+                                        mine: mine,
+                                        nativeCanvas:
+                                            !mine &&
+                                            BilConversationText.usesNativeText,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            BilConversationText(
+                                              key: ValueKey(
+                                                'community-message-body-${message.id}',
+                                              ),
+                                              text: message.body,
+                                              mine: mine,
+                                              direction: direction,
+                                              style: messageStyle,
+                                              visitIsCurrent: () =>
+                                                  _current(binding),
+                                              onPainted: (ready) {
+                                                if (_current(binding)) {
+                                                  _presentation.markPainted(
+                                                    message.id,
+                                                    ready,
+                                                  );
+                                                }
+                                              },
+                                              fallback: SelectableText(
+                                                message.body,
                                                 style: Theme.of(context)
                                                     .textTheme
-                                                    .labelSmall
+                                                    .bodyLarge
                                                     ?.copyWith(
                                                       color: mine
                                                           ? Colors.white
-                                                          : CommunitySapphire.muted(
+                                                          : CommunitySapphire.ink(
                                                               context,
                                                             ),
                                                     ),
-                                              ),
-                                              if (mine) ...[
-                                                Icon(
-                                                  message.isRead
-                                                      ? Icons.done_all_rounded
-                                                      : Icons.done_rounded,
-                                                  size: 15,
-                                                  color: mine
-                                                      ? Colors.white
-                                                      : CommunitySapphire.muted(
-                                                          context,
-                                                        ),
-                                                  semanticLabel: message.isRead
-                                                      ? _copy(
-                                                          context,
-                                                          'مقروءة',
-                                                          'Read',
-                                                          'Lu',
-                                                          'Leído',
-                                                          'Okundu',
-                                                        )
-                                                      : _copy(
-                                                          context,
-                                                          'مُرسلة',
-                                                          'Sent',
-                                                          'Envoyé',
-                                                          'Enviado',
-                                                          'Gönderildi',
-                                                        ),
+                                                textDirection:
+                                                    BilWrittenLanguageResolver.directionFor(
+                                                      message.body,
+                                                      fallback:
+                                                          Directionality.of(
+                                                            context,
+                                                          ),
+                                                    ),
+                                                key: ValueKey(
+                                                  'community-message-text-${message.id}',
                                                 ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Wrap(
+                                              alignment: WrapAlignment.end,
+                                              crossAxisAlignment:
+                                                  WrapCrossAlignment.center,
+                                              spacing: 4,
+                                              runSpacing: 4,
+                                              children: [
+                                                if (!mine)
+                                                  bilPearlPopupMenuButton<
+                                                    String
+                                                  >(
+                                                    key: Key(
+                                                      'community-message-safety-${message.id}',
+                                                    ),
+                                                    enabled: !_safetyBusy,
+                                                    tooltip: communityText(
+                                                      context,
+                                                      'Message actions',
+                                                      'إجراءات الرسالة',
+                                                    ),
+                                                    onSelected: (action) =>
+                                                        _messageSafety(
+                                                          message,
+                                                          action,
+                                                        ),
+                                                    itemBuilder: (_) => [
+                                                      PopupMenuItem(
+                                                        value: 'report',
+                                                        child: Text(
+                                                          communityText(
+                                                            context,
+                                                            'Report',
+                                                            'إبلاغ',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      PopupMenuItem(
+                                                        value: 'block',
+                                                        child: Text(
+                                                          communityText(
+                                                            context,
+                                                            'Block member',
+                                                            'حظر العضو',
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                Text(
+                                                  TimeOfDay.fromDateTime(
+                                                    message.createdAt.toLocal(),
+                                                  ).format(context),
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall
+                                                      ?.copyWith(
+                                                        color: mine
+                                                            ? Colors.white
+                                                            : CommunitySapphire.muted(
+                                                                context,
+                                                              ),
+                                                      ),
+                                                ),
+                                                if (mine) ...[
+                                                  Icon(
+                                                    message.isRead
+                                                        ? Icons.done_all_rounded
+                                                        : Icons.done_rounded,
+                                                    size: 15,
+                                                    color: mine
+                                                        ? Colors.white
+                                                        : CommunitySapphire.muted(
+                                                            context,
+                                                          ),
+                                                    semanticLabel:
+                                                        message.isRead
+                                                        ? _copy(
+                                                            context,
+                                                            'مقروءة',
+                                                            'Read',
+                                                            'Lu',
+                                                            'Leído',
+                                                            'Okundu',
+                                                          )
+                                                        : _copy(
+                                                            context,
+                                                            'مُرسلة',
+                                                            'Sent',
+                                                            'Envoyé',
+                                                            'Enviado',
+                                                            'Gönderildi',
+                                                          ),
+                                                  ),
+                                                ],
                                               ],
-                                            ],
-                                          ),
-                                        ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -334,7 +387,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                             TextButton.icon(
                               key: const Key('community-chat-refresh-retry'),
                               onPressed: () => _setChatState(_reload),
-                              icon: const BilGlassPressFeedback(
+                              icon: const BilNavigationFeedback(
                                 child: Icon(Icons.refresh_rounded),
                               ),
                               label: Text(
@@ -374,6 +427,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                               Flexible(
                                 fit: FlexFit.loose,
                                 child: SingleChildScrollView(
+                                  key: _composerAnchor,
                                   child: TextField(
                                     key: const Key(
                                       'community-message-composer',
@@ -607,15 +661,14 @@ extension _CommunityChatRendering on _CommunityChatPageState {
         icon: busy
             ? const SizedBox.square(
                 dimension: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(ink),
-                ),
+                child: BilFeatureWelcomeStatus(color: ink),
               )
-            : Icon(
-                Icons.arrow_upward_rounded,
-                size: 25,
-                color: allowed ? ink : ink.withValues(alpha: .38),
+            : BilCrystalArrow(
+                child: Icon(
+                  Icons.arrow_upward_rounded,
+                  size: 25,
+                  color: allowed ? ink : ink.withValues(alpha: .38),
+                ),
               ),
       ),
     );

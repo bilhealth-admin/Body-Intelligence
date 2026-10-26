@@ -1,0 +1,148 @@
+{
+  "at": "2026-10-26T16:12:19.319Z",
+  "artifact": "physical iPhone TestFlight38",
+  "cloud_function_version": 132,
+  "tests": {
+    "check_nutrition": "FAIL38: nutrition review wrongly executes saved-plan read and returns No saved plan.",
+    "explain_sleep": "FAIL38: entire sleep-review question interpreted as food requiring quantity.",
+    "next_best_focus": "Response observed, Gemini succeeded in8041ms with55credits; reply states no selected health context. Generic proposed navigation present in38.",
+    "review_my_day": "FAIL38: Gemini succeeded in4444ms with41credits, but client automatically navigates to Food Diary instead of keeping response in chat.",
+    "safety_report_without_reason_and_consent": "No submit; remote count0.",
+    "safety_report_after_reason_note_and_consent": "One open report, explicit QA note, consent persisted.",
+    "repeat_report": "UI does not reopen submit sheet; remote count remains1."
+  },
+  "existing39_fixes": [
+    "CoachFoodTurnParser read-only starter admission",
+    "classifyCoachRequest reviewProgress prevents smartPlanIntent routing",
+    "CoachActionPresentationPolicy whole-word direct navigation prevents review substring matching view",
+    "test/features/intelligence_center/bil39_four_starters_widget_test.dart exercises all8 EN/AR actual starter widgets against unsolicited daily_log action"
+  ],
+  "cloud": {
+    "focus_usage": [
+      {
+        "request_fingerprint": "a03ec70c7e0fb679391c580160429b3b",
+        "created_at": "2026-10-26 15:53:09.638896+00",
+        "state": "succeeded",
+        "provider": "gemini",
+        "model": "gemini-3.8-flash",
+        "latency_ms": 8041,
+        "credit_reserved": 100,
+        "credit_actual": 55,
+        "completed_at": "2026-10-26 15:53:17.865004+00"
+      }
+    ],
+    "day_usage": [
+      {
+        "request_fingerprint": "d55828faac29eb023aca8abddca39c4e",
+        "created_at": "2026-10-26 16:06:59.487324+00",
+        "state": "succeeded",
+        "provider": "gemini",
+        "model": "gemini-3.8-flash",
+        "latency_ms": 4444,
+        "credit_actual": 41,
+        "completed_at": "2026-10-26 16:07:03.711175+00"
+      }
+    ],
+    "final_starter_window": [
+      {
+        "read_at": "2026-10-26 16:10:34.797564+00",
+        "provider_requests_in_starter_window": 2,
+        "total_actual_credit": "96",
+        "wallet": {
+          "used": 244,
+          "granted": 5000,
+          "reserved": 0
+        }
+      }
+    ],
+    "reports_before": [
+      {
+        "read_at": "2026-10-26 15:58:14.433493+00",
+        "reports": 0
+      }
+    ],
+    "reports_after": [
+      {
+        "read_at": "2026-10-26 16:02:15.93425+00",
+        "report_fingerprint": "26d246e7f914e56fb6007fd30bf431e7",
+        "reason": "other",
+        "status": "open",
+        "runtime": "cloud_personalized",
+        "locale": "en",
+        "consent_recorded": true,
+        "explicitly_qa_marked": true,
+        "answer_fingerprint": "16572b7f176c2ecd2761aebe5978e673",
+        "answer_length": 309,
+        "created_at": "2026-10-26 16:01:42.690335+00"
+      }
+    ],
+    "reports_repeat": [
+      {
+        "read_at": "2026-10-26 16:04:15.318813+00",
+        "reports": 1,
+        "wallet": {
+          "used": 203,
+          "granted": 5000,
+          "reserved": 0
+        }
+      }
+    ]
+  },
+  "images": [
+    {
+      "name": "348-coach-new-conversation-starters.png",
+      "sha256": "2094587bf90eb6ef829cc71dbfbded1f1eb3c1a61c87c03da1013698f2a3e3bd"
+    },
+    {
+      "name": "350-check-nutrition-response.png",
+      "sha256": "fe1a8203169b5a997e5d1c7407cb4986305527bba05d4cac4444634b77174d0f"
+    },
+    {
+      "name": "354-sleep-starter-response.png",
+      "sha256": "9e04ef337c8bd57b8a9ab16651950eedabcbd5dba8e25ce172a342998e46be3a"
+    },
+    {
+      "name": "358-focus-starter-inflight.png",
+      "sha256": "5457823d415fbeed880058b5cc914e1b01907837a39c9bd79c25e0feeb8f9534"
+    },
+    {
+      "name": "360-focus-starter-native.png",
+      "sha256": "f6538796cd66bac07ce339b178a3f51a51e868edeb27a90a0a9327dcacc6e9c9"
+    },
+    {
+      "name": "361-coach-report-advice-dialog.png",
+      "sha256": "79bb8e35659c9c247852f57bcfde56f36c87bded25642b9cfe91a785d69062e2"
+    },
+    {
+      "name": "362-coach-report-without-consent.png",
+      "sha256": "73f2000541e6dbd27bd6391d00c4dbd791728d1eaa9390e9fd028d35fcfddf79"
+    },
+    {
+      "name": "365-coach-report-consented.png",
+      "sha256": "bfea7d52c478302ac91a1ff084d3c58840dfaaab9d49e6b112fef87bef9a506f"
+    },
+    {
+      "name": "366-coach-report-submitted.png",
+      "sha256": "e4dc456ca8a9216b91c966234714926be7db72a60ad80d302eba2b3b743880a7"
+    },
+    {
+      "name": "367-coach-report-repeat-prevented.png",
+      "sha256": "7a4e4964bd0d248025cdfc9491e375fad4afa47459b627f98f7ce0b4c68046b2"
+    },
+    {
+      "name": "370-day-review-inflight.png",
+      "sha256": "d30c7f6fc55b8512ef32a0fb3e3617e7759955e78b02a27cd13054065fa406dc"
+    },
+    {
+      "name": "371-day-review-response.png",
+      "sha256": "8bd33694cc64a89baacbb850412f84b6a9032e07237d44f533198b3202dc0b91"
+    }
+  ],
+  "limits": [
+    "All four native results are from38, not39.",
+    "No renewed full suite; existing39 fixes retained without duplicate editing.",
+    "Two real Gemini calls in the bounded window; total96credits; wallet used148->244; reserved0.",
+    "QA AI report remains open and marked test; no moderation audit deleted.",
+    "No additional Gemini context category enabled."
+  ]
+}

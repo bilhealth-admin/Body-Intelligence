@@ -31,7 +31,7 @@ class _ManagementNotice extends StatelessWidget {
             alignment: AlignmentDirectional.centerStart,
             child: TextButton.icon(
               onPressed: action,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(
@@ -176,7 +176,7 @@ class _OperationNoticeState extends State<_OperationNotice> {
       children: [
         if (state.phase == CircleMutationPhase.submitting ||
             state.phase == CircleMutationPhase.readingBack)
-          const LinearProgressIndicator(),
+          const BilFeatureWelcomeStatus(),
         _ManagementNotice(text: text),
         if (_error) _ManagementNotice(text: _managementStepError(context)),
         if (state.phase == CircleMutationPhase.readbackRequired)
@@ -185,7 +185,7 @@ class _OperationNoticeState extends State<_OperationNotice> {
             onPressed: _running
                 ? null
                 : () => _run(() => controller.retryReadback(operationKey)),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(
@@ -203,7 +203,7 @@ class _OperationNoticeState extends State<_OperationNotice> {
             onPressed: _running
                 ? null
                 : () => _run(() => controller.resumeMedia(operationKey)),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.upload_rounded),
             ),
             label: Text(
@@ -216,7 +216,7 @@ class _OperationNoticeState extends State<_OperationNotice> {
             onPressed: _running
                 ? null
                 : () => _run(() => controller.retryReadback(operationKey)),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(
@@ -319,7 +319,7 @@ class CircleVerifiedMedia extends StatelessWidget {
                 errorBuilder: (context, _, _) => unavailable(),
                 loadingBuilder: (context, child, progress) => progress == null
                     ? child
-                    : const Center(child: CircularProgressIndicator()),
+                    : const Center(child: BilFeatureWelcomeStatus()),
               ),
       ),
     );

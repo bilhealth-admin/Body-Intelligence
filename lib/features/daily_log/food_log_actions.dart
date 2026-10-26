@@ -18,6 +18,7 @@ extension _FoodLogActions on _FoodLogPageState {
       var showQuantityGuide = _tourVisible;
       var quantityEdited = false;
       var dialogSubmitted = false;
+      String? quantityError;
       final quantity = await showDialog<double>(
         context: context,
         builder: (dialogContext) => StatefulBuilder(
@@ -91,7 +92,10 @@ extension _FoodLogActions on _FoodLogPageState {
                       child: TextFormField(
                         onChanged: (value) {
                           enteredQuantity = value;
-                          refreshDialog(() => quantityEdited = true);
+                          refreshDialog(() {
+                            quantityEdited = true;
+                            quantityError = null;
+                          });
                         },
                         key: const Key('food-log-serving-quantity-field'),
                         initialValue: enteredQuantity,
@@ -102,6 +106,12 @@ extension _FoodLogActions on _FoodLogPageState {
                         decoration: InputDecoration(
                           labelText:
                               '${food.servingUnit} ${_t(dialogContext, 'Quantity')}',
+                          error: quantityError == null
+                              ? null
+                              : Text(
+                                  quantityError!,
+                                  key: const Key('food-log-serving-error'),
+                                ),
                         ),
                       ),
                     ),
@@ -124,11 +134,19 @@ extension _FoodLogActions on _FoodLogPageState {
                     key: const Key('food-log-serving-confirm'),
                     onPressed: () {
                       if (dialogSubmitted) return;
+                      final value = parseNutritionNumber(enteredQuantity);
+                      if (value == null || value <= 0 || value > 100000) {
+                        refreshDialog(() {
+                          quantityError = nutritionEntryText(
+                            dialogContext,
+                            'Enter a quantity greater than 0 and at most 100000.',
+                            'أدخل كمية أكبر من صفر ولا تتجاوز 100000.',
+                          );
+                        });
+                        return;
+                      }
                       dialogSubmitted = true;
-                      Navigator.pop(
-                        dialogContext,
-                        double.tryParse(enteredQuantity.replaceAll(',', '.')),
-                      );
+                      Navigator.pop(dialogContext, value);
                     },
                     child: Text(_t(dialogContext, 'Add')),
                   ),

@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 
@@ -293,9 +294,7 @@ class _QuickMacroEntryDialogState extends State<_QuickMacroEntryDialog> {
                             child: saving
                                 ? const SizedBox.square(
                                     dimension: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
+                                    child: BilFeatureWelcomeStatus(),
                                   )
                                 : Text(copy('Add', 'إضافة')),
                           ),

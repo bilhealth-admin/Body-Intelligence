@@ -1,5 +1,7 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -185,7 +187,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/dashboard'),
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
           ),
           title: Text(wellnessCopy(context, 'BIL recipes', 'وصفات BIL')),
           actions: [
@@ -213,7 +215,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           future: _catalog,
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: BilFeatureWelcomeStatus());
             }
             if (snapshot.hasError || !snapshot.hasData) {
               return _CatalogUnavailable(onRetry: _retry);
@@ -228,7 +230,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
 
   Widget _buildCatalog(List<RecipeCatalogSummary> source) {
     if (_favoritesLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: BilFeatureWelcomeStatus());
     }
     if (_favoritesError != null) {
       return _CatalogUnavailable(onRetry: _loadFavorites);
@@ -432,7 +434,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
                               _cuisine = section.key;
                               _visibleLimit = _filteredPageSize;
                             }),
-                            icon: const BilGlassPressFeedback(
+                            icon: const BilNavigationFeedback(
                               child: Icon(Icons.arrow_forward_rounded),
                             ),
                           ),
@@ -506,7 +508,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
                   key: const Key('recipe-show-more'),
                   onPressed: () =>
                       setState(() => _visibleLimit += _filteredPageSize),
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.expand_more_rounded),
                   ),
                   label: Text(wellnessCopy(context, 'More', 'المزيد')),

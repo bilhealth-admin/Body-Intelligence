@@ -252,6 +252,7 @@ void main() {
               selectedPlan: homePlan,
               showWarmup: warmup,
             );
+            await settleVisualAssetImages(tester);
             final name =
                 'smart_plan_home_${warmup ? 'warmup' : 'exercise'}_${locale}_${dark ? 'dark' : 'light'}';
             final boundary = tester.renderObject<RenderRepaintBoundary>(
@@ -403,6 +404,7 @@ void main() {
         tester,
       ) async {
         await pump(tester, locale: locale, dark: dark);
+        await settleVisualAssetImages(tester);
         final semantics = tester.ensureSemantics();
         try {
           await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -443,6 +445,35 @@ void main() {
           );
           await tester.ensureVisible(check);
           await tester.pumpAndSettle();
+          final previous = find.widgetWithText(
+            OutlinedButton,
+            locale == 'ar' ? 'التمرين السابق' : 'Previous exercise',
+          );
+          final next = find.byKey(
+            const ValueKey('bil-smart-plan-session-next'),
+          );
+          final previousRect = tester.getRect(previous);
+          final nextRect = tester.getRect(next);
+          expect(previousRect.top, closeTo(nextRect.top, .5));
+          expect(previousRect.width, closeTo(nextRect.width, .5));
+          expect(previousRect.height, greaterThanOrEqualTo(44));
+          expect(nextRect.height, greaterThanOrEqualTo(44));
+          expect(previousRect.overlaps(nextRect), isFalse);
+          final title = find.byKey(
+            const ValueKey('bil-smart-plan-session-exercise'),
+          );
+          final originalTitle = tester.widget<Text>(title).data;
+          expect(tester.widget<OutlinedButton>(previous).onPressed, isNull);
+          await tester.ensureVisible(next);
+          await tester.pumpAndSettle();
+          await tester.tap(next);
+          await tester.pumpAndSettle();
+          expect(tester.widget<Text>(title).data, isNot(originalTitle));
+          await tester.ensureVisible(previous);
+          await tester.pumpAndSettle();
+          await tester.tap(previous);
+          await tester.pumpAndSettle();
+          expect(tester.widget<Text>(title).data, originalTitle);
           expect(
             Directionality.of(
               tester.element(find.byType(BilSmartPlanSessionPage)),

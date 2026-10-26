@@ -1,3 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -109,14 +112,14 @@ class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(copy('title')),
-          leading: BackButton(onPressed: leave),
+          leading: BilCrystalArrow(child: BackButton(onPressed: leave)),
         ),
         body: ListView(
           padding: PremiumDesignTokens.screenPadding.add(
             const EdgeInsets.only(bottom: 48),
           ),
           children: [
-            if (selectedLog.isLoading) const LinearProgressIndicator(),
+            if (selectedLog.isLoading) const BilFeatureWelcomeStatus(),
             DiaryDateNavigator(
               date: date,
               arabic: arabic,
@@ -128,7 +131,7 @@ class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
                         date.add(const Duration(days: 1))
                   : null,
               onPick: () async {
-                final picked = await showDatePicker(
+                final picked = await showBilCrystalDatePicker(
                   context: context,
                   initialDate: date,
                   firstDate: DateTime(2000),

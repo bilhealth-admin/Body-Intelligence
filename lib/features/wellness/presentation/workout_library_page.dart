@@ -275,7 +275,7 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
                   : () => context.canPop()
                         ? context.pop()
                         : context.go('/dashboard'),
-              icon: const BackButtonIcon(),
+              icon: const BilCrystalArrow(child: BackButtonIcon()),
             ),
             centerTitle: true,
             title: Text(pageTitle),
@@ -373,7 +373,7 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
                                   value: multiSelection.contains(item.id),
                                   onChanged: (_) => _toggleMulti(item.id),
                                 )
-                              : const BilGlassPressFeedback(
+                              : const BilNavigationFeedback(
                                   child: Icon(Icons.chevron_right_rounded),
                                 ),
                           onTap: () => multiSelecting
@@ -437,7 +437,7 @@ class _WorkoutLibraryPageState extends ConsumerState<WorkoutLibraryPage>
               else if (libraryTab == 0 && historyLoading)
                 const Padding(
                   padding: EdgeInsets.all(48),
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: BilFeatureWelcomeStatus()),
                 )
               else if (libraryTab == 0 && historyError != null)
                 _WorkoutHistoryError(

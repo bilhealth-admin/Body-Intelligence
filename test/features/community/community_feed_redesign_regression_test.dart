@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'package:body_intelligence_log/features/community/domain/community_feed_modes.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
@@ -142,7 +143,7 @@ void main() {
       await tester.tap(find.byKey(const Key('community-hub-following-tab')));
       await tester.pump();
       expect(find.text('explore stable post'), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       repository.following.complete(
         repository.page(CommunityFeedMode.following),
       );
@@ -170,7 +171,7 @@ void main() {
         ),
         hasLength(1),
       );
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
@@ -203,10 +204,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(
-          of: action,
-          matching: find.byType(CircularProgressIndicator),
-        ),
+        find.descendant(of: action, matching: bilWaitingIndicators()),
         findsNothing,
       );
       expect(tester.widget<TextButton>(action).onPressed, isNull);

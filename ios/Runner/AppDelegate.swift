@@ -58,6 +58,9 @@ import UserNotifications
     BILFitnessBleBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILFitnessBleBridge")!)
     BILSystemCryptoBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILSystemCryptoBridge")!)
     BILSettingsSymbolsBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILSettingsSymbolsBridge")!)
+    let markdownRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILCoachMarkdown")!
+    markdownRegistrar.register(BILCoachMarkdownFactory(registrar: markdownRegistrar),
+                               withId: "bil/coach_markdown")
     let appleLifecycleRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILAppleSignInLifecycleBridge")!
     appleSignInLifecycleBridge = BILAppleSignInLifecycleBridge(messenger: appleLifecycleRegistrar.messenger())
     let appAttestRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILAppAttestBridge")!

@@ -37,6 +37,7 @@ extension _CommunityChatOwnerScope on _CommunityChatPageState {
     _conversationChanges = null;
     _auth = null;
     _rows = const [];
+    _presentation.reset('');
     _messages = Future.value(const []);
     _hasOlder = false;
     _loadingOlder = false;
@@ -70,6 +71,7 @@ extension _CommunityChatOwnerScope on _CommunityChatPageState {
       return;
     }
     final binding = ++_binding;
+    _presentation.reset('dm:$_ownerId:$_peerId:$binding');
     final auth = _repository!.communitySocialClient.auth;
     var deliveredOwner = auth.currentUser?.id;
     _auth = auth.onAuthStateChange.listen(

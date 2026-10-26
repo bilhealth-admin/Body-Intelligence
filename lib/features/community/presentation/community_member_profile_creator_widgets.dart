@@ -201,7 +201,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
       context: context,
       builder: (dialogContext) => visit.guard(
         BilPearlMaterialAlertDialog(
-          icon: BilGlassPressFeedback(child: Icon(icon)),
+          icon: BilNavigationFeedback(child: Icon(icon)),
           title: Text(title),
           content: Text(body),
           actions: [
@@ -511,7 +511,7 @@ class _CommunityCreatorRewardsSnapshot extends StatelessWidget {
                   onPressed: () {
                     if (visit.isCurrent()) context.push('/community/rewards');
                   },
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.chevron_right_rounded),
                   ),
                 ),
@@ -608,7 +608,7 @@ class _CreatorToolTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            BilGlassPressFeedback(child: Icon(icon, size: 20)),
+            BilNavigationFeedback(child: Icon(icon, size: 20)),
             const SizedBox(width: 8),
             Expanded(
               child: Text(label, style: Theme.of(context).textTheme.labelLarge),
@@ -635,7 +635,7 @@ class _CreatorMetricRow extends StatelessWidget {
   Widget build(BuildContext context) => ListTile(
     dense: true,
     contentPadding: EdgeInsets.zero,
-    leading: BilGlassPressFeedback(child: Icon(icon)),
+    leading: BilNavigationFeedback(child: Icon(icon)),
     title: Text(label),
     trailing: Text(
       value,

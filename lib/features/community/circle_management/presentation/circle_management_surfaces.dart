@@ -1,4 +1,6 @@
-import '../../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
+import '../../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -137,7 +139,7 @@ class _CircleManagementPanelState extends State<CircleManagementPanel> {
                             'العودة إلى إدارة الدوائر',
                           ),
                           onPressed: () => _show(_ManagementView.menu),
-                          icon: const BackButtonIcon(),
+                          icon: const BilCrystalArrow(child: BackButtonIcon()),
                         ),
                       Expanded(
                         child: Text(
@@ -171,7 +173,7 @@ class _CircleManagementPanelState extends State<CircleManagementPanel> {
                           padding: const EdgeInsets.all(16),
                           children: [
                             if (controller.capabilitiesLoading)
-                              const LinearProgressIndicator(),
+                              const BilFeatureWelcomeStatus(),
                             if (controller.operationRecoveryError != null)
                               _ManagementNotice(
                                 key: const Key(
@@ -301,7 +303,7 @@ class _CircleManagementPanelState extends State<CircleManagementPanel> {
                                 onPressed: controller.capabilitiesLoading
                                     ? null
                                     : controller.loadCapabilities,
-                                icon: const BilGlassPressFeedback(
+                                icon: const BilNavigationFeedback(
                                   child: Icon(Icons.refresh_rounded),
                                 ),
                                 label: Text(

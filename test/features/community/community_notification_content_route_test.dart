@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -352,12 +353,7 @@ Future<void> _pumpUntil(WidgetTester tester, bool Function() ready) async {
 }
 
 Future<void> _settle(WidgetTester tester) async {
-  await _pumpUntil(
-    tester,
-    () =>
-        find.byType(CircularProgressIndicator).evaluate().isEmpty &&
-        find.byType(LinearProgressIndicator).evaluate().isEmpty,
-  );
+  await _pumpUntil(tester, () => bilWaitingIndicators().evaluate().isEmpty);
   await tester.pumpAndSettle();
 }
 

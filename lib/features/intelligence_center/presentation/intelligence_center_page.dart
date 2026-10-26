@@ -1,15 +1,21 @@
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import '../../../app/router/bil_primary_navigation.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../domain/bil_tool_registry.dart';
 import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../smart_plan/services/bil_smart_plan_coach.dart';
 import '../services/coach_request_intent.dart';
+import '../services/coach_weight_history_readout.dart';
 import '../../smart_plan/data/bil_smart_plan_repository.dart';
 import '../../smart_plan/domain/bil_smart_plan.dart';
 import '../../smart_plan/services/bil_smart_plan_catalog.dart';
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'coach_thinking_status.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import 'coach_conversation_restart_pull.dart';
+import 'coach_tools_locale_copy.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -92,6 +98,7 @@ import '../services/coach_language_resolver.dart';
 import '../services/coach_speech_policy.dart';
 import '../services/coach_voice_turn_policy.dart';
 import '../services/coach_daily_brief.dart';
+import '../services/coach_overview_context_provider.dart';
 import '../services/coach_memory_repository.dart';
 import '../settings_commands/coach_unit_settings_command.dart';
 import '../settings_commands/coach_reminder_command.dart';
@@ -100,6 +107,7 @@ import '../services/coach_native_command_repository.dart';
 import '../services/coach_voice_transcript_normalizer.dart';
 import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
+import '../services/coach_context_reader.dart';
 import '../services/local_coach_api.dart';
 import '../services/remote_ai_consent_coordinator.dart';
 import '../food_flow/coach_food_flow.dart';
@@ -135,6 +143,8 @@ import '../../nutrition/presentation/meal_vision_consent_gate.dart';
 import '../intelligence_locale_copy.dart';
 import '../ai_coach_chat_copy.dart';
 import 'coach_message_text.dart';
+import 'coach_native_markdown.dart';
+import 'coach_sent_message_arrival.dart';
 import 'coach_reply_arrival.dart';
 import '../../../shared/widgets/bil_reference_bottom_bar.dart';
 import '../../../app/router/bil_quick_add_presenter.dart';
@@ -163,6 +173,7 @@ part 'intelligence_conversation_voice_transcript.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_media_confirmation.dart';
 part 'intelligence_query_flow.dart';
+part 'intelligence_query_guard_flow.dart';
 part 'intelligence_smart_plan_flow.dart';
 part 'intelligence_query_retry.dart';
 part 'intelligence_query_decision.dart';
@@ -235,6 +246,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final question = TextEditingController();
   final questionFocus = FocusNode(debugLabel: 'coach-composer');
   final conversationScroll = ScrollController();
+  final outgoingMessageOrigins = <String, Rect>{};
   final coachMessageReadingAnchors = <String, GlobalKey>{};
   String? coachMessageReadingAnchorScope;
   final speech = SpeechToText();
@@ -282,6 +294,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   bool conversationReady = false;
   bool conversationLoadFailed = false;
   bool conversationHistoryOpening = false;
+  bool conversationRestarting = false;
   bool coachMenuOpening = false;
   bool entryWelcomeVisible = true;
   String? activeConversationId;
@@ -327,6 +340,10 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void initState() {
     super.initState();
+    if (widget.startWithVisionCapture ||
+        (widget.initialBarcode?.trim().isNotEmpty ?? false)) {
+      _referenceOverview = false;
+    }
     entryWelcomeTimer = Timer(bilFeatureEntryDuration, () {
       if (mounted) setState(() => entryWelcomeVisible = false);
     });
@@ -400,9 +417,13 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   void didUpdateWidget(covariant IntelligenceCenterPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialBarcode != widget.initialBarcode) {
+      if (widget.initialBarcode?.trim().isNotEmpty == true) {
+        _updateState(() => _referenceOverview = false);
+      }
       _applyInitialBarcode(widget.initialBarcode);
     }
     if (!oldWidget.startWithVisionCapture && widget.startWithVisionCapture) {
+      _updateState(() => _referenceOverview = false);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _analyzeFoodImageInChat();
       });
@@ -520,6 +541,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   Future<void> _openCoachMenuSheet(BuildContext anchor) async {
     if (!mounted ||
         !conversationReady ||
+        conversationRestarting ||
         coachMenuOpening ||
         foodImageFlowOpening) {
       return;
@@ -560,7 +582,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     super.dispose();
   }
 
-  bool _referenceOverview = false;
+  // Authorized Coach opens on Overview, not a blank conversation.
+  // History is still loaded and retained by the existing owner-scoped store.
+  bool _referenceOverview = true;
   bool _referenceNavigating = false;
 
   @override

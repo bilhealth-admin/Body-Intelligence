@@ -96,7 +96,7 @@ extension _CommunityPostComposerImages on _CommunityPostComposerPageState {
                     _selectingImage
                         ? const SizedBox.square(
                             dimension: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           )
                         : Icon(
                             Theme.of(context).platform == TargetPlatform.iOS

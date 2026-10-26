@@ -61,6 +61,8 @@ abstract final class CommunitySocialRuntimeCopy {
     'Your BIL Code is unavailable. Sign in, complete your Community profile, and try again.',
     'Your old code will stop working. Friends will need the new one.',
     'This is you',
+    'Remove friend?',
+    'Unfollow',
   ];
 
   static const supported = <String>{

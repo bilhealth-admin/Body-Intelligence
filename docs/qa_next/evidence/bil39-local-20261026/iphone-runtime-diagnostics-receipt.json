@@ -1,0 +1,125 @@
+{
+  "schema": "bil39.iphone_runtime_diagnostics.v1",
+  "recorded_at": "2026-10-26T18:07:33.921Z",
+  "scope": "Real connected iPhone running installed BIL38, not signed39",
+  "installed": {
+    "bundle": "com.bilhealth.bodyintelligencelog",
+    "version": "1.0.0",
+    "build": "38",
+    "minimum_ios": "18.0",
+    "process_id": 32314,
+    "installation_path_matches_coredevice_and_sysmon": true
+  },
+  "attachment": {
+    "name": "IN_PROGRESS_sysdiagnose_2026.08.13_20-28-44+0300_iPhone-OS_iPhone_23G71.tmp.zip",
+    "zip_crc_valid": true,
+    "entries": 138,
+    "diagnostic_payload_files": 0,
+    "appledouble_metadata_bytes": 176,
+    "status": "NO_DIAGNOSTIC_PAYLOAD"
+  },
+  "syslog": {
+    "duration_seconds": 60,
+    "records": 1475,
+    "all_records_match_pid": true,
+    "levels": {
+      "DEBUG": 990,
+      "NOTICE": 263,
+      "INFO": 222
+    },
+    "technical_groups": [
+      {
+        "count": 2,
+        "image": "/System/Library/Frameworks/Security.framework/Security",
+        "level": "NOTICE",
+        "message": "SecTaskLoadEntitlements: failed to get cs_flags, error=1, pid=[pid]"
+      },
+      {
+        "count": 1,
+        "image": "/System/Library/Frameworks/WebKit.framework/WebKit",
+        "level": "NOTICE",
+        "message": "WebContent[32322]: [webPageID=8] WebPage::markLayersVolatile: Failed to mark all layers as volatile, will retry in 20 ms"
+      },
+      {
+        "count": 1,
+        "image": "/System/Library/Frameworks/WebKit.framework/WebKit",
+        "level": "NOTICE",
+        "message": "WebContent[32322] Memory pressure relief: Total: res = 13959168/18055168/4096000, res+swap = 32049208/30541880/-1507328"
+      },
+      {
+        "count": 3,
+        "image": "/System/Library/Frameworks/Network.framework/Network",
+        "level": "DEBUG",
+        "message": "nw_path_necp_check_for_updates Failed to copy updated result (2)"
+      },
+      {
+        "count": 1,
+        "image": "/System/Library/Frameworks/CFNetwork.framework/CFNetwork",
+        "level": "NOTICE",
+        "message": "Task <[id]>.<18> resuming, timeouts(10.0, 604800.0) qos([address]) voucher((null)) activity([id])"
+      }
+    ],
+    "interpretation": "No ERROR/FAULT or Flutter exception observed in this bounded window. OS framework notices are retained, not treated as proven app defects."
+  },
+  "memory": {
+    "pid": 32314,
+    "resident_bytes": 143900672,
+    "physical_footprint_bytes": 324470912,
+    "cpu_usage_raw": 0.12140114582207329,
+    "scope": "one snapshot; no leak or scrolling-performance verdict"
+  },
+  "network": {
+    "samples": 16,
+    "pids": [
+      32314
+    ],
+    "observed_seconds": 15.689,
+    "tx_bytes_after_first": 3223,
+    "rx_bytes_after_first": 2283,
+    "first_sample_is_lifetime_baseline": true
+  },
+  "display_fps": {
+    "samples": 18,
+    "min": 0,
+    "max": 1,
+    "scope": "display-wide idle; no scrolling or smoothness verdict"
+  },
+  "crash_review": {
+    "file": "JetsamEvent-2026-10-26-201529.ips",
+    "date": "2026-10-26 20:15:29.27 +0300",
+    "runner_entries": 3,
+    "runner_termination_reasons": 0,
+    "current_bil_binary_uuid_matches": 0,
+    "attribution": "No BIL-linked termination proven; do not call this an app crash or use it to exonerate all history."
+  },
+  "permissions": {
+    "installed_purpose_keys": [
+      "NSBluetoothPeripheralUsageDescription",
+      "NSSpeechRecognitionUsageDescription",
+      "NSMicrophoneUsageDescription",
+      "NSHealthShareUsageDescription",
+      "NSHealthUpdateUsageDescription",
+      "NSPhotoLibraryUsageDescription",
+      "NSCameraUsageDescription",
+      "NSBluetoothAlwaysUsageDescription"
+    ],
+    "scope": "Installed purpose strings plus actual native/Dart permission call sites. Does not expose or prove TCC/Health read grants.",
+    "functional_permissions_removed": [],
+    "legacy_metadata_cleanup": "NSBluetoothPeripheralUsageDescription removed from39 only; NSBluetoothAlwaysUsageDescription retained"
+  },
+  "raw_evidence_policy": "All phone logs, process inventories, full crash report and device captures stay privately outside Git. Public record contains redacted summaries and hashes only.",
+  "raw_hashes": {
+    "syslog": "24e72a69390eba03cca63d83eaebefa52bc8d2a9b12abe7ff330b6c6dea10862",
+    "crash": "681ddcba2933722a56fe6c8d7567f7c96005e66ae8147b377ffce3e1ac071425",
+    "sysmon": "65f689b5a6a71719b54ee05449897f0f2eb823afd7dcbd56f19a9cf8397a3e16",
+    "network": "0cf88d201a923db97c7db2f75986bc542a1caa6ba9063b7fe007d51e2844d444",
+    "fps": "595e33c1781277df5ab59d0dd5d12a0900da546b0ce96e81f2e1ad0fd744e729",
+    "installed_metadata": "4528d0e4e7507c9ad9c605be224164e99eb4b5821ab81d17215b95e123766f4d"
+  },
+  "remaining": [
+    "Performance during real scrolling and repeated navigation",
+    "Further causal investigation of any recurring OS framework notices",
+    "Native39 behavior and bundled permission metadata after signing",
+    "Source/tool cleanup only when no current dependency remains; no blind deletion"
+  ]
+}

@@ -53,7 +53,7 @@ class _FastingStatusPanel extends StatelessWidget {
           key: const Key('fasting-status-icon'),
           radius: 28,
           backgroundColor: const Color(0xFF19C6DF),
-          child: BilGlassPressFeedback(
+          child: BilNavigationFeedback(
             child: Icon(icon, color: const Color(0xFF071829)),
           ),
         );

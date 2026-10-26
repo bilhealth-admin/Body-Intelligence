@@ -184,7 +184,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                   : () => context.canPop()
                         ? context.pop()
                         : context.go('/dashboard'),
-              icon: const BackButtonIcon(),
+              icon: const BilCrystalArrow(child: BackButtonIcon()),
             ),
             title: Text(
               tr('Intermittent fasting', 'الصيام المتقطع'),
@@ -194,12 +194,12 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
             ),
           ),
           body: loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: BilFeatureWelcomeStatus())
               : loadError != null
               ? Center(
                   child: FilledButton.icon(
                     onPressed: _load,
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.refresh_rounded),
                     ),
                     label: Text(tr('Retry', 'إعادة المحاولة')),
@@ -464,11 +464,9 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                                 icon: busy
                                     ? const SizedBox.square(
                                         dimension: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: BilFeatureWelcomeStatus(),
                                       )
-                                    : BilGlassPressFeedback(
+                                    : BilNavigationFeedback(
                                         child: Icon(
                                           active
                                               ? Icons.stop_rounded

@@ -1,0 +1,35 @@
+{
+  "classification": "TEST_FIXTURE_ORDER_DEPENDENCE_CORRECTION_NO_PRODUCT_PRIVACY_CHANGE",
+  "utc": "2026-10-26T20:35:54.127Z",
+  "source_hashes": {
+    "test/features/ads/admob_request_privacy_boundary_test.dart": "c62528d8fc6986dd4fd2a72f45fa7a2c82b13e353db7639567d93b56d356a38e"
+  },
+  "root_cause": "Native SDK singleton registers _init once per isolate. Random order may initialize first in another case; optional at-most-once _init remains first when present; required privacy-off/init/load order and payload/revocation assertions preserved.",
+  "red": {
+    "file": "logs/admob-request-random-order-v1.jsonl",
+    "sha256": "c95efc3647c825fb711d1d07daf4cf7d4c9c458ac026a7a7d8452983a3f6eaee"
+  },
+  "green": {
+    "file": "logs/admob-request-random-order-green-v2.jsonl",
+    "sha256": "8eb438aa3bf8073310c6decf71b6f3c5e4e600b0525ea3dbf7a4fe8d723183f6",
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "done": {
+      "success": true,
+      "type": "done",
+      "time": 6986
+    },
+    "cases": [
+      "fresh denial cannot initialize SDK or issue a native request",
+      "revocation during SDK initialization blocks load: owner=false",
+      "native request contains no health, owner or targeting payload",
+      "revocation during SDK initialization blocks load: owner=true"
+    ]
+  },
+  "analyze": {
+    "file": "logs/admob-request-order-analyze-v3.log",
+    "sha256": "033e081c3b07b66075b683c5672eb796372d92965e8453781a29931d9f849327",
+    "issues": 0
+  }
+}

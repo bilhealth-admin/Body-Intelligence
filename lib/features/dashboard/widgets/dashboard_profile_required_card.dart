@@ -1,5 +1,5 @@
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -122,7 +122,7 @@ class _EmptyMetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BilGlassPressFeedback(
+            BilNavigationFeedback(
               child: Icon(icon, color: Theme.of(context).colorScheme.primary),
             ),
             const SizedBox(height: 12),

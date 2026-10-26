@@ -185,7 +185,7 @@ void _addMasterContractTests() {
         );
         expect(tester.widget<CheckboxListTile>(sibling).value, isTrue);
         expect(tester.renderObject(find.byType(ListView)), same(body));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         await tester.tap(_toggleTarget(row));
         await tester.pump(const Duration(milliseconds: 50));
         expect(push.syncCalls, 0);
@@ -299,7 +299,7 @@ void _addMasterContractTests() {
           reason: 'Daily changes must not issue cloud-category writes',
         );
         expect(tester.renderObject(find.byType(ListView)), same(pageBody));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         expect(tester.takeException(), isNull);
         SharedPreferences.resetStatic();
         expect(
@@ -368,7 +368,7 @@ void _addMasterContractTests() {
         await tester.pump(const Duration(milliseconds: 50));
         expect(push.setCalls, 1);
         expect(tester.renderObject(find.byType(ListView)), same(body));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         completed.complete();
         await tester.pumpAndSettle();
         expect(tester.widget<SwitchListTile>(cloud).value, isFalse);
@@ -398,7 +398,7 @@ void _addMasterContractTests() {
         expect(tester.widget<CheckboxListTile>(row).value, isFalse);
         expect(tester.widget<CheckboxListTile>(row).onChanged, isNull);
         expect(tester.renderObject(find.byType(ListView)), same(body));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         expect(
           (await NotificationDeliveryPreferencesStore().load()).allows(
             NotificationCategory.newMessage,

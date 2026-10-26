@@ -1,6 +1,6 @@
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -46,7 +46,7 @@ class NutritionProgressCard extends StatelessWidget {
                   CircleAvatar(
                     radius: 18,
                     backgroundColor: color.withValues(alpha: 0.14),
-                    child: BilGlassPressFeedback(
+                    child: BilNavigationFeedback(
                       child: Icon(icon, color: color, size: 20),
                     ),
                   ),

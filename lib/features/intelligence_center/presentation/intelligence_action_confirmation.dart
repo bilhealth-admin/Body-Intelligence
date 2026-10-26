@@ -21,7 +21,7 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
       context: context,
       builder: (dialogContext) => BilPearlMaterialAlertDialog(
         scrollable: true,
-        icon: BilGlassPressFeedback(
+        icon: BilNavigationFeedback(
           child: Icon(
             action.destructive
                 ? BilSemanticIcons.deleteAccount
@@ -77,7 +77,7 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
             barrierDismissible: false,
             builder: (dialogContext) => BilPearlMaterialAlertDialog(
               scrollable: true,
-              icon: BilGlassPressFeedback(
+              icon: BilNavigationFeedback(
                 child: Icon(
                   BilSemanticIcons.deleteAccount,
                   color: Theme.of(context).colorScheme.error,

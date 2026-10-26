@@ -128,16 +128,22 @@ void main() {
       await _pumpBoundedRouteFrames(tester);
       await tester.tap(entry);
       await _pumpBoundedRouteFrames(tester);
+      // The approved BIL39 entry is Overview. Header/System Back from that
+      // entry must still return to More, without changing workspace state.
+      final overview = find.byKey(const Key('coach-reference-workspace'));
       for (
         var attempt = 0;
-        attempt < 35 &&
-            find.byKey(const ValueKey('ai-coach-hero')).evaluate().isEmpty;
+        attempt < 35 && overview.evaluate().isEmpty;
         attempt++
       ) {
         await tester.pump(const Duration(milliseconds: 100));
       }
       expect(find.byType(IntelligenceCenterPage), findsOneWidget);
-      expect(find.byKey(const ValueKey('ai-coach-hero')), findsOneWidget);
+      expect(overview, findsOneWidget);
+      expect(
+        find.byKey(const Key('coach-workspace-open-chat')),
+        findsOneWidget,
+      );
       expect(find.byType(IntelligenceCenterPage).hitTestable(), findsOneWidget);
       expect(find.byType(SettingsPage).hitTestable(), findsNothing);
     }

@@ -76,7 +76,7 @@ class _CodeUnavailable extends StatelessWidget {
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: onRetry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
@@ -124,7 +124,7 @@ class _MemberCodeUnavailable extends StatelessWidget {
                     context.go('/community');
                   }
                 },
-                icon: const BackButtonIcon(),
+                icon: const BilCrystalArrow(child: BackButtonIcon()),
                 label: Text(
                   MaterialLocalizations.of(context).backButtonTooltip,
                 ),
@@ -160,7 +160,7 @@ class _CodeScannerFailure extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(

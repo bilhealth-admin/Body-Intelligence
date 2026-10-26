@@ -180,7 +180,7 @@ class _FoodAddActionTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        trailing: const BilGlassPressFeedback(
+        trailing: const BilNavigationFeedback(
           child: Icon(Icons.chevron_right_rounded),
         ),
         onTap: onTap,
@@ -451,10 +451,10 @@ class _RuntimeSearchStatus extends StatelessWidget {
               if (state == _RuntimeSearchUiState.searching)
                 const SizedBox.square(
                   dimension: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: BilFeatureWelcomeStatus(),
                 )
               else
-                BilGlassPressFeedback(child: Icon(icon, size: 18)),
+                BilNavigationFeedback(child: Icon(icon, size: 18)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

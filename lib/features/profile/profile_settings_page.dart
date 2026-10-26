@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
@@ -102,11 +104,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
             key: const Key('profile-settings-back'),
             tooltip: t('Back to settings', 'العودة إلى الإعدادات'),
             onPressed: saving ? null : leave,
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
           ),
         ),
         body: profileAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: BilFeatureWelcomeStatus()),
           error: (_, _) => Center(
             child: FilledButton(
               onPressed: () => ref.invalidate(userProfileProvider),
@@ -129,7 +131,7 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
               );
             }
             if (!systemAsync.hasValue) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: BilFeatureWelcomeStatus());
             }
             hydrate(profile, systemAsync.requireValue);
             if (hydrationFailed) {
@@ -150,7 +152,7 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
               );
             }
             if (!formHydrated) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: BilFeatureWelcomeStatus());
             }
             final photo = ref.watch(profileAvatarStateProvider).bytes;
             final photoUrl = ref.watch(profileAvatarStateProvider).url;
@@ -215,6 +217,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                         gender = value ?? gender;
                         dirty = true;
                       }),
+
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -326,6 +333,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                         activity = value ?? activity;
                         dirty = true;
                       }),
+
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
@@ -367,6 +379,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                               value ?? weeklyExerciseSessions;
                           dirty = true;
                         }),
+
+                        icon: const BilCrystalArrow(
+                          extent: 36,
+                          child: Icon(Icons.keyboard_arrow_down_rounded),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -409,6 +426,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                           exerciseType = value ?? exerciseType;
                           dirty = true;
                         }),
+
+                        icon: const BilCrystalArrow(
+                          extent: 36,
+                          child: Icon(Icons.keyboard_arrow_down_rounded),
+                        ),
                       ),
                     ],
                     const SizedBox(height: 20),
@@ -456,6 +478,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                         dietApproach = value ?? dietApproach;
                         dirty = true;
                       }),
+
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<DietaryPattern>(
@@ -489,6 +516,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                         dietaryPattern = value ?? dietaryPattern;
                         dirty = true;
                       }),
+
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(

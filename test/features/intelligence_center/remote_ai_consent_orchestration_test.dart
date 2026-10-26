@@ -144,9 +144,21 @@ void main() {
     );
 
     test('UI clears progress before consent and retries original turn once', () {
-      final source = File(
-        'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
+      final pageSource = File(
+        'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
       ).readAsStringSync();
+      expect(
+        pageSource,
+        contains("part 'intelligence_query_guard_flow.dart';"),
+      );
+      final source =
+          ['intelligence_query_flow.dart', 'intelligence_query_guard_flow.dart']
+              .map(
+                (name) => File(
+                  'lib/features/intelligence_center/presentation/$name',
+                ).readAsStringSync(),
+              )
+              .join('\n');
       expect(source, contains('sending = false;'));
       expect(source, contains('replyPhase = _CoachReplyPhase.idle;'));
       expect(source, contains('addUserMessage: false'));

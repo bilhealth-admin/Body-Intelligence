@@ -220,7 +220,7 @@ class _CommunityNotificationContentPageState
                 leading: const CommunityReturnButton(),
                 title: Text(communityText(context, 'Post', 'منشور')),
               ),
-              body: const Center(child: CircularProgressIndicator()),
+              body: const Center(child: BilFeatureWelcomeStatus()),
             );
           }
           final loaded = snapshot.data;

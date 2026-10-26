@@ -83,6 +83,11 @@ class _FoodAnalysisTabState extends State<_FoodAnalysisTab> {
             border: const OutlineInputBorder(),
             labelText: _t(context, 'Nutrient'),
           ),
+
+          icon: const BilCrystalArrow(
+            extent: 36,
+            child: Icon(Icons.keyboard_arrow_down_rounded),
+          ),
         ),
         const SizedBox(height: 20),
         Text(

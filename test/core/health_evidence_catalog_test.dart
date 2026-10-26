@@ -9,6 +9,29 @@ import 'package:body_intelligence_log/features/nutrition_plans/domain/pathways/p
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('FDA source separates English and Arabic without changing evidence', () {
+    final source = HealthEvidenceCatalog.byId(
+      HealthEvidenceIds.fdaDailyValues,
+    )!;
+    final arabic = RegExp(r'[\u0600-\u06ff]');
+    for (final english in [
+      source.title,
+      source.shortDescription,
+      source.methodologyNote,
+    ]) {
+      expect(arabic.hasMatch(english), isFalse);
+    }
+    for (final translated in [
+      source.arabicTitle,
+      source.arabicShortDescription,
+      source.arabicMethodologyNote,
+    ]) {
+      expect(translated, isNotNull);
+      expect(arabic.hasMatch(translated!), isTrue);
+    }
+    expect(source.url.host, 'www.fda.gov');
+    expect(source.id, HealthEvidenceIds.fdaDailyValues);
+  });
   test('approved health evidence registry has unique safe sources', () {
     final ids = HealthEvidenceCatalog.all.map((source) => source.id).toList();
     final urls = HealthEvidenceCatalog.all

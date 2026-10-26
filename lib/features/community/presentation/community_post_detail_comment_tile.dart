@@ -158,7 +158,7 @@ class _CommunityCommentTile extends StatelessWidget {
               TextButton.icon(
                 key: Key('community-comment-reply-${comment.id}'),
                 onPressed: busy ? null : () => onAction('reply'),
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.reply_rounded, size: 18),
                 ),
                 label: Text(communityText(context, 'Reply', 'رد')),

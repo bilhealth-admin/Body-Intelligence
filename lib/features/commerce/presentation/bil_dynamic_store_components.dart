@@ -370,9 +370,8 @@ class _StoreTierCard extends StatelessWidget {
                               padding: EdgeInsetsDirectional.only(end: 10),
                               child: SizedBox.square(
                                 dimension: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 1.8,
-                                  color: Color(0xFFFFD66B),
+                                child: FittedBox(
+                                  child: BilFeatureWelcomeStatus(),
                                 ),
                               ),
                             )
@@ -549,16 +548,34 @@ class _StickyPurchaseBar extends StatelessWidget {
                 if (statusMessage != null) ...[
                   Semantics(
                     liveRegion: true,
-                    child: Text(
-                      statusMessage!,
-                      key: const ValueKey('store-purchase-status'),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: statusIsError
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (loading) ...[
+                          const SizedBox.square(
+                            key: ValueKey('store-operation-progress'),
+                            dimension: 24,
+                            child: BilFeatureWelcomeStatus(),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        Flexible(
+                          child: Text(
+                            statusMessage!,
+                            key: const ValueKey('store-purchase-status'),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  color: statusIsError
+                                      ? Theme.of(context).colorScheme.error
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -595,43 +612,33 @@ class _StickyPurchaseBar extends StatelessWidget {
                           child: SizedBox(
                             height: 56,
                             child: Center(
-                              child: loading
-                                  ? const SizedBox.square(
-                                      dimension: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Color(0xFF06121D),
-                                      ),
-                                    )
-                                  : Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '$label · $price',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .labelLarge
-                                                ?.copyWith(
-                                                  color: const Color(
-                                                    0xFF06121D,
-                                                  ),
-                                                  fontWeight: FontWeight.w900,
-                                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      '$label · $price',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelLarge
+                                          ?.copyWith(
+                                            color: const Color(0xFF06121D),
+                                            fontWeight: FontWeight.w900,
                                           ),
-                                        ),
-                                        const SizedBox(width: 9),
-                                        const BilGlassPressFeedback(
-                                          child: Icon(
-                                            Icons.arrow_forward_rounded,
-                                            color: Color(0xFF06121D),
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ],
                                     ),
+                                  ),
+                                  const SizedBox(width: 9),
+                                  const BilGlassPressFeedback(
+                                    child: Icon(
+                                      Icons.arrow_forward_rounded,
+                                      color: Color(0xFF06121D),
+                                      size: 20,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),

@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -78,7 +80,7 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
       appBar: AppBar(
         title: Text(nutritionText(context, 'Food libraries', 'مكتبات الغذاء')),
       ),
-      body: RefreshIndicator(
+      body: BilRefreshIndicator(
         onRefresh: _load,
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -165,7 +167,7 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
         trailing: busy
             ? const SizedBox.square(
                 dimension: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: BilFeatureWelcomeStatus(),
               )
             : installed == null
             ? FilledButton(

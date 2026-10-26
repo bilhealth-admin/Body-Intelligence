@@ -51,6 +51,8 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Il tuo codice BIL non è disponibile. Accedi, completa il profilo della Community e riprova.',
     'Il tuo vecchio codice smetterà di funzionare. Gli amici dovranno usare quello nuovo.',
     'Sei tu',
+    "Rimuovere questo amico?",
+    "Non seguire più",
   ],
   'pt-BR': <String>[
     'Adicione @{handle} no BIL: {uri}',
@@ -102,6 +104,8 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Seu código BIL está indisponível. Entre na conta, complete seu perfil da Comunidade e tente novamente.',
     'Seu código antigo deixará de funcionar. Seus amigos precisarão do novo.',
     'Este é você',
+    "Remover amigo?",
+    "Deixar de seguir",
   ],
   'pt-PT': <String>[
     'Adicione @{handle} no BIL: {uri}',
@@ -153,6 +157,8 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'O seu código BIL está indisponível. Inicie sessão, complete o perfil da Comunidade e tente novamente.',
     'O seu código antigo deixará de funcionar. Os amigos precisarão do novo.',
     'És tu',
+    "Remover amigo?",
+    "Deixar de seguir",
   ],
   'pl': <String>[
     'Dodaj @{handle} w BIL: {uri}',
@@ -204,6 +210,8 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Twój kod BIL jest niedostępny. Zaloguj się, uzupełnij profil społeczności i spróbuj ponownie.',
     'Twój stary kod przestanie działać. Znajomi będą potrzebować nowego.',
     'To Ty',
+    "Usunąć znajomego?",
+    "Przestań obserwować",
   ],
   'nl': <String>[
     'Voeg @{handle} toe op BIL: {uri}',
@@ -255,6 +263,8 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Je BIL-code is niet beschikbaar. Meld je aan, voltooi je communityprofiel en probeer het opnieuw.',
     'Je oude code werkt niet meer. Vrienden hebben de nieuwe nodig.',
     'Dit ben jij',
+    "Vriend verwijderen?",
+    "Niet meer volgen",
   ],
   'uk': <String>[
     'Додати @{handle} у BIL: {uri}',
@@ -306,5 +316,7 @@ const _communitySocialEuropeRows = <String, List<String>>{
     'Ваш код BIL недоступний. Увійдіть, заповніть профіль спільноти й повторіть спробу.',
     'Старий код перестане працювати. Друзям знадобиться новий.',
     'Це ви',
+    "Видалити друга?",
+    "Відписатися",
   ],
 };

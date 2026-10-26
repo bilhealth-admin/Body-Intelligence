@@ -1,7 +1,7 @@
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'dart:io';

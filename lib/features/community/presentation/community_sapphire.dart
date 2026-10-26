@@ -36,50 +36,56 @@ class CommunityMessageBubble extends StatelessWidget {
   const CommunityMessageBubble({
     required this.mine,
     required this.child,
+    this.nativeCanvas = false,
     super.key,
   });
   final bool mine;
   final Widget child;
+  final bool nativeCanvas;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, bounds) => ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: bounds.maxWidth * .82),
+      constraints: BoxConstraints(
+        maxWidth: nativeCanvas ? bounds.maxWidth : bounds.maxWidth * .82,
+      ),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: mine
-              ? CommunitySapphire.blue
-              : CommunitySapphire.paper(context),
-          gradient: mine
-              ? CommunitySapphire.messageGradient(context)
-              : BilPearlFinish.panel(context, shadow: false).gradient,
-          boxShadow: MediaQuery.highContrastOf(context)
-              ? const []
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .06),
-                    blurRadius: 10,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-          borderRadius: BorderRadiusDirectional.only(
-            topStart: const Radius.circular(20),
-            topEnd: const Radius.circular(20),
-            bottomStart: Radius.circular(mine ? 20 : 6),
-            bottomEnd: Radius.circular(mine ? 6 : 20),
-          ),
-          border: Border.all(
-            color: MediaQuery.highContrastOf(context)
-                ? (mine ? Colors.white : CommunitySapphire.ink(context))
-                : mine
-                ? Colors.white.withValues(alpha: .18)
-                : Theme.of(context).brightness == Brightness.dark
-                ? BilPearlFinish.darkEdge
-                : BilPearlFinish.lightEdge,
-            width: MediaQuery.highContrastOf(context) ? 1.5 : .8,
-          ),
-        ),
+        decoration: nativeCanvas
+            ? null
+            : BoxDecoration(
+                color: mine
+                    ? CommunitySapphire.blue
+                    : CommunitySapphire.paper(context),
+                gradient: mine
+                    ? CommunitySapphire.messageGradient(context)
+                    : BilPearlFinish.panel(context, shadow: false).gradient,
+                boxShadow: MediaQuery.highContrastOf(context)
+                    ? const []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: .06),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                borderRadius: BorderRadiusDirectional.only(
+                  topStart: const Radius.circular(20),
+                  topEnd: const Radius.circular(20),
+                  bottomStart: Radius.circular(mine ? 20 : 6),
+                  bottomEnd: Radius.circular(mine ? 6 : 20),
+                ),
+                border: Border.all(
+                  color: MediaQuery.highContrastOf(context)
+                      ? (mine ? Colors.white : CommunitySapphire.ink(context))
+                      : mine
+                      ? Colors.white.withValues(alpha: .18)
+                      : Theme.of(context).brightness == Brightness.dark
+                      ? BilPearlFinish.darkEdge
+                      : BilPearlFinish.lightEdge,
+                  width: MediaQuery.highContrastOf(context) ? 1.5 : .8,
+                ),
+              ),
         child: DefaultTextStyle.merge(
           style: TextStyle(
             color: mine ? Colors.white : CommunitySapphire.ink(context),

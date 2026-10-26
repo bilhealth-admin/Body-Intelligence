@@ -2,7 +2,7 @@
   "schema": "bil.smart-plan.home-prescriptions.v1",
   "sourceContractId": "bil-home-strength-general-adult-v1",
   "reviewedOn": "2026-10-23",
-  "catalogSha256": "2387b01877f0ad365c2d378cdcd191b6ae436683cf8de8909739a2fba550f101",
+  "catalogSha256": "228debb07aa65ed3b65526ccc99360aab1df7bb35435105a59047febc373db7d",
   "scope": "General strength practice for adults who pass the existing BIL safety assessment; not injury rehabilitation or an individual clinical prescription.",
   "sources": [
     {

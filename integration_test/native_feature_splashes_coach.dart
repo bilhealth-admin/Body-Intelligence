@@ -181,6 +181,14 @@ Future<GoRouter> _mountNativeCoach(
   // would return before the independent 2.2s hold Timer completes.
   expect(find.byKey(const Key('ai-coach-entry-welcome')), findsNothing);
   await _nativeSettle(tester);
+  // Follow the approved Overview default through the actual member action.
+  // This does not override initial state, entitlement, consent or the model.
+  expect(find.byKey(const Key('coach-reference-workspace')), findsOneWidget);
+  final openChat = find.byKey(const Key('coach-workspace-open-chat'));
+  await tester.ensureVisible(openChat);
+  await _nativeSettle(tester);
+  await tester.tap(openChat);
+  await _nativeSettle(tester);
   expect(
     find.byKey(const Key('ai-coach-question-field')).hitTestable(),
     findsOneWidget,
@@ -333,6 +341,7 @@ Future<Finder> nativeQaEnterOlderHistory(
 }
 
 void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
+  if (_conversationOnly) return;
   for (final language in ['ar', 'en']) {
     for (final reduced in [false, true]) {
       final scene = '$language-light-${reduced ? 'reduced' : 'normal'}';
@@ -483,10 +492,13 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                 final first = nonempty.first;
                 metadata['first_nonempty_native_frame'] = first;
                 expect(
-                  first['first_glyphs_visible_area'] as num,
+                  first[Platform.isIOS
+                          ? 'first_content_visible_area'
+                          : 'first_glyphs_visible_area']
+                      as num,
                   greaterThan(0),
                   reason:
-                      'First nonempty painted glyphs must be inside the actual native viewport.',
+                      'First visible content must be inside the actual native viewport; SwiftUI reports its measured first block and Flutter reports glyph boxes.',
                 );
                 expect(
                   first['visible_graphemes'] as int,
@@ -580,17 +592,27 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                 );
               } else {
                 final row = _replyRow(reply);
-                expect(
-                  tester
-                      .widget<SelectableText>(
-                        find.descendant(
-                          of: row,
-                          matching: find.byType(SelectableText),
-                        ),
-                      )
-                      .data,
-                  reply,
-                );
+                if (Platform.isIOS) {
+                  expect(tester.widget<CoachNativeMarkdown>(row).text, reply);
+                  final native = tester.state<CoachNativeMarkdownState>(row);
+                  expect(native.nativeLayoutReady, isTrue);
+                  expect(
+                    find.descendant(of: row, matching: find.byType(UiKitView)),
+                    findsOneWidget,
+                  );
+                } else {
+                  expect(
+                    tester
+                        .widget<SelectableText>(
+                          find.descendant(
+                            of: row,
+                            matching: find.byType(SelectableText),
+                          ),
+                        )
+                        .data,
+                    reply,
+                  );
+                }
                 final painted = trace.samples
                     .where(
                       (sample) =>

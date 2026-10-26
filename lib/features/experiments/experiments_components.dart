@@ -197,7 +197,7 @@ class _PresetCard extends StatelessWidget {
                   color: scheme.primaryContainer,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: BilGlassPressFeedback(
+                child: BilNavigationFeedback(
                   child: Icon(preset.icon, color: scheme.primary),
                 ),
               ),
@@ -228,7 +228,7 @@ class _PresetCard extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const BilGlassPressFeedback(
+                  const BilNavigationFeedback(
                     child: Icon(Icons.arrow_forward_rounded),
                   ),
                 ],
@@ -277,7 +277,7 @@ class _ExperimentDetail extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        BilGlassPressFeedback(child: Icon(icon, size: 20)),
+        BilNavigationFeedback(child: Icon(icon, size: 20)),
         const SizedBox(width: 9),
         Expanded(child: Text('$title: $value')),
       ],

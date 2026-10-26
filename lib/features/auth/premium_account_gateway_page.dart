@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'dart:ui';
 
@@ -136,7 +137,7 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
       );
       return Scaffold(
         backgroundColor: pageBackground,
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(child: BilFeatureWelcomeStatus()),
       );
     }
 
@@ -236,9 +237,7 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                             icon: restoring
                                 ? const SizedBox.square(
                                     dimension: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
+                                    child: BilFeatureWelcomeStatus(),
                                   )
                                 : const Icon(Icons.restore_rounded, size: 18),
                             label: Text(
@@ -526,7 +525,7 @@ class _StoryGlassSignal extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(icon, color: const Color(0xFF0877F9), size: 19),
               ),
               const SizedBox(width: 9),

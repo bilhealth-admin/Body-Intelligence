@@ -22,7 +22,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           if (!snapshot.hasData) {
             return const Padding(
               padding: EdgeInsets.all(20),
-              child: LinearProgressIndicator(),
+              child: BilFeatureWelcomeStatus(),
             );
           }
           return Column(
@@ -89,7 +89,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             kind: BilSemanticIconKind.foodSearch,
           ),
           title: Text(_mealCopy('openFoodLibrary')),
-          trailing: const BilGlassPressFeedback(
+          trailing: const BilNavigationFeedback(
             child: Icon(Icons.arrow_forward_ios_rounded, size: 16),
           ),
           onTap: () {
@@ -127,7 +127,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
             kind: BilSemanticIconKind.foodSearch,
           ),
           title: Text(_mealCopy('openFoodLibrary')),
-          trailing: const BilGlassPressFeedback(
+          trailing: const BilNavigationFeedback(
             child: Icon(Icons.arrow_forward_ios_rounded, size: 16),
           ),
           onTap: () {

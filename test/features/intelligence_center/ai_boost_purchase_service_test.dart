@@ -480,12 +480,39 @@ void main() {
   );
 
   test(
+    'Apple authentication outlives catalog timeout without false failure',
+    () async {
+      final launch = Completer<bool>();
+      final native = _Native()..launch = () => launch.future;
+      final service = await create(
+        native,
+        launchTimeout: const Duration(milliseconds: 5),
+        pendingTimeout: const Duration(milliseconds: 100),
+      );
+      final purchasing = service.purchaseBoost();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      final stateWhileAuthenticating = service.state;
+      final errorWhileAuthenticating = service.errorCode;
+      await service.purchaseBoost();
+      launch.complete(false);
+      await purchasing;
+      expect(stateWhileAuthenticating, AiBoostPurchaseState.pending);
+      expect(errorWhileAuthenticating, isNull);
+      expect(native.launches, 1);
+      expect(service.verifiedCreditsRevision, 0);
+      expect(service.state, AiBoostPurchaseState.ready);
+      expect(service.errorCode, 'purchase_not_started');
+    },
+  );
+
+  test(
     'hanging launch cannot leave pending forever or enable duplicate charge',
     () async {
       final native = _Native()..launch = () => Completer<bool>().future;
       final service = await create(
         native,
         launchTimeout: const Duration(milliseconds: 1),
+        pendingTimeout: const Duration(milliseconds: 1),
       );
       await service.purchaseBoost();
       expect(service.state, AiBoostPurchaseState.failed);

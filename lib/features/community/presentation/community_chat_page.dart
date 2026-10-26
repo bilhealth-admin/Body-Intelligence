@@ -16,6 +16,8 @@ class CommunityChatPage extends StatefulWidget {
 class _CommunityChatPageState extends State<CommunityChatPage> {
   CommunityRepository? _repository;
   final _composer = TextEditingController();
+  final _composerAnchor = GlobalKey();
+  final _presentation = BilConversationPresentation();
   final _historyScroll = ScrollController(keepScrollOffset: false);
   Future<List<CommunityMessage>> _messages = Future.value(const []);
   StreamSubscription<void>? _conversationChanges;
@@ -89,8 +91,22 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
         ? _rows.where((row) => _compareMessages(row, messages.first) < 0)
         : const <CommunityMessage>[];
     _rows = _mergeMessages([...older, ...messages]);
+    _observeMessagePresentation();
     _hasOlder = older.isNotEmpty ? _hasOlder : messages.length == 50;
     return _rows;
+  }
+
+  void _observeMessagePresentation() {
+    _presentation.observe(
+      _rows.map(
+        (row) => BilConversationPresentationRow(
+          id: row.id,
+          text: row.body,
+          mine: row.senderId == _ownerId,
+          createdAt: row.createdAt,
+        ),
+      ),
+    );
   }
 
   void _reload() {
@@ -119,6 +135,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
       }
       setState(() {
         _rows = _mergeMessages([...older, ..._rows]);
+        _observeMessagePresentation();
         _hasOlder = older.length == 50;
         _messages = Future.value(_rows);
       });
@@ -179,6 +196,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     if (_historyScroll.hasClients) {
       _historyScroll.jumpTo(_historyScroll.position.minScrollExtent);
     }
+    var visualRequestSucceeded = false;
     try {
       if (_removedDelivery) {
         setState(() => _confirmingReplacement = true);
@@ -231,6 +249,13 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
         _sendRequestId = newCommunityMessageRequestId();
         _sendRequestBody = body;
       }
+      final composerBox = _composerAnchor.currentContext?.findRenderObject();
+      _presentation.beginSend(
+        body,
+        composerBox is RenderBox && composerBox.attached && composerBox.hasSize
+            ? composerBox.localToGlobal(Offset.zero) & composerBox.size
+            : null,
+      );
       await _run(
         binding,
         () => repository.sendMessageOperation(
@@ -240,6 +265,8 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
         ),
       );
       if (!mounted || !_current(binding)) return;
+      visualRequestSucceeded = true;
+      _presentation.confirmSend();
       _sendRequestId = _sendRequestBody = null;
       if (_composerRevision == revision && _composer.text.trim() == body) {
         _composer.clear();
@@ -357,6 +384,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
       );
     } finally {
       if (mounted && _current(binding)) {
+        if (!visualRequestSucceeded) _presentation.abandonSend();
         setState(() {
           _sending = false;
           _confirmingReplacement = false;
@@ -371,6 +399,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     _composer.removeListener(_composerEdited);
     _historyScroll.dispose();
     _composer.dispose();
+    _presentation.dispose();
     super.dispose();
   }
 

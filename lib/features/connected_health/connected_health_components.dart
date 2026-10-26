@@ -69,7 +69,7 @@ class _ConnectedSourcesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => snapshot.when(
-    loading: () => const Center(child: CircularProgressIndicator()),
+    loading: () => const Center(child: BilFeatureWelcomeStatus()),
     error: (_, _) => Center(
       child: Text(
         connectedHealthText(
@@ -340,9 +340,9 @@ class _FitnessDeviceSection extends ConsumerWidget {
             icon: busy
                 ? const SizedBox.square(
                     dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: BilFeatureWelcomeStatus(),
                   )
-                : BilGlassPressFeedback(
+                : BilNavigationFeedback(
                     child: Icon(
                       accessGranted
                           ? Icons.bluetooth_searching_rounded

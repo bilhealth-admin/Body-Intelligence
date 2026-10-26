@@ -1,4 +1,4 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
@@ -112,7 +112,7 @@ class _TwinLikeInsightRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 18, color: accent)),
+          BilNavigationFeedback(child: Icon(icon, size: 18, color: accent)),
           const SizedBox(width: PremiumDesignTokens.spaceSm),
           Expanded(
             child: Text.rich(

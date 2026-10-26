@@ -37,11 +37,11 @@ class _RecipesTab extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 18),
-        if (saved.isLoading) const Center(child: CircularProgressIndicator()),
+        if (saved.isLoading) const Center(child: BilFeatureWelcomeStatus()),
         if (saved.hasError)
           TextButton.icon(
             onPressed: () => ref.invalidate(trustedRecipesProvider),
-            icon: const BilGlassPressFeedback(child: Icon(Icons.refresh)),
+            icon: const BilNavigationFeedback(child: Icon(Icons.refresh)),
             label: Text(
               '${_recipeListCopy(context, 'loadFailed')} ${_c(context, 'Retry')}',
             ),

@@ -1,5 +1,5 @@
 import '../../../shared/widgets/bil_striped_progress.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../dashboard_five_locale_copy.dart';
@@ -38,7 +38,7 @@ class DashboardDetailPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              BilGlassPressFeedback(child: Icon(icon, size: 20)),
+              BilNavigationFeedback(child: Icon(icon, size: 20)),
               const SizedBox(width: PremiumDesignTokens.spaceSm),
               Expanded(
                 child: Text(

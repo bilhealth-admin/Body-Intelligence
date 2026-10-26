@@ -149,21 +149,21 @@ class _CommunitySavedPostsPageState extends State<CommunitySavedPostsPage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done &&
             _posts.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: BilFeatureWelcomeStatus());
         }
         if (snapshot.hasError && _posts.isEmpty) {
           return Center(
             child: FilledButton.icon(
               key: const Key('community-saved-retry'),
               onPressed: _refresh,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
             ),
           );
         }
-        return RefreshIndicator(
+        return BilRefreshIndicator(
           onRefresh: _refresh,
           child: _posts.isEmpty
               ? ListView(
@@ -196,11 +196,9 @@ class _CommunitySavedPostsPageState extends State<CommunitySavedPostsPage> {
                           icon: _loadingMore
                               ? const SizedBox.square(
                                   dimension: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: BilFeatureWelcomeStatus(),
                                 )
-                              : const BilGlassPressFeedback(
+                              : const BilNavigationFeedback(
                                   child: Icon(Icons.expand_more_rounded),
                                 ),
                           label: Text(

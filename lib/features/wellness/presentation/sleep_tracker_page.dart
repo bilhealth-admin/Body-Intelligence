@@ -23,7 +23,7 @@ class _LegacySleepTrackerPageState
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/dashboard'),
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
           ),
           title: Text(tr('Sleep intelligence', 'ذكاء النوم')),
         ),

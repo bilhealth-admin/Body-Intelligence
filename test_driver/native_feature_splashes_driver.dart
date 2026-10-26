@@ -47,21 +47,29 @@ Future<void> main() async {
     },
     responseDataCallback: (data) async {
       final coachOnly = data?['native_scope'] == 'coach-only';
+      final conversationOnly = data?['native_scope'] == 'conversations-only';
       final selected = data?['native_scenes'];
       final scenes =
-          data?['native_feature_splashes'] ?? (coachOnly ? [] : null);
-      final reveal = data?['native_coach_reveal'];
-      final history = data?['native_coach_history'];
+          data?['native_feature_splashes'] ??
+          (coachOnly || conversationOnly ? [] : null);
+      final reveal =
+          data?['native_coach_reveal'] ?? (conversationOnly ? [] : null);
+      final history =
+          data?['native_coach_history'] ?? (conversationOnly ? [] : null);
+      final conversations = data?['community_conversations_native'] ?? const [];
+      final storeActivity = data?['store_activity_native'] ?? const [];
       Object? collectionFailure;
       final collectionFailures = <Map<String, Object?>>[];
       Future<void> checkpoint() async {
         await File('${output.path}/native-metadata.json').writeAsString(
           const JsonEncoder.withIndent('  ').convert({
-            'scope': coachOnly ? 'coach-only' : 'all',
+            'scope': data?['native_scope'],
             'selected_scenes': selected,
             'scenes': scenes,
             'coach_reveal': reveal,
             'coach_history': history,
+            'community_conversations': conversations,
+            'store_activity': storeActivity,
             'native_capture_manifest': data?[nativeCaptureManifestKey],
             'collection_error': collectionFailure?.toString(),
             'collection_failures': collectionFailures,
@@ -99,7 +107,8 @@ Future<void> main() async {
       }
       // Preserve partial evidence on failure rather than manufacturing a full pass.
       if (scenes is! List ||
-          scenes.length != (coachOnly ? 0 : selected.length) ||
+          scenes.length !=
+              (coachOnly || conversationOnly ? 0 : selected.length) ||
           scenes.any(
             (scene) =>
                 scene is! Map ||
@@ -111,9 +120,9 @@ Future<void> main() async {
         );
       }
       if (reveal is! List ||
-          reveal.length != selected.length ||
+          reveal.length != (conversationOnly ? 0 : selected.length) ||
           history is! List ||
-          history.length != selected.length ||
+          history.length != (conversationOnly ? 0 : selected.length) ||
           [...reveal, ...history].any(
             (scene) =>
                 scene is! Map ||
@@ -126,15 +135,96 @@ Future<void> main() async {
         );
       }
       final names = captures.map((item) => item['name']).toSet();
+      final expectedPlans =
+          !coachOnly && !conversationOnly && selected.length == 4 ? 16 : 0;
+      final expectedConversations = !coachOnly && selected.length == 4 ? 8 : 0;
+      final expectedStoreActivity = !coachOnly && selected.length == 4 ? 4 : 0;
+      if (data?['community_conversations_expected'] != expectedConversations ||
+          data?['store_activity_expected'] != expectedStoreActivity ||
+          conversations is! List ||
+          conversations.length != expectedConversations ||
+          storeActivity is! List ||
+          storeActivity.length != expectedStoreActivity ||
+          conversations.any(
+            (row) =>
+                row is! Map ||
+                row['completed'] != true ||
+                row['one_send'] != true ||
+                row['network_requests'] != 0,
+          ) ||
+          storeActivity.any(
+            (row) =>
+                row is! Map ||
+                row['completed'] != true ||
+                row['one_indicator_above_cta'] != true ||
+                row['purchase_requests'] != 0,
+          )) {
+        throw StateError('Native Community/checkout evidence is incomplete.');
+      }
+      final plans = data?['smart_plan_native'] ?? const [];
+      if (data?['smart_plan_native_expected'] != expectedPlans ||
+          plans is! List ||
+          plans.length != expectedPlans ||
+          plans.any(
+            (plan) =>
+                plan is! Map ||
+                plan['completed'] != true ||
+                plan['navigation_forward_and_back'] != 'PASS' ||
+                plan['completion_recorded'] != false,
+          )) {
+        throw StateError('Native Smart Plan session evidence is incomplete');
+      }
       if (names.length !=
-          scenes.length * 12 + reveal.length * 3 + history.length * 3) {
+          scenes.length * 12 +
+              reveal.length * 3 +
+              history.length * 3 +
+              expectedPlans * 2 +
+              expectedConversations * 2 +
+              expectedStoreActivity) {
         throw StateError(
           'Required welcome/released and Coach first/mid/end/history PNGs are incomplete',
         );
       }
+      if (expectedConversations != 0) {
+        for (final language in ['ar', 'en']) {
+          for (final brightness in ['dark', 'light']) {
+            if (!names.contains(
+              'bil39-store-$language-$brightness-2x-pending',
+            )) {
+              throw StateError('Missing native checkout waiting PNG');
+            }
+            for (final scale in [1, 2]) {
+              for (final phase in ['reply', 'sent']) {
+                if (!names.contains(
+                  'bil39-community-$language-$brightness-${scale}x-$phase',
+                )) {
+                  throw StateError('Missing native conversation PNG');
+                }
+              }
+            }
+          }
+        }
+      }
+      if (expectedPlans != 0) {
+        for (final environment in ['home', 'gym']) {
+          for (final language in ['ar', 'en']) {
+            for (final brightness in ['dark', 'light']) {
+              for (final scale in [1, 2]) {
+                for (final phase in ['warmup', 'session']) {
+                  if (!names.contains(
+                    'bil39-plan-$environment-$language-$brightness-${scale}x-$phase',
+                  )) {
+                    throw StateError('Missing native Smart Plan PNG');
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
       for (final label in selected) {
         for (final kind
-            in coachOnly
+            in coachOnly || conversationOnly
                 ? <String>[]
                 : [
                     'recipes',
@@ -150,12 +240,14 @@ Future<void> main() async {
             }
           }
         }
-        for (final phase in ['first', 'mid', 'end']) {
+        for (final phase
+            in conversationOnly ? <String>[] : ['first', 'mid', 'end']) {
           if (!names.contains('coach-reveal-$label-$phase')) {
             throw StateError('Missing reveal PNG');
           }
         }
-        for (final phase in ['reading', 'mid', 'end']) {
+        for (final phase
+            in conversationOnly ? <String>[] : ['reading', 'mid', 'end']) {
           if (!names.contains('coach-history-$label-$phase')) {
             throw StateError('Missing history PNG');
           }

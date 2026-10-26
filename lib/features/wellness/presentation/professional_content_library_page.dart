@@ -1,5 +1,8 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -80,13 +83,13 @@ class _ProfessionalContentLibraryPageState
           onPressed: () => context.canPop()
               ? context.pop()
               : context.go('/wellness-library'),
-          icon: const BackButtonIcon(),
+          icon: const BilCrystalArrow(child: BackButtonIcon()),
         ),
         actions: [
           IconButton(
             tooltip: FeatureStrings.of(context).get('content_library'),
             onPressed: () => context.push('/wellness/content-packs'),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.download_for_offline_outlined),
             ),
           ),
@@ -96,7 +99,7 @@ class _ProfessionalContentLibraryPageState
         future: _items,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: BilFeatureWelcomeStatus());
           }
           if (snapshot.hasError) {
             return _LibraryError(onRetry: () => setState(_reload));
@@ -110,7 +113,7 @@ class _ProfessionalContentLibraryPageState
                         .contains(query),
               )
               .toList();
-          return RefreshIndicator(
+          return BilRefreshIndicator(
             onRefresh: () async => setState(_reload),
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
@@ -201,7 +204,7 @@ class _LibraryError extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onRetry,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(
@@ -299,7 +302,7 @@ class _EmptyLibrary extends StatelessWidget {
         const SizedBox(height: 18),
         FilledButton.icon(
           onPressed: () => context.push('/wellness/content-packs'),
-          icon: const BilGlassPressFeedback(
+          icon: const BilNavigationFeedback(
             child: Icon(Icons.download_rounded),
           ),
           label: Text(
@@ -499,7 +502,7 @@ class _ContentDetailsPage extends StatelessWidget {
           leading: const Icon(Icons.verified_rounded),
           title: Text(item.publisher),
           subtitle: Text('${item.licenseName}\n${item.sourceUrl}'),
-          trailing: const BilGlassPressFeedback(
+          trailing: const BilNavigationFeedback(
             child: Icon(Icons.open_in_new_rounded),
           ),
           onTap: item.sourceUrl.scheme == 'https'

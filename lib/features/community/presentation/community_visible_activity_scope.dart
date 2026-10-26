@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// A fetch is not a read. Only continuously visible, foreground activity rows
 /// become eligible. This widget never changes a row or a badge optimistically.
@@ -13,6 +14,8 @@ class CommunityVisibleActivityScope extends StatefulWidget {
     this.enabled = true,
     this.retryKey = 0,
     this.dwell = const Duration(milliseconds: 600),
+    this.isRowPainted,
+    this.paintChanges,
     super.key,
   });
 
@@ -24,6 +27,8 @@ class CommunityVisibleActivityScope extends StatefulWidget {
   final bool enabled;
   final int retryKey;
   final Duration dwell;
+  final bool Function(String id)? isRowPainted;
+  final Listenable? paintChanges;
 
   @override
   State<CommunityVisibleActivityScope> createState() =>
@@ -48,6 +53,7 @@ class _CommunityVisibleActivityScopeState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.paintChanges?.addListener(_schedule);
   }
 
   @override
@@ -60,6 +66,10 @@ class _CommunityVisibleActivityScopeState
   @override
   void didUpdateWidget(covariant CommunityVisibleActivityScope oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.paintChanges != widget.paintChanges) {
+      oldWidget.paintChanges?.removeListener(_schedule);
+      widget.paintChanges?.addListener(_schedule);
+    }
     if (widget.ownerId != oldWidget.ownerId ||
         widget.retryKey != oldWidget.retryKey) {
       _generation++;
@@ -106,8 +116,21 @@ class _CommunityVisibleActivityScopeState
     if (clip.width <= 0 || clip.height <= 0) return {};
     final result = <String>{};
     for (final id in widget.unreadIds) {
+      if (widget.isRowPainted?.call(id) == false) continue;
       final box = _markers[id]?.currentContext?.findRenderObject();
       if (box is! RenderBox || !box.attached || !box.hasSize) continue;
+      var painted = true;
+      RenderObject? ancestor = box;
+      while (ancestor != null && ancestor != viewport) {
+        if (ancestor is RenderOpacity && ancestor.opacity < .99 ||
+            ancestor is RenderAnimatedOpacity && ancestor.opacity.value < .99 ||
+            ancestor is RenderOffstage && ancestor.offstage) {
+          painted = false;
+          break;
+        }
+        ancestor = ancestor.parent;
+      }
+      if (!painted) continue;
       final rect = box.localToGlobal(Offset.zero) & box.size;
       final visible = rect.intersect(clip);
       final height = rect.height.clamp(0.0, clip.height);
@@ -232,6 +255,7 @@ class _CommunityVisibleActivityScopeState
     _generation++;
     _cancelPending();
     WidgetsBinding.instance.removeObserver(this);
+    widget.paintChanges?.removeListener(_schedule);
     super.dispose();
   }
 

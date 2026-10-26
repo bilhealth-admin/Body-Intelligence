@@ -110,7 +110,9 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           if (path == null) throw StateError('invalid_navigation_target');
           await _openCoachRoute(path);
         case IntelligenceActionType.readNutritionRemaining:
-          final snapshot = await ref.read(coachContextSnapshotProvider.future);
+          final snapshot = await readCoachContextSnapshot(
+            ProviderScope.containerOf(context, listen: false),
+          );
           final remaining = snapshot.nutritionRemainingFor(DateTime.now());
           if (remaining == null) {
             throw StateError('nutrition_remaining_unavailable');
@@ -124,7 +126,9 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             );
           }
         case IntelligenceActionType.readProfileIdentity:
-          final snapshot = await ref.read(coachContextSnapshotProvider.future);
+          final snapshot = await readCoachContextSnapshot(
+            ProviderScope.containerOf(context, listen: false),
+          );
           final name = snapshot.minimalIdentity['displayName']?.toString();
           if (mounted) {
             _appendToolReceipt(
@@ -877,6 +881,9 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
   }
 
   void usePrompt(String value) {
+    // The retained opening row stays visible during a reply, but must not
+    // overwrite a new draft or queue another turn while that reply is pending.
+    if (sending || conversationRestarting) return;
     question.text = value;
     ask();
   }

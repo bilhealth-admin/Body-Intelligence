@@ -65,7 +65,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
         if (visit.isCurrent()) onPressed();
       },
       color: Theme.of(context).colorScheme.primary,
-      icon: BilGlassPressFeedback(child: Icon(icon)),
+      icon: BilNavigationFeedback(child: Icon(icon)),
     ),
   );
 
@@ -325,8 +325,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                         children: [
                           _ProfileRelationshipAction(
                             profile: profile,
-                            busy: relationshipBusy,
-                            showAcceptedStatus: profile.friendCount == null,
+                            busy: relationshipBusy || followBusy,
                             onRequestFriend: () {
                               if (visit.isCurrent()) onRequestFriend();
                             },
@@ -334,7 +333,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                           if (profile.viewerFollows || profile.allowFollows)
                             OutlinedButton.icon(
                               key: const Key('community-profile-follow-action'),
-                              onPressed: followBusy
+                              onPressed: followBusy || relationshipBusy
                                   ? null
                                   : () {
                                       if (visit.isCurrent()) onToggleFollow();
@@ -342,9 +341,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                               icon: followBusy
                                   ? const SizedBox.square(
                                       dimension: 16,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
+                                      child: BilFeatureWelcomeStatus(),
                                     )
                                   : Icon(
                                       profile.viewerFollows
@@ -355,8 +352,8 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                                 profile.viewerFollows
                                     ? communityText(
                                         context,
-                                        'Following',
-                                        'يتابع',
+                                        'Unfollow',
+                                        'إلغاء المتابعة',
                                       )
                                     : communityText(
                                         context,
@@ -367,7 +364,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                             ),
                           if (profile.followsViewer)
                             Chip(
-                              avatar: const BilGlassPressFeedback(
+                              avatar: const BilNavigationFeedback(
                                 child: Icon(Icons.swap_horiz_rounded, size: 17),
                               ),
                               label: Text(
@@ -458,44 +455,58 @@ class _ProfileRelationshipAction extends StatelessWidget {
   const _ProfileRelationshipAction({
     required this.profile,
     required this.busy,
-    this.showAcceptedStatus = true,
     required this.onRequestFriend,
   });
 
   final CommunityProfileOverview profile;
   final bool busy;
-  final bool showAcceptedStatus;
   final VoidCallback onRequestFriend;
 
   @override
   Widget build(BuildContext context) => switch (profile.relationship) {
     CommunityRelationshipStatus.none when profile.allowFriendRequests =>
       FilledButton.icon(
+        key: const Key('community-profile-friend-action'),
         onPressed: busy ? null : onRequestFriend,
         icon: busy
             ? const SizedBox.square(
                 dimension: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: BilFeatureWelcomeStatus(),
               )
             : const Icon(Icons.person_add_alt_1_rounded),
         label: Text(communityText(context, 'Add Friend', 'إضافة صديق')),
       ),
-    CommunityRelationshipStatus.pending => Chip(
-      avatar: const Icon(Icons.schedule_rounded),
-      label: Text(
-        communityText(context, 'Request pending', 'الطلب قيد الانتظار'),
-      ),
+    CommunityRelationshipStatus.pending => Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Chip(
+          avatar: const Icon(Icons.schedule_rounded),
+          label: Text(
+            communityText(context, 'Request pending', 'الطلب قيد الانتظار'),
+          ),
+        ),
+        OutlinedButton.icon(
+          key: const Key('community-profile-cancel-request'),
+          onPressed: busy ? null : onRequestFriend,
+          icon: const Icon(Icons.close_rounded),
+          label: Text(communityText(context, 'Cancel request', 'إلغاء الطلب')),
+        ),
+      ],
     ),
     CommunityRelationshipStatus.incoming => FilledButton.tonalIcon(
-      onPressed: () => context.push('/community/connections'),
+      key: const Key('community-profile-friend-action'),
+      onPressed: busy ? null : onRequestFriend,
       icon: const Icon(Icons.mark_email_unread_outlined),
       label: Text(communityText(context, 'Review request', 'مراجعة الطلب')),
     ),
-    CommunityRelationshipStatus.accepted when showAcceptedStatus => Chip(
-      avatar: const Icon(Icons.people_rounded),
+    CommunityRelationshipStatus.accepted => OutlinedButton.icon(
+      key: const Key('community-profile-friend-action'),
+      onPressed: busy ? null : onRequestFriend,
+      icon: const Icon(Icons.people_rounded),
       label: Text(communityText(context, 'Friends', 'الأصدقاء')),
     ),
-    CommunityRelationshipStatus.accepted => const SizedBox.shrink(),
     _ => const SizedBox.shrink(),
   };
 }
@@ -601,7 +612,7 @@ class _CommunitySelfQuickAction extends StatelessWidget {
                 Badge(
                   isLabelVisible: badge != null,
                   label: badge == null ? null : Text(badge!),
-                  child: BilGlassPressFeedback(
+                  child: BilNavigationFeedback(
                     child: Icon(icon, color: scheme.primary, size: 22),
                   ),
                 ),

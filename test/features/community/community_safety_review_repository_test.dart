@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -562,7 +563,7 @@ void main() {
       );
       expect(find.text('تم إلغاء الحظر.'), findsOneWidget);
       expect(find.text('تعذر تأكيد إلغاء الحظر. حاول مجددًا.'), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(calls.where((call) => call.method == 'DELETE'), hasLength(1));
       expect(tester.takeException(), isNull);
     },

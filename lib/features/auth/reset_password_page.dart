@@ -1,4 +1,6 @@
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -197,7 +199,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         elevation: 0,
         leading: IconButton(
           onPressed: () => context.go('/login'),
-          icon: const BackButtonIcon(),
+          icon: const BilCrystalArrow(child: BackButtonIcon()),
         ),
       ),
       body: SafeArea(
@@ -269,7 +271,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                     onPressed: retryingRecovery
                                         ? null
                                         : _retryRecovery,
-                                    icon: const BilGlassPressFeedback(
+                                    icon: const BilNavigationFeedback(
                                       child: Icon(Icons.refresh_rounded),
                                     ),
                                     label: Text(
@@ -289,9 +291,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                                 children: [
                                   const SizedBox.square(
                                     dimension: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
+                                    child: BilFeatureWelcomeStatus(),
                                   ),
                                   const SizedBox(width: 10),
                                   Flexible(
@@ -362,7 +362,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       child: loading
                           ? const SizedBox.square(
                               dimension: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: BilFeatureWelcomeStatus(),
                             )
                           : Text(tr('Save password', 'حفظ كلمة المرور')),
                     ),

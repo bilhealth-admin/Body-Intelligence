@@ -166,6 +166,8 @@ extension on _IntelligenceCenterPageState {
       key: _coachMessageReadingAnchor(message),
       child: _MessageBubble(
         message: message,
+        sentFrom: outgoingMessageOrigins[message.id],
+        onSentArrivalFinished: () => outgoingMessageOrigins.remove(message.id),
         feedbackValue: feedback[message.id],
         reported: reportedMessages.contains(message.id),
         expectedOwnerKey: ownerKey,

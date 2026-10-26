@@ -50,10 +50,10 @@ void main() {
         'NSHealthShareUsageDescription',
         'NSHealthUpdateUsageDescription',
         'NSBluetoothAlwaysUsageDescription',
-        'NSBluetoothPeripheralUsageDescription',
       ]) {
         expect(strings, contains('"$key"'));
       }
+      expect(strings, isNot(contains('NSBluetoothPeripheralUsageDescription')));
     }
   });
 }

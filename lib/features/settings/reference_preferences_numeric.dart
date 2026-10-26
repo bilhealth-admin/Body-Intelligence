@@ -331,7 +331,7 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
         trailing: loading || saving
             ? const SizedBox.square(
                 dimension: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: BilFeatureWelcomeStatus(),
               )
             : error != null ||
                   resolved?.status == NutritionGoalStatus.storageFailure
@@ -500,7 +500,7 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
                                   ],
                                   if (dialogSaving) ...[
                                     const SizedBox(height: 12),
-                                    const LinearProgressIndicator(),
+                                    const BilFeatureWelcomeStatus(),
                                   ],
                                 ],
                               ),

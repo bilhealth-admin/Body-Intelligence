@@ -40,7 +40,38 @@ abstract final class ClosureCoachRuntimeCopy {
     'Weight saved.',
     'recorded periods',
   ];
-  static const sources = <String>[..._baseSources, ..._presentationSources];
+  static const _startConversationLabels = <String, String>{
+    'en': 'Start new conversation',
+    'ar': 'بدء محادثة جديدة',
+    'fr': 'Démarrer une nouvelle conversation',
+    'es': 'Iniciar una nueva conversación',
+    'tr': 'Yeni bir konuşma başlat',
+    'de': 'Neue Unterhaltung beginnen',
+    'it': 'Avvia una nuova conversazione',
+    'pt-BR': 'Iniciar uma nova conversa',
+    'pt-PT': 'Iniciar uma nova conversa',
+    'ur': 'نئی گفتگو شروع کریں',
+    'fa': 'شروع گفت‌وگوی جدید',
+    'hi': 'नई बातचीत शुरू करें',
+    'id': 'Mulai percakapan baru',
+    'ms': 'Mulakan perbualan baharu',
+    'ja': '新しい会話を始める',
+    'ko': '새 대화 시작',
+    'zh-Hans': '开始新对话',
+    'zh-Hant': '開始新對話',
+    'ru': 'Начать новый разговор',
+    'bn': 'নতুন কথোপকথন শুরু করুন',
+    'vi': 'Bắt đầu cuộc trò chuyện mới',
+    'th': 'เริ่มการสนทนาใหม่',
+    'pl': 'Rozpocznij nową rozmowę',
+    'nl': 'Nieuw gesprek beginnen',
+    'uk': 'Почати нову розмову',
+  };
+  static const sources = <String>[
+    ..._baseSources,
+    ..._presentationSources,
+    'Start new conversation',
+  ];
   static const _baseRows = <String, List<String>>{
     'en': _baseSources,
     'ar': [
@@ -358,7 +389,11 @@ abstract final class ClosureCoachRuntimeCopy {
   };
   static final rows = <String, List<String>>{
     for (final tag in BilLocalePolicy.productionTags)
-      tag: [..._baseRows[tag]!, ..._closureCoachPresentationRows[tag]!],
+      tag: [
+        ..._baseRows[tag]!,
+        ..._closureCoachPresentationRows[tag]!,
+        _startConversationLabels[tag]!,
+      ],
   };
 
   static String? resolve(String source, String tag) {

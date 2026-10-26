@@ -11,6 +11,8 @@ import 'package:body_intelligence_log/features/commerce/providers/verified_purch
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:in_app_purchase_storekit/src/sk2_pigeon.g.dart' as sk2;
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -279,6 +281,127 @@ void main() {
     }
     expect(store.state, VerifiedStoreState.failed);
   }
+
+  Future<void> restoreInactiveWithFailedFinish() async {
+    await ready();
+    native.failCompletion = true;
+    native.restoreReceipt = _receipt(
+      status: PurchaseStatus.restored,
+      productId: StoreCatalogConfiguration.premiumMonthly,
+      purchaseId: 'inactive-finish-recovery',
+    );
+    final restoring = store.restore();
+    await verificationStarted.future;
+    verification.complete(
+      http.Response(
+        '{"verified":true,"entitlement_active":false}',
+        200,
+        headers: {'content-type': 'application/json'},
+      ),
+    );
+    await restoring;
+    await waitForStoreCondition(
+      () =>
+          store.hasPendingVerifiedFinish &&
+          store.messageCode == 'store_finish_pending',
+    );
+    expect(store.state, VerifiedStoreState.ready);
+    expect(store.canStartPurchase, isFalse);
+    expect(store.entitlement?.grantsPaidAccess, isNot(true));
+  }
+
+  test(
+    'inactive finish retry releases checkout only after acknowledgement',
+    () async {
+      await restoreInactiveWithFailedFinish();
+      native.failCompletion = false;
+      var notifications = 0;
+      void changed() => notifications++;
+      store.addListener(changed);
+      try {
+        await store.continueVerification();
+        expect(store.hasPendingVerifiedFinish, isFalse);
+        expect(store.state, VerifiedStoreState.ready);
+        expect(store.messageCode, 'no_restorable_purchases');
+        expect(store.canStartPurchase, isTrue);
+        expect(notifications, greaterThan(0));
+        expect(store.entitlement?.grantsPaidAccess, isNot(true));
+        expect(verificationCalls, 1);
+        expect(native.completionCalls, 2);
+        expect(native.launches, 0);
+        // Reopening the page cannot inherit the retired blocking marker.
+        await store.initialize();
+        expect(store.canStartPurchase, isTrue);
+        native.restoreBatch = const [];
+        native.purchaseLaunch.complete(true);
+        await store.purchasePlan(
+          CommercePlan.premium,
+          term: SubscriptionTerm.oneMonth,
+        );
+        expect(native.launches, 1);
+        expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      } finally {
+        store.removeListener(changed);
+      }
+    },
+  );
+
+  test(
+    'inactive finish retry failure remains blocked without re-verification',
+    () async {
+      await restoreInactiveWithFailedFinish();
+      await store.continueVerification();
+      expect(store.hasPendingVerifiedFinish, isTrue);
+      expect(store.messageCode, 'store_finish_pending');
+      expect(store.canStartPurchase, isFalse);
+      expect(verificationCalls, 1);
+      expect(native.launches, 0);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+    },
+  );
+
+  test(
+    'inactive finish retry cannot replace a newer receipt rejection',
+    () async {
+      await restoreInactiveWithFailedFinish();
+      final entered = Completer<void>();
+      final held = Completer<void>();
+      native.failCompletion = false;
+      native.finish = () {
+        if (!entered.isCompleted) entered.complete();
+        return held.future;
+      };
+      final retry = store.continueVerification();
+      String? newerFailure;
+      try {
+        await entered.future.timeout(const Duration(seconds: 2));
+        verificationResponse = (_) => http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+        native.updates.add([
+          _receipt(
+            productId: StoreCatalogConfiguration.premiumAnnual,
+            purchaseId: 'newer-rejected-while-inactive-finish-retries',
+          ),
+        ]);
+        await waitForVerificationFailure();
+        newerFailure = store.messageCode;
+        expect(newerFailure, 'reconciliation_verification_failed');
+      } finally {
+        held.complete();
+        await retry;
+      }
+      expect(store.hasPendingVerifiedFinish, isFalse);
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, newerFailure);
+      expect(store.canStartPurchase, isFalse);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      expect(verificationCalls, 2);
+      expect(native.launches, 0);
+    },
+  );
 
   test(
     'subscription callback timeout stays unresolved and cannot open a second charge',
@@ -1021,6 +1144,185 @@ void main() {
       expect(store.busy, isFalse);
     },
   );
+  test('expired unfinished preflight waits for verified native finish', () async {
+    await ready();
+    final finish = Completer<void>();
+    var finished = false;
+    var reads = 0;
+    const channel = BasicMessageChannel<Object?>(
+      'dev.flutter.pigeon.in_app_purchase_storekit.InAppPurchase2API.unfinishedTransactions',
+      sk2.InAppPurchase2API.pigeonChannelCodec,
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockDecodedMessageHandler<Object?>(channel, (_) async {
+          reads++;
+          return <Object?>[
+            <Object?>[
+              if (!finished)
+                sk2.SK2TransactionMessage(
+                  id: 123,
+                  originalId: 123,
+                  productId: StoreCatalogConfiguration.premiumMonthly,
+                  purchaseDate: 1,
+                  receiptData: 'signed-expired-fixture',
+                  status: sk2.SK2PurchaseStatusMessage.purchased,
+                ),
+            ],
+          ];
+        });
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<Object?>(channel, null),
+    );
+    verificationResponse = (_) => http.Response(
+      '{"verified":true,"entitlement_active":false}',
+      200,
+      headers: {'content-type': 'application/json'},
+    );
+    native.finish = () async {
+      await finish.future;
+      finished = true;
+    };
+    native.purchaseLaunch.complete(false);
+    final checkout = store.purchasePlan(
+      CommercePlan.premium,
+      term: SubscriptionTerm.oneMonth,
+    );
+    await native.completionAttempted.future;
+    await drain();
+    final readsDuringFinish = reads;
+    final launchesDuringFinish = native.launches;
+    await store.purchasePlan(
+      CommercePlan.premium,
+      term: SubscriptionTerm.oneMonth,
+    );
+    finish.complete();
+    await checkout;
+    expect(
+      readsDuringFinish,
+      1,
+      reason:
+          'unfinished state cannot be re-read before verified finish settles',
+    );
+    expect(launchesDuringFinish, 0);
+    expect(native.launches, 1);
+    expect(native.completionCalls, 1);
+    expect(verificationCalls, 1);
+    expect(store.entitlement?.grantsPaidAccess ?? false, isFalse);
+    expect(store.messageCode, 'purchase_not_started');
+  });
+
+  test(
+    'expired renewal backlog finishes every verified receipt before checkout',
+    () async {
+      await ready();
+      const backlogSize = 12;
+      var finished = 0;
+      var reads = 0;
+      const channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.in_app_purchase_storekit.InAppPurchase2API.unfinishedTransactions',
+        sk2.InAppPurchase2API.pigeonChannelCodec,
+      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<Object?>(channel, (_) async {
+            reads++;
+            return <Object?>[
+              <Object?>[
+                for (var index = finished; index < backlogSize; index++)
+                  sk2.SK2TransactionMessage(
+                    id: 1000 + index,
+                    originalId: 1000,
+                    productId: StoreCatalogConfiguration.premiumMonthly,
+                    purchaseDate: 1.0 + index,
+                    receiptData: 'signed-expired-renewal-$index',
+                    status: sk2.SK2PurchaseStatusMessage.purchased,
+                  ),
+              ],
+            ];
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<Object?>(channel, null),
+      );
+      verificationResponse = (_) => http.Response(
+        '{"verified":true,"entitlement_active":false}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      native.finish = () async {
+        expect(
+          reads,
+          1,
+          reason: 'Do not re-read unfinished receipts mid-finish',
+        );
+        expect(
+          native.launches,
+          0,
+          reason: 'No checkout before backlog settlement',
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        finished++;
+      };
+      native.purchaseLaunch.complete(false);
+      await store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      expect(finished, backlogSize);
+      expect(native.completionCalls, backlogSize);
+      expect(verificationCalls, backlogSize);
+      expect(reads, 2);
+      expect(native.launches, 1);
+      expect(store.entitlement?.grantsPaidAccess ?? false, isFalse);
+      expect(store.messageCode, 'purchase_not_started');
+    },
+  );
+
+  test(
+    'stalled explicit restore ends waiting without duplicate native sync',
+    () async {
+      store.dispose();
+      store = _ConfiguredStore(
+        native,
+        pendingTimeout: const Duration(milliseconds: 5),
+      );
+      await ready();
+      final sync = Completer<void>();
+      native.appleSync = () => sync.future;
+      native.restoreBatch = [];
+      var returned = false;
+      final restoring = store.restore().then((_) => returned = true);
+      await Future.any<void>([
+        restoring,
+        Future<void>.delayed(const Duration(milliseconds: 80)),
+      ]);
+      final returnedBeforeNative = returned;
+      final busyBeforeNative = store.busy;
+      final codeBeforeNative = store.messageCode;
+      final mayPurchaseBeforeNative = store.canStartPurchase;
+      await store.initialize();
+      expect(
+        store.messageCode,
+        'purchase_status_unknown',
+        reason: 're-entering Plans must retain an actionable unresolved result',
+      );
+      // A retry observes the same App Store operation; it must not open another
+      // authentication sheet while the first native operation is unresolved.
+      final retry = store.restore();
+      await Future<void>.delayed(const Duration(milliseconds: 15));
+      final syncCallsBeforeNative = native.appleSyncCalls;
+      sync.complete();
+      await restoring;
+      await retry;
+      expect(returnedBeforeNative, isTrue);
+      expect(busyBeforeNative, isFalse);
+      expect(codeBeforeNative, 'purchase_status_unknown');
+      expect(mayPurchaseBeforeNative, isFalse);
+      expect(syncCallsBeforeNative, 1);
+      expect(native.restoreCalls, 1);
+    },
+  );
+
   test('explicit iOS restore syncs before StoreKit restoration', () async {
     final sync = Completer<void>();
     native.appleSync = () => sync.future;

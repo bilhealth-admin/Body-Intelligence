@@ -1,5 +1,6 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -119,7 +120,7 @@ class BilMealVoiceCaptureDialog extends StatelessWidget {
                             !MediaQuery.disableAnimationsOf(context))
                           const SizedBox.square(
                             dimension: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           )
                         else
                           Icon(
@@ -216,7 +217,7 @@ class BilMealVoiceCaptureDialog extends StatelessWidget {
                         FilledButton.icon(
                           key: useKey,
                           onPressed: preparing ? null : onUse,
-                          icon: BilGlassPressFeedback(child: Icon(useIcon)),
+                          icon: BilNavigationFeedback(child: Icon(useIcon)),
                           label: Text(useLabel),
                         ),
                     ],

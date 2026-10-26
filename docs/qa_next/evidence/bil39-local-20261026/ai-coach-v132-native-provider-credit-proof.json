@@ -1,0 +1,18 @@
+{
+  "scope": "ONE_PHYSICAL38_LIVE_REQUEST_ON_AUTHORIZED_PRODUCTION132",
+  "function_version": 132,
+  "runtime_matches": 15,
+  "bundle_sha256": "2eb04d4a2a3092e4572cbc41e2adb2e0ea49164b11f45ebdd227ea45450c992c",
+  "http_status": 200,
+  "provider": "gemini",
+  "model": "gemini-3.8-flash",
+  "latency_ms": 10209,
+  "requests_in_window": 1,
+  "credit_actual": 70,
+  "paid_used_before": 78,
+  "paid_used_after": 148,
+  "reserved_after": 0,
+  "native_answer_observed": true,
+  "all_scenarios_certified": false,
+  "signed39_acceptance": false
+}

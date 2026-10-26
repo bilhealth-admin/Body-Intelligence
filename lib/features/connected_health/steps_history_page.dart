@@ -1,8 +1,11 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart' show NumberFormat;
+import '../../app/router/bil_safe_return_button.dart';
 
 import '../../app/localization/app_localizations.dart';
 import 'connected_health_copy.dart';
@@ -45,8 +48,13 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
 
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
-        appBar: AppBar(title: Text(t('Steps', 'الخطوات'))),
-        body: RefreshIndicator(
+        appBar: AppBar(
+          leading: const BilSafeReturnButton(
+            fallbackLocation: '/connected-health/steps',
+          ),
+          title: Text(t('Steps', 'الخطوات')),
+        ),
+        body: BilRefreshIndicator(
           onRefresh: () => ref.read(connectedHealthProvider.notifier).refresh(),
           child: ListView(
             key: const Key('steps-history-list'),
@@ -121,7 +129,7 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
                 trailing: health.isLoading || snapshot?.isBusy == true
                     ? const SizedBox.square(
                         dimension: 22,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : IconButton(
                         key: const Key('steps-history-refresh'),
@@ -129,7 +137,7 @@ class _StepsHistoryPageState extends ConsumerState<StepsHistoryPage> {
                         onPressed: () => ref
                             .read(connectedHealthProvider.notifier)
                             .refresh(),
-                        icon: const BilGlassPressFeedback(
+                        icon: const BilNavigationFeedback(
                           child: Icon(Icons.sync_rounded),
                         ),
                       ),

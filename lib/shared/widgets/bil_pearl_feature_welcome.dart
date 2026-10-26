@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/bil_pearl_finish.dart';
@@ -207,8 +208,8 @@ class BilPearlFeatureWelcome extends StatelessWidget {
 /// iOS reduceMotion flag is separate from MediaQuery.disableAnimations in the
 /// pinned Flutter SDK, so changes to either must produce the static variant.
 class BilFeatureWelcomeStatus extends StatefulWidget {
-  const BilFeatureWelcomeStatus({super.key, required this.color, this.label});
-  final Color color;
+  const BilFeatureWelcomeStatus({super.key, this.color, this.label});
+  final Color? color;
   final String? label;
 
   @override
@@ -237,22 +238,32 @@ class _BilFeatureWelcomeStatusState extends State<BilFeatureWelcomeStatus>
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final color =
+        widget.color ??
+        (MediaQuery.highContrastOf(context)
+            ? (dark ? Colors.white : Colors.black)
+            : (dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178)));
     final reduced =
         MediaQuery.disableAnimationsOf(context) ||
         View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
     return Semantics(
       liveRegion: true,
       label: widget.label,
+      role: ui.SemanticsRole.loadingSpinner,
       child: ExcludeSemantics(
-        child: CupertinoActivityIndicator(
-          key: Key(
-            reduced
-                ? 'bil-feature-welcome-static-status'
-                : 'bil-feature-welcome-progress',
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: CupertinoActivityIndicator(
+            key: Key(
+              reduced
+                  ? 'bil-feature-welcome-static-status'
+                  : 'bil-feature-welcome-progress',
+            ),
+            radius: 12,
+            animating: !reduced,
+            color: color,
           ),
-          radius: 12,
-          animating: !reduced,
-          color: widget.color,
         ),
       ),
     );

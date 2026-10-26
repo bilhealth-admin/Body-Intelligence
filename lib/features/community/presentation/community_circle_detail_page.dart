@@ -412,7 +412,7 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done &&
               _posts.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: BilFeatureWelcomeStatus());
           }
           if (snapshot.hasError && _posts.isEmpty) {
             return Center(
@@ -420,14 +420,14 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
                 onPressed: () {
                   if (visit.isCurrent()) _refresh();
                 },
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
               ),
             );
           }
-          return RefreshIndicator(
+          return BilRefreshIndicator(
             onRefresh: () async {
               if (visit.isCurrent()) await _refresh();
             },
@@ -543,11 +543,9 @@ class _CommunityCirclePageState extends State<CommunityCirclePage> {
                           icon: _loadingMore
                               ? const SizedBox.square(
                                   dimension: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: BilFeatureWelcomeStatus(),
                                 )
-                              : const BilGlassPressFeedback(
+                              : const BilNavigationFeedback(
                                   child: Icon(Icons.expand_more_rounded),
                                 ),
                           label: Text(

@@ -10,7 +10,7 @@ packages:
     source: hosted
     version: "99.0.0"
   analyzer:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: analyzer
       sha256: "663efa951fb8a45e06f491223a604c93820598f20e6a99c25617a1576065e8b7"
@@ -679,10 +679,9 @@ packages:
   go_router:
     dependency: "direct main"
     description:
-      name: go_router
-      sha256: "5922b2861e2235a3504896f0d6fa07d84141b480cf52eecd2f42cd25585a9e8a"
-      url: "https://pub.dev"
-    source: hosted
+      path: "tool/vendor_go_router"
+      relative: true
+    source: path
     version: "17.3.0"
   google_identity_services_web:
     dependency: transitive

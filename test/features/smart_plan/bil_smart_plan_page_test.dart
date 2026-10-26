@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_coach.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_material.dart';
@@ -138,7 +139,7 @@ void main() {
                     .byKey(const ValueKey('bil-smart-plan-data-management'))
                     .evaluate()
                     .isNotEmpty &&
-                find.byType(LinearProgressIndicator).evaluate().isEmpty) ||
+                bilWaitingIndicators().evaluate().isEmpty) ||
             find
                 .byKey(const ValueKey('bil-smart-plan-tabs'))
                 .evaluate()
@@ -161,7 +162,7 @@ void main() {
       }
     });
     await tester.pumpAndSettle();
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(bilWaitingIndicators(), findsNothing);
   }
 
   for (final language in ['en', 'ar']) {
@@ -780,6 +781,7 @@ void main() {
           before.encode(),
         );
         if (_capturePlanGoldens) {
+          await settleVisualAssetImages(tester);
           await expectLater(
             find.byType(BilSmartPlanPage),
             matchesGoldenFile('goldens/smart_plan_pending_$locale.png'),
@@ -832,8 +834,13 @@ void main() {
         final open = find.byKey(
           const ValueKey('bil-smart-plan-replace-session'),
         );
-        await tester.ensureVisible(open);
+        await tester.scrollUntilVisible(
+          open,
+          170,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
+        expect(open, findsOneWidget);
         await tester.tap(open);
         final field = find.byKey(
           const ValueKey('bil-smart-plan-alternative-session'),
@@ -891,9 +898,17 @@ void main() {
         );
         await repo.save(before, expectedRevision: initial.revision);
         await pump(tester, locale, 320, 2);
-        final meal = find.byIcon(Icons.restaurant_menu_rounded).first;
-        await tester.ensureVisible(meal);
+        final targetSlot = before.days.first.meals.first.slot.name;
+        // A stable row key lets scrollUntilVisible build the offscreen tile.
+        // A .first finder throws before the 320px/200% scroll can start.
+        final meal = find.byKey(ValueKey('bil-smart-plan-meal-$targetSlot'));
+        await tester.scrollUntilVisible(
+          meal,
+          170,
+          scrollable: find.byType(Scrollable).first,
+        );
         await tester.pumpAndSettle();
+        expect(meal, findsOneWidget);
         await tester.tap(meal);
         final schedule = find.byKey(
           const ValueKey('bil-smart-plan-meal-schedule'),
@@ -1018,6 +1033,7 @@ void main() {
         );
         expect(tester.takeException(), isNull);
         if (_capturePlanGoldens) {
+          await settleVisualAssetImages(tester);
           await expectLater(
             find.byType(MaterialApp),
             matchesGoldenFile('goldens/smart_plan_${locale}_report.png'),
@@ -1062,6 +1078,8 @@ void main() {
     );
     testWidgets('Smart Plan $locale glass layout Golden', (tester) async {
       await pump(tester, locale, 390, 1);
+      // Wait for the actual bundled artwork before auditing rendered pixels.
+      await settleVisualAssetImages(tester);
       final semantics = tester.ensureSemantics();
       try {
         await expectLater(tester, meetsGuideline(textContrastGuideline));

@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "checked_at_utc": "2026-10-26T19:01:18.780Z",
+  "status": "PARTIAL_RUNTIME_OBSERVATION_PLUS_LOCAL_BEHAVIOR_PROOF",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "phone": {
+    "version": "1.0.0",
+    "build": "38",
+    "tracking_request_list": "BIL absent between the inspected B-name entries; global request switch already on",
+    "settings_modified": false,
+    "app_privacy_report_enabled_before_audit": true,
+    "network_domains": [
+      "project.supabase.co",
+      "fundingchoicesmessages.google.com",
+      "googleads.g.doubleclick.net",
+      "g.doubleclick.net",
+      "sandbox.itunes.apple.com",
+      "amp-api.sandbox.apple.com",
+      "mzstorekit-sb.itunes.apple.com",
+      "pubads.g.doubleclick.net"
+    ],
+    "domain_limit": "Contact counts are OS report observations, not request content or proof of tracking. Project hostname redacted.",
+    "sensor_history": "BIL not present in inspected available sensor-access list; not proof of never accessing sensors or absence of grants.",
+    "in_app_disclosure": {
+      "observed_on_build38": true,
+      "health_and_private_data_separation_copy_visible": true,
+      "google_sdk_ip_based_approximate_location_disclosed": true,
+      "premium_ad_free_copy_visible": true,
+      "contextual_eligibility_visible": true,
+      "google_privacy_options_entry_visible": false,
+      "limit": "No Google privacy-options entry was visible in this device/region session; UI alone does not establish UMP required/not-required machine state.",
+      "screenshot_sha256": "7dc77d304f9d18dc9c70a87772954a357c0226ce95fbe36350fa89e3403b740f"
+    }
+  },
+  "source": {
+    "first_party_publisher_id_disabled_before_sdk_initialize": true,
+    "native_plugin_mapping_verified": true,
+    "non_personalized_ad_request": true,
+    "only_ad_placement": "generalDiscovery",
+    "fresh_ump_verification": true,
+    "no_app_owned_ATT_request_or_IDFA_API_found": true,
+    "no_health_or_identity_targeting_fields_in_native_request": true
+  },
+  "new_behavior_tests": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "done": {
+      "success": true,
+      "type": "done",
+      "time": 9192
+    },
+    "cases": [
+      "native request contains no health, owner or targeting payload",
+      "fresh denial cannot initialize SDK or issue a native request",
+      "revocation during SDK initialization blocks load: owner=false",
+      "revocation during SDK initialization blocks load: owner=true"
+    ]
+  },
+  "test_log_sha256": "c377c31cffdd7b420b5188cab5f793bd1d96c6dc2b965a44ad77b685ceba8d9e",
+  "tested_test_file_sha256": "2a4915eee57a6960fc493b696f332db50a64aca8fcbf99c6309b521a915d8664",
+  "test_file_post_run_change": "Three explanatory lint-suppression comment lines only, keeping the legacy wire-field absence assertion. Scoped analyzer after comments: 0 issues.",
+  "analyze_log_sha256": "e582120669854f9aae62cec748016886ec3ad784a0102565e152a3f4860a8735",
+  "source_hashes": {
+    "lib/features/ads/services/admob_contextual_ad_gateway.dart": "9f9e383bbd658ccdd9fccf6fea855658a0789c7a4cef34642d500661870dc2d0",
+    "lib/features/ads/services/admob_ump_consent_gate.dart": "341705b62afe605a6270ba1b32ba53160d96ef85e71f1b2759c4b765ca75b1be",
+    "lib/features/ads/providers/ad_providers.dart": "22be883afbb47790ef39d223de163a0b047ab1cff977756f6684accaba6848d0",
+    "test/features/ads/admob_request_privacy_boundary_test.dart": "3f8282011794f6ec6f308c91155b4e1958dcd5ec7334a7c862009945b344fe2a",
+    "ios/Runner/PrivacyInfo.xcprivacy": "c4c2ef4b551492e986953db664a7307defc66dc863be74a009eb195b6aa60738"
+  },
+  "historical_compiled_sdk_inventory": {
+    "artifact_id": 12533833422,
+    "run_id": 40020583706,
+    "source_sha": "c20c1bc6737819b6689bedf130a0f4cf807e275c",
+    "manifests": 58,
+    "google_sdk_device_id_tracking_capability_declared": true,
+    "not_a_bil39_archive": true
+  },
+  "private_screen_hashes": {
+    "398-bil-all-privacy-network-domains38-private.png": "36a503541d021be636eb5b934dc6fc3096ee5e40276ab6983079a7c1f50d2e49",
+    "402-tracking-apps-private.png": "7380221d36308884fbae19bf52874cd40e22120ec6a25b883e65de3453b7e855",
+    "403-tracking-next-private.png": "bfd6c17ace84e4bcfa73e558b2fa324634dfc4f92c0e38b14c7ae5784bed16b8"
+  },
+  "official_sources": [
+    "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+    "https://developers.google.com/admob/ios/privacy/strategies?hl=en",
+    "https://developers.google.com/admob/ios/privacy/ad-serving-modes?hl=en"
+  ],
+  "limitations": [
+    "NPA alone does not prove identifier-free SDK behavior.",
+    "SDK manifest capabilities are not measured collection.",
+    "No decrypted HTTPS traffic or actual IDFA return value inspected.",
+    "No new ATT purpose text or tracking authorization added.",
+    "No store, ad-console, consent preference or device permission changed.",
+    "Final39 SDK aggregate manifest, signed artifact and native consent lifecycle remain unverified.",
+    "No full-root rerun or39 build performed."
+  ]
+}

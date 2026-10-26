@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -175,7 +176,7 @@ void main() {
     for (final type in const ['breakfast', 'lunch', 'dinner', 'snack']) {
       expect(find.byKey(Key('daily-meal-card-$type')), findsOneWidget);
     }
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(bilWaitingIndicators(), findsNothing);
     requests[finalDate]!.add([]);
     await tester.pumpAndSettle();
     oldRequest.addError(StateError('late abandoned date'));
@@ -367,7 +368,7 @@ void main() {
       find.byKey(const Key('daily-meal-loading-skeleton')),
       findsOneWidget,
     );
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(bilWaitingIndicators(), findsNothing);
   });
 
   testWidgets('week strip shows a date number inside every circle', (

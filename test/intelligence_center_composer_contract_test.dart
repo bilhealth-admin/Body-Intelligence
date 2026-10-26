@@ -24,6 +24,7 @@ void main() {
             'intelligence_conversation_voice.dart',
             'intelligence_vision_flow.dart',
             'intelligence_query_flow.dart',
+            'intelligence_query_guard_flow.dart',
             'intelligence_action_flow.dart',
             'intelligence_action_runtime.dart',
           ]
@@ -99,7 +100,18 @@ void main() {
     expect(page, contains('await _startVoiceCapture(playCue: true);'));
     expect(page, contains('CoachVoiceEntryPoint.composerDictation'));
     expect(page, contains('CoachVoiceEntryPoint.liveCall'));
-    expect(page, contains('coachContextSnapshotProvider.future'));
+    expect(page, contains('readCoachContextSnapshot('));
+    final contextReader = File(
+      'lib/features/intelligence_center/services/coach_context_reader.dart',
+    ).readAsStringSync();
+    expect(
+      contextReader,
+      contains('container.read(coachContextSnapshotProvider.future)'),
+    );
+    expect(contextReader, contains('container.listen('));
+    expect(contextReader, contains('subscription.close();'));
+    expect(contextReader, contains('ownerSubscription.close();'));
+    expect(contextReader, contains('repositorySubscription.close();'));
     expect(page, contains('coachContext: coachContext'));
     expect(page, contains('inputChannel: inputChannel'));
   });
@@ -211,7 +223,12 @@ void main() {
     expect(page, contains('latestMessageId: visibleMessages.isEmpty'));
     expect(page, contains('latestTargetOffset: _coachLatestReadingOffset'));
     expect(page, contains('centerJumpButton: true'));
-    expect(page, contains('if (!conversationReady)'));
+    expect(
+      page,
+      contains('if (!conversationReady || conversationRestarting) return;'),
+    );
+    expect(page, contains('if (!shouldFollow)'));
+    expect(page, contains('_coachIsNearLatest(conversationScroll.position)'));
     expect(page, contains('sessionWelcomeMessage'));
   });
 

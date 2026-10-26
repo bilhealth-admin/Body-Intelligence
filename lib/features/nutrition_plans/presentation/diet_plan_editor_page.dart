@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -492,7 +494,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
               context.go('/nutrition-plans');
             }
           },
-          icon: const BackButtonIcon(),
+          icon: const BilCrystalArrow(child: BackButtonIcon()),
         ),
         title: Text(nutritionPathwayTitle(pathway, localeTag)),
         centerTitle: true,
@@ -536,7 +538,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
             icon: _saving
                 ? const SizedBox.square(
                     dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: BilFeatureWelcomeStatus(),
                   )
                 : const Icon(Icons.check_circle_outline_rounded),
             label: Text(
@@ -558,7 +560,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: BilFeatureWelcomeStatus())
           : ListView(
               padding: const EdgeInsets.only(bottom: 28),
               children: [

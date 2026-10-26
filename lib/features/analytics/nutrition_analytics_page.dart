@@ -1,6 +1,9 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../nutrition/domain/unified_food.dart';
 import '../../data/database/meal_food_evidence.dart';
 import 'package:flutter/material.dart';
@@ -218,8 +221,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
                 child: meals.when(
                   skipLoadingOnRefresh: true,
                   skipLoadingOnReload: true,
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(child: BilFeatureWelcomeStatus()),
                   error: (_, _) => Center(
                     child: FilledButton(
                       onPressed: () => ref.invalidate(dailyMealsProvider),
@@ -394,7 +396,7 @@ class _NutritionDependencyError extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const BilGlassPressFeedback(
+            const BilNavigationFeedback(
               child: Icon(Icons.sync_problem_rounded, size: 44),
             ),
             const SizedBox(height: 12),
@@ -405,7 +407,7 @@ class _NutritionDependencyError extends StatelessWidget {
             const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(_t(context, 'Try again')),

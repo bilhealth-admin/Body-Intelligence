@@ -12,6 +12,7 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
+            key: _composerAnchor,
             child: TextField(
               key: const Key('bil07-composer'),
               controller: _composer,
@@ -58,9 +59,9 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
               icon: controller.sending
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: BilFeatureWelcomeStatus(),
                     )
-                  : const BilGlassPressFeedback(
+                  : const BilNavigationFeedback(
                       child: Icon(Icons.send_rounded),
                     ),
             ),
@@ -165,6 +166,8 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
           ExpansionTile(
             key: const Key('bil07-show-attempt'),
             title: Text(_copy(CommunityChannelsCopyKey.originalAttempt)),
+
+            trailing: const BilCrystalExpansionIndicator(),
             children: [
               SelectableText(
                 attempt.text,
@@ -184,7 +187,7 @@ extension _CommunityChannelComposer on _CommunityChannelsViewState {
             controller.sending || !controller.canSend || !controller.foreground
             ? null
             : () => _send(controller, retry: true),
-        icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
+        icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
         label: Text(_copy(CommunityChannelsCopyKey.retrySend)),
       ),
     );

@@ -97,7 +97,7 @@ extension _CommunityDraftsPreview on _CommunityDraftsSheetState {
                   key: Key('community-draft-preview-retry-${summary.draftId}'),
                   tooltip: communityText(context, 'Retry', 'إعادة المحاولة'),
                   onPressed: () => _retryPreview(summary.draftId),
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.refresh_rounded),
                   ),
                 ),

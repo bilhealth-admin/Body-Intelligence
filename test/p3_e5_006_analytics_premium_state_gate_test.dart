@@ -1,3 +1,4 @@
+import 'support/bil_waiting_indicators.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -45,7 +46,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(bilWaitingIndicators(), findsNothing);
       expect(
         find.byWidgetPredicate(
           (widget) =>

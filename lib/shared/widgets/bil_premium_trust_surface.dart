@@ -1,5 +1,6 @@
+import 'bil_pearl_feature_welcome.dart';
 import 'bil_pearl_material.dart';
-import 'bil_glass_press_feedback.dart';
+import 'bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../app/theme/bil_pearl_finish.dart';
 
@@ -62,7 +63,7 @@ class BilPremiumTrustSurface extends StatelessWidget {
                       ),
                     ),
                     alignment: Alignment.center,
-                    child: BilGlassPressFeedback(
+                    child: BilNavigationFeedback(
                       child: Icon(icon, color: Colors.white, size: 23),
                     ),
                   ),
@@ -113,7 +114,7 @@ class BilPremiumTrustSurface extends StatelessWidget {
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
-                            child: BilGlassPressFeedback(
+                            child: BilNavigationFeedback(
                               child: Icon(
                                 point.icon,
                                 size: 15,
@@ -214,12 +215,9 @@ class BilPremiumConsentToggle extends StatelessWidget {
               child: loading
                   ? const SizedBox.square(
                       dimension: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                      child: BilFeatureWelcomeStatus(color: Colors.white),
                     )
-                  : BilGlassPressFeedback(
+                  : BilNavigationFeedback(
                       child: Icon(icon, color: Colors.white, size: 22),
                     ),
             ),
@@ -515,7 +513,7 @@ class _BilPremiumAiConsentRow extends StatelessWidget {
               ),
             ),
             alignment: Alignment.center,
-            child: BilGlassPressFeedback(
+            child: BilNavigationFeedback(
               child: Icon(
                 point.icon,
                 size: 21,

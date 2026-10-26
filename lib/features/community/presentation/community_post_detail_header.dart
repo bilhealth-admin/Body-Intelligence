@@ -246,7 +246,7 @@ class _CommunityPostDetailMetric extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        BilGlassPressFeedback(
+        BilNavigationFeedback(
           child: Icon(
             icon,
             size: 19,

@@ -97,7 +97,7 @@ class _CommunityProfileConnectionsSheetState
     future: _connections,
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: BilFeatureWelcomeStatus());
       }
       if (snapshot.hasError) {
         return Center(
@@ -147,15 +147,19 @@ class _CommunityProfileConnectionsSheetState
                     child: _followBusyUserId == member.userId
                         ? const SizedBox.square(
                             dimension: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           )
                         : Text(
                             member.viewerFollows
-                                ? communityText(context, 'Following', 'يتابع')
+                                ? communityText(
+                                    context,
+                                    'Unfollow',
+                                    'إلغاء المتابعة',
+                                  )
                                 : communityText(context, 'Follow', 'متابعة'),
                           ),
                   ),
-                BilGlassPressFeedback(
+                BilNavigationFeedback(
                   child: Icon(
                     Directionality.of(context) == TextDirection.rtl
                         ? Icons.chevron_left_rounded

@@ -1,0 +1,10 @@
+{
+  "classification": "GENERATED_COMPARISONS_PRESERVED_OUTSIDE_RELEASE_SOURCE",
+  "utc": "2026-10-26T21:43:58.7456865Z",
+  "count": 84,
+  "all_sha256_verified": true,
+  "tracked_references_moved": 0,
+  "private_index_sha256": "0d7618314e418356f7b81df854ae097d003bbe8509ef74ae370a3130e3d2561b",
+  "no_files_deleted": true,
+  "no_reference_goldens_changed": true
+}

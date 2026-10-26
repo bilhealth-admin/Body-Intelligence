@@ -90,7 +90,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
         const SizedBox(height: 16),
         if (snapshot.connectionState != ConnectionState.done &&
             !snapshot.hasData)
-          const Center(child: CircularProgressIndicator()),
+          const Center(child: BilFeatureWelcomeStatus()),
         if (snapshot.hasError) _InlineError(onRetry: () => setState(_reload)),
         for (final row in snapshot.data ?? const <Map<String, dynamic>>[])
           BilPearlMaterialCard(

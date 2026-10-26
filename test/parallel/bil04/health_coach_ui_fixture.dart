@@ -32,6 +32,7 @@ Future<void> _withHealthCoach(
   final semantics = enableSemantics ? tester.ensureSemantics() : null;
   try {
     await tester.pumpWidget(_healthCoachApp(fixture));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
     await body(fixture);
     expect(tester.takeException(), isNull);
@@ -223,6 +224,7 @@ Future<void> _remountHealthCoach(
 ) async {
   await _unmountHealthCoach(tester);
   await tester.pumpWidget(_healthCoachApp(fixture));
+  await openCoachConversationFromOverview(tester);
   await tester.pumpAndSettle();
 }
 

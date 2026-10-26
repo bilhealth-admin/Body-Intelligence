@@ -51,6 +51,8 @@ const _communitySocialEastRows = <String, List<String>>{
     'BILコードを利用できません。サインインしてコミュニティプロフィールを完成させてから、もう一度お試しください。',
     '古いコードは使えなくなります。友達は新しいコードを使用する必要があります。',
     'これはあなたです',
+    "友達を削除しますか？",
+    "フォローを解除",
   ],
   'ko': <String>[
     'BIL에서 @{handle} 추가: {uri}',
@@ -102,6 +104,8 @@ const _communitySocialEastRows = <String, List<String>>{
     'BIL 코드를 사용할 수 없습니다. 로그인하고 커뮤니티 프로필을 완성한 후 다시 시도하세요.',
     '이전 코드는 작동하지 않게 됩니다. 친구는 새 코드를 사용해야 합니다.',
     '본인입니다',
+    "친구를 삭제할까요?",
+    "팔로우 취소",
   ],
   'zh-Hans': <String>[
     '在 BIL 上添加 @{handle}：{uri}',
@@ -153,6 +157,8 @@ const _communitySocialEastRows = <String, List<String>>{
     '你的 BIL 代码不可用。请登录、完善社区个人资料，然后重试。',
     '旧代码将停止使用。好友需要使用新代码。',
     '这是你',
+    "移除好友？",
+    "取消关注",
   ],
   'zh-Hant': <String>[
     '在 BIL 上新增 @{handle}：{uri}',
@@ -204,6 +210,8 @@ const _communitySocialEastRows = <String, List<String>>{
     '你的 BIL 代碼無法使用。請登入、完成社群個人檔案，然後再試一次。',
     '舊代碼將停止運作。好友需要使用新代碼。',
     '這是你',
+    "移除好友？",
+    "取消追蹤",
   ],
   'ru': <String>[
     'Добавить @{handle} в BIL: {uri}',
@@ -255,6 +263,8 @@ const _communitySocialEastRows = <String, List<String>>{
     'Ваш код BIL недоступен. Войдите в аккаунт, заполните профиль сообщества и повторите попытку.',
     'Старый код перестанет работать. Друзьям понадобится новый код.',
     'Это вы',
+    "Удалить друга?",
+    "Отписаться",
   ],
   'vi': <String>[
     'Thêm @{handle} trên BIL: {uri}',
@@ -306,6 +316,8 @@ const _communitySocialEastRows = <String, List<String>>{
     'Mã BIL của bạn không khả dụng. Hãy đăng nhập, hoàn tất hồ sơ Cộng đồng rồi thử lại.',
     'Mã cũ của bạn sẽ ngừng hoạt động. Bạn bè sẽ cần mã mới.',
     'Đây là bạn',
+    "Xóa bạn bè?",
+    "Bỏ theo dõi",
   ],
   'th': <String>[
     'เพิ่ม @{handle} บน BIL: {uri}',
@@ -357,5 +369,7 @@ const _communitySocialEastRows = <String, List<String>>{
     'โค้ด BIL ของคุณไม่พร้อมใช้งาน โปรดลงชื่อเข้าใช้ กรอกโปรไฟล์ชุมชนให้ครบ แล้วลองอีกครั้ง',
     'โค้ดเก่าของคุณจะหยุดทำงาน เพื่อนๆ จะต้องใช้โค้ดใหม่',
     'นี่คือคุณ',
+    "ลบเพื่อนหรือไม่?",
+    "เลิกติดตาม",
   ],
 };

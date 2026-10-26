@@ -1,6 +1,7 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'presentation/food_translation_attribution.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -436,7 +437,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
             ),
             Expanded(
               child: allFoods.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: BilFeatureWelcomeStatus()),
                 error: (_, _) => ActionableErrorState(
                   title: t('Could not load foods'),
                   onRetry: () => ref.invalidate(foodsProvider),
@@ -448,7 +449,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                     _CatalogView.recent => recent,
                   };
                   if (search.text.trim().isEmpty && selectedAsync.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: BilFeatureWelcomeStatus());
                   }
                   if (search.text.trim().isEmpty && selectedAsync.hasError) {
                     return ActionableErrorState(
@@ -495,7 +496,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                       runtimeSearchState == _RuntimeSearchUiState.searching) {
                     return const Center(
                       key: Key('food-search-results-loading'),
-                      child: CircularProgressIndicator(),
+                      child: BilFeatureWelcomeStatus(),
                     );
                   }
                   if (visible.isEmpty) {

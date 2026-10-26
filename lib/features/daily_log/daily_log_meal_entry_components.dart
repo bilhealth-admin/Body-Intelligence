@@ -28,7 +28,7 @@ class _DiaryActionButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                BilGlassPressFeedback(
+                BilNavigationFeedback(
                   child: Icon(
                     BilSemanticIcons.spec(kind).icon,
                     size: 20,

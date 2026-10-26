@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -390,9 +391,7 @@ Future<void> _settle(WidgetTester tester, String stage) async {
     );
     await tester.pump(const Duration(milliseconds: 50));
     _assertNoFrameworkErrors(tester, stage);
-    final loading =
-        find.byType(CircularProgressIndicator).evaluate().isNotEmpty ||
-        find.byType(LinearProgressIndicator).evaluate().isNotEmpty;
+    final loading = bilWaitingIndicators().evaluate().isNotEmpty;
     quietFrames =
         !loading &&
             _providersHydrated(tester) &&
@@ -404,8 +403,8 @@ Future<void> _settle(WidgetTester tester, String stage) async {
   fail(
     'Real SQLite/UI hydration did not complete within the bounded fixture '
     'at $stage: circular='
-    '${find.byType(CircularProgressIndicator).evaluate().length}, linear='
-    '${find.byType(LinearProgressIndicator).evaluate().length}, scheduled='
+    '${bilWaitingIndicators().evaluate().length}, linear='
+    '${bilWaitingIndicators().evaluate().length}, scheduled='
     '${tester.binding.hasScheduledFrame}, providersHydrated='
     '${_providersHydrated(tester)}',
   );

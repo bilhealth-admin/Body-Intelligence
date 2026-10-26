@@ -410,7 +410,7 @@ class _CustomWorkoutRoutineBuilderState
               child: _saving
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: BilFeatureWelcomeStatus(),
                     )
                   : Text(_copy(context, 'Save', 'حفظ')),
             ),
@@ -461,7 +461,9 @@ class _CustomWorkoutRoutineBuilderState
                       ),
                 title: Text(item.title),
                 subtitle: Text(
-                  item.category ?? _copy(context, 'Workout', 'تمرين'),
+                  workoutVideoGroupIds.contains(item.category)
+                      ? _workoutPlanGroupTitle(context, item.category!)
+                      : item.category ?? _copy(context, 'Workout', 'تمرين'),
                 ),
               ),
           ],

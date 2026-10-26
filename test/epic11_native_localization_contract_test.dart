@@ -31,7 +31,6 @@ void main() {
     'NSHealthShareUsageDescription',
     'NSHealthUpdateUsageDescription',
     'NSBluetoothAlwaysUsageDescription',
-    'NSBluetoothPeripheralUsageDescription',
     'NSCameraUsageDescription',
     'NSPhotoLibraryUsageDescription',
     'NSMicrophoneUsageDescription',
@@ -40,7 +39,6 @@ void main() {
   const permissionKeysRequiringLocaleCopy = <String>{
     'NSHealthShareUsageDescription',
     'NSBluetoothAlwaysUsageDescription',
-    'NSBluetoothPeripheralUsageDescription',
   };
 
   test('iOS permission copy is complete and bundled in all 25 locales', () {
@@ -82,9 +80,9 @@ void main() {
         }
       }
       expect(
-        permissionValues['NSBluetoothAlwaysUsageDescription'],
-        permissionValues['NSBluetoothPeripheralUsageDescription'],
-        reason: '$locale Bluetooth permission descriptions must match',
+        copy,
+        isNot(contains('NSBluetoothPeripheralUsageDescription')),
+        reason: '$locale must not bundle the retired pre-iOS13 purpose key',
       );
       final coachName = switch (locale) {
         'ar' => 'مدرب BIL الذكي',

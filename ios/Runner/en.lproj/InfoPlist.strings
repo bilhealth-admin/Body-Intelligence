@@ -1,7 +1,6 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—for your private on-device fitness timeline and insights. Only when you enable Personalized Intelligence and ask BIL Coach a question may the minimum relevant data be securely processed by cloud AI to answer it.";
 "NSHealthUpdateUsageDescription" = "BIL writes weight records only after you separately approve Health write access.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
-"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Use the camera only when you choose to scan a barcode, review a meal photo, or add a private profile or progress photo.";
 "NSPhotoLibraryUsageDescription" = "BIL accesses only a photo you choose for a meal, profile, progress record, community post, or food submission so you can review it before saving or uploading.";
 "NSMicrophoneUsageDescription" = "BIL uses the microphone only when you start voice input. It transcribes speech on this device and stops if on-device recognition is unavailable. Raw audio is not sent to Gemini. Gemini processes text you send to AI Coach only after you enable Personalized Intelligence and send it. Voice input includes weight, meals, and Community posts.";

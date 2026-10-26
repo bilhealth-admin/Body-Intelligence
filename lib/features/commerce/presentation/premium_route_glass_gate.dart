@@ -1,5 +1,7 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -178,7 +180,7 @@ class _AiCoachAccessCheckingSurface extends StatelessWidget {
       child: SizedBox.square(
         key: ValueKey('ai-coach-access-checking-surface'),
         dimension: 24,
-        child: CircularProgressIndicator(strokeWidth: 2.5),
+        child: BilFeatureWelcomeStatus(),
       ),
     ),
   );

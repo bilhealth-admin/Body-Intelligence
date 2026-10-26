@@ -1,3 +1,7 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../app/router/bil_primary_navigation.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'community_post_surface.dart';
 import 'community_post_body.dart';
 import 'community_report_sheet.dart';
@@ -6,7 +10,7 @@ import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import 'package:flutter/foundation.dart' show SynchronousFuture;
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'community_attention_scope.dart';
 import 'bil_gold_coin.dart';
 import 'dart:async';
@@ -348,13 +352,13 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                 selected: 3,
                 dark: Theme.of(context).brightness == Brightness.dark,
                 onSelected: (index) {
-                  if (!visit.isCurrent()) return;
                   if (index == 2) {
+                    if (!visit.isCurrent()) return;
                     unawaited(
                       showBilQuickAdd(context, originPath: '/community'),
                     );
                   } else if (index != 3) {
-                    context.go(BilReferenceBottomBar.routes[index]);
+                    bilSelectPrimaryTab(context, index);
                   }
                 },
               ),
@@ -363,13 +367,15 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
           // pushed it above an existing screen, expose the real previous route.
           automaticallyImplyLeading: false,
           leading: _section == _CommunityHubSection.circles
-              ? BackButton(
-                  key: const Key('community-safe-return'),
-                  onPressed: () {
-                    if (visit != null && visit.isCurrent()) {
-                      _showFeedMode(_feedMode);
-                    }
-                  },
+              ? BilCrystalArrow(
+                  child: BackButton(
+                    key: const Key('community-safe-return'),
+                    onPressed: () {
+                      if (visit != null && visit.isCurrent()) {
+                        _showFeedMode(_feedMode);
+                      }
+                    },
+                  ),
                 )
               : Navigator.of(context).canPop()
               ? const CommunityReturnButton()

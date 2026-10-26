@@ -16,7 +16,7 @@ class _StoreMark extends StatelessWidget {
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        BilGlassPressFeedback(child: Icon(icon, color: Colors.white, size: 20)),
+        BilNavigationFeedback(child: Icon(icon, color: Colors.white, size: 20)),
         const SizedBox(width: 7),
         Text(
           label,

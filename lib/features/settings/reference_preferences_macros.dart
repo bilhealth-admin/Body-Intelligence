@@ -48,14 +48,14 @@ class _DerivedMacroGramsState extends ConsumerState<_DerivedMacroGrams> {
             title: Text(context.strings.text('Unavailable')),
             trailing: TextButton.icon(
               onPressed: () => setState(() => generation += 1),
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(context.strings.text('Retry')),
             ),
           );
         }
-        if (!snapshot.hasData) return const LinearProgressIndicator();
+        if (!snapshot.hasData) return const BilFeatureWelcomeStatus();
         final grams = deriveMacroGrams(snapshot.data!);
         final valid = grams != null;
         const labels = ['Carbohydrates', 'Protein', 'Fat'];

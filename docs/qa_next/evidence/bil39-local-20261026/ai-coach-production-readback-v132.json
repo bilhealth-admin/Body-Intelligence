@@ -1,0 +1,78 @@
+{
+  "publishedAt": "2026-10-26T12:23:44.661Z",
+  "project": "tgmanzhqulksykhslrzb",
+  "function": "ai-coach",
+  "version": 132,
+  "status": "ACTIVE",
+  "bundleSha": "2eb04d4a2a3092e4572cbc41e2adb2e0ea49164b11f45ebdd227ea45450c992c",
+  "previousVersion": 131,
+  "previousBundleSha": "29c96fa980f9d5ed4cb31807b778f45843166a5866e5aec828815052b426d917",
+  "verifyJwtUnchanged": true,
+  "files": [
+    {
+      "name": "ai-coach/index.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/server.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "_shared/bcp47.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_reasoning.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_conversation_scope.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_answer_quality.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_food_safety.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_health_safety.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_verified_weight_proposal.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_workout_review_copy.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_weight_truth.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/coach_tool_arguments.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "_shared/ai_provider_recipient.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "_shared/mobile_integrity.ts",
+      "exactContentMatch": true
+    },
+    {
+      "name": "ai-coach/deno.json",
+      "exactContentMatch": true
+    }
+  ],
+  "allRuntimeFilesExactlyMatched": true,
+  "isolatedTypedTests": 164,
+  "liveProviderAcceptance": "PENDING",
+  "staging": "NOT_RUN_USER_AUTHORIZED_PRODUCTION_VERIFICATION",
+  "rollbackPayload": "production-predeploy-20261026/ai-coach-v131/rollback-deploy-payload.json"
+}

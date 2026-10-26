@@ -73,6 +73,7 @@ class _CommunityMemberProfilePageState
   bool _relationshipBusy = false;
   bool _memberSafetyBusy = false;
   bool _followBusy = false;
+  int _followMetadataGeneration = 0;
   bool _managingPost = false;
   _CommunityProfileContentTab _contentTab = _CommunityProfileContentTab.moments;
   _CommunityProfileMomentFilter _momentFilter =
@@ -141,67 +142,125 @@ class _CommunityMemberProfilePageState
             const <CommunityPostReferenceMetadata>[];
 
         if (repository.useServerCommunityReferenceParity) {
-          final postIds = (postsVisible ? batch.posts : const <CommunityPost>[])
-              .map((post) => post.id)
-              .toList(growable: false);
-          final extras = await Future.wait<Object>([
-            repository.loadCommunityCreatorProfile(visit.targetId),
-            profile.isSelf
-                ? repository.listMyCommunityDrafts(limit: 50)
-                : Future<List<CommunityDraftSummary>>.value(
-                    const <CommunityDraftSummary>[],
-                  ),
-            repository.loadCommunityPostViewCounts(postIds),
-            postIds.isEmpty
-                ? Future<List<CommunityPostReferenceMetadata>>.value(
-                    const <CommunityPostReferenceMetadata>[],
-                  )
-                : repository.loadCommunityPostReferenceMetadata(postIds),
-          ]);
-          visit.check();
-          creator = extras[0] as CommunityCreatorProfile;
-          drafts = extras[1] as List<CommunityDraftSummary>;
-          counts = extras[2] as Map<String, int>;
-          references = extras[3] as List<CommunityPostReferenceMetadata>;
-          coverUrl = await repository.loadCommunityProfileCoverUrl(
-            visit.targetId,
+          final metadataDeadline = Completer<void>();
+          final metadataTimer = Timer(
+            const Duration(seconds: 6),
+            () => metadataDeadline.complete(),
           );
-          visit.check();
-          if (postsVisible) {
-            try {
-              // Reviews are a separately authorized, paginated surface. Load
-              // the first page from the owning repository; a zero-length
-              // placeholder leaves the Reviews tab permanently empty.
-              reviews = await repository.loadCommunityProfileReviews(
-                userId: visit.targetId,
-                limit: _pageSize,
-              );
+          try {
+            Future<T> optionalMetadata<T>(
+              Future<T> Function() read,
+              T fallback,
+            ) async {
               visit.check();
-            } on CommunityOwnerOperationCancelled {
-              rethrow;
-            } on Object {
-              // An unavailable reviews endpoint must not expose private data
-              // or block the rest of an otherwise authorized profile.
-              reviews = const <CommunityProfileReview>[];
+              if (metadataDeadline.isCompleted) return fallback;
+              try {
+                final result = await Future.any<T>([
+                  read(),
+                  metadataDeadline.future.then((_) => fallback),
+                ]);
+                visit.check();
+                return result;
+              } on CommunityOwnerOperationCancelled {
+                rethrow;
+              } on Object {
+                // Optional creator artwork, counts and reward services cannot
+                // discard an already authorized profile or trap navigation.
+                // Their reads share one budget and never grant any privilege.
+                visit.check();
+                return fallback;
+              }
             }
-          }
-          if (profile.isSelf) {
-            try {
-              final rewards = await Future.wait<Object>([
-                repository.loadGoldBalance(),
-                repository.loadCommunityQuests(),
-              ]);
-              visit.check();
-              goldBalance = rewards[0] as CommunityGoldBalance;
-              quests = rewards[1] as List<CommunityQuest>;
-            } on CommunityOwnerOperationCancelled {
-              rethrow;
-            } on Object {
-              // Creator rewards are an enhancement to the self-profile. The
-              // profile itself remains usable when reward policy is unavailable.
-              goldBalance = null;
-              quests = const <CommunityQuest>[];
+
+            final postIds =
+                (postsVisible ? batch.posts : const <CommunityPost>[])
+                    .map((post) => post.id)
+                    .toList(growable: false);
+            final extras = await Future.wait<Object?>([
+              optionalMetadata<CommunityCreatorProfile?>(
+                () => repository.loadCommunityCreatorProfile(visit.targetId),
+                null,
+              ),
+              profile.isSelf
+                  ? optionalMetadata(
+                      () => repository.listMyCommunityDrafts(limit: 50),
+                      const <CommunityDraftSummary>[],
+                    )
+                  : Future<List<CommunityDraftSummary>>.value(
+                      const <CommunityDraftSummary>[],
+                    ),
+              optionalMetadata(
+                () => repository.loadCommunityPostViewCounts(postIds),
+                const <String, int>{},
+              ),
+              postIds.isEmpty
+                  ? Future<List<CommunityPostReferenceMetadata>>.value(
+                      const <CommunityPostReferenceMetadata>[],
+                    )
+                  : optionalMetadata(
+                      () => repository.loadCommunityPostReferenceMetadata(
+                        postIds,
+                      ),
+                      const <CommunityPostReferenceMetadata>[],
+                    ),
+            ]);
+            visit.check();
+            creator = extras[0] as CommunityCreatorProfile?;
+            drafts = extras[1] as List<CommunityDraftSummary>;
+            counts = extras[2] as Map<String, int>;
+            references = extras[3] as List<CommunityPostReferenceMetadata>;
+            coverUrl = await optionalMetadata<String?>(
+              () => repository.loadCommunityProfileCoverUrl(visit.targetId),
+              null,
+            );
+            visit.check();
+            if (postsVisible) {
+              try {
+                // Reviews are a separately authorized, paginated surface. Load
+                // the first page from the owning repository; a zero-length
+                // placeholder leaves the Reviews tab permanently empty.
+                reviews = await optionalMetadata(
+                  () => repository.loadCommunityProfileReviews(
+                    userId: visit.targetId,
+                    limit: _pageSize,
+                  ),
+                  const <CommunityProfileReview>[],
+                );
+                visit.check();
+              } on CommunityOwnerOperationCancelled {
+                rethrow;
+              } on Object {
+                // An unavailable reviews endpoint must not expose private data
+                // or block the rest of an otherwise authorized profile.
+                reviews = const <CommunityProfileReview>[];
+              }
             }
+            if (profile.isSelf) {
+              try {
+                final rewards = await optionalMetadata<List<Object>>(
+                  () => Future.wait<Object>([
+                    repository.loadGoldBalance(),
+                    repository.loadCommunityQuests(),
+                  ]),
+                  const <Object>[],
+                );
+                visit.check();
+                if (rewards.length == 2) {
+                  goldBalance = rewards[0] as CommunityGoldBalance;
+                  quests = rewards[1] as List<CommunityQuest>;
+                }
+              } on CommunityOwnerOperationCancelled {
+                rethrow;
+              } on Object {
+                // Creator rewards are an enhancement to the self-profile. The
+                // profile itself remains usable when reward policy is unavailable.
+                goldBalance = null;
+                quests = const <CommunityQuest>[];
+              }
+            }
+          } finally {
+            metadataTimer.cancel();
+            if (!metadataDeadline.isCompleted) metadataDeadline.complete();
           }
         }
         visit.check();
@@ -395,12 +454,11 @@ class _CommunityMemberProfilePageState
       selected: 3,
       dark: Theme.of(context).brightness == Brightness.dark,
       onSelected: (index) {
-        final visit = _captureProfileVisit();
-        if (visit == null) return;
         if (index == 2) {
+          if (_captureProfileVisit() == null) return;
           unawaited(showBilQuickAdd(context, originPath: '/community'));
         } else {
-          context.go(BilReferenceBottomBar.routes[index]);
+          bilSelectPrimaryTab(context, index);
         }
       },
     ),
@@ -468,13 +526,13 @@ class _CommunityMemberProfilePageState
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done &&
                   _profile == null) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               if (snapshot.hasError || _profile == null) {
                 return Center(
                   child: FilledButton.icon(
                     onPressed: _refresh,
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.refresh_rounded),
                     ),
                     label: Text(
@@ -488,7 +546,7 @@ class _CommunityMemberProfilePageState
                 return const _CommunityProfileOwnerChangedBody();
               }
               final profile = _profile!;
-              return RefreshIndicator(
+              return BilRefreshIndicator(
                 onRefresh: _refresh,
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),

@@ -7,7 +7,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) retryProfileStorage();
       });
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: BilFeatureWelcomeStatus());
     }
     return Center(
       child: FilledButton(

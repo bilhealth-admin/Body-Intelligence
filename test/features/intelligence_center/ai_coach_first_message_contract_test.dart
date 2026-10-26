@@ -32,7 +32,9 @@ void main() {
     expect(
       page,
       allOf(
-        contains('absorbing: !conversationReady'),
+        // Restarting also disables interaction; readiness alone is insufficient.
+        contains('conversationReady && !conversationRestarting'),
+        contains('absorbing: !conversationInteractive'),
         contains('child: !conversationReady'),
         contains('? ColoredBox(color: scheme.surface)'),
         contains(': visibleMessages.isEmpty'),

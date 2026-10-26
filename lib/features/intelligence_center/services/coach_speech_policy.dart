@@ -11,7 +11,10 @@ class CoachSpeechPolicy {
     if (isWeightLookup(question)) {
       return CoachSpeechPlan.dataLookup;
     }
-    if (isSleepQuestion(question)) return CoachSpeechPlan.directAnswer;
+    if (isGeneralSleepDurationQuestion(question)) {
+      return CoachSpeechPlan.directAnswer;
+    }
+    if (isSleepQuestion(question)) return CoachSpeechPlan.dataLookup;
     if (_containsAny(normalized, _quickAnswerMarkers) &&
         normalized.trim().length <= 120) {
       return CoachSpeechPlan.directAnswer;
@@ -37,6 +40,21 @@ class CoachSpeechPolicy {
       if (marker == 'son' || marker == 'sen') return words.contains(marker);
       return normalized.contains(marker);
     });
+  }
+
+  /// Population sleep-duration guidance can be answered locally. Reviewing a
+  /// member's recorded sleep needs the consented personal-context path; a
+  /// generic 7–9 hour sentence is not an analysis of their actual trend.
+  bool isGeneralSleepDurationQuestion(String question) {
+    if (!isSleepQuestion(question)) return false;
+    final normalized = _normalize(question);
+    return !RegExp(
+      r'\b(?:recorded|logged|trend|history|yesterday)\b|'
+      r'\b(?:my sleep|i slept|last night|past week)\b|'
+      r'نومي|نمت|اتجاه|مسجل|المسج|سجل|أمس|امس|البارح|بيانات',
+      caseSensitive: false,
+      unicode: true,
+    ).hasMatch(normalized);
   }
 
   bool canSpeakWithinTenSeconds(String value) {

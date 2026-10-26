@@ -204,6 +204,8 @@ extension _BilSmartPlanDrafts on _BilSmartPlanPageState {
                       subtitle: Text(
                         '${_statusName(plan.status)} · ${plan.revision}',
                       ),
+
+                      trailing: const BilCrystalExpansionIndicator(),
                       children: [
                         for (final day in plan.days)
                           ListTile(

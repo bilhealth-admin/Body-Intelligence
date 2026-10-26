@@ -1,5 +1,7 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -196,7 +198,7 @@ class _NotificationSettingsPageState
                   : () => context.canPop()
                         ? context.pop()
                         : context.go('/settings'),
-              icon: const BackButtonIcon(),
+              icon: const BilCrystalArrow(child: BackButtonIcon()),
             ),
             title: Text(_copy.title),
             actions: [
@@ -236,7 +238,7 @@ class _NotificationSettingsPageState
                         const SizedBox(height: 12),
                         FilledButton.tonalIcon(
                           onPressed: _load,
-                          icon: const BilGlassPressFeedback(
+                          icon: const BilNavigationFeedback(
                             child: Icon(Icons.refresh_rounded),
                           ),
                           label: Text(
@@ -254,7 +256,7 @@ class _NotificationSettingsPageState
                   ),
                 )
               : reminders == null || delivery == null
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: BilFeatureWelcomeStatus())
               : ListView(
                   padding: const EdgeInsets.all(20),
                   children: [

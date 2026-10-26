@@ -1,5 +1,5 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
-import 'package:body_intelligence_log/shared/widgets/bil_glass_press_feedback.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_navigation_feedback.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
 import 'package:body_intelligence_log/features/settings/help_center_page.dart';
@@ -110,7 +110,14 @@ void main() {
         expect(tile.onTap, isNotNull, reason: item.id);
         expect(tile.leading, isNull, reason: 'No decorative leading icon');
         expect(tile.minTileHeight, greaterThanOrEqualTo(48));
-        expect(tile.trailing, isA<BilGlassPressFeedback>());
+        expect(tile.trailing, isA<BilNavigationFeedback>());
+        expect(
+          find.descendant(
+            of: tileFinder,
+            matching: find.byKey(const Key('bil-crystal-arrow-bubble')),
+          ),
+          findsOneWidget,
+        );
         final trailing = find.descendant(
           of: tileFinder,
           matching: find.byIcon(Icons.chevron_right_rounded),

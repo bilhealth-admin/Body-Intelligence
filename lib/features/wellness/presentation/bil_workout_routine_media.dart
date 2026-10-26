@@ -109,7 +109,7 @@ class _WorkoutSegmentTile extends StatelessWidget {
                   ],
                 ),
               ),
-              BilGlassPressFeedback(
+              BilNavigationFeedback(
                 child: Icon(
                   rtl
                       ? Icons.chevron_left_rounded
@@ -158,7 +158,7 @@ class _SegmentThumbnail extends StatelessWidget {
             child: CircleAvatar(
               radius: 18,
               backgroundColor: Color(0xDFFFFFFF),
-              child: BilGlassPressFeedback(
+              child: BilNavigationFeedback(
                 child: Icon(Icons.play_arrow_rounded, color: Colors.black87),
               ),
             ),
@@ -590,7 +590,7 @@ class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
             const ColoredBox(color: Colors.black),
           ColoredBox(color: Colors.black.withValues(alpha: .48)),
           if (_checkingCache || _busy)
-            const Center(child: CircularProgressIndicator())
+            const Center(child: BilFeatureWelcomeStatus())
           else
             Center(
               child: Padding(
@@ -622,7 +622,7 @@ class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
                         FilledButton.icon(
                           key: const ValueKey('workout-video-play'),
                           onPressed: _play,
-                          icon: const BilGlassPressFeedback(
+                          icon: const BilNavigationFeedback(
                             child: Icon(Icons.play_arrow_rounded),
                           ),
                           label: Text(
@@ -645,7 +645,7 @@ class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
                           FilledButton.tonalIcon(
                             key: const ValueKey('workout-video-download'),
                             onPressed: _download,
-                            icon: const BilGlassPressFeedback(
+                            icon: const BilNavigationFeedback(
                               child: Icon(Icons.download_rounded),
                             ),
                             label: Text(

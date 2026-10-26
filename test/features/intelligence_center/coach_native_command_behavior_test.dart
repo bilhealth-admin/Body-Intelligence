@@ -1,3 +1,5 @@
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -77,6 +79,7 @@ Future<void> _withCoach(
   if (seed != null) await seed(fixture);
   try {
     await tester.pumpWidget(_nativeCoachApp(fixture));
+    await openCoachConversationFromOverview(tester);
     await tester.pumpAndSettle();
     await body(fixture);
   } finally {

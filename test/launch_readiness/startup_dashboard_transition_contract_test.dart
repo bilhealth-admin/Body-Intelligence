@@ -1,40 +1,29 @@
-import 'dart:io';
-
+import 'package:body_intelligence_log/app/router/app_router.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+
+import '../support/production_no_transition_route.dart';
 
 void main() {
-  test('startup and first dashboard entry cannot animate side by side', () {
-    final source = [
-      File('lib/app/router/app_router.dart').readAsStringSync(),
-      File('lib/app/router/app_community_routes.dart').readAsStringSync(),
-    ].join('\n');
+  testWidgets('startup and first dashboard entry cannot animate side by side', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: SizedBox(key: Key('route-factory-host'))),
+    );
+    final startup = expectProductionNoTransitionRoute(tester, '/startup');
+    final dashboard = expectProductionNoTransitionRoute(tester, '/dashboard');
+    expect(startup.key, isNot(dashboard.key));
 
-    expect(
-      source,
-      contains(
-        "pageBuilder: (_, state) => NoTransitionPage(\n"
-        '          child: StartupPage(\n'
-        '            initialAuthSession: state.extra is Session\n'
-        '                ? state.extra! as Session\n'
-        '                : null,\n'
-        '          ),\n'
-        '        ),',
-      ),
-    );
-    expect(
-      source,
-      contains(
-        'pageBuilder: (_, state, child) => NoTransitionPage(\n'
-        '          child: ResponsiveAppShell(currentUri: state.uri, child: child),\n'
-        '        ),',
-      ),
-    );
-    expect(
-      source,
-      contains(
-        "path: '/dashboard',\n            pageBuilder: (_, _) =>\n"
-        '                const NoTransitionPage(child: DashboardPage()),',
-      ),
-    );
+    final configuration = AppRouter.router.configuration;
+    final matches = configuration.findMatch(Uri.parse('/dashboard'));
+    final state = matches.lastOrNull!.buildState(configuration, matches);
+    final context = tester.element(find.byKey(const Key('route-factory-host')));
+    final shell = configuration.routes.whereType<ShellRoute>().single;
+    final page = shell.pageBuilder!(context, state, const SizedBox());
+    expect(page, isA<NoTransitionPage<dynamic>>());
+    expect(page.key, state.pageKey);
+    expectNoTransitionDurations(context, page);
   });
 }

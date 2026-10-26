@@ -18,10 +18,22 @@ const _copy = <String, Map<String, String>>{
     'prepMode': 'Meal prep',
     'preferences': 'Preferences',
     'hero': 'A week built around you',
+    'sourceLabel': 'Plan source',
+    'sourceBody':
+        'This Week is generated from the Meal Planner recipe catalog and your saved planner preferences. It is separate from My Plan → Suggested meals; neither plan is automatically merged into or overwrites the other.',
     'heroBody':
         'Choose your time, budget and eating style. BIL creates a practical seven-day plan you can review before logging.',
     'generate': 'Build my week',
     'saving': 'Saving…',
+    'retry': 'Retry',
+    'loadFailed':
+        'Meal Planner could not load its saved data. Your existing plan has not been replaced. Retry before making changes.',
+    'missingRecipe':
+        'A saved recipe is no longer available. Your plan was not changed.',
+    'planChanged':
+        'Saved planner data changed elsewhere. Reload it before creating a new week.',
+    'generateFailed':
+        'The new week could not be saved. Your previous plan is kept; try again.',
     'empty': 'Set your preferences, then build your first week.',
     'noDietaryMatch':
         'No catalog recipe satisfies every saved dietary constraint. Review your profile preferences or build meals manually; BIL will not substitute an excluded ingredient.',
@@ -76,10 +88,21 @@ const _copy = <String, Map<String, String>>{
     'prepMode': 'تحضير الوجبات',
     'preferences': 'التفضيلات',
     'hero': 'أسبوع مصمم لك',
+    'sourceLabel': 'مصدر الخطة',
+    'sourceBody':
+        'تُنشأ خطة الأسبوع من كتالوج وصفات مخطط الوجبات وتفضيلاته المحفوظة. وهي مستقلة عن «خطتي ← الوجبات المقترحة»؛ لا تُدمج الخطتان تلقائيًا ولا تستبدل إحداهما الأخرى.',
     'heroBody':
         'اختر الوقت والميزانية ونمط الطعام، وسيبني BIL خطة عملية لسبعة أيام تراجعها قبل التسجيل.',
     'generate': 'أنشئ أسبوعي',
     'saving': 'جارٍ الحفظ…',
+    'retry': 'إعادة المحاولة',
+    'loadFailed':
+        'تعذر تحميل بيانات مخطط الوجبات المحفوظة. لم تُستبدل خطتك الحالية. أعد التحميل قبل إجراء أي تغيير.',
+    'missingRecipe': 'وصفة محفوظة لم تعد متاحة. لم تُعدّل خطتك.',
+    'planChanged':
+        'تغيّرت بيانات المخطط المحفوظة. أعد تحميلها قبل إنشاء أسبوع جديد.',
+    'generateFailed':
+        'تعذر حفظ الأسبوع الجديد. احتُفظ بالخطة السابقة؛ حاول مرة أخرى.',
     'empty': 'اضبط تفضيلاتك ثم أنشئ أسبوعك الأول.',
     'minutes': 'د',
     'generateFirst': 'أنشئ خطة أسبوعية أولًا.',
@@ -131,10 +154,22 @@ const _copy = <String, Map<String, String>>{
     'prepMode': 'Préparation',
     'preferences': 'Préférences',
     'hero': 'Une semaine faite pour vous',
+    'sourceLabel': 'Source du plan',
+    'sourceBody':
+        'Cette semaine est générée à partir du catalogue de recettes Meal Planner et de vos préférences enregistrées. Elle est distincte de My Plan → Suggested meals ; aucun des deux plans ne fusionne automatiquement avec l’autre et aucun ne l’écrase.',
     'heroBody':
         'Choisissez temps, budget et alimentation. BIL crée un plan de sept jours à vérifier avant journalisation.',
     'generate': 'Créer ma semaine',
     'saving': 'Enregistrement…',
+    'retry': 'Réessayer',
+    'loadFailed':
+        'Meal Planner n’a pas pu charger les données enregistrées. Votre plan existant n’a pas été remplacé. Réessayez avant toute modification.',
+    'missingRecipe':
+        'Une recette enregistrée n’est plus disponible. Le plan reste inchangé.',
+    'planChanged':
+        'Le plan a changé ailleurs. Rechargez-le avant de créer une nouvelle semaine.',
+    'generateFailed':
+        'La nouvelle semaine n’a pas pu être enregistrée. Votre plan précédent est conservé ; réessayez.',
     'empty': 'Réglez vos préférences puis créez votre semaine.',
     'minutes': 'min',
     'generateFirst': 'Créez d’abord un plan hebdomadaire.',
@@ -186,10 +221,22 @@ const _copy = <String, Map<String, String>>{
     'prepMode': 'Preparación',
     'preferences': 'Preferencias',
     'hero': 'Una semana hecha para ti',
+    'sourceLabel': 'Origen del plan',
+    'sourceBody':
+        'Esta semana se genera a partir del catálogo de recetas de Meal Planner y de tus preferencias guardadas. Es independiente de My Plan → Suggested meals; los planes no se combinan automáticamente ni se sobrescriben entre sí.',
     'heroBody':
         'Elige tiempo, presupuesto y estilo. BIL crea un plan de siete días para revisar antes de registrar.',
     'generate': 'Crear mi semana',
     'saving': 'Guardando…',
+    'retry': 'Reintentar',
+    'loadFailed':
+        'Meal Planner no pudo cargar los datos guardados. Tu plan actual no se ha reemplazado. Reintenta la carga antes de modificarlo.',
+    'missingRecipe':
+        'Una receta guardada ya no está disponible. Tu plan no se modificó.',
+    'planChanged':
+        'Los datos guardados cambiaron en otro lugar. Vuelve a cargarlos antes de crear una semana.',
+    'generateFailed':
+        'No se pudo guardar la nueva semana. Se conserva tu plan anterior; vuelve a intentarlo.',
     'empty': 'Configura tus preferencias y crea tu semana.',
     'minutes': 'min',
     'generateFirst': 'Crea primero un plan semanal.',
@@ -241,10 +288,22 @@ const _copy = <String, Map<String, String>>{
     'prepMode': 'Öğün hazırlığı',
     'preferences': 'Tercihler',
     'hero': 'Size göre hazırlanmış bir hafta',
+    'sourceLabel': 'Plan kaynağı',
+    'sourceBody':
+        'Bu hafta, Meal Planner tarif kataloğu ve kayıtlı plan tercihleriniz kullanılarak oluşturulur. My Plan → Suggested meals bölümünden ayrıdır; planlar otomatik olarak birleştirilmez ve birbirlerinin üzerine yazmaz.',
     'heroBody':
         'Süreyi, bütçeyi ve beslenme biçimini seçin. BIL kayıttan önce gözden geçireceğiniz yedi günlük plan oluşturur.',
     'generate': 'Haftamı oluştur',
     'saving': 'Kaydediliyor…',
+    'retry': 'Yeniden dene',
+    'loadFailed':
+        'Meal Planner kayıtlı verileri yükleyemedi. Mevcut planınız değiştirilmedi. Değişiklik yapmadan önce yeniden yükleyin.',
+    'missingRecipe':
+        'Kayıtlı bir tarif artık mevcut değil. Planınız değiştirilmedi.',
+    'planChanged':
+        'Kayıtlı plan başka yerde değiştirildi. Yeni hafta oluşturmadan önce yeniden yükleyin.',
+    'generateFailed':
+        'Yeni hafta kaydedilemedi. Önceki planınız korunuyor; yeniden deneyin.',
     'empty': 'Tercihlerinizi ayarlayıp ilk haftanızı oluşturun.',
     'minutes': 'dk',
     'generateFirst': 'Önce haftalık plan oluşturun.',

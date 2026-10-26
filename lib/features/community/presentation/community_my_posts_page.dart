@@ -226,7 +226,7 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
               if (widget.showProfileHeader) _profileHeader(),
               const Padding(
                 padding: EdgeInsets.all(32),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(child: BilFeatureWelcomeStatus()),
               ),
             ],
           );
@@ -240,7 +240,7 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
                 child: FilledButton.icon(
                   key: const Key('community-my-posts-retry'),
                   onPressed: _refresh,
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.refresh_rounded),
                   ),
                   label: Text(
@@ -251,7 +251,7 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
             ],
           );
         }
-        return RefreshIndicator(
+        return BilRefreshIndicator(
           onRefresh: _refresh,
           child: _posts.isEmpty
               ? ListView(
@@ -294,11 +294,9 @@ class _CommunityMyPostsPageState extends State<CommunityMyPostsPage> {
                           icon: _loadingMore
                               ? const SizedBox.square(
                                   dimension: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: BilFeatureWelcomeStatus(),
                                 )
-                              : const BilGlassPressFeedback(
+                              : const BilNavigationFeedback(
                                   child: Icon(Icons.expand_more_rounded),
                                 ),
                           label: Text(

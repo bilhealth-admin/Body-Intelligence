@@ -20,7 +20,8 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
   ),
   GoRoute(
     path: '/wellness/sleep',
-    pageBuilder: (_, _) => const NoTransitionPage(
+    pageBuilder: (_, state) => bilNoTransitionPage(
+      state: state,
       child: PremiumRouteGlassGate(
         feature: PremiumGateFeature.sleep,
         child: BilFeatureEntrySplashGate(
@@ -32,7 +33,8 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
   ),
   GoRoute(
     path: '/wellness/workouts',
-    pageBuilder: (_, state) => NoTransitionPage(
+    pageBuilder: (_, state) => bilNoTransitionPage(
+      state: state,
       child: BilFeatureEntrySplashGate(
         kind: BilFeatureEntryKind.videos,
         child: BilWorkoutRoutinesPage(
@@ -43,11 +45,16 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
   ),
   GoRoute(
     path: '/wellness/workouts/routines',
-    pageBuilder: (_, state) => NoTransitionPage(
+    pageBuilder: (_, state) => bilNoTransitionPage(
+      state: state,
       child: BilFeatureEntrySplashGate(
         kind: BilFeatureEntryKind.videos,
         child: BilWorkoutRoutinesPage(
           initialItemId: state.uri.queryParameters['item'],
+          // A forged cold/warm deep link must not impersonate a live session.
+          returnToCallerAfterInitialItem:
+              state.uri.queryParameters['returnToSession'] == '1' &&
+              state.extra == true,
         ),
       ),
     ),
@@ -67,7 +74,8 @@ List<RouteBase> _wellnessRoutes() => <RouteBase>[
   ),
   GoRoute(
     path: '/wellness/recipes',
-    pageBuilder: (_, state) => NoTransitionPage(
+    pageBuilder: (_, state) => bilNoTransitionPage(
+      state: state,
       child: BilFeatureEntrySplashGate(
         kind: BilFeatureEntryKind.recipes,
         child: RecipeLibraryPage(

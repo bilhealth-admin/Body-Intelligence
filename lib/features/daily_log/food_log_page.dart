@@ -1,6 +1,6 @@
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import '../../shared/widgets/first_use_target_guide.dart';
 import 'dart:async';
@@ -30,6 +30,7 @@ import '../foods/providers/food_provider.dart';
 import '../nutrition/presentation/food_barcode_scanner_page.dart';
 import '../nutrition/presentation/meal_image_review_dialog.dart';
 import '../nutrition/presentation/meal_vision_ui_copy.dart';
+import '../nutrition/presentation/nutrition_entry_fields.dart';
 import '../nutrition/presentation/meal_vision_consent_gate.dart';
 import '../nutrition/services/bil_speech_to_text.dart';
 import '../nutrition/services/food_presentation_localizer.dart';
@@ -295,7 +296,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                   key: const Key('food-log-select-meal'),
                   value: mealType,
                   isExpanded: true,
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.arrow_drop_down_rounded),
                   ),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -330,7 +331,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         error: (_, _) => Center(
           child: FilledButton.icon(
             onPressed: () => ref.invalidate(foodsProvider),
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.refresh_rounded),
             ),
             label: Text(_t(context, 'Retry')),
@@ -532,7 +533,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         ),
         if (searchLoading) ...[
           const SizedBox(height: 8),
-          const LinearProgressIndicator(minHeight: 2),
+          const BilFeatureWelcomeStatus(),
         ],
         const SizedBox(height: 14),
 

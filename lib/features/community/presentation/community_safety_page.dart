@@ -1,5 +1,6 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -303,11 +304,9 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                               icon: _openingDocument
                                   ? const SizedBox.square(
                                       dimension: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
+                                      child: BilFeatureWelcomeStatus(),
                                     )
-                                  : const BilGlassPressFeedback(
+                                  : const BilNavigationFeedback(
                                       child: Icon(Icons.open_in_new_rounded),
                                     ),
                               label: Text(_t('Read policy', 'قراءة السياسة')),
@@ -534,7 +533,7 @@ class _PolicyStatusMessage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 52)),
+          BilNavigationFeedback(child: Icon(icon, size: 52)),
           const SizedBox(height: 14),
           Text(
             title,
@@ -545,14 +544,14 @@ class _PolicyStatusMessage extends StatelessWidget {
           Text(body, textAlign: TextAlign.center),
           if (loading) ...[
             const SizedBox(height: 20),
-            const CircularProgressIndicator(),
+            const BilFeatureWelcomeStatus(),
           ],
           if (onRetry != null && retryLabel != null) ...[
             const SizedBox(height: 20),
             FilledButton.icon(
               key: const Key('community-policy-retry'),
               onPressed: onRetry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(retryLabel!),

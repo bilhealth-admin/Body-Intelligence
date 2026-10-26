@@ -1,5 +1,6 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -114,7 +115,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             context.go(dashboardBack ? '/dashboard' : '/settings');
           }
         },
-        icon: const BackButtonIcon(),
+        icon: const BilCrystalArrow(child: BackButtonIcon()),
       ),
     );
   }
@@ -662,7 +663,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                     'المنهجيات والمراجع، بما فيها تدوير الكربوهيدرات',
                   ),
                 ),
-                trailing: const BilGlassPressFeedback(
+                trailing: const BilNavigationFeedback(
                   child: Icon(Icons.chevron_right_rounded),
                 ),
                 onTap: () => context.push('/health-information-sources'),

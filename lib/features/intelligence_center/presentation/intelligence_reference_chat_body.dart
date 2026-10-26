@@ -8,6 +8,8 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
       return const _AiCoachEntryWelcome();
     }
     final scheme = Theme.of(context).colorScheme;
+    final conversationInteractive =
+        conversationReady && !conversationRestarting;
     final coachContext = ref.watch(coachHealthBriefProvider);
     // Keep the opening transcript stable for same-dependency data refreshes.
     // Dependency reloads (including owner or context-permission changes) use
@@ -68,14 +70,10 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                           width: double.infinity,
                           child: _CoachHero(
                             key: const ValueKey('ai-coach-hero'),
-                            interactionEnabled: conversationReady,
+                            interactionEnabled: conversationInteractive,
                             onBack: () {
                               questionFocus.unfocus();
-                              if (context.canPop()) {
-                                context.pop();
-                              } else {
-                                context.go('/dashboard');
-                              }
+                              _updateState(() => _referenceOverview = true);
                             },
                             onHistory: () =>
                                 unawaited(_openConversationHistory()),
@@ -95,36 +93,58 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                         onRetry: () => unawaited(_loadConversation()),
                       ),
                     Expanded(
-                      child: ChatHistoryViewport(
+                      child: CoachConversationRestartPull(
                         controller: conversationScroll,
-                        latestMessageId: visibleMessages.isEmpty
-                            ? null
-                            : visibleMessages.last.id,
-                        centerJumpButton: true,
-                        latestTargetOffset: _coachLatestReadingOffset,
-                        child: AbsorbPointer(
-                          absorbing: !conversationReady,
-                          // Do not paint a provisional greeting and replace it
-                          // with the restored transcript one frame later. The
-                          // stable surface keeps the coach shell opaque while
-                          // local history is read, then paints user content
-                          // exactly once.
-                          child: !conversationReady
-                              ? ColoredBox(color: scheme.surface)
-                              : visibleMessages.isEmpty
-                              ? _CoachEmptyState(
-                                  onVoice: _toggleLiveCall,
-                                  onCamera: _analyzeFoodImageInChat,
-                                )
-                              : _buildConversationHistory(
-                                  visibleMessages,
-                                  dailyBrief: showIntroBrief
-                                      ? dailyBrief
-                                      : null,
-                                  showLiveVoiceDraft: showLiveVoiceDraft,
-                                  showReplyThinking: showReplyThinking,
-                                  showReplyFailure: showReplyFailure,
-                                ),
+                        enabled:
+                            conversationInteractive &&
+                            !sending &&
+                            !listening &&
+                            !voiceCaptureStarting &&
+                            !voiceSubmitPending &&
+                            voiceMode == _CoachVoiceMode.idle &&
+                            !foodImageFlowOpening &&
+                            !conversationHistoryOpening &&
+                            !coachMenuOpening &&
+                            !consentPromptVisible &&
+                            messages.any(
+                              (message) =>
+                                  message.role == IntelligenceMessageRole.user,
+                            ),
+                        conversationIdentity: activeConversationId,
+                        label: tr('Start new conversation', 'بدء محادثة جديدة'),
+                        onRestart: _startNewConversation,
+                        child: ChatHistoryViewport(
+                          controller: conversationScroll,
+                          latestMessageId: visibleMessages.isEmpty
+                              ? null
+                              : visibleMessages.last.id,
+                          centerJumpButton: true,
+                          latestTargetOffset: _coachLatestReadingOffset,
+                          onLatestRequested: () => _scrollToLatest(force: true),
+                          child: AbsorbPointer(
+                            absorbing: !conversationInteractive,
+                            // Do not paint a provisional greeting and replace it
+                            // with the restored transcript one frame later. The
+                            // stable surface keeps the coach shell opaque while
+                            // local history is read, then paints user content
+                            // exactly once.
+                            child: !conversationReady
+                                ? ColoredBox(color: scheme.surface)
+                                : visibleMessages.isEmpty
+                                ? _CoachEmptyState(
+                                    onVoice: _toggleLiveCall,
+                                    onCamera: _analyzeFoodImageInChat,
+                                  )
+                                : _buildConversationHistory(
+                                    visibleMessages,
+                                    dailyBrief: showIntroBrief
+                                        ? dailyBrief
+                                        : null,
+                                    showLiveVoiceDraft: showLiveVoiceDraft,
+                                    showReplyThinking: showReplyThinking,
+                                    showReplyFailure: showReplyFailure,
+                                  ),
+                          ),
                         ),
                       ),
                     ),
@@ -183,7 +203,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                             ),
                                             controller: question,
                                             focusNode: questionFocus,
-                                            enabled: conversationReady,
+                                            enabled: conversationInteractive,
                                             minLines: 1,
                                             maxLines:
                                                 MediaQuery.viewInsetsOf(
@@ -237,11 +257,14 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                       ),
                                       label: tr('Sending', 'جارٍ الإرسال'),
                                       onPressed: null,
-                                      icon: Icon(
-                                        Icons.arrow_upward_rounded,
-                                        size: 25,
-                                        color: _coachComposerActionInk
-                                            .withValues(alpha: .38),
+                                      icon: BilCrystalArrow(
+                                        extent: 36,
+                                        child: Icon(
+                                          Icons.arrow_upward_rounded,
+                                          size: 25,
+                                          color: _coachComposerActionInk
+                                              .withValues(alpha: .38),
+                                        ),
                                       ),
                                     )
                                   else if (question.text.trim().isEmpty ||
@@ -257,7 +280,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                               'إنهاء المكالمة',
                                             )
                                           : tr('Talk to BIL', 'تحدث مع BIL'),
-                                      onPressed: !conversationReady
+                                      onPressed: !conversationInteractive
                                           ? null
                                           : voiceMode ==
                                                 _CoachVoiceMode.liveCall
@@ -270,7 +293,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                             )
                                           : Icon(
                                               Icons.graphic_eq_rounded,
-                                              color: conversationReady
+                                              color: conversationInteractive
                                                   ? _coachComposerActionInk
                                                   : _coachComposerActionInk
                                                         .withValues(alpha: .38),
@@ -282,16 +305,19 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                         'ai-coach-send-button',
                                       ),
                                       label: tr('Send', 'إرسال'),
-                                      onPressed: !conversationReady
+                                      onPressed: !conversationInteractive
                                           ? null
                                           : ask,
-                                      icon: Icon(
-                                        Icons.arrow_upward_rounded,
-                                        size: 25,
-                                        color: conversationReady
-                                            ? _coachComposerActionInk
-                                            : _coachComposerActionInk
-                                                  .withValues(alpha: .38),
+                                      icon: BilCrystalArrow(
+                                        extent: 36,
+                                        child: Icon(
+                                          Icons.arrow_upward_rounded,
+                                          size: 25,
+                                          color: conversationInteractive
+                                              ? _coachComposerActionInk
+                                              : _coachComposerActionInk
+                                                    .withValues(alpha: .38),
+                                        ),
                                       ),
                                     ),
                                   const SizedBox(width: 2),
@@ -301,7 +327,7 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                     ),
                                     tooltip: tr('Open camera', 'افتح الكاميرا'),
                                     onPressed:
-                                        !conversationReady ||
+                                        !conversationInteractive ||
                                             foodImageFlowOpening ||
                                             sending
                                         ? null

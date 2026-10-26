@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -231,14 +232,14 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
     expect(find.byKey(const Key('weekly-pulse-hero')), findsNothing);
 
     pending.complete(report);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('weekly-pulse-hero')), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(bilWaitingIndicators(), findsNothing);
   });
 
   testWidgets('failed first load exposes a retry that renders the digest', (

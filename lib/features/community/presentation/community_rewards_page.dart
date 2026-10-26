@@ -1,6 +1,8 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_striped_progress.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -380,7 +382,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
           }
           if (snapshot.connectionState != ConnectionState.done &&
               !snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: BilFeatureWelcomeStatus());
           }
           if (snapshot.hasError) {
             return _RewardsMessageState(
@@ -438,7 +440,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         : quests
               .where((quest) => quest.cadence == _cadenceFilter)
               .toList(growable: false);
-    return RefreshIndicator(
+    return BilRefreshIndicator(
       onRefresh: _reloadAfterMutation,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -526,7 +528,7 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         })
         .toList(growable: false);
 
-    return RefreshIndicator(
+    return BilRefreshIndicator(
       onRefresh: _reloadAfterMutation,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -579,9 +581,9 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
                 icon: _historyLoadingMore
                     ? const SizedBox.square(
                         dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
-                    : const BilGlassPressFeedback(
+                    : const BilNavigationFeedback(
                         child: Icon(Icons.expand_more_rounded),
                       ),
                 label: Text(

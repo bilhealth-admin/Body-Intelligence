@@ -5,7 +5,8 @@ abstract final class _CommunityRoutes {
     return [
       GoRoute(
         path: '/community',
-        pageBuilder: (_, _) => const NoTransitionPage(
+        pageBuilder: (_, state) => bilNoTransitionPage(
+          state: state,
           child: PremiumRouteGlassGate(
             feature: PremiumGateFeature.community,
             child: CommunityEntryGate(

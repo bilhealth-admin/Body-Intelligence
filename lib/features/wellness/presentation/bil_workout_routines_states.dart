@@ -7,7 +7,7 @@ class _WorkoutLibraryLoading extends StatelessWidget {
   Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.all(20),
     children: const [
-      LinearProgressIndicator(),
+      BilFeatureWelcomeStatus(),
       SizedBox(height: 20),
       _LoadingCard(),
       SizedBox(height: 18),
@@ -49,7 +49,7 @@ class _WorkoutLibraryError extends StatelessWidget {
     ),
     action: FilledButton.icon(
       onPressed: onRetry,
-      icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
+      icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
       label: Text(_copy(context, 'Retry', 'إعادة المحاولة')),
     ),
   );
@@ -116,7 +116,7 @@ class _WorkoutLibraryEmpty extends StatelessWidget {
           ? null
           : FilledButton.icon(
               onPressed: onManagePacks,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.download_for_offline_outlined),
               ),
               label: Text(_copy(context, 'Manage packs', 'إدارة الحزم')),
@@ -255,7 +255,7 @@ class _CenteredLibraryState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          BilGlassPressFeedback(child: Icon(icon, size: 58)),
+          BilNavigationFeedback(child: Icon(icon, size: 58)),
           const SizedBox(height: 15),
           Text(
             title,

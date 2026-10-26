@@ -120,15 +120,18 @@ class _NativeEntryWarmupTrace {
     expect(hold.timeline.deadlineConsistent, isTrue);
     expect(_welcome(kind), findsNothing);
     if (kind == 'coach') {
-      final composer = find.byKey(const Key('ai-coach-question-field'));
+      final overview = find.byKey(const Key('coach-reference-workspace'));
+      final openChat = find.byKey(const Key('coach-workspace-open-chat'));
       bool ready() =>
-          composer.hitTestable().evaluate().length == 1 &&
-          tester.widget<TextField>(composer).enabled == true;
+          overview.hitTestable().evaluate().length == 1 &&
+          openChat.evaluate().length == 1 &&
+          tester.widget<TextButton>(openChat).onPressed != null;
       while (!ready() && hold.watch.elapsedMilliseconds < 4500) {
         await tester.pump(const Duration(milliseconds: 20));
       }
-      expect(composer.hitTestable(), findsOneWidget);
-      expect(tester.widget<TextField>(composer).enabled, isTrue);
+      expect(overview.hitTestable(), findsOneWidget);
+      expect(openChat, findsOneWidget);
+      expect(tester.widget<TextButton>(openChat).onPressed, isNotNull);
     } else if (kind == 'diet') {
       expect(find.byType(NutritionPathwaysPage), findsOneWidget);
     } else {
@@ -182,7 +185,7 @@ class _NativeEntryWarmupTrace {
       'completed_to_destination': destinationReadyUs != null,
       'warmup_evidence_complete': completed,
       'destination_ready_at_us': destinationReadyUs,
-      'coach_composer_enabled_verified': kind == 'coach'
+      'coach_overview_open_chat_enabled_verified': kind == 'coach'
           ? destinationReadyUs != null
           : null,
       'cold_observation_budget_met':

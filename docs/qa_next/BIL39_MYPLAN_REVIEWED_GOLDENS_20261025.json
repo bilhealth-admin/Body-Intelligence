@@ -1,0 +1,211 @@
+{
+  "schema": "bil39.reviewed.goldens.v1",
+  "worker_base": "3a6745fd2f7911e47f1b3c7089083efe442492f0",
+  "reviewer": "Codex visual inspection",
+  "test_run_before_review": {
+    "passed": 199,
+    "failed": 28,
+    "failure_scope": "Golden image deltas only; no accessibility assertion failures"
+  },
+  "baseline_policy": "Only the following 28 actually inspected viewport renders replaced old references; no update-goldens wildcard, test deletion, tolerance or comparator change",
+  "test_sources_unchanged": true,
+  "surfaces": [
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_390.png",
+      "previous_sha256": "88494f33210471aae1f14490db248ba2f57625550671cfeafdab614d37ad24fe",
+      "reviewed_render_sha256": "50a612673117badade83423436f115b2f45b3a96d444c8c783b4e009083d9cd7",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_memory.png",
+      "previous_sha256": "0c94d68e947df5c614962ad8988ece51512e5f17c41e1dbca1e7ceb5720ee8cc",
+      "reviewed_render_sha256": "81a6af55d9a5e45358a7868271161b8ce58ced569e762f01b2d551fe21f13e31",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_ar_report.png",
+      "previous_sha256": "1ed9d22009afe0f597cf2e6c13693a29e7f5c27336900996bdbfcee70b073dc0",
+      "reviewed_render_sha256": "9aee664a6d2e1549ed7ddbad0e38b8f1d39e3df6f98692e99fe9533c01ed24f5",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_390.png",
+      "previous_sha256": "c09bbe5ff9a2d3a995b9edc6be5ca540061d0d2f4c1e8a36e1efa4c983a49fc1",
+      "reviewed_render_sha256": "b45a2c1ab688d6c59ffd225c0b62680e68293241426b68958d6344c7258bbc51",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_memory.png",
+      "previous_sha256": "39807e378c0394db51d7aa727fdcc274b481a2333e0256b35ceda219532405c1",
+      "reviewed_render_sha256": "395fc8fb21472d6d0b4d4754668208663110f7ddde0235956f220b5f5c77fc5a",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_en_report.png",
+      "previous_sha256": "030b42d6bdd8eab202f1f399e4eb7ef17f9c2aaa3375d4cea9f9596353fc1a6b",
+      "reviewed_render_sha256": "d22c21d20168e8d4fce236d9b06c9d4ff99f76f31c7299761031fc6110f19a75",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_dark.png",
+      "previous_sha256": "7edd37a4f9c7533f6b2c5096f1f52aa662631f34480319911856e383c40658e7",
+      "reviewed_render_sha256": "46579f2d576a451a1da4e8cdd61bc3fc05c6fd93abea9fb188ad5bf2de0f3e41",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_light.png",
+      "previous_sha256": "cff2a286c3cf628c1844053a0e8b9acd2ac98b11c991cfdadeee951a72557c00",
+      "reviewed_render_sha256": "7b331c50a224c7a6b3c39f009bf93f3d9b7db578c945c31d45078fc146022813",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_dark.png",
+      "previous_sha256": "b7ef2daea781ce812bd196df4e588f9b8a655654ae2335eef9cfa0ea581fb5de",
+      "reviewed_render_sha256": "87a0496aee5abb29bf151406ae0d32fa0cd5cfb9f29f076360b8d10dcd23ce47",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_light.png",
+      "previous_sha256": "35c9e9ee38dffdea82ca3e517d11a57ebfc63967dd7dd7576b49c69518640488",
+      "reviewed_render_sha256": "0fa61558d71b2be19db23c2a27ad63f360d6081019e11c6a2b07d4520dd83b41",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_ar_dark.png",
+      "previous_sha256": "17de711ceafb9c4c19b7dec49129ea055ac325486fe92acf2f910e1ae690750d",
+      "reviewed_render_sha256": "e6f94d007a0e4725be4a42f10f850c1e1e3368eb3ba4fc1239fae0c69512def0",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_ar_light.png",
+      "previous_sha256": "1b86787d59ac2efdbf8560e4a2df76298e89e942aac8cb1287a75262cb03a6bc",
+      "reviewed_render_sha256": "d1824e68ddc6ea24e7966e14be79050405c963f0206b1cfc9ddd3999515a658c",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_en_dark.png",
+      "previous_sha256": "d2f6f82b6be48a0044749dcf35912061503197a749773d001f096d6f03d470ab",
+      "reviewed_render_sha256": "9f05401c74aa4af62b0caff55a576adfbb765e2f1630bae919aceb4f62fe104f",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_home_warmup_en_light.png",
+      "previous_sha256": "868c12160a277fd1c28a76b885bed536be7bdafdcfdf7c1524ee1b3b11b21386",
+      "reviewed_render_sha256": "3d1c0a058bac277aa087ef5977a3360404e42f3c38f18a06b3edda2a48bb6b75",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_ar.png",
+      "previous_sha256": "b65f152dd45520fbfa1d04c035a9bdb213c38bf8b1233c50137acdb983b491e2",
+      "reviewed_render_sha256": "03d2078aad6ad3c8632888dcd1b1b206722c7f6ee828bec87002db56049a8b26",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_pending_en.png",
+      "previous_sha256": "fa5d1d613983064da2fc2f22cbe2a07776c42ef18085d5447a3c300f4b03e3c8",
+      "reviewed_render_sha256": "98eb70524945b595e43ab6e21ee3647e32573112cc40ba9249633a644c6c69c4",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_dark.png",
+      "previous_sha256": "4c706066a34a0a26c8ba46acb6f90e3afe57c5792aae315c806e4ab3a5647ebf",
+      "reviewed_render_sha256": "f9c35ab1573e7965da4598a786603e322710faa2c9d78de2bbdb62b559f38592",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_ar_light.png",
+      "previous_sha256": "8e8b13397265d77f96da0894ead751b92c740e266a86ad67438c0cac3b332653",
+      "reviewed_render_sha256": "5c42c9e834372c858679bc73a308e74834c92143d05a0862cc07d72f38b0f3e1",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_en_dark.png",
+      "previous_sha256": "00a7798699bb5b552f5ab5b8bfe488b330cc2005fea4c1f96159746d874bb797",
+      "reviewed_render_sha256": "5211699705e3cc9ece134fdd3368446378209dc804bac17e9e5dc1313be33f14",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_progress_en_light.png",
+      "previous_sha256": "3004696a051d01e0ec40fb49533d789ebb3b8783a61d93b0690416dd9080e43f",
+      "reviewed_render_sha256": "6a0f0b5982c3d7d7f5d63d13d3a0a1ac22982c1f9639f2640b59e8a1d10a7938",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_dark.png",
+      "previous_sha256": "3df55bb1d86aed2dd163f8df96d938bce16f18f15c99447faa9db12304103bae",
+      "reviewed_render_sha256": "fd641fd5abff09d71ab46f64a6fcc7cc1a5b31cf47442e30580099f8dd3e06ee",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_ar_light.png",
+      "previous_sha256": "3ccc68149022263bf8c462b4535d8e889266d3cbf44777ee52a0c548294f11b3",
+      "reviewed_render_sha256": "5d29f2987548ac6ebb0e732ec3296f18e227bed902a4e9eb52bb6fc91ee17947",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_dark.png",
+      "previous_sha256": "970f66ecaf3765ae6d06bdd21dce35a2adedea635db33164a5ab279edb8435b4",
+      "reviewed_render_sha256": "3a81dfca53f4766824bc29facfc1417f1aec73532b6f2d6c8e48977349aae1f2",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_schedule_en_light.png",
+      "previous_sha256": "0452b8aea1e7ff629fde1ebd8c6f749052dd2c6f3890871ea98dc63be09faa44",
+      "reviewed_render_sha256": "1e46c3ab1af1e57979d14b9e656bb3f1a3928f364e130a930771f04d180d8759",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_dark.png",
+      "previous_sha256": "fec7bc237c8c526e798271b13969adf685926687de9a5f9a43a67fab32a6d1bf",
+      "reviewed_render_sha256": "7dd5d04c3135697e89c966327648aca95e7a30af55b21a3466a278b58d684cde",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_ar_light.png",
+      "previous_sha256": "515a1b84e4189bf02b334abab3e24c87ff15c899f23bcfebbbb26c76a7abe3c9",
+      "reviewed_render_sha256": "b8e064bad253a67cc9eae5ac66c092d73290b4f8f048961f6450fbac98d5cacf",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_dark.png",
+      "previous_sha256": "d46d05b8e46133273a4c98950cbe258bb36af539ba632b994a295838f831387e",
+      "reviewed_render_sha256": "78dbf30e18fd9859af8d5a31abe8e07055446eeb55cad953944b32af43b4fd71",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    },
+    {
+      "file": "test/features/smart_plan/goldens/smart_plan_session_en_light.png",
+      "previous_sha256": "f9fc69c4a16b77b894d7c932e361c3375a7d949043479c2f78836dd3ec2fee72",
+      "reviewed_render_sha256": "065e628893abdeaaaafb83632d79cf4e1b7106f21b7ecd002f3175cd04a07d88",
+      "reason": "Intentional PR22 BIL Overview-style artwork/metrics and corrected readable Arabic labels; original pixel comparator and accessibility assertions unchanged",
+      "review_scope": "Actual fixed-size viewport inspected; does not replace native navigation or final integrated QA"
+    }
+  ],
+  "final_candidate_status": "Not integrated; native and physical acceptance pending"
+}

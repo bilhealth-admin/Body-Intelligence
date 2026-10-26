@@ -1,0 +1,134 @@
+{
+  "status": "PASS",
+  "source_sha": "847f161c5cf2f4d34d77ed7345416c40cf0ad085",
+  "deployed_version": "8907ada2-dc09-47f6-901d-7173e13e9bfe",
+  "rollback_version": "f772c023-6e71-4629-a487-668a71632420",
+  "scope": "Two real source pages GET/HEAD/Range, unknown/traversal paths, anonymous paid denial and unchanged approved free preview; not a live paid-account test",
+  "probes": [
+    {
+      "path": "/v2/source/workouts/v1/home/movements/balance-coordination-alternating-balance-march-supported.mp4",
+      "method": "GET",
+      "request_headers": {},
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "csp": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "content_range": null,
+      "body_sha256": "1fc365327ed22dda06dbcb9334f5dd61ad47d271d8636ef95a9d1fca4e6f81bc",
+      "bytes_read": 1297
+    },
+    {
+      "path": "/v2/source/workouts/v1/home/movements/balance-coordination-alternating-balance-march-supported.mp4",
+      "method": "HEAD",
+      "request_headers": {},
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "csp": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "content_range": null,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes_read": 0
+    },
+    {
+      "path": "/v2/source/workouts/v1/home/movements/balance-coordination-alternating-balance-march-supported.mp4",
+      "method": "GET",
+      "request_headers": {
+        "Range": "bytes=0-31"
+      },
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "csp": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "content_range": null,
+      "body_sha256": "1fc365327ed22dda06dbcb9334f5dd61ad47d271d8636ef95a9d1fca4e6f81bc",
+      "bytes_read": 1297
+    },
+    {
+      "path": "/v2/objects/workouts/v1/home/movements/balance-coordination-alternating-balance-march-supported.mp4",
+      "method": "HEAD",
+      "request_headers": {},
+      "status": 401,
+      "content_type": "application/json; charset=utf-8",
+      "csp": null,
+      "content_range": null,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes_read": 0
+    },
+    {
+      "path": "/v2/source/workouts/v1/gym-six-month/movements/core-stability-bear-plank-shoulder-tap-technique.mp4",
+      "method": "GET",
+      "request_headers": {},
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "csp": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "content_range": null,
+      "body_sha256": "3b0a546a4b8a15193480d161ef1342220f273a552514a5523c30e57bb92704d0",
+      "bytes_read": 1293
+    },
+    {
+      "path": "/v2/source/workouts/v1/gym-six-month/movements/core-stability-bear-plank-shoulder-tap-technique.mp4",
+      "method": "HEAD",
+      "request_headers": {},
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "csp": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "content_range": null,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes_read": 0
+    },
+    {
+      "path": "/v2/source/workouts/v1/gym-six-month/movements/core-stability-bear-plank-shoulder-tap-technique.mp4",
+      "method": "GET",
+      "request_headers": {
+        "Range": "bytes=0-31"
+      },
+      "status": 200,
+      "content_type": "text/html; charset=utf-8",
+      "csp": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "content_range": null,
+      "body_sha256": "3b0a546a4b8a15193480d161ef1342220f273a552514a5523c30e57bb92704d0",
+      "bytes_read": 1293
+    },
+    {
+      "path": "/v2/objects/workouts/v1/gym-six-month/movements/core-stability-bear-plank-shoulder-tap-technique.mp4",
+      "method": "HEAD",
+      "request_headers": {},
+      "status": 401,
+      "content_type": "application/json; charset=utf-8",
+      "csp": null,
+      "content_range": null,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes_read": 0
+    },
+    {
+      "path": "/v2/source/workouts/v1/home/movements/nonexistent.mp4",
+      "method": "GET",
+      "request_headers": {},
+      "status": 404,
+      "content_type": "application/json; charset=utf-8",
+      "csp": null,
+      "content_range": null,
+      "body_sha256": "d2dfdc9511fbeaa0701d1f8730f4989313b062ca1b61a2bd8bed8f4f5d654b5d",
+      "bytes_read": 21
+    },
+    {
+      "path": "/v2/source/workouts/v1/home/movements/%2e%2e%2fhidden.mp4",
+      "method": "GET",
+      "request_headers": {},
+      "status": 404,
+      "content_type": "application/json; charset=utf-8",
+      "csp": null,
+      "content_range": null,
+      "body_sha256": "d2dfdc9511fbeaa0701d1f8730f4989313b062ca1b61a2bd8bed8f4f5d654b5d",
+      "bytes_read": 21
+    },
+    {
+      "path": "/v2/objects/workouts/v1/gym-six-month/movements/mobility-flexibility-adductor-rock-back-gentle-flow.mp4",
+      "method": "HEAD",
+      "request_headers": {},
+      "status": 200,
+      "content_type": "video/mp4",
+      "csp": null,
+      "content_range": null,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes_read": 0
+    }
+  ]
+}

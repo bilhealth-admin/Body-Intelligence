@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_report_reason_option.dart';
 import 'package:flutter/material.dart';
 
@@ -275,9 +276,12 @@ Future<void> showAiCoachAnswerReportSheet(
                               AnimatedRotation(
                                 turns: privacyDetailsExpanded ? .5 : 0,
                                 duration: const Duration(milliseconds: 180),
-                                child: const Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  size: 20,
+                                child: const BilCrystalArrow(
+                                  extent: 36,
+                                  child: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    size: 20,
+                                  ),
                                 ),
                               ),
                             ],

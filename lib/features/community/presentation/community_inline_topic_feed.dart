@@ -169,7 +169,7 @@ class _CommunityInlineTopicFeedState extends State<_CommunityInlineTopicFeed> {
         return const SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.all(32),
-            child: Center(child: CircularProgressIndicator()),
+            child: Center(child: BilFeatureWelcomeStatus()),
           ),
         );
       }
@@ -179,9 +179,9 @@ class _CommunityInlineTopicFeedState extends State<_CommunityInlineTopicFeed> {
           delegate: SliverChildBuilderDelegate((context, index) {
             if (index == 0) {
               return SizedBox(
-                height: 3,
+                height: _refreshing ? 24 : 3,
                 child: _refreshing
-                    ? const LinearProgressIndicator()
+                    ? const BilFeatureWelcomeStatus()
                     : const SizedBox.shrink(),
               );
             }
@@ -231,9 +231,12 @@ class _CommunityInlineTopicFeedState extends State<_CommunityInlineTopicFeed> {
                       icon: _loadingMore
                           ? const SizedBox.square(
                               dimension: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: BilFeatureWelcomeStatus(),
                             )
-                          : const Icon(Icons.expand_more_rounded),
+                          : const BilCrystalArrow(
+                              extent: 36,
+                              child: Icon(Icons.expand_more_rounded),
+                            ),
                       label: Text(
                         communityText(
                           context,

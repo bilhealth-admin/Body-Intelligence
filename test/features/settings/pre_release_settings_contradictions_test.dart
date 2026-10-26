@@ -85,8 +85,8 @@ void main() {
 
       await tester.scrollUntilVisible(find.text('BIL Premium'), 400);
       expect(find.text('BIL Premium'), findsOneWidget);
-      expect(find.text('Start 7-day free trial'), findsOneWidget);
-      expect(find.text('Explore Premium'), findsNothing);
+      expect(find.text('Start 7-day free trial'), findsNothing);
+      expect(find.text('Explore Premium'), findsOneWidget);
       expect(find.text('Go Premium'), findsNothing);
     },
   );

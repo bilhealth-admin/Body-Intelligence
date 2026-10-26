@@ -203,7 +203,7 @@ class _BilWorkoutRoutineDetailsPageState
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const BilGlassPressFeedback(
+                    const BilNavigationFeedback(
                       child: Icon(Icons.arrow_forward_rounded),
                     ),
                     const SizedBox(width: 10),
@@ -230,7 +230,7 @@ class _BilWorkoutRoutineDetailsPageState
                 icon: _logging
                     ? const SizedBox.square(
                         dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: BilFeatureWelcomeStatus(),
                       )
                     : const Icon(Icons.add_task_rounded),
                 label: Text(_copy(context, 'Log Workout', 'تسجيل التمرين')),
@@ -465,7 +465,7 @@ class _SourceAndSafety extends StatelessWidget {
               key: const Key('workout-original-source-link'),
               style: TextButton.styleFrom(padding: EdgeInsets.zero),
               onPressed: () => _openOriginalSource(context),
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.open_in_new_rounded, size: 17),
               ),
               label: Text(
@@ -486,11 +486,10 @@ class _SourceAndSafety extends StatelessWidget {
   );
 
   Future<void> _openOriginalSource(BuildContext context) async {
+    final sourcePage = workoutOriginalSourcePage(item.sourceUrl);
     try {
-      if (await launchUrl(
-        item.sourceUrl,
-        mode: LaunchMode.externalApplication,
-      )) {
+      if (sourcePage != null &&
+          await launchUrl(sourcePage, mode: LaunchMode.externalApplication)) {
         return;
       }
     } on Object {

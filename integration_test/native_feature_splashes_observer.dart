@@ -1,7 +1,9 @@
 part of 'native_feature_splashes_test.dart';
 
 Finder _replyRow(String text) => find.byWidgetPredicate(
-  (widget) => widget is CoachMessageText && widget.text == text,
+  (widget) =>
+      widget is CoachMessageText && widget.text == text ||
+      widget is CoachNativeMarkdown && widget.text == text,
 );
 
 // Post-frame observers run while tester.pump is guarded. Read actual render
@@ -31,6 +33,21 @@ Map<String, Object?> nativeQaReplyGeometry(
     'viewport_top': rect.top,
     'viewport_bottom': rect.bottom,
   });
+  final draftFlight = find.byKey(const ValueKey('coach-sent-message-flight'));
+  if (draftFlight.evaluate().length == 1) {
+    final draftClip = find.byKey(
+      const ValueKey('coach-sent-message-flight-clip'),
+    );
+    expect(draftClip, findsOneWidget);
+    final clip = _nativeRect(draftClip);
+    expect(
+      clip.top,
+      greaterThanOrEqualTo(rect.top - .5),
+      reason: 'The draft flight must never paint over the conversation header.',
+    );
+    sample['draft_flight_clip_top'] = clip.top;
+    sample['draft_flight_clip_bottom'] = clip.bottom;
+  }
   if (anchor != null && anchor.evaluate().length == 1) {
     sample['history_anchor_top'] = _nativeRect(anchor).top;
   }
@@ -53,6 +70,32 @@ Map<String, Object?> nativeQaReplyGeometry(
   sample['reply_opacity'] = arrival.evaluate().length == 1
       ? (arrival.evaluate().single.widget as FadeTransition).opacity.value
       : 1.0;
+  final rowElement = row.evaluate().single;
+  if (rowElement.widget is CoachNativeMarkdown) {
+    final native =
+        (rowElement as StatefulElement).state as CoachNativeMarkdownState;
+    sample['renderer'] = 'native_swiftui';
+    sample['native_layout_ready'] = native.nativeLayoutReady;
+    if (!native.nativeLayoutReady || native.nativeFirstContentBounds == null) {
+      sample['reply_opacity'] = 0.0;
+      sample['visible_graphemes'] = 0;
+      sample['first_content_visible_area'] = 0.0;
+      return sample;
+    }
+    sample['visible_graphemes'] = reply.characters.length;
+    final bounds = native.nativeFirstContentBounds!.shift(
+      _nativeRect(row).topLeft,
+    );
+    final overlap = bounds.intersect(rect);
+    sample['first_content_visible_area'] =
+        overlap.width > 0 && overlap.height > 0
+        ? overlap.width * overlap.height
+        : 0.0;
+    sample['content_geometry_basis'] =
+        'actual SwiftUI first block layout, not a glyph-pixel claim';
+    return sample;
+  }
+  sample['renderer'] = 'flutter_selectable_text';
   final selectable = find.descendant(
     of: row,
     matching: find.byType(SelectableText),

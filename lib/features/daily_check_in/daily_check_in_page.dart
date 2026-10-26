@@ -1,5 +1,6 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -241,7 +242,7 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
         ),
         body: SafeArea(
           child: loading
-              ? const Center(child: CircularProgressIndicator())
+              ? const Center(child: BilFeatureWelcomeStatus())
               : hasError || system == null
               ? Center(
                   child: Padding(
@@ -354,7 +355,7 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                                   ),
                                   showCheckmark: false,
                                   selected: measurementContext == option.$1,
-                                  avatar: BilGlassPressFeedback(
+                                  avatar: BilNavigationFeedback(
                                     child: Icon(option.$3, size: 18),
                                   ),
                                   label: Text(
@@ -379,9 +380,7 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                               child: saving
                                   ? const SizedBox.square(
                                       dimension: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
+                                      child: BilFeatureWelcomeStatus(),
                                     )
                                   : Text(context.strings.text('Save')),
                             ),
@@ -391,9 +390,7 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                             child: skipping
                                 ? const SizedBox.square(
                                     dimension: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
+                                    child: BilFeatureWelcomeStatus(),
                                   )
                                 : Text(dailyCheckInText(context, 'Skip today')),
                           ),
@@ -565,7 +562,7 @@ class _RepeatWeightButton extends StatelessWidget {
               ),
             ),
           ),
-          icon: BilGlassPressFeedback(child: Icon(icon)),
+          icon: BilNavigationFeedback(child: Icon(icon)),
         ),
       ),
     );

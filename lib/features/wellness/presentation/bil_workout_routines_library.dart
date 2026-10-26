@@ -78,7 +78,7 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
         })
         .toList(growable: false);
 
-    return RefreshIndicator(
+    return BilRefreshIndicator(
       onRefresh: () async => _reload(),
       child: CustomScrollView(
         key: ValueKey('workout-library-tab-${_tabs.index}'),

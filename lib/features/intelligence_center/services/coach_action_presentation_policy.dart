@@ -30,8 +30,42 @@ class CoachActionPresentationPolicy {
         .replaceAll('أ', 'ا')
         .replaceAll('إ', 'ا')
         .replaceAll('آ', 'ا');
-    return _directOpenMarkers.any(value.contains);
+    // "review"/"preview" contain "view", but asking for analysis must not
+    // navigate away or replace the answer with a navigation acknowledgement.
+    // English action verbs must also be a request, not a fact such as
+    // "my goals show improvement" or a question about how opening works.
+    if (_englishDirectOpen.hasMatch(value)) return true;
+    return _directOpenMarkers.any((marker) {
+      if (const {
+        'open',
+        'show',
+        'view',
+        'take me to',
+        'go to',
+      }.contains(marker)) {
+        return false;
+      }
+      // Preserve scripts whose imperative forms attach suffixes or do not
+      // delimit words with spaces; Latin verbs still require a whole word.
+      if (!RegExp(
+        r'^[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\u017E]',
+      ).hasMatch(marker)) {
+        return value.contains(marker);
+      }
+      return RegExp(
+        '(?<![\\p{L}\\p{N}_])${RegExp.escape(marker)}(?![\\p{L}\\p{N}_])',
+        unicode: true,
+      ).hasMatch(value);
+    });
   }
+
+  static final _englishDirectOpen = RegExp(
+    r'^(?:(?:please|kindly)[,\s]+)?'
+    r'(?:(?:can|could|will|would)\s+you\s+(?:please\s+)?|'
+    r'i\s+(?:want|need|would like)\s+(?:you\s+)?to\s+)?'
+    r'(?:open|show|view|take me to|go to)(?![\p{L}\p{N}_])',
+    unicode: true,
+  );
 
   bool isContextualOpenFollowUp(String input) {
     final value = input

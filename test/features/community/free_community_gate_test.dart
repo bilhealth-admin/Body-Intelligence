@@ -1,3 +1,4 @@
+import '../../support/bil_waiting_indicators.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/premium_route_glass_gate.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
@@ -45,7 +46,7 @@ void main() {
         await tester.tap(find.text('Open friends'));
         expect(taps, 1);
         expect(storefrontReads, 0);
-        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(bilWaitingIndicators(), findsNothing);
         expect(
           find.byWidgetPredicate(
             (widget) => widget is AbsorbPointer && widget.absorbing,

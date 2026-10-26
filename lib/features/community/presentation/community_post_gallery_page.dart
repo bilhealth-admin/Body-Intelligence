@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/bil_persistent_network_image.dart';
 
@@ -117,7 +118,7 @@ class _CommunityPostGalleryPageState extends State<CommunityPostGalleryPage> {
                   key: const Key('community-gallery-previous'),
                   tooltip: material.previousPageTooltip,
                   onPressed: _index > 0 ? () => _select(_index - 1) : null,
-                  icon: const BackButtonIcon(),
+                  icon: const BilCrystalArrow(child: BackButtonIcon()),
                   color: Colors.white,
                   disabledColor: Colors.white38,
                   constraints: const BoxConstraints(
@@ -131,7 +132,7 @@ class _CommunityPostGalleryPageState extends State<CommunityPostGalleryPage> {
                   onPressed: _index + 1 < _media.length
                       ? () => _select(_index + 1)
                       : null,
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.arrow_forward_rounded),
                   ),
                   color: Colors.white,

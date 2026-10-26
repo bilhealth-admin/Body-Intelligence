@@ -1,4 +1,4 @@
-import 'shared/widgets/bil_glass_press_feedback.dart';
+import 'shared/widgets/bil_navigation_feedback.dart';
 import 'features/community/presentation/community_attention_scope.dart';
 import 'features/commerce/presentation/app_purchase_coordinator.dart';
 import 'dart:async';
@@ -276,7 +276,7 @@ class _BILBootstrapState extends State<_BILBootstrap> {
                           const SizedBox(height: 16),
                           FilledButton.icon(
                             onPressed: _initializeCloud,
-                            icon: const BilGlassPressFeedback(
+                            icon: const BilNavigationFeedback(
                               child: Icon(Icons.refresh_rounded),
                             ),
                             label: Text(

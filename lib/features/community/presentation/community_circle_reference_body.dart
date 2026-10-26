@@ -48,7 +48,7 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
   final VoidCallback? onManage;
 
   @override
-  Widget build(BuildContext context) => RefreshIndicator(
+  Widget build(BuildContext context) => BilRefreshIndicator(
     onRefresh: onRefresh,
     child: CustomScrollView(
       key: const Key('community-circles-list'),
@@ -72,7 +72,7 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
           if (serverLoading && serverRows.isEmpty)
             const SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: BilFeatureWelcomeStatus()),
             )
           else if (serverError != null && serverRows.isEmpty)
             SliverFillRemaining(
@@ -89,7 +89,7 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
                   !snapshot.hasData) {
                 return const SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
+                  child: Center(child: BilFeatureWelcomeStatus()),
                 );
               }
               if (snapshot.hasError) {
@@ -99,7 +99,7 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
                     child: FilledButton.icon(
                       key: const Key('community-circles-retry'),
                       onPressed: onRefresh,
-                      icon: const BilGlassPressFeedback(
+                      icon: const BilNavigationFeedback(
                         child: Icon(Icons.refresh_rounded),
                       ),
                       label: Text(
@@ -130,9 +130,9 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
                   icon: serverLoading
                       ? const SizedBox.square(
                           dimension: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: BilFeatureWelcomeStatus(),
                         )
-                      : const BilGlassPressFeedback(
+                      : const BilNavigationFeedback(
                           child: Icon(Icons.expand_more_rounded),
                         ),
                   label: Text(
@@ -161,7 +161,7 @@ class _CommunityCircleReferenceBody extends StatelessWidget {
         TextButton.icon(
           key: const Key('bil06-server-search-retry'),
           onPressed: serverLoading ? null : onRefresh,
-          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
+          icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
         ),
       ],

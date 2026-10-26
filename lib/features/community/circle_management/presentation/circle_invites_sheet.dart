@@ -298,7 +298,7 @@ class _CircleInvitesFormState extends State<_CircleInvitesForm> {
               'صلاحية الوصول إلى الدعوات غير متاحة.',
             ),
           ),
-        if (controller.invitesLoading) const LinearProgressIndicator(),
+        if (controller.invitesLoading) const BilFeatureWelcomeStatus(),
         if (controller.invitesError != null)
           _ManagementNotice(
             key: const Key('bil06-invites-error'),
@@ -330,7 +330,7 @@ class _CircleInvitesFormState extends State<_CircleInvitesForm> {
             onPressed: controller.invitesLoading
                 ? null
                 : controller.loadMoreInvites,
-            icon: const BilGlassPressFeedback(
+            icon: const BilNavigationFeedback(
               child: Icon(Icons.expand_more_rounded),
             ),
             label: Text(
@@ -346,7 +346,7 @@ class _CircleInvitesFormState extends State<_CircleInvitesForm> {
           onPressed: controller.invitesLoading || !canRead
               ? null
               : () => controller.loadInvites(circleSlug: slug),
-          icon: const BilGlassPressFeedback(child: Icon(Icons.refresh_rounded)),
+          icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
           label: Text(
             circleManagementText(
               context,

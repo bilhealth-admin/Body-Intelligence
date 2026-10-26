@@ -159,6 +159,11 @@ extension _BilSmartPlanMeals on _BilSmartPlanPageState {
                             ),
                         ],
                         onChanged: (value) => update(() => selected = value),
+
+                        icon: const BilCrystalArrow(
+                          extent: 36,
+                          child: Icon(Icons.keyboard_arrow_down_rounded),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       FilledButton(

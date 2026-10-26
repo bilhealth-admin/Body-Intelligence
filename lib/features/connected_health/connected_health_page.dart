@@ -1,5 +1,8 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../commerce/presentation/optional_access_offer.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -184,7 +187,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/dashboard'),
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           ),
           title: Text(
@@ -251,7 +254,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                     children: [
                       state.when(
                         loading: () =>
-                            const Center(child: CircularProgressIndicator()),
+                            const Center(child: BilFeatureWelcomeStatus()),
                         error: (_, _) => PremiumSurface(
                           dashboardGlass: true,
                           child: Text(
@@ -308,7 +311,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                                           .notifier,
                                                     )
                                                     .synchronize(),
-                                          icon: const BilGlassPressFeedback(
+                                          icon: const BilNavigationFeedback(
                                             child: Icon(Icons.sync_rounded),
                                           ),
                                         ),

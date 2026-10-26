@@ -283,7 +283,15 @@ class DashboardIntelligenceComposer {
   final DashboardTrustedBodyTwinAdapter _bodyTwinAdapter;
 
   DashboardIntelligenceSnapshot compose(DashboardIntelligenceInput input) {
-    final todayItems = input.todayMeals.expand((meal) => meal.items).toList();
+    // A meal container survives deleting its last item. It is not evidence
+    // that food was eaten, nor a recorded nutrition day.
+    final todayMeals = input.todayMeals
+        .where((meal) => meal.items.isNotEmpty)
+        .toList(growable: false);
+    final allMeals = input.allMeals
+        .where((meal) => meal.items.isNotEmpty)
+        .toList(growable: false);
+    final todayItems = todayMeals.expand((meal) => meal.items).toList();
     final nutrition = DashboardNutritionEvidence(todayItems);
     final calories = nutrition.total(TrackedNutrient.calories);
     final protein = nutrition.total(TrackedNutrient.protein);
@@ -324,7 +332,7 @@ class DashboardIntelligenceComposer {
       bil.targets,
       input.planOverrides,
     );
-    final mealDays = input.allMeals.map((row) => row.dayKey).toSet();
+    final mealDays = allMeals.map((row) => row.dayKey).toSet();
     final waterDays = input.allWater.map((row) => row.dayKey).toSet();
     final weightDays = input.weights
         .map((row) => row.dayKey ?? dayKeyFor(row.at))
@@ -371,7 +379,7 @@ class DashboardIntelligenceComposer {
     final todayKey = dayKeyFor(input.now);
     final bestAction = _decisionAuthority.choose(
       weighedToday: weightDays.contains(todayKey) || input.skippedWeightToday,
-      loggingComplete: input.todayMeals.isNotEmpty,
+      loggingComplete: todayMeals.isNotEmpty,
       protein: protein,
       proteinTarget: effectiveTargets.protein,
       waterMl: waterMl,
@@ -398,7 +406,7 @@ class DashboardIntelligenceComposer {
     for (final row in input.weights) {
       consider(row.at);
     }
-    for (final row in input.allMeals) {
+    for (final row in allMeals) {
       consider(row.at);
     }
     for (final row in input.allWater) {
@@ -410,7 +418,7 @@ class DashboardIntelligenceComposer {
     );
     final dailyReturn = DailyReturnEngine.compose(
       hasWeight: weightDays.contains(todayKey),
-      hasMeals: input.todayMeals.isNotEmpty,
+      hasMeals: todayMeals.isNotEmpty,
       hasWater: input.todayWater.isNotEmpty,
       bestAction: bestAction,
       changed: changed,
@@ -450,7 +458,7 @@ class DashboardIntelligenceComposer {
           .map((row) => dayKeyFor(row.at))
           .toSet()
           .length,
-      nutritionDays: input.allMeals
+      nutritionDays: allMeals
           .where((row) => row.dayKey.compareTo(weekCutoff) >= 0)
           .map((row) => row.dayKey)
           .toSet()
@@ -468,7 +476,7 @@ class DashboardIntelligenceComposer {
       weeklyWeightChangeKg: progress.weeklyDirectionKg,
     );
     final itemsByDay = <DateTime, List<DashboardMealItemInput>>{};
-    for (final meal in input.allMeals) {
+    for (final meal in allMeals) {
       final day = DateTime(meal.at.year, meal.at.month, meal.at.day);
       (itemsByDay[day] ??= []).addAll(meal.items);
     }

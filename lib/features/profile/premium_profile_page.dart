@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 
@@ -143,12 +145,12 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
             showDashboardAction: false,
           ),
           body: profileAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const Center(child: BilFeatureWelcomeStatus()),
             error: (_, _) => profileStorageFailure(),
             data: (profile) {
               final authIdentity = authIdentityAsync.value;
               if (authIdentity == null) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               if (profile == null) {
                 return Center(
@@ -161,7 +163,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                 );
               }
               if (goalAsync.isLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               if (goalAsync.hasError) {
                 return profileStorageFailure();
@@ -180,7 +182,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                     authIdentity,
                   ),
                 );
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: BilFeatureWelcomeStatus());
               }
               final photo = ref.watch(profileAvatarStateProvider).bytes;
               final dietaryPreferences =

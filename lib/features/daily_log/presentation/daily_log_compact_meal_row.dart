@@ -84,7 +84,7 @@ class _DiaryCompactMealRow extends StatelessWidget {
                   return Row(
                     key: Key('daily-meal-header-$type'),
                     children: [
-                      BilGlassPressFeedback(
+                      BilNavigationFeedback(
                         child: Icon(
                           BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,
                           size: 24,
@@ -112,7 +112,7 @@ class _DiaryCompactMealRow extends StatelessWidget {
                               ),
                       ),
                       const SizedBox(width: 10),
-                      BilGlassPressFeedback(
+                      BilNavigationFeedback(
                         child: Icon(
                           Icons.chevron_right_rounded,
                           size: 20,

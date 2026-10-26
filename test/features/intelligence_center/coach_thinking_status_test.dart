@@ -1,5 +1,7 @@
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_thinking_status.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -38,6 +40,8 @@ void main() {
         );
         final rect = tester.getRect(find.byKey(const Key('anchor')));
         expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
+        expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
         await tester.pump(const Duration(milliseconds: 4500));
         await tester.pump(const Duration(milliseconds: 500));
         expect(find.text(labels[1]), findsOneWidget);
@@ -70,6 +74,14 @@ void main() {
     expect(find.text('Preparing…'), findsOneWidget);
     expect(find.text('Please wait…'), findsNothing);
     expect(find.byType(ShaderMask), findsNothing);
+    expect(
+      tester
+          .widget<CupertinoActivityIndicator>(
+            find.byType(CupertinoActivityIndicator),
+          )
+          .animating,
+      isFalse,
+    );
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(tester.takeException(), isNull);
   });

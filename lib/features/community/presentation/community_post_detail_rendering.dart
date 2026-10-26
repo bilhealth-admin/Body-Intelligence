@@ -11,14 +11,14 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done &&
             _comments.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: BilFeatureWelcomeStatus());
         }
         if (snapshot.hasError && _comments.isEmpty) {
           return Center(
             child: FilledButton.icon(
               key: const Key('community-post-detail-retry'),
               onPressed: _retry,
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.refresh_rounded),
               ),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
@@ -28,7 +28,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
         return Column(
           children: [
             Expanded(
-              child: RefreshIndicator(
+              child: BilRefreshIndicator(
                 onRefresh: _refresh,
                 child: ListView(
                   key: const Key('community-post-detail-list'),
@@ -43,9 +43,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                               padding: EdgeInsetsDirectional.only(end: 8),
                               child: SizedBox.square(
                                 dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
+                                child: BilFeatureWelcomeStatus(),
                               ),
                             ),
                           Expanded(
@@ -188,11 +186,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                           icon: _loadingMore
                               ? const SizedBox.square(
                                   dimension: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: BilFeatureWelcomeStatus(),
                                 )
-                              : const BilGlassPressFeedback(
+                              : const BilNavigationFeedback(
                                   child: Icon(Icons.expand_more_rounded),
                                 ),
                           label: Text(
@@ -316,11 +312,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                             icon: _submitting
                                 ? const SizedBox.square(
                                     dimension: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
+                                    child: BilFeatureWelcomeStatus(),
                                   )
-                                : const BilGlassPressFeedback(
+                                : const BilNavigationFeedback(
                                     child: Icon(Icons.send_rounded),
                                   ),
                           ),
@@ -384,9 +378,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                   icon: _loadingReplyThreads.contains(root.id)
                       ? const SizedBox.square(
                           dimension: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: BilFeatureWelcomeStatus(),
                         )
-                      : const BilGlassPressFeedback(
+                      : const BilNavigationFeedback(
                           child: Icon(Icons.expand_more_rounded),
                         ),
                   label: Text(
@@ -401,7 +395,7 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                 key: Key('community-comment-hide-replies-${root.id}'),
                 onPressed: () =>
                     _setDetailState(() => _expandedThreads.remove(root.id)),
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.expand_less_rounded),
                 ),
                 label: Text(

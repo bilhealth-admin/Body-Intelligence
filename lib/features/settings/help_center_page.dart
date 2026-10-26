@@ -1,6 +1,8 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../nutrition/presentation/food_translation_attribution.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -263,7 +265,7 @@ class HelpCenterPage extends StatelessWidget {
           leading: IconButton(
             onPressed: () =>
                 context.canPop() ? context.pop() : context.go('/settings'),
-            icon: const BackButtonIcon(),
+            icon: const BilCrystalArrow(child: BackButtonIcon()),
           ),
           title: Text(t('Help', 'المساعدة', 'Aide', 'Ayuda', 'Yardım')),
         ),
@@ -279,7 +281,7 @@ class HelpCenterPage extends StatelessWidget {
             return ListTile(
               minTileHeight: 54,
               title: Text(row.title),
-              trailing: BilGlassPressFeedback(
+              trailing: BilNavigationFeedback(
                 child: Icon(
                   Directionality.of(context) == TextDirection.rtl
                       ? Icons.chevron_left_rounded
@@ -375,6 +377,8 @@ class HelpFaqPage extends StatelessWidget {
               ExpansionTile(
                 title: Text(question.$1),
                 childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+
+                trailing: const BilCrystalExpansionIndicator(),
                 children: [Text(question.$2)],
               ),
           ],

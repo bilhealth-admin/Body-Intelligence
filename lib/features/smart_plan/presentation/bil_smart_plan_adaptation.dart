@@ -56,6 +56,11 @@ extension _BilSmartPlanAdaptation on _BilSmartPlanPageState {
                     ),
                 ],
                 onChanged: (v) => update(() => target = v ?? target),
+
+                icon: const BilCrystalArrow(
+                  extent: 36,
+                  child: Icon(Icons.keyboard_arrow_down_rounded),
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -152,6 +157,11 @@ extension _BilSmartPlanAdaptation on _BilSmartPlanPageState {
                   onChanged: (v) => update(
                     () => selected = choices.singleWhere((s) => s.id == v),
                   ),
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 for (final id in selected.exerciseIds)
@@ -174,6 +184,11 @@ extension _BilSmartPlanAdaptation on _BilSmartPlanPageState {
                       DropdownMenuItem(value: r, child: Text(_changeReason(r))),
                   ],
                   onChanged: (v) => update(() => reason = v ?? reason),
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text(

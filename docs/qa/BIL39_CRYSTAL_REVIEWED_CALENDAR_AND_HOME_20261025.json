@@ -1,0 +1,73 @@
+{
+  "status": "VISUALLY_REVIEWED_REFERENCES; current-tree verification still required",
+  "evidence_sheets": [
+    "bil39-calendar-eight-final-review.png",
+    "bil39-crystal-home-four-comparison.jpg"
+  ],
+  "references": [
+    {
+      "path": "test/goldens/bil39_calendar_ar_dark_1x.png",
+      "sha256": "9ec8cfd44407e6d670dea98cff4a5ce0a281443de91090e6ec16359315ae2fe1",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/goldens/bil39_calendar_ar_dark_2x.png",
+      "sha256": "ab7942ba65ba76f61b8e6541d25e8207d197dde320879f8e3c113fcc12cb5d2a",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/goldens/bil39_calendar_ar_light_1x.png",
+      "sha256": "343b1761d1ae965910eaa914b839fd91927af025b6a7975c815b5d7843782397",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/goldens/bil39_calendar_ar_light_2x.png",
+      "sha256": "25a9d92d77013e3d05e32eaa58747dead3af5ed36186d294f533d7d01bf781cc",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/goldens/bil39_calendar_en_dark_1x.png",
+      "sha256": "3ff06807b78d62f0fe07f8b8d986a38dd9b418028b88a1b04c8f53a2ab5abb47",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/goldens/bil39_calendar_en_dark_2x.png",
+      "sha256": "d0e3b2f85b3b2b24d3e1a11ea0ed53847da0bc060ee9ea1eca362d40ad1e1e7d",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/goldens/bil39_calendar_en_light_1x.png",
+      "sha256": "669ab81b69ba08168d4bef5888a6145143b997eb4af5d2590a2599fc8098a8ce",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/goldens/bil39_calendar_en_light_2x.png",
+      "sha256": "dc25a94dfc848ebed0dd4f426cbe36fdc4b927d9cf960b5552fe0a4d2e04bd07",
+      "review": "All eight real renders inspected at 100% and 200%, Arabic/English, dark/light. Complete month/year and two-digit day readable; no crystal/text overlap."
+    },
+    {
+      "path": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_dark.png",
+      "previous_sha256": "2d21bd69c1850a03bae13609e2ca21b377a8a58f36fb7646e8a0113066e3e1e4",
+      "sha256": "13e52b1325a8d3525ddb331c0b0577d87002281b2ea8e17f00ab8e462dc74043",
+      "review": "Reviewed full before/after contact sheet. Intended default expansion chevron now has a permanent 48px crystal. All source text, subject, layout and adjacent previous/next controls preserved."
+    },
+    {
+      "path": "test/features/smart_plan/goldens/smart_plan_home_exercise_ar_light.png",
+      "previous_sha256": "4af1f64a0a0de4d53bb906abb9e028c48f4a3afa02a1f980307bbffb2d4b301c",
+      "sha256": "7fb4ab0e631e20c575aff5fb1d12671b738543c316dbbfabccb7d2297421d5e5",
+      "review": "Reviewed full before/after contact sheet. Intended default expansion chevron now has a permanent 48px crystal. All source text, subject, layout and adjacent previous/next controls preserved."
+    },
+    {
+      "path": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_dark.png",
+      "previous_sha256": "f380011eab926313d0c9b7604001a34ebbf5adbbf009e20d9662278cf94b50c6",
+      "sha256": "b287e1b637f69bb4f879db380a857a8793b07e789c5d09b31b0c2ed01bfd1d09",
+      "review": "Reviewed full before/after contact sheet. Intended default expansion chevron now has a permanent 48px crystal. All source text, subject, layout and adjacent previous/next controls preserved."
+    },
+    {
+      "path": "test/features/smart_plan/goldens/smart_plan_home_exercise_en_light.png",
+      "previous_sha256": "b599b4fbaadb20cd87e655e5eeed0ee4e2ab15e06da169bee94df7f3c5e73b20",
+      "sha256": "fdd870da1b517c4aa69f1da025b92558e2b421895cee95a4783a70711220218b",
+      "review": "Reviewed full before/after contact sheet. Intended default expansion chevron now has a permanent 48px crystal. All source text, subject, layout and adjacent previous/next controls preserved."
+    }
+  ]
+}

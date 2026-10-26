@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/bil_written_language_resolver.dart';
@@ -75,11 +76,14 @@ class _CommunityPostBodyState extends State<CommunityPostBody> {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 visualDensity: VisualDensity.compact,
               ),
-              icon: Icon(
-                _expanded
-                    ? Icons.expand_less_rounded
-                    : Icons.expand_more_rounded,
-                size: 19,
+              icon: BilCrystalArrow(
+                extent: 36,
+                child: Icon(
+                  _expanded
+                      ? Icons.expand_less_rounded
+                      : Icons.expand_more_rounded,
+                  size: 19,
+                ),
               ),
               label: Text(
                 _expanded

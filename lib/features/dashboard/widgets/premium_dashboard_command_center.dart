@@ -217,7 +217,7 @@ class _MobileCommandCenter extends StatelessWidget {
               FilledButton.icon(
                 key: const Key('dashboard-mobile-command-action'),
                 onPressed: onAction,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.arrow_forward_rounded),
                 ),
                 label: Text(
@@ -273,7 +273,7 @@ class _TruthExplanationSurface extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BilGlassPressFeedback(
+            BilNavigationFeedback(
               child: Icon(icon, size: 18, color: scheme.primary),
             ),
             const SizedBox(width: PremiumDesignTokens.spaceXs),

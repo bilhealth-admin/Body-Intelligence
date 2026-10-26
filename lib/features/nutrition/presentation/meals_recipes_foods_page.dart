@@ -1,6 +1,7 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,9 +55,7 @@ class _MealsRecipesFoodsPageState extends ConsumerState<MealsRecipesFoodsPage> {
       future: preference,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Scaffold(body: Center(child: BilFeatureWelcomeStatus()));
         }
         if (snapshot.hasError) {
           return BilCalmVisualScope(
@@ -68,7 +67,7 @@ class _MealsRecipesFoodsPageState extends ConsumerState<MealsRecipesFoodsPage> {
                       ref.read(databaseProvider),
                     ).get('diary.defaultSearchTab'),
                   ),
-                  icon: const BilGlassPressFeedback(
+                  icon: const BilNavigationFeedback(
                     child: Icon(Icons.refresh_rounded),
                   ),
                   label: Text(_c(context, 'Retry')),

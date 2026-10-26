@@ -43,7 +43,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     onPick: mutationBusy
         ? null
         : () async {
-            final picked = await showDatePicker(
+            final picked = await showBilCrystalDatePicker(
               context: context,
               initialDate: date,
               firstDate: DateTime(2000),
@@ -90,6 +90,14 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
 
   void _leaveMealDetail() {
     if (widget.focusMealEntry) {
+      if (widget.initialAction == 'food') {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/meal-planner');
+        }
+        return;
+      }
       context.go(widget.returnPath ?? '/daily-log');
       return;
     }
@@ -133,6 +141,24 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
     initialActionInFlight = action;
     try {
       switch (action) {
+        case 'food':
+          // The planner's recipe title is only a search hint. The user must
+          // select a canonical diary food and confirm its portion before save.
+          final initialQuery = GoRouterState.of(
+            context,
+          ).uri.queryParameters['query']?.trim();
+          if (initialQuery != null && initialQuery.isNotEmpty) {
+            foodSearch.text = initialQuery;
+          }
+          _updateState(() {
+            selectedFood = null;
+            mealSearchActive = true;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted || !mealSearchActive) return;
+            _focusMealEntry();
+            _openFoodSearchAfterBuild();
+          });
         case 'barcode':
           await _scanBarcode();
         case 'voice':

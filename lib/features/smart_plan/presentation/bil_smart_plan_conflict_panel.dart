@@ -123,6 +123,8 @@ class BilSmartPlanConflictReviewPanel extends ConsumerWidget {
             ),
             ExpansionTile(
               title: Text(t('Compare changed days', 'مقارنة الأيام المتغيرة')),
+
+              trailing: const BilCrystalExpansionIndicator(),
               children: [
                 for (final date in dates)
                   if (jsonEncode(dayFor(device, date)?.toJson()) !=

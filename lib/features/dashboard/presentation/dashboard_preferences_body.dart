@@ -26,7 +26,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
               onPressed: _savingLayout && !_restoringDefaults
                   ? null
                   : _finishEditing,
-              icon: const BackButtonIcon(),
+              icon: const BilCrystalArrow(child: BackButtonIcon()),
             ),
             title: Text(
               _sectionCopy(context, 'Customize Today', 'تخصيص شاشة اليوم'),
@@ -36,9 +36,9 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
             children: [
               SizedBox(
-                height: 12,
+                height: _savingLayout ? 24 : 12,
                 child: _savingLayout
-                    ? const LinearProgressIndicator()
+                    ? const BilFeatureWelcomeStatus()
                     : const SizedBox.shrink(),
               ),
               _DashboardPreferencesHero(
@@ -100,7 +100,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                         'Loading saved view',
                         'جارٍ تحميل العرض المحفوظ',
                       ),
-                      child: const LinearProgressIndicator(),
+                      child: const BilFeatureWelcomeStatus(),
                     );
                   }
                   final pendingPreset = _pendingPresetId;
@@ -174,16 +174,14 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                         onPressed: () => ref.invalidate(
                                           verifiedSubscriptionStateProvider,
                                         ),
-                                        icon: const BilGlassPressFeedback(
+                                        icon: const BilNavigationFeedback(
                                           child: Icon(Icons.refresh_rounded),
                                         ),
                                       )
                                     : preset.premium && !entitlementResolved
                                     ? const SizedBox.square(
                                         dimension: 22,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: BilFeatureWelcomeStatus(),
                                       )
                                     : preset.premium && !paid
                                     ? const Icon(
@@ -374,9 +372,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                     child: const Center(
                                       child: SizedBox.square(
                                         dimension: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
+                                        child: BilFeatureWelcomeStatus(),
                                       ),
                                     ),
                                   );
@@ -487,7 +483,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                           tr: 'Hedefi düzenle',
                         ),
                       ),
-                      trailing: const BilGlassPressFeedback(
+                      trailing: const BilNavigationFeedback(
                         child: Icon(Icons.chevron_right_rounded),
                       ),
                       onTap: _savingLayout
@@ -526,7 +522,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                         if (state.isLoading) {
                           return const SizedBox.square(
                             dimension: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           );
                         }
                         if (state.hasError) {
@@ -612,21 +608,21 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                             onPressed: () => ref.invalidate(
                               verifiedSubscriptionStateProvider,
                             ),
-                            icon: const BilGlassPressFeedback(
+                            icon: const BilNavigationFeedback(
                               child: Icon(Icons.refresh_rounded),
                             ),
                           )
                         : !entitlementResolved
                         ? const SizedBox.square(
                             dimension: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           )
                         : !paid
                         ? const Icon(
                             Icons.workspace_premium_rounded,
                             color: Color(0xFFF2B632),
                           )
-                        : const BilGlassPressFeedback(
+                        : const BilNavigationFeedback(
                             child: Icon(Icons.chevron_right_rounded),
                           ),
                     onTap: () {

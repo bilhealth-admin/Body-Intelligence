@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "checked_at_utc": "2026-10-26T20:09:37.881Z",
+  "status": "LOCAL_RECOVERY_PASS_NATIVE39_PENDING",
+  "base_sha": "155b079696430919f8272df934371f033fb11be2",
+  "finding": "Independent read-only review found expired verified receipt finish failure then successful Continue left ready/store_finish_pending and disabled checkout, even across page reentry.",
+  "red_result": {
+    "passed": 2,
+    "failed": 1,
+    "skipped": 0,
+    "done": {
+      "success": false,
+      "type": "done",
+      "time": 9361
+    },
+    "cases": [
+      "inactive finish retry releases checkout only after acknowledgement",
+      "inactive finish retry failure remains blocked without re-verification",
+      "inactive finish retry cannot replace a newer receipt rejection"
+    ]
+  },
+  "green_new_cases": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "done": {
+      "success": true,
+      "type": "done",
+      "time": 9646
+    },
+    "cases": [
+      "inactive finish retry releases checkout only after acknowledgement",
+      "inactive finish retry failure remains blocked without re-verification",
+      "inactive finish retry cannot replace a newer receipt rejection"
+    ]
+  },
+  "affected_purchase_suites": {
+    "passed": 71,
+    "failed_application_behaviors": 0,
+    "coordinator_fixture_configuration_failures": 4,
+    "log_sha256": "b9b5cb929bd8266fed964ccf4ccb79efb3dace3a5277cc9ba7675c2af0de8085"
+  },
+  "coordinator_correct_fixture": {
+    "result": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "done": {
+        "success": true,
+        "type": "done",
+        "time": 21344
+      },
+      "cases": [
+        "(setUpAll)",
+        "Boost confirmation after route exit before native finish at 390.0",
+        "Boost confirmation after route exit before native finish at 320.0",
+        "trusted Google refund during finish cancels queued confirmation and preserves draft",
+        "commerce race regression: confirmation survives background during journal reservation",
+        "(tearDownAll)"
+      ]
+    },
+    "required_define": "BIL_PAYMENTS_ENABLED=true",
+    "production_config_changed": false,
+    "log_sha256": "ecd5282ef7990b86aa5e36ee85b9ddb3f6c819e2a54fe3b9cd615947838b5338"
+  },
+  "source_hashes": {
+    "lib/features/commerce/services/verified_store_purchase_pending.dart": "f3255d645f6a778ccd8f218e2f432b8ec6187962e120f95e21065be584b52f81",
+    "lib/features/commerce/services/verified_store_purchase_service.dart": "61711a173b88bc93267cda36e3bdcc00e8d9915e4085fdec53d11337241dead3",
+    "test/features/commerce/store_transaction_queue_test.dart": "792268429d2f42f66c765df1f5a2f6aee062bb34272a7e6c407d40afb1deb6d0"
+  },
+  "change": "When the owner visit is still current and the finish queue is empty, clear exactly ready/store_finish_pending to current verified entitlement feedback. Do not change failed/pending outcomes, credits or entitlements.",
+  "analyze": {
+    "issues": 0,
+    "log_sha256": "56ef64fbbbc0dab0cd5d6f2902d409aab4fd59bb62a1050022f27831c122dcf2"
+  },
+  "red_log_sha256": "34c6ac0dd7e2abac1a9e11f7f5ab291c80087aedbc12f2078a22e2c74eacd17d",
+  "green_log_sha256": "06d595e9bc88135d51b93154da359e745b7c832c6353498f6c26986eddfe6821",
+  "independent_review": {
+    "agent": "commerce_final_review",
+    "read_only": true,
+    "verdict": "No actionable race or truth issue found in current fix; native39 remains pending."
+  },
+  "financial_boundaries": {
+    "native_store": "controlled fake",
+    "server": "test-only mocked HTTP",
+    "real_purchases": 0,
+    "manual_grants": 0,
+    "protected_cta_changed": false,
+    "prices_changed": false
+  },
+  "limits": [
+    "This proves real service state-machine behavior with mocked native/HTTP boundaries, not actual StoreKit39.",
+    "Historical device38 observations cannot certify signed39."
+  ]
+}

@@ -257,6 +257,11 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                     if (value == null || value == mealType) return;
                     _updateState(() => mealType = value);
                   },
+
+            icon: const BilCrystalArrow(
+              extent: 36,
+              child: Icon(Icons.keyboard_arrow_down_rounded),
+            ),
           ),
           const SizedBox(height: 12),
           LayoutBuilder(
@@ -303,6 +308,11 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                         }
                         _changeMealQuantityUnit(value);
                       },
+
+                icon: const BilCrystalArrow(
+                  extent: 36,
+                  child: Icon(Icons.keyboard_arrow_down_rounded),
+                ),
               );
               final largeText =
                   MediaQuery.textScalerOf(context).scale(1) >= 1.35;
@@ -409,7 +419,7 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                               overflow: TextOverflow.ellipsis,
                             )
                           : null,
-                      trailing: BilGlassPressFeedback(
+                      trailing: BilNavigationFeedback(
                         child: Icon(
                           nutritionFactsExpanded
                               ? Icons.keyboard_arrow_up_rounded

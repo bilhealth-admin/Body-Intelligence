@@ -1,0 +1,627 @@
+{
+  "schema": "bil39.coach_restart_pull.v1",
+  "recorded_at": "2026-10-26T17:38:44.433Z",
+  "base_head": "155b079696430919f8272df934371f033fb11be2",
+  "candidate_sha": null,
+  "source_files": {
+    "lib/features/intelligence_center/presentation/coach_conversation_restart_pull.dart": "7f22e3af42bf7783f4cb5109bcc7e4c3304d1e3925ea33028bba5309b7facc62",
+    "lib/features/intelligence_center/presentation/intelligence_center_page.dart": "a475cacd7fa79239185150ea7a1257002b2a5538f40ef061b679b5c46eae5886",
+    "lib/features/intelligence_center/presentation/intelligence_conversation_history.dart": "f89acdc5971a0b821d3e40da893332c97d2f08bcb121aa8a67b96bb13bdc6fd5",
+    "lib/features/intelligence_center/presentation/intelligence_conversation_persistence.dart": "e56733c7e8715e43a440502fdb73e0df51c2a8efe0ca323ae1dc074d4ed16137",
+    "lib/features/intelligence_center/presentation/intelligence_conversation_viewport.dart": "03155589f836b38efa94bb18b09b3a207ca3351a1b88af8dfa42a54aa4f22220",
+    "lib/features/intelligence_center/presentation/intelligence_reference_chat_body.dart": "6fbc7c3d26e352a932b03960a02c25fa83aa63f5c1b5eaecb7c5b3f4ce3775d6",
+    "lib/features/intelligence_center/presentation/intelligence_query_flow.dart": "f26f8c805ddfe45414595e468260817dc67aa4f6d854599db79b030a8271a961",
+    "lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart": "2cc90587b761f1e8c14b4061bd3615384691ff7d16da3b26ff09887de8112229",
+    "test/features/intelligence_center/coach_conversation_restart_pull_test.dart": "07fc21a672007ca4ece0a27fe709a3fafa19c525f208a8aa91acfe2a1962f278",
+    "test/features/intelligence_center/coach_page_lifecycle_regression_test.dart": "d67bdf1fefd83959ff5f11f16f53143c45f2de681ab6aa676d9f4d7caa17702b",
+    "test/features/intelligence_center/support/coach_page_restart_cases.dart": "a0b38fab1b09aacce24e4a0f83f12c27483b38d1f72f25250f6dd491f1f7468f",
+    "test/features/intelligence_center/support/coach_page_accessibility_cases.dart": "80b6fcd4646b409ab3836ce1ee469e678e9ec75ad082bed2d17de264dc50dce9"
+  },
+  "source_unchanged_during_run": true,
+  "behavior": {
+    "edge": "actual newest end: minScrollExtent, including negative anchored extents",
+    "preview_after_logical_pixels": 12,
+    "start_after_logical_pixels": 112,
+    "start_on": "pointer release only",
+    "indicator": "existing BilFeatureWelcomeStatus from Splash",
+    "label": {
+      "en": "Start new conversation",
+      "ar": "بدء محادثة جديدة"
+    },
+    "preserve_opening_row": true,
+    "archive": "owner-scoped atomic compare-and-set with transcript and archive readback before UI clear",
+    "failure": "preserve visible transcript and allow retry"
+  },
+  "tests": {
+    "log": "coach-restart-focused-v4.jsonl",
+    "sha256": "947cb3453431a8b21ae970b253a95ccc02b75ce61bc3f1cc0a5a186ee5e4d34a",
+    "success": 108,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_ms": 66887,
+    "cases": [
+      {
+        "name": "Coach dock can leave a pending reply and preserve it target=0 arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "short newest-edge pull previews Splash only Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "legacy V1 list migrates in place without losing conversations",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "history keeps every conversation beyond the former 20 item cap",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "saved current selection wins instead of defaulting to newest chat",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "legacy transcript match restores its identity without a new chat",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "legacy archive migration keeps the selected conversation across restart",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "short newest-edge pull previews Splash only Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "full extra pull restarts on release and runs once while saving",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "reading older history cannot restart or show the preview",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename current light-en-430-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "scrolling to the latest message does not count as extra pull",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "armed pull cancel leaves the current chat intact",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "armed pull disable leaves the current chat intact",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "armed pull identity leaves the current chat intact",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "armed pull return leaves the current chat intact",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "armed pull away leaves the current chat intact",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "jump and automatic scroll never restart the conversation",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "newest edge can be negative after appending an anchored reply",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "downward and horizontal drags do not arm a restart",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "vertical history drag dismisses the focused composer",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach dock can leave a pending reply and preserve it target=4 arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "opening history does not create a conversation implicitly",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach dock can leave a pending reply and preserve it target=0 arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach dock can leave a pending reply and preserve it target=4 arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual page meal read fold copy share and reopening preserve SQLite facts",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename past light-en-430-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual page two meal comparison reads same records without duplicate writes",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual page delivered A B A permanently hides old facts and copy actions",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "full long reply arrives softly at stable geometry AR=false light 320 2x",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "full long reply arrives softly at stable geometry AR=true light 320 2x",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename cancel light-en-430-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "wide tablet history expands while header and composer stay put",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "capture actual Coach reply preview from Flutter",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename failure light-en-430-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "old history remains anchored during actual new reply reveal and keyboard closing",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "pending or failed context keeps one bounded intro and no request",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "one introduction through refresh and re-entry Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "one introduction through refresh and re-entry Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach layout: TargetPlatform.iOS Arabic=false large text and keyboard",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename ownerABA light-en-430-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach layout: TargetPlatform.iOS Arabic=true large text and keyboard",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach layout: TargetPlatform.android Arabic=false large text and keyboard",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach layout: TargetPlatform.android Arabic=true large text and keyboard",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "restored history ends with its reply, not a new welcome",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename deleted light-en-430-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "welcome and user move above the newest reply, including a long reply",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach pearl recording keeps real start stop and no text dispatch dark=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename reply light-en-430-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach pearl recording keeps real start stop and no text dispatch dark=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Quick Add pauses live voice and retains the unfinished transcript",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "camera permission is single-flight and returning late cannot open a route",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "voice opening is single-flight and cannot start after leaving",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "unavailable recognizer leaves the composer usable",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "voice reply completion respects next draft and lifecycle leave=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "voice reply completion respects next draft and lifecycle leave=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename current dark-ar-320-2.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "backgrounding a live call prevents reply speech and microphone restart",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "cloud request status retry keeps one generation at 320px 2x Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "cloud request status retry keeps one generation at 320px 2x Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach pearl send keeps actual dispatch draft and pending gate dark=false Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach pearl send keeps actual dispatch draft and pending gate dark=false Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach pearl send keeps actual dispatch draft and pending gate dark=true Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach pearl send keeps actual dispatch draft and pending gate dark=true Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename current light-en-320-2.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Arabic greeting completes locally without an incomplete reply card",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "repeated service failure keeps one transcript retry surface",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "each new question receives its own service failure reply",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "one first-message failure surface: service",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "one first-message failure surface: exception",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "actual Coach rename current dark-en-768-1.0x preserves local identity receipts and messages",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "one first-message failure surface: timeout",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "a different entitlement owner gets a fresh UI state",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "failed local restore preserves the transcript and offers retry",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "leaving a corrupt snapshot does not silently overwrite it",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "credit refresh denies exhausted/error access, retains draft, recovers error=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "credit refresh denies exhausted/error access, retains draft, recovers error=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "in-flight response disables send without a second spinner",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "retry keeps exactly one user turn",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "rename editor Arabic 320 keyboard 2x validates empty name and uses real reachable actions",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "slow touch scroll through a long new reply TargetPlatform.iOS Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "slow touch scroll through a long new reply TargetPlatform.iOS Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "incoming reply cannot cancel a slow active drag TargetPlatform.iOS",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "slow touch scroll through a long new reply TargetPlatform.android Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "slow touch scroll through a long new reply TargetPlatform.android Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "incoming reply cannot cancel a slow active drag TargetPlatform.android",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "opening Coach surface remains a scrollable row after sending",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "newest-edge pull archives and can restore all turns Arabic=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "newest-edge pull archives and can restore all turns Arabic=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "restart archive-write preserves the actual transcript and permits retry",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "restart archive-readback preserves the actual transcript and permits retry",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "restart switch-write preserves the actual transcript and permits retry",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "restart concurrent-change preserves the actual transcript and permits retry",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "restart post-commit-read preserves the actual transcript and permits retry",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "owner A B A while archiving retires the restart without deleting turns",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "pull preview visual Arabic=false dark=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "pull preview visual Arabic=false dark=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "pull preview visual Arabic=true dark=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "pull preview visual Arabic=true dark=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "Coach welcome brief stays anchored during a data refresh",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "successful reply must preserve coach state and unsent draft through valid credit refresh",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "iOS-themed transcript scroll and keyboard Arabic=false reduced=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "iOS-themed transcript scroll and keyboard Arabic=false reduced=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "iOS-themed transcript scroll and keyboard Arabic=true reduced=false",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "iOS-themed transcript scroll and keyboard Arabic=true reduced=true",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "incoming reply must keep the message being read in the same place",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "leaving coach while history loads must not use a disposed WidgetRef",
+        "result": "success",
+        "skipped": false
+      },
+      {
+        "name": "rapidly opening history creates only one sheet",
+        "result": "success",
+        "skipped": false
+      }
+    ]
+  },
+  "analyze": {
+    "log": "coach-restart-analyze-v2.log",
+    "sha256": "427a3c39e788b5f04c49f1a11d0c7e6cea7a2c3340756b30562e8a4be2e5e2cb",
+    "issues": 0
+  },
+  "red_behavior_proof": {
+    "file": "coach-restart-intro-red-v2.jsonl",
+    "sha256": "e0e5fc8810cf2b6dae0a33a567b4f4dc677451b65bea0eb29b65aa1b946c015c",
+    "result": "opening starter surface missing after actual send"
+  },
+  "visuals": [
+    {
+      "file": "pull-ar-dark.png",
+      "sha256": "e9d5bd2c25673838ef6649445a0b67ff3fb6c398fd11cae954f1f78b98ab3e63",
+      "reviewed": true,
+      "scope": "real Flutter Coach page fixture; native39 pending"
+    },
+    {
+      "file": "pull-ar-light.png",
+      "sha256": "ba3fd1de3717e5cbc8abfee7f4be52df4f03b25ae3f4bb797995a6e2e68ee291",
+      "reviewed": true,
+      "scope": "real Flutter Coach page fixture; native39 pending"
+    },
+    {
+      "file": "pull-en-dark.png",
+      "sha256": "a1416601633e17122f2655d9b0e9334d2bb86b39726bd204813ee234ed07abdc",
+      "reviewed": true,
+      "scope": "real Flutter Coach page fixture; native39 pending"
+    },
+    {
+      "file": "pull-en-light.png",
+      "sha256": "e258b588d338995532ce6685afb8c00f87dfa6b57efb2bee72b5e3655769c0e9",
+      "reviewed": true,
+      "scope": "real Flutter Coach page fixture; native39 pending"
+    }
+  ],
+  "fixture_note": "Existing fallback greeting ordering test now explicitly uses unavailable brief; ordering and scroll assertions unchanged. Available-data opening retention tested separately. No golden baseline changed.",
+  "limits": [
+    "Local Flutter fixtures and in-memory owner-scoped SQLite only",
+    "No signed39 installed or TestFlight39 claimed",
+    "Not a repeat full-root QA or live-cloud claim"
+  ]
+}

@@ -9,7 +9,7 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
         .where((channel) => channel.canRead)
         .toList(growable: false);
     if (channels.isEmpty && controller.loadingDirectory) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: BilFeatureWelcomeStatus());
     }
     if (channels.isEmpty) {
       return _empty(
@@ -19,7 +19,7 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
         onRetry: () => _refresh(controller),
       );
     }
-    return RefreshIndicator(
+    return BilRefreshIndicator(
       onRefresh: () => _refresh(controller),
       child: ListView(
         key: const Key('bil07-directory'),
@@ -31,7 +31,7 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
               CommunityChannelsCopyKey.directoryUnavailable,
               action: TextButton.icon(
                 onPressed: () => controller.loadDirectory(),
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
                 label: Text(_copy(CommunityChannelsCopyKey.retry)),
@@ -126,7 +126,7 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
                       const SizedBox(width: 4),
                       const ExcludeSemantics(
                         // This Material icon already mirrors in RTL.
-                        child: BilGlassPressFeedback(
+                        child: BilNavigationFeedback(
                           child: Icon(Icons.chevron_right_rounded),
                         ),
                       ),
@@ -141,7 +141,7 @@ extension _CommunityChannelsDirectory on _CommunityChannelsViewState {
               onPressed: controller.loadingDirectory
                   ? null
                   : () => controller.loadDirectory(more: true),
-              icon: const BilGlassPressFeedback(
+              icon: const BilNavigationFeedback(
                 child: Icon(Icons.expand_more_rounded),
               ),
               label: Text(_copy(CommunityChannelsCopyKey.loadMoreChannels)),

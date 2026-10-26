@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -280,6 +281,11 @@ class _RecipeDraftFormState extends State<RecipeDraftForm> {
                             setState(() => _ingredients[i].unit = value);
                           }
                         },
+
+                  icon: const BilCrystalArrow(
+                    extent: 36,
+                    child: Icon(Icons.keyboard_arrow_down_rounded),
+                  ),
                 ),
               ),
               IconButton(

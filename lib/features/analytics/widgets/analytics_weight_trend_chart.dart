@@ -41,15 +41,21 @@ class AnalyticsWeightTrendChart extends StatelessWidget {
         : UnitConverter.weightFromKg(targetWeightKg!, system);
     final measuredMin = converted.reduce((a, b) => a < b ? a : b);
     final measuredMax = converted.reduce((a, b) => a > b ? a : b);
-    final minValue = convertedTarget == null
+    var minValue = convertedTarget == null
         ? measuredMin
         : (convertedTarget < measuredMin ? convertedTarget : measuredMin);
-    final maxValue = convertedTarget == null
+    var maxValue = convertedTarget == null
         ? measuredMax
         : (convertedTarget > measuredMax ? convertedTarget : measuredMax);
-    final span = (maxValue - minValue).abs() < 0.01
-        ? 1.0
-        : (maxValue - minValue);
+    if ((maxValue - minValue).abs() < 0.01) {
+      // A constant series still needs a real axis interval. Expand both bounds
+      // so the labels and painter share the same scale, rather than placing a
+      // midpoint above an unchanged maximum or pinning the point to the bottom.
+      final center = (minValue + maxValue) / 2;
+      minValue = center - 0.5;
+      maxValue = center + 0.5;
+    }
+    final span = maxValue - minValue;
     final unit = UnitConverter.weightUnit(system);
     final firstValue = converted.first;
     final lastValue = converted.last;

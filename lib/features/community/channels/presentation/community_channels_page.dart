@@ -1,6 +1,9 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import '../../presentation/community_report_sheet.dart';
 import '../../../../shared/widgets/bil_pearl_material.dart';
-import '../../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,6 +11,7 @@ import 'package:flutter/scheduler.dart';
 
 import '../../../../app/localization/bil_written_language_resolver.dart';
 import '../../../../shared/widgets/chat_history_viewport.dart';
+import '../../../../shared/widgets/bil_conversation_presentation.dart';
 import '../../../../shared/widgets/bil_pearl_alert_dialog.dart';
 import '../../domain/community_text_policy.dart';
 import '../../presentation/community_return_button.dart';
@@ -90,6 +94,9 @@ class _CommunityChannelsView extends StatefulWidget {
 class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
   late CommunityChannelsController _controller;
   final _composer = TextEditingController();
+  final _composerAnchor = GlobalKey();
+  final _messagePresentation = BilConversationPresentation();
+  bool _presentationLoadObserved = false;
   final _history = ScrollController(keepScrollOffset: false);
   int _binding = 0;
   int _readRetry = 0;
@@ -141,6 +148,31 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
 
   void _changed() {
     if (!mounted || _disposed) return;
+    final scope = _visitKey.toString();
+    if (!_controller.isCurrent) {
+      _messagePresentation.reset('');
+      _presentationLoadObserved = false;
+    } else {
+      if (_messagePresentation.scope != scope) {
+        _messagePresentation.reset(scope);
+        _presentationLoadObserved = false;
+      }
+      if (_controller.loadingMessages) _presentationLoadObserved = true;
+      if (_presentationLoadObserved &&
+          !_controller.loadingMessages &&
+          _controller.messagesError == null) {
+        _messagePresentation.observe(
+          _controller.messages.map(
+            (row) => BilConversationPresentationRow(
+              id: row.id,
+              text: row.text,
+              mine: row.authorId == _controller.ownerId,
+              createdAt: row.createdAt,
+            ),
+          ),
+        );
+      }
+    }
     _syncComposer();
     if (SchedulerBinding.instance.schedulerPhase !=
         SchedulerPhase.persistentCallbacks) {
@@ -372,6 +404,15 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
     bool retry = false,
   }) async {
     if (!_current(controller) || !controller.foreground) return;
+    if (!retry) {
+      final composerBox = _composerAnchor.currentContext?.findRenderObject();
+      _messagePresentation.beginSend(
+        _composer.text.trim(),
+        composerBox is RenderBox && composerBox.attached && composerBox.hasSize
+            ? composerBox.localToGlobal(Offset.zero) & composerBox.size
+            : null,
+      );
+    }
     if (_history.hasClients && _history.position.hasContentDimensions) {
       _history.jumpTo(_history.position.minScrollExtent);
     }
@@ -379,6 +420,12 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
       await controller.retrySend();
     } else {
       await controller.send();
+    }
+    if (!_current(controller)) return;
+    if (controller.sendError == null && controller.pendingSend == null) {
+      _messagePresentation.confirmSend();
+    } else {
+      _messagePresentation.abandonSend();
     }
   }
 
@@ -402,6 +449,7 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
     _composer.removeListener(_edited);
     _composer.dispose();
     _history.dispose();
+    _messagePresentation.dispose();
     super.dispose();
   }
 
@@ -441,7 +489,7 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
                 onPressed: controller.isCurrent
                     ? () => _refresh(controller)
                     : null,
-                icon: const BilGlassPressFeedback(
+                icon: const BilNavigationFeedback(
                   child: Icon(Icons.refresh_rounded),
                 ),
               ),
@@ -467,8 +515,8 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
     }
     if (!controller.initialized) {
       return Center(
-        child: CircularProgressIndicator(
-          semanticsLabel: _copy(CommunityChannelsCopyKey.loading),
+        child: BilFeatureWelcomeStatus(
+          label: _copy(CommunityChannelsCopyKey.loading),
         ),
       );
     }
@@ -502,7 +550,7 @@ class _CommunityChannelsViewState extends State<_CommunityChannelsView> {
                 : TextButton.icon(
                     key: const Key('bil07-empty-retry'),
                     onPressed: onRetry,
-                    icon: const BilGlassPressFeedback(
+                    icon: const BilNavigationFeedback(
                       child: Icon(Icons.refresh_rounded),
                     ),
                     label: Text(_copy(CommunityChannelsCopyKey.retry)),

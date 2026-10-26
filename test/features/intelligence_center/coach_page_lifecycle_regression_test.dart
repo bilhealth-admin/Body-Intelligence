@@ -1,4 +1,7 @@
+import '../../support/bil_waiting_indicators.dart';
 // Exercises the real Coach page and entitlement gate with controlled local I/O.
+import '../../support/coach_conversation_entry.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -23,6 +26,7 @@ import 'package:body_intelligence_log/features/intelligence_center/app_commands/
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_message.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_anchored_history.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_conversation_restart_pull.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
@@ -44,6 +48,7 @@ part 'support/coach_page_presentation_cases.dart';
 part 'support/coach_page_voice_cases.dart';
 part 'support/coach_page_request_cases.dart';
 part 'support/coach_page_scroll_cases.dart';
+part 'support/coach_page_restart_cases.dart';
 
 class _HeldGateway implements LocalModelGateway {
   final replies = <Completer<LocalModelResult>>[];
@@ -161,6 +166,14 @@ Future<GoRouter> _mount(
         path: '/dashboard',
         builder: (_, _) => const Scaffold(body: Text('Audit dashboard')),
       ),
+      GoRoute(
+        path: '/settings',
+        builder: (_, _) => const Scaffold(body: Text('Audit More')),
+      ),
+      GoRoute(
+        path: '/community',
+        builder: (_, _) => const Scaffold(body: Text('Audit Community')),
+      ),
     ],
   );
   addTearDown(router.dispose);
@@ -169,6 +182,9 @@ Future<GoRouter> _mount(
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
+    // Drift schedules stream-cache cleanup with Timer.run; a microtask-only
+    // pump cannot drain it when an earlier assertion prevented normal unmount.
+    await tester.pump(Duration.zero);
   });
   final fixtureTheme =
       (dark
@@ -266,6 +282,7 @@ Future<GoRouter> _mount(
       ),
     ),
   );
+  await openCoachConversationFromOverview(tester);
   await tester.pumpAndSettle();
   if (waitForBrief) await _settleBoundedBrief(tester);
   return router;
@@ -318,12 +335,91 @@ Future<void> _unmount(WidgetTester tester) async {
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
+  for (final arabic in [false, true]) {
+    for (final target in [0, 4]) {
+      testWidgets(
+        'Coach dock can leave a pending reply and preserve it target=$target arabic=$arabic',
+        (tester) async {
+          final database = AppDatabase.forTesting(NativeDatabase.memory());
+          final gateway = _HeldGateway();
+          try {
+            final router = await _mount(
+              tester,
+              database: database,
+              gateway: gateway,
+              arabic: arabic,
+            );
+            final original = tester.state(find.byType(IntelligenceCenterPage));
+            await _send(tester, gateway, question: arabic ? 'مرحبا' : 'hi');
+            FocusManager.instance.primaryFocus?.unfocus();
+            await tester.pump();
+            await tester.tap(find.byKey(Key('bil-reference-nav-$target')));
+            final destination = target == 0 ? 'Audit dashboard' : 'Audit More';
+            for (
+              var i = 0;
+              i < 100 && find.text(destination).evaluate().isEmpty;
+              i++
+            ) {
+              await tester.pump(const Duration(milliseconds: 20));
+            }
+            expect(find.text(destination), findsOneWidget);
+            expect(gateway.calls, 1);
+            final response = arabic
+                ? 'رد محفوظ أثناء الانتقال.'
+                : 'Reply preserved while navigating.';
+            gateway.finish(text: response);
+            for (
+              var i = 0;
+              i < 100 &&
+                  find.text(response, skipOffstage: false).evaluate().isEmpty;
+              i++
+            ) {
+              await tester.pump(const Duration(milliseconds: 20));
+            }
+            expect(find.text(response, skipOffstage: false), findsOneWidget);
+            router.pop();
+            await tester.pumpAndSettle();
+            expect(
+              tester.state(find.byType(IntelligenceCenterPage)),
+              same(original),
+            );
+            expect(find.text(response), findsOneWidget);
+            // The completed push must not leave the Coach's navigation lock set.
+            await tester.tap(find.byKey(Key('bil-reference-nav-$target')));
+            for (
+              var i = 0;
+              i < 100 && find.text(destination).evaluate().isEmpty;
+              i++
+            ) {
+              await tester.pump(const Duration(milliseconds: 20));
+            }
+            expect(find.text(destination), findsOneWidget);
+            expect(gateway.calls, 1);
+            expect(tester.takeException(), isNull);
+          } finally {
+            for (final reply in gateway.replies) {
+              if (!reply.isCompleted) {
+                reply.complete(
+                  const LocalModelResult.answer(
+                    LocalModelAnswer(text: 'Synthetic cleanup', action: null),
+                  ),
+                );
+              }
+            }
+            await _unmount(tester);
+            await tester.runAsync(database.close);
+          }
+        },
+      );
+    }
+  }
   registerCoachPresentationPageCases();
   registerCoachRevealViewportCases();
   registerCoachAccessibilityCases();
   registerCoachVoiceCases();
   registerCoachRequestCases();
   registerCoachScrollCases();
+  registerCoachRestartCases();
   testWidgets('Coach welcome brief stays anchored during a data refresh', (
     tester,
   ) async {
@@ -456,66 +552,101 @@ void main() {
   );
 
   for (final arabic in [false, true]) {
-    testWidgets('iOS-themed transcript scroll and keyboard Arabic=$arabic', (
-      tester,
-    ) async {
-      final database = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(database.close);
-      await _mount(
-        tester,
-        database: database,
-        gateway: _HeldGateway(),
-        arabic: arabic,
-        historyCount: 35,
+    for (final reduced in [false, true]) {
+      testWidgets(
+        'iOS-themed transcript scroll and keyboard Arabic=$arabic reduced=$reduced',
+        (tester) async {
+          tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
+              FakeAccessibilityFeatures(disableAnimations: reduced);
+          addTearDown(
+            tester
+                .binding
+                .platformDispatcher
+                .clearAccessibilityFeaturesTestValue,
+          );
+          final database = AppDatabase.forTesting(NativeDatabase.memory());
+          addTearDown(database.close);
+          addTearDown(() async {
+            await tester.pumpWidget(const SizedBox.shrink());
+          });
+          await _mount(
+            tester,
+            database: database,
+            gateway: _HeldGateway(),
+            arabic: arabic,
+            historyCount: 35,
+          );
+          final listFinder = find.byType(CustomScrollView).first;
+          final scroll = tester
+              .widget<CustomScrollView>(listFinder)
+              .controller!;
+          expect(scroll.offset, closeTo(0, .5));
+          final textFinder = find.byType(SelectableText).hitTestable().first;
+          await tester.drag(textFinder, const Offset(0, 300));
+          await tester.pumpAndSettle();
+          expect(
+            scroll.offset,
+            greaterThan(72),
+            reason: 'Dragging message text must reach older messages.',
+          );
+          final beforeLatestTap = scroll.offset;
+          await tester.tap(find.byKey(const ValueKey('chat-jump-to-latest')));
+          await tester.pump();
+          if (reduced) {
+            expect(scroll.offset, closeTo(0, .5));
+          } else {
+            expect(
+              scroll.offset,
+              closeTo(beforeLatestTap, .5),
+              reason:
+                  'The actual Coach button begins a smooth scroll, not a jump.',
+            );
+            await tester.pump(const Duration(milliseconds: 16));
+            await tester.pump(const Duration(milliseconds: 100));
+            expect(scroll.offset, inExclusiveRange(0, beforeLatestTap));
+          }
+          await tester.pumpAndSettle();
+          expect(scroll.offset, closeTo(0, .5));
+          await tester.tap(find.byKey(const Key('ai-coach-question-field')));
+          final composer = tester.widget<EditableText>(
+            find.descendant(
+              of: find.byKey(const Key('ai-coach-question-field')),
+              matching: find.byType(EditableText),
+            ),
+          );
+          tester.view.viewInsets = const FakeViewPadding(bottom: 310);
+          await tester.pumpAndSettle();
+          expect(composer.focusNode.hasFocus, isTrue);
+          expect(
+            tester
+                .getBottomRight(
+                  find.byKey(const Key('ai-coach-question-field')),
+                )
+                .dy,
+            lessThanOrEqualTo(534),
+          );
+          final historyViewport = tester.getRect(
+            find.byType(CoachAnchoredHistory),
+          );
+          await tester.dragFrom(
+            Offset(historyViewport.left + 2, historyViewport.center.dy),
+            const Offset(0, 170),
+          );
+          await tester.pumpAndSettle();
+          expect(
+            composer.focusNode.hasFocus,
+            isFalse,
+            reason:
+                'Dragging the message history should dismiss the keyboard itself.',
+          );
+          tester.view.viewInsets = const FakeViewPadding();
+          await tester.pumpAndSettle();
+          expect(scroll.offset, greaterThan(0));
+          expect(tester.takeException(), isNull);
+          await _unmount(tester);
+        },
       );
-      final listFinder = find.byType(CustomScrollView).first;
-      final scroll = tester.widget<CustomScrollView>(listFinder).controller!;
-      expect(scroll.offset, closeTo(0, .5));
-      final textFinder = find.byType(SelectableText).hitTestable().first;
-      await tester.drag(textFinder, const Offset(0, 300));
-      await tester.pumpAndSettle();
-      expect(
-        scroll.offset,
-        greaterThan(72),
-        reason: 'Dragging message text must reach older messages.',
-      );
-      await tester.tap(find.byKey(const ValueKey('chat-jump-to-latest')));
-      await tester.pumpAndSettle();
-      expect(scroll.offset, closeTo(0, .5));
-      await tester.tap(find.byKey(const Key('ai-coach-question-field')));
-      final composer = tester.widget<EditableText>(
-        find.descendant(
-          of: find.byKey(const Key('ai-coach-question-field')),
-          matching: find.byType(EditableText),
-        ),
-      );
-      tester.view.viewInsets = const FakeViewPadding(bottom: 310);
-      await tester.pumpAndSettle();
-      expect(composer.focusNode.hasFocus, isTrue);
-      expect(
-        tester
-            .getBottomRight(find.byKey(const Key('ai-coach-question-field')))
-            .dy,
-        lessThanOrEqualTo(534),
-      );
-      final historyViewport = tester.getRect(find.byType(CoachAnchoredHistory));
-      await tester.dragFrom(
-        Offset(historyViewport.left + 2, historyViewport.center.dy),
-        const Offset(0, 170),
-      );
-      await tester.pumpAndSettle();
-      expect(
-        composer.focusNode.hasFocus,
-        isFalse,
-        reason:
-            'Dragging the message history should dismiss the keyboard itself.',
-      );
-      tester.view.viewInsets = const FakeViewPadding();
-      await tester.pumpAndSettle();
-      expect(scroll.offset, greaterThan(0));
-      expect(tester.takeException(), isNull);
-      await _unmount(tester);
-    });
+    }
   }
 
   testWidgets('incoming reply must keep the message being read in the same place', (
@@ -593,10 +724,22 @@ void main() {
         preferences: preferences,
       );
       preferences.heldHistory = Completer<String?>();
+      addTearDown(() {
+        final held = preferences.heldHistory;
+        if (held != null && !held.isCompleted) held.complete(null);
+      });
       await tester.tap(
         find.byKey(const Key('ai-coach-conversation-history-button')),
       );
       await tester.pump();
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+      // Conversation Back returns to the approved Overview. Its separate exit
+      // leaves the Coach route while the actual history read is still held.
+      expect(
+        find.byKey(const Key('coach-reference-workspace')),
+        findsOneWidget,
+      );
       await tester.tap(find.byTooltip('Back'));
       await tester.pumpAndSettle();
       expect(router.routeInformationProvider.value.uri.path, '/dashboard');

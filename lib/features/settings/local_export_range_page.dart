@@ -1,5 +1,7 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -111,9 +113,9 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
           icon: preparing
               ? const SizedBox.square(
                   dimension: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: BilFeatureWelcomeStatus(),
                 )
-              : const BilGlassPressFeedback(
+              : const BilNavigationFeedback(
                   child: Icon(Icons.file_download_outlined),
                 ),
           label: Text(_copy(context, 'Create CSV export')),
@@ -145,7 +147,7 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
                     icon: sharing
                         ? const SizedBox.square(
                             dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           )
                         : const Icon(Icons.ios_share_rounded),
                     label: Text(_copy(context, 'Share prepared export')),
@@ -174,7 +176,7 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
     onTap: preparing || sharing
         ? null
         : () async {
-            final selected = await showDatePicker(
+            final selected = await showBilCrystalDatePicker(
               context: context,
               initialDate: value ?? DateTime.now(),
               firstDate: DateTime(2000),

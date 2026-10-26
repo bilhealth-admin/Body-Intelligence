@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../app/theme/bil_navigation_press_style.dart';
 import 'package:flutter/material.dart';
 
@@ -56,7 +57,9 @@ class BilAccountSurface extends StatelessWidget {
                                   context,
                                 ),
                                 onPressed: onBack,
-                                icon: const BackButtonIcon(),
+                                icon: const BilCrystalArrow(
+                                  child: BackButtonIcon(),
+                                ),
                               ),
                       ),
                       const SizedBox(width: 8),

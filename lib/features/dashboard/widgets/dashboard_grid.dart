@@ -50,9 +50,7 @@ import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
 
 part 'dashboard_unprofiled_reference.dart';
-
 part 'dashboard_nutrient_goal_cards.dart';
-
 part 'dashboard_grid_actions.dart';
 
 class DashboardGrid extends ConsumerWidget {
@@ -200,7 +198,9 @@ class DashboardGrid extends ConsumerWidget {
       return const DashboardLoadingSkeleton();
     }
     final weights = weightsAsync.value ?? const [];
-    final meals = mealsAsync.value ?? const [];
+    final meals = (mealsAsync.value ?? const [])
+        .where((meal) => meal.items.isNotEmpty)
+        .toList(growable: false);
     final todayMealItems = meals.expand((meal) => meal.items).toList();
     final nutrientDashboardPreset = ref
         .watch(dashboardNutrientDashboardProvider)

@@ -1,7 +1,6 @@
 "NSHealthShareUsageDescription" = "デバイス上の非公開フィットネスタイムラインと分析を表示するため、BIL は選択した Health のカテゴリ（アクティビティ、睡眠、身体測定値、心臓指標、水分補給、栄養）のみを読み取ります。パーソナライズドインテリジェンス（Personalized Intelligence）を有効にして BIL Coach に質問した場合に限り、回答に必要な最小限の関連データがクラウド AI によって安全に処理されることがあります。";
 "NSHealthUpdateUsageDescription" = "BIL は、Health への書き込みを個別に許可した後にのみ体重記録を書き込みます。";
 "NSBluetoothAlwaysUsageDescription" = "測定値をローカルに取り込めるよう、BIL は明示的にペアリングしたフィットネス機器とのみ接続します。";
-"NSBluetoothPeripheralUsageDescription" = "測定値をローカルに取り込めるよう、BIL は明示的にペアリングしたフィットネス機器とのみ接続します。";
 "NSCameraUsageDescription" = "バーコードのスキャン、食事の写真の確認、プライベート プロフィールや進捗状況の写真の追加を選択した場合にのみカメラを使用してください。";
 "NSPhotoLibraryUsageDescription" = "BIL は、食事、プロフィール、進捗記録、コミュニティ投稿、食品投稿のために選択した写真だけにアクセスし、保存またはアップロード前に確認できるようにします。";
 "NSMicrophoneUsageDescription" = "BIL がマイクを使用するのは、音声入力を開始したときだけです。音声はこのデバイス上でテキストに変換され、デバイス上の認識が利用できない場合は停止します。生の音声は Gemini に送信されません。Personalized Intelligence を有効にして送信した AI Coach のテキストのみ Gemini が処理します。 音声入力には体重、食事、コミュニティ投稿が含まれます。";

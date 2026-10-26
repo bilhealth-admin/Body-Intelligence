@@ -351,7 +351,7 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
   }
 
   Future<void> _saveConversation() async {
-    if (!conversationReady) return;
+    if (!conversationReady || conversationRestarting) return;
     // Capture every provider-owned dependency synchronously. `dispose` cannot
     // await, but the resulting repository operations remain valid after the
     // WidgetRef itself is no longer usable.

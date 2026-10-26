@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'food_translation_attribution.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
@@ -99,12 +100,12 @@ class _NutritionFoodPickerState extends ConsumerState<NutritionFoodPicker> {
                     );
                   }
                   if (foods == null) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(child: BilFeatureWelcomeStatus());
                   }
                   return ListView(
                     children: [
                       if (snapshot.connectionState != ConnectionState.done)
-                        const LinearProgressIndicator(),
+                        const BilFeatureWelcomeStatus(),
                       if (foods.isEmpty)
                         Padding(
                           padding: const EdgeInsets.all(16),

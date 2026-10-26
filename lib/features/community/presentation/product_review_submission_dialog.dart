@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -235,6 +237,11 @@ class _ProductReviewSubmissionDialogState
                 onChanged: (value) => setState(() {
                   kind = value ?? ProductKind.unknown;
                 }),
+
+                icon: const BilCrystalArrow(
+                  extent: 36,
+                  child: Icon(Icons.keyboard_arrow_down_rounded),
+                ),
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -314,7 +321,7 @@ class _ProductReviewSubmissionDialogState
         child: submitting
             ? const SizedBox.square(
                 dimension: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: BilFeatureWelcomeStatus(),
               )
             : Text(_t('Submit for review', 'إرسال للمراجعة')),
       ),

@@ -280,7 +280,7 @@ Widget _contextTile(
   decoration: _glassDecoration(context),
   child: Column(
     children: [
-      BilGlassPressFeedback(
+      BilNavigationFeedback(
         child: Icon(icon, color: _accent(context), size: 20),
       ),
       const SizedBox(height: 4),
@@ -412,7 +412,7 @@ Widget _unverifiedNutrition(BuildContext context) => Container(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        BilGlassPressFeedback(
+                        BilNavigationFeedback(
                           child: Icon(fact.$1, color: fact.$3, size: 20),
                         ),
                         const SizedBox(height: 4),

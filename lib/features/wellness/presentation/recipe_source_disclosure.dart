@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -19,6 +20,8 @@ class RecipeSourceDisclosure extends StatelessWidget {
       tilePadding: EdgeInsets.zero,
       title: Text(context.strings.text('Source')),
       subtitle: Text(RecipeSourceCopy.weighingBasis(locale)),
+
+      trailing: const BilCrystalExpansionIndicator(),
       children: [
         for (final ingredient in ingredients)
           ListTile(

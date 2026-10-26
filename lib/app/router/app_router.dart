@@ -1,3 +1,4 @@
+import 'bil_primary_navigation.dart';
 import '../../features/smart_plan/services/bil_smart_plan_coach.dart';
 import 'bil_navigation_focus_observer.dart';
 import '../../features/commerce/presentation/app_purchase_presentation_routes.dart';
@@ -132,6 +133,10 @@ class AppRouter {
     observers: [
       bilStorePresentationRouteObserver,
       bilRootNavigationFocusObserver,
+      // Shell pushes can create another live shell Navigator. Attach each
+      // shared observer only to the root; go_router forwards child events
+      // through its per-Navigator observer bridge.
+      bilShellNavigationFocusObserver,
     ],
     initialLocation: '/startup',
     errorBuilder: (_, _) => const InvalidRoutePage(),
@@ -145,7 +150,8 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/startup',
-        pageBuilder: (_, state) => NoTransitionPage(
+        pageBuilder: (_, state) => bilNoTransitionPage(
+          state: state,
           child: StartupPage(
             initialAuthSession: state.extra is Session
                 ? state.extra! as Session
@@ -299,7 +305,8 @@ class AppRouter {
       ),
       GoRoute(
         path: '/nutrition-plans',
-        pageBuilder: (_, _) => const NoTransitionPage(
+        pageBuilder: (_, state) => bilNoTransitionPage(
+          state: state,
           child: BilFeatureEntrySplashGate(
             kind: BilFeatureEntryKind.diet,
             child: NutritionPathwaysPage(),
@@ -516,18 +523,19 @@ class AppRouter {
         },
       ),
       ShellRoute(
-        observers: [bilShellNavigationFocusObserver],
+        notifyRootObserver: true,
         // Startup is a full-screen gate. Entering the product must replace it
         // atomically; a platform page transition would expose the blue splash
         // beside the dashboard for a frame, especially in RTL on iOS.
-        pageBuilder: (_, state, child) => NoTransitionPage(
+        pageBuilder: (_, state, child) => bilNoTransitionPage(
+          state: state,
           child: ResponsiveAppShell(currentUri: state.uri, child: child),
         ),
         routes: [
           GoRoute(
             path: '/dashboard',
-            pageBuilder: (_, _) =>
-                const NoTransitionPage(child: DashboardPage()),
+            pageBuilder: (_, state) =>
+                bilNoTransitionPage(state: state, child: DashboardPage()),
           ),
           GoRoute(
             path: '/dashboard/decision-explanation',
@@ -593,7 +601,8 @@ class AppRouter {
           ),
           GoRoute(
             path: '/intelligence-center',
-            pageBuilder: (_, state) => NoTransitionPage(
+            pageBuilder: (_, state) => bilNoTransitionPage(
+              state: state,
               child: PremiumRouteGlassGate(
                 feature: PremiumGateFeature.aiCoach,
                 child: IntelligenceCenterPage(
@@ -624,8 +633,8 @@ class AppRouter {
           ),
           GoRoute(
             path: '/settings',
-            pageBuilder: (_, _) =>
-                const NoTransitionPage(child: SettingsPage()),
+            pageBuilder: (_, state) =>
+                bilNoTransitionPage(state: state, child: SettingsPage()),
           ),
         ],
       ),

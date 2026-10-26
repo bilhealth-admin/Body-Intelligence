@@ -1,6 +1,7 @@
+import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_striped_progress.dart';
-import '../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -193,7 +194,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     icon: loading
                         ? const SizedBox.square(
                             dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: BilFeatureWelcomeStatus(),
                           )
                         : const Icon(Icons.person_add_alt_1_rounded),
                     label: Text(tr('Create account', 'إنشاء الحساب')),
@@ -264,7 +265,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   InputDecoration _decoration(String label, IconData icon) => InputDecoration(
     labelText: label,
-    prefixIcon: BilGlassPressFeedback(child: Icon(icon)),
+    prefixIcon: BilNavigationFeedback(child: Icon(icon)),
   );
 }
 

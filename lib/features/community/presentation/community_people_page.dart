@@ -1,7 +1,10 @@
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'community_report_sheet.dart';
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'community_attention_scope.dart';
 import 'dart:async';
 
@@ -18,6 +21,7 @@ import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../../../shared/widgets/chat_history_viewport.dart';
+import '../../../shared/widgets/bil_conversation_presentation.dart';
 import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
@@ -38,6 +42,7 @@ part 'community_chat_owner_scope.dart';
 part 'community_chat_safety.dart';
 part 'community_chat_rendering.dart';
 part 'community_people_widgets.dart';
+part 'community_people_contact_invite.dart';
 
 class CommunityPeoplePage extends StatefulWidget {
   const CommunityPeoplePage({this.repository, super.key});
@@ -46,7 +51,9 @@ class CommunityPeoplePage extends StatefulWidget {
   State<CommunityPeoplePage> createState() => _CommunityPeoplePageState();
 }
 
-class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
+class _CommunityPeoplePageState extends State<CommunityPeoplePage>
+    with _CommunityPeopleContactInvite {
+  @override
   CommunityRepository? _repository;
   CommunityMessageOwnerVisit? _relationshipVisit;
   final _search = TextEditingController();
@@ -55,184 +62,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
   final Set<String> _pendingRequests = <String>{};
   final Set<String> _sendingRequests = <String>{};
   final Map<String, CommunityFriendRequestStatus> _relationshipStates = {};
-  bool _pickingContact = false;
   String _lastQuery = '';
-
-  Future<void> _pickContact() async {
-    if (_pickingContact) return;
-    setState(() => _pickingContact = true);
-    try {
-      final contact = await const ContactPickerService().pick();
-      if (!mounted || contact == null) return;
-      await _showContactInvite(contact);
-    } on PlatformException {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _copy(
-              context,
-              'تعذر فتح منتقي جهات الاتصال الآمن.',
-              'The secure contact picker could not be opened.',
-              'Impossible d’ouvrir le sélecteur de contacts sécurisé.',
-              'No se pudo abrir el selector seguro de contactos.',
-              'Güvenli kişi seçici açılamadı.',
-            ),
-          ),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _pickingContact = false);
-    }
-  }
-
-  Future<void> _showContactInvite(PickedBilContact contact) async {
-    final localeTag = BilLocalePolicy.canonicalTag(
-      Localizations.localeOf(context),
-    );
-    String? trackedInviteUrl;
-    final repository = _repository;
-    if (repository != null) {
-      try {
-        final invite = await repository.createCommunityInvite();
-        if (invite.active) {
-          trackedInviteUrl = invite.url?.toString();
-        }
-      } on Object {
-        // Referral attribution is fail-closed. The existing generic BIL
-        // download invite remains available when tracked links are disabled
-        // or the cloud is temporarily unavailable.
-      }
-    }
-    if (!mounted) return;
-    final message = bilCommunityInviteMessage(
-      localeTag,
-      name: contact.name,
-      url: trackedInviteUrl,
-    );
-    final privacy = bilCommunityContactPrivacy(localeTag);
-    // The native system picker grants one-contact access only.
-    // No permission was requested. BIL cannot read or retain the address book.
-    await showBilPearlBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          18,
-          20,
-          20 + MediaQuery.viewInsetsOf(sheetContext).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _StoreMark(
-                  icon: Icons.play_arrow_rounded,
-                  label: 'Google Play',
-                ),
-                SizedBox(width: 10),
-                _StoreMark(icon: Icons.apple_rounded, label: 'App Store'),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Text(
-              contact.name.trim().isEmpty ? contact.phone : contact.name,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                sheetContext,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              key: const Key('community-contact-invite-preview'),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F7FA),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: const Color(0xFFE4E7EC)),
-              ),
-              child: Text(message, style: const TextStyle(height: 1.45)),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.privacy_tip_outlined,
-                  size: 18,
-                  color: Color(0xFF475467),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    privacy,
-                    style: const TextStyle(
-                      color: Color(0xFF475467),
-                      fontSize: 12,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              key: const Key('community-send-contact-sms'),
-              onPressed: () async {
-                final uri = Uri(
-                  scheme: 'sms',
-                  path: contact.phone,
-                  queryParameters: {'body': message},
-                );
-                final opened = await launchUrl(
-                  uri,
-                  mode: LaunchMode.externalApplication,
-                );
-                if (!opened && sheetContext.mounted) {
-                  await Clipboard.setData(ClipboardData(text: message));
-                  if (sheetContext.mounted) Navigator.pop(sheetContext);
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          _copy(
-                            context,
-                            'تم نسخ الدعوة. افتح تطبيق الرسائل وأرسلها.',
-                            'Invitation copied. Open Messages to send it.',
-                            'Invitation copiée. Ouvrez Messages pour l’envoyer.',
-                            'Invitación copiada. Abre Mensajes para enviarla.',
-                            'Davet kopyalandı. Göndermek için Mesajlar’ı açın.',
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  return;
-                }
-                if (sheetContext.mounted) Navigator.pop(sheetContext);
-              },
-              icon: const Icon(Icons.sms_rounded),
-              label: Text(
-                _copy(
-                  sheetContext,
-                  'إرسال الدعوة',
-                  'Send invitation',
-                  'Envoyer l’invitation',
-                  'Enviar invitación',
-                  'Daveti gönder',
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   void _searchPeople(String value) {
     final repository = _repository;
@@ -244,6 +74,67 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
     setState(() {
       _results = results;
     });
+  }
+
+  Future<void> _refreshProfileRelationship(
+    String userId,
+    CommunityMessageOwnerVisit visit,
+  ) async {
+    final repository = _repository;
+    if (repository == null || !visit.isCurrent) return;
+    setState(() => _sendingRequests.add(userId));
+    try {
+      final rows = await visit.run(repository.loadFriendshipsWithProfiles);
+      if (!mounted ||
+          !identical(visit, _relationshipVisit) ||
+          !visit.isCurrent) {
+        return;
+      }
+      final row = rows
+          .where((row) => row['other_user_id'] == userId)
+          .firstOrNull;
+      final status = switch (row?['status']) {
+        'accepted' => CommunityFriendRequestStatus.accepted,
+        'pending' =>
+          row!['requester_id'] == visit.owner
+              ? CommunityFriendRequestStatus.pending
+              : CommunityFriendRequestStatus.incoming,
+        _ => null,
+      };
+      setState(() {
+        _pendingRequests.remove(userId);
+        _relationshipStates.remove(userId);
+        if (status != null) _relationshipStates[userId] = status;
+        if (status == CommunityFriendRequestStatus.pending) {
+          _pendingRequests.add(userId);
+        }
+      });
+    } on Object {
+      if (mounted && visit.isCurrent) {
+        // Keep the last confirmed state on failure; an unsuccessful read must
+        // not enable a second request or imply that a cancellation succeeded.
+        final messenger = ScaffoldMessenger.of(context);
+        messenger.hideCurrentSnackBar();
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(
+              _copy(
+                context,
+                'تعذر تحديث حالة العلاقة. أعد المحاولة.',
+                'Could not refresh the connection. Try again.',
+                'Impossible d’actualiser la relation. Réessayez.',
+                'No se pudo actualizar la conexión. Inténtalo de nuevo.',
+                'Bağlantı yenilenemedi. Tekrar deneyin.',
+              ),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted && identical(visit, _relationshipVisit) && visit.isCurrent) {
+        setState(() => _sendingRequests.remove(userId));
+      }
+    }
   }
 
   Future<void> _requestFriend(String userId) async {
@@ -498,9 +389,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
                           icon: _pickingContact
                               ? const SizedBox.square(
                                   dimension: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
+                                  child: BilFeatureWelcomeStatus(),
                                 )
                               : const Icon(Icons.contacts_outlined),
                           label: Text(
@@ -561,7 +450,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
                     future: _results,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState != ConnectionState.done) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: BilFeatureWelcomeStatus());
                       }
                       if (snapshot.hasError) {
                         return Center(
@@ -582,7 +471,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
                               const SizedBox(height: 12),
                               FilledButton.icon(
                                 onPressed: () => _searchPeople(_lastQuery),
-                                icon: const BilGlassPressFeedback(
+                                icon: const BilNavigationFeedback(
                                   child: Icon(Icons.refresh_rounded),
                                 ),
                                 label: Text(
@@ -620,9 +509,29 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
                         itemBuilder: (context, index) {
                           final row = rows[index];
                           return ListTile(
-                            onTap: () => context.push(
-                              '/community/profile/${row['user_id']}',
-                            ),
+                            onTap: () async {
+                              final visit = _relationshipVisit;
+                              if (visit?.isCurrent != true) return;
+                              await context.push(
+                                '/community/profile/${row['user_id']}',
+                              );
+                              if (!mounted ||
+                                  !identical(visit, _relationshipVisit) ||
+                                  !visit!.isCurrent) {
+                                return;
+                              }
+                              // Blocking or changing a relationship inside the
+                              // profile can invalidate this saved search row.
+                              // Re-read through the same owner's guarded RPC.
+                              // Search supplies identity rows only. Read the
+                              // relationship separately so both a still-pending
+                              // request and a confirmed cancellation survive Back.
+                              _searchPeople(_lastQuery);
+                              await _refreshProfileRelationship(
+                                row['user_id'] as String,
+                                visit,
+                              );
+                            },
                             leading: BilAccountAvatar(
                               radius: 20,
                               networkUrl: row['avatar_url'] as String?,
@@ -707,9 +616,7 @@ class _CommunityPeoplePageState extends State<CommunityPeoplePage> {
                                           )
                                         ? const SizedBox.square(
                                             dimension: 18,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
+                                            child: BilFeatureWelcomeStatus(),
                                           )
                                         : const Icon(
                                             Icons.person_add_alt_1_rounded,

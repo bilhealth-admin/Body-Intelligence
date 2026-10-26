@@ -1,4 +1,5 @@
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -97,7 +98,7 @@ class PremiumValueMask extends StatelessWidget {
                   child: checking
                       ? const SizedBox.square(
                           dimension: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: BilFeatureWelcomeStatus(),
                         )
                       : Tooltip(
                           message: onRetry != null ? text('Retry') : label,
@@ -112,7 +113,7 @@ class PremiumValueMask extends StatelessWidget {
                                 child: onRetry != null || !showLabel
                                     ? SizedBox.square(
                                         dimension: 36,
-                                        child: BilGlassPressFeedback(
+                                        child: BilNavigationFeedback(
                                           child: Icon(
                                             onRetry != null
                                                 ? Icons.refresh_rounded

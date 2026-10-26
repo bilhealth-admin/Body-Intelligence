@@ -1,6 +1,6 @@
 import '../../../shared/widgets/bil_pearl_popup_menu.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
-import '../../../shared/widgets/bil_glass_press_feedback.dart';
+import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -331,7 +331,7 @@ class _DiaryMealCard extends StatelessWidget {
                     Row(
                       key: Key('daily-meal-header-$type'),
                       children: [
-                        BilGlassPressFeedback(
+                        BilNavigationFeedback(
                           child: Icon(
                             BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,
                             color: scheme.primary,
@@ -393,7 +393,7 @@ class _DiaryMealCard extends StatelessWidget {
                     key: Key('daily-meal-header-$type'),
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BilGlassPressFeedback(
+                      BilNavigationFeedback(
                         child: Icon(
                           BilSemanticIcons.spec(_mealSemanticIcon(type)).icon,
                           color: scheme.primary,

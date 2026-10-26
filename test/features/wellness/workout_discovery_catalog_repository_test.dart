@@ -72,6 +72,30 @@ void main() {
     }
   });
 
+  test(
+    'visually verified bench movement declares its support without changing media',
+    () {
+      final item = repository
+          .parse(source, release)
+          .singleWhere(
+            (item) =>
+                item.stableId ==
+                'gym-six-month:resistance-upper-body-bench-push-up-technique',
+          );
+      expect(item.equipment, ['stable bench']);
+      expect(
+        item.videoMedia!.sha256,
+        '99f5720291d81e33824d5bee9d035c70ad9782502350b390b6284674789389b4',
+      );
+      expect(
+        item.imageMedia!.sha256,
+        '758c2a531d023cf2fde4054f265479130adc1619787b4b0cc2f95102b44b67dc',
+      );
+      expect(item.videoMedia!.sizeBytes, 17824997);
+      expect(item.durationSeconds, 10);
+    },
+  );
+
   test('parser is metadata-only and has no network client', () {
     final implementation = File(
       'lib/features/wellness/repositories/'

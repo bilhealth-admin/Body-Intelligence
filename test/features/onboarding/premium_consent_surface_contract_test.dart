@@ -8,6 +8,9 @@ void main() {
       'lib/features/onboarding/onboarding_detail_steps.dart',
     ).readAsStringSync();
     final coach = File(
+      'lib/features/intelligence_center/presentation/intelligence_query_guard_flow.dart',
+    ).readAsStringSync();
+    final query = File(
       'lib/features/intelligence_center/presentation/intelligence_query_flow.dart',
     ).readAsStringSync();
     final vision = File(
@@ -27,6 +30,7 @@ void main() {
     expect(onboarding, contains("Key('onboarding-ai-consent-decline')"));
     expect(onboarding, contains("Key('onboarding-ai-consent-accept')"));
     expect(coach, contains('showBilPremiumAiConsentSheet('));
+    expect(query, contains('await _offerPersonalIntelligence()'));
     expect(vision, contains('BilPearlAlertDialog('));
     expect(vision, contains("Key('meal-vision-consent-decline')"));
     expect(vision, contains("Key('meal-vision-consent-accept')"));

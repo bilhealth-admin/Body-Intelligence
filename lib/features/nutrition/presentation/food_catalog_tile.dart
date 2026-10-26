@@ -156,7 +156,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                   child: busy
                       ? const SizedBox.square(
                           dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: BilFeatureWelcomeStatus(),
                         )
                       : Text(context.strings.text('Delete')),
                 ),
