@@ -1,0 +1,32 @@
+{
+  "schema": "bil39.native-shell-boundary-correction.v1",
+  "parent_sha": "f083eec40e8d30b96b39f579ab27a7ebb76e526b",
+  "status": "LOCAL_PASS_NEW_EXACT_SHA_NATIVE_CI_PENDING",
+  "red": {
+    "run": 40421416524,
+    "job": 121916504779,
+    "phase": "device selection before app build",
+    "errors": [
+      "ambiguous redirect",
+      "Python dictionary literal corrupted before execution"
+    ],
+    "log_sha256": "12ff501e27eb738bbd2f1173e6cee4ddfe7bbdf3f07c87708b3f34d073ae3b54"
+  },
+  "fix": "Keep quoted Python heredoc outside process substitution; write selection to owned evidence file then read it. Preserve old37helper.",
+  "local": {
+    "qa_tests": 310,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 13.754,
+    "log_sha256": "13e6c5ab7e32d30144504dc1110033deee3bd63c75599772fb8c424a36ba498f",
+    "shell_boundary_cases": 6,
+    "host_scope": "Windows real heredoc/Python via exec plus separate Bash read; macOS full shell boundary is required in native CI"
+  },
+  "source_hashes": {
+    ".github/scripts/bil39_ios_native_integration.sh": "715dde8e59d7f5c63c6c0eff0cfccacd441bdf1a16d1c0585d77ab3e9c78d5ca",
+    "tools/qa/test_bil39_native_split.py": "094e7120190dfa388892746fc8d10d2fd5d4d2e33c715450be996bc72d7e0528"
+  },
+  "native_actual_pass": false,
+  "new_testflight_upload": false,
+  "old_helper_sha256": "68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314"
+}

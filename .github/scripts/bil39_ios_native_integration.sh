@@ -9,6 +9,7 @@ case "${BIL_NATIVE_DEVICE:-}" in
 esac
 OUT="artifacts/qa/bil39-native-$LABEL"
 mkdir -p "$OUT"
+printf '%s\n' "$BASH_VERSION" > "$OUT/bash-version.txt"
 BOUND=.github/scripts/bil_native_bounded_command.py
 SOURCE_HEAD="$(git rev-parse HEAD)"
 SOURCE_TREE="$(git rev-parse 'HEAD^{tree}')"
@@ -86,7 +87,11 @@ trap cleanup EXIT
 stage xcode-version 120 "$OUT/xcode-version.txt" xcodebuild -version
 stage list-runtimes 120 "$OUT/runtimes.json" xcrun simctl list runtimes available -j
 stage list-device-types 120 "$OUT/device-types.json" xcrun simctl list devicetypes -j
-read -r RUNTIME DEVICE_TYPE < <(python3 - "$OUT" "$LABEL" <<'PY_DEVICE'
+# Keep the quoted Python heredoc outside Bash 3.2 process substitution.
+# The macOS shell expanded its dictionary braces inside < <(...), corrupting
+# valid Python before the first Simulator was created. A file also preserves
+# Python's actual exit status under set -e rather than hiding a child failure.
+python3 - "$OUT" "$LABEL" > "$OUT/selected-device.txt" <<'PY_DEVICE'
 import json
 from pathlib import Path
 import re
@@ -109,7 +114,7 @@ preferred = (['iPhone 16 Pro', 'iPhone 16', 'iPhone 15 Pro'] if label == 'iphone
 device = next((item for name in preferred for item in items if item['name'] == name), items[-1])
 print(runtime['identifier'], device['identifier'])
 PY_DEVICE
-)
+read -r RUNTIME DEVICE_TYPE < "$OUT/selected-device.txt"
 stage "create-$LABEL" 120 "$OUT/create-$LABEL.log" xcrun simctl create \
   "BIL39-$LABEL-${GITHUB_RUN_ID}" "$DEVICE_TYPE" "$RUNTIME"
 DEVICE="$(tr -d '\r\n' < "$OUT/create-$LABEL.log")"

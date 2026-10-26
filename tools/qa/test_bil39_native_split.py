@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import shlex
 import tempfile
 import unittest
 from types import SimpleNamespace
@@ -23,7 +24,7 @@ class NativeSplitTest(unittest.TestCase):
     def setUpClass(cls):
         cls.script = SCRIPT.read_text(encoding='utf-8')
         cls.bash = (str(Path('C:/Program Files/Git/bin/bash.exe')) if os.name == 'nt'
-                    else shutil.which('bash'))
+                    else '/bin/bash' if sys.platform == 'darwin' else shutil.which('bash'))
         if not cls.bash:
             raise RuntimeError('Real Bash is required to verify native orchestration')
 
@@ -60,6 +61,55 @@ class NativeSplitTest(unittest.TestCase):
                     f'com.apple.CoreSimulator.SimRuntime.iOS-26-1 qa-{label}-type')
                 other = 'ipad' if label == 'iphone' else 'iphone'
                 self.assertNotEqual(self.select(other, types).returncode, 0)
+
+    def test_quoted_selector_runs_through_the_actual_shell_and_preserves_python_literals(self):
+        # Execute the complete shell/Python boundary, not just extracted Python.
+        # macOS CI uses its /bin/bash (3.2); Windows runs the same boundary on Git Bash.
+        code = self.script.split('python3 - "$OUT" "$LABEL" >', 1)[1]
+        code = 'python3 - "$OUT" "$LABEL" >' + code.split('\nstage "create-$LABEL"', 1)[0]
+        python = Path(sys.executable).as_posix()
+        if os.name == 'nt':
+            python = '/' + python[0].lower() + python[2:]
+        code = code.replace('python3 - ', shlex.quote(python) + ' - ', 1)
+        with tempfile.TemporaryDirectory(prefix='bil39 full shell selector ') as folder:
+            target = Path(folder)
+            (target / 'runtimes.json').write_text(json.dumps({'runtimes': [
+                {'identifier': 'com.apple.CoreSimulator.SimRuntime.iOS-26-1',
+                 'version': '26.1', 'isAvailable': True}]}), encoding='utf-8')
+            (target / 'device-types.json').write_text(json.dumps({'devicetypes': [
+                {'name': 'iPhone 16 Pro', 'identifier': 'qa-iphone'},
+                {'name': 'iPad Pro 13-inch (M4)', 'identifier': 'qa-ipad'}]}), encoding='utf-8')
+            shell_code = code
+            read_code = ''
+            if os.name == 'nt':
+                # Git Bash's fork of a native child is unavailable on this
+                # Windows host (dofork 0xC0000142). exec still runs the real
+                # quoted heredoc and native Python, then a second owned Bash
+                # verifies the unchanged read boundary. macOS runs it whole.
+                shell_code, read_code = code.rsplit('\nread -r ', 1)
+                shell_code = 'exec ' + shell_code + '\n'
+                read_code = 'read -r ' + read_code + '\n'
+            for label in ('iphone', 'ipad'):
+                result = subprocess.run([self.bash, '-e', '-o', 'pipefail'],
+                    input=shell_code + ('' if os.name == 'nt' else
+                        '\nprintf "%s|%s\\n" "$RUNTIME" "$DEVICE_TYPE"\n'),
+                    env={**os.environ, 'OUT': str(target), 'LABEL': label},
+                    text=True, capture_output=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                if os.name == 'nt':
+                    result = subprocess.run([self.bash, '-e', '-o', 'pipefail'],
+                        input=read_code + '\nprintf "%s|%s\\n" "$RUNTIME" "$DEVICE_TYPE"\n',
+                        env={**os.environ, 'OUT': str(target)},
+                        text=True, capture_output=True, timeout=10)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout.strip(),
+                    f'com.apple.CoreSimulator.SimRuntime.iOS-26-1|qa-{label}')
+            (target / 'runtimes.json').write_text('{"runtimes": []}', encoding='utf-8')
+            result = subprocess.run([self.bash, '-e', '-o', 'pipefail'], input=shell_code,
+                env={**os.environ, 'OUT': str(target), 'LABEL': 'ipad'},
+                text=True, capture_output=True, timeout=10)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('No available iOS Simulator runtime', result.stderr)
 
     def test_all_native_scopes_and_exact_binary_remain_mandatory_per_device(self):
         assignment = self.script.split('KINDS=(', 1)[1].split(')', 1)[0]
