@@ -1,0 +1,127 @@
+{
+  "schema": "bil39.native-capture-root-correction.v1",
+  "parent_sha": "219a06bf85bc19a9d43d80f19ddd470784f515f6",
+  "classification": "LOCAL_CORRECTION_PASS_NEW_EXACT_SHA_CI_PENDING",
+  "native_red": {
+    "run_id": 40412373242,
+    "job_id": 121886032718,
+    "log_sha256": "e85ac166273221f2501c4c4cda0fd66d5e2867e5ec21074624d2135a70a68933",
+    "actual_result": "Feature tests reported +41 All tests passed; driver then exited1 on capture path ownership guard. Overall job FAIL, not PASS.",
+    "exception": "Bad state: Android capture must belong to the selected QA emulator",
+    "cause": "New conversation and store QA scenes used internal Documents while the established Android capture producer and collector use app-specific external storage.",
+    "crypto": "Actual three system-crypto cases passed in this failed job; do not infer overall job acceptance",
+    "settings": "Native settings cases passed in this failed job; do not infer overall job acceptance",
+    "actual_manifest": {
+      "captures": 124,
+      "accepted_external_root": 104,
+      "rejected_internal_documents_root": 20,
+      "metadata_sha256": "ed45acebdd53d67ab51bda0d874fc9f34d026d6d17a4cd0171f932c27f2fbb6e",
+      "community_source_sha": "219a06bf85bc19a9d43d80f19ddd470784f515f6"
+    }
+  },
+  "correction": {
+    "behavior": "Use the existing _output() producer for both added scene families. Keep Android paths external, iOS paths in selected CoreSimulator Documents, and collector path guard unchanged.",
+    "runtime_changes": "QA producer only; no app lib/ios runtime, signing or cloud changes",
+    "collector_guard_changed": false
+  },
+  "local": {
+    "capture_suite": {
+      "log": "native-capture-output-alignment-v1.jsonl",
+      "passed": 32,
+      "failed": 0,
+      "done": {
+        "success": true,
+        "type": "done",
+        "time": 11463
+      },
+      "sha256": "a83ca74b2dba6450563b542aa972e65466cece53c17f4010801c861c5d289f80"
+    },
+    "cleanup_followup": {
+      "log": "native-capture-output-alignment-v2.jsonl",
+      "passed": 5,
+      "failed": 0,
+      "done": {
+        "success": true,
+        "type": "done",
+        "time": 11402
+      },
+      "sha256": "29dcab50dce13a903b918bd1ced0d111d366d85941b808dae72ef511e811c2dd"
+    },
+    "followup_overlap": "5 followup cases repeat the same5 directory cases after adding owned-temporary-root cleanup safety; do not add to32 as distinct cases",
+    "analyzer": {
+      "issues": 0,
+      "seconds": 25.6,
+      "log_sha256": "914fee684e2eabd695791df08d69123f545a2fe683e4792a02bca67d55865aea"
+    },
+    "parallel_gate": {
+      "tests": 3,
+      "actual_bash_scenarios": 19,
+      "log_sha256": "c3b2d1df844b5da3e94131ac59299743b9d8f738e3b015d931623ccbf3188923",
+      "meaning": "Full eight shards wait for source only and overlap focused phases; unchanged final aggregator requires success of all six dependencies. Actual Bash rejects each failed/cancelled/skipped phase."
+    },
+    "all_qa_tools": {
+      "passed": 296,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 14.465,
+      "log_sha256": "82c16a660b46e73ae6db3241b6f09f0d97d3ed09d83e46fef6b5fc1534838e97"
+    }
+  },
+  "source_hashes": {
+    "integration_test/native_feature_splashes_test.dart": "b55e7a34bdb4730fe547e214f2b8cb421c54de90f8af59a8fbd387e579e49de4",
+    "integration_test/native_feature_splashes_conversations.dart": "c81e550e42186c9ef658333090b17c10a80f8836d4f393b8dff9eca1eb99bbbb",
+    "tools/qa/flutter/native_capture_output_directory_test.dart": "ecea9bbd1a33ee19866a52dee962a82be437c0364314236ac84947b032b0a27b",
+    ".github/workflows/verify.yml": "a85fe050b8da8a18b4e913d043f8bb0611095f4f5c4ab970a6946adb9b233002",
+    "tools/qa/test_bil39_parallel_shards.py": "72e1e114e7a0e86954b1eec8b07d27babaee3ec08a815ad2de974f83352b862f",
+    "test_driver/native_capture_transport.dart": "249299ddc03d83b9fd049b8a18b75bcd98410950f4b0e06eb2bf2f2d1fd52338"
+  },
+  "remaining": [
+    "Commit QA corrections and split native runs; all10 exact-SHA workflows must pass",
+    "Independent native iPhone/iPad launch and capture acceptance remain pending actual CI",
+    "No signing or TestFlight yet"
+  ],
+  "followup_local": {
+    "qa_tools": {
+      "passed": 309,
+      "failed": 0,
+      "skipped": 0,
+      "log": "independent-full-qa-tools-v2.log",
+      "sha256": "e62e050f6d3615b9a66bc5519c3a62e3d75a7386aa799f387579491bdf3097e7"
+    },
+    "ios_tools": {
+      "passed": 95,
+      "failed": 0,
+      "skipped": 0,
+      "log": "independent-ios-native-local-v3.log",
+      "sha256": "0963e62ccdf33c6dd64805042767c166ca52a539cabf4816aeacc9ce5c61eddc"
+    },
+    "bounded_runner": {
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "log": "independent-native-supervisor-v1.log",
+      "sha256": "3bde3d454a1a9ce197859e878e7eea539f8ec2e7978106b8d6ff2a1f562788a0"
+    },
+    "actionlint": {
+      "version": "1.7.12",
+      "exit": 0,
+      "files": 5,
+      "archive_sha256": "6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9",
+      "scope": "YAML/Actions expressions; shellcheck and pyflakes unavailable, not claimed"
+    },
+    "argv": {
+      "status": "PASS",
+      "scope": "Actual Windows native Dart argv transport; actual Flutter driver separately smoke-tested with 51 tests",
+      "test_files": 184,
+      "characters": 11223,
+      "ordered_arguments_identical": true,
+      "powershell_parse_errors": 0
+    },
+    "actual_flutter_invocation_smoke": {
+      "passed": 51,
+      "failed": 0,
+      "protocol_success": true,
+      "log_sha256": "e1f1dd56a70266be2eea34022f41231d83d6e00519c7400a357c7b2ff9878471"
+    }
+  }
+}

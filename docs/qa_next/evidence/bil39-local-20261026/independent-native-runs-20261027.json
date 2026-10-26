@@ -1,0 +1,93 @@
+{
+  "schema": "bil39.independent-native-runs.v1",
+  "parent_sha": "219a06bf85bc19a9d43d80f19ddd470784f515f6",
+  "status": "LOCAL_TOOLS_PASS_NEW_SHA_NATIVE_CI_PENDING",
+  "request": "Independent GitHub runs for iPhone and iPad",
+  "workflows": [
+    "bil39_iphone_native.yml",
+    "bil39_ipad_native.yml"
+  ],
+  "required_before_signing": true,
+  "required_workflows": 10,
+  "required_scopes_per_device": [
+    "RunnerTests:5",
+    "system-crypto",
+    "native-settings",
+    "feature-splashes"
+  ],
+  "old_combined_helper_sha256": "68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314",
+  "old_failure": {
+    "run_id": 40412373242,
+    "job_id": 121886032633,
+    "device": "ipad",
+    "reason": "bootstrap_timeout",
+    "seconds": 1800.597,
+    "first_native_test": null,
+    "observed_error": "Error waiting for a debug connection: The log reader failed unexpectedly",
+    "root_cause": "UNRESOLVED_PENDING_INDEPENDENT_NATIVE_RUN",
+    "iphone_crypto_body_seconds": 4
+  },
+  "local": {
+    "qa_tools": {
+      "passed": 309,
+      "failed": 0,
+      "skipped": 0,
+      "log": "independent-full-qa-tools-v2.log",
+      "sha256": "e62e050f6d3615b9a66bc5519c3a62e3d75a7386aa799f387579491bdf3097e7"
+    },
+    "ios_tools": {
+      "passed": 95,
+      "failed": 0,
+      "skipped": 0,
+      "log": "independent-ios-native-local-v3.log",
+      "sha256": "0963e62ccdf33c6dd64805042767c166ca52a539cabf4816aeacc9ce5c61eddc"
+    },
+    "bounded_runner": {
+      "passed": 25,
+      "failed": 0,
+      "skipped": 0,
+      "log": "independent-native-supervisor-v1.log",
+      "sha256": "3bde3d454a1a9ce197859e878e7eea539f8ec2e7978106b8d6ff2a1f562788a0"
+    },
+    "actionlint": {
+      "version": "1.7.12",
+      "exit": 0,
+      "files": 5,
+      "archive_sha256": "6e7241b51e6817ea6a047693d8e6fed13b31819c9a0dd6c5a726e1592d22f6e9",
+      "scope": "YAML/Actions expressions; shellcheck and pyflakes unavailable, not claimed"
+    },
+    "argv": {
+      "status": "PASS",
+      "scope": "Actual Windows native Dart argv transport; actual Flutter driver separately smoke-tested with 51 tests",
+      "test_files": 184,
+      "characters": 11223,
+      "ordered_arguments_identical": true,
+      "powershell_parse_errors": 0
+    },
+    "actual_flutter_invocation_smoke": {
+      "passed": 51,
+      "failed": 0,
+      "protocol_success": true,
+      "log_sha256": "e1f1dd56a70266be2eea34022f41231d83d6e00519c7400a357c7b2ff9878471"
+    }
+  },
+  "source_hashes": {
+    ".github/scripts/bil39_ios_native_integration.sh": "ef363fa72e523f2400dcf6dfccb24ace188b28114b283b3c837862596716eb93",
+    ".github/scripts/bil39_native_receipts.py": "f77cba1c5b3a06b5dfe4b2b511640d4f3b2ae3a88fa48e1127892e1f3d04c557",
+    ".github/scripts/bil_native_bounded_command.py": "900412e9d30e81861ab373d94c354aa1f234ce3e09dab6341ebb06655d081f41",
+    ".github/scripts/bil_ios_runner_tests.py": "b8e75c7322e08f2ac0d0f51cb8fa1c63366739b9f6204425939267f22178f605",
+    ".github/scripts/bil_ios_simulator_adhoc_sign.py": "fe9f4337664bd70beb73d6e0f82362b74264325807f9667600eda32094f4b064",
+    ".github/workflows/bil39_iphone_native.yml": "b197581b8d49f2f01a88cf9e6095eb8f563b843c2e305de09222c2be4aa3ba8b",
+    ".github/workflows/bil39_ipad_native.yml": "f4572252d9a7aae3b54f689adc0f0513438a5240b35fe3af2babbe02a6283eb5",
+    ".github/workflows/bil_codeql_security_extended.yml": "5f716ab6073e8d4cc1b11950aa6b552bb25de3abe5562498e4f5867b3243822c",
+    ".github/workflows/bil_security_fixture_inventory.yml": "f6fc98d5a15e245087dfa969aececfcaaaef99330c3f22057d19a6704829cdb0",
+    ".github/workflows/verify.yml": "a85fe050b8da8a18b4e913d043f8bb0611095f4f5c4ab970a6946adb9b233002",
+    "tools/qa/bil39_internal_build_ci.py": "aacc0d758d20dd897bf1ca268f0ffded4fb2f92ab5d2502b10eac8cf8bf85070",
+    "tools/qa/bil39_full_suite_files.py": "cd252fe33d8b8b8856e39f392b12e7de4139ce57152d9827131a4c33d099f159",
+    "tools/qa/test_bil39_native_split.py": "e6e4b03098e30ca543ca41c28f8360ca2c270ea4fe67059174d5d883c8d4c49b",
+    "tools/qa/test_bil39_full_suite_files.py": "bf6ae07a84aa48e8d8693a22ab419b93cb85a933c709f7f7025ee1423b2fb0a1"
+  },
+  "runtime_app_code_changed": false,
+  "production_cloud_deployed": false,
+  "testflight_uploaded": false
+}

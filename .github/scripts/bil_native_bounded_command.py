@@ -222,7 +222,7 @@ def _stop_owned_tree(process, grace):
 
 def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
                 running_timeout_seconds=None, summary_grace_seconds=60,
-                kill_grace_seconds=5):
+                kill_grace_seconds=5, fail_on_launch_error=False):
     log_path, receipt_path = Path(log_path), Path(receipt_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -231,6 +231,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
     phase, reason = "bootstrap", "process_exit"
     first_test_at = terminal_at = None
     native_summary, native_failed = None, False
+    launch_error = None
     interrupted = []
     previous_signals = {}
     process = None
@@ -272,7 +273,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
 
     def consume(raw, stream):
         nonlocal deadline, phase, first_test_at, terminal_at
-        nonlocal native_summary, native_failed, output_bytes, parser_tail
+        nonlocal native_summary, native_failed, output_bytes, parser_tail, launch_error
         stream.write(raw)
         stream.flush()
         output_hash.update(raw)
@@ -283,6 +284,10 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         # a split native failure/summary cannot disappear from the receipt.
         parser_tail = text[-4096:] if not raw.endswith(b"\n") else ""
         text = ANSI.sub("", text).strip()
+        if fail_on_launch_error and first_test_at is None and re.search(
+                r"(?:^|\n)(?:\[[^\]\n]+\]\s*)?Error waiting for a debug connection: "
+                r"The log reader failed unexpectedly(?:\r?$|\n)", text):
+            launch_error = "flutter_debug_log_reader_failed"
         match = COUNTER.search(text)
         if match is None or match.group(1).lower().startswith("loading "):
             return
@@ -348,9 +353,9 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
                     console.line(f"BIL_NATIVE_STAGE {label}: {phase}, "
                                  f"elapsed={int(now-started)}s")
                     last_heartbeat = now
-                if interrupted or now >= deadline:
-                    timed_out = not interrupted
-                    reason = "interrupted" if interrupted else {
+                if launch_error or interrupted or now >= deadline:
+                    timed_out = not interrupted and not launch_error
+                    reason = "interrupted" if interrupted else "bootstrap_launch_error" if launch_error else {
                         "bootstrap": "bootstrap_timeout",
                         "native_tests": "native_test_timeout",
                         "result_delivery": "result_delivery_timeout",
@@ -403,6 +408,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         127 if raw_returncode is None else
         raw_returncode if raw_returncode != 0 else
         2 if supervisor_error is not None else
+        1 if launch_error else
         1 if native_failed else 0
     )
     if raw_returncode == 0 and native_failed and not timed_out:
@@ -422,6 +428,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         "terminal_summary_after_seconds": None if terminal_at is None else round(terminal_at-started, 3),
         "native_summary": native_summary,
         "native_failure_summary_seen": native_failed,
+        "launch_error": launch_error,
         "timed_out": timed_out,
         "reason": reason,
         "raw_returncode": raw_returncode,
@@ -452,6 +459,8 @@ def main():
     parser.add_argument("--running-timeout-seconds", type=positive_seconds)
     parser.add_argument("--summary-grace-seconds", type=positive_seconds, default=60)
     parser.add_argument("--kill-grace-seconds", type=positive_seconds, default=5)
+    parser.add_argument("--fail-on-launch-error", action="store_true",
+                        help="Fail an explicit Flutter debug log-reader launch error before native tests")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
@@ -463,6 +472,7 @@ def main():
         running_timeout_seconds=args.running_timeout_seconds,
         summary_grace_seconds=args.summary_grace_seconds,
         kill_grace_seconds=args.kill_grace_seconds,
+        fail_on_launch_error=args.fail_on_launch_error,
     )
 
 

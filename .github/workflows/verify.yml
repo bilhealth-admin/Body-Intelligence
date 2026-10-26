@@ -371,7 +371,7 @@ jobs:
 
   broad:
     # Run every historically failing full-suite file in smaller domain groups.
-    # Full 8-shard execution stays blocked until all known failure clusters pass.
+    # The final aggregate requires these focused regressions and all full shards.
     name: broad-regressions (${{ matrix.suite }})
     needs: [source, p0, focused]
     runs-on: windows-latest
@@ -430,7 +430,7 @@ jobs:
 
   shards:
     name: flutter-tests (shard ${{ matrix.shard }} of 8)
-    needs: [source, p0, focused, broad]
+    needs: source
     runs-on: windows-latest
     timeout-minutes: 60
     strategy:
@@ -484,12 +484,18 @@ jobs:
         run: |
           $bilEvidence=Join-Path $env:RUNNER_TEMP 'bil39-full-shard-${{ matrix.shard }}'
           New-Item -ItemType Directory -Path $bilEvidence -Force | Out-Null
-          flutter test `
+          python tools/qa/bil39_full_suite_files.py --source-sha $env:GITHUB_SHA --index ${{ matrix.shard }} --total 8 --output (Join-Path $bilEvidence 'plan.json')
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $bilTestFiles = @((Get-Content -LiteralPath (Join-Path $bilEvidence 'plan.json') -Raw | ConvertFrom-Json).files)
+          if ($bilTestFiles.Count -eq 0) { throw 'An empty complete-suite partition cannot pass' }
+          $bilDart = Join-Path $env:FLUTTER_ROOT 'bin/cache/dart-sdk/bin/dart.exe'
+          $bilFlutterTools = Join-Path $env:FLUTTER_ROOT 'bin/cache/flutter_tools.snapshot'
+          & $bilDart $bilFlutterTools test `
             --no-pub `
             --machine `
             --dart-define=BIL_PAYMENTS_ENABLED=true `
-            --total-shards=8 `
-            --shard-index=${{ matrix.shard }} 2>&1 | Tee-Object -FilePath (Join-Path $bilEvidence 'events.jsonl')
+            --concurrency=2 `
+            @bilTestFiles 2>&1 | Tee-Object -FilePath (Join-Path $bilEvidence 'events.jsonl')
           $bilFlutterExit=$LASTEXITCODE
           python tools/qa/bil39_flutter_event_receipt.py --log (Join-Path $bilEvidence 'events.jsonl') --source-sha $env:GITHUB_SHA --test-exit $bilFlutterExit --output (Join-Path $bilEvidence 'receipt.json')
           exit $LASTEXITCODE
@@ -529,7 +535,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0, Node24
         with:
           python-version: '3.14'
       - name: Execute all QA tool regression tests
@@ -541,6 +547,9 @@ jobs:
     needs: [source, p0, focused, broad, shards, integration-tools]
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
     steps:
       - name: Require analysis, formatting and all eight shards to pass
         shell: bash
@@ -563,3 +572,27 @@ jobs:
             exit 1
           fi
           echo "All quality gates passed."
+
+      - name: Checkout exact sources for complete file-coverage verification
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Prove all complete-suite files ran exactly once
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
+            --pattern "bil39-full-shard-*-$GITHUB_SHA" --dir "$RUNNER_TEMP/bil39-full-coverage"
+          python3 tools/qa/bil39_full_suite_files.py --source-sha "$GITHUB_SHA" --total 8 \
+            --verify "$RUNNER_TEMP/bil39-full-coverage" --output "$RUNNER_TEMP/bil39-full-coverage.json"
+
+      - name: Preserve exact-source full-suite coverage proof
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil39-complete-file-coverage-${{ github.sha }}
+          path: ${{ runner.temp }}/bil39-full-coverage.json
+          if-no-files-found: error
+          retention-days: 30

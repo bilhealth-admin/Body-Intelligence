@@ -9,7 +9,7 @@ import argparse
 import base64
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import plistlib
 import re
 import shlex
@@ -111,7 +111,9 @@ def resolve_simulated_entitlements_path(settings, build_log):
         raise ValueError("Xcode must identify exactly one generated simulated entitlements file")
     if len(unique) != 1:
         raise ValueError("Conflicting Xcode simulated entitlements paths")
-    path = Path(unique[0])
+    # Parse Xcode's POSIX path as POSIX even in Windows offline regression QA.
+    # Convert to a filesystem Path only at the macOS-only execution boundary.
+    path = PurePosixPath(unique[0]) if unique[0].startswith('/') else Path(unique[0])
     if not path.is_absolute() or path.name != "Runner.app-Simulated.xcent":
         raise ValueError("Xcode must identify the exact Runner simulated entitlements file")
     return path
@@ -208,6 +210,9 @@ def verify_simulated_sections(raw, expected, architecture_count):
 
 
 def sign_simulator(args, *, run=subprocess.run, run_build=run_bounded, host=sys.platform):
+    build_number = getattr(args, "build_number", "37")
+    if build_number not in ("37", "39"):
+        raise ValueError("Only the reviewed Simulator QA build numbers are permitted")
     workspace = Path(args.workspace).resolve()
     output = checked_path(args.output, workspace)
     if not any(output.resolve().is_relative_to(workspace / name) for name in ("artifacts/qa", "build/qa")):
@@ -263,10 +268,10 @@ def sign_simulator(args, *, run=subprocess.run, run_build=run_bounded, host=sys.
                  f"BUILD_DIR={workspace / 'build/ios'}", "CODE_SIGN_IDENTITY=-",
                  "CODE_SIGNING_ALLOWED=YES", "CODE_SIGNING_REQUIRED=YES",
                  "PROVISIONING_PROFILE=", "PROVISIONING_PROFILE_SPECIFIER=",
-                 f"FLUTTER_TARGET={args.target}", "FLUTTER_BUILD_NUMBER=37"]
+                 f"FLUTTER_TARGET={args.target}", f"FLUTTER_BUILD_NUMBER={build_number}"]
         settings = runner_settings(command(xcode + ["-showBuildSettings", "-json"], timeout=120).stdout)
-        if settings["FLUTTER_TARGET"] != args.target or settings["FLUTTER_BUILD_NUMBER"] != "37":
-            raise ValueError("Xcode must build the exact requested entrypoint and build 37")
+        if settings["FLUTTER_TARGET"] != args.target or settings["FLUTTER_BUILD_NUMBER"] != build_number:
+            raise ValueError("Xcode must build the exact requested entrypoint and QA build number")
         if (Path(settings["TARGET_BUILD_DIR"]).resolve() / settings["FULL_PRODUCT_NAME"]) != app.resolve():
             raise ValueError("Resolved Xcode output does not match the exact Simulator app")
         receipt["resolved_settings_allowlist"] = settings
@@ -294,18 +299,18 @@ def sign_simulator(args, *, run=subprocess.run, run_build=run_bounded, host=sys.
         info_path = checked_path(app / "Info.plist", app)
         info_bytes = info_path.read_bytes()
         info = plistlib.loads(info_bytes)
-        if (info.get("CFBundleIdentifier") != BUNDLE_ID or info.get("CFBundleVersion") != "37"
+        if (info.get("CFBundleIdentifier") != BUNDLE_ID or info.get("CFBundleVersion") != build_number
                 or info.get("DTPlatformName") != "iphonesimulator"
                 or info.get("CFBundleSupportedPlatforms") != ["iPhoneSimulator"]
                 or info.get("CFBundleExecutable") != "Runner"):
-            raise ValueError("Bundle identity, build 37 and Simulator platform must match")
+            raise ValueError("Bundle identity, requested QA build number and Simulator platform must match")
         binary = checked_path(app / "Runner", app)
         receipt["binary_sha256_after"] = digest(binary.read_bytes())
         platform_result = command(["xcrun", "vtool", "-show-build", str(binary)], public_readback=True)
         platforms = re.findall(r"^\s*platform\s+(\S+)\s*$", platform_result.stdout.decode("utf-8"), re.MULTILINE)
         if not platforms or any(value != "IOSSIMULATOR" for value in platforms):
             raise ValueError("Every executable architecture must be an actual iOS Simulator Mach-O")
-        simulated_path = resolve_simulated_entitlements_path(settings, build_log.read_bytes())
+        simulated_path = Path(resolve_simulated_entitlements_path(settings, build_log.read_bytes()))
         # Xcode's generated build intermediates may live in DerivedData. Read
         # only its resolved xcent siblings; never create or rewrite either file.
         if not simulated_path.is_absolute() or not simulated_path.name.endswith("-Simulated.xcent"):
@@ -350,6 +355,7 @@ def main():
     for name in ("workspace", "app", "output", "target", "source-head", "source-tree"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--qa-simulator-only", action="store_true", required=True)
+    parser.add_argument("--build-number", choices=("37", "39"), default="37")
     args = parser.parse_args()
     try:
         receipt = sign_simulator(args)

@@ -51,7 +51,9 @@ def verified_summary(raw_summary, execution_log, names):
     return {**counts, "testNames": sorted(passed)}
 
 
-def run_tests(workspace, output, device, defines, *, run=run_bounded, host=sys.platform):
+def run_tests(workspace, output, device, defines, *, run=run_bounded, host=sys.platform, build_number="37"):
+    if build_number not in ("37", "39"):
+        raise ValueError("Only the reviewed Simulator QA build numbers are permitted")
     workspace, output = Path(workspace).resolve(), Path(output).resolve()
     output.relative_to(workspace)
     if host != "darwin" or re.fullmatch(r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}", device) is None:
@@ -78,7 +80,7 @@ def run_tests(workspace, output, device, defines, *, run=run_bounded, host=sys.p
     receipt = {
         "status": "RUNNING", "stage": "xcodebuild-test", "expected_test_count": EXPECTED_TEST_COUNT,
         "scope": "Existing in-memory App Attest key-store unit tests on an iOS Simulator, not real-device App Attest proof",
-        "real_device_attestation_proven": False, "build_number": "37",
+        "real_device_attestation_proven": False, "build_number": build_number,
         "source_test_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "xcresult": str(bundle.relative_to(workspace)),
     }
@@ -95,7 +97,7 @@ def run_tests(workspace, output, device, defines, *, run=run_bounded, host=sys.p
         "-only-testing:RunnerTests", "-parallel-testing-enabled", "NO",
         "-resultBundlePath", str(bundle), f"BUILD_DIR={build_dir}",
         "CODE_SIGN_IDENTITY=-", "CODE_SIGNING_ALLOWED=YES", "CODE_SIGNING_REQUIRED=YES",
-        "PROVISIONING_PROFILE_SPECIFIER=", "FLUTTER_TARGET=lib/main.dart", "FLUTTER_BUILD_NUMBER=37",
+        "PROVISIONING_PROFILE_SPECIFIER=", "FLUTTER_TARGET=lib/main.dart", f"FLUTTER_BUILD_NUMBER={build_number}",
         f"DART_DEFINES={encoded_defines}",
     ]
     log = output / "runner-tests.log"
@@ -138,9 +140,10 @@ def main():
     parser.add_argument("--workspace", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", required=True)
+    parser.add_argument("--build-number", choices=("37", "39"), default="37")
     parser.add_argument("--dart-define", action="append", required=True)
     args = parser.parse_args()
-    return run_tests(args.workspace, args.output, args.device, args.dart_define)
+    return run_tests(args.workspace, args.output, args.device, args.dart_define, build_number=args.build_number)
 
 
 if __name__ == "__main__":

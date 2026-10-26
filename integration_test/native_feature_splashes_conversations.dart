@@ -125,10 +125,7 @@ void _registerNativeConversationsAndStoreActivity(
               authOptions: const AuthClientOptions(autoRefreshToken: false),
             );
             final repository = _NativeDmRepository(client);
-            final output = Directory(
-              '${(await getApplicationDocumentsDirectory()).path}/feature-splashes-native',
-            );
-            await output.create(recursive: true);
+            final output = await _output();
             for (var index = 0; index < 24; index++) {
               repository.rows.add(
                 CommunityMessage(
@@ -288,10 +285,7 @@ void _registerNativeConversationsAndStoreActivity(
           if (Platform.isAndroid) {
             await binding.convertFlutterSurfaceToImage();
           }
-          final output = Directory(
-            '${(await getApplicationDocumentsDirectory()).path}/feature-splashes-native',
-          );
-          await output.create(recursive: true);
+          final output = await _output();
           await _capture(binding, '$name-pending', output);
           expect(tester.takeException(), isNull);
           final reports =

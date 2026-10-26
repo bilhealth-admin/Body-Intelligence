@@ -49,6 +49,21 @@ class ExistingRunnerTestsCoverage(unittest.TestCase):
                                 run=self.fake_run, host="darwin")
         return code, json.loads((self.output / "runner-tests-result.json").read_bytes())
 
+    def test_build39_keeps_all_five_real_xctest_assertions_and_records_exact_build(self):
+        code = runner.run_tests(self.workspace, self.output, DEVICE, DEFINES,
+            run=self.fake_run, host='darwin', build_number='39')
+        self.assertEqual(code, 0)
+        self.assertIn('FLUTTER_BUILD_NUMBER=39', self.calls[0][0])
+        receipt = json.loads((self.output / 'runner-tests-result.json').read_text())
+        self.assertEqual(receipt['build_number'], '39')
+        self.assertEqual(receipt['summary']['passedTests'], 5)
+
+    def test_unreviewed_build_number_fails_before_any_xcode_execution(self):
+        with self.assertRaises(ValueError):
+            runner.run_tests(self.workspace, self.output, DEVICE, DEFINES,
+                run=self.fake_run, host='darwin', build_number='38')
+        self.assertEqual(self.calls, [])
+
     def test_actual_command_targets_existing_suite_on_exact_iphone_with_offline_host(self):
         code, receipt = self.invoke()
         self.assertEqual(code, 0)

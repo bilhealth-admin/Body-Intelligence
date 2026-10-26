@@ -147,6 +147,20 @@ class SimulatorSigningFixtures(unittest.TestCase):
         self.assertFalse(any(arg == "--sign" or "allowProvisioning" in arg
                              for cmd in self.commands for arg in cmd))
 
+    def test_build39_requires_matching_xcode_settings_and_actual_bundle(self):
+        self.args.build_number = '39'
+        self.settings['FLUTTER_BUILD_NUMBER'] = '39'
+        self.info['CFBundleVersion'] = '39'
+        self.write_info()
+        receipt = self.invoke()
+        self.assertEqual(receipt['status'], 'PASS_SIMULATOR_SIGNATURE_CHECK')
+        self.assertTrue(any('FLUTTER_BUILD_NUMBER=39' in command for command in self.commands))
+
+    def test_old_bundle_cannot_satisfy_requested_build39(self):
+        self.args.build_number = '39'
+        self.settings['FLUTTER_BUILD_NUMBER'] = '39'
+        self.fails('requested QA build number')
+
     def test_missing_setting_and_build_export_fail_closed(self):
         self.include_entitlements_export = False
         self.fails('identify exactly one generated simulated entitlements file')

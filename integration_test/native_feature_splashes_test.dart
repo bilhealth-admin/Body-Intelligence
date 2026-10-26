@@ -263,15 +263,24 @@ String _location(String kind) => switch (kind) {
   _ => '/native/$kind',
 };
 
-Future<Directory> _output() async {
-  final root = Platform.isAndroid
+Future<Directory> _output() =>
+    nativeQaCaptureDirectory(android: Platform.isAndroid);
+
+// Keep every native scene on the same platform-owned output root. The optional
+// creation switch lets host tests exercise genuine path-provider selection and
+// the transport's unchanged path guard without writing to a device-style path.
+Future<Directory> nativeQaCaptureDirectory({
+  required bool android,
+  bool create = true,
+}) async {
+  final root = android
       ? await getExternalStorageDirectory()
       : await getApplicationDocumentsDirectory();
   if (root == null) {
     throw StateError('Native QA app documents directory unavailable');
   }
   final directory = Directory('${root.path}/feature-splashes-native');
-  await directory.create(recursive: true);
+  if (create) await directory.create(recursive: true);
   return directory;
 }
 
