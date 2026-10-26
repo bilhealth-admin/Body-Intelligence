@@ -19,6 +19,9 @@ from run_gate import EVIDENCE, ROOT, run_gate
 
 
 NOT_RUN = {
+    "test/bil_crystal_calendar_video_test.dart": "all cases emit actual calendar/video captures; required Crystal CI and the complete Flutter suite retain these tests",
+    "test/bil_crystal_calendar_visual_test.dart": "all cases compare calendar golden pixels; required Crystal CI and the complete Flutter suite retain these tests",
+    "test/bil_crystal_purchase_cta_isolation_test.dart": "all cases emit protected CTA pixel evidence; required Crystal CI and the complete Flutter suite retain these tests",
     "test/qa_next/community_entry_capture_test.dart": "dedicated R5 Community entry capture job executes this real Flutter render; excluded only from code-only partition",
     "test/qa_next/coach_reference_workspace_capture_test.dart": "dedicated native Coach capture job executes these cases; excluded only from code-only partition",
     "test/features/community/community_polish_visual_test.dart": "dedicated Community QA runs its 8 layout/capture cases separately; no image capture in code-only release suite",
@@ -47,6 +50,9 @@ NOT_RUN = {
 
 # Negative matches are limited to the reviewed visual test names in these files.
 MIXED_NAMES = {
+    "test/features/analytics/analytics_weight_constant_axis_test.dart": r"^(?!Narrow measured range renders ).*$",
+    "test/features/commerce/bil_store_activity_indicator_test.dart": r"^(?!.*reduced=true restore=true).*$",
+    "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart": r"^(?!photographic background stays visible ).*$",
     "test/epic3_visual_matrix_golden_test.dart": r"^(?!Epic 3 visual matrix).*$",
     "test/epic8_weekly_report_golden_test.dart": r"^(?!.*(?:golden|evidence)).*$",
     "test/premium_dashboard_benchmark_test.dart": r"^(?!.*golden).*$",

@@ -1,0 +1,95 @@
+{
+  "schema": "bil39.ci-root-corrections.v1",
+  "utc": "2026-10-26T22:23:16.633Z",
+  "parent_sha": "0a73cbcc3ccc311596b5344771da08f2564edb8a",
+  "classification": "LOCAL_AFFECTED_CORRECTIONS_PASS_FINAL_EXACT_SHA_CI_REQUIRED",
+  "fixes": [
+    {
+      "issue": "Windows checkout changed reviewed LF byte sequences into CRLF",
+      "behavior": "Set existing LF checkout configuration before QA tools checkout; real Git fixtures reproduce rejection and preserve tamper denial",
+      "result": "293 QA-tool tests PASS, including two new real-Git checkout tests"
+    },
+    {
+      "issue": "Diagnostic --verbose changed immutable native helper bytes",
+      "behavior": "Restore exact reviewed helper SHA256 without changing expected hashes or allowlists",
+      "restored_sha256": "68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314",
+      "result": "5 native-scope guard tests PASS"
+    },
+    {
+      "issue": "8 native Community cases call an unregistered TestTextInput.hide stub",
+      "behavior": "Unfocus and invoke actual TextInput.hide channel; preserve draft and existing send assertions",
+      "result": "5 IME/observer regression cases PASS; scoped analyzer zero issues; fresh native execution remains required"
+    },
+    {
+      "issue": "API36 memory missing in both dispatch and full startup matrix",
+      "behavior": "Restore 4096M already required by unchanged regression expectations",
+      "result": "8 startup matrix tests PASS; no success criteria or deadlines changed"
+    },
+    {
+      "issue": "Required final workflows could be omitted by path filters",
+      "behavior": "Remove push path filters from 5 required workflows; a new test requires all 8 exact-SHA workflows to be scheduled",
+      "result": "293 QA tests PASS; 29 final BIL39 gate tests PASS"
+    },
+    {
+      "issue": "Six added visual suites were not classified by legacy code-only audit inventory",
+      "behavior": "Classify reviewed capture/pixel cases only in the separate code-only audit; full release suite retains every file and all cases unchanged",
+      "result": "Expanded tool/release suite had 6 inventory errors; all affected 19 scheduling tests now PASS, including preservation of all 6 complete release files"
+    }
+  ],
+  "source_hashes": {
+    ".github/scripts/bil_ios37_native_integration.sh": "68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314",
+    ".github/workflows/verify.yml": "25c54e2712364e7fcdc6759f344f7d8a049c6a6026f9717b17a7ff30087400f4",
+    ".github/workflows/bil39_cloud_source_qa.yml": "c9ec3216378d5e2ea9f5f004e53c209583ad08d19d11700488b8a1395a50d07e",
+    ".github/workflows/bil39_video_source_qa.yml": "97d33a9eea163059c5ae151258f161f6b58c74982101281914d69ae5dae778e1",
+    ".github/workflows/bil_android_isolated_emulator_smoke.yml": "623dff55c2e7d7c8cf5a59e77ac9799cc78421e51ce04222373c1970d156e3bf",
+    ".github/workflows/bil_codeql_security_extended.yml": "93c8e6be1fa4a8be9275ac0fdd38e39083e207a1a50f2b2c28932c2a415bcda9",
+    ".github/workflows/bil_security_fixture_inventory.yml": "8ed5c189cd3367b404f5fbd1b584221db54b0233aba94335930e3617fdf105a6",
+    "integration_test/native_feature_splashes_test.dart": "0d2351d291caadfad4fb2281a9b7eb392fb06e4597f65cdf6b59a0124a04b5f6",
+    "integration_test/native_feature_splashes_conversations.dart": "9d95640596af1fe9d11d07b696547b578d508989d85ed834373c3e8173aafd0f",
+    "tools/qa/flutter/native_keyboard_dismissal_test.dart": "988db08cebc62902e842d1f0fd4c8ac4f4d217add099481351dad2769cf1bf2b",
+    "tools/qa/test_bil39_windows_checkout.py": "20dbfd42709f728beef52c702a387dd2df59b4be7b0db938544e7b0eb6d37328",
+    "tools/qa/test_bil39_internal_build_ci.py": "c2e3648736d6344277fb9a5a6b915772607b0320c8e07370036b4acb59b89b7c",
+    "tool/prebuild/run_code_tests.py": "269043703de5ddfc56e0d4ae2c7559f65258381c347b9bb657575eaf29b9f36b",
+    "tool/release/test_run_portable_release_tests.py": "9596b1fb1784b2000568a1cae07dace66c16abee7d473a12c0fb9dc14a75bb5f"
+  },
+  "log_sha256": {
+    "windows-checkout-byte-guard-red-v1.log": "15776a33eacc60505170278a9b7e5843a33721aecb38e1ceb20484ae716402d4",
+    "final-ci-tooling-green-v3.log": "7f0c5f0c7db468c3f378140ac9fa65fc1627ead7b2b27c15bad1b2df0f21d014",
+    "windows-checkout-restored-native-scope-v2.log": "446482bc3f8fed594480cc2d3398a991b966e94ba00c6ad5930b39f03d9e8565",
+    "native-ime-observer-green-v1.jsonl": "70b2b0a530fb36b6a752afef0018edce1c9a279f007cb8437869918674105868",
+    "native-ime-analyze-v1.log": "1dfc9e6331364d2407611175eb5d3b276fd0a1e90a30f9dff5b60dbb69f15371",
+    "android-startup-matrix-red-v1.log": "eb857060d314f70502634ec218abdafa5e6f43398b85e93a8528058046c02368",
+    "android-startup-matrix-green-v2.log": "e8ae47e4a5dfa57becfb1fa39edd27ec6bdd41fd1295cf50e312cb7f5598ecf3",
+    "release-tool-regressions-env-green-v2.log": "baf7986a0d6a4abecaefea1fc465d91e2df7baa69faad02db34b00f5267742e4",
+    "portable-inventory-corrections-green-v4.log": "296260c457d43f16c624cb9e1da0b2a980ee1eaf94e08377ef6383a6f25b3e8f",
+    "bil39-final-gate-focused-green-v4.log": "74956e166a39d45aa9490ed0daa357f215113edb79ac7dd62adc84586d2316dd",
+    "final-ci-tooling-green-v5.log": "00cf7d2df8783fb0874db3c8cbc5146d047398e7c3d03e071dc513473f3712c8"
+  },
+  "unchanged": {
+    "protected_purchase_blob": "fdd24dbfa5b16f78aad65a821a2f5cf1215f90d5",
+    "protected_glass_blob": "653d424ddb6cca8adeb0d394f5c8f8866da3792d",
+    "main": "9a90c88e0ffa2bfef34910b1e4439beb0fbf97cf",
+    "ios38": "155b079696430919f8272df934371f033fb11be2",
+    "app_runtime": "No lib/ or ios/ runtime changes in this correction",
+    "cloud_deployment": "No new deployment"
+  },
+  "old_ci": {
+    "verify": "Cancelled after genuine QA tools failure; not PASS",
+    "security": "Cancelled after genuine Android native fixture failure; cancelled iOS/Swift jobs not PASS",
+    "android_startup": "5 of 6 PASS; API34 failed app focus after emulator Launcher ANR; no BIL crash captured",
+    "native_component": "iPhone and iPad SwiftUI jobs PASS at parent SHA; 16 originals visually reviewed, separate receipt"
+  },
+  "remaining": [
+    "Required workflows must pass on the new pushed SHA",
+    "Android34 startup must succeed on a fresh runner; prior failed attempt preserved",
+    "Full iPhone/iPad native bundles must complete successfully",
+    "Signed artifact identity, archive, upload, processing and physical39 acceptance not yet proved"
+  ],
+  "final_local_tooling": {
+    "tests": 293,
+    "failed": 0,
+    "skipped": 0,
+    "log": "final-ci-tooling-green-v5.log",
+    "seconds": 12.987
+  }
+}

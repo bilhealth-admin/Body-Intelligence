@@ -1,5 +1,7 @@
 """Fail-closed pre-signing receipts, synthetic only; no actual CI claimed."""
 import copy
+from pathlib import Path
+import re
 import unittest
 import bil39_internal_build_ci as gate
 
@@ -8,6 +10,18 @@ WORKFLOW = 'verify.yml'
 
 
 class InternalBuildGateTest(unittest.TestCase):
+    def test_every_required_workflow_runs_on_the_final_integration_sha(self):
+        workflow_root = Path(__file__).resolve().parents[2] / '.github/workflows'
+        for workflow in gate.WORKFLOWS:
+            with self.subTest(workflow=workflow):
+                source = (workflow_root / workflow).read_text(encoding='utf-8')
+                push = re.search(r'^  push:\n(.*?)(?=^  [A-Za-z_]|^\S)',
+                                 source, re.MULTILINE | re.DOTALL)
+                self.assertIsNotNone(push, 'A dispatch cannot replace exact-SHA push evidence')
+                self.assertIn(gate.BRANCH, push.group(1))
+                self.assertNotRegex(push.group(1), r'(?m)^    paths(?:-ignore)?:',
+                                    'Path filters can omit a required final-SHA workflow')
+
     def setUp(self):
         self.run = {'id': 123, 'head_sha': SHA, 'head_branch': gate.BRANCH,
                     'event': 'push', 'status': 'completed', 'conclusion': 'success',

@@ -3,7 +3,7 @@
   "source_bundle_sha256": "bd62a5c229b00687968cf43b816bc809478f7f0062c78169ca5e8ff8487fe28b",
   "protected_ios38_sha": "155b079696430919f8272df934371f033fb11be2",
   "candidate_sha": null,
-  "release_status": "LOCAL_CORRECTIONS_VERIFIED_PENDING_FINAL_EXACT_SHA_CI_AND_NATIVE39",
+  "release_status": "CI_TOOLING_CORRECTIONS_VERIFIED_PENDING_FRESH_EXACT_SHA_CI_AND_NATIVE39",
   "original_37_cases": [
     {
       "ID": "BIL-01",
@@ -6211,5 +6211,6 @@
     "Supabase ai-coach132 active:15runtime exact-content matches with164typed local tests, no-auth/invalid-session401 and three physical38 real Gemini calls (70+55+41 credits, reserved0). All provider/fallback/failure and signed39 acceptance remain incomplete; rollback131preserved; historical6:50cause UNRESOLVED.",
     "Final Android/iPhone/iPad matrix, signed39 purchase/Restore and physical acceptance remain incomplete",
     "No final integration commit/push or TestFlight39 upload has occurred; protected38/main/store administration unchanged"
-  ]
+  ],
+  "latest_ci_tooling_correction": "evidence/bil39-local-20261026/ci-root-corrections-20261027.json"
 }

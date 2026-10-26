@@ -1,0 +1,102 @@
+{
+  "schema": "bil39.native-component-visual-review.v1",
+  "source_sha": "0a73cbcc3ccc311596b5344771da08f2564edb8a",
+  "ci_run": "https://github.com/bilhealth-admin/Body-Intelligence/actions/runs/40407552399",
+  "scope": "Actual UIKit/SwiftUI component render, not full BIL39 device acceptance",
+  "reviewed_screenshots": [
+    {
+      "device": "swiftui-iphone",
+      "file": "0007D91A-D1BC-4100-A1AC-9011E8C4E829.png",
+      "sha256": "499cc32a8ea902c2e309e7e23554fa097544add8ba668e8398039171f2530f05"
+    },
+    {
+      "device": "swiftui-iphone",
+      "file": "2CBDB565-CD67-466C-A075-90D0D71DBDAB.png",
+      "sha256": "96828b54d49daaf80a25c1ddf5ff26a64e97557ef282401da97beac49f0c5573"
+    },
+    {
+      "device": "swiftui-iphone",
+      "file": "5447C6C3-2D3B-4F71-A920-50C0F669EB4B.png",
+      "sha256": "b01bdb81f911025dc3f57df1f6523f0df84b78124d129fba3fba29ea7dceeb2e"
+    },
+    {
+      "device": "swiftui-iphone",
+      "file": "6A4EC06C-ACE9-4E94-A952-CFC8CE8188A6.png",
+      "sha256": "0895b4b8498690bee3c976e96cb3030bd3c57ed50b2fb071a906ea06b1cac33f"
+    },
+    {
+      "device": "swiftui-iphone",
+      "file": "BCC5B561-806A-4D2E-BAA5-A0A196611388.png",
+      "sha256": "4b3993f6afb5c9480b9fe3dd2b116412cef6babe9aa71e28aaf2c15c5bf1ceb3"
+    },
+    {
+      "device": "swiftui-iphone",
+      "file": "C8346E77-DF35-4B12-88A2-557F0CBDFB83.png",
+      "sha256": "f17445d83498e322cef92f48442e6fbf1e1a82574905de5cfeca08d9f0d88370"
+    },
+    {
+      "device": "swiftui-iphone",
+      "file": "D377243E-A214-4667-BFF9-BCDBB3893048.png",
+      "sha256": "b7af2943dc363e1aabe21c841af93ea3f4e3b7ba22eceebfb8816f5d0fb8ce58"
+    },
+    {
+      "device": "swiftui-iphone",
+      "file": "F1E0B80C-A5C4-46A9-BCB9-DFB50702341E.png",
+      "sha256": "8f0a934f5fdea9fa4aefab6d77635c3e55cd8fc3c1ffd7478c174cf0de66175b"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "24611069-B9F0-4390-B012-7EFB7755FF69.png",
+      "sha256": "e1bd7017d0adc666aaac1ea887aab3d846cfe771b5a3d06f1f36d79ed8989584"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "28F3B2E7-5C01-40F7-B5CE-521DE4E6355C.png",
+      "sha256": "93149f33c40a393e160f75c2f3eb9a7c78f6a49a4671598fd9d6c8a8b6860169"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "6593D1F8-8138-498D-9766-92DF30C629E3.png",
+      "sha256": "bb4fb2009b1cc06f5b51c936257728b5820dd21899d01abd87a11e4084857972"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "8BD83DB1-964C-4BCB-BFB6-BC23C3BF489A.png",
+      "sha256": "1fcc3184442c2a22c08db1921d9fe6cd298b273a5f236d58035b107e86cab553"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "AA7AC4E6-2DC9-46E8-A7C5-10A596174650.png",
+      "sha256": "b196275685dac647647fc48c6d7656f7104595c0c334532bf7dd5adba4b132e8"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "E545E675-1495-491F-9DE3-1A17CE87940E.png",
+      "sha256": "a686ae24e9207e9d4891213fc72eeb28da2663df774cb6f67fa283253b7ba306"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "ED0D3F68-3775-43DC-9E1F-2B633DC6B04D.png",
+      "sha256": "26d5b4dbb6248e7c9c99a3b81e9d1bcd4479fad34fbab92ba03a50c9b37467b4"
+    },
+    {
+      "device": "swiftui-ipad",
+      "file": "F805E6F5-7C4B-474F-98E7-898E86189AAE.png",
+      "sha256": "12311ec3a9ed434b516fcc6847982a5274c76d834bb2b4ebd27184699125eab2"
+    }
+  ],
+  "review": {
+    "count": 16,
+    "configurations": "Arabic and English, light and dark, text scale 1 and 2, iPhone and iPad jobs",
+    "observations": [
+      "Headings, paragraphs, ordered lists and mixed-script units remain readable in reviewed captures.",
+      "Wide tables use the existing horizontal scroll viewport; not every column is visible at once at 2x.",
+      "Captures do not prove interactive horizontal scrolling or full-app route behavior."
+    ],
+    "method": "Viewed contact sheets of all 16 native originals and the original Arabic 2x iPhone capture. Originals retained unchanged outside source."
+  },
+  "limitations": [
+    "No physical-device BIL39 installation acceptance",
+    "Original SHA is evidence only, not a substitute for final-SHA required CI"
+  ]
+}

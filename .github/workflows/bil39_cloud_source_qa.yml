@@ -4,12 +4,6 @@ on:
     branches:
       - codex/bil39-cloud-completion-20261025
       - bil39/integration-20261025
-    paths:
-      - supabase/functions/ai-coach/**
-      - supabase/functions/_shared/**
-      - supabase/functions/deno.json
-      - supabase/functions/deno.lock
-      - .github/workflows/bil39_cloud_source_qa.yml
   workflow_dispatch:
 permissions:
   contents: read

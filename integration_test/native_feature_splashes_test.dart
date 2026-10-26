@@ -104,6 +104,14 @@ class _NativeDartNetworkDeny extends HttpOverrides {
 
 final _dartNetworkDeny = _NativeDartNetworkDeny();
 
+// IntegrationTestWidgetsFlutterBinding uses the platform IME rather than the
+// registered TestTextInput stub. Exercise the real dismissal path on devices.
+Future<void> nativeQaDismissKeyboard(WidgetTester tester) async {
+  FocusManager.instance.primaryFocus?.unfocus();
+  await SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+  await tester.pump();
+}
+
 Future<void> _nativeSettle(WidgetTester tester) async {
   try {
     await tester.pumpAndSettle(

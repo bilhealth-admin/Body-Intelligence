@@ -2,22 +2,6 @@ name: BIL supplementary security fixture inventory
 on:
   push:
     branches: [codex/bil-native-gates-diagnostic-20261023, bil39/integration-20261025]
-    paths:
-      - .github/workflows/bil_security_fixture_inventory.yml
-      - tools/qa/bil_security_fixture_inventory.py
-      - tools/qa/test_bil_security_fixture_inventory.py
-      - tools/qa/bil_fixture_network_deny.cjs
-      - tools/qa/bil_circle_review_native_fixture.mjs
-      - tools/qa/native_pg_fixture/**
-      - tools/qa/security_delete_message/**
-      - tool/shared/**
-      - tool/prebuild/**
-      - tool/release/**
-      - tool/apple_store_connect/**
-      - tool/google_play/**
-      - public_site/index.html
-      - public_site/app.js
-      - public_site/policy-pages/**
   workflow_dispatch:
     inputs:
       expected_sha:

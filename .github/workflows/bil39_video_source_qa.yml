@@ -2,10 +2,6 @@ name: BIL39 isolated video source and protected delivery tests
 on:
   push:
     branches: [codex/bil39-video-source-completion-20261025, bil39/integration-20261025]
-    paths:
-      - cloudflare/workout-runtime/**
-      - artifacts/workout_media/cloudflare_runtime_v2/**
-      - .github/workflows/bil39_video_source_qa.yml
   workflow_dispatch:
 permissions:
   contents: read

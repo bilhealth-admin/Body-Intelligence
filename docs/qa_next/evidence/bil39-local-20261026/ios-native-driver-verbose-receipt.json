@@ -16,5 +16,8 @@
   "limitations": [
     "Historical iPad bootstrap stall cause remains unresolved",
     "Fresh native simulator run pending"
-  ]
+  ],
+  "current_status": "WITHDRAWN_RESTORED_ORIGINAL_APPROVED_BYTES",
+  "superseded_by": "ci-root-corrections-20261027.json",
+  "withdrawal_reason": "The immutable native-helper guard rejected the diagnostic change. Expected digests were preserved and --verbose was removed."
 }

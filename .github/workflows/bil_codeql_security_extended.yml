@@ -6,8 +6,6 @@ on:
       - main
       - integration/bil-qa-media-policy-20261011
       - bil39/integration-20261025
-    paths-ignore:
-      - 'docs/**'
   pull_request:
     branches:
       - main

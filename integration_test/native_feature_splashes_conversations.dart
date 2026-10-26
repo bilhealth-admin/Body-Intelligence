@@ -206,7 +206,7 @@ void _registerNativeConversationsAndStoreActivity(
                     .text,
                 '',
               );
-              tester.testTextInput.hide();
+              await nativeQaDismissKeyboard(tester);
               await _nativeSettle(tester);
               await _capture(binding, '$name-sent', output);
               expect(transport.sends, 0);

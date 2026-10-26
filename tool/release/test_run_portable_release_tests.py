@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import io
 import os
+import re
 import subprocess
 from types import SimpleNamespace
 import unittest
@@ -62,6 +63,36 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
             self.assertNotIn(path, policy.NOT_RUN)
             self.assertNotIn(path, policy.MIXED_NAMES)
             self.assertEqual(policy.ENV_CAPTURE_GUARDED[path], "BIL_CAPTURE_COACH_RELEASE")
+
+    def test_bil39_visual_partition_does_not_remove_any_complete_release_test(self):
+        policy = runner.load_code_only_policy()
+        _, complete = runner.discover_tests()
+        captures = [
+            "test/bil_crystal_calendar_video_test.dart",
+            "test/bil_crystal_calendar_visual_test.dart",
+            "test/bil_crystal_purchase_cta_isolation_test.dart",
+        ]
+        mixed = {
+            "test/features/analytics/analytics_weight_constant_axis_test.dart": (
+                "Distinct measurements retain their actual axis bounds",
+                "Narrow measured range renders ar dark=True"),
+            "test/features/commerce/bil_store_activity_indicator_test.dart": (
+                "one Splash indicator above checkout dark=true rtl=true reduced=false restore=true",
+                "one Splash indicator above checkout dark=true rtl=true reduced=true restore=true"),
+            "test/features/smart_plan/bil_smart_plan_overview_finish_test.dart": (
+                "real Coach Overview and Smart Plan share finish, clipping and ink in dark RTL",
+                "photographic background stays visible with the same focal crop in RTL and LTR dark=true"),
+        }
+        for name in [*captures, *mixed]:
+            with self.subTest(file=name):
+                self.assertIn(name, complete, 'The complete release suite must retain every case')
+        for name in captures:
+            self.assertIn(name, policy.NOT_RUN)
+        for name, (behavior, capture) in mixed.items():
+            with self.subTest(file=name):
+                self.assertNotIn(name, policy.NOT_RUN)
+                self.assertIsNotNone(re.fullmatch(policy.MIXED_NAMES[name], behavior))
+                self.assertIsNone(re.fullmatch(policy.MIXED_NAMES[name], capture))
 
     def test_partition_preserves_the_remaining_order(self):
         self.assertEqual(
