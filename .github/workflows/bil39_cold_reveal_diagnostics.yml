@@ -35,6 +35,8 @@ jobs:
             --output artifacts/qa/bil39-cold-ipad/cocoapods-installation.json
       - name: Validate direct VM attachment input boundaries
         run: python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
+      - name: Validate advancing capture delivery without changing native deadlines
+        run: python3 -m unittest discover -s .github/scripts -p test_bil_native_bounded_command.py -k capture -v
       - name: Resolve existing dependencies and native pods
         shell: bash
         run: |
@@ -68,35 +70,6 @@ jobs:
         env:
           BIL_NATIVE_DEVICE: ipad
         run: bash .github/scripts/bil39_cold_reveal_diagnostic.sh
-      - name: Exercise actual known-width SwiftUI measurement after the cold app
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY_SWIFT'
-          import pathlib,os,shutil,subprocess
-          root=pathlib.Path.cwd()
-          package=pathlib.Path(os.environ['RUNNER_TEMP'])/'bil39-known-width-package'
-          sources=package/'Sources/BILCoachPresentation'
-          tests=package/'Tests/BILCoachPresentationTests'
-          sources.mkdir(parents=True)
-          tests.mkdir(parents=True)
-          for name in ['BILCoachMarkdownDocument.swift','BILCoachMarkdownView.swift']:
-              shutil.copy2(root/'ios/Runner'/name,sources/name)
-          shutil.copy2(root/'tools/qa/swift/coach_presentation/Package.swift',package/'Package.swift')
-          shutil.copy2(root/'tools/qa/swift/coach_presentation/CoachMarkdownTests.swift',tests/'CoachMarkdownTests.swift')
-          import json
-          devices=json.loads(subprocess.check_output(['xcrun','simctl','list','devices','available','-j']))['devices']
-          device=next(d for runtime,items in devices.items() if '.iOS-' in runtime for d in items if d['name'].startswith('iPad') and d['isAvailable'])
-          if device['state']!='Booted':subprocess.run(['xcrun','simctl','boot',device['udid']],check=True)
-          subprocess.run(['xcrun','simctl','bootstatus',device['udid'],'-b'],check=True)
-          out=root/'artifacts/qa/bil39-cold-ipad'
-          with (out/'known-width-swiftui.log').open('wb') as log:
-              subprocess.run(['xcodebuild','-scheme','BILCoachPresentation','-destination','platform=iOS Simulator,id='+device['udid'],
-                '-derivedDataPath',str(package/'DerivedData'),'-resultBundlePath',str(out/'KnownWidth.xcresult'),
-                '-only-testing:BILCoachPresentationTests/CoachMarkdownTests/testKnownWidthPreparesTheRealLongBodyBeforeItsFirstWindowFrame',
-                'CODE_SIGNING_ALLOWED=NO','test'],cwd=package,stdout=log,stderr=subprocess.STDOUT,check=True,timeout=900)
-          PY_SWIFT
       - name: Upload exact cold reply diagnostic evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

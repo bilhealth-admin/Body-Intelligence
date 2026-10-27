@@ -6,10 +6,12 @@ not cause a 30-minute wait when that exact process already published its URL.
 No app changes, entitlement changes, arbitrary URLs, network discovery or retry.
 """
 import argparse
+import os
 import json
 from pathlib import Path
 import re
 import subprocess
+import signal
 import sys
 import time
 from urllib.parse import urlsplit
@@ -18,6 +20,36 @@ from bil_native_bounded_command import run_bounded
 from bil_ios_simulator_adhoc_sign import TARGETS
 
 BUNDLE = 'com.bilhealth.bodyintelligencelog'
+
+
+def collector_command(device):
+    # macOS log buffers its readiness banner when stdout is a regular file.
+    # A PTY makes the real banner line-buffered, before the selected Runner
+    # exists. script only relays the original bytes; it invents no readiness.
+    return ['/usr/bin/script', '-q', '/dev/null', 'xcrun', 'simctl', 'spawn',
+            device, 'log', 'stream', '--style', 'json', '--predicate',
+            'process == "Runner"']
+
+
+def stop_collector(collector):
+    def send(sig, *, force=False):
+        if (os.name == 'posix' and
+                getattr(collector, '_bil_collector_group', False) is True and
+                type(collector.pid) is int and collector.pid > 0):
+            try:
+                os.killpg(collector.pid, sig)
+            except ProcessLookupError:
+                pass
+        elif force:
+            collector.kill()
+        else:
+            collector.terminate()
+    send(signal.SIGTERM)
+    try:
+        collector.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        send(signal.SIGKILL if os.name == 'posix' else signal.SIGTERM, force=True)
+        collector.wait(timeout=5)
 
 
 def launch_to_file(command, output, timeout=60):
@@ -209,9 +241,9 @@ def main():
         stage = 'log_collector'
         native_log = output / 'selected-runner-events.json'
         collector_output = native_log.open('wb')
-        collector = subprocess.Popen(['xcrun', 'simctl', 'spawn', args.device, 'log', 'stream',
-            '--style', 'json', '--predicate', 'process == "Runner"'],
-            stdout=collector_output, stderr=subprocess.STDOUT)
+        collector = subprocess.Popen(collector_command(args.device),
+            stdout=collector_output, stderr=subprocess.STDOUT, start_new_session=True)
+        collector._bil_collector_group = True
         wait_for_collector(native_log, collector)
         stage = 'launch'
         raw = launch_to_file(['xcrun', 'simctl', 'launch', args.device, BUNDLE,
@@ -234,7 +266,8 @@ def main():
         code = run_bounded(relay, label=args.label,
             log_path=raw_log, receipt_path=native_receipt,
             timeout_seconds=180, running_timeout_seconds=1200, summary_grace_seconds=60,
-            fail_on_launch_error=True)
+            fail_on_launch_error=True,
+            allow_capture_progress=args.target == 'integration_test/native_feature_splashes_test.dart')
         result['drive_exit'] = code
         return code
     except Exception as error:
@@ -242,12 +275,7 @@ def main():
         raise
     finally:
         if collector is not None:
-            collector.terminate()
-            try:
-                collector.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                collector.kill()
-                collector.wait(timeout=5)
+            stop_collector(collector)
         if collector_output is not None:
             collector_output.close()
         result['last_stage'] = stage

@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import time
 import io
+import os
 from unittest.mock import patch
 
 import bil39_simulator_vm_attach as attach
@@ -12,6 +13,66 @@ from bil39_simulator_vm_attach import BUNDLE, launch_pid, vm_url_from_log
 
 
 class ExactSimulatorVmTests(unittest.TestCase):
+    def test_collector_uses_a_local_pty_without_changing_selected_app_filter(self):
+        command = attach.collector_command('AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE')
+        self.assertEqual(command[:4], ['/usr/bin/script', '-q', '/dev/null', 'xcrun'])
+        self.assertEqual(command[-4:], ['--style', 'json', '--predicate', 'process == "Runner"'])
+
+    def test_collector_cleanup_signals_only_its_explicitly_owned_group(self):
+        from unittest.mock import Mock
+        collector = Mock(pid=424242, _bil_collector_group=True)
+        with patch.object(attach.os, 'name', 'posix'), \
+                patch.object(attach.os, 'killpg', create=True) as kill:
+            attach.stop_collector(collector)
+        kill.assert_called_once_with(424242, attach.signal.SIGTERM)
+        collector.wait.assert_called_once_with(timeout=5)
+
+    def test_unresponsive_owned_collector_group_is_killed_with_bounded_waits(self):
+        from unittest.mock import Mock, call
+        collector = Mock(pid=424242, _bil_collector_group=True)
+        collector.wait.side_effect = [subprocess.TimeoutExpired('owned', 5), 0]
+        with patch.object(attach.os, 'name', 'posix'), \
+                patch.object(attach.os, 'killpg', create=True) as kill:
+            attach.stop_collector(collector)
+        self.assertEqual(kill.call_args_list, [call(424242, attach.signal.SIGTERM),
+            call(424242, attach.signal.SIGKILL)])
+        self.assertEqual(collector.wait.call_args_list, [call(timeout=5), call(timeout=5)])
+
+    def test_unmarked_collector_cannot_signal_an_unowned_group(self):
+        from unittest.mock import Mock
+        collector = Mock(pid=424242, _bil_collector_group=False)
+        collector.wait.side_effect = [subprocess.TimeoutExpired('owned', 5), 0]
+        with patch.object(attach.os, 'name', 'posix'), \
+                patch.object(attach.os, 'killpg', create=True) as kill:
+            attach.stop_collector(collector)
+        kill.assert_not_called()
+        collector.terminate.assert_called_once_with()
+        collector.kill.assert_called_once_with()
+
+    @unittest.skipUnless(attach.sys.platform == 'darwin', 'Actual macOS PTY regression')
+    def test_real_mac_pty_exposes_buffered_readiness_before_the_app_is_launched(self):
+        # The old file-only collector waits for output that remains buffered
+        # until the as-yet-unlaunched Runner emits events: a circular wait.
+        source = "import sys,time;print('Filtering the log data using synthetic-only');time.sleep(10)"
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'ready.log'
+            for tty in [False, True]:
+                with path.open('wb') as output:
+                    command = [attach.sys.executable, '-E', '-c', source]
+                    if tty:
+                        command = ['/usr/bin/script', '-q', '/dev/null', *command]
+                    collector = subprocess.Popen(command, stdout=output,
+                        stderr=subprocess.STDOUT, start_new_session=True)
+                    collector._bil_collector_group = True
+                    try:
+                        if tty:
+                            attach.wait_for_collector(path, collector, timeout=3)
+                        else:
+                            with self.assertRaises(TimeoutError):
+                                attach.wait_for_collector(path, collector, timeout=.3)
+                    finally:
+                        attach.stop_collector(collector)
+
     def row(self, url='http://127.0.0.1:52553/synthetic-auth=/', **changes):
         return {'processID': 37093, 'processImagePath': '/qa/Runner.app/Runner',
                 'eventMessage': 'flutter: The Dart VM service is listening on ' + url, **changes}

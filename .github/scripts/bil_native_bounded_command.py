@@ -222,7 +222,8 @@ def _stop_owned_tree(process, grace):
 
 def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
                 running_timeout_seconds=None, summary_grace_seconds=60,
-                kill_grace_seconds=5, fail_on_launch_error=False):
+                kill_grace_seconds=5, fail_on_launch_error=False,
+                allow_capture_progress=False):
     log_path, receipt_path = Path(log_path), Path(receipt_path)
     log_path.parent.mkdir(parents=True, exist_ok=True)
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -251,6 +252,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
     reader = None
     eof = False
     output_drain_limited = False
+    capture_completed, capture_total, capture_events = 0, None, 0
     for sig in (signal.SIGTERM, signal.SIGINT):
         previous_signals[sig] = signal.signal(
             sig, lambda received, _frame: interrupted.append(received),
@@ -274,6 +276,7 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
     def consume(raw, stream):
         nonlocal deadline, phase, first_test_at, terminal_at
         nonlocal native_summary, native_failed, output_bytes, parser_tail, launch_error
+        nonlocal capture_completed, capture_total, capture_events
         stream.write(raw)
         stream.flush()
         output_hash.update(raw)
@@ -284,6 +287,23 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         # a split native failure/summary cannot disappear from the receipt.
         parser_tail = text[-4096:] if not raw.endswith(b"\n") else ""
         text = ANSI.sub("", text).strip()
+        # The feature driver verifies each original PNG before publishing this
+        # checkpoint. A large iPad batch can take longer than 60s in total while
+        # making steady progress. Keep the same 60s inactivity bound and the
+        # original absolute native deadline; repeated/foreign markers buy no time.
+        if allow_capture_progress and terminal_at is not None:
+            for progress in re.finditer(
+                    r"(?:^|\n)(?:\[\s*(?:[+-]?[0-9]+\s*ms)?\]\s*)?"
+                    r"BIL_NATIVE_CAPTURE_PROGRESS ([1-9][0-9]*)/([1-9][0-9]*)(?:\r?$|\n)", text):
+                completed, total = map(int, progress.groups())
+                if (capture_completed < completed <= total <= 124
+                        and (capture_total is None or capture_total == total)):
+                    capture_completed, capture_total = completed, total
+                    capture_events += 1
+                    absolute_end = (first_test_at + running_timeout_seconds
+                                    if running_timeout_seconds is not None
+                                    else started + timeout_seconds)
+                    deadline = min(absolute_end, time.monotonic() + summary_grace_seconds)
         if fail_on_launch_error and first_test_at is None and re.search(
                 r"(?:^|\n)(?:\[[^\]\n]+\]\s*)?Error waiting for a debug connection: "
                 r"The log reader failed unexpectedly(?:\r?$|\n)", text):
@@ -424,6 +444,10 @@ def run_bounded(command, *, label, log_path, receipt_path, timeout_seconds,
         "bootstrap_timeout_seconds": timeout_seconds,
         "native_test_timeout_seconds": running_timeout_seconds,
         "summary_grace_seconds": summary_grace_seconds,
+        "capture_progress": {"enabled": allow_capture_progress,
+                             "verified_count": capture_completed,
+                             "expected_count": capture_total,
+                             "advancing_checkpoints": capture_events},
         "first_test_after_seconds": None if first_test_at is None else round(first_test_at-started, 3),
         "terminal_summary_after_seconds": None if terminal_at is None else round(terminal_at-started, 3),
         "native_summary": native_summary,
@@ -461,6 +485,8 @@ def main():
     parser.add_argument("--kill-grace-seconds", type=positive_seconds, default=5)
     parser.add_argument("--fail-on-launch-error", action="store_true",
                         help="Fail an explicit Flutter debug log-reader launch error before native tests")
+    parser.add_argument("--allow-capture-progress", action="store_true",
+                        help="Bound verified native PNG collection by inactivity and the original absolute deadline")
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
@@ -473,6 +499,7 @@ def main():
         summary_grace_seconds=args.summary_grace_seconds,
         kill_grace_seconds=args.kill_grace_seconds,
         fail_on_launch_error=args.fail_on_launch_error,
+        allow_capture_progress=args.allow_capture_progress,
     )
 
 
