@@ -72,12 +72,16 @@ class ExactSimulatorVmTests(unittest.TestCase):
                     patch.object(attach.subprocess, 'run', side_effect=run), \
                     patch.object(attach.subprocess, 'Popen') as collector, \
                     patch.object(attach, 'launch_to_file', return_value=BUNDLE + ': 37093\n'), \
+                    patch.object(attach, 'wait_for_collector'), \
+                    patch.object(attach, 'discover_vm_from_capture',
+                        return_value='http://127.0.0.1:52553/synthetic-auth=/') as discovery, \
                     patch.object(attach, 'run_bounded', return_value=0) as drive:
                 collector.return_value.poll.return_value = None
                 self.assertEqual(attach.main(), 0)
-            self.assertEqual(len(commands), 2)
+            self.assertEqual(len(commands), 1)
             self.assertEqual(commands[0][:3], ['xcrun', 'simctl', 'install'])
-            self.assertIn('log', commands[1])
+            discovery.assert_called_once()
+            self.assertEqual(discovery.call_args.args[1], 37093)
             collector.return_value.terminate.assert_called_once()
             drive.assert_called_once()
             invoked = drive.call_args.args[0]
@@ -87,6 +91,32 @@ class ExactSimulatorVmTests(unittest.TestCase):
             receipt = (output / 'attachment-receipt.json').read_text()
             self.assertNotIn('synthetic-auth', receipt)
             self.assertEqual(json.loads(receipt)['retry_count'], 0)
+
+    def test_vm_discovery_reads_the_already_captured_stream_without_commands(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'events.json'
+            path.write_text('Filtering the log data using "process == Runner"\n[' +
+                json.dumps(self.row(processID=999)) + ',' + json.dumps(self.row()) + ']')
+            from unittest.mock import Mock
+            collector = Mock()
+            collector.poll.return_value = None
+            with patch.object(attach.subprocess, 'run') as command:
+                attach.wait_for_collector(path, collector)
+                self.assertEqual(attach.discover_vm_from_capture(path, 37093, collector),
+                                 'http://127.0.0.1:52553/synthetic-auth=/')
+                command.assert_not_called()
+
+    def test_closed_or_unready_collector_is_not_treated_as_success(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'events.json'
+            path.write_text('')
+            from unittest.mock import Mock
+            collector = Mock()
+            collector.poll.return_value = 1
+            with self.assertRaises(RuntimeError):
+                attach.wait_for_collector(path, collector)
+            with self.assertRaises(RuntimeError):
+                attach.discover_vm_from_capture(path, 37093, collector)
 
     def test_real_inherited_pipe_eof_trap_is_avoided_by_file_wait(self):
         child = 'import time;time.sleep(2.5)'

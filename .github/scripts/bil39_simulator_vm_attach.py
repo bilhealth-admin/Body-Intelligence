@@ -36,7 +36,7 @@ def launch_to_file(command, output, timeout=60):
             raise
     if process.returncode:
         raise subprocess.CalledProcessError(process.returncode, ['selected-simulator-launch'])
-    return Path(output).read_text(errors='replace')
+    return Path(output).read_text(encoding='utf-8', errors='replace')
 
 
 def decode_events(buffer):
@@ -58,6 +58,35 @@ def decode_events(buffer):
         buffer = buffer[end:]
 
 
+def wait_for_collector(path, collector, timeout=20):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if collector.poll() is not None:
+            raise RuntimeError('Selected-app log collector exited before readiness')
+        with Path(path).open('r', encoding='utf-8', errors='replace') as stream:
+            prefix = stream.read(16384)
+        if 'Filtering the log data using' in prefix or decode_events(prefix)[0]:
+            return
+        time.sleep(.05)
+    raise TimeoutError('Selected-app log collector did not become ready')
+
+
+def discover_vm_from_capture(path, pid, collector, timeout=90):
+    deadline = time.monotonic() + timeout
+    buffer = ''
+    with Path(path).open('r', encoding='utf-8', errors='replace') as stream:
+        while time.monotonic() < deadline:
+            buffer += stream.read(65536)
+            rows, buffer = decode_events(buffer)
+            url = vm_url_from_log(json.dumps(rows), pid)
+            if url is not None:
+                return url
+            if collector.poll() is not None:
+                raise RuntimeError('Selected-app log collector exited before VM discovery')
+            time.sleep(.05)
+    raise TimeoutError('Selected BIL process did not publish a VM service within 90s')
+
+
 def relay_driver(arguments):
     parser = argparse.ArgumentParser(description='Internal selected-app log relay')
     parser.add_argument('--native-log', type=Path, required=True)
@@ -71,7 +100,7 @@ def relay_driver(arguments):
     root = Path.cwd().resolve()
     for path in (args.native_log, args.driver_log):
         path.resolve().relative_to(root)
-    with args.driver_log.open('wb') as output, args.native_log.open('r', errors='replace') as native:
+    with args.driver_log.open('wb') as output, args.native_log.open('r', encoding='utf-8', errors='replace') as native:
         process = subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT)
         buffer = ''
         finished_at = None
@@ -175,6 +204,7 @@ def main():
         collector = subprocess.Popen(['xcrun', 'simctl', 'spawn', args.device, 'log', 'stream',
             '--style', 'json', '--predicate', 'process == "Runner"'],
             stdout=collector_output, stderr=subprocess.STDOUT)
+        wait_for_collector(native_log, collector)
         stage = 'launch'
         raw = launch_to_file(['xcrun', 'simctl', 'launch', args.device, BUNDLE,
             '--enable-dart-profiling', '--disable-vm-service-publication', '--start-paused',
@@ -182,21 +212,7 @@ def main():
         pid = launch_pid(raw)
         result['pid'] = pid
         stage = 'discover_vm'
-        url = None
-        deadline = time.monotonic() + 90
-        while time.monotonic() < deadline and url is None:
-            if collector.poll() is not None:
-                raise RuntimeError('Selected-app log collector exited before VM discovery')
-            raw = subprocess.run(['xcrun', 'simctl', 'spawn', args.device, 'log', 'show',
-                '--last', '2m', '--style', 'json', '--predicate',
-                'process == "Runner" AND eventMessage CONTAINS "The Dart VM service is listening on"'],
-                capture_output=True, text=True, timeout=15)
-            raw.check_returncode()
-            url = vm_url_from_log(raw.stdout, pid)
-            if url is None:
-                time.sleep(1)
-        if url is None:
-            raise TimeoutError('Selected BIL process did not publish a VM service within 90s')
+        url = discover_vm_from_capture(native_log, pid, collector)
         result['vm_discovered_after_seconds'] = round(time.monotonic() - started, 3)
         result['vm_origin'] = 'http://127.0.0.1:' + str(urlsplit(url).port)
         stage = 'native_driver'

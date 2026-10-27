@@ -54,8 +54,7 @@ Future<void> main() async {
           (coachOnly || conversationOnly ? [] : null);
       final reveal =
           data?['native_coach_reveal'] ?? (conversationOnly ? [] : null);
-      final history =
-          data?['native_coach_history'] ?? (conversationOnly ? [] : null);
+      final history = data?['native_coach_history'] ?? const [];
       final conversations = data?['community_conversations_native'] ?? const [];
       final storeActivity = data?['store_activity_native'] ?? const [];
       Object? collectionFailure;

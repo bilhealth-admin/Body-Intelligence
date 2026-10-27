@@ -2,7 +2,7 @@ name: BIL39 iPhone bridge diagnostics only
 
 on:
   push:
-    branches: [codex/bil39-native-diagnostics-20261027]
+    branches: [codex/bil39-iphone-discovery-fix-20261027]
 
 permissions:
   contents: read
