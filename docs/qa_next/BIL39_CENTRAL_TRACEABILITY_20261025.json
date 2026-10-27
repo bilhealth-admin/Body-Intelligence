@@ -3,7 +3,7 @@
   "source_bundle_sha256": "bd62a5c229b00687968cf43b816bc809478f7f0062c78169ca5e8ff8487fe28b",
   "protected_ios38_sha": "155b079696430919f8272df934371f033fb11be2",
   "candidate_sha": null,
-  "release_status": "CI_TOOLING_CORRECTIONS_VERIFIED_PENDING_FRESH_EXACT_SHA_CI_AND_NATIVE39",
+  "release_status": "LOCAL_NATIVE_RUNNER_CLOSURE_AWAITING_FINAL_EXACT_SHA_CI",
   "original_37_cases": [
     {
       "ID": "BIL-01",
@@ -5723,10 +5723,9 @@
     }
   },
   "hard_blockers": [
-    "The new combined IME/UIKit presentation correction requires all ten exact-source CI workflows; d34 had seven successful and three failed workflows despite full host coverage passing.",
-    "Native Swift compilation and real Coach/Community layout acceptance on independent iPhone and iPad runs remain required for the corrected source.",
-    "Signed39 archive, final binary privacy/entitlement/icon identity, Apple processing and internal TestFlight availability remain unverified.",
-    "Physical39 acceptance remains pending installation; physical38 source-discovery evidence cannot certify39."
+    "Final candidate must pass all ten existing workflows on its exact SHA, including full 41-feature cases and all three native scopes independently on iPhone and iPad.",
+    "Signed39 original IPA identity/privacy/signature, Apple processing and internal TestFlight availability remain unverified.",
+    "Physical39 acceptance remains pending installation; physical38 evidence cannot certify39."
   ],
   "private_original_photos": "35 hashed originals preserved privately; not committed",
   "prohibited_actions_performed": [],
@@ -6244,5 +6243,66 @@
     "native_swift_build": "PENDING_MACOS_CI",
     "signed_build39": false,
     "physical39_acceptance": "PENDING_INSTALLATION"
-  }
+  },
+  "latest_native_runner_closure": {
+    "date": "2026-10-27",
+    "base_product_sha": "89c528e1aff7145607ddf7dd6fe62b9a7923370d",
+    "scope": "QA transport and observation only; production Dart/iOS/Android/cloud/contracts/commerce unchanged",
+    "retained_full_source_evidence": {
+      "flutter_files": 1471,
+      "pass": 11164,
+      "fail": 0,
+      "error": 0,
+      "expected_skip": 1,
+      "native_android_feature_cases": 41,
+      "native_component_original_pngs": 16
+    },
+    "actual_isolated_evidence": [
+      {
+        "run": 40448435716,
+        "sha": "36e652b8a9d3998ea2ccbb182cecb25d49b25db5",
+        "result": "iPad real crypto PASS; VM discovery28.802s;3actual tests plus teardown; no retries; not full release acceptance"
+      },
+      {
+        "run": 40451125122,
+        "sha": "df85a9b8529cf5804f98b767226eba6f8670d331",
+        "result": "AR native first reply PASS693ms within1500ms. Community3failed aftersend because idle/native-visibility observation invalid for focused own-row state; original failures and raw captures retained; no all-pass claim"
+      }
+    ],
+    "confirmed_tooling_corrections": [
+      "Discover VM from already captured selected-PID JSON; redundant logshow query removed",
+      "Collect actual native test counters independently of Flutter app-null device log reader",
+      "Wait for owned launch process with file output instead of inherited-pipe EOF",
+      "Build only exact selected simulator active architecture; all signing/entitlement/identity checks retained"
+    ],
+    "conversation_observation": {
+      "before_send": "Existing strict nonempty native readiness and fallback rejection preserved",
+      "acknowledgement": "Within original3s require one operation, one painted accepted row, empty composer, enabled send button and finished outgoing flight; do not require global animation idleness",
+      "after_send": "Verify focused composer, explicitly dismiss IME, scroll history into view, require native readiness with existing8s guard, tap real latest arrow and verify final offset and retained one-send receipt"
+    },
+    "local_new_evidence": {
+      "community_behavior_tests": 10,
+      "transport_host_controls": 10,
+      "real_shell_scope_handoffs": 7,
+      "signer_controls_retained_identical_to_verified_probe": 47,
+      "analyzer": "0 issues; four-file analysis identified one unnecessary import, removed; changed file reanalysis clean",
+      "native_runtime_current_candidate": "not run yet"
+    },
+    "source_files": [
+      ".github/scripts/bil39_simulator_vm_attach.py",
+      ".github/scripts/bil39_ios_native_integration.sh",
+      ".github/scripts/bil_ios_simulator_adhoc_sign.py",
+      "tools/qa/flutter/native_conversation_observer.dart",
+      "integration_test/native_feature_splashes_conversations.dart",
+      "test/features/community/community_chat_refresh_regression_test.dart",
+      "tools/qa/test_bil39_native_split.py"
+    ],
+    "final_rule": "All existing ten exact-SHA gates and full3native scopes per device remain required. No diagnostic selection or four-case driver is merged."
+  },
+  "historical_hard_blockers_before_native_runner_closure": [
+    "The new combined IME/UIKit presentation correction requires all ten exact-source CI workflows; d34 had seven successful and three failed workflows despite full host coverage passing.",
+    "Native Swift compilation and real Coach/Community layout acceptance on independent iPhone and iPad runs remain required for the corrected source.",
+    "Signed39 archive, final binary privacy/entitlement/icon identity, Apple processing and internal TestFlight availability remain unverified.",
+    "Physical39 acceptance remains pending installation; physical38 source-discovery evidence cannot certify39."
+  ]
 }

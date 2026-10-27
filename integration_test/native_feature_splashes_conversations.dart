@@ -189,9 +189,40 @@ void _registerNativeConversationsAndStoreActivity(
                 outgoing,
               );
               await tester.tap(find.byKey(const Key('community-chat-send')));
+              await nativeQaAwaitAcceptedConversationSend(
+                tester,
+                sendCount: () => repository.sends,
+                composer: find.byKey(const Key('community-message-composer')),
+                sendButton: find.byKey(const Key('community-chat-send')),
+                acceptedRow: find.byKey(
+                  const Key('community-message-text-sent-1'),
+                ),
+                viewport: history,
+              );
+              final focusedComposer = find.descendant(
+                of: find.byKey(const Key('community-message-composer')),
+                matching: find.byType(EditableText),
+              );
+              expect(
+                tester.widget<EditableText>(focusedComposer).focusNode.hasFocus,
+                isTrue,
+              );
+              await nativeQaDismissKeyboard(tester);
+              await _nativeSettle(tester);
+              // Own messages intentionally use Flutter text. At 2x with the
+              // IME open the incoming native body can be entirely off-screen.
+              // Reveal history before requiring real SwiftUI readiness again.
+              await tester.drag(history, const Offset(0, 300));
               await _nativeSettle(tester);
               await _waitNativeDmLayout(tester);
+              final latest = find.byKey(const ValueKey('chat-jump-to-latest'));
+              expect(latest.hitTestable(), findsOneWidget);
+              await tester.tap(latest);
               await _nativeSettle(tester);
+              expect(
+                controller.offset,
+                closeTo(controller.position.minScrollExtent, 1),
+              );
               expect(repository.sends, 1);
               expect(find.text(outgoing), findsOneWidget);
               expect(
@@ -203,8 +234,6 @@ void _registerNativeConversationsAndStoreActivity(
                     .text,
                 '',
               );
-              await nativeQaDismissKeyboard(tester);
-              await _nativeSettle(tester);
               await _capture(binding, '$name-sent', output);
               expect(transport.sends, 0);
               expect(_dartNetworkDeny.blockedClientCreations, 0);

@@ -35,6 +35,14 @@ SETTING_KEYS = (
 )
 
 
+def simulator_build_destination(device=None):
+    if device is None:
+        return ['-destination', 'generic/platform=iOS Simulator']
+    if not re.fullmatch(r'[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}', device):
+        raise ValueError('An exact QA simulator UUID is required')
+    return ['-destination', f'platform=iOS Simulator,id={device}', 'ONLY_ACTIVE_ARCH=YES']
+
+
 def digest(data):
     return hashlib.sha256(data).hexdigest()
 
@@ -262,7 +270,7 @@ def sign_simulator(args, *, run=subprocess.run, run_build=run_bounded, host=sys.
                 raise ValueError("Refusing to replace an existing certificate signature")
         xcode = ["xcodebuild", "-workspace", str(workspace / "ios/Runner.xcworkspace"),
                  "-scheme", "Runner", "-configuration", "Debug", "-sdk", "iphonesimulator",
-                 "-destination", "generic/platform=iOS Simulator",
+                 *simulator_build_destination(getattr(args, 'device', None)),
                  "-clonedSourcePackagesDirPath", str(workspace / "build/ios/SourcePackages"),
                  "-disableAutomaticPackageResolution", "-skipPackageUpdates",
                  f"BUILD_DIR={workspace / 'build/ios'}", "CODE_SIGN_IDENTITY=-",
@@ -356,6 +364,7 @@ def main():
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--qa-simulator-only", action="store_true", required=True)
     parser.add_argument("--build-number", choices=("37", "39"), default="37")
+    parser.add_argument("--device", help="Exact selected QA simulator; build its active architecture only")
     args = parser.parse_args()
     try:
         receipt = sign_simulator(args)

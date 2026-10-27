@@ -57,6 +57,7 @@ import 'package:path_provider/path_provider.dart';
 import 'native_layout_measurements.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../tools/qa/flutter/native_conversation_observer.dart';
 import '../tools/qa/flutter/native_hold_observer.dart';
 import '../tools/qa/flutter/native_capture_manifest.dart';
 

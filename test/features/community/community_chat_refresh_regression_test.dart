@@ -1,3 +1,4 @@
+import '../../../tools/qa/flutter/native_conversation_observer.dart';
 import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 
@@ -88,6 +89,204 @@ void main() {
   tearDown(() async {
     await client.dispose();
   });
+  testWidgets(
+    'accepted iOS send is observable while an independent ticker remains active',
+    (tester) async {
+      final repository = _ChatRepository(client)..appendSentMessage = true;
+      addTearDown(repository.changes.close);
+      await tester.pumpWidget(_chat(repository));
+      await tester.pumpAndSettle();
+      final composer = find.byKey(const Key('community-message-composer'));
+      final button = find.byKey(const Key('community-chat-send'));
+      await tester.enterText(composer, 'Acknowledged iOS message');
+      await tester.tap(button);
+      final ongoing = AnimationController(
+        vsync: tester,
+        duration: const Duration(milliseconds: 300),
+      )..repeat();
+      await nativeQaAwaitAcceptedConversationSend(
+        tester,
+        sendCount: () => repository.sendCalls,
+        composer: composer,
+        sendButton: button,
+        acceptedRow: find.byKey(
+          const Key('community-message-text-accepted-own-1'),
+        ),
+        viewport: find.byKey(const Key('community-message-history')),
+      );
+      expect(repository.sendCalls, 1);
+      expect(find.text('Acknowledged iOS message'), findsOneWidget);
+      expect(tester.widget<TextField>(composer).controller!.text, '');
+      final editable = find.descendant(
+        of: composer,
+        matching: find.byType(EditableText),
+      );
+      expect(tester.widget<EditableText>(editable).focusNode.hasFocus, isTrue);
+      expect(ongoing.isAnimating, isTrue);
+      FlutterError? idleError;
+      try {
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 20),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 3),
+        );
+      } on FlutterError catch (error) {
+        idleError = error;
+      }
+      expect(idleError.toString(), contains('pumpAndSettle timed out'));
+      ongoing.dispose();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'conversation observer refuses a send before acknowledgement',
+    (tester) async {
+      final acknowledgement = Completer<void>();
+      final repository = _ChatRepository(client)
+        ..appendSentMessage = true
+        ..pendingSend = acknowledgement;
+      addTearDown(repository.changes.close);
+      await tester.pumpWidget(_chat(repository));
+      await tester.pumpAndSettle();
+      final composer = find.byKey(const Key('community-message-composer'));
+      final button = find.byKey(const Key('community-chat-send'));
+      await tester.enterText(composer, 'Keep until acknowledged');
+      await tester.tap(button);
+      Object? pendingError;
+      try {
+        await nativeQaAwaitAcceptedConversationSend(
+          tester,
+          sendCount: () => repository.sendCalls,
+          composer: composer,
+          sendButton: button,
+          acceptedRow: find.byKey(
+            const Key('community-message-text-accepted-own-1'),
+          ),
+          viewport: find.byKey(const Key('community-message-history')),
+        );
+      } catch (error) {
+        pendingError = error;
+      }
+      expect(
+        pendingError.toString(),
+        contains('Send did not reach one acknowledged'),
+      );
+      expect(
+        tester.widget<TextField>(composer).controller!.text,
+        'Keep until acknowledged',
+      );
+      expect(tester.widget<IconButton>(button).onPressed, isNull);
+      acknowledgement.complete();
+      await nativeQaAwaitAcceptedConversationSend(
+        tester,
+        sendCount: () => repository.sendCalls,
+        composer: composer,
+        sendButton: button,
+        acceptedRow: find.byKey(
+          const Key('community-message-text-accepted-own-1'),
+        ),
+        viewport: find.byKey(const Key('community-message-history')),
+      );
+      expect(repository.sendCalls, 1);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets(
+      'accepted DM history and latest navigation at scale $scale',
+      (tester) async {
+        tester.view.reset();
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(402, 874);
+        addTearDown(tester.view.reset);
+        final repository = _ChatRepository(
+          client,
+          messages: List.generate(
+            24,
+            (index) => CommunityMessage(
+              id: 'old-$index',
+              senderId: '22222222-2222-4222-8222-222222222222',
+              recipientId: '11111111-1111-4111-8111-111111111111',
+              body:
+                  'Previously acknowledged history message $index. Read the saved plan before making changes.',
+              createdAt: DateTime(2026, 10, 25, 8, index),
+            ),
+          ),
+        )..appendSentMessage = true;
+        addTearDown(repository.changes.close);
+        await tester.pumpWidget(
+          MaterialApp(
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.linear(scale)),
+              child: child!,
+            ),
+            home: CommunityChatPage(
+              userId: '22222222-2222-4222-8222-222222222222',
+              displayName: 'QA chat',
+              repository: repository,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final composer = find.byKey(const Key('community-message-composer'));
+        final button = find.byKey(const Key('community-chat-send'));
+        final history = find.byKey(const Key('community-message-history'));
+        tester.view.viewInsets = const FakeViewPadding(bottom: 336);
+        await tester.pump();
+        await tester.enterText(
+          composer,
+          'Received the plan; this is a local test message.',
+        );
+        await tester.tap(button);
+        await nativeQaAwaitAcceptedConversationSend(
+          tester,
+          sendCount: () => repository.sendCalls,
+          composer: composer,
+          sendButton: button,
+          acceptedRow: find.byKey(
+            const Key('community-message-text-accepted-own-1'),
+          ),
+          viewport: history,
+        );
+        FocusManager.instance.primaryFocus?.unfocus();
+        tester.view.viewInsets = const FakeViewPadding();
+        await tester.pumpAndSettle();
+        await tester.drag(history, const Offset(0, 300));
+        await tester.pumpAndSettle();
+        final latest = find.byKey(const ValueKey('chat-jump-to-latest'));
+        expect(latest.hitTestable(), findsOneWidget);
+        await tester.tap(latest);
+        await tester.pumpAndSettle();
+        final controller = tester.widget<ListView>(history).controller!;
+        expect(
+          controller.offset,
+          closeTo(controller.position.minScrollExtent, 1),
+        );
+        expect(repository.sendCalls, 1);
+        expect(tester.widget<TextField>(composer).controller!.text, '');
+        expect(
+          find.text('Received the plan; this is a local test message.'),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  }
+
   testWidgets('accepted DM travels to its own bubble without a second send', (
     tester,
   ) async {

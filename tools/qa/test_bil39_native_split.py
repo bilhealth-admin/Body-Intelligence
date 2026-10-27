@@ -121,14 +121,50 @@ class NativeSplitTest(unittest.TestCase):
         self.assertNotIn('IPAD_UDID', self.script)
         self.assertNotIn('IPHONE_UDID', self.script)
         self.assertIn('--build-number 39', self.script)
-        self.assertIn('--use-application-binary "$APP" --target "$TARGET" --driver "$DRIVER"', self.script)
-        self.assertIn('--summary-grace-seconds 60 --fail-on-launch-error', self.script)
-        self.assertIn('flutter --verbose drive', self.script)
+        self.assertIn('python3 .github/scripts/bil39_simulator_vm_attach.py --qa-simulator-only', self.script)
+        self.assertIn('--target "$TARGET" --driver "$DRIVER" --label "$LABEL-$KIND-drive"', self.script)
+        self.assertIn('--device "$DEVICE"', self.script)
         self.assertIn('for pair in "$LABEL:$DEVICE"', self.script)
         self.assertNotIn('continue-on-error', self.script)
         old = ROOT / '.github/scripts/bil_ios37_native_integration.sh'
         self.assertEqual(hashlib.sha256(old.read_bytes()).hexdigest(),
             '68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314')
+
+    def test_actual_shell_hands_all_three_scopes_and_exact_receipts_to_transport(self):
+        selection = 'case "$KIND" in' + self.script.split('case "$KIND" in', 1)[1].split('\n  esac', 1)[0] + '\n  esac\n'
+        command = self.script.split('    BIL_NATIVE_CAPTURE_DEVICE_ID=', 1)[1].split('    collect_app_files', 1)[0]
+        command = '    BIL_NATIVE_CAPTURE_DEVICE_ID=' + command
+        python = Path(sys.executable).as_posix()
+        if os.name == 'nt':
+            python = '/' + python[0].lower() + python[2:]
+        with tempfile.TemporaryDirectory(prefix='bil39-scope-argv-') as folder:
+            root = Path(folder)
+            recorder = root / 'record.py'
+            recorder.write_text('import json,os,sys;print(json.dumps({"argv":sys.argv[1:],"device":os.environ.get("BIL_NATIVE_CAPTURE_DEVICE_ID")}))', encoding='utf-8')
+            shell = selection + command.replace('python3 .github/scripts/bil39_simulator_vm_attach.py',
+                'exec ' + shlex.quote(python) + ' ' + shlex.quote(recorder.as_posix()), 1)
+            device = 'AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE'
+            for kind, target in [('system-crypto', 'integration_test/system_crypto_bridge_integration_test.dart'),
+                                 ('native-settings', 'integration_test/native_settings_polish_test.dart'),
+                                 ('feature-splashes', 'integration_test/native_feature_splashes_test.dart')]:
+                with self.subTest(kind=kind):
+                    result = subprocess.run([self.bash, '-e', '-o', 'pipefail'], input=shell,
+                        text=True, capture_output=True, timeout=10, env={**os.environ,
+                            'KIND':kind, 'LABEL':'iphone', 'DEVICE':device, 'APP':root.as_posix()+'/Runner.app',
+                            'GITHUB_WORKSPACE':root.as_posix(), 'OUT':'artifacts/native', 'CRYPTO_DRIVER':'crypto-driver.dart'})
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    record = json.loads(result.stdout)
+                    args = record['argv']
+                    self.assertEqual(record['device'], device)
+                    self.assertEqual(args[args.index('--device')+1], device)
+                    self.assertEqual(args[args.index('--app')+1].replace(chr(92), '/'), root.as_posix()+'/Runner.app')
+                    expected_driver = ('crypto-driver.dart' if kind == 'system-crypto' else 'test_driver/native_settings_capture_driver.dart' if kind == 'native-settings' else 'test_driver/native_feature_splashes_driver.dart')
+                    self.assertEqual(args[args.index('--driver')+1], expected_driver)
+                    self.assertEqual(args[args.index('--target')+1], target)
+                    self.assertEqual(args[args.index('--label')+1], 'iphone-'+kind+'-drive')
+                    self.assertTrue(args[args.index('--log')+1].replace(chr(92), '/').endswith('/artifacts/native/iphone-'+kind+'.log'))
+                    self.assertTrue(args[args.index('--receipt')+1].replace(chr(92), '/').endswith('/artifacts/native/iphone-'+kind+'-drive-result.json'))
+                    self.assertIn('--qa-simulator-only', args)
 
     def test_two_distinct_workflow_runs_are_required_and_each_missing_failed_or_skipped_job_blocks(self):
         for label, title in [('iphone', 'iPhone'), ('ipad', 'iPad')]:

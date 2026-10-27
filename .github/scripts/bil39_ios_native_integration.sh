@@ -182,7 +182,7 @@ for KIND in "${KINDS[@]}"; do
     python3 .github/scripts/bil_ios_simulator_adhoc_sign.py \
     --qa-simulator-only --build-number 39 --workspace "$GITHUB_WORKSPACE" --app "$APP" \
     --output "$GITHUB_WORKSPACE/$OUT/$KIND-simulator-signature.json" \
-    --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE"
+    --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE" --device "$DEVICE"
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '39'
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
   shasum -a 256 "$APP/Runner" > "$OUT/$KIND-binary.sha256"
@@ -274,13 +274,11 @@ BIL_PRIVACY_PY
     BIL_NATIVE_CAPTURE_DEVICE_ID="$DEVICE" \
     BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-native-settings" \
     BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/$LABEL-feature-splashes" \
-      python3 "$BOUND" --label "$LABEL-$KIND-drive" \
-        --log "$OUT/$LABEL-$KIND.log" --receipt "$OUT/$LABEL-$KIND-drive-result.json" \
-        --timeout-seconds 1800 --running-timeout-seconds 1200 \
-        --summary-grace-seconds 60 --fail-on-launch-error -- \
-        flutter --verbose drive --no-pub --keep-app-running --device-id "$DEVICE" --timeout 1200 \
-        --use-application-binary "$APP" --target "$TARGET" --driver "$DRIVER" \
-        --test-arguments="--packages=$GITHUB_WORKSPACE/.dart_tool/package_config.json"
+      python3 .github/scripts/bil39_simulator_vm_attach.py --qa-simulator-only \
+        --device "$DEVICE" --app "$APP" --output "$GITHUB_WORKSPACE/$OUT/$LABEL-$KIND-transport" \
+        --target "$TARGET" --driver "$DRIVER" --label "$LABEL-$KIND-drive" \
+        --log "$GITHUB_WORKSPACE/$OUT/$LABEL-$KIND.log" \
+        --receipt "$GITHUB_WORKSPACE/$OUT/$LABEL-$KIND-drive-result.json"
     collect_app_files "$LABEL-$KIND" "$DEVICE"
     stage "$LABEL-$KIND-shutdown" 30 "$OUT/$LABEL-$KIND-shutdown.log" \
       xcrun simctl shutdown "$DEVICE"

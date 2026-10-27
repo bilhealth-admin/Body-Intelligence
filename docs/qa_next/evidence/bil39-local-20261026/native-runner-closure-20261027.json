@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-27",
+  "base_product_sha": "89c528e1aff7145607ddf7dd6fe62b9a7923370d",
+  "scope": "QA transport and observation only; production Dart/iOS/Android/cloud/contracts/commerce unchanged",
+  "retained_full_source_evidence": {
+    "flutter_files": 1471,
+    "pass": 11164,
+    "fail": 0,
+    "error": 0,
+    "expected_skip": 1,
+    "native_android_feature_cases": 41,
+    "native_component_original_pngs": 16
+  },
+  "actual_isolated_evidence": [
+    {
+      "run": 40448435716,
+      "sha": "36e652b8a9d3998ea2ccbb182cecb25d49b25db5",
+      "result": "iPad real crypto PASS; VM discovery28.802s;3actual tests plus teardown; no retries; not full release acceptance"
+    },
+    {
+      "run": 40451125122,
+      "sha": "df85a9b8529cf5804f98b767226eba6f8670d331",
+      "result": "AR native first reply PASS693ms within1500ms. Community3failed aftersend because idle/native-visibility observation invalid for focused own-row state; original failures and raw captures retained; no all-pass claim"
+    }
+  ],
+  "confirmed_tooling_corrections": [
+    "Discover VM from already captured selected-PID JSON; redundant logshow query removed",
+    "Collect actual native test counters independently of Flutter app-null device log reader",
+    "Wait for owned launch process with file output instead of inherited-pipe EOF",
+    "Build only exact selected simulator active architecture; all signing/entitlement/identity checks retained"
+  ],
+  "conversation_observation": {
+    "before_send": "Existing strict nonempty native readiness and fallback rejection preserved",
+    "acknowledgement": "Within original3s require one operation, one painted accepted row, empty composer, enabled send button and finished outgoing flight; do not require global animation idleness",
+    "after_send": "Verify focused composer, explicitly dismiss IME, scroll history into view, require native readiness with existing8s guard, tap real latest arrow and verify final offset and retained one-send receipt"
+  },
+  "local_new_evidence": {
+    "community_behavior_tests": 10,
+    "transport_host_controls": 10,
+    "real_shell_scope_handoffs": 7,
+    "signer_controls_retained_identical_to_verified_probe": 47,
+    "analyzer": "0 issues; four-file analysis identified one unnecessary import, removed; changed file reanalysis clean",
+    "native_runtime_current_candidate": "not run yet"
+  },
+  "source_files": [
+    ".github/scripts/bil39_simulator_vm_attach.py",
+    ".github/scripts/bil39_ios_native_integration.sh",
+    ".github/scripts/bil_ios_simulator_adhoc_sign.py",
+    "tools/qa/flutter/native_conversation_observer.dart",
+    "integration_test/native_feature_splashes_conversations.dart",
+    "test/features/community/community_chat_refresh_regression_test.dart",
+    "tools/qa/test_bil39_native_split.py"
+  ],
+  "final_rule": "All existing ten exact-SHA gates and full3native scopes per device remain required. No diagnostic selection or four-case driver is merged."
+}
