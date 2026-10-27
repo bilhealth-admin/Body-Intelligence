@@ -122,6 +122,8 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
 
   Map<String, Object> _payload(BuildContext context) => {
     'generation': _generation,
+    // Supply the actual Flutter content width before UIKit's first attachment.
+    'width': _width ?? 0,
     'text': widget.visitIsCurrent() ? widget.text : '',
     'rtl': widget.direction == TextDirection.rtl,
     'fontSize': MediaQuery.textScalerOf(
