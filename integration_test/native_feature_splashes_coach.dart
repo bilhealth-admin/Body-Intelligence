@@ -645,6 +645,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
             } finally {
               trace?.stop();
               gateway.cancelPending();
+              _diagnoseNativeViews(tester, 'coach-$mode-$scene');
               metadata['geometry_native_frames'] =
                   trace?.samples ?? <Object?>[];
               metadata['native_frame_timings'] =

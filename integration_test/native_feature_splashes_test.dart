@@ -113,6 +113,39 @@ Future<void> nativeQaDismissKeyboard(WidgetTester tester) async {
   await tester.pump();
 }
 
+void _diagnoseNativeViews(WidgetTester tester, String stage) {
+  if (!const bool.fromEnvironment('BIL_QA_NATIVE_DIAGNOSTIC')) return;
+  final values = tester
+      .stateList<CoachNativeMarkdownState>(find.byType(CoachNativeMarkdown))
+      .map((state) {
+        final finder = find.byWidget(state.widget);
+        return {
+          ...state.nativeQaDiagnostics,
+          'widget_rect': tester.getRect(finder).toString(),
+          'ancestor_fades': tester
+              .widgetList<FadeTransition>(
+                find.ancestor(
+                  of: finder,
+                  matching: find.byType(FadeTransition),
+                ),
+              )
+              .map((fade) => fade.opacity.value)
+              .toList(),
+        };
+      })
+      .toList();
+  final data = IntegrationTestWidgetsFlutterBinding.instance.reportData!;
+  (data['native_bridge_diagnostics'] ??= <Object?>[]).add({
+    'stage': stage,
+    'views': values,
+    'scheduled_frame': tester.binding.hasScheduledFrame,
+    'transient_callbacks': tester.binding.transientCallbackCount,
+  });
+  debugPrint(
+    'BIL_NATIVE_DIAGNOSTIC ${jsonEncode({'stage': stage, 'views': values})}',
+  );
+}
+
 Future<void> _nativeSettle(WidgetTester tester) async {
   try {
     await tester.pumpAndSettle(

@@ -63,6 +63,8 @@ Future<void> main() async {
       Future<void> checkpoint() async {
         await File('${output.path}/native-metadata.json').writeAsString(
           const JsonEncoder.withIndent('  ').convert({
+            'diagnostic_only_not_release_acceptance': true,
+            'native_bridge_diagnostics': data?['native_bridge_diagnostics'],
             'scope': data?['native_scope'],
             'selected_scenes': selected,
             'scenes': scenes,

@@ -70,6 +70,32 @@ class CoachNativeMarkdown extends StatefulWidget {
 }
 
 class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
+  static const _diagnosticsEnabled =
+      kDebugMode && bool.fromEnvironment('BIL_QA_NATIVE_DIAGNOSTIC');
+  final _diagnosticClock = Stopwatch()..start();
+  final _diagnosticEvents = <Map<String, Object?>>[];
+  void _diagnostic(String event, [Map<String, Object?> values = const {}]) {
+    if (!_diagnosticsEnabled || _diagnosticEvents.length >= 512) return;
+    _diagnosticEvents.add({
+      'ms': _diagnosticClock.elapsedMilliseconds,
+      'event': event,
+      'generation': _generation,
+      ...values,
+    });
+  }
+
+  Map<String, Object?> get nativeQaDiagnostics => {
+    'id': identityHashCode(this),
+    'generation': _generation,
+    'height': _height,
+    'width': _width,
+    'height_ready': _heightReady,
+    'paint_ready': _paintReady,
+    'paint_gate_scheduled': _paintGateScheduled,
+    'failed': _failed,
+    'first_bounds': _firstContentBounds?.toString(),
+    'events': [..._diagnosticEvents],
+  };
   MethodChannel? _channel;
   String _generation = UniqueKey().toString();
   double _height = 60;
@@ -112,6 +138,10 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
     if (widget.text != oldWidget.text ||
         widget.direction != oldWidget.direction ||
         widget.style != oldWidget.style) {
+      _diagnostic('widget_parameters_changed', {
+        'text_changed': widget.text != oldWidget.text,
+        'style_changed': widget.style != oldWidget.style,
+      });
       _generation = UniqueKey().toString();
       _parameters = null;
       _heightReady = false;
@@ -140,6 +170,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
       return;
     }
     try {
+      _diagnostic('update_sent');
       await _channel?.invokeMethod<void>('update', payload);
     } on PlatformException {
       if (mounted) setState(() => _failed = true);
@@ -156,6 +187,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
         _paintGateScheduled) {
       return;
     }
+    _diagnostic('paint_gate_scheduled');
     _paintGateScheduled = true;
     final generation = _generation;
     // Let the existing Flutter history measure/reanchor the final native body
@@ -170,6 +202,10 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
               'setVisible',
               {'generation': generation, 'visible': true},
             );
+            _diagnostic('visibility_ack', {
+              'ack': acknowledged,
+              'scheduled_generation': generation,
+            });
             if (!mounted ||
                 !widget.visitIsCurrent() ||
                 _generation != generation ||
@@ -208,6 +244,10 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
       return null;
     }
     final args = call.arguments as Map;
+    _diagnostic('native_${call.method}', {
+      'received_generation': args['generation'],
+      if (call.method != 'openLink') ...args.cast<String, Object?>(),
+    });
     if (args['generation'] != _generation) return null;
     switch (call.method) {
       case 'height':
@@ -274,6 +314,10 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (_width != constraints.maxWidth) {
+          _diagnostic('width_changed', {
+            'old_width': _width,
+            'new_width': constraints.maxWidth,
+          });
           _width = constraints.maxWidth;
           _generation = UniqueKey().toString();
           _parameters = null;
@@ -306,12 +350,14 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
             creationParamsCodec: const StandardMessageCodec(),
             gestureRecognizers: coachNativeMarkdownGestures(),
             onPlatformViewCreated: (id) {
+              _diagnostic('platform_created', {'platform_id': id});
               _channel = MethodChannel('bil/coach_markdown/$id')
                 ..setMethodCallHandler(_receive);
               _update(_payload(context));
               _layoutTimer?.cancel();
               _layoutTimer = Timer(const Duration(seconds: 3), () {
                 if (mounted && widget.visitIsCurrent() && !nativeLayoutReady) {
+                  _diagnostic('layout_deadline');
                   setState(() => _failed = true);
                 }
               });

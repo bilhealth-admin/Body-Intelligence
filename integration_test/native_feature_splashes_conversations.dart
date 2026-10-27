@@ -70,6 +70,7 @@ Future<void> _waitNativeDmLayout(WidgetTester tester) async {
       return;
     }
   }
+  _diagnoseNativeViews(tester, 'community-native-timeout');
   fail(
     'Visible Community text never reached real native layout readiness; fallback is not native acceptance.',
   );
@@ -225,6 +226,7 @@ void _registerNativeConversationsAndStoreActivity(
                 'network_requests': transport.sends,
               });
             } finally {
+              _diagnoseNativeViews(tester, name);
               await tester.pumpWidget(const SizedBox.shrink());
               await repository.changes.close();
               await client.dispose();

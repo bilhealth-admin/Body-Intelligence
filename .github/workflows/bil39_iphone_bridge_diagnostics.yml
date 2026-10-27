@@ -1,0 +1,56 @@
+name: BIL39 iPhone bridge diagnostics only
+
+on:
+  push:
+    branches: [codex/bil39-native-diagnostics-20261027]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil39-iphone-diagnostics-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native:
+    name: Diagnose actual Flutter UIKit bridge; no release acceptance
+    runs-on: macos-26
+    timeout-minutes: 55
+    steps:
+      - name: Check out exact integration source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Select exact CocoaPods in an isolated job gem home
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
+          python3 .github/scripts/install_isolated_cocoapods.py \
+            --output artifacts/qa/bil39-native-iphone/cocoapods-installation.json
+      - name: Validate direct VM attachment input boundaries
+        run: python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
+      - name: Resolve existing dependencies and native pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          pod install --project-directory=ios
+      - name: Diagnose existing feature scope on dedicated iPhone
+        env:
+          BIL_NATIVE_DEVICE: iphone
+        run: bash .github/scripts/bil39_native_diagnostic.sh
+      - name: Upload exact iPhone native evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil39-iphone-diagnostics-${{ github.sha }}
+          path: artifacts/qa/bil39-diagnostic-iphone
+          if-no-files-found: error
+          retention-days: 14
