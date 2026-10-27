@@ -61,7 +61,7 @@ class BoundedNativeCommandTests(unittest.TestCase):
             mock.call(424242, module.signal.SIGTERM), mock.call(424242, 9),
         ])
 
-    def run_fixture(self, source, *, timeout=4, running=None, grace=.2):
+    def run_fixture(self, source, *, timeout=4, running=None, grace=.2, capture_progress=False):
         temporary = tempfile.TemporaryDirectory(prefix="bil-owned-command-")
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
@@ -75,6 +75,8 @@ class BoundedNativeCommandTests(unittest.TestCase):
         ]
         if running is not None:
             command.extend(["--running-timeout-seconds", str(running)])
+        if capture_progress:
+            command.append("--allow-capture-progress")
         result = subprocess.run(
             command + ["--", sys.executable, "-u", "-c", source],
             capture_output=True, timeout=15, check=False,
@@ -95,6 +97,67 @@ class BoundedNativeCommandTests(unittest.TestCase):
         self.assertEqual(result.returncode, 7)
         self.assertEqual(receipt["raw_returncode"], 7)
         self.assertEqual(receipt["reason"], "process_exit")
+
+    def test_verified_advancing_capture_work_keeps_original_idle_and_absolute_bounds(self):
+        source = ("import time; print('00:01 +41: All tests passed!'); "
+                  "[(time.sleep(.15), print('BIL_NATIVE_CAPTURE_PROGRESS '+str(i)+'/4')) "
+                  "for i in range(1,5)]")
+        result, receipt, _ = self.run_fixture(source, running=2, grace=.3, capture_progress=True)
+        self.assertEqual(result.returncode, 0)
+        self.assertGreater(receipt['elapsed_seconds'], .3)
+        self.assertEqual(receipt['capture_progress']['verified_count'], 4)
+        self.assertEqual(receipt['capture_progress']['advancing_checkpoints'], 4)
+
+    def test_capture_progress_is_opt_in_and_never_overrides_a_failed_test(self):
+        source = ("import time; print('00:01 +40 -1: Some tests failed.'); "
+                  "[(time.sleep(.15), print('BIL_NATIVE_CAPTURE_PROGRESS '+str(i)+'/4')) "
+                  "for i in range(1,5)]")
+        result, receipt, _ = self.run_fixture(source, running=2, grace=.3, capture_progress=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertTrue(receipt['native_failure_summary_seen'])
+        result, receipt, _ = self.run_fixture(source, running=2, grace=.3)
+        self.assertEqual(result.returncode, 124)
+        self.assertEqual(receipt['capture_progress']['verified_count'], 0)
+
+    def test_actual_flutter_verbose_prefix_preserves_advancing_capture_checkpoints(self):
+        source = ("import time; print('flutter: 00:01 +41: All tests passed!'); "
+                  "[(time.sleep(.15), print(prefix+'BIL_NATIVE_CAPTURE_PROGRESS '+str(i)+'/4')) "
+                  "for i,prefix in enumerate(['[        ] ', '[ +157 ms] ', '[-1 ms] ', ''],1)]")
+        result, receipt, _ = self.run_fixture(source, running=2, grace=.3, capture_progress=True)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(receipt['capture_progress']['advancing_checkpoints'], 4)
+
+    def test_repeated_capture_count_cannot_keep_a_stalled_driver_alive(self):
+        source = ("import time; print('00:01 +41: All tests passed!'); "
+                  "[(print('BIL_NATIVE_CAPTURE_PROGRESS 1/4'), time.sleep(.1)) for _ in range(20)]")
+        result, receipt, _ = self.run_fixture(source, running=3, grace=.3, capture_progress=True)
+        self.assertEqual(result.returncode, 124)
+        self.assertEqual(receipt['capture_progress']['advancing_checkpoints'], 1)
+        self.assertEqual(receipt['reason'], 'result_delivery_timeout')
+
+    def test_capture_progress_never_extends_the_absolute_native_budget(self):
+        source = ("import time; print('00:01 +41: All tests passed!'); "
+                  "[(print('BIL_NATIVE_CAPTURE_PROGRESS '+str(i)+'/100'), time.sleep(.1)) for i in range(1,50)]")
+        result, receipt, _ = self.run_fixture(source, running=.45, grace=.3, capture_progress=True)
+        self.assertEqual(result.returncode, 124)
+        self.assertLess(receipt['elapsed_seconds'], 2)
+
+    def test_invalid_capture_totals_and_changing_manifests_do_not_renew_grace(self):
+        for markers in [('1/125', '2/125', '3/125'), ('1/4', '2/5', '3/6'),
+                        ('3/4', '2/4', '1/4'), ('5/4', '6/4', '7/4')]:
+            with self.subTest(markers=markers):
+                source = ("import time; print('00:01 +41: All tests passed!'); "
+                          f"[(time.sleep(.13), print('BIL_NATIVE_CAPTURE_PROGRESS '+s)) for s in {markers!r}]; time.sleep(10)")
+                result, receipt, _ = self.run_fixture(source, running=3, grace=.25, capture_progress=True)
+                self.assertEqual(result.returncode, 124)
+                self.assertLessEqual(receipt['capture_progress']['advancing_checkpoints'], 1)
+
+    def test_capture_markers_before_terminal_summary_do_not_extend_bootstrap(self):
+        source = ("import time; [(print('BIL_NATIVE_CAPTURE_PROGRESS '+str(i)+'/100'), "
+                  "time.sleep(.1)) for i in range(1,50)]")
+        result, receipt, _ = self.run_fixture(source, timeout=.3, running=2, capture_progress=True)
+        self.assertEqual(result.returncode, 124)
+        self.assertEqual(receipt['reason'], 'bootstrap_timeout')
 
     def test_silent_bootstrap_has_a_real_os_deadline(self):
         result, receipt, _ = self.run_fixture("import time; time.sleep(60)", timeout=.3)

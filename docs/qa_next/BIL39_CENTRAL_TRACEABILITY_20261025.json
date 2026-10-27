@@ -3,7 +3,7 @@
   "source_bundle_sha256": "bd62a5c229b00687968cf43b816bc809478f7f0062c78169ca5e8ff8487fe28b",
   "protected_ios38_sha": "155b079696430919f8272df934371f033fb11be2",
   "candidate_sha": null,
-  "release_status": "PROVEN_COLD_NATIVE_CORRECTION_AWAITING_FINAL_EXACT_SHA_CI",
+  "release_status": "VERIFIED_PRIMARY_NATIVE_REPLY_CORRECTION_AWAITING_COMPLETE_EXACT_SHA_ACCEPTANCE",
   "original_37_cases": [
     {
       "ID": "BIL-01",
@@ -5723,7 +5723,7 @@
     }
   },
   "hard_blockers": [
-    "Final candidate must pass all ten existing workflows on its exact SHA, including full 41-feature cases and all three native scopes independently on iPhone and iPad.",
+    "Final candidate must pass all ten workflows on its exact SHA, including40functional+teardown(counter41),Runner5andall3native scopes independently on iPhone/iPad. Recipes entry3200ms observation remains unresolved until original unchanged assertion passes.",
     "Signed39 original IPA identity/privacy/signature, Apple processing and internal TestFlight availability remain unverified.",
     "Physical39 acceptance remains pending installation; physical38 evidence cannot certify39."
   ],
@@ -6320,7 +6320,8 @@
     "discarded_experiment": {
       "sha": "d4378b30982359953ffdf4d49f9689f9cd7922d2",
       "run": 40460923235,
-      "result": "Known-width SwiftUI unitPASS0.574s, actual firstARcaseFAIL; firstframe1529ms with nativeReadyfalse. No sizing code or experimental test was integrated."
+      "result": "Known-width SwiftUI unitPASS0.574s, actual firstARcaseFAIL; firstframe1529ms with nativeReadyfalse. No sizing code or experimental test was integrated.",
+      "historical_scope": "Sizing alone was excluded at that checkpoint; the later correction combines real width sizing with idempotent native updates and whole-parent composition."
     },
     "proven_correction": {
       "sha": "780b3a8846b7ffcd90060731892ede0c21078a01",
@@ -6349,6 +6350,82 @@
       "analyzer_issues": 0,
       "actionlint_exit": 0
     },
-    "final_gates": "All10 workflows on final merged SHA, full3native scopes and all40functional cases+teardown perdevice; no diagnostic selectors/workflows/signing acceptance are merged."
+    "final_gates": "All10 workflows on final merged SHA, full3native scopes and all40functional cases+teardown perdevice; no diagnostic selectors/workflows/signing acceptance are merged.",
+    "historical_status": "Earlier isolated780b proof retained; superseded as full-readiness evidence by9a full-sequence firstAR failure and current3eef context investigation."
+  },
+  "latest_native_context_and_transport_correction": {
+    "source_parent": "9a6907ec9222dab9c572ae3fe009d1906164b933",
+    "diagnostic_source": "3eefcc70b747f9775145b7eece3201622adb754a",
+    "diagnostic_run": 40499268533,
+    "diagnostic_artifact": 12733177188,
+    "diagnostic_scope": "Four entry scenes then original ARnormal2x reveal/history; not release acceptance.",
+    "overall_diagnostic_status": "FAIL: first recipes entry timing observation; never counted as an overall pass.",
+    "actual_primary_reply": {
+      "status": "PASS",
+      "first_readable_frame_ms": 1188,
+      "budget_ms": 1500,
+      "visible_graphemes": 1783,
+      "first_content_visible_area": 893385.9782426778,
+      "history": "PASS original anchor/scroll checks",
+      "original_first_png_sha256": "d2a395972e3890d987edd30ce084439d5872f8b3ec8d876bde5239f966bb67ee",
+      "original_first_png_visually_reviewed": true,
+      "visual_review": "Arabic paragraph0 starts below header; native Naskh readable; existing composer/navigation visible; no overlap in this original iPad2x frame."
+    },
+    "unresolved_recipes_observation": {
+      "last_visible_ms": 2079,
+      "first_absent_ms": 3607,
+      "budget_ms": 3200,
+      "observation_gap_us": 1528203,
+      "actual_timer_expiry": "Not established inside the gap; do not infer exact deadline or declare it passed.",
+      "production_gate_git_blob_unchanged": "a084c653ebdda4fb5571e91047a3faf5802af266",
+      "observer_git_blob_unchanged": "fd62d4ac7630861d55ce2285b5dfa5e506e57b23",
+      "comparison": "Both blobs identical to9a and e8, whose full native entry scenes passed. Keep3200 assertion and require final sameSHA native evidence.",
+      "blocks_release": true
+    },
+    "previous_attempts": [
+      {
+        "sha": "b42597f41da2330c0924ee202e267447309f9626",
+        "run": 40491480268,
+        "status": "NO_NATIVE_CASES: collector readiness circular wait,selected log0bytes. Independent sizingSwiftUI unit1PASS2.431s; workflowcanceledafterprimaryfailure,neverPASS."
+      },
+      {
+        "sha": "e8a7668003db19ad5949f5d52412b5136398dccf",
+        "run": 40494501528,
+        "native_functional_counter": "+7 All tests passed (6functional+teardown)",
+        "status": "FAIL strictactualfirstframe1747ms;54originalPNGscollected. Never use counter alone as acceptance.",
+        "height_ready_ms": 569,
+        "reading_anchor_correct_ms": 588
+      }
+    ],
+    "corrections": [
+      "Native update identical to creation payload replays current-generation measured geometry rather than rebuilding the same SwiftUI root.",
+      "Measure the real native host at actual Flutter content width; keep owner/generation/geometry and both reading-layout gates.",
+      "The outer reply arrival still skipped painting at alpha0. A real CustomPaint beneath the original whole arrival reproduces paintCount0; native-only minimum one 8-bit alpha step keeps composition, while UIKit text stays hidden by its existing alpha0 safety gate. The320ms entrance is retained.",
+      "Assert actual first frame<=1500ms after native pump, closing the previous loop-overrun falsepass.",
+      "Use local macOS PTY so selected log readiness is delivered before launching its source; all15macOStransportcontrols passed on e8.",
+      "Original PNG checkpoints renew the same60s inactivity grace only on strictly advancing verified counts within unchanged1200s absolute budget; repeated/invalid markers cannot keep a stalled process alive."
+    ],
+    "local_evidence": {
+      "flutter": {
+        "passed": 24,
+        "files": 2,
+        "scope": "19nativepresentation plus5arrival; fullparentcomposition RED before correction and GREEN after; not a full app or device pass"
+      },
+      "supervisor_distinct_controls": 32,
+      "mac_transport_controls_on_e8": 15,
+      "windows_transport_controls": 14,
+      "windows_mac_only_control_skipped": 1,
+      "native_receipt_negative_controls": 4,
+      "android9a_original_first_frames_ms": [
+        1203,
+        656,
+        246,
+        321
+      ]
+    },
+    "selection_safety": "Cold-sequence selector, diagnostic workflow/helper/driver not integrated. All40functional+teardown,Runner5,and3native scopes remain mandatory on both iPhone and iPad.",
+    "archive_evidence": "Selected original JSON members CRC and SHA verified; first original PNG CRC and capture-manifest SHA verified. Entire209MB diagnostic archive not independently hashed.",
+    "release_status": "NOT_READY; integrated candidate must pass all10sameSHAworkflows, original signedIPA checks and Apple processing/internalavailability. Physical39 acceptance remains separate.",
+    "no_provider_or_store_actions": "No real AI requests/credits,purchases,storechanges,Productiondeployment or signed39 build by this correction."
   }
 }

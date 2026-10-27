@@ -13,6 +13,7 @@ class CoachReplyArrival extends StatefulWidget {
     required this.animate,
     required this.child,
     this.onPresentationReady,
+    this.keepPlatformSurfaceComposed = false,
     super.key,
   });
 
@@ -20,6 +21,7 @@ class CoachReplyArrival extends StatefulWidget {
   final bool animate;
   final Widget child;
   final VoidCallback? onPresentationReady;
+  final bool keepPlatformSurfaceComposed;
 
   @override
   State<CoachReplyArrival> createState() => _CoachReplyArrivalState();
@@ -31,6 +33,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
 
   late final AnimationController _controller;
   late final Animation<double> _opacity;
+  late final Animation<double> _platformOpacity;
   late final Animation<Offset> _position;
   String? _handledMessageId;
   String? _awaitingLayoutFor;
@@ -57,6 +60,11 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
       value: widget.animate ? 0 : 1,
     );
     _opacity = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    // Alpha zero skips Flutter platform-view composition. UIKit already keeps
+    // unmeasured native text at alpha zero until its geometry/owner gate opens.
+    // One 8-bit alpha step keeps that surface composed during the same entrance
+    // without exposing its text or adding another layout frame before creation.
+    _platformOpacity = Tween<double>(begin: 1 / 255, end: 1).animate(_opacity);
     _position = Tween<Offset>(
       begin: const Offset(0, .008),
       end: Offset.zero,
@@ -286,7 +294,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
     return FadeTransition(
       key: ValueKey('coach-reply-arrival-fade-${widget.messageId}'),
       alwaysIncludeSemantics: true,
-      opacity: _opacity,
+      opacity: widget.keepPlatformSurfaceComposed ? _platformOpacity : _opacity,
       child: SlideTransition(position: _position, child: widget.child),
     );
   }

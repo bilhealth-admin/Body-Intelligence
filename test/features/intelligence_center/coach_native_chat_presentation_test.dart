@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_native_markdown.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_reply_arrival.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_sent_message_arrival.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -9,6 +10,40 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('the whole reply arrival composes its pending native surface', (
+    tester,
+  ) async {
+    for (final platformSurface in [false, true]) {
+      final probe = _NativeCompositionProbe();
+      await tester.pumpWidget(
+        MaterialApp(
+          key: ValueKey(platformSurface),
+          home: Scaffold(
+            body: CoachReplyArrival(
+              messageId: 'qa-native-parent-composition-$platformSurface',
+              animate: true,
+              keepPlatformSurfaceComposed: platformSurface,
+              child: CoachNativeMarkdownSurface(
+                height: 60,
+                ready: false,
+                child: CustomPaint(painter: probe),
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        probe.paintCount,
+        platformSurface ? greaterThan(0) : 0,
+        reason: platformSurface
+            ? 'The real outer arrival must not skip the pending UIKit surface.'
+            : 'The original outer opacity-zero gate reproduces skipped paint.',
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+  });
 
   testWidgets('pending native surface still reaches actual composition', (
     tester,

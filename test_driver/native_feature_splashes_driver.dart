@@ -92,6 +92,11 @@ Future<void> main() async {
               collectionFailures.addAll(failures);
               if (failures.isNotEmpty) collectionFailure = failures.first;
               await checkpoint();
+              if (failures.isEmpty) {
+                stdout.writeln(
+                  'BIL_NATIVE_CAPTURE_PROGRESS ${captures.length}/${entries.length}',
+                );
+              }
             },
           );
         }
