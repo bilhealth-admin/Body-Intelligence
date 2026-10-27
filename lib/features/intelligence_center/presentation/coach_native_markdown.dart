@@ -45,6 +45,39 @@ class CoachNativeMarkdownSurface extends StatelessWidget {
   );
 }
 
+/// Creates the existing native renderer during the normal Coach entry hold,
+/// before a reply arrives. It contains only fixed, transparent preparation text;
+/// no account/context data, input, semantics, network or AI work is involved.
+class CoachNativeRendererPreparation extends StatelessWidget {
+  const CoachNativeRendererPreparation({super.key});
+
+  static Widget surface(Widget child) => SizedBox.square(
+    dimension: 1,
+    child: IgnorePointer(
+      child: ExcludeSemantics(child: ClipRect(child: child)),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) => surface(
+    const UiKitView(
+      viewType: 'bil/coach_markdown',
+      layoutDirection: TextDirection.rtl,
+      creationParamsCodec: StandardMessageCodec(),
+      creationParams: <String, Object>{
+        'generation': 'bil-renderer-preparation',
+        'text': 'BIL المدرب',
+        'rtl': true,
+        'fontSize': 32.0,
+        'foreground': 0,
+        'accent': 0,
+      },
+      // No visibility acknowledgement is sent. UIKit retains its initial
+      // alpha=0 and accessibility-hidden state for this preparation view.
+    ),
+  );
+}
+
 /// The current ai-coach contract is one validated JSON response, not SSE.
 /// This native view formats that response; it never simulates token streaming.
 class CoachNativeMarkdown extends StatefulWidget {
@@ -83,6 +116,9 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
   bool? _reportedReadiness;
   bool _readinessQueued = false;
   bool get nativeLayoutReady => _paintReady;
+  bool get nativeHeightReady => _heightReady;
+  bool get nativePaintGateScheduled => _paintGateScheduled;
+  double get nativeMeasuredHeight => _height;
   Rect? get nativeFirstContentBounds => _firstContentBounds;
   Map<String, Object>? _parameters;
 

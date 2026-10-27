@@ -45,6 +45,53 @@ void main() {
     );
   });
 
+  testWidgets(
+    'renderer preparation is composed without taking input or semantics',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      final probe = _NativeCompositionProbe();
+      var taps = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            children: [
+              Positioned(
+                left: 0,
+                top: 0,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => taps++,
+                  child: const SizedBox(width: 48, height: 48),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                child: CoachNativeRendererPreparation.surface(
+                  Semantics(
+                    label: 'Internal renderer preparation',
+                    child: CustomPaint(painter: probe),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(probe.paintCount, greaterThan(0));
+      expect(
+        find.bySemanticsLabel('Internal renderer preparation'),
+        findsNothing,
+      );
+      expect(tester.getSize(find.byType(ClipRect)), const Size(1, 1));
+      await tester.tapAt(const Offset(.5, .5));
+      expect(taps, 1);
+      expect(tester.takeException(), isNull);
+      semantics.dispose();
+    },
+  );
+
   testWidgets('native surface accepts interaction only after readiness', (
     tester,
   ) async {

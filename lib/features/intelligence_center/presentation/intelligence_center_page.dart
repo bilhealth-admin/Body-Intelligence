@@ -588,5 +588,19 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   bool _referenceNavigating = false;
 
   @override
-  Widget build(BuildContext context) => _buildReferencePresentation(context);
+  Widget build(BuildContext context) {
+    final page = _buildReferencePresentation(context);
+    if (!coachUsesNativeMarkdown) return page;
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        page,
+        const Positioned(
+          left: 0,
+          top: 0,
+          child: CoachNativeRendererPreparation(),
+        ),
+      ],
+    );
+  }
 }

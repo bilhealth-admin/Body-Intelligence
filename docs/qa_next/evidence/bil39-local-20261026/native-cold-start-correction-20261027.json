@@ -1,0 +1,45 @@
+{
+  "base_sha": "145caa70a985cafe89720345933ce0407a62649f",
+  "base_full_host_evidence": {
+    "files": 1471,
+    "success": 11168,
+    "failure": 0,
+    "error": 0,
+    "expected_skip": 1
+  },
+  "base_native_result": "Both devices: Runner5 PASS, crypto3plusTeardown PASS, settings1plusTeardown PASS; feature counter40success1failure. Only first ARnormal2x reveal failed. All8Community,all4history,other3reveal passed.",
+  "count_clarification": "Feature scope has40 functional testWidgets and one teardown counter; all41 counter entries remain required. Previous41-feature wording referred to the terminal counter, not41 functional cases.",
+  "discarded_experiment": {
+    "sha": "d4378b30982359953ffdf4d49f9689f9cd7922d2",
+    "run": 40460923235,
+    "result": "Known-width SwiftUI unitPASS0.574s, actual firstARcaseFAIL; firstframe1529ms with nativeReadyfalse. No sizing code or experimental test was integrated."
+  },
+  "proven_correction": {
+    "sha": "780b3a8846b7ffcd90060731892ede0c21078a01",
+    "run": 40464878132,
+    "artifact_id": 12716293633,
+    "full_archive_sha256": "02a289e5d60c2243cc510f855ad352898d68dba22a60d8dca0cae53ec57867ac",
+    "result": "PASS original coldAR2x reveal and history, plus teardown; canonical driver, rawexit0/outputcomplete. Original1500ms and viewport/native-ready assertions unchanged.",
+    "first_readable_native_frame_ms": 1051,
+    "native_height": 1542.0,
+    "visible_graphemes": 1783,
+    "native_first_block_visible_area": 893385.9782426778,
+    "original_pngs": 6,
+    "first_png_sha256": "03d001e20614e94380ecea6c2188f88cf22ec5a71bb8623fc9867301827d3e76",
+    "first_png_visually_reviewed": true,
+    "scope": "A production Coach page on actual iPad simulator; held synthetic response, no real model/cloud/credit use; not full candidate acceptance."
+  },
+  "behavior": "Prepare existing native renderer once during the original Coach entry, using only fixed transparent local text. One-point surface is composed, ignores input and exposes no semantics; native alpha remains0. Actual answer readiness/geometry/generation/owner gates and all wait texts/composer/navigation are unchanged.",
+  "files": [
+    "lib/features/intelligence_center/presentation/coach_native_markdown.dart",
+    "lib/features/intelligence_center/presentation/intelligence_center_page.dart",
+    "integration_test/native_feature_splashes_observer.dart",
+    "test/features/intelligence_center/coach_native_chat_presentation_test.dart"
+  ],
+  "local_controls": {
+    "native_presentation_tests": 18,
+    "analyzer_issues": 0,
+    "actionlint_exit": 0
+  },
+  "final_gates": "All10 workflows on final merged SHA, full3native scopes and all40functional cases+teardown perdevice; no diagnostic selectors/workflows/signing acceptance are merged."
+}

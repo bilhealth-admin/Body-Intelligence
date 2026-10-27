@@ -76,6 +76,19 @@ Map<String, Object?> nativeQaReplyGeometry(
         (rowElement as StatefulElement).state as CoachNativeMarkdownState;
     sample['renderer'] = 'native_swiftui';
     sample['native_layout_ready'] = native.nativeLayoutReady;
+    sample['native_height_ready'] = native.nativeHeightReady;
+    sample['native_paint_gate_scheduled'] = native.nativePaintGateScheduled;
+    sample['native_measured_height'] = native.nativeMeasuredHeight;
+    sample['arrival_opacity'] = sample['reply_opacity'];
+    final firstBlock = native.nativeFirstContentBounds;
+    sample['native_first_block'] = firstBlock == null
+        ? null
+        : [
+            firstBlock.left,
+            firstBlock.top,
+            firstBlock.width,
+            firstBlock.height,
+          ];
     if (!native.nativeLayoutReady || native.nativeFirstContentBounds == null) {
       sample['reply_opacity'] = 0.0;
       sample['visible_graphemes'] = 0;
