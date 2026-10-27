@@ -15,9 +15,11 @@ This is the signing configuration contract, not a QA certificate or permission t
 
 ## Required exact-source evidence
 
-`tools/qa/bil39_internal_build_ci.py` requires all configured jobs in eight workflows at the same integration SHA: source/analysis and eight full Flutter shards, CodeQL/security/SQL/RLS, actual Android/iOS integration, Android API26/29/33/34/35/36 startup, cloud handler tests, Worker tests and real public video range delivery, Crystal checks on Linux/Windows, iPhone/iPad SwiftUI component tests, and negative fixtures/native PostgreSQL tests.
+`tools/qa/bil39_internal_build_ci.py` requires all configured jobs in ten workflows at the same integration SHA: source/analysis and eight full Flutter shards, CodeQL/security/SQL/RLS and Android native integration, independent iPhone and iPad native application workflows, Android API26/29/33/34/35/36 startup, cloud handler tests, Worker tests and real public video range delivery, Crystal checks on Linux/Windows, iPhone/iPad SwiftUI component tests, and negative fixtures/native PostgreSQL tests. The two native application workflows have separate runs, runners and evidence; both must pass.
 
 `BIL39_VERIFIED_CLOUD_SOURCE_SHA` must equal that candidate only after authorized Production Coach publication, exact-source readback and successful live verification. It is not set merely because local tests or an HTTP response succeeded. The existing cloud project is Production; an old configuration that points to those same resources is not staging evidence.
+
+For presentation-only follow-up commits whose complete cloud runtime is unchanged, compare a fresh Production readback of all runtime files against the final committed Git blobs and retain the existing live verification evidence for that deployed version. This does not require another deployment or provider request, and must not be described as a new live inference test.
 
 Before signing, the checkout must be clean, descend from the protected base, and preserve these blobs:
 

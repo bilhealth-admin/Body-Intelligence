@@ -10,6 +10,66 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  testWidgets('pending native surface still reaches actual composition', (
+    tester,
+  ) async {
+    final probe = _NativeCompositionProbe();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          height: 60,
+          child: Opacity(opacity: 0, child: CustomPaint(painter: probe)),
+        ),
+      ),
+    );
+    expect(
+      probe.paintCount,
+      0,
+      reason: 'The old zero-opacity gate skips paint.',
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CoachNativeMarkdownSurface(
+          height: 60,
+          ready: false,
+          child: CustomPaint(painter: probe),
+        ),
+      ),
+    );
+    expect(
+      probe.paintCount,
+      greaterThan(0),
+      reason: 'UIKit must be composed before SwiftUI can report real layout.',
+    );
+  });
+
+  testWidgets('native surface accepts interaction only after readiness', (
+    tester,
+  ) async {
+    var taps = 0;
+    Widget surface(bool ready) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: CoachNativeMarkdownSurface(
+        height: 60,
+        ready: ready,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => taps++,
+          child: const Text('Measured native content'),
+        ),
+      ),
+    );
+    await tester.pumpWidget(surface(false));
+    await tester.tap(find.text('Measured native content'), warnIfMissed: false);
+    expect(taps, 0);
+    await tester.pumpWidget(surface(true));
+    await tester.tap(find.text('Measured native content'));
+    expect(taps, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   test(
     'production gesture factories construct the real UIKit render object',
     () {
@@ -336,4 +396,16 @@ class _RenderOnlyUiKitController implements UiKitViewController {
   dynamic noSuchMethod(Invocation invocation) => throw UnsupportedError(
     'The render-only regression must not call native services.',
   );
+}
+
+class _NativeCompositionProbe extends CustomPainter {
+  var paintCount = 0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    paintCount++;
+  }
+
+  @override
+  bool shouldRepaint(covariant _NativeCompositionProbe oldDelegate) => false;
 }

@@ -136,6 +136,66 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'closing IME cannot starve first paint under recorded native frame gaps',
+    (tester) async {
+      const messageId = 'qa-native-closing-ime-frame-gaps';
+      tester.view.viewPadding = const FakeViewPadding(bottom: 24);
+      tester.view.padding = FakeViewPadding.zero;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 264.3809523809524);
+      addTearDown(tester.view.resetViewInsets);
+      addTearDown(tester.view.resetPadding);
+      addTearDown(tester.view.resetViewPadding);
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: CoachReplyArrival(
+              messageId: messageId,
+              animate: true,
+              child: Text('The complete reply is ready while the IME closes.'),
+            ),
+          ),
+        ),
+      );
+      final fade = find.byKey(
+        const ValueKey('coach-reply-arrival-fade-$messageId'),
+      );
+      final samples = <({int milliseconds, double opacity})>[];
+      var elapsed = 0;
+      // API33's failed native trace: 520, 750, 1256, 1452 and 1519ms.
+      // These are virtual frame gaps for a behavior regression, not a speed claim.
+      for (final frame in <({int gap, double inset})>[
+        (gap: 520, inset: 65.1619844590557),
+        (gap: 230, inset: 0),
+        (gap: 506, inset: 264.3809523809524),
+        (gap: 196, inset: 65.1619844590557),
+        (gap: 67, inset: 65.1619844590557),
+      ]) {
+        tester.view.padding = FakeViewPadding(
+          bottom: frame.inset == 0 ? 24 : 0,
+        );
+        tester.view.viewInsets = FakeViewPadding(bottom: frame.inset);
+        await tester.pump(Duration(milliseconds: frame.gap));
+        elapsed += frame.gap;
+        samples.add((
+          milliseconds: elapsed,
+          opacity: tester.widget<FadeTransition>(fade).opacity.value,
+        ));
+      }
+      expect(
+        samples.where(
+          (frame) => frame.milliseconds <= 1500 && frame.opacity > 0,
+        ),
+        isNotEmpty,
+        reason:
+            'A retracting IME must not repeatedly reset a ready reply to zero.',
+      );
+      expect(samples.last.opacity, 1);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 }
 
 class _MetricChurner extends StatefulWidget {

@@ -1,0 +1,218 @@
+{
+  "schema": "bil39.native-layout-ime-correction.v1",
+  "parent_sha": "d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+  "status": "LOCAL_PASS_REAL_NEW_NATIVE_CI_PENDING",
+  "required_workflows": 10,
+  "separate_iphone_ipad_runs": true,
+  "original_requirement_counts": {
+    "original_37_cases": 37,
+    "additional_18_coach_scenarios": 18,
+    "cloud_10_truth_gates": 10,
+    "supplemental_scopes": 3
+  },
+  "red": {
+    "native-closing-ime-starvation-red-v1.jsonl": {
+      "results": {
+        "success": 4,
+        "error": 1
+      },
+      "done": [
+        false
+      ],
+      "log_sha256": "5e005afd3ddf749230f2570b2185f59e7ebb20a7b49c86a0da7ff85c0da6b37e"
+    },
+    "native-composition-layout-deadlock-red-v1.jsonl": {
+      "results": {
+        "error": 1,
+        "success": 15
+      },
+      "done": [
+        false
+      ],
+      "log_sha256": "0c107fe464ebc1e0b5a5702294964a44e640ee3e6073790e2ca00efc31f797fd"
+    }
+  },
+  "local_green": {
+    "native-composition-and-interaction-green-v1.jsonl": {
+      "results": {
+        "success": 17
+      },
+      "done": [
+        true
+      ],
+      "log_sha256": "a8f79a64d67dadb3ddb6b58170aeb46227f45a7e9259e7c11039afea120ab3b7"
+    },
+    "native-closing-ime-host-controls-final-v1.jsonl": {
+      "results": {
+        "success": 64
+      },
+      "done": [
+        true
+      ],
+      "log_sha256": "01b44ab066c8fc8ee6a3cfe3a29169280f156e9e3655414451ece4e49cabf6b6"
+    },
+    "native-composition-community-and-architecture-v1.jsonl": {
+      "results": {
+        "success": 7
+      },
+      "done": [
+        true
+      ],
+      "log_sha256": "7374d911f0d0f4c4d2147216aed3d0d5fc574a7b28f7b55cffc833780e7716a7"
+    }
+  },
+  "qa_tools": {
+    "passed": 315,
+    "failed": 0,
+    "seconds": 66.611,
+    "log_sha256": "9a2c2cf4c0041bf09cd5ef10cafaa9c3106c887ab09b134f9c93b06b775e3490"
+  },
+  "analysis": {
+    "items": 5,
+    "issues": 0,
+    "exit": 0,
+    "log_sha256": "dc93d4d44e42de6ea1308eb52b88ff5e6b0c81d2ca48283ce346e3c59ae12ab3",
+    "final_owner_guard": {
+      "issues": 0,
+      "exit": 0,
+      "source_sha256": "9b40e4d6a170994c79cf009b7831d159959689b6ccd43a2bee24b8fb2af1855b",
+      "log_sha256": "43b00930ad33b233a1191b8f2dd8d56369106c820604cf20cc98847f034f7fb5"
+    }
+  },
+  "workflow_lint": {
+    "files": 3,
+    "exit": 0,
+    "shellcheck_run": false,
+    "pyflakes_run": false
+  },
+  "source_local_file_sha256": {
+    ".github/workflows/bil39_ipad_native.yml": "1a3d13db6cc813ae1b893612d4a637539c1888829a3ee4f84ec27504fe05e482",
+    ".github/workflows/bil39_iphone_native.yml": "adb94827eccce3664a43eaa1d68101f2f6b502e3c66370db90dc81ba2823558f",
+    ".github/workflows/verify.yml": "bb819a49e12026b20232f549d771f6a3f72adf90aea3a98c853af1d1ce4a0737",
+    "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json": "4872ec7269e65ca5b885e57bb00b43100c1e2fe7b3e0a6c636c1c5d6b17cfb5a",
+    "docs/release/BIL_IOS39_INTERNAL_CONFIGURATION_20261025.md": "631ce674bd9f01d4b2fa9797a78905fd8a65c34028f2f6ef92dd1887433ae88e",
+    "ios/Runner/BILCoachMarkdownBridge.swift": "2934d603904859a7f48a7634d3d8f858b521ec0e662caf8a4ffc5f8acf83b6cd",
+    "lib/features/intelligence_center/presentation/coach_native_markdown.dart": "9b40e4d6a170994c79cf009b7831d159959689b6ccd43a2bee24b8fb2af1855b",
+    "lib/features/intelligence_center/presentation/coach_reply_arrival.dart": "17afac97692419a4f26914930a051c5870a447c12f3c5aea3c014a6139549449",
+    "test/features/intelligence_center/coach_native_chat_presentation_test.dart": "737d3af9b3d98b7bd06fa77881e10a957906a43f282896127b94548d477c3a21",
+    "test/features/intelligence_center/coach_reply_arrival_test.dart": "5d7ec3a29274af5485e9391ece6fdd36aedaeead5fc705855db3c60286709b76",
+    "tools/qa/flutter/native_visual_observer_regression_test.dart": "8d5064eb4125ebebcf33add2066384ba974f5820784a67e1fd4b645b83f18793",
+    "docs/qa_next/BIL39_NATIVE_LAYOUT_AND_IME_CORRECTION_20261027_AR.md": "0a90ca25587325091b361610cd5f6e4499eb136ff103d082c6422b468c40a274"
+  },
+  "source_hash_scope": "Local file bytes before commit; final exact-SHA CI remains separate",
+  "previous_complete_file_coverage": {
+    "schema": "bil39.full-file-coverage.v1",
+    "status": "PASS",
+    "source_sha": "d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+    "shards": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "test_files": 1471,
+    "inventory_sha256": "3580c9fb5140775109f4ca371d8f294bb697e742abfe2fe231220bd01744f1ad",
+    "counts": {
+      "success": 11161,
+      "failure": 0,
+      "error": 0,
+      "skip": 1
+    },
+    "duplicate_files": 0,
+    "missing_files": 0,
+    "artifact_selection": {
+      "source_sha": "d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+      "run_id": 40431033518,
+      "artifacts": [
+        {
+          "index": 0,
+          "id": 12703037319,
+          "name": "bil39-full-shard-0-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:6997006927d8a98d138cac6ba1ebf9b56beb359ed825451514d48d6652c4b6da",
+          "created_at": "2026-10-27T01:34:51Z",
+          "superseded_artifact_ids": []
+        },
+        {
+          "index": 1,
+          "id": 12702912749,
+          "name": "bil39-full-shard-1-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:ff0b55d2567be3db3dc35cde30c52f0d7b6232398b3fc5874842643338228577",
+          "created_at": "2026-10-27T01:34:55Z",
+          "superseded_artifact_ids": []
+        },
+        {
+          "index": 2,
+          "id": 12702083697,
+          "name": "bil39-full-shard-2-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:24dc2d5d3ee936edf70eac0de08959b3368aec33ce58f04b1e66e227c2cff1dd",
+          "created_at": "2026-10-27T01:33:25Z",
+          "superseded_artifact_ids": []
+        },
+        {
+          "index": 3,
+          "id": 12702577845,
+          "name": "bil39-full-shard-3-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:b5358595cd7ba6e5beadaa58dddca9d17cead6b7142e74bbdda79bc9b284da05",
+          "created_at": "2026-10-27T01:30:50Z",
+          "superseded_artifact_ids": []
+        },
+        {
+          "index": 4,
+          "id": 12702487826,
+          "name": "bil39-full-shard-4-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:3232407ff0bb5911d409857363cbeda2a8efc578861a128a6b46008495b50463",
+          "created_at": "2026-10-27T01:28:44Z",
+          "superseded_artifact_ids": []
+        },
+        {
+          "index": 5,
+          "id": 12703166268,
+          "name": "bil39-full-shard-5-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:b1009f3814ebba205fc58b1b7e9e5264b15c33a8b70cad50a9a9de2b36376c7c",
+          "created_at": "2026-10-27T01:32:44Z",
+          "superseded_artifact_ids": []
+        },
+        {
+          "index": 6,
+          "id": 12703261008,
+          "name": "bil39-full-shard-6-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:7c268dfc7a6a54e620c84e2eedef355f94e2ddc1f4c3e866b08e985327f62a09",
+          "created_at": "2026-10-27T01:33:09Z",
+          "superseded_artifact_ids": []
+        },
+        {
+          "index": 7,
+          "id": 12702238171,
+          "name": "bil39-full-shard-7-d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+          "digest": "sha256:4e6fa85e9119d6f1844053607683b7b5e3b6873da8042493f037f574d3fefefb",
+          "created_at": "2026-10-27T01:29:55Z",
+          "superseded_artifact_ids": []
+        }
+      ],
+      "prior_artifacts_deleted": false,
+      "scope": "Newest upload per exact-run shard; actual PASS checked separately"
+    },
+    "scope": "All host Flutter test files; native and live-cloud evidence remain separate"
+  },
+  "private_failure_metadata_sha256": {
+    "android33-native-metadata-0.json": "4ded9fec7e793567fa43a758318a2315a25beacf135236c0e0f7d572d95ae307",
+    "iphone-native-metadata-0.json": "b74b41bf01bed034e49f5b81990a7cdfa3c917dff03f312121f610c18867e1ea"
+  },
+  "native_zip_retrieval_scope": "Bounded range reads and entry CRC verified; whole large native archive digest not recalculated",
+  "diagnostic_non_pass_run_retained": "native-closing-ime-and-all-qa-controls-v1.jsonl:70PASS4ERROR includes two required live-runner fences and two reused test-message IDs; no production cloud access, no assertion weakened",
+  "budgets_preserved": {
+    "first_reply_ms": 1500,
+    "native_fallback_ms": 3000,
+    "community_native_layout_ms": 8000,
+    "hit_target_minimum": 48
+  },
+  "old_native37_helper_sha256": "68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314",
+  "swift_compilation": "PENDING_MACOS_CI",
+  "new_native_bridge_runtime_pass": false,
+  "cloud_deployed": false,
+  "signed_build39": false
+}

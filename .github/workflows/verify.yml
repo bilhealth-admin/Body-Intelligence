@@ -136,8 +136,15 @@ jobs:
       - name: Prove pinned calendar date logic is unchanged
         run: dart run tool/verify_bil39_pinned_calendar.dart
 
-      - name: Verify native hit-target measurement negative controls
-        run: flutter test --no-pub tools/qa/flutter/native_hit_target_measurement_test.dart
+      - name: Verify native observation, IME and capture negative controls
+        shell: pwsh
+        run: |
+          # Live cloud cycles retain their explicit isolated runner and credentials.
+          # This phase runs every host-safe native observer/transport control.
+          $bilNativeQaFiles = @(Get-ChildItem -LiteralPath tools/qa/flutter -File -Filter 'native_*_test.dart' |
+            Sort-Object Name | ForEach-Object { $_.FullName })
+          if ($bilNativeQaFiles.Count -eq 0) { throw 'Native QA controls must not be empty' }
+          flutter test --no-pub --concurrency=1 @bilNativeQaFiles
 
       - name: Verify first-food commits, optional Skip and reviewer entitlement
         if: ${{ success() }}

@@ -17,6 +17,34 @@ Set<Factory<OneSequenceGestureRecognizer>> coachNativeMarkdownGestures() => {
   ),
 };
 
+/// Native layout needs a composed platform surface before its readiness reply.
+class CoachNativeMarkdownSurface extends StatelessWidget {
+  const CoachNativeMarkdownSurface({
+    required this.height,
+    required this.ready,
+    required this.child,
+    super.key,
+  });
+
+  final double height;
+  final bool ready;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: height,
+    child: IgnorePointer(
+      ignoring: !ready,
+      child: ExcludeSemantics(
+        excluding: !ready,
+        // Zero Flutter opacity skips platform-view composition altogether.
+        // UIKit owns temporary visibility while SwiftUI measures this surface.
+        child: child,
+      ),
+    ),
+  );
+}
+
 /// The current ai-coach contract is one validated JSON response, not SSE.
 /// This native view formats that response; it never simulates token streaming.
 class CoachNativeMarkdown extends StatefulWidget {
@@ -123,6 +151,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
   void _schedulePaintGate() {
     if (!_heightReady ||
         _firstContentBounds == null ||
+        _failed ||
         _paintReady ||
         _paintGateScheduled) {
       return;
@@ -132,12 +161,42 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
     // Let the existing Flutter history measure/reanchor the final native body
     // before revealing it. This is layout synchronization, not fake streaming.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _paintGateScheduled = false;
-        if (mounted && widget.visitIsCurrent() && _generation == generation) {
-          setState(() => _paintReady = true);
-        } else if (mounted && widget.visitIsCurrent()) {
-          _schedulePaintGate();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          if (!mounted || !widget.visitIsCurrent()) return;
+          if (_generation == generation && !_failed) {
+            final channel = _channel;
+            final acknowledged = await channel?.invokeMethod<bool>(
+              'setVisible',
+              {'generation': generation, 'visible': true},
+            );
+            if (!mounted ||
+                !widget.visitIsCurrent() ||
+                _generation != generation ||
+                _failed) {
+              await channel?.invokeMethod<bool>('setVisible', {
+                'generation': generation,
+                'visible': false,
+              });
+              return;
+            }
+            if (mounted &&
+                widget.visitIsCurrent() &&
+                _generation == generation &&
+                acknowledged == true) {
+              _layoutTimer?.cancel();
+              setState(() => _paintReady = true);
+            }
+          }
+        } on PlatformException {
+          if (mounted) setState(() => _failed = true);
+        } on MissingPluginException {
+          if (mounted) setState(() => _failed = true);
+        } finally {
+          _paintGateScheduled = false;
+          if (mounted && widget.visitIsCurrent() && _generation != generation) {
+            _schedulePaintGate();
+          }
         }
       });
       WidgetsBinding.instance.scheduleFrame();
@@ -237,30 +296,26 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
           });
         }
         _reportReadinessAfterPaint();
-        return SizedBox(
+        return CoachNativeMarkdownSurface(
           height: _height,
-          child: Opacity(
-            opacity: nativeLayoutReady ? 1 : 0,
-            child: UiKitView(
-              viewType: 'bil/coach_markdown',
-              layoutDirection: widget.direction,
-              creationParams: payload,
-              creationParamsCodec: const StandardMessageCodec(),
-              gestureRecognizers: coachNativeMarkdownGestures(),
-              onPlatformViewCreated: (id) {
-                _channel = MethodChannel('bil/coach_markdown/$id')
-                  ..setMethodCallHandler(_receive);
-                _update(_payload(context));
-                _layoutTimer?.cancel();
-                _layoutTimer = Timer(const Duration(seconds: 3), () {
-                  if (mounted &&
-                      widget.visitIsCurrent() &&
-                      !nativeLayoutReady) {
-                    setState(() => _failed = true);
-                  }
-                });
-              },
-            ),
+          ready: nativeLayoutReady,
+          child: UiKitView(
+            viewType: 'bil/coach_markdown',
+            layoutDirection: widget.direction,
+            creationParams: payload,
+            creationParamsCodec: const StandardMessageCodec(),
+            gestureRecognizers: coachNativeMarkdownGestures(),
+            onPlatformViewCreated: (id) {
+              _channel = MethodChannel('bil/coach_markdown/$id')
+                ..setMethodCallHandler(_receive);
+              _update(_payload(context));
+              _layoutTimer?.cancel();
+              _layoutTimer = Timer(const Duration(seconds: 3), () {
+                if (mounted && widget.visitIsCurrent() && !nativeLayoutReady) {
+                  setState(() => _failed = true);
+                }
+              });
+            },
           ),
         );
       },

@@ -37,6 +37,8 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   int _layoutGeneration = 0;
   bool _awaitingFirstPaint = false;
   String? _lastMetricsSignature;
+  String? _lastNonKeyboardMetricsSignature;
+  double? _lastKeyboardInset;
   Timer? _metricLayoutDebounce;
   String? _reportedVisibleFor;
   bool _visibilityNoticeQueued = false;
@@ -87,6 +89,10 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _lastMetricsSignature ??= _metricsSignature();
+    _lastNonKeyboardMetricsSignature ??= _metricsSignature(
+      includeKeyboardInset: false,
+    );
+    _lastKeyboardInset ??= View.of(context).viewInsets.bottom;
     _syncMotionPreference();
   }
 
@@ -115,10 +121,26 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
     if (!mounted) return;
     final signature = _metricsSignature();
     final previousSignature = _lastMetricsSignature;
+    final nonKeyboardSignature = _metricsSignature(includeKeyboardInset: false);
+    final previousNonKeyboardSignature = _lastNonKeyboardMetricsSignature;
+    final keyboardInset = View.of(context).viewInsets.bottom;
+    final previousKeyboardInset = _lastKeyboardInset;
     _lastMetricsSignature = signature;
+    _lastNonKeyboardMetricsSignature = nonKeyboardSignature;
+    _lastKeyboardInset = keyboardInset;
     if (previousSignature == null ||
         previousSignature == signature ||
         !_awaitingFirstPaint) {
+      return;
+    }
+
+    // A retracting IME expands the existing reading viewport. Restarting the
+    // fade on every closing frame can keep a fully laid-out reply transparent,
+    // especially when native debug frames are slow. Keep the current entrance;
+    // genuine viewport contractions and other geometry changes still re-gate.
+    if (previousNonKeyboardSignature == nonKeyboardSignature &&
+        previousKeyboardInset != null &&
+        keyboardInset < previousKeyboardInset) {
       return;
     }
 
@@ -128,11 +150,13 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
     _scheduleMetricLayoutGate();
   }
 
-  String _metricsSignature() {
+  String _metricsSignature({bool includeKeyboardInset = true}) {
     final view = View.of(context);
     final size = view.physicalSize;
     final insets = view.viewInsets;
-    final padding = view.padding;
+    // Computed padding changes as the keyboard consumes the bottom safe area.
+    // Only raw viewPadding distinguishes a real safe-area change from IME motion.
+    final padding = includeKeyboardInset ? view.padding : view.viewPadding;
     return <double>[
       view.devicePixelRatio,
       size.width,
@@ -140,7 +164,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
       insets.left,
       insets.top,
       insets.right,
-      insets.bottom,
+      if (includeKeyboardInset) insets.bottom,
       padding.left,
       padding.top,
       padding.right,

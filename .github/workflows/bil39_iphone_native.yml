@@ -44,6 +44,11 @@ jobs:
           flutter pub get
           dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
           pod install --project-directory=ios
+      - name: Verify Flutter UIKit composition and IME behavior before native build
+        run: >
+          flutter test --no-pub
+          test/features/intelligence_center/coach_native_chat_presentation_test.dart
+          test/features/intelligence_center/coach_reply_arrival_test.dart
       - name: Drive all native scopes on dedicated iPhone
         env:
           BIL_NATIVE_DEVICE: iphone

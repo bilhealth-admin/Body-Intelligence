@@ -5723,8 +5723,8 @@
     }
   },
   "hard_blockers": [
-    "Final exact-source GitHub checks on the committed assembly have not run; local results do not replace them.",
-    "Fresh native iPhone/iPad Coach/crypto and Android API26/29/33/34/35/36 acceptance must pass on that same SHA.",
+    "The new combined IME/UIKit presentation correction requires all ten exact-source CI workflows; d34 had seven successful and three failed workflows despite full host coverage passing.",
+    "Native Swift compilation and real Coach/Community layout acceptance on independent iPhone and iPad runs remain required for the corrected source.",
     "Signed39 archive, final binary privacy/entitlement/icon identity, Apple processing and internal TestFlight availability remain unverified.",
     "Physical39 acceptance remains pending installation; physical38 source-discovery evidence cannot certify39."
   ],
@@ -6212,5 +6212,37 @@
     "Final Android/iPhone/iPad matrix, signed39 purchase/Restore and physical acceptance remain incomplete",
     "No final integration commit/push or TestFlight39 upload has occurred; protected38/main/store administration unchanged"
   ],
-  "latest_ci_tooling_correction": "evidence/bil39-local-20261026/ci-root-corrections-20261027.json"
+  "latest_ci_tooling_correction": "evidence/bil39-local-20261026/ci-root-corrections-20261027.json",
+  "latest_native_presentation_correction": {
+    "document": "BIL39_NATIVE_LAYOUT_AND_IME_CORRECTION_20261027_AR.md",
+    "receipt": "evidence/bil39-local-20261026/native-layout-ime-correction-20261027.json",
+    "parent_sha": "d34a18570ea63b17d8041be4127dcde9b1bf82fc",
+    "status": "LOCAL_PASS_NEW_EXACT_SHA_NATIVE_CI_REQUIRED",
+    "original_requirement_counts": {
+      "original_37_cases": 37,
+      "additional_18_coach_scenarios": 18,
+      "cloud_10_truth_gates": 10,
+      "supplemental_scopes": 3
+    },
+    "previous_exact_sha_ci": {
+      "verify_run": 40431033518,
+      "status": "PASS",
+      "test_files": 1471,
+      "success": 11161,
+      "failure": 0,
+      "error": 0,
+      "expected_separate_live_range_skip": 1,
+      "native_android": "40PASS1FAIL",
+      "native_iphone": "FAIL_NATIVE_LAYOUT_READINESS",
+      "native_ipad": "29PASS12FAIL"
+    },
+    "fixes": [
+      "Do not restart first reply opacity while only the IME retracts",
+      "Compose UIKit before waiting for real SwiftUI layout; native generation-scoped visibility acknowledgement",
+      "Early actual Flutter composition and IME controls on each independent native run"
+    ],
+    "native_swift_build": "PENDING_MACOS_CI",
+    "signed_build39": false,
+    "physical39_acceptance": "PENDING_INSTALLATION"
+  }
 }

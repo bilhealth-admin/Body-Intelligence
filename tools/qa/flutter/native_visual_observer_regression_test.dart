@@ -10,143 +10,171 @@ import '../../../integration_test/native_feature_splashes_test.dart'
 
 void main() {
   for (final arabic in [true, false]) {
-    testWidgets(
-      'first painted reply stays readable when IME resizes before arrival AR=$arabic',
-      (tester) async {
-        tester.view.physicalSize = const Size(412, 890);
-        tester.view.devicePixelRatio = 1;
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-        addTearDown(tester.view.resetViewInsets);
-        final controller = ScrollController();
-        addTearDown(controller.dispose);
-        final anchor = GlobalKey();
-        final messageId = 'qa-ime-first-paint-$arabic';
-        final reply = List.generate(
-          26,
-          (i) => arabic
-              ? 'فقرة تركيبية $i: هذه قراءة محلية واضحة لا تحفظ طعامًا ولا تغيّر حسابًا.'
-              : 'Synthetic paragraph $i: this readable reply performs no food write or account change.',
-        ).join('\n');
-        double readingTarget(ScrollPosition position) {
-          final render = anchor.currentContext?.findRenderObject();
-          if (!position.hasContentDimensions ||
-              !position.hasViewportDimension ||
-              render is! RenderBox ||
-              !render.hasSize ||
-              render.size.height <= position.viewportDimension) {
-            return position.minScrollExtent;
+    for (final closingIme in [false, true]) {
+      testWidgets(
+        'first painted reply stays readable when IME resizes before arrival AR=$arabic closing=$closingIme',
+        (tester) async {
+          tester.view.physicalSize = const Size(412, 890);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          addTearDown(tester.view.resetViewInsets);
+          if (closingIme) {
+            tester.view.viewInsets = const FakeViewPadding(
+              bottom: 264.3809523809524,
+            );
           }
-          return RenderAbstractViewport.of(render)
-              .getOffsetToReveal(
-                render,
-                1,
-                rect: Rect.fromLTWH(0, 0, render.size.width, 1),
-                axis: Axis.vertical,
-              )
-              .offset
-              .clamp(position.minScrollExtent, position.maxScrollExtent)
-              .toDouble();
-        }
+          final controller = ScrollController();
+          addTearDown(controller.dispose);
+          final anchor = GlobalKey();
+          final messageId = 'qa-ime-first-paint-$arabic-$closingIme';
+          final reply = List.generate(
+            26,
+            (i) => arabic
+                ? 'فقرة تركيبية $i: هذه قراءة محلية واضحة لا تحفظ طعامًا ولا تغيّر حسابًا.'
+                : 'Synthetic paragraph $i: this readable reply performs no food write or account change.',
+          ).join('\n');
+          double readingTarget(ScrollPosition position) {
+            final render = anchor.currentContext?.findRenderObject();
+            if (!position.hasContentDimensions ||
+                !position.hasViewportDimension ||
+                render is! RenderBox ||
+                !render.hasSize ||
+                render.size.height <= position.viewportDimension) {
+              return position.minScrollExtent;
+            }
+            return RenderAbstractViewport.of(render)
+                .getOffsetToReveal(
+                  render,
+                  1,
+                  rect: Rect.fromLTWH(0, 0, render.size.width, 1),
+                  axis: Axis.vertical,
+                )
+                .offset
+                .clamp(position.minScrollExtent, position.maxScrollExtent)
+                .toDouble();
+          }
 
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(platform: TargetPlatform.android),
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: const TextScaler.linear(2)),
-              child: child!,
-            ),
-            home: Scaffold(
-              body: Column(
-                children: [
-                  const SizedBox(height: 182),
-                  Expanded(
-                    child: ChatHistoryViewport(
-                      controller: controller,
-                      latestMessageId: messageId,
-                      latestTargetOffset: readingTarget,
-                      child: ListView(
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: ThemeData(platform: TargetPlatform.android),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(2)),
+                child: child!,
+              ),
+              home: Scaffold(
+                body: Column(
+                  children: [
+                    const SizedBox(height: 182),
+                    Expanded(
+                      child: ChatHistoryViewport(
                         controller: controller,
-                        reverse: true,
-                        children: [
-                          KeyedSubtree(
-                            key: anchor,
-                            child: CoachReplyArrival(
-                              messageId: messageId,
-                              animate: true,
-                              child: Padding(
-                                padding: const EdgeInsets.all(13),
-                                child: CoachMessageText(
-                                  text: reply,
-                                  createdAt: DateTime.utc(2026, 10, 15),
-                                  textDirection: arabic
-                                      ? TextDirection.rtl
-                                      : TextDirection.ltr,
-                                  style: const TextStyle(fontSize: 12),
-                                  showTime: false,
+                        latestMessageId: messageId,
+                        latestTargetOffset: readingTarget,
+                        child: ListView(
+                          controller: controller,
+                          reverse: true,
+                          children: [
+                            KeyedSubtree(
+                              key: anchor,
+                              child: CoachReplyArrival(
+                                messageId: messageId,
+                                animate: true,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(13),
+                                  child: CoachMessageText(
+                                    text: reply,
+                                    createdAt: DateTime.utc(2026, 10, 15),
+                                    textDirection: arabic
+                                        ? TextDirection.rtl
+                                        : TextDirection.ltr,
+                                    style: const TextStyle(fontSize: 12),
+                                    showTime: false,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 216),
-                ],
+                    const SizedBox(height: 216),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-        final watch = Stopwatch()..start();
-        final samples = <Map<String, Object?>>[
-          native_qa.nativeQaReplyGeometry(tester, reply, watch),
-        ];
-        var observing = true;
-        void observe(Duration _) {
-          if (!observing) return;
-          samples.add(native_qa.nativeQaReplyGeometry(tester, reply, watch));
-          WidgetsBinding.instance.addPostFrameCallback(observe);
-        }
+          );
+          final watch = Stopwatch()..start();
+          final samples = <Map<String, Object?>>[
+            native_qa.nativeQaReplyGeometry(tester, reply, watch),
+          ];
+          var observing = true;
+          void observe(Duration _) {
+            if (!observing) return;
+            samples.add(native_qa.nativeQaReplyGeometry(tester, reply, watch));
+            WidgetsBinding.instance.addPostFrameCallback(observe);
+          }
 
-        WidgetsBinding.instance.addPostFrameCallback(observe);
-        // Reproduce native AR's delayed first frame: IME removes 199.219
-        // logical pixels before the first positive opacity, after the old
-        // reading offset was measured. Do not settle away this vulnerable frame.
-        tester.view.viewInsets = const FakeViewPadding(
-          bottom: 199.21896792189682,
-        );
-        await tester.pump(const Duration(milliseconds: 356));
-        for (var frame = 0; frame < 24; frame++) {
-          await tester.pump(const Duration(milliseconds: 16));
-        }
-        observing = false;
-        watch.stop();
-        debugPrint(
-          'BIL_IME_FIRST_PAINT ${<String, Object?>{'arabic': arabic, 'scope': 'widget virtual frame regression, not native performance', 'samples': samples}}',
-        );
-        final painted = samples.where(
-          (sample) => (sample['reply_opacity'] as num? ?? 0) > 0,
-        );
-        expect(painted, isNotEmpty);
-        expect(
-          painted.first['first_glyphs_visible_area'] as num,
-          greaterThan(0),
-          reason:
-              'First nonempty painted glyphs must be inside the resized viewport.',
-        );
-        expect(painted.first['visible_graphemes'], reply.characters.length);
-        expect(samples.last['reply_opacity'], 1);
-        expect(
-          controller.offset,
-          closeTo(readingTarget(controller.position), .5),
-        );
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox.shrink());
-      },
-    );
+          WidgetsBinding.instance.addPostFrameCallback(observe);
+          // Reproduce native AR's delayed first frame: IME removes 199.219
+          // logical pixels before the first positive opacity, after the old
+          // reading offset was measured. Do not settle away this vulnerable frame.
+          if (closingIme) {
+            // Actual failed API33 viewport sequence, including its late rebound.
+            // Preserve the 1500ms first-paint bound while checking real glyph boxes.
+            for (final frame in <({int gap, double inset})>[
+              (gap: 520, inset: 65.1619844590557),
+              (gap: 230, inset: 0),
+              (gap: 506, inset: 264.3809523809524),
+              (gap: 196, inset: 65.1619844590557),
+            ]) {
+              tester.view.viewInsets = FakeViewPadding(bottom: frame.inset);
+              await tester.pump(Duration(milliseconds: frame.gap));
+            }
+            expect(
+              samples.where(
+                (frame) => (frame['reply_opacity'] as num? ?? 0) > 0,
+              ),
+              isNotEmpty,
+              reason: 'Native closing-IME replay must paint before 1500ms.',
+            );
+          } else {
+            tester.view.viewInsets = const FakeViewPadding(
+              bottom: 199.21896792189682,
+            );
+            await tester.pump(const Duration(milliseconds: 356));
+          }
+          for (var frame = 0; frame < 24; frame++) {
+            await tester.pump(const Duration(milliseconds: 16));
+          }
+          observing = false;
+          watch.stop();
+          debugPrint(
+            'BIL_IME_FIRST_PAINT ${<String, Object?>{'arabic': arabic, 'scope': 'widget virtual frame regression, not native performance', 'samples': samples}}',
+          );
+          final painted = samples.where(
+            (sample) => (sample['reply_opacity'] as num? ?? 0) > 0,
+          );
+          expect(painted, isNotEmpty);
+          expect(
+            painted.first['first_glyphs_visible_area'] as num,
+            greaterThan(0),
+            reason:
+                'First nonempty painted glyphs must be inside the resized viewport.',
+          );
+          expect(painted.first['visible_graphemes'], reply.characters.length);
+          expect(samples.last['reply_opacity'], 1);
+          expect(
+            controller.offset,
+            closeTo(readingTarget(controller.position), .5),
+          );
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox.shrink());
+        },
+      );
+    }
   }
 
   testWidgets('native geometry observer is safe during a guarded tester pump', (

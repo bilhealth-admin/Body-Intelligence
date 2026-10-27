@@ -20,6 +20,7 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
   private let host: UIHostingController<AnyView>
   private var generation = ""
   private var lastHeight: CGFloat = 0
+  private var firstBlock: CGRect?
   private static var registeredFonts: [String: String] = [:]
 
   init(frame: CGRect, id: Int64, arguments: [String: Any],
@@ -33,12 +34,27 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
     host.view.frame = frame
     host.view.backgroundColor = .clear
     host.view.isOpaque = false
+    setVisible(false)
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self else { result(nil); return }
-      guard call.method == "update", let data = call.arguments as? [String: Any]
-      else { result(FlutterMethodNotImplemented); return }
-      self.update(data, registrar: registrar)
-      result(nil)
+      guard let data = call.arguments as? [String: Any] else {
+        result(FlutterMethodNotImplemented); return
+      }
+      switch call.method {
+      case "update":
+        self.update(data, registrar: registrar)
+        result(nil)
+      case "setVisible":
+        guard data["generation"] as? String == self.generation,
+              let visible = data["visible"] as? Bool,
+              !visible || (self.lastHeight > 0 && self.firstBlock != nil) else {
+          result(false); return
+        }
+        self.setVisible(visible)
+        result(true)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
     }
     update(arguments, registrar: registrar)
   }
@@ -49,8 +65,12 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
           let size = data["fontSize"] as? Double, size.isFinite, size >= 8, size <= 120,
           let foreground = data["foreground"] as? NSNumber,
           let accent = data["accent"] as? NSNumber else { return }
-    generation = token
-    lastHeight = 0
+    if generation != token {
+      generation = token
+      lastHeight = 0
+      firstBlock = nil
+      setVisible(false)
+    }
     let rtl = data["rtl"] as? Bool ?? false
     let asset = rtl ? "assets/fonts/NotoNaskhArabic-Regular.ttf" : nil
     let name = asset.flatMap { Self.fontName($0, registrar: registrar) }
@@ -71,10 +91,30 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
         guard let self, self.generation == token, !rect.isEmpty,
               rect.origin.x.isFinite, rect.origin.y.isFinite,
               rect.width.isFinite, rect.height.isFinite else { return }
+        self.firstBlock = rect
         self.channel.invokeMethod("contentBounds", arguments: ["generation": token,
           "x": Double(rect.minX), "y": Double(rect.minY),
           "width": Double(rect.width), "height": Double(rect.height)])
       }).id(token))
+    host.view.setNeedsLayout()
+    // The first measurement can precede Flutter's channel handler. Replaying
+    // cached current-generation geometry also makes initial attachment safe.
+    if lastHeight > 0 {
+      channel.invokeMethod("height", arguments: ["generation": token, "height": Double(lastHeight)])
+    }
+    if let rect = firstBlock {
+      channel.invokeMethod("contentBounds", arguments: ["generation": token,
+        "x": Double(rect.minX), "y": Double(rect.minY),
+        "width": Double(rect.width), "height": Double(rect.height)])
+    }
+  }
+
+  private func setVisible(_ visible: Bool) {
+    // UIView alpha preserves native layout; Flutter Opacity(0) prevents the
+    // platform surface from joining the composition and deadlocks measurement.
+    host.view.alpha = visible ? 1 : 0
+    host.view.isUserInteractionEnabled = visible
+    host.view.accessibilityElementsHidden = !visible
   }
 
   private static func color(_ number: NSNumber) -> Color {
