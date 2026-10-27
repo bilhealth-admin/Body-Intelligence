@@ -1,8 +1,8 @@
-name: BIL39 signed internal TestFlight
-run-name: BIL39 exact-source signed internal TestFlight; no App Store submission
+name: BIL39 verified-source signing recovery
+run-name: BIL39 signed internal TestFlight from accepted69eb source; separate signing orchestration
 on:
   push:
-    branches: [bil39/internal-testflight-20261025]
+    branches: [codex/bil39-signing-orchestration-20261027]
 permissions:
   contents: read
   actions: read
@@ -12,9 +12,9 @@ concurrency:
   cancel-in-progress: false
 env:
   BIL_VALIDATION_MODE: all_exact_source_ci
-  BIL_TESTED_SOURCE_SHA: ${{ github.sha }}
-  BIL_TESTED_SOURCE: ${{ github.sha }}
-  BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS39_INTERNAL_CONFIGURATION_20261025.md
+  BIL_TESTED_SOURCE_SHA: 69ebb89279f11a8da5ee8e631016a88f3d24333d
+  BIL_TESTED_SOURCE: 69ebb89279f11a8da5ee8e631016a88f3d24333d
+  BIL_RELEASE_CONFIGURATION_PATH: docs/release/BIL_IOS39_INTERNAL_CONFIGURATION_20261025.md
   BIL_ORIGINAL_SHA: 155b079696430919f8272df934371f033fb11be2
 jobs:
   signed-ios-release:
@@ -24,9 +24,29 @@ jobs:
       - name: Checkout the immutable candidate accepted by final CI
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ github.sha }}
+          ref: 69ebb89279f11a8da5ee8e631016a88f3d24333d
           fetch-depth: 0
           persist-credentials: false
+      - name: Checkout only the audited signing orchestration tools
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          path: .bil39-signing-tools
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /tools/qa/bil39_internal_signing_manifest.py
+            /tools/qa/test_bil39_internal_signing_manifest.py
+          persist-credentials: false
+      - name: Isolate signing tools outside the immutable application checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C .bil39-signing-tools rev-parse HEAD)" = "$GITHUB_SHA"
+          test ! -e "$RUNNER_TEMP/bil39-signing-tools"
+          mv "$GITHUB_WORKSPACE/.bil39-signing-tools" "$RUNNER_TEMP/bil39-signing-tools"
+          echo "BIL_SIGNING_TOOLS_DIR=$RUNNER_TEMP/bil39-signing-tools" >> "$GITHUB_ENV"
+          PYTHONPATH="$GITHUB_WORKSPACE/tools/qa" python3 -m unittest discover \
+            -s "$RUNNER_TEMP/bil39-signing-tools/tools/qa" -p test_bil39_internal_signing_manifest.py -v
       - name: Require all final exact-source CI and verified cloud before credentials
         shell: bash
         env:
@@ -34,8 +54,11 @@ jobs:
           BIL39_VERIFIED_CLOUD_SOURCE_SHA: ${{ vars.BIL39_VERIFIED_CLOUD_SOURCE_SHA }}
         run: |
           set -euo pipefail
-          python3 tools/qa/bil39_internal_build_ci.py --sha "$GITHUB_SHA" --output BIL39-pre-signing-ci.json
-          echo "BIL_AUDITED_FREEZE_MANIFEST_SHA256=$(python3 -c 'import hashlib,pathlib,os;print(hashlib.sha256(pathlib.Path(os.environ["BIL_RELEASE_MANIFEST_PATH"]).read_bytes()).hexdigest())')" >> "$GITHUB_ENV"
+          python3 tools/qa/bil39_internal_build_ci.py --sha "$BIL_TESTED_SOURCE_SHA" --output BIL39-pre-signing-ci.json
+          python3 "$BIL_SIGNING_TOOLS_DIR/tools/qa/bil39_internal_signing_manifest.py" \
+            --receipt BIL39-pre-signing-ci.json --output "$RUNNER_TEMP/BIL39-internal-acceptance.md"
+          mkdir -p evidence
+          cp BIL39-pre-signing-ci.json BIL39-signing-manifest-proof.json BIL39-internal-acceptance.md evidence/
       - name: Verify selected Xcode 26+ and iOS SDK 26+
         id: apple_toolchain_gate
         shell: bash
@@ -227,9 +250,9 @@ jobs:
           BIL_PUSH_PROVIDER_READY: true
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-          BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
+          BIL_SOURCE_COMMIT: 69ebb89279f11a8da5ee8e631016a88f3d24333d
+          BIL_AUDITED_SOURCE_COMMIT: 69ebb89279f11a8da5ee8e631016a88f3d24333d
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: 69ebb89279f11a8da5ee8e631016a88f3d24333d
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: '39'
         run: |
           flutter pub get --enforce-lockfile
@@ -575,6 +598,8 @@ jobs:
             BIL-source-head.txt
             BIL-ios-build-only-receipt.json
             BIL39-pre-signing-ci.json
+            BIL39-internal-acceptance.md
+            BIL39-signing-manifest-proof.json
             BIL-apple-release-toolchain.txt
             BIL-apple-release-toolchain.json
 
@@ -596,7 +621,7 @@ jobs:
           python3 - <<'PY'
           import json,os,pathlib
           r=json.loads(pathlib.Path('BIL-ios-build-only-receipt.json').read_text())
-          assert r['build']==39 and r['source_sha']==os.environ['GITHUB_SHA']
+          assert r['build']==39 and r['source_sha']==os.environ['BIL_TESTED_SOURCE_SHA']
           with open(os.environ['GITHUB_ENV'],'a') as stream:
               stream.write('BIL_IPA_SHA256='+r['ipa_sha256']+'\n')
               stream.write('BIL_SIGNED_RUN='+os.environ['BIL_SIGNED_RUN']+'\n')
@@ -778,6 +803,23 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         shell: bash
         run: node evidence/asc-processing.mjs processing
+      - name: Record failure-safe signing stage evidence without credentials
+        if: always()
+        env:
+          BIL_SIGNING_JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          mkdir -p evidence
+          python3 - <<'PY2'
+          import json, os, pathlib, subprocess
+          record={'source_sha':os.environ['BIL_TESTED_SOURCE_SHA'],
+                  'workflow_sha':os.environ['GITHUB_SHA'], 'job_status':os.environ['BIL_SIGNING_JOB_STATUS'],
+                  'actual_checkout':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+                  'signed_receipt_exists':pathlib.Path('BIL-ios-build-only-receipt.json').is_file(),
+                  'upload_receipt_exists':pathlib.Path('evidence/upload-receipt.json').is_file(),
+                  'public_release_approved':False}
+          pathlib.Path('evidence/signing-stage-status.json').write_text(json.dumps(record,indent=2)+'\n')
+          PY2
       - name: Preserve upload, processing and artifact identity evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
