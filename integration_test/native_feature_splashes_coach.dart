@@ -491,6 +491,14 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                       'Real page must paint a nonempty reply within the recorded native observation budget.',
                 );
                 final first = nonempty.first;
+                // A slow native pump can return after the loop's deadline.
+                // Check the actual observed frame, not just entry into pump.
+                expect(
+                  (first['observed_at_ms'] as num) - replyReleasedAt,
+                  lessThanOrEqualTo(1500),
+                  reason:
+                      'The actual first readable frame must meet the original 1500ms budget.',
+                );
                 metadata['first_nonempty_native_frame'] = first;
                 expect(
                   first[Platform.isIOS

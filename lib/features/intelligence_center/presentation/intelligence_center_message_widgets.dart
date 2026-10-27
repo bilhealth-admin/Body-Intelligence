@@ -138,6 +138,8 @@ class _MessageBubble extends StatelessWidget {
     return CoachReplyArrival(
       messageId: message.id,
       animate: animateReveal,
+      keepPlatformSurfaceComposed:
+          coachUsesNativeMarkdown && message.presentation == null,
       child: Container(
         key: ValueKey('ai-coach-reply-card-${message.id}'),
         width: double.infinity,

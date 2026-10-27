@@ -32,10 +32,11 @@ class ExactSimulatorVmTests(unittest.TestCase):
         collector = Mock(pid=424242, _bil_collector_group=True)
         collector.wait.side_effect = [subprocess.TimeoutExpired('owned', 5), 0]
         with patch.object(attach.os, 'name', 'posix'), \
+                patch.object(attach.signal, 'SIGKILL', 9, create=True), \
                 patch.object(attach.os, 'killpg', create=True) as kill:
             attach.stop_collector(collector)
         self.assertEqual(kill.call_args_list, [call(424242, attach.signal.SIGTERM),
-            call(424242, attach.signal.SIGKILL)])
+            call(424242, 9)])
         self.assertEqual(collector.wait.call_args_list, [call(timeout=5), call(timeout=5)])
 
     def test_unmarked_collector_cannot_signal_an_unowned_group(self):
@@ -43,6 +44,7 @@ class ExactSimulatorVmTests(unittest.TestCase):
         collector = Mock(pid=424242, _bil_collector_group=False)
         collector.wait.side_effect = [subprocess.TimeoutExpired('owned', 5), 0]
         with patch.object(attach.os, 'name', 'posix'), \
+                patch.object(attach.signal, 'SIGKILL', 9, create=True), \
                 patch.object(attach.os, 'killpg', create=True) as kill:
             attach.stop_collector(collector)
         kill.assert_not_called()
