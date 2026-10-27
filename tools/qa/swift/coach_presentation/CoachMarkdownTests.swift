@@ -72,6 +72,42 @@ final class CoachMarkdownTests: XCTestCase {
   }
 
   #if canImport(UIKit)
+  @MainActor func testKnownWidthPreparesTheRealLongBodyBeforeItsFirstWindowFrame() async throws {
+    for arabic in [true, false] {
+      let text = (0..<26).map { index in
+        arabic ? "فقرة تركيبية \(index): هذه قراءة محلية واضحة لا تحفظ طعامًا ولا تغيّر حسابًا."
+          : "Synthetic paragraph \(index): a readable local reply without any account change."
+      }.joined(separator: "\n")
+      var reported: CGFloat = 0
+      var first = CGRect.zero
+      let host = UIHostingController(rootView: BILCoachMarkdownView(
+        blocks: BILCoachMarkdownDocument.blocks(text), rightToLeft: arabic,
+        fontSize: 32, textColor: .primary, linkColor: .blue, fontName: nil,
+        openLink: { _ in XCTFail("Sizing must not open links") },
+        reportHeight: { reported = $0 }, reportFirstBlock: { first = $0 }))
+      // A platform view begins unattached; the real Flutter width is supplied
+      // by the same production sizing function used by the bridge.
+      host.view.frame = .zero
+      XCTAssertNil(BILCoachMarkdownSizing.prepare(host, width: 0))
+      XCTAssertNil(BILCoachMarkdownSizing.prepare(host, width: .infinity))
+      let measured = try XCTUnwrap(BILCoachMarkdownSizing.prepare(host, width: 360))
+      XCTAssertGreaterThan(measured, 600)
+      XCTAssertEqual(host.view.frame.width, 360)
+      XCTAssertEqual(host.view.frame.height, measured)
+      let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 360, height: 844))
+      window.rootViewController = host
+      window.makeKeyAndVisible()
+      host.view.frame = CGRect(x: 0, y: 0, width: 360, height: measured)
+      host.view.layoutIfNeeded()
+      try await Task.sleep(nanoseconds: 100_000_000)
+      XCTAssertEqual(reported, measured, accuracy: 0.5)
+      XCTAssertGreaterThan(first.width, 0)
+      XCTAssertGreaterThan(first.height, 0)
+      window.isHidden = true
+      window.rootViewController = nil
+    }
+  }
+
   @MainActor func testActualSwiftUISurfacesInBothLanguagesThemesAndTextSizes() async throws {
     for arabic in [false, true] {
       for dark in [false, true] {

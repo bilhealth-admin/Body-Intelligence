@@ -21,6 +21,7 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
   private var generation = ""
   private var lastHeight: CGFloat = 0
   private var firstBlock: CGRect?
+  private var appliedInput: NSDictionary?
   private static var registeredFonts: [String: String] = [:]
 
   init(frame: CGRect, id: Int64, arguments: [String: Any],
@@ -65,6 +66,15 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
           let size = data["fontSize"] as? Double, size.isFinite, size >= 8, size <= 120,
           let foreground = data["foreground"] as? NSNumber,
           let accent = data["accent"] as? NSNumber else { return }
+    // Flutter sends the creation payload again when its channel attaches.
+    // Replacing the same SwiftUI root dirties its first text layout a second
+    // time. Replay measured geometry instead; a new generation/width/content
+    // still takes the complete layout path below.
+    if appliedInput?.isEqual(to: data) == true {
+      replayGeometry(token: token)
+      return
+    }
+    appliedInput = data as NSDictionary
     if generation != token {
       generation = token
       lastHeight = 0
@@ -96,9 +106,19 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
           "x": Double(rect.minX), "y": Double(rect.minY),
           "width": Double(rect.width), "height": Double(rect.height)])
       }).id(token))
+    if let width = data["width"] as? Double,
+       let height = BILCoachMarkdownSizing.prepare(host, width: CGFloat(width)),
+       abs(height - lastHeight) > 0.5 {
+      lastHeight = height
+    }
     host.view.setNeedsLayout()
     // The first measurement can precede Flutter's channel handler. Replaying
     // cached current-generation geometry also makes initial attachment safe.
+    replayGeometry(token: token)
+  }
+
+  private func replayGeometry(token: String) {
+    guard generation == token else { return }
     if lastHeight > 0 {
       channel.invokeMethod("height", arguments: ["generation": token, "height": Double(lastHeight)])
     }

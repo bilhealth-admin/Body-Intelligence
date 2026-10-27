@@ -129,13 +129,12 @@ DEFINES=(
   --dart-define=BIL_PAYMENTS_ENABLED=false
   --dart-define=BIL_ADS_ENABLED=false
   --dart-define=BIL_QA_IOS_SIMULATOR=true
-  --dart-define=BIL_QA_NATIVE_COACH_ONLY=true
-  --dart-define=BIL_QA_NATIVE_SCENE=ar-light-normal
+  --dart-define=BIL_QA_COLD_SEQUENCE_ONLY=true
   --dart-define=BIL_QA_DEVICE_NAME=github-bil39-native-$LABEL
   --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD"
   --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE"
 )
-# Only the failed scene is selected for this diagnostic; final certification stays full.
+# Four original feature-entry scenes precede the failed Arabic pair for this diagnostic; final certification stays full.
 KINDS=(feature-splashes)
 # Warm the Swift package graph in the fresh native job before Flutter's fixed
 # settings-query deadline. This is preparation, never native-test evidence.
@@ -158,7 +157,7 @@ for KIND in "${KINDS[@]}"; do
       DRIVER=test_driver/native_settings_capture_driver.dart ;;
     feature-splashes)
       TARGET=integration_test/native_feature_splashes_test.dart
-      DRIVER=test_driver/native_feature_splashes_driver.dart ;;
+      DRIVER=test_driver/bil39_cold_sequence_diagnostic_driver.dart ;;
   esac
   stage "$KIND-generic-config" 900 "$OUT/$KIND-generic-config.log" \
     flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub \

@@ -346,6 +346,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
     for (final reduced in [false, true]) {
       final scene = '$language-light-${reduced ? 'reduced' : 'normal'}';
       if (_sceneFilter.isNotEmpty && scene != _sceneFilter) continue;
+      if (_coldSequenceOnly && scene != 'ar-light-normal') continue;
       for (final history in [false, true]) {
         final mode = history ? 'history' : 'reveal';
         testWidgets(

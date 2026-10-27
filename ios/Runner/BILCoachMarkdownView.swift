@@ -125,3 +125,31 @@ private struct BILCoachMarkdownFirstBlock: PreferenceKey {
     if value.isEmpty && !next.isEmpty { value = next }
   }
 }
+
+#if canImport(UIKit)
+/// Measures the existing native body at Flutter's known width before its first
+/// window frame. A zero-width UIKit attachment otherwise needs a second slow
+/// cold layout before Flutter can reserve the complete reading surface.
+enum BILCoachMarkdownSizing {
+  static func prepare<Content: View>(_ host: UIHostingController<Content>,
+                                    width: CGFloat) -> CGFloat? {
+    guard width.isFinite, width > 0, width <= 10_000 else { return nil }
+    host.view.frame.size.width = width
+    let fitting: CGSize
+    if #available(iOS 16.0, *) {
+      fitting = host.sizeThatFits(in: CGSize(width: width, height: 100_000))
+    } else {
+      fitting = host.view.systemLayoutSizeFitting(
+        CGSize(width: width, height: 100_000),
+        withHorizontalFittingPriority: .required,
+        verticalFittingPriority: .fittingSizeLevel)
+    }
+    guard fitting.height.isFinite, fitting.height > 0,
+          fitting.height <= 100_000 else { return nil }
+    host.view.frame.size.height = fitting.height
+    host.view.setNeedsLayout()
+    host.view.layoutIfNeeded()
+    return fitting.height
+  }
+}
+#endif

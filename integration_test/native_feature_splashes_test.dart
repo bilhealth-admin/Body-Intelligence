@@ -77,6 +77,7 @@ const _fingerprint = String.fromEnvironment('BIL_QA_SOURCE_FINGERPRINT');
 const _androidQaEnabled = bool.fromEnvironment('BIL_QA_ANDROID_EMULATOR');
 const _iosQaEnabled = bool.fromEnvironment('BIL_QA_IOS_SIMULATOR');
 const _sceneFilter = String.fromEnvironment('BIL_QA_NATIVE_SCENE');
+const _coldSequenceOnly = bool.fromEnvironment('BIL_QA_COLD_SEQUENCE_ONLY');
 const _coachOnly = bool.fromEnvironment('BIL_QA_NATIVE_COACH_ONLY');
 const _conversationOnly = bool.fromEnvironment(
   'BIL_QA_NATIVE_CONVERSATIONS_ONLY',
@@ -315,17 +316,24 @@ void main() {
   setUp(() => _dartNetworkDeny.blockedClientCreations = 0);
   tearDownAll(() => HttpOverrides.global = priorHttpOverrides);
   binding.reportData = {
-    'native_scope': _coachOnly
+    'native_scope': _coldSequenceOnly
+        ? 'cold-sequence-only'
+        : _coachOnly
         ? 'coach-only'
         : _conversationOnly
         ? 'conversations-only'
         : 'all',
     'smart_plan_native_expected':
-        !_coachOnly && !_conversationOnly && _sceneFilter.isEmpty ? 16 : 0,
-    'community_conversations_expected': !_coachOnly && _sceneFilter.isEmpty
-        ? 8
+        !_coldSequenceOnly &&
+            !_coachOnly &&
+            !_conversationOnly &&
+            _sceneFilter.isEmpty
+        ? 16
         : 0,
-    'store_activity_expected': !_coachOnly && _sceneFilter.isEmpty ? 4 : 0,
+    'community_conversations_expected':
+        !_coldSequenceOnly && !_coachOnly && _sceneFilter.isEmpty ? 8 : 0,
+    'store_activity_expected':
+        !_coldSequenceOnly && !_coachOnly && _sceneFilter.isEmpty ? 4 : 0,
     'native_scenes': [
       for (final scene in _scenes)
         if (_sceneFilter.isEmpty ||
@@ -755,8 +763,10 @@ void main() {
     );
   }
   _registerNativeCoachReveal(binding);
-  _registerNativeSmartPlanSessions(binding);
-  _registerNativeConversationsAndStoreActivity(binding);
+  if (!_coldSequenceOnly) {
+    _registerNativeSmartPlanSessions(binding);
+    _registerNativeConversationsAndStoreActivity(binding);
+  }
 }
 
 // These eight additional cases mount the real production page and renderer.
