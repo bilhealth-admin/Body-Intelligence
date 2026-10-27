@@ -6,7 +6,12 @@ part of 'native_feature_splashes_test.dart';
 void _registerNativeSmartPlanSessions(
   IntegrationTestWidgetsFlutterBinding binding,
 ) {
-  if (_coachOnly || _conversationOnly || _sceneFilter.isNotEmpty) return;
+  if (_coachOnly ||
+      _conversationOnly ||
+      _bridgeDiagnosticOnly ||
+      _sceneFilter.isNotEmpty) {
+    return;
+  }
   for (final environment in ['home', 'gym']) {
     for (final language in ['ar', 'en']) {
       for (final dark in [false, true]) {

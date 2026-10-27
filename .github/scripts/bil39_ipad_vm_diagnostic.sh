@@ -170,7 +170,7 @@ for KIND in "${KINDS[@]}"; do
     python3 .github/scripts/bil_ios_simulator_adhoc_sign.py \
     --qa-simulator-only --build-number 39 --workspace "$GITHUB_WORKSPACE" --app "$APP" \
     --output "$GITHUB_WORKSPACE/$OUT/$KIND-simulator-signature.json" \
-    --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE"
+    --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE" --device "$DEVICE"
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '39'
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
   shasum -a 256 "$APP/Runner" > "$OUT/$KIND-binary.sha256"

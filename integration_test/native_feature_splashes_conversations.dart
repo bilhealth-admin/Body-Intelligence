@@ -113,6 +113,14 @@ void _registerNativeConversationsAndStoreActivity(
       for (final scale in [1.0, 2.0]) {
         final name =
             'bil39-community-$language-${dark ? 'dark' : 'light'}-${scale.toInt()}x';
+        if (_bridgeDiagnosticOnly &&
+            !const {
+              'bil39-community-ar-dark-1x',
+              'bil39-community-en-light-2x',
+              'bil39-community-en-dark-2x',
+            }.contains(name)) {
+          continue;
+        }
         testWidgets(
           'native $name actual conversation and accepted send',
           (tester) async {
@@ -226,7 +234,12 @@ void _registerNativeConversationsAndStoreActivity(
                 'network_requests': transport.sends,
               });
             } finally {
-              _diagnoseNativeViews(tester, name);
+              final diagnostic = _diagnoseNativeViews(tester, name);
+              if (diagnostic != null) {
+                await File(
+                  '${output.path}/$name-diagnostic.json',
+                ).writeAsString(jsonEncode(diagnostic), flush: true);
+              }
               await tester.pumpWidget(const SizedBox.shrink());
               await repository.changes.close();
               await client.dispose();
@@ -236,6 +249,7 @@ void _registerNativeConversationsAndStoreActivity(
           timeout: const Timeout(Duration(seconds: 90)),
         );
       }
+      if (_bridgeDiagnosticOnly) continue;
       final name = 'bil39-store-$language-${dark ? 'dark' : 'light'}-2x';
       testWidgets(
         'native $name one waiting indicator outside checkout',

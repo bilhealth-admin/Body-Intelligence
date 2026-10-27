@@ -18,6 +18,21 @@ SIGN = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(SIGN)
 
 
+class ExactSimulatorDestination(unittest.TestCase):
+    def test_legacy_default_is_unchanged(self):
+        self.assertEqual(SIGN.simulator_build_destination(), ['-destination', 'generic/platform=iOS Simulator'])
+
+    def test_exact_device_uses_only_active_architecture(self):
+        device = 'AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE'
+        self.assertEqual(SIGN.simulator_build_destination(device),
+            ['-destination', 'platform=iOS Simulator,id=' + device, 'ONLY_ACTIVE_ARCH=YES'])
+
+    def test_invalid_or_ambiguous_destinations_are_refused(self):
+        for device in ['', 'booted', 'generic/platform=iOS Simulator', 'AAAAAAAA-' * 5]:
+            with self.subTest(device=device), self.assertRaises(ValueError):
+                SIGN.simulator_build_destination(device)
+
+
 class SimulatorSigningFixtures(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix="bil-qa-simulator-sign-")

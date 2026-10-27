@@ -77,6 +77,7 @@ const _androidQaEnabled = bool.fromEnvironment('BIL_QA_ANDROID_EMULATOR');
 const _iosQaEnabled = bool.fromEnvironment('BIL_QA_IOS_SIMULATOR');
 const _sceneFilter = String.fromEnvironment('BIL_QA_NATIVE_SCENE');
 const _coachOnly = bool.fromEnvironment('BIL_QA_NATIVE_COACH_ONLY');
+const _bridgeDiagnosticOnly = bool.fromEnvironment('BIL_QA_NATIVE_DIAGNOSTIC');
 const _conversationOnly = bool.fromEnvironment(
   'BIL_QA_NATIVE_CONVERSATIONS_ONLY',
 );
@@ -113,8 +114,8 @@ Future<void> nativeQaDismissKeyboard(WidgetTester tester) async {
   await tester.pump();
 }
 
-void _diagnoseNativeViews(WidgetTester tester, String stage) {
-  if (!const bool.fromEnvironment('BIL_QA_NATIVE_DIAGNOSTIC')) return;
+Map<String, Object?>? _diagnoseNativeViews(WidgetTester tester, String stage) {
+  if (!const bool.fromEnvironment('BIL_QA_NATIVE_DIAGNOSTIC')) return null;
   final values = tester
       .stateList<CoachNativeMarkdownState>(find.byType(CoachNativeMarkdown))
       .map((state) {
@@ -135,15 +136,17 @@ void _diagnoseNativeViews(WidgetTester tester, String stage) {
       })
       .toList();
   final data = IntegrationTestWidgetsFlutterBinding.instance.reportData!;
-  (data['native_bridge_diagnostics'] ??= <Object?>[]).add({
+  final record = <String, Object?>{
     'stage': stage,
     'views': values,
     'scheduled_frame': tester.binding.hasScheduledFrame,
     'transient_callbacks': tester.binding.transientCallbackCount,
-  });
+  };
+  (data['native_bridge_diagnostics'] ??= <Object?>[]).add(record);
   debugPrint(
     'BIL_NATIVE_DIAGNOSTIC ${jsonEncode({'stage': stage, 'views': values})}',
   );
+  return record;
 }
 
 Future<void> _nativeSettle(WidgetTester tester) async {
@@ -347,6 +350,7 @@ void main() {
   setUp(() => _dartNetworkDeny.blockedClientCreations = 0);
   tearDownAll(() => HttpOverrides.global = priorHttpOverrides);
   binding.reportData = {
+    'bridge_diagnostic_only_not_release_acceptance': _bridgeDiagnosticOnly,
     'native_scope': _coachOnly
         ? 'coach-only'
         : _conversationOnly
@@ -367,7 +371,7 @@ void main() {
     ],
   };
   for (final scene in _scenes) {
-    if (_coachOnly || _conversationOnly) break;
+    if (_coachOnly || _conversationOnly || _bridgeDiagnosticOnly) break;
     final name =
         '${scene.language}-light-${scene.reduced ? 'reduced' : 'normal'}';
     if (_sceneFilter.isNotEmpty && name != _sceneFilter) continue;

@@ -157,7 +157,7 @@ for KIND in "${KINDS[@]}"; do
       DRIVER=test_driver/native_settings_capture_driver.dart ;;
     feature-splashes)
       TARGET=integration_test/native_feature_splashes_test.dart
-      DRIVER=test_driver/native_feature_splashes_driver.dart ;;
+      DRIVER=test_driver/bil39_native_bridge_diagnostic_driver.dart ;;
   esac
   stage "$KIND-generic-config" 900 "$OUT/$KIND-generic-config.log" \
     flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub \
@@ -170,7 +170,7 @@ for KIND in "${KINDS[@]}"; do
     python3 .github/scripts/bil_ios_simulator_adhoc_sign.py \
     --qa-simulator-only --build-number 39 --workspace "$GITHUB_WORKSPACE" --app "$APP" \
     --output "$GITHUB_WORKSPACE/$OUT/$KIND-simulator-signature.json" \
-    --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE"
+    --target "$TARGET" --source-head "$SOURCE_HEAD" --source-tree "$SOURCE_TREE" --device "$DEVICE"
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist")" = '39'
   test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")" = 'com.bilhealth.bodyintelligencelog'
   shasum -a 256 "$APP/Runner" > "$OUT/$KIND-binary.sha256"

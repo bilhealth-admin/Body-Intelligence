@@ -79,7 +79,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
     _diagnosticEvents.add({
       'ms': _diagnosticClock.elapsedMilliseconds,
       'event': event,
-      'generation': _generation,
+      'current_generation': _generation,
       ...values,
     });
   }

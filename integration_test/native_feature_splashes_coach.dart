@@ -347,6 +347,9 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
       final scene = '$language-light-${reduced ? 'reduced' : 'normal'}';
       if (_sceneFilter.isNotEmpty && scene != _sceneFilter) continue;
       for (final history in [false, true]) {
+        if (_bridgeDiagnosticOnly && (language != 'ar' || reduced || history)) {
+          continue;
+        }
         final mode = history ? 'history' : 'reveal';
         testWidgets(
           'native Coach $mode $scene 2x real fonts and frames',
@@ -645,7 +648,10 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
             } finally {
               trace?.stop();
               gateway.cancelPending();
-              _diagnoseNativeViews(tester, 'coach-$mode-$scene');
+              metadata['bridge_diagnostic'] = _diagnoseNativeViews(
+                tester,
+                'coach-$mode-$scene',
+              );
               metadata['geometry_native_frames'] =
                   trace?.samples ?? <Object?>[];
               metadata['native_frame_timings'] =
