@@ -96,15 +96,6 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
           "x": Double(rect.minX), "y": Double(rect.minY),
           "width": Double(rect.width), "height": Double(rect.height)])
       }).id(token))
-    // The Flutter LayoutBuilder already knows this exact content width. Size
-    // the same SwiftUI host before its first platform-view composition instead
-    // of waiting for a 60-point provisional surface to be resized on cold frames.
-    if let width = data["width"] as? Double,
-       let height = BILCoachMarkdownSizing.prepare(host, width: CGFloat(width)),
-       abs(height - lastHeight) > 0.5 {
-      lastHeight = height
-      channel.invokeMethod("height", arguments: ["generation": token, "height": Double(height)])
-    }
     host.view.setNeedsLayout()
     // The first measurement can precede Flutter's channel handler. Replaying
     // cached current-generation geometry also makes initial attachment safe.
