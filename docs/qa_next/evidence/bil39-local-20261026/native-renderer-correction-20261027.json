@@ -1,0 +1,67 @@
+{
+  "schema": "bil39.native-renderer-correction.v1",
+  "parent_sha": "a434d712044011b8f838461b8e85b3c5eff48040",
+  "status": "LOCAL_PASS_NEW_EXACT_SHA_CI_PENDING",
+  "local": {
+    "renderer_before": {
+      "passed": 14,
+      "errors": 1
+    },
+    "renderer_after": {
+      "passed": 15,
+      "errors": 0
+    },
+    "renderer_and_hit_target": {
+      "passed": 18,
+      "errors": 0
+    },
+    "preferences_and_catalog_serial": {
+      "passed": 29,
+      "errors": 0
+    },
+    "qa_tools": {
+      "passed": 315,
+      "errors": 0,
+      "seconds": 49.651
+    },
+    "analysis": {
+      "issues": 0,
+      "exit": 0
+    },
+    "hit_target_minimum": 48,
+    "preferences_explicit_timeout_seconds": 30,
+    "interrupted_whole_partition_is_pass": false
+  },
+  "source_sha256": {
+    ".github/workflows/verify.yml": "61763e750958658580c234375a7cf6fb84b1fb7c869b46cd36eb2ebb8f2fb511",
+    "integration_test/native_feature_splashes_smart_plan.dart": "0c903ec9a9d359778a950d285d9a94344334c56f95bfbe9ad2dfb3603e5b8dea",
+    "integration_test/native_feature_splashes_test.dart": "f1ee5004ead239e006e21c8e9c74726147f85fd87350094345cc3d64acf6fb27",
+    "lib/features/intelligence_center/presentation/coach_native_markdown.dart": "db9d19abefedd194fc0b83b68f65e6c875f3b88110def618eaff556a5bd8a53b",
+    "test/features/intelligence_center/coach_native_chat_presentation_test.dart": "1690e86bef830876825a38bc09a179e906e1240cae25e6effccdf14ac700e276",
+    "tools/qa/bil39_full_suite_files.py": "14d7fa0d149cac4f6b9a59541ca6800cc63919a3cb5610900c12c23d55ad2099",
+    "docs/qa_next/BIL39_NATIVE_RENDERER_CORRECTION_20261027_AR.md": "1a0e2881559a147f8b8df023dc605b5bded59340c3889d462eb907102176c90b",
+    "integration_test/native_layout_measurements.dart": "10f29325565f4d847bfcbf557064000a34da9ef70dd7a9d7fa82094a3b1b9e7e",
+    "tools/qa/bil39_full_suite_artifacts.py": "56755388470aec93f71d4d45d34bd84017d840783afd4212b53a47822101e9ea",
+    "tools/qa/flutter/native_hit_target_measurement_test.dart": "24835a71ea027035458bd1d3120fd8a028cf112ad0bd14bb7a9eeb5a9813cee7",
+    "tools/qa/test_bil39_full_suite_artifacts.py": "7abbc16c2bc618847ac4579a627cc85cfe039d61997fd823219575a84652c731"
+  },
+  "private_log_sha256": {
+    "native-markdown-factory-renderer-red-v1.jsonl": "9dadb04b41626b6d0ee831aad9fa92698112e7410276d273a738fbfcff06e5cb",
+    "native-markdown-factory-renderer-green-v1.jsonl": "12d1a6259cb6630ee6424e679bad681c91e6a982a5fa7a7ccea412a0c06ca97b",
+    "native-renderer-and-hit-target-regressions-v1.jsonl": "11e3f8bd2abb4ef6ec3e05ecee60b7e53fa2cf944e66bf31b2e5d8dbb6dbfa51",
+    "preferences-and-catalog-serial-regression-v1.jsonl": "44bc95a85f89818053bdfbcdaf5c3ad7e8bb6ded50594ced20f82485bdeab405",
+    "native-gesture-and-measurement-analyze-v1.log": "43545b25aa986dac37f93e4e269d8f2ca8f60221bbf2c35767fd32394afa36c2",
+    "native-gesture-final-batch-qa-tools-v1.log": "583568d80c15afa550de18331a8547bb9d455ccfebadea52d70d43be848d1aec"
+  },
+  "native_ci_pass": false,
+  "signed_build39": false,
+  "cloud_deployed": false,
+  "old_native37_helper_sha256": "68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314",
+  "prior_failed_runs": {
+    "iphone": 40422532578,
+    "ipad": 40422532539,
+    "verify": 40422532642
+  },
+  "workflow_count_required": 10,
+  "latest_artifact_probe": "8 exact-ID archives downloaded and SHA256 checked; failed shard remains failed; no deletion"
+}

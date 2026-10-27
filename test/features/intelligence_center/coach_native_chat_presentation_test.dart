@@ -1,9 +1,57 @@
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_native_markdown.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_sent_message_arrival.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'production gesture factories construct the real UIKit render object',
+    () {
+      final factories = coachNativeMarkdownGestures();
+      final renderer = RenderUiKitView(
+        viewController: _RenderOnlyUiKitController(),
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: factories,
+      );
+      try {
+        expect(factories.map((factory) => factory.type).toSet(), {
+          LongPressGestureRecognizer,
+          HorizontalDragGestureRecognizer,
+        });
+        // Vertical history scrolling remains with Flutter's existing viewport.
+        renderer.updateGestureRecognizers(coachNativeMarkdownGestures());
+      } finally {
+        renderer.dispose();
+      }
+    },
+  );
+
+  test(
+    'the old base-typed factories reproduce the native renderer assertion',
+    () {
+      expect(
+        () => RenderUiKitView(
+          viewController: _RenderOnlyUiKitController(),
+          hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+          gestureRecognizers: {
+            Factory<OneSequenceGestureRecognizer>(
+              () => LongPressGestureRecognizer(),
+            ),
+            Factory<OneSequenceGestureRecognizer>(
+              () => HorizontalDragGestureRecognizer(),
+            ),
+          },
+        ),
+        throwsAssertionError,
+      );
+    },
+  );
   test('Markdown links are public HTTPS taps, never an action authority', () {
     expect(
       coachMarkdownPublicLink('https://www.cdc.gov/physical-activity/'),
@@ -278,5 +326,14 @@ void main() {
       scroll.dispose();
       expect(tester.takeException(), isNull);
     },
+  );
+}
+
+// Only the controller boundary is a fixture: RenderUiKitView and its factory
+// validation are Flutter's real implementation. This does not certify SwiftUI.
+class _RenderOnlyUiKitController implements UiKitViewController {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnsupportedError(
+    'The render-only regression must not call native services.',
   );
 }

@@ -136,6 +136,9 @@ jobs:
       - name: Prove pinned calendar date logic is unchanged
         run: dart run tool/verify_bil39_pinned_calendar.dart
 
+      - name: Verify native hit-target measurement negative controls
+        run: flutter test --no-pub tools/qa/flutter/native_hit_target_measurement_test.dart
+
       - name: Verify first-food commits, optional Skip and reviewer entitlement
         if: ${{ success() }}
         shell: pwsh
@@ -494,7 +497,7 @@ jobs:
             --no-pub `
             --machine `
             --dart-define=BIL_PAYMENTS_ENABLED=true `
-            --concurrency=2 `
+            --concurrency=1 `
             @bilTestFiles 2>&1 | Tee-Object -FilePath (Join-Path $bilEvidence 'events.jsonl')
           $bilFlutterExit=$LASTEXITCODE
           python tools/qa/bil39_flutter_event_receipt.py --log (Join-Path $bilEvidence 'events.jsonl') --source-sha $env:GITHUB_SHA --test-exit $bilFlutterExit --output (Join-Path $bilEvidence 'receipt.json')
@@ -584,8 +587,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" \
-            --pattern "bil39-full-shard-*-$GITHUB_SHA" --dir "$RUNNER_TEMP/bil39-full-coverage"
+          python3 tools/qa/bil39_full_suite_artifacts.py --sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID" \
+            --total 8 --output "$RUNNER_TEMP/bil39-full-coverage"
           python3 tools/qa/bil39_full_suite_files.py --source-sha "$GITHUB_SHA" --total 8 \
             --verify "$RUNNER_TEMP/bil39-full-coverage" --output "$RUNNER_TEMP/bil39-full-coverage.json"
 

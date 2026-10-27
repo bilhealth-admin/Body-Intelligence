@@ -95,10 +95,12 @@ def verify(root: Path, artifact_root: Path, *, sha: str, total: int) -> dict:
     if (seen != set(range(total)) or Counter(observed) != Counter(files.keys()) or
             recorded_skips > 1):
         raise ValueError('Complete-suite coverage has a missing or repeated test file')
+    selection = artifacts / 'artifact-selection.json'
     return {'schema': 'bil39.full-file-coverage.v1', 'status': 'PASS',
             'source_sha': sha, 'shards': sorted(seen), 'test_files': len(files),
             'inventory_sha256': plan(files, sha=sha, index=0, total=total)['inventory_sha256'],
             'counts': dict(counts), 'duplicate_files': 0, 'missing_files': 0,
+            'artifact_selection': json.loads(selection.read_text(encoding='utf-8')) if selection.is_file() else None,
             'scope': 'All host Flutter test files; native and live-cloud evidence remain separate'}
 
 

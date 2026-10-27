@@ -175,7 +175,10 @@ void _registerNativeSmartPlanSessions(
               expect(nextRect.top, closeTo(previousRect.top, .1));
               expect(nextRect.height, closeTo(previousRect.height, .1));
               expect(nextRect.width, closeTo(previousRect.width, .1));
-              expect(nextRect.height, greaterThanOrEqualTo(48));
+              expect(
+                nativeUnscaledHitTargetSize(tester, next).height,
+                greaterThanOrEqualTo(48),
+              );
               final title = find.byKey(
                 const ValueKey('bil-smart-plan-session-exercise'),
               );

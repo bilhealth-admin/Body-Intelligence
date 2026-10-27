@@ -9,6 +9,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 bool get coachUsesNativeMarkdown => !kIsWeb && Platform.isIOS;
 
+/// UIKit checks the factory's declared type, not only its constructed object.
+Set<Factory<OneSequenceGestureRecognizer>> coachNativeMarkdownGestures() => {
+  Factory<LongPressGestureRecognizer>(() => LongPressGestureRecognizer()),
+  Factory<HorizontalDragGestureRecognizer>(
+    () => HorizontalDragGestureRecognizer(),
+  ),
+};
+
 /// The current ai-coach contract is one validated JSON response, not SSE.
 /// This native view formats that response; it never simulates token streaming.
 class CoachNativeMarkdown extends StatefulWidget {
@@ -238,14 +246,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
               layoutDirection: widget.direction,
               creationParams: payload,
               creationParamsCodec: const StandardMessageCodec(),
-              gestureRecognizers: {
-                Factory<OneSequenceGestureRecognizer>(
-                  () => LongPressGestureRecognizer(),
-                ),
-                Factory<OneSequenceGestureRecognizer>(
-                  () => HorizontalDragGestureRecognizer(),
-                ),
-              },
+              gestureRecognizers: coachNativeMarkdownGestures(),
               onPlatformViewCreated: (id) {
                 _channel = MethodChannel('bil/coach_markdown/$id')
                   ..setMethodCallHandler(_receive);
