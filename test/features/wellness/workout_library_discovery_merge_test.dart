@@ -82,6 +82,60 @@ void main() {
     },
   );
 
+  test(
+    'iOS container relocation resolves only current protected pack bytes',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'bil-workout-relocated-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final installed = await _writeInstalledHomeItem(directory, version: 1);
+      final registry = File(p.join(directory.path, 'installed.json'));
+      final rows = jsonDecode(await registry.readAsString()) as List;
+      rows.single['path'] =
+          '/var/mobile/Containers/Data/Application/'
+          'E173E03A-5FCE-4893-BBFC-D08222D8CFF6/Library/Application Support/'
+          'wellness_packs/bil-workouts-home-v1-1.json';
+      await registry.writeAsString(jsonEncode(rows));
+      final manager = WellnessContentPackManager(
+        packsDirectory: directory,
+        workoutReleaseLoader: () async => release,
+        workoutDiscoveryLoader: () async => discovery,
+      );
+      final items = await manager.loadWorkoutLibraryItems(locale: 'en');
+      expect(items, hasLength(302));
+      expect(
+        items.singleWhere((v) => v.stableId == installed.releaseKey).steps,
+        orderedEquals(installed.steps),
+      );
+      expect(
+        await registry.readAsString(),
+        jsonEncode(rows),
+      ); // No reset/rewrite on read.
+      rows.single['path'] = 'bil-workouts-home-v1-1.json';
+      await registry.writeAsString(jsonEncode(rows));
+      expect(
+        await manager.loadWorkoutLibraryItems(locale: 'ar'),
+        hasLength(302),
+      );
+      rows.single['path'] = '/tmp/bil-workouts-home-v1-1.json';
+      await registry.writeAsString(jsonEncode(rows));
+      await expectLater(
+        manager.loadWorkoutLibraryItems(locale: 'en'),
+        throwsFormatException,
+      );
+      rows.single['path'] =
+          '/var/mobile/Containers/Data/Application/'
+          'E173E03A-5FCE-4893-BBFC-D08222D8CFF6/Library/Application Support/'
+          'wellness_packs/../bil-workouts-home-v1-1.json';
+      await registry.writeAsString(jsonEncode(rows));
+      await expectLater(
+        manager.loadWorkoutLibraryItems(locale: 'en'),
+        throwsFormatException,
+      );
+    },
+  );
+
   test('non-release pack version cannot supersede discovery', () async {
     final directory = await Directory.systemTemp.createTemp(
       'bil-workout-discovery-wrong-version-',

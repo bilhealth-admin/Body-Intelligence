@@ -6,6 +6,7 @@ class _EntryRepository extends _Repository {
   int inboxLoads = 0, sentLoads = 0;
   bool failInbox = false, failSent = false, failSend = false;
   bool policyAccepted = true;
+  Object? sendError;
   final acceptances = <String>[];
   @override
   Future<List<Map<String, dynamic>>> loadInboxMessages() async {
@@ -27,6 +28,7 @@ class _EntryRepository extends _Repository {
   @override
   Future<void> sendMessage(String peer, String body) async {
     sends.add(body);
+    if (sendError case final error?) throw error;
     if (failSend) throw StateError('send offline');
     await pendingSend?.future;
   }

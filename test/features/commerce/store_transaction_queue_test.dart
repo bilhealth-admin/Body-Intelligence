@@ -3,8 +3,10 @@ import 'dart:convert';
 
 import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_term.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
+import 'package:body_intelligence_log/features/commerce/services/verified_store_catalog_adapter.dart';
 import 'package:body_intelligence_log/features/commerce/providers/app_purchase_providers.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/providers/verified_purchase_handoff.dart';
@@ -38,6 +40,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   int completionCalls = 0;
   final completionChanges = ChangeNotifier();
   int restoreCalls = 0;
+  Object? restoreError;
   int appleSyncCalls = 0;
   final completionAttempted = Completer<void>();
   int queries = 0;
@@ -64,6 +67,8 @@ class _NativeStore extends Fake implements InAppPurchase {
   @override
   Future<void> restorePurchases({String? applicationUserName}) async {
     restoreCalls++;
+    final error = restoreError;
+    if (error != null) throw error;
     final receipt = restoreReceipt ?? _receipt();
     final delay = restoreCallbackDelay;
     if (delay == null) {
@@ -970,6 +975,103 @@ void main() {
       expect(store.messageCode, 'ai_boost_verified');
     },
   );
+  test(
+    'real catalog launch may still await native completion after its exact receipt verified',
+    () async {
+      await ready();
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      var returned = false;
+      final launch = VerifiedStoreCatalogAdapter(store)
+          .requestPurchase(
+            const BilStoreOfferMetadata(
+              productId: StoreCatalogConfiguration.premiumMonthly,
+              kind: BilStoreProductKind.premiumSubscription,
+              localizedTitle: 'Premium',
+              localizedPrice: '2.49',
+              currencyCode: 'USD',
+              priceMicros: 2490000,
+              billingPeriodIso8601: 'P1M',
+            ),
+          )
+          .then((_) => returned = true);
+      await waitForNativeLaunch();
+      expect(store.state, VerifiedStoreState.purchasePending);
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'verified-before-native-launch-completion',
+        ),
+      ]);
+      await verificationStarted.future;
+      // This diagnostic asserts the authenticated v2 delivery identity, not
+      // only the legacy verified/active flags used by other receipt fixtures.
+      verification.complete(
+        http.Response(
+          jsonEncode({
+            'verified': true,
+            'entitlement_active': true,
+            'delivery': {
+              'version': 2,
+              'owner_id': Supabase.instance.client.auth.currentUser!.id,
+              'product_id': StoreCatalogConfiguration.premiumMonthly,
+              'store': 'app_store',
+              'environment': 'sandbox',
+              'event_key': List.filled(64, 'd').join(),
+              'kind': 'subscription',
+              'verified_at': now.toIso8601String(),
+              'active': true,
+              'finish_pending': false,
+            },
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await native.completionAttempted.future;
+      await drain();
+
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.messageCode, 'subscription_verified');
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      expect(store.lastDeliveryIsUserPurchase, isTrue);
+      expect(
+        store.lastDelivery?.productId,
+        StoreCatalogConfiguration.premiumMonthly,
+      );
+      expect(
+        store.lastDelivery?.ownerId,
+        Supabase.instance.client.auth.currentUser!.id,
+      );
+      expect(store.lastDelivery?.eventKey, List.filled(64, 'd').join());
+      expect(store.busy, isFalse);
+      expect(
+        returned,
+        isFalse,
+        reason:
+            'The page request Future is a separate native lifecycle, not receipt authority',
+      );
+
+      native.purchaseLaunch.complete(true);
+      await launch;
+      expect(returned, isTrue);
+      expect(store.state, VerifiedStoreState.verified);
+      expect(native.launches, 1);
+      expect(verificationCalls, 1);
+    },
+  );
   for (final throws in [false, true]) {
     test(
       'late Boost launch failure (throws=$throws) cannot replace a verified receipt',
@@ -1343,6 +1445,200 @@ void main() {
     expect(native.completionCalls, 1);
     expect(native.launches, 0);
   });
+  test(
+    'real catalog adapter does not claim an empty history from silent iOS restore',
+    () async {
+      native.restoreBatch = const [];
+      await ready();
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(native.appleSyncCalls, 1);
+      expect(native.restoreCalls, 1);
+      expect(store.messageCode, 'restore_unconfirmed');
+      expect(store.state, VerifiedStoreState.ready);
+      expect(store.busy, isFalse);
+      expect(store.canStartPurchase, isTrue);
+      expect(store.entitlement?.grantsPaidAccess ?? false, isFalse);
+      expect(store.verifiedBenefitRevision, 0);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'real catalog adapter maps wrapped Apple authentication cancellation neutrally',
+    () async {
+      native.appleSync = () async {
+        throw PlatformException(
+          code: 'storekit2_failed_to_sync_to_app_store',
+          message: 'Storekit has failed to sync to the app store.',
+          details: 'userCancelled',
+        );
+      };
+      await ready();
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(native.restoreCalls, 0);
+      expect(store.messageCode, 'restore_cancelled');
+      expect(store.state, VerifiedStoreState.ready);
+      expect(store.busy, isFalse);
+      expect(store.canStartPurchase, isTrue);
+      expect(store.entitlement?.grantsPaidAccess ?? false, isFalse);
+      expect(store.verifiedBenefitRevision, 0);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'empty iOS restore retains existing paid access but cannot clear another receipt ownership rejection',
+    () async {
+      await ready();
+      native.restoreBatch = const [];
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+          'grace_period_ends_at': null,
+        },
+      ];
+      await store.refreshEntitlement();
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(store.messageCode, 'restore_unconfirmed');
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      store.state = VerifiedStoreState.failed;
+      store.messageCode = 'purchase_owned_by_another_account';
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(store.messageCode, 'purchase_owned_by_another_account');
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.canStartPurchase, isFalse);
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'explicit restore stream cancellation is not an empty checked history',
+    () async {
+      native.restoreReceipt = _receipt(status: PurchaseStatus.canceled);
+      await ready();
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(store.messageCode, 'restore_cancelled');
+      expect(store.state, VerifiedStoreState.ready);
+      expect(store.busy, isFalse);
+      expect(store.canStartPurchase, isTrue);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'native restore cancellation after sync leaves a retryable neutral result',
+    () async {
+      native.restoreError = PlatformException(code: 'payment_cancelled');
+      await ready();
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(native.appleSyncCalls, 1);
+      expect(native.restoreCalls, 1);
+      expect(store.messageCode, 'restore_cancelled');
+      expect(store.canStartPurchase, isTrue);
+      expect(verificationCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'a pending restored callback remains unresolved instead of claiming no purchases',
+    () async {
+      native.restoreReceipt = _receipt(status: PurchaseStatus.pending);
+      await ready();
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'purchase_status_unknown');
+      expect(store.canStartPurchase, isFalse);
+      expect(store.busy, isFalse);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'cancelled or unconfirmed restore cannot remove unresolved receipt blockers',
+    () async {
+      await ready();
+      for (final cancelled in [true, false]) {
+        for (final code in [
+          'verification_failed',
+          'restore_verification_failed',
+          'reconciliation_verification_failed',
+          'purchase_status_unknown',
+          'purchase_owned_by_another_account',
+          'store_finish_pending',
+        ]) {
+          store.state = code == 'store_finish_pending'
+              ? VerifiedStoreState.ready
+              : VerifiedStoreState.failed;
+          store.messageCode = code;
+          native.appleSync = cancelled
+              ? () async => throw PlatformException(code: 'user_cancelled')
+              : null;
+          native.restoreBatch = const [];
+
+          await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+          expect(store.messageCode, code, reason: '$code cancelled=$cancelled');
+          expect(store.canStartPurchase, isFalse);
+          expect(store.busy, isFalse);
+          expect(store.entitlement?.grantsPaidAccess ?? false, isFalse);
+        }
+      }
+      expect(store.verifiedBenefitRevision, 0);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'unrecognized Apple sync error is not disguised as user cancellation',
+    () async {
+      native.appleSync = () async {
+        throw PlatformException(
+          code: 'storekit2_failed_to_sync_to_app_store',
+          details: 'Network unavailable; cancellation status is unknown',
+        );
+      };
+      await ready();
+
+      await VerifiedStoreCatalogAdapter(store).restorePurchases();
+
+      expect(store.messageCode, 'restore_failed');
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.canStartPurchase, isFalse);
+      expect(native.restoreCalls, 0);
+      expect(verificationCalls, 0);
+    },
+  );
   test(
     'a failed explicit Apple sync never starts native restoration',
     () async {

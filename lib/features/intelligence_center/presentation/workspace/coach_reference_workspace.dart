@@ -261,7 +261,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                             ),
                           ),
                           onPressed: item.$2 == 'coach'
-                              ? () {}
+                              ? onChat
                               : item.$2 == '/daily-log'
                               ? (onTools ?? () => onRoute('/daily-log'))
                               : () => onRoute(item.$2),
@@ -287,18 +287,6 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: TextButton.icon(
-                  key: const Key('coach-workspace-open-chat'),
-                  onPressed: onChat,
-                  icon: const Icon(Icons.chat_bubble_outline_rounded, size: 18),
-                  label: Text(
-                    t('Open Coach conversation', 'افتح محادثة المدرب'),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final columns =

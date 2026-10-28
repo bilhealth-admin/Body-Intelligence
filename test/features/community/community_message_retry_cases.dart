@@ -120,6 +120,37 @@ void _messageRetryCases(
       expect(repo.sends, [repo.sends.first, repo.sends.first]);
     },
   );
+  _case(
+    'recipient eligibility refusal explains requirements and retains the draft',
+    (tester) async {
+      final repo = _EntryRepository(fixture().client)
+        ..sendError = const CommunityMessageRecipientUnavailable();
+      track(repo);
+      await tester.pumpWidget(
+        MaterialApp(home: NewCommunityMessagePage(repository: repo)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Private peer'));
+      await tester.pump();
+      final body = find.byKey(const Key('community-message-body'));
+      await tester.enterText(body, 'Retained private message');
+      tester.testTextInput.hide();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-message-send')));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(
+          'Messages require an accepted friendship and recipient permission. Your text is kept.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester.widget<TextField>(body).controller!.text,
+        'Retained private message',
+      );
+      expect(repo.sends, hasLength(1));
+    },
+  );
   for (final page in ['inbox', 'new']) {
     _case('$page repository replacement rejects old private cached state', (
       tester,

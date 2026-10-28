@@ -6,6 +6,92 @@ import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 
 void main() {
   test(
+    'cancelled and unconfirmed restores stay distinct in all 25 locales',
+    () {
+      for (final locale in AppLocalizations.supportedLocales) {
+        final tag = locale.toLanguageTag();
+        final outcomes = {
+          for (final key in const ['restore_cancelled', 'restore_unconfirmed'])
+            key: BilStoreCopy.text(tag, key),
+        };
+        expect(outcomes.values.toSet(), hasLength(2), reason: tag);
+        for (final outcome in outcomes.entries) {
+          expect(outcome.value, isNotEmpty, reason: '$tag:${outcome.key}');
+          expect(outcome.value, isNot(outcome.key), reason: tag);
+          if (locale.languageCode != 'en') {
+            expect(
+              outcome.value,
+              isNot(BilStoreCopy.text('en', outcome.key)),
+              reason: '$tag:${outcome.key}',
+            );
+          }
+          for (final key in const [
+            'restore_verified',
+            'restore_checked',
+            'restore_none',
+            'restore_failed',
+            'restore_checking',
+          ]) {
+            expect(
+              outcome.value,
+              isNot(BilStoreCopy.text(tag, key)),
+              reason: '$tag:${outcome.key} must not claim $key',
+            );
+          }
+        }
+      }
+    },
+  );
+
+  test('settled verification is localized in every supported locale', () {
+    const key = 'purchase_verified';
+    final english = BilStoreCopy.text('en', key);
+    expect(english, 'Purchase verified.');
+    expect(BilStoreCopy.text('ar', key), 'تم التحقق من الشراء.');
+    for (final locale in AppLocalizations.supportedLocales) {
+      final tag = locale.toLanguageTag();
+      final settled = BilStoreCopy.text(tag, key);
+      expect(settled, isNotEmpty, reason: tag);
+      expect(settled, isNot(key), reason: tag);
+      expect(
+        settled,
+        isNot(BilStoreCopy.text(tag, 'purchase_in_progress')),
+        reason: tag,
+      );
+      expect(
+        settled,
+        isNot(BilStoreCopy.text(tag, 'purchase_inactive')),
+        reason: tag,
+      );
+      if (locale.languageCode != 'en') {
+        expect(settled, isNot(english), reason: tag);
+      }
+      final oldPendingCopy = RuntimeCopy.resolve(
+        'Purchase verified. Your access is updating.',
+        tag,
+      );
+      if (oldPendingCopy != null) {
+        expect(settled, isNot(oldPendingCopy), reason: tag);
+      }
+    }
+  });
+
+  test('settled verification resolves normalized regional locale tags', () {
+    for (final tags in const [
+      ['pt-BR', 'PT_br'],
+      ['pt-PT', 'PT_pt'],
+      ['zh-Hans', 'ZH_hans'],
+      ['zh-Hant', 'ZH_hant'],
+    ]) {
+      expect(
+        BilStoreCopy.text(tags[1], 'purchase_verified'),
+        BilStoreCopy.text(tags[0], 'purchase_verified'),
+        reason: tags.join(' / '),
+      );
+    }
+  });
+
+  test(
     'legal footer uses reviewed locale copy without AppLocalizations context',
     () {
       for (final locale in AppLocalizations.supportedLocales) {

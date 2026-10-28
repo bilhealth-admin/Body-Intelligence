@@ -6,6 +6,7 @@ on:
       - main
       - integration/bil-qa-media-policy-20261011
       - bil39/integration-20261025
+      - codex/bil40-device-fixes-20261028
   pull_request:
     branches:
       - main
@@ -636,7 +637,7 @@ jobs:
           deno test --allow-env --allow-read --allow-net supabase/functions
 
   isolated-source-audit:
-    if: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/bil39/integration-20261025')) || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
+    if: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/bil39/integration-20261025' || github.ref == 'refs/heads/codex/bil40-device-fixes-20261028')) || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
     name: Isolated Semgrep source audit
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -780,7 +781,7 @@ jobs:
 
   ios-native-integration:
     if: >-
-      ${{ github.ref != 'refs/heads/bil39/integration-20261025' && inputs.source_audit_only != true && inputs.mobsf_only != true && inputs.android_native_only != true &&
+      ${{ github.ref != 'refs/heads/bil39/integration-20261025' && github.ref != 'refs/heads/codex/bil40-device-fixes-20261028' && inputs.source_audit_only != true && inputs.mobsf_only != true && inputs.android_native_only != true &&
           ((github.event_name == 'workflow_dispatch' && inputs.ios_native_only == true) ||
            (inputs.ios_native_only != true &&
             !(github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') &&

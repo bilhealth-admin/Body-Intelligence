@@ -1,7 +1,7 @@
 name: BIL39 Native Coach Presentation
 on:
   push:
-    branches: [bil39/integration-20261025, bil39/native-coach-ui-20261025]
+    branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028, bil39/native-coach-ui-20261025]
   workflow_dispatch:
 permissions:
   contents: read

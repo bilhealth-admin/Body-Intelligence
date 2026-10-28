@@ -105,6 +105,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     final text = inputChannel == CoachInputChannel.voice
         ? normalizeCoachVoiceTranscript(rawText)
         : rawText;
+    final readOnlyTurn = coachExplicitlyForbidsActions(text);
+    final actionText = coachActionRequestText(text);
     if (!conversationReady ||
         conversationRestarting ||
         text.isEmpty ||
@@ -239,7 +241,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         localHealthHandled = true;
         return;
       }
-      if (await _answerSmartPlanIntent(text, questionLocale)) {
+      if (!readOnlyTurn && await _answerSmartPlanIntent(text, questionLocale)) {
         localHealthHandled = true;
         return;
       }
@@ -252,17 +254,17 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         locale: questionLocale,
       );
       if (localHealthHandled) return;
-      localHealthHandled = await _answerLocalHealthIntent(
-        text,
-        locale: questionLocale,
-      );
+      localHealthHandled =
+          !readOnlyTurn &&
+          await _answerLocalHealthIntent(actionText, locale: questionLocale);
       if (localHealthHandled) return;
       // Food/Personal BIL owns its remaining intents and their frozen
       // nutrition evidence before any catalog/model fallback.
-      if (await _tryHandleCoachFoodTurn(
-        text: text,
-        localeTag: questionLocale,
-      )) {
+      if (!readOnlyTurn &&
+          await _tryHandleCoachFoodTurn(
+            text: actionText,
+            localeTag: questionLocale,
+          )) {
         return;
       }
       final immediateEngine = const IntelligenceCenterEngine();
@@ -512,9 +514,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       final availableActions = reply.actions
           .where(
             (action) =>
-                allowPlanActions ||
-                (action.type != IntelligenceActionType.smartPlan &&
-                    action.type != IntelligenceActionType.openPlan),
+                !readOnlyTurn &&
+                (allowPlanActions ||
+                    (action.type != IntelligenceActionType.smartPlan &&
+                        action.type != IntelligenceActionType.openPlan)),
           )
           .map(const CoachActionAdmission().admitProposal)
           .whereType<IntelligenceAction>()

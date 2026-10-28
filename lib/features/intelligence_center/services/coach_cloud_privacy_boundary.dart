@@ -147,6 +147,16 @@ List<CoachConversationTurn> questionScopedCoachCloudConversation({
 Set<CoachCloudContextCategory> _coachCloudCategoriesInText(String source) {
   final text = source.toLowerCase();
   final categories = <CoachCloudContextCategory>{};
+  // This explicit Overview starter asks about the selected BIL context as a
+  // whole. Treating it as an unclassified general question used to discard
+  // every personal category, even when the prepared snapshot contained verified
+  // activity. The snapshot provider still applies each saved category choice;
+  // this does not grant a withheld category or expand native permissions.
+  if (text.contains('based on my selected bil context') ||
+      text.contains('بناءً على سياق bil الذي اخترته') ||
+      text.contains('بناء على سياق bil الذي اخترته')) {
+    return CoachCloudContextCategory.values.toSet();
+  }
   bool has(RegExp pattern) => pattern.hasMatch(text);
   if (has(
     RegExp(

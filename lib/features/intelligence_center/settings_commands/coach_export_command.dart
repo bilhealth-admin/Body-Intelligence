@@ -4,7 +4,7 @@ import '../../../app/services/local_data_lifecycle_service.dart';
 const _exportDatasetFiles = <String, String>{
   'progress': 'BIL-progress.csv',
   'meal_nutrition': 'BIL-meal-nutrition.csv',
-  'exercise_notes': 'BIL-exercise-notes.csv',
+  'exercise_notes': 'BIL-exercise.csv',
 };
 
 abstract interface class CoachExportDataGateway {
@@ -91,10 +91,15 @@ class CoachExportCommandService {
       from: normalizedFrom,
       to: normalizedTo,
     );
-    final selected = <String, String>{
-      for (final dataset in datasets)
-        _exportDatasetFiles[dataset]!: all[_exportDatasetFiles[dataset]!]!,
-    };
+    final selected = <String, String>{};
+    for (final dataset in datasets) {
+      final name = _exportDatasetFiles[dataset]!;
+      final contents = all[name];
+      if (contents == null) {
+        throw StateError('Selected export dataset is unavailable: $dataset');
+      }
+      selected[name] = contents;
+    }
     return CoachPreparedExport(
       from: normalizedFrom,
       to: normalizedTo,

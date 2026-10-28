@@ -1,16 +1,5 @@
 part of 'community_repository.dart';
 
-String newCommunityMessageRequestId() => const Uuid().v4();
-
-class CommunityMessageDeliveryUnavailable implements Exception {
-  const CommunityMessageDeliveryUnavailable();
-}
-
-/// A verified prior request was delivered and later removed. Never resend it.
-class CommunityMessageDeliveryRemoved implements Exception {
-  const CommunityMessageDeliveryRemoved();
-}
-
 mixin _CommunityConnectionsMessagingRepositoryMixin {
   SupabaseClient get _client;
 
@@ -548,23 +537,6 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
         .toList(growable: false);
   }
 
-  static bool _validMessageEnvelope(String body) {
-    if (body.trim().isEmpty ||
-        body.runes.length > 2000 ||
-        CommunityRepository._unsafeText.hasMatch(body)) {
-      return false;
-    }
-    const marker = '[BIL-SUBJECT]';
-    if (!body.startsWith(marker)) return true;
-    final newline = body.indexOf('\n');
-    if (newline < 0) return false;
-    final subject = body.substring(marker.length, newline);
-    final message = body.substring(newline + 1);
-    return subject.runes.length <= 120 &&
-        message.trim().isNotEmpty &&
-        message.runes.length <= 2000;
-  }
-
   /// Additive server contract. Never fall back to a second non-idempotent POST.
   Future<void> sendMessageOperation(
     String recipientId,
@@ -656,39 +628,16 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
         throw const CommunityMessageDeliveryRemoved();
       }
     } on PostgrestException catch (error) {
+      if (error.code == '42501' &&
+          error.message.trim() == 'community_message_recipient_unavailable') {
+        throw const CommunityMessageRecipientUnavailable();
+      }
       if (const {'PGRST202', '42883'}.contains(error.code)) {
         throw const CommunityMessageDeliveryUnavailable();
       }
       rethrow;
     }
   });
-
-  void _validateMessageDelivery(
-    Object? response, {
-    required String owner,
-    required String recipient,
-    required String requestId,
-    required String body,
-  }) {
-    if (response is! Map) {
-      throw const FormatException('Unverified private message delivery');
-    }
-    final removed = response['status'] == 'removed';
-    final messageId = response['message_id'];
-    if ((!removed && response['status'] != 'delivered') ||
-        response['owner_id'] != owner ||
-        response['recipient_id'] != recipient ||
-        response['request_id'] != requestId ||
-        (removed ? response['body'] != null : response['body'] != body) ||
-        (messageId == null
-            ? !removed
-            : messageId is! String ||
-                  !CommunityRepository._uuid.hasMatch(messageId)) ||
-        response['delivered_at'] is! String ||
-        DateTime.tryParse(response['delivered_at'] as String) == null) {
-      throw const FormatException('Unverified private message delivery');
-    }
-  }
 
   Future<void> sendMessage(String recipientId, String body) =>
       _runCommunityOwnerOperation((operation) async {

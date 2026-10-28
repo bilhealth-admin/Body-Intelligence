@@ -8,6 +8,10 @@ import '../domain/bil_smart_plan.dart';
 enum BilSmartPlanIntent { none, open, today, revise, completedWorkout }
 
 BilSmartPlanIntent smartPlanIntent(String input) {
+  // Legacy phrase fallbacks below cannot override an explicit read-only turn.
+  if (coachExplicitlyForbidsActions(input) || isCoachPlanNegated(input)) {
+    return BilSmartPlanIntent.none;
+  }
   final semantic = classifyCoachRequest(input);
   if (semantic.createsPlan) return BilSmartPlanIntent.open;
   if (semantic.kind == CoachRequestKind.completeWorkout) {
@@ -32,7 +36,7 @@ BilSmartPlanIntent smartPlanIntent(String input) {
       ).hasMatch(normalizeCoachMeaning(input))) {
     return BilSmartPlanIntent.none;
   }
-  final text = input.toLowerCase().replaceAll(RegExp('[أإآ]'), 'ا');
+  final text = normalizeCoachMeaning(coachActionRequestText(input));
   if (RegExp(
         r'\b(goal|target|aim|weigh|weight)\b|وزن|هدفي|هدف',
       ).hasMatch(text) &&

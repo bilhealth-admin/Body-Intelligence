@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/services/local_data_lifecycle_service.dart';
 import '../../data/database/database_provider.dart';
 import '../intelligence_center/settings_commands/coach_export_command.dart';
+import '../profile/providers/profile_auth_identity_provider.dart';
 
 class LocalExportRangePage extends ConsumerStatefulWidget {
   const LocalExportRangePage({
@@ -44,6 +45,10 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
   bool preparing = false;
   bool sharing = false;
   CoachPreparedExport? prepared;
+  ProviderSubscription<AsyncValue<ProfileAuthIdentity>>? _identitySubscription;
+  String? _ownerId;
+  bool _identityReady = false;
+  int _ownerVisit = 0;
 
   @override
   void initState() {
@@ -61,6 +66,42 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
             requested.every(_allDatasets.contains)
         ? Set<String>.of(requested)
         : Set<String>.of(_allDatasets);
+    _identitySubscription = ref.listenManual(
+      profileAuthIdentityProvider,
+      _onIdentityChanged,
+      fireImmediately: true,
+    );
+  }
+
+  void _onIdentityChanged(
+    AsyncValue<ProfileAuthIdentity>? previous,
+    AsyncValue<ProfileAuthIdentity> next,
+  ) {
+    final identity = next.asData?.value;
+    final ready = !next.isLoading && !next.hasError && identity != null;
+    final owner = identity?.ownerId;
+    if (_identityReady == ready && _ownerId == owner) return;
+    if (!mounted) return;
+    setState(() {
+      _identityReady = ready;
+      _ownerId = owner;
+      _ownerVisit++;
+      // Prepared health bytes belong to this visit, including A -> B -> A.
+      // Retiring the page's snapshot never changes stored account data.
+      prepared = null;
+      preparing = false;
+      sharing = false;
+    });
+  }
+
+  bool _isCurrentVisit(int visit) =>
+      mounted && _identityReady && visit == _ownerVisit;
+
+  @override
+  void dispose() {
+    _ownerVisit++;
+    _identitySubscription?.close();
+    super.dispose();
   }
 
   CoachExportCommandService get _service =>
@@ -90,7 +131,9 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
         _dateTile('Start date', from, (value) => _changeScope(from: value)),
         _dateTile('End date', to, (value) => _changeScope(to: value)),
         TextButton(
-          onPressed: () => _changeScope(clearDates: true),
+          onPressed: preparing || sharing
+              ? null
+              : () => _changeScope(clearDates: true),
           child: Text(_copy(context, 'All dates')),
         ),
         const SizedBox(height: 12),
@@ -109,7 +152,9 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
           ),
         const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: preparing || sharing || datasets.isEmpty ? null : _prepare,
+          onPressed: !_identityReady || preparing || sharing || datasets.isEmpty
+              ? null
+              : _prepare,
           icon: preparing
               ? const SizedBox.square(
                   dimension: 18,
@@ -143,7 +188,9 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
                   for (final name in ready.files.keys) Text('• $name'),
                   const SizedBox(height: 12),
                   FilledButton.tonalIcon(
-                    onPressed: sharing ? null : _sharePrepared,
+                    onPressed: !_identityReady || sharing
+                        ? null
+                        : _sharePrepared,
                     icon: sharing
                         ? const SizedBox.square(
                             dimension: 18,
@@ -182,7 +229,7 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
               firstDate: DateTime(2000),
               lastDate: DateTime.now(),
             );
-            if (selected != null) update(selected);
+            if (selected != null && mounted) update(selected);
           },
   );
 
@@ -211,6 +258,8 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
   }
 
   Future<void> _prepare() async {
+    if (!_identityReady || preparing || sharing) return;
+    final visit = _ownerVisit;
     if (from != null && to != null && from!.isAfter(to!)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -227,7 +276,7 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
         to: to,
         datasets: Set<String>.of(datasets),
       );
-      if (!mounted) return;
+      if (!mounted || !_isCurrentVisit(visit)) return;
       setState(() => prepared = ready);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -237,7 +286,7 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
         ),
       );
     } on Object {
-      if (mounted) {
+      if (mounted && _isCurrentVisit(visit)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(_copy(context, 'Export could not be created')),
@@ -245,17 +294,18 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
         );
       }
     } finally {
-      if (mounted) setState(() => preparing = false);
+      if (_isCurrentVisit(visit)) setState(() => preparing = false);
     }
   }
 
   Future<void> _sharePrepared() async {
     final ready = prepared;
-    if (ready == null) return;
+    if (ready == null || !_identityReady || preparing || sharing) return;
+    final visit = _ownerVisit;
     setState(() => sharing = true);
     try {
       await _service.sharePrepared(ready);
-      if (mounted) {
+      if (mounted && _isCurrentVisit(visit)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -268,13 +318,13 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
         );
       }
     } on Object {
-      if (mounted) {
+      if (mounted && _isCurrentVisit(visit)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(_copy(context, 'Share sheet could not open'))),
         );
       }
     } finally {
-      if (mounted) setState(() => sharing = false);
+      if (_isCurrentVisit(visit)) setState(() => sharing = false);
     }
   }
 }

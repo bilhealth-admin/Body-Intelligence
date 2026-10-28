@@ -83,7 +83,9 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           state = products.isEmpty
               ? VerifiedStoreState.unavailable
               : VerifiedStoreState.ready;
-          messageCode = null;
+          messageCode = origin == _StorePurchaseEventOrigin.restore
+              ? 'restore_cancelled'
+              : null;
           if (origin == _StorePurchaseEventOrigin.purchase) {
             _clearPurchaseInitiation();
           }

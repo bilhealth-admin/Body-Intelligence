@@ -22,7 +22,7 @@ Future<void> openCoachConversationFromOverview(WidgetTester tester) async {
   expect(welcome, findsNothing, reason: 'The entry hold must finish.');
   final overview = find.byKey(const Key('coach-reference-workspace'));
   if (overview.evaluate().isEmpty) return; // Already in chat, or gated.
-  final open = find.byKey(const Key('coach-workspace-open-chat'));
+  final open = find.byKey(const Key('coach-workspace-tab-coach'));
   expect(open, findsOneWidget);
   await tester.ensureVisible(open);
   await tester.pumpAndSettle();

@@ -9,15 +9,19 @@ extension _CommunityPostComposerReferenceSections
         child: TextField(
           key: const Key('community-composer-title'),
           controller: _title,
+          textDirection: BilWrittenLanguageResolver.directionFor(
+            _title.text,
+            fallback: Directionality.of(context),
+          ),
           enabled: !busy,
           maxLength: 120,
           style: TextStyle(fontSize: 14, color: CommunitySapphire.ink(context)),
           textCapitalization: TextCapitalization.sentences,
           onChanged: (value) {
-            widget.draft.title = value;
-            if (_submitError != null) {
-              _setComposerState(() => _submitError = null);
-            }
+            _setComposerState(() {
+              widget.draft.title = value;
+              _submitError = null;
+            });
           },
           decoration: _composerFieldDecoration(
             hint: communityText(

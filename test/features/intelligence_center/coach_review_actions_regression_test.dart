@@ -133,7 +133,7 @@ Future<GoRouter> mount(
   // Direct-chat fixtures enter through the real default Overview action.
   // This strengthens entry assertions without changing media/privacy checks.
   expect(find.byKey(const Key('coach-reference-workspace')), findsOneWidget);
-  await tester.tap(find.byKey(const Key('coach-workspace-open-chat')));
+  await tester.tap(find.byKey(const Key('coach-workspace-tab-coach')));
   await tester.pumpAndSettle();
   expect(find.byKey(const Key('ai-coach-question-field')), findsOneWidget);
   return router;

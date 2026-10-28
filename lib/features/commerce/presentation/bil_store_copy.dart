@@ -1,5 +1,6 @@
 import '../../../app/localization/runtime_copy.dart';
 import 'bil_store_recovery_copy.dart';
+import 'bil_store_terminal_copy.dart';
 
 abstract final class BilStoreCopy {
   static const _runtimeFallbackSource = <String, String>{
@@ -179,7 +180,7 @@ abstract final class BilStoreCopy {
           'Checking a previous store transaction. No new purchase was started.',
       'purchase_reconciliation_failed':
           'A previous store transaction needs verification. No new purchase was made. Try Restore purchases again later.',
-      'purchase_verified': 'Purchase verified. Your access is updating.',
+      'purchase_verified': 'Purchase verified.',
       'ads_consent': 'Choose whether BIL may show contextual ads.',
     },
     'ar': {
@@ -274,7 +275,7 @@ abstract final class BilStoreCopy {
           'جارٍ التحقق من عملية سابقة من المتجر. لم تبدأ عملية شراء جديدة.',
       'purchase_reconciliation_failed':
           'هناك عملية سابقة من المتجر تحتاج إلى تحقق. لم تُجرَ عملية شراء جديدة. حاول استعادة المشتريات لاحقًا.',
-      'purchase_verified': 'تم التحقق من الشراء. يجري تحديث صلاحياتك.',
+      'purchase_verified': 'تم التحقق من الشراء.',
       'ads_consent': 'اختر ما إذا كان بإمكان BIL عرض إعلانات سياقية.',
     },
     'fr': {
@@ -378,8 +379,7 @@ abstract final class BilStoreCopy {
           'Vérification d’une transaction antérieure de la boutique. Aucun nouvel achat n’a été lancé.',
       'purchase_reconciliation_failed':
           'Une transaction antérieure de la boutique doit être vérifiée. Aucun nouvel achat n’a été effectué. Réessayez de restaurer vos achats plus tard.',
-      'purchase_verified':
-          'Achat vérifié. Votre accès est en cours de mise à jour.',
+      'purchase_verified': 'Achat vérifié.',
       'ads_consent':
           'Choisissez si BIL peut afficher des publicités contextuelles.',
     },
@@ -485,7 +485,7 @@ abstract final class BilStoreCopy {
           'Comprobando una transacción anterior de la tienda. No se inició ninguna compra nueva.',
       'purchase_reconciliation_failed':
           'Una transacción anterior de la tienda necesita verificación. No se realizó ninguna compra nueva. Intenta restaurar las compras más tarde.',
-      'purchase_verified': 'Compra verificada. Se está actualizando tu acceso.',
+      'purchase_verified': 'Compra verificada.',
       'ads_consent': 'Elige si BIL puede mostrar anuncios contextuales.',
     },
     'tr': {
@@ -584,7 +584,7 @@ abstract final class BilStoreCopy {
           'Önceki bir mağaza işlemi kontrol ediliyor. Yeni bir satın alma başlatılmadı.',
       'purchase_reconciliation_failed':
           'Önceki bir mağaza işlemi doğrulama gerektiriyor. Yeni bir satın alım yapılmadı. Daha sonra satın alımları geri yüklemeyi deneyin.',
-      'purchase_verified': 'Satın alma doğrulandı. Erişiminiz güncelleniyor.',
+      'purchase_verified': 'Satın alma doğrulandı.',
       'ads_consent':
           'BIL’in bağlamsal reklam gösterip gösteremeyeceğini seçin.',
     },
@@ -641,7 +641,13 @@ abstract final class BilStoreCopy {
           _catalogChangedCopy[language] ??
           english;
     }
-    return BilStoreRecoveryCopy.text(normalized, key) ??
+    if (key == 'purchase_verified') {
+      return catalogs[language]?[key] ??
+          BilStoreTerminalCopy.text(normalized, key) ??
+          english;
+    }
+    return BilStoreTerminalCopy.text(normalized, key) ??
+        BilStoreRecoveryCopy.text(normalized, key) ??
         catalogs[language]?[key] ??
         _extendedTrialRenewalCopy[key]?[normalized] ??
         _extendedTrialRenewalCopy[key]?[language] ??

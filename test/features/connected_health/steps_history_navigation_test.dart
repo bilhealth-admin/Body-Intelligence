@@ -11,6 +11,56 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('Arabic measured Steps keeps ordinary UI labels Arabic', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    final snapshot = const ConnectedHealthSnapshot.unavailable().copyWith(
+      status: ConnectedHealthStatus.synchronized,
+      platformSource: 'Apple Health',
+      deviceVerified: true,
+      stepHistory: [
+        ConnectedHealthSignalView(
+          key: 'steps',
+          value: 100,
+          unit: 'count',
+          source: 'healthkit.statistics',
+          observedAt: now,
+          confidence: 1,
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          connectedHealthGatewayProvider.overrideWithValue(
+            _HistoryGateway(snapshot),
+          ),
+        ],
+        child: MaterialApp(
+          locale: const Locale('ar'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: const StepsHistoryPage(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Measured'), findsNothing);
+    expect(find.text('Last 30 days'), findsNothing);
+    expect(find.text('تاريخ القياس'), findsOneWidget);
+    expect(find.text('آخر ٣٠ يومًا'), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.byType(StepsHistoryPage))),
+      TextDirection.rtl,
+    );
+  });
+
   test('every measured steps entry opens dedicated daily step history', () {
     final settings = File(
       'lib/features/connected_health/steps_settings_page.dart',

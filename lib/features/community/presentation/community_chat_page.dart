@@ -302,6 +302,19 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
           ),
         ),
       );
+    } on CommunityMessageRecipientUnavailable {
+      if (!mounted || !_current(binding)) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Messages require an accepted friendship and recipient permission. Your text is kept.',
+              'تتطلب الرسائل صداقة مقبولة وسماح المستلم بالمراسلة. النص محفوظ.',
+            ),
+          ),
+        ),
+      );
     } on CommunityMessageDeliveryUnavailable {
       if (!mounted || !_current(binding)) return;
       ScaffoldMessenger.of(context).showSnackBar(

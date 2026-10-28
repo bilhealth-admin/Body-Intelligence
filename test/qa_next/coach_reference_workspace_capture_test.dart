@@ -529,7 +529,7 @@ void main() {
       await tester.tap(find.text('Overview'));
       await tester.pumpAndSettle();
       expect(find.byType(CoachReferenceWorkspace), findsOneWidget);
-      await tester.tap(find.byKey(const Key('coach-workspace-open-chat')));
+      await tester.tap(find.byKey(const Key('coach-workspace-tab-coach')));
       await tester.pumpAndSettle();
       expect(find.text('Keep this unfinished draft'), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -569,6 +569,89 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
     },
   );
+
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      'Coach robot is the single conversation entry and Back preserves state in $language',
+      (tester) async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(db.close);
+        final preferences = PreferencesRepository(db);
+        final savedMessage = IntelligenceMessage(
+          id: 'single-coach-entry-$language',
+          role: IntelligenceMessageRole.user,
+          kind: IntelligenceMessageKind.coach,
+          text: 'Saved conversation entry fixture',
+          createdAt: _clock.subtract(const Duration(minutes: 20)),
+        );
+        final savedJson = jsonEncode([savedMessage.toJson()]);
+        await tester.runAsync(
+          () => preferences.set('intelligenceConversationV1', savedJson),
+        );
+        await _mount(
+          tester,
+          const IntelligenceCenterPage(),
+          db,
+          GlobalKey(),
+          language: language,
+        );
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+        final coach = find.byKey(const Key('coach-workspace-tab-coach'));
+        expect(coach, findsOneWidget);
+        expect(
+          find.descendant(
+            of: coach,
+            matching: find.text(language == 'ar' ? 'المدرب' : 'Coach'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: coach,
+            matching: find.byIcon(Icons.smart_toy_outlined),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('coach-workspace-open-chat')),
+          findsNothing,
+        );
+        expect(find.text('Open Coach conversation'), findsNothing);
+        expect(find.text('افتح محادثة المدرب'), findsNothing);
+        await tester.tap(coach);
+        await tester.pumpAndSettle();
+        final composer = find.byKey(const Key('ai-coach-question-field'));
+        expect(composer, findsOneWidget);
+        expect(find.byType(CoachReferenceWorkspace), findsNothing);
+        const draft = 'Keep this unsent conversation draft';
+        await tester.enterText(composer, draft);
+        FocusManager.instance.primaryFocus?.unfocus();
+        tester.testTextInput.hide();
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip(language == 'ar' ? 'رجوع' : 'Back'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CoachReferenceWorkspace), findsOneWidget);
+        expect(find.text('Route: /dashboard'), findsNothing);
+        await tester.tap(coach);
+        await tester.pumpAndSettle();
+        expect(find.text(draft), findsOneWidget);
+        expect(
+          find.byKey(const Key('bil-reference-navigation')),
+          findsOneWidget,
+        );
+        expect(
+          await tester.runAsync(
+            () => preferences.get('intelligenceConversationV1'),
+          ),
+          savedJson,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 300));
+      },
+    );
+  }
 
   testWidgets('shared dock keeps five accessible destinations', (tester) async {
     final selected = <int>[];

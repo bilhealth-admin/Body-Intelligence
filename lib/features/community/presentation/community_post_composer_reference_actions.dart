@@ -63,7 +63,15 @@ extension _CommunityPostComposerReferenceActions
       // this editor mounted retains every controller, image and selection.
       await pushCommunityPage<void>(
         context,
-        CommunityDraftsPage(repository: repository),
+        CommunityDraftsPage(
+          repository: repository,
+          onDraftPublished: (draftId) {
+            if (!current() || widget.draft.persistentDraftId != draftId) return;
+            // Only the same persisted draft was consumed. A different draft
+            // published from the list must never erase this editor's work.
+            _setComposerState(_clearPublishedComposerDraft);
+          },
+        ),
       );
     } on Object {
       if (!current()) return;

@@ -1,7 +1,7 @@
 name: BIL supplementary security fixture inventory
 on:
   push:
-    branches: [codex/bil-native-gates-diagnostic-20261023, bil39/integration-20261025]
+    branches: [codex/bil-native-gates-diagnostic-20261023, bil39/integration-20261025, codex/bil40-device-fixes-20261028]
   workflow_dispatch:
     inputs:
       expected_sha:

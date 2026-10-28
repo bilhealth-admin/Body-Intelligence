@@ -75,7 +75,9 @@ dependencies:
   in_app_purchase_android: ^0.5.2
   # Keep the native BillingResult; exact already-locked public SDK interface.
   in_app_purchase_platform_interface: 1.4.1
-  in_app_purchase_storekit: ^0.4.11
+  # Includes the upstream StoreKit2 finish replay callback fix. Keep this native
+  # patch exact while receipt ownership and purchase replay are release-tested.
+  in_app_purchase_storekit: 0.4.13+1
   in_app_review: ^2.0.12
   app_links: ^7.0.0
   video_player: ^2.13.0

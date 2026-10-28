@@ -6,6 +6,7 @@ on:
       - phase-3-product-excellence
       - fix/admob-clean-production-2026-10-02
       - bil39/integration-20261025
+      - codex/bil40-device-fixes-20261028
   pull_request:
   workflow_dispatch:
 

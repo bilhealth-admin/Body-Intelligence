@@ -234,7 +234,7 @@ Future<void> _mount(
   );
   // The default Coach entry is Overview. The media bridge explicitly enters
   // the conversation before testing its original barcode/photo contract.
-  final chatEntry = find.byKey(const Key('coach-workspace-open-chat'));
+  final chatEntry = find.byKey(const Key('coach-workspace-tab-coach'));
   final field = find.byKey(
     const Key('ai-coach-question-field'),
     skipOffstage: false,

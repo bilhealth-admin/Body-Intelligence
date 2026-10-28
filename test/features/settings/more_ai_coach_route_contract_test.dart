@@ -141,7 +141,7 @@ void main() {
       expect(find.byType(IntelligenceCenterPage), findsOneWidget);
       expect(overview, findsOneWidget);
       expect(
-        find.byKey(const Key('coach-workspace-open-chat')),
+        find.byKey(const Key('coach-workspace-tab-coach')),
         findsOneWidget,
       );
       expect(find.byType(IntelligenceCenterPage).hitTestable(), findsOneWidget);

@@ -5,6 +5,7 @@ on:
     branches:
       - integration/bil-qa-media-policy-20261011
       - bil39/integration-20261025
+      - codex/bil40-device-fixes-20261028
   workflow_dispatch:
     inputs:
       api36_only:

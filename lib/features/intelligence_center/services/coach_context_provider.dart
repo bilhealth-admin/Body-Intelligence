@@ -663,9 +663,11 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
         ? const <Map<String, Object?>>[]
         : compactCoachDecisionMemories(decisionMemories),
     explicitMemories: explicitMemories,
-    activityHistory: includeTraining || includeHabits
-        ? activityHistory.take(14).toList(growable: false)
-        : const <Map<String, Object?>>[],
+    activityHistory: scopeCoachActivityHistoryForFocus(
+      activityHistory,
+      includeTraining: includeTraining,
+      includeHabits: includeHabits,
+    ),
     bodyContextHistory: includeHabits
         ? bodyContextHistory.take(42).toList(growable: false)
         : const <Map<String, Object?>>[],

@@ -49,6 +49,10 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
           Text(
             title!,
             key: const Key('community-post-reference-title'),
+            textDirection: BilWrittenLanguageResolver.directionFor(
+              title,
+              fallback: Directionality.of(context),
+            ),
             maxLines: compact ? 3 : null,
             overflow: compact ? TextOverflow.ellipsis : null,
             style: compact

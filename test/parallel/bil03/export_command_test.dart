@@ -33,7 +33,7 @@ void main() {
 
       expect(status, CoachExportShareStatus.handoffReturned);
       expect(share.calls, 1);
-      expect(share.lastFiles!.keys, {'BIL-exercise-notes.csv'});
+      expect(share.lastFiles!.keys, {'BIL-exercise.csv'});
     },
   );
 
@@ -61,7 +61,7 @@ class _FakeExportData implements CoachExportDataGateway {
     return const {
       'BIL-progress.csv': 'date,weightKg\n2026-09-01,90.4',
       'BIL-meal-nutrition.csv': 'date,calories\n2026-09-01,1200',
-      'BIL-exercise-notes.csv': 'date,note\n2026-09-01,walk',
+      'BIL-exercise.csv': 'date,note\n2026-09-01,walk',
     };
   }
 }

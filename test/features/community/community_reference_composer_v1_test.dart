@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/community/services/community_comp
 import 'package:body_intelligence_log/features/community/services/community_post_image_picker.dart';
 import 'package:body_intelligence_log/features/nutrition/services/bil_speech_to_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -41,7 +42,12 @@ final class _ReferenceComposerRepository extends CommunityRepository {
   _ReferenceComposerRepository() : super(_testClient);
 
   CommunityDraftSaveInput? savedDraft;
+  CommunityDraftSaveInput? externalDraft;
+  CommunityDraftSaveInput? get availableDraft =>
+      externalDraft ??
+      (savedDraft?.draftId == publishedDraftId ? null : savedDraft);
   List<CommunityPostImageDraft>? savedImages;
+  String? feedTitle;
   int saveCalls = 0;
   int publishCalls = 0;
   String? publishedBody;
@@ -58,7 +64,7 @@ final class _ReferenceComposerRepository extends CommunityRepository {
   );
 
   @override
-  bool get useServerCommunityReferenceParity => false;
+  bool get useServerCommunityReferenceParity => feedTitle != null;
 
   @override
   String get currentUserId => _owner;
@@ -90,7 +96,28 @@ final class _ReferenceComposerRepository extends CommunityRepository {
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>
-      const <CommunityPost>[];
+      feedTitle == null
+      ? []
+      : [
+          CommunityPost(
+            id: '55555555-5555-4555-8555-555555555555',
+            authorId: _collaborator,
+            authorName: 'Peer',
+            body: 'A short post body.',
+            createdAt: DateTime.utc(2026, 10, 28),
+          ),
+        ];
+  @override
+  Future<List<CommunityPostReferenceMetadata>>
+  loadCommunityPostReferenceMetadata(List<String> ids) async => [
+    for (final id in ids)
+      CommunityPostReferenceMetadata(
+        postId: id,
+        title: feedTitle,
+        hashtags: const [],
+        collaborators: const [],
+      ),
+  ];
 
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async =>
@@ -128,6 +155,61 @@ final class _ReferenceComposerRepository extends CommunityRepository {
   }
 
   @override
+  Future<List<CommunityDraftSummary>> listMyCommunityDrafts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 20,
+  }) async {
+    final input = availableDraft;
+    return input == null
+        ? []
+        : [
+            CommunityDraftSummary(
+              draftId: input.draftId,
+              title: input.title,
+              body: input.body,
+              updatedAt: DateTime.utc(2026, 10, 28),
+              mediaCount: 0,
+            ),
+          ];
+  }
+
+  CommunityPersistentDraft persistentDraft(String draftId) {
+    final input = availableDraft!;
+    return CommunityPersistentDraft(
+      draftId: draftId,
+      title: input.title,
+      body: input.body,
+      topicSlugs: input.topicSlugs,
+      mentions: input.mentions,
+      collaborators: input.collaborators,
+      hashtags: input.hashtags,
+      pollOptions: input.pollOptions,
+      pollAllowMultiple: input.pollAllowMultiple,
+      createdAt: DateTime.utc(2026, 10, 28),
+      updatedAt: DateTime.utc(2026, 10, 28),
+      media: const [],
+    );
+  }
+
+  @override
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImageDraft> images})
+  >
+  loadMyCommunityDraft(String draftId) async =>
+      (draft: persistentDraft(draftId), images: <CommunityPostImageDraft>[]);
+
+  @override
+  Future<
+    ({CommunityPersistentDraft draft, List<CommunityPostImagePreview?> images})
+  >
+  loadMyCommunityDraftMosaicPreview(
+    String draftId, {
+    int maxImages = 4,
+  }) async =>
+      (draft: persistentDraft(draftId), images: <CommunityPostImagePreview?>[]);
+
+  @override
   Future<void> publishRichPost(
     String body, {
     List<CommunityPostImageDraft> images = const <CommunityPostImageDraft>[],
@@ -151,6 +233,7 @@ final class _ReferenceComposerRepository extends CommunityRepository {
       collaborators,
     );
     publishedDraftId = persistentDraftId;
+    if (externalDraft?.draftId == persistentDraftId) externalDraft = null;
   }
 }
 
@@ -200,8 +283,17 @@ final class _FakeSpeechToText extends SpeechToText {
   Future<void> dispose() async => _listening = false;
 }
 
-Widget _app(CommunityRepository repository) => MaterialApp(
-  locale: const Locale('en'),
+Widget _app(
+  CommunityRepository repository, {
+  Locale locale = const Locale('en'),
+}) => MaterialApp(
+  locale: locale,
+  supportedLocales: const [Locale('en'), Locale('ar')],
+  localizationsDelegates: const [
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
   home: CommunityHubPage(
     repository: repository,
     postImagePicker: const _NoImagePicker(),
@@ -468,6 +560,113 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final matching in [true, false]) {
+    testWidgets(
+      'publishing ${matching ? 'the same' : 'another'} draft reconciles only its original editor',
+      (tester) async {
+        final repository = _ReferenceComposerRepository();
+        if (!matching) {
+          repository.externalDraft = const CommunityDraftSaveInput(
+            draftId: '77777777-7777-4777-8777-777777777777',
+            title: 'Other draft',
+            body: 'Another persisted post.',
+          );
+        }
+        await tester.pumpWidget(_app(repository));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('community-create-post')));
+        await tester.pumpAndSettle();
+        final body = find.byKey(const Key('community-post-composer'));
+        await tester.enterText(body, 'Original editor text.');
+        tester.testTextInput.hide();
+        await tester.pumpAndSettle();
+        if (matching) {
+          await tester.tap(find.byKey(const Key('community-post-save-draft')));
+          await tester.pumpAndSettle();
+        }
+        final draftId = repository.availableDraft!.draftId;
+        await tester.tap(
+          find.byKey(const Key('community-composer-open-drafts')),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(Key('community-draft-continue-$draftId')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('community-post-publish')));
+        await tester.pumpAndSettle();
+        expect(repository.publishCalls, 1);
+        expect(repository.publishedDraftId, draftId);
+        await tester.tap(find.byKey(const Key('community-safe-return')));
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<TextField>(body).controller!.text,
+          matching ? '' : 'Original editor text.',
+        );
+        expect(find.text('Update draft'), findsNothing);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      },
+    );
+  }
+
+  testWidgets(
+    'English post title with leading number stays LTR in Arabic feed',
+    (tester) async {
+      final repository = _ReferenceComposerRepository()
+        ..feedTitle = '4 Simple Habits That Improved My Health';
+      await tester.pumpWidget(_app(repository, locale: const Locale('ar')));
+      await tester.pumpAndSettle();
+      final title = find.byKey(const Key('community-post-reference-title'));
+      await tester.ensureVisible(title);
+      await tester.pumpAndSettle();
+      expect(tester.widget<Text>(title).textDirection, TextDirection.ltr);
+      expect(Directionality.of(tester.element(title)), TextDirection.rtl);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    },
+  );
+
+  testWidgets('resumed English title and body stay LTR inside Arabic Drafts', (
+    tester,
+  ) async {
+    final repository = _ReferenceComposerRepository()
+      ..externalDraft = const CommunityDraftSaveInput(
+        draftId: '77777777-7777-4777-8777-777777777777',
+        title: '4 Simple Habits',
+        body: 'English draft ending with punctuation.',
+      );
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: CommunityDraftsPage(repository: repository),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(
+        const Key(
+          'community-draft-continue-77777777-7777-4777-8777-777777777777',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    for (final key in ['community-composer-title', 'community-post-composer']) {
+      final field = find.byKey(Key(key));
+      expect(tester.widget<TextField>(field).textDirection, TextDirection.ltr);
+      expect(Directionality.of(tester.element(field)), TextDirection.rtl);
+    }
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
 
   testWidgets('voice capture is reviewed before transcript is returned', (
     tester,

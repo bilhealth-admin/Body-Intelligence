@@ -78,7 +78,7 @@ void main() {
               findsNothing,
             );
             final openChat = find.byKey(
-              const ValueKey('coach-workspace-open-chat'),
+              const ValueKey('coach-workspace-tab-coach'),
             );
             await tester.ensureVisible(openChat);
             await tester.tap(openChat);

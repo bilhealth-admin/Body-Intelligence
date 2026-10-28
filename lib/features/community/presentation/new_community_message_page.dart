@@ -267,6 +267,20 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
           ),
         ),
       );
+    } on CommunityMessageRecipientUnavailable {
+      if (mounted && visit.isCurrent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              communityText(
+                context,
+                'Messages require an accepted friendship and recipient permission. Your text is kept.',
+                'تتطلب الرسائل صداقة مقبولة وسماح المستلم بالمراسلة. النص محفوظ.',
+              ),
+            ),
+          ),
+        );
+      }
     } on CommunityMessageDeliveryUnavailable {
       if (mounted && visit.isCurrent) {
         ScaffoldMessenger.of(context).showSnackBar(

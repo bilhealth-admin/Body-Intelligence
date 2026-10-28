@@ -716,7 +716,7 @@ void main() {
         expect(find.byType(Scaffold), findsOneWidget);
         // An authorized Coach first lands on Overview. This golden explicitly
         // captures the conversation surface, so use the visible Chat action.
-        final chatEntry = find.byKey(const Key('coach-workspace-open-chat'));
+        final chatEntry = find.byKey(const Key('coach-workspace-tab-coach'));
         for (
           var attempt = 0;
           attempt < 60 && chatEntry.evaluate().isEmpty;

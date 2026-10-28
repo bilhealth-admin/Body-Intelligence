@@ -32,6 +32,7 @@ import 'community_social_repository_mixin.dart';
 
 part 'community_repository_composer_persistence_mixin.dart';
 part 'community_repository_connections_messaging_mixin.dart';
+part 'community_message_delivery_validation.dart';
 part 'community_repository_discovery_mixin.dart';
 part 'community_repository_profile_moderation_mixin.dart';
 part 'community_repository_reference_parity_mixin.dart';

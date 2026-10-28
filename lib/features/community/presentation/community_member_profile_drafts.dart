@@ -1,9 +1,16 @@
 part of 'community_hub_page.dart';
 
 class CommunityDraftsPage extends StatefulWidget {
-  const CommunityDraftsPage({this.repository, super.key});
+  const CommunityDraftsPage({
+    this.repository,
+    this.onDraftPublished,
+    super.key,
+  });
 
   final CommunityRepository? repository;
+
+  /// A verified successful editor return, scoped to this owner's draft.
+  final ValueChanged<String>? onDraftPublished;
 
   @override
   State<CommunityDraftsPage> createState() => _CommunityDraftsPageState();
@@ -141,7 +148,7 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
       if (!mounted || !_sameOwnerOperation(repository, owner, generation)) {
         return;
       }
-      await pushCommunityPage<bool>(
+      final published = await pushCommunityPage<bool>(
         context,
         _CommunityPostComposerPage(
           repository: repository,
@@ -155,6 +162,7 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
         ),
       );
       if (_sameOwnerOperation(repository, owner, generation)) {
+        if (published == true) widget.onDraftPublished?.call(draftId);
         await _draftsKey.currentState?.refresh();
       }
     } on Object {

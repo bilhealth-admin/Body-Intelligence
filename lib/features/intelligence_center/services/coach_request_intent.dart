@@ -46,6 +46,92 @@ String normalizeCoachMeaning(String input) {
   return text.replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
+const _coachEnglishActionVerbs =
+    r'(?:change|modify|edit|adjust|revise|reschedule|swap|log|record|save|add|'
+    r'delete|remove|create|make|build|open|start|finish|complete|mark|update|'
+    r'write|post|send)';
+const _coachArabicActionVerbs =
+    r'(?:تغير|تعدل|تبدل|تسجل|تحفظ|تضيف|تحذف|تنشئ|تفتح|تحدث|تكتب|تسوي|تعمل)';
+
+// These existing commands treat everything after the first colon as literal
+// content. Only their header can choose an action; the health parser still
+// validates the entire header, date and payload before proposing that action.
+String _coachDirectiveText(String input) {
+  final separator = input.indexOf(':');
+  if (separator < 0) return input;
+  final header = input.substring(0, separator);
+  if (RegExp(
+    r'^(?:(?:save|log) (?:a )?note|(?:save|log) life context|'
+    r'(?:find|search) health content|سجل ملاحظة|احفظ ملاحظة|'
+    r'سجل سياق حياتي|احفظ سياق حياتي|ابحث في المحتوى)(?:\s|$)',
+  ).hasMatch(normalizeCoachMeaning(header))) {
+    return header;
+  }
+  return input;
+}
+
+/// Explicit global restrictions and answer-only requests suppress actions for
+/// this turn. A scoped "do not log weight; update my goal" is not a global veto.
+bool coachExplicitlyForbidsActions(String input) {
+  final text = normalizeCoachMeaning(
+    _coachDirectiveText(input),
+  ).replaceAll('’', "'");
+  return RegExp(r'\bread[ -]?only\b').hasMatch(text) ||
+      RegExp(
+        r"\b(?:do not|don't|dont|never)\s+" +
+            _coachEnglishActionVerbs +
+            r'\b[^.!?;]*\b(?:anything|any data|any records?|any changes?)\b',
+      ).hasMatch(text) ||
+      RegExp(
+        r'\b(?:only|just)\s+(?:answer|reply|respond|explain)\b|'
+        r'\b(?:answer|reply|respond)\s+only\b',
+      ).hasMatch(text) ||
+      RegExp(
+        r'(?:^|[\s.!?،؛؟])(?:لا|ما|مش|مو)\s*' +
+            _coachArabicActionVerbs +
+            r'[^.!?؛؟]*اي\s*(?:شيء|شي|بيانات|سجلات)',
+      ).hasMatch(text) ||
+      RegExp(
+        r'(?:بدون|دون)[^.!?؛؟]*اي\s*(?:شيء|شي|بيانات|سجلات)|'
+        r'(?:للقراءة|قراءة)\s+فقط|'
+        r'(?:اشرح|اجب|جاوب)[^.!?؛؟]*\sفقط',
+      ).hasMatch(text);
+}
+
+/// Remove only an explicitly negated imperative clause before deterministic
+/// command matching. Keep a following positive clause, its values and dates.
+/// The original turn is still retained for conversation and model reasoning.
+String coachActionRequestText(String input) {
+  if (_coachDirectiveText(input) != input) return input.trim();
+  var text = input.trim().replaceAll('’', "'");
+  text = text.replaceAll(
+    RegExp(
+      r"(?:^|[.!?;،,؛])\s*(?:please\s+)?(?:do not|don't|dont|never)\s+" +
+          _coachEnglishActionVerbs +
+          r'\b.*?(?=[.!?;،,؛]|\bbut\b|$)',
+      caseSensitive: false,
+    ),
+    ' ',
+  );
+  text = text.replaceAll(
+    RegExp(
+      r'(?:^|[.!?;،,؛؟])\s*(?:لا|ما|مش|مو)\s*' +
+          _coachArabicActionVerbs +
+          r'.*?(?=[.!?;،,؛؟]|لكن|$)',
+    ),
+    ' ',
+  );
+  return text
+      .replaceFirst(
+        RegExp(
+          r'^[\s.!?;،,؛؟]*(?:(?:but|however)\b\s*|لكن\s*)?',
+          caseSensitive: false,
+        ),
+        '',
+      )
+      .trim();
+}
+
 /// Read-only history/chart intent. A weight diary must never be inferred
 /// to be a Smart Plan just because the user said "جدول" or "شهر".
 bool isCoachWeightHistoryReadRequest(String input) {
@@ -115,7 +201,9 @@ bool isCoachPlanNegated(String input) {
 /// explicitly requested a plan operation. Review/analysis questions cannot
 /// create or launch a plan as an unsolicited side effect.
 bool coachAllowsSuggestedPlanAction(String input) {
-  if (isCoachPlanNegated(input) || isCoachWeightHistoryReadRequest(input)) {
+  if (coachExplicitlyForbidsActions(input) ||
+      isCoachPlanNegated(input) ||
+      isCoachWeightHistoryReadRequest(input)) {
     return false;
   }
   final intent = classifyCoachRequest(input);
@@ -128,8 +216,13 @@ bool coachAllowsSuggestedPlanAction(String input) {
 }
 
 CoachRequestIntent classifyCoachRequest(String input) {
-  final text = normalizeCoachMeaning(input);
+  final text = normalizeCoachMeaning(
+    _coachDirectiveText(coachActionRequestText(input)),
+  );
   bool has(String pattern) => RegExp(pattern).hasMatch(text);
+  if (coachExplicitlyForbidsActions(input)) {
+    return const CoachRequestIntent(CoachRequestKind.information);
+  }
   if (isCoachWeightHistoryReadRequest(input)) {
     return const CoachRequestIntent(CoachRequestKind.savedData);
   }

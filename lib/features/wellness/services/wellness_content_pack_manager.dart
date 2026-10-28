@@ -150,7 +150,9 @@ class WellnessContentPackManager {
     final installed = InstalledWellnessContentPack(
       id: pack.id,
       version: pack.version,
-      path: target.path,
+      // iOS relocates the app data container across updates. Registry paths
+      // are relative to our protected pack directory, never an old container.
+      path: p.basename(target.path),
       installedAt: DateTime.now(),
       minimumAccess: pack.minimumAccess,
     );
@@ -199,15 +201,30 @@ class WellnessContentPackManager {
     Directory packsDirectory,
     InstalledWellnessContentPack installed,
   ) {
-    final expected = File(
-      p.join(
-        packsDirectory.absolute.path,
-        '${installed.id}-${installed.version}.json',
-      ),
-    );
+    if (!RegExp(
+          r'^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$',
+        ).hasMatch(installed.id) ||
+        installed.version <= 0) {
+      throw const FormatException('Invalid installed wellness pack identity.');
+    }
+    final name = '${installed.id}-${installed.version}.json';
+    final expected = File(p.join(packsDirectory.absolute.path, name));
     final registered = File(installed.path);
-    if (p.normalize(expected.absolute.path) !=
-        p.normalize(registered.absolute.path)) {
+    // Read legacy iOS registry entries after a container relocation, but never
+    // open the registered absolute path. Only the exact current directory's
+    // identity-derived file is eligible, and the existing link, payload and
+    // release approval checks below still apply. Arbitrary outside paths and
+    // traversal are deliberately not migration candidates.
+    final legacyIos = RegExp(
+      r'^/(?:private/)?var/mobile/Containers/Data/Application/'
+      r'[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-'
+      r'[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/Library/Application Support/'
+      r'wellness_packs/([^/]+)$',
+    ).firstMatch(installed.path);
+    if (installed.path != name &&
+        p.normalize(expected.absolute.path) !=
+            p.normalize(registered.absolute.path) &&
+        legacyIos?.group(1) != name) {
       throw const FormatException('Unsafe installed wellness pack path.');
     }
     return expected;

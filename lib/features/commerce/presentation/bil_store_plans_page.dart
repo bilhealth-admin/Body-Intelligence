@@ -243,6 +243,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     final key = switch (code) {
       'purchase_pending' => 'purchase_awaiting_approval',
       'restore_pending' => 'restore_checking',
+      'restore_cancelled' => 'restore_cancelled',
+      'restore_unconfirmed' => 'restore_unconfirmed',
       'reconciliation_pending' => 'purchase_reconciliation_pending',
       // Cancelling the native sheet is an intentional choice, not an error.
       // Keep the catalog actionable so another term can be selected at once.
@@ -350,6 +352,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       messageKey = switch (store?.messageCode) {
         'subscription_verified' => 'restore_verified',
         'no_restorable_purchases' => 'restore_none',
+        'restore_cancelled' => 'restore_cancelled',
+        'restore_unconfirmed' => 'restore_unconfirmed',
         'authentication_required' => 'restore_sign_in',
         'restore_failed' => 'restore_failed',
         'purchase_status_unknown' ||

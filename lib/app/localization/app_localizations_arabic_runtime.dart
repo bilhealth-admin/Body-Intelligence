@@ -1,6 +1,8 @@
 part of 'app_localizations.dart';
 
 const _appLocaleArabicRuntime = {
+  'Measured': 'تاريخ القياس',
+  'Last 30 days': 'آخر ٣٠ يومًا',
   'Body context': 'سياق الجسم',
   'Nothing notable': 'لا شيء يُذكر',
   'Add sleep, travel, stress, hydration, and other context on a focused page.':

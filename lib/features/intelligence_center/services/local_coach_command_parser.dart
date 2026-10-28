@@ -2,6 +2,7 @@ import '../domain/intelligence_action.dart';
 import '../domain/coach_action_admission.dart';
 import '../intelligence_locale_copy.dart';
 import 'coach_date_resolver.dart';
+import 'coach_request_intent.dart';
 import 'local_coach_calorie_command.dart';
 import '../app_commands/coach_health_parser.dart';
 
@@ -22,10 +23,11 @@ class LocalCoachCommandParser {
     String? locale,
     DateTime? referenceLocal,
   }) {
+    if (coachExplicitlyForbidsActions(input)) return const [];
     const admission = CoachActionAdmission();
     return [
       for (final action in _parse(
-        input,
+        coachActionRequestText(input),
         arabic: arabic,
         locale: locale,
         referenceLocal: referenceLocal ?? DateTime.now(),

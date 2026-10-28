@@ -89,13 +89,23 @@ class ResponsiveAppShell extends StatelessWidget {
         currentPath.startsWith('/intelligence-center/');
     final wide = MediaQuery.sizeOf(context).width >= 900;
     final platform = Theme.of(context).platform;
-    final systemUiOverlayStyle = SystemUiOverlayStyle.dark.copyWith(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    );
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final navigationBarColor = Theme.of(context).scaffoldBackgroundColor;
+    final systemUiOverlayStyle = dark
+        ? SystemUiOverlayStyle.light.copyWith(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+            systemNavigationBarColor: navigationBarColor,
+            systemNavigationBarIconBrightness: Brightness.light,
+          )
+        : SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+            systemNavigationBarColor: navigationBarColor,
+            systemNavigationBarIconBrightness: Brightness.dark,
+          );
     ({
       IconData icon,
       IconData selected,

@@ -1,7 +1,10 @@
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
+import '../../../app/localization/runtime_copy_cloud_restore.dart';
 import '../providers/cloud_restore_conflict_provider.dart';
+import '../providers/cloud_restore_providers.dart';
+import '../services/cloud_restore_consent_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,6 +28,25 @@ class _ConflictControlsState
   @override
   Widget build(BuildContext context) {
     final syncing = ref.watch(cloudManualSyncStatusProvider).isSyncing;
+    final asyncConsent = ref.watch(cloudRestoreConsentStateProvider);
+    final consent = asyncConsent.value;
+    final canReview =
+        !asyncConsent.isLoading &&
+        !asyncConsent.hasError &&
+        consent?.availability == CloudRestoreConsentAvailability.available &&
+        consent!.grantedScopes.isNotEmpty;
+    final disabledReason = asyncConsent.isLoading
+        ? CloudRestoreCopy.checking
+        : asyncConsent.hasError
+        ? CloudRestoreCopy.unavailable
+        : switch (consent?.availability) {
+            CloudRestoreConsentAvailability.available => null,
+            CloudRestoreConsentAvailability.baseConsentRequired =>
+              CloudRestoreCopy.baseRequired,
+            CloudRestoreConsentAvailability.signedOut =>
+              CloudRestoreCopy.signIn,
+            _ => CloudRestoreCopy.unavailable,
+          };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -36,12 +58,19 @@ class _ConflictControlsState
             tr('Review backup conflicts', 'مراجعة تعارضات النسخة الاحتياطية'),
           ),
           subtitle: Text(
-            tr(
-              'Choose a version; local changes remain saved until your decision.',
-              'اختر النسخة؛ تبقى تعديلاتك المحلية محفوظة حتى قرارك.',
-            ),
+            canReview
+                ? tr(
+                    'Choose a version; local changes remain saved until your decision.',
+                    'اختر النسخة؛ تبقى تعديلاتك المحلية محفوظة حتى قرارك.',
+                  )
+                : disabledReason != null
+                ? CloudRestoreCopy.text(context, disabledReason)
+                : tr(
+                    'Enable Nutrition backup or Goal backup before reviewing backup conflicts.',
+                    'فعّل النسخ الاحتياطي للتغذية أو الأهداف قبل مراجعة تعارضات النسخ.',
+                  ),
           ),
-          onTap: busy || syncing ? null : _review,
+          onTap: busy || syncing || !canReview ? null : _review,
           key: const Key('cloud-restore-review-conflicts'),
         ),
         if (busy) const BilFeatureWelcomeStatus(),

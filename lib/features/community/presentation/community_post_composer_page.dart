@@ -167,6 +167,39 @@ class _CommunityPostComposerPageState
     super.dispose();
   }
 
+  void _clearPublishedComposerDraft() {
+    widget.draft.persistentDraftId = null;
+    widget.draft.savedPersistently = false;
+    widget.draft.title = '';
+    _title.clear();
+    widget.draft.body = '';
+    _composer.clear();
+    _composerDirection = null;
+    _composerError = null;
+    _submitError = null;
+    _operationRecovery = false;
+    widget.draft.images.clear();
+    _selectedImages.clear();
+    widget.draft.topicSlugs.clear();
+    widget.draft.circleSlug = null;
+    widget.draft.pollEnabled = false;
+    widget.draft.pollQuestion = '';
+    widget.draft.pollOptions
+      ..clear()
+      ..addAll(const ['', '']);
+    widget.draft.pollAllowMultiple = false;
+    widget.draft.locationLabel = '';
+    _location.clear();
+    widget.draft.mentions.clear();
+    widget.draft.collaborators.clear();
+    widget.draft.hashtags.clear();
+    _mentionResults = const <CommunityMentionCandidate>[];
+    _collaboratorResults = const <CommunityMentionCandidate>[];
+    _mentionQuery.clear();
+    _collaboratorQuery.clear();
+    _hashtagInput.clear();
+  }
+
   Future<void> _publish() async {
     final owner = _composerOwnerId;
     if (!_checkComposerOwner() ||
@@ -336,31 +369,7 @@ class _CommunityPostComposerPageState
         isCurrentOwner: () => _sameComposerOwner,
       );
       if (!mounted || !_checkComposerOwner()) return;
-      widget.draft.persistentDraftId = null;
-      widget.draft.savedPersistently = false;
-      widget.draft.title = '';
-      _title.clear();
-      widget.draft.body = '';
-      widget.draft.images.clear();
-      _selectedImages.clear();
-      widget.draft.topicSlugs.clear();
-      widget.draft.circleSlug = null;
-      widget.draft.pollEnabled = false;
-      widget.draft.pollQuestion = '';
-      widget.draft.pollOptions
-        ..clear()
-        ..addAll(const ['', '']);
-      widget.draft.pollAllowMultiple = false;
-      widget.draft.locationLabel = '';
-      _location.clear();
-      widget.draft.mentions.clear();
-      widget.draft.collaborators.clear();
-      widget.draft.hashtags.clear();
-      _mentionResults = const <CommunityMentionCandidate>[];
-      _collaboratorResults = const <CommunityMentionCandidate>[];
-      _mentionQuery.clear();
-      _collaboratorQuery.clear();
-      _hashtagInput.clear();
+      _clearPublishedComposerDraft();
       // Pop only after the request completes successfully. The hub owns refresh.
       // Re-enable route pop before the next frame; keep input locked until then.
       setState(() => _completed = true);

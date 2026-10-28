@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -117,6 +118,51 @@ Widget shellApp({
 }
 
 void main() {
+  for (final brightness in [Brightness.light, Brightness.dark]) {
+    testWidgets(
+      'shell status icons follow ${brightness.name} across navigation',
+      (tester) async {
+        tester.view.physicalSize = const Size(430, 932);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(
+          shellApp(
+            theme: ThemeData(
+              brightness: brightness,
+              platform: TargetPlatform.iOS,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        void expectStyle() {
+          final pop = find.byKey(const Key('responsive-app-shell-pop-scope'));
+          final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+            find
+                .ancestor(
+                  of: pop,
+                  matching: find.byType(AnnotatedRegion<SystemUiOverlayStyle>),
+                )
+                .first,
+          );
+          expect(region.value.statusBarBrightness, brightness);
+          expect(
+            region.value.statusBarIconBrightness,
+            brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+          );
+        }
+
+        expectStyle();
+        await tester.tap(find.byKey(const Key('shell-more-destination')));
+        await tester.pumpAndSettle();
+        expectStyle();
+        await tester.tap(find.byKey(const Key('shell-dashboard-destination')));
+        await tester.pumpAndSettle();
+        expectStyle();
+      },
+    );
+  }
+
   testWidgets('shared More badge follows authoritative readback and owner', (
     tester,
   ) async {

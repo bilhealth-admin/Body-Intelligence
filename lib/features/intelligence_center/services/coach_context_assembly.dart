@@ -1,5 +1,35 @@
 part of 'coach_context_provider.dart';
 
+/// Scope historical rows independently, just like today's computed health.
+/// Unknown future fields fail closed until they are deliberately classified.
+List<Map<String, Object?>> scopeCoachActivityHistoryForFocus(
+  Iterable<Map<String, Object?>> history, {
+  required bool includeTraining,
+  required bool includeHabits,
+}) => history
+    .map(
+      (row) => <String, Object?>{
+        if (row['day'] != null) 'day': row['day'],
+        if (includeTraining) ...{
+          for (final key in ['steps', 'exercises'])
+            if (row[key] != null) key: row[key],
+        },
+        if (includeHabits) ...{
+          for (final key in [
+            'sleepHours',
+            'sleepSource',
+            'sleepDeviceSource',
+            'sleepObservedAt',
+            'sleepLastSyncAt',
+          ])
+            if (row[key] != null) key: row[key],
+        },
+      },
+    )
+    .where((row) => row.keys.any((key) => key != 'day'))
+    .take(14)
+    .toList(growable: false);
+
 // Keep analytics fail-closed: only these computed, category-neutral body-model
 // fields may be exposed when analytics is selected. In particular, never copy
 // the complete health map because it also contains nutrition, training, and

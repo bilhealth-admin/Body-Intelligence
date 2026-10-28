@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_restore_providers.dart';
+import 'package:body_intelligence_log/features/cloud_platform/services/cloud_restore_consent_repository.dart';
 import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_restore_conflict_provider.dart';
 import 'dart:io';
 import 'dart:convert';
@@ -550,6 +552,13 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
+              cloudRestoreConsentStateProvider.overrideWith(
+                (ref) async => const CloudRestoreConsentState(
+                  availability: CloudRestoreConsentAvailability.available,
+                  ownerId: 'owner',
+                  grantedScopes: {CloudRestoreScope.goals},
+                ),
+              ),
               cloudRestoreConflictServiceProvider.overrideWithValue(
                 CloudRestoreConflictService(() async => eb),
               ),
@@ -571,6 +580,9 @@ void main() {
             ),
           ),
         );
+        // Consent is asynchronous; wait for the authoritative fixture before
+        // tapping, just as the real control remains disabled while loading.
+        await tester.pumpAndSettle();
         await tester.tap(
           find.byKey(const Key('cloud-restore-review-conflicts')),
         );

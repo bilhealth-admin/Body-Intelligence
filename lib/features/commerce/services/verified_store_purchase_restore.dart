@@ -13,6 +13,8 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
     }
     final restoreOwnerId = _currentStoreOwnerId()!;
     final visit = _storeVisit.capture();
+    final previousState = state;
+    final previousMessageCode = messageCode;
     _restoring = true;
     _restoreOwnershipConflict = false;
     _explicitRestoreTransactionKeys.clear();
@@ -56,7 +58,34 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
         notifyListeners();
         return;
       }
+      if (messageCode == 'restore_cancelled') {
+        _settleRestoreWithoutReceipt(
+          previousState: previousState,
+          previousMessageCode: previousMessageCode,
+          resultCode: 'restore_cancelled',
+        );
+        return;
+      }
       if (state == VerifiedStoreState.purchasePending) {
+        if (restoreEventObserved.isCompleted) {
+          // A pending native transaction is not an empty history. Keep its
+          // verification unresolved instead of enabling another checkout.
+          state = VerifiedStoreState.failed;
+          messageCode = 'purchase_status_unknown';
+          notifyListeners();
+          return;
+        }
+        if (defaultTargetPlatform == TargetPlatform.iOS) {
+          // AppStore.sync exposes only a void completion. After a cancelled
+          // authentication sheet it can still finish without any transaction
+          // callback. Absence of a receipt cannot prove an empty history.
+          _settleRestoreWithoutReceipt(
+            previousState: previousState,
+            previousMessageCode: previousMessageCode,
+            resultCode: 'restore_unconfirmed',
+          );
+          return;
+        }
         state = entitlement?.grantsPaidAccess == true
             ? VerifiedStoreState.verified
             : products.isEmpty
@@ -78,6 +107,23 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
         messageCode = 'purchase_status_unknown';
         notifyListeners();
       }
+    } on PlatformException catch (error) {
+      if (_disposed ||
+          !_isCurrentStoreOwner(restoreOwnerId) ||
+          !_storeVisit.isCurrent(visit)) {
+        return;
+      }
+      if (_isStoreRestoreCancellation(error)) {
+        _settleRestoreWithoutReceipt(
+          previousState: previousState,
+          previousMessageCode: previousMessageCode,
+          resultCode: 'restore_cancelled',
+        );
+      } else {
+        state = VerifiedStoreState.failed;
+        messageCode = 'restore_failed';
+        notifyListeners();
+      }
     } on Object {
       if (_disposed ||
           !_isCurrentStoreOwner(restoreOwnerId) ||
@@ -95,6 +141,36 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
       _restoring = false;
       notifyListeners();
     }
+  }
+
+  void _settleRestoreWithoutReceipt({
+    required VerifiedStoreState previousState,
+    required String? previousMessageCode,
+    required String resultCode,
+  }) {
+    // A genuine receipt callback or ownership rejection takes precedence over
+    // a native cancellation. Never erase its result with a weaker UI outcome.
+    if (state != VerifiedStoreState.purchasePending &&
+        messageCode != 'restore_cancelled') {
+      return;
+    }
+    final previouslyBlocked =
+        previousMessageCode == 'store_finish_pending' ||
+        (previousState == VerifiedStoreState.failed &&
+            !canStartStorePurchase(
+              state: previousState,
+              productAvailable: products.isNotEmpty,
+              messageCode: previousMessageCode,
+            ));
+    state = previouslyBlocked
+        ? previousState
+        : entitlement?.grantsPaidAccess == true
+        ? VerifiedStoreState.verified
+        : products.isEmpty
+        ? VerifiedStoreState.unavailable
+        : VerifiedStoreState.ready;
+    messageCode = previouslyBlocked ? previousMessageCode : resultCode;
+    notifyListeners();
   }
 
   Future<void> _coalescedNativeRestore() {
@@ -127,4 +203,27 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
         .getPlatformAddition<InAppPurchaseStoreKitPlatformAddition>();
     await addition.sync();
   }
+}
+
+bool _isStoreRestoreCancellation(PlatformException error) {
+  final code = error.code.toLowerCase();
+  if (const {
+    'payment_cancelled',
+    'payment_canceled',
+    'user_cancelled',
+    'user_canceled',
+    'storekit2_purchase_cancelled',
+    'storekit2_purchase_canceled',
+  }.contains(code)) {
+    return true;
+  }
+  // StoreKit2 0.4.11 wraps every AppStore.sync error in this one Pigeon code.
+  // Match only the explicit native enum value, not arbitrary error prose.
+  return code == 'storekit2_failed_to_sync_to_app_store' &&
+      const {
+        'usercancelled',
+        'usercanceled',
+        'storekiterror.usercancelled',
+        'storekiterror.usercanceled',
+      }.contains(error.details?.toString().trim().toLowerCase());
 }

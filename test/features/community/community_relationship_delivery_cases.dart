@@ -624,6 +624,48 @@ void _relationshipDeliveryCases(
     expect(repo.cursors.first, repo.cursors.last);
   });
   test(
+    'v2 recipient refusal is typed while unrelated permission errors remain intact',
+    () async {
+      final auth = fixture();
+      for (final specific in [true, false]) {
+        final paths = <String>[];
+        auth.dataRequest = (request) async {
+          paths.add(request.url.path);
+          if (request.url.path.endsWith(
+            'bil_get_community_message_delivery_v2',
+          )) {
+            return _deliveryResponse(request, null);
+          }
+          return http.Response(
+            jsonEncode({
+              'code': '42501',
+              'message': specific
+                  ? 'community_message_recipient_unavailable'
+                  : 'different_authorization_failure',
+            }),
+            403,
+            headers: {'content-type': 'application/json'},
+            request: request,
+          );
+        };
+        await expectLater(
+          _PolicyRepository(
+            auth.client,
+          ).sendMessageOperation(_peer, 'Body', requestId: _messageId),
+          throwsA(
+            specific
+                ? isA<CommunityMessageRecipientUnavailable>()
+                : isA<PostgrestException>(),
+          ),
+        );
+        expect(paths, [
+          '/rest/v1/rpc/bil_get_community_message_delivery_v2',
+          '/rest/v1/rpc/bil_send_community_message_v2',
+        ]);
+      }
+    },
+  );
+  test(
     'v2 missing server reports unavailable without the legacy POST',
     () async {
       final auth = fixture();

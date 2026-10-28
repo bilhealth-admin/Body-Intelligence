@@ -8,6 +8,7 @@ import 'local_model_gateway.dart';
 import '../domain/coach_context_snapshot.dart';
 import '../intelligence_locale_copy.dart';
 import 'coach_intent_normalizer.dart';
+import 'coach_request_intent.dart';
 import '../app_commands/coach_health_tools.dart';
 
 class LocalCoachRequest {
@@ -139,7 +140,9 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
         diagnosticCode: modelResult.diagnosticCode,
       );
     }
-    final action = _validatedModelAction(model.action, request.locale);
+    final action = coachExplicitlyForbidsActions(request.text)
+        ? null
+        : _validatedModelAction(model.action, request.locale);
     return LocalCoachResult(
       actions: action == null ? const [] : [action],
       processedOnDevice: model.processedOnDevice,

@@ -208,7 +208,12 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
         height: 1.45,
         color: CommunitySapphire.ink(context),
       ),
-      textDirection: _composerDirection ?? Directionality.of(context),
+      textDirection:
+          _composerDirection ??
+          BilWrittenLanguageResolver.directionFor(
+            _composer.text,
+            fallback: Directionality.of(context),
+          ),
       textCapitalization: TextCapitalization.sentences,
       onChanged: (value) {
         widget.draft.body = value;
