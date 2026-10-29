@@ -1,16 +1,23 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/domain/community_reference_parity.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_surface.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_sapphire.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../visual_closure/visual_evidence_font.dart';
 
 const _owner = '11111111-1111-4111-8111-111111111111';
 const _member = '22222222-2222-4222-8222-222222222222';
@@ -213,6 +220,7 @@ Future<void> _mount(
   Locale locale = const Locale('en'),
   Brightness brightness = Brightness.light,
   double textScale = 1,
+  GlobalKey? captureKey,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -224,17 +232,40 @@ Future<void> _mount(
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(brightness: brightness),
+      theme: captureKey == null
+          ? ThemeData(brightness: brightness)
+          : visualEvidenceTheme(
+              brightness == Brightness.dark
+                  ? BilFlagshipTheme.dark(isArabic: locale.languageCode == 'ar')
+                  : BilFlagshipTheme.light(
+                      isArabic: locale.languageCode == 'ar',
+                    ),
+              fontFamily: locale.languageCode == 'ar'
+                  ? 'NotoArabicEvidence'
+                  : 'RobotoEvidence',
+            ),
       builder: (context, child) => MediaQuery(
         data: MediaQuery.of(
           context,
         ).copyWith(textScaler: TextScaler.linear(textScale)),
         child: child!,
       ),
-      home: CommunityMemberProfilePage(
-        userId: repo.self ? _owner : _member,
-        repository: repo,
-      ),
+      home: captureKey == null
+          ? CommunityMemberProfilePage(
+              userId: repo.self ? _owner : _member,
+              repository: repo,
+            )
+          : RepaintBoundary(
+              key: captureKey,
+              child: CommunitySurface(
+                child: visualEvidenceTextSurface(
+                  CommunityMemberProfilePage(userId: _member, repository: repo),
+                  fontFamily: locale.languageCode == 'ar'
+                      ? 'NotoArabicEvidence'
+                      : 'RobotoEvidence',
+                ),
+              ),
+            ),
     ),
   );
   await tester.pumpAndSettle();
@@ -258,6 +289,7 @@ void _expectFollowers(String count) {
 }
 
 void main() {
+  setUpAll(loadVisualEvidenceFont);
   setUp(() {
     _client = SupabaseClient(
       'https://relationships.invalid',
@@ -266,6 +298,223 @@ void main() {
     );
   });
   tearDown(() => _client.dispose());
+  for (final language in ['en', 'ar']) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'profile selection is blue and active across tabs $language dark=$dark',
+        (tester) async {
+          tester.view.physicalSize = const Size(390, 844);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final semantics = tester.ensureSemantics();
+          try {
+            final repo = _RelationshipsRepository();
+            final key = GlobalKey();
+            await _mount(
+              tester,
+              repo,
+              locale: Locale(language),
+              brightness: dark ? Brightness.dark : Brightness.light,
+              captureKey: key,
+            );
+            Finder tab(String id) =>
+                find.byKey(Key('community-profile-tab-$id'));
+            Future<void> capture(String state) async {
+              final folder = Platform.environment['BIL_REFERENCE_CAPTURE_DIR'];
+              if (folder == null) return;
+              await tester.runAsync(() async {
+                final image =
+                    await (key.currentContext!.findRenderObject()!
+                            as RenderRepaintBoundary)
+                        .toImage(pixelRatio: 2);
+                try {
+                  final data = await image.toByteData(
+                    format: ui.ImageByteFormat.png,
+                  );
+                  await Directory(folder).create(recursive: true);
+                  await File(
+                    '$folder/profile_selection_${language}_${dark ? 'dark' : 'light'}_$state.png',
+                  ).writeAsBytes(data!.buffer.asUint8List());
+                } finally {
+                  image.dispose();
+                }
+              });
+            }
+
+            void expectTab(String id, {required bool selected}) {
+              expect(tester.widget(tab(id)), isA<TextButton>());
+              final button = tester.widget<TextButton>(tab(id));
+              final accent = CommunitySapphire.actionBlue(
+                tester.element(tab(id)),
+              );
+              expect(button.onPressed, isNotNull);
+              expect(button.style!.foregroundColor!.resolve({}), accent);
+              expect(tester.getSize(tab(id)).height, greaterThanOrEqualTo(48));
+              expect(
+                tester.getSemantics(tab(id)).flagsCollection.isSelected,
+                selected ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+              );
+              final panel = tester.widget<DecoratedBox>(
+                find
+                    .ancestor(of: tab(id), matching: find.byType(DecoratedBox))
+                    .first,
+              );
+              final decoration = panel.decoration as BoxDecoration;
+              expect(decoration.gradient != null, selected);
+              if (selected) {
+                final gradient = decoration.gradient! as LinearGradient;
+                expect(
+                  gradient.colors.every((color) => color.b > color.r),
+                  isTrue,
+                );
+                expect(gradient.colors.every((color) => color.a < .25), isTrue);
+              }
+            }
+
+            await Scrollable.ensureVisible(
+              tester.element(tab('moments')),
+              alignment: .65,
+            );
+            await tester.pumpAndSettle();
+            await capture('posts');
+            expectTab('posts', selected: true);
+            expectTab('moments', selected: true);
+            expectTab('reviews', selected: false);
+            final reads = repo.overviewReads;
+            await _tap(tester, tab('posts'));
+            await _tap(tester, tab('posts'));
+            expect(repo.overviewReads, reads);
+
+            await _tap(tester, tab('media'));
+            expectTab('media', selected: true);
+            expectTab('posts', selected: false);
+            expect(tab('moments'), findsNothing);
+            await _tap(tester, tab('likes'));
+            expectTab('likes', selected: true);
+            expectTab('media', selected: false);
+            expect(
+              find.byKey(const Key('community-profile-likes-private')),
+              findsOneWidget,
+            );
+            await _tap(tester, tab('posts'));
+            expectTab('posts', selected: true);
+            await _tap(tester, tab('reviews'));
+            expectTab('reviews', selected: true);
+            expectTab('moments', selected: false);
+            expect(
+              find.text(
+                language == 'ar'
+                    ? 'لا توجد مراجعات معتمدة بعد.'
+                    : 'No approved reviews yet.',
+              ),
+              findsOneWidget,
+            );
+            await capture('reviews');
+            await _tap(tester, tab('moments'));
+            expectTab('moments', selected: true);
+            expectTab('reviews', selected: false);
+            expect(repo.overviewReads, reads);
+            expect(tester.takeException(), isNull);
+          } finally {
+            semantics.dispose();
+          }
+        },
+      );
+    }
+  }
+  for (final language in ['en', 'ar']) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'blue profile actions stay unframed and functional $language dark=$dark',
+        (tester) async {
+          tester.view.physicalSize = const Size(390, 844);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          final repo = _RelationshipsRepository();
+          final key = GlobalKey();
+          await _mount(
+            tester,
+            repo,
+            locale: Locale(language),
+            brightness: dark ? Brightness.dark : Brightness.light,
+            captureKey: key,
+          );
+          await Scrollable.ensureVisible(
+            tester.element(_friend),
+            alignment: .5,
+          );
+          await tester.pumpAndSettle();
+          final folder = Platform.environment['BIL_REFERENCE_CAPTURE_DIR'];
+          if (folder != null) {
+            await tester.runAsync(() async {
+              final image =
+                  await (key.currentContext!.findRenderObject()!
+                          as RenderRepaintBoundary)
+                      .toImage(pixelRatio: 2);
+              try {
+                final data = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                await Directory(folder).create(recursive: true);
+                await File(
+                  '$folder/profile_blue_actions_${language}_${dark ? 'dark' : 'light'}.png',
+                ).writeAsBytes(data!.buffer.asUint8List());
+              } finally {
+                image.dispose();
+              }
+            });
+          }
+          expect(tester.widget(_friend), isA<TextButton>());
+          final friend = tester.widget<TextButton>(_friend);
+          final blue = Theme.of(tester.element(_friend)).colorScheme.primary;
+          expect(friend.style!.foregroundColor!.resolve({}), blue);
+          expect(
+            friend.style!.backgroundColor!.resolve({}),
+            Colors.transparent,
+          );
+          expect(friend.style!.side!.resolve({}), BorderSide.none);
+          expect(tester.getSize(_friend).height, greaterThanOrEqualTo(48));
+          expect(tester.getSize(_friend).width, greaterThanOrEqualTo(48));
+          final follow = tester.widget<OutlinedButton>(_follow);
+          expect(follow.style!.foregroundColor!.resolve({}), blue);
+          for (final action in [_friend, _follow]) {
+            final icon = find
+                .descendant(of: action, matching: find.byType(Icon))
+                .first;
+            expect(IconTheme.of(tester.element(icon)).color, blue);
+          }
+          await _tap(tester, _follow);
+          expect(repo.follows, 1);
+          await _tap(tester, _follow);
+          expect(repo.unfollows, 1);
+          repo.holdFriend = Completer<void>();
+          await tester.tap(_friend);
+          await tester.pump();
+          expect(tester.widget<TextButton>(_friend).onPressed, isNull);
+          expect(
+            tester.widget<TextButton>(_friend).style!.foregroundColor!.resolve({
+              WidgetState.disabled,
+            }),
+            isNot(blue),
+          );
+          await tester.tap(_friend);
+          await tester.pump();
+          expect(repo.requests, 1);
+          repo.holdFriend!.complete();
+          await tester.pumpAndSettle();
+          await _tap(
+            tester,
+            find.byKey(const Key('community-profile-cancel-request')),
+          );
+          expect(repo.cancellations, 1);
+          expect(tester.widget(_friend), isA<TextButton>());
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
   testWidgets(
     'one profile button follows and unfollows using server readback',
     (tester) async {

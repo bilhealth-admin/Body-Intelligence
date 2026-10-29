@@ -303,13 +303,13 @@ extension _CommunityMemberProfilePrimaryContent
   ) {
     final selected = _profileActivity.tab == tab;
     final label = communityText(context, english, arabic);
-    return selected
-        ? FilledButton.tonal(key: key, onPressed: null, child: Text(label))
-        : TextButton(
-            key: key,
-            onPressed: () => _selectProfilePrimaryTab(tab, profile),
-            child: Text(label),
-          );
+    return _communityProfileSelectionTab(
+      context: context,
+      tabKey: key,
+      label: label,
+      selected: selected,
+      onPressed: () => _selectProfilePrimaryTab(tab, profile),
+    );
   }
 
   List<Widget> _profilePostSlivers(

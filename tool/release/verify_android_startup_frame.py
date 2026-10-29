@@ -9,6 +9,7 @@ import re
 import struct
 import subprocess
 import sys
+import tempfile
 import time
 import zlib
 from collections import Counter
@@ -26,6 +27,50 @@ WINDOW_FAILURE_CODES = {
     "EXTERNAL_APP_ANR": 22,
     "FOCUSED_WINDOW_UNAVAILABLE": 23,
 }
+
+
+def capture_failure_diagnostics(evidence: Path) -> None:
+    """Bounded read-only capture; no signals, dialog action, root or restart."""
+    evidence.mkdir(parents=True, exist_ok=True)
+    receipt_path = evidence / "failure-diagnostics.json"
+    if receipt_path.exists():
+        return  # The prelaunch check and shell EXIT trap share one capture.
+    commands = (
+        ("last-anr", ["shell", "dumpsys", "activity", "lastanr"]),
+        ("system-app-anr", ["shell", "dumpsys", "dropbox", "--print", "system_app_anr"]),
+        ("events", ["logcat", "-b", "events", "-d", "-t", "500"]),
+        ("cpu", ["shell", "dumpsys", "cpuinfo"]),
+        ("threads", ["shell", "ps", "-A", "-T", "-o", "PID,TID,NAME"]),
+    )
+    rows = []
+    limit = 512 * 1024
+    for name, arguments in commands:
+        command = ["adb", *arguments]
+        row = {"command": command, "timeout_seconds": 8,
+               "file": f"failure-diagnostic-{name}.txt", "return_code": None}
+        with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+            try:
+                result = subprocess.run(command, stdout=stdout, stderr=stderr,
+                                        timeout=8, check=False)
+                row["return_code"] = result.returncode
+                row["status"] = "CAPTURED" if result.returncode == 0 else "NONZERO_EXIT"
+            except subprocess.TimeoutExpired:
+                row["status"] = "TIMEOUT"
+            except OSError as error:
+                row["status"] = "COMMAND_ERROR"
+                row["error"] = str(error)[:1024]
+            for stream, suffix, field in ((stdout, "", "stdout_truncated"),
+                                           (stderr, ".errors.txt", "stderr_truncated")):
+                stream.seek(0)
+                data = stream.read(limit + 1)
+                row[field] = len(data) > limit
+                (evidence / (row["file"] + suffix)).write_bytes(data[:limit])
+        rows.append(row)
+    receipt_path.write_text(json.dumps({
+        "scope": "Read-only failure diagnostics, not startup acceptance",
+        "app_startup_proven": False, "commands": rows,
+        "saved_byte_limit_per_stream": limit,
+    }, indent=2) + "\n", encoding="utf-8")
 
 
 def _paeth(left: int, up: int, up_left: int) -> int:
@@ -211,6 +256,7 @@ def _capture_prelaunch_blocker(evidence: Path, exit_code: int) -> None:
         f"exit_status={exit_code}\nstage=verify-emulator-system-ui-before-launch\n",
         encoding="utf-8",
     )
+    capture_failure_diagnostics(evidence)
     captures = (
         ("failure-screen.png", ["exec-out", "screencap", "-p"]),
         ("prelaunch-logcat.txt", ["logcat", "-d", "-t", "1500"]),
@@ -384,10 +430,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("screenshot", nargs="?", type=Path)
     parser.add_argument("accessibility_tree", nargs="?", type=Path)
     parser.add_argument("--window-state", type=Path)
-    parser.add_argument("--window-health-only", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--window-health-only", action="store_true")
     parser.add_argument("--require-app-focus", action="store_true")
-    parser.add_argument("--verify-emulator-before-launch", type=Path)
+    mode.add_argument("--verify-emulator-before-launch", type=Path)
+    mode.add_argument("--capture-failure-diagnostics", type=Path)
     args = parser.parse_args(argv)
+    if args.capture_failure_diagnostics is not None:
+        if (args.screenshot is not None or args.accessibility_tree is not None or
+                args.window_state is not None or args.require_app_focus):
+            parser.error("diagnostics cannot be combined with startup acceptance inputs")
+        capture_failure_diagnostics(args.capture_failure_diagnostics)
+        print("diagnostics_only=true; app_startup_proven=false")
+        return 0
     if args.verify_emulator_before_launch is not None:
         return verify_emulator_before_launch(args.verify_emulator_before_launch)
     if args.window_health_only:

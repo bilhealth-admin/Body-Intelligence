@@ -4,7 +4,13 @@ import '../../../app/theme/bil_pearl_finish.dart';
 /// Community-only design tokens: never installed on dashboard/watch surfaces.
 abstract final class CommunitySapphire {
   static const blue = Color(0xFF155EEF);
+  // The existing Explore accent in dark mode, shared without installing a
+  // Community theme on the Coach or any dashboard/watch surface.
+  static const darkActionBlue = Color(0xFF8BB4FF);
   static const navy = Color(0xFF14243A);
+
+  static Color actionBlue(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkActionBlue : blue;
 
   /// Every stop maintains at least 4.5:1 contrast against white text.
   static LinearGradient messageGradient(BuildContext context) => LinearGradient(

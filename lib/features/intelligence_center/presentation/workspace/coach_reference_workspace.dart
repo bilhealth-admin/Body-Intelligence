@@ -5,13 +5,13 @@ import '../../../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/bil_coach_identity.dart';
-import '../../../commerce/domain/commerce_entitlement.dart';
+import '../../../community/presentation/community_sapphire.dart';
 import '../../../commerce/domain/commerce_plan.dart';
-import '../../../commerce/domain/subscription_state.dart';
 import '../../../commerce/providers/commerce_providers.dart';
 import '../../../commerce/presentation/bil_store_copy.dart';
 import '../../domain/coach_context_snapshot.dart';
 import '../../intelligence_locale_copy.dart';
+import 'coach_overview_paid_label_provider.dart';
 
 part 'coach_reference_workspace_components.dart';
 
@@ -49,16 +49,12 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final muted = scheme.onSurfaceVariant;
     String t(String en, String arabic) => intelligenceText(context, en, arabic);
-    final access = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
+    final paidPlan = ref.watch(coachOverviewPaidLabelProvider);
     // Same server-authoritative quota decision as the existing Coach gate.
     // Verified paid Boost can grant Coach access without a subscription.
     final unlocked =
         ref.watch(aiCoachCreditAccessProvider).asData?.value == true;
-    final paidLabel =
-        access != null &&
-        access.authority == EntitlementAuthority.verifiedServer &&
-        access.plan != CommercePlan.free &&
-        access.grants(CommerceEntitlement.advancedIntelligence);
+    final paidLabel = paidPlan != null;
     final name = snapshot?.minimalIdentity['displayName']?.toString();
     final date =
         '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
@@ -174,7 +170,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                           key: const Key('coach-workspace-greeting-detail'),
                           style: TextStyle(fontSize: 12, color: muted),
                         ),
-                        if (unlocked) ...[
+                        if (paidLabel || unlocked) ...[
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -191,7 +187,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                                       Localizations.localeOf(
                                         context,
                                       ).toLanguageTag(),
-                                      access.plan == CommercePlan.premiumAiCoach
+                                      paidPlan == CommercePlan.premiumAiCoach
                                           ? 'premium_ai_coach'
                                           : 'premium',
                                     )
@@ -244,42 +240,54 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                     ])
                       Padding(
                         padding: const EdgeInsetsDirectional.only(end: 5),
-                        child: TextButton(
-                          key: Key('coach-workspace-tab-${item.$2}'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: item.$2 == 'coach'
-                                ? scheme.onSurface
-                                : muted,
-                            backgroundColor: Colors.transparent,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 17,
-                              vertical: 10,
-                            ),
-                            minimumSize: const Size(48, 40),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(11),
-                            ),
-                          ),
-                          onPressed: item.$2 == 'coach'
-                              ? onChat
-                              : item.$2 == '/daily-log'
-                              ? (onTools ?? () => onRoute('/daily-log'))
-                              : () => onRoute(item.$2),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (item.$2 == 'coach') ...[
-                                const Icon(Icons.smart_toy_outlined, size: 18),
-                                const SizedBox(width: 6),
-                              ],
-                              Text(
-                                item.$1,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                        child: MergeSemantics(
+                          child: Semantics(
+                            selected: item.$2 == 'coach',
+                            child: TextButton(
+                              key: Key('coach-workspace-tab-${item.$2}'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: CommunitySapphire.actionBlue(
+                                  context,
+                                ),
+                                disabledForegroundColor: scheme.onSurface
+                                    .withValues(alpha: .38),
+                                backgroundColor: Colors.transparent,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 17,
+                                  vertical: 10,
+                                ),
+                                minimumSize: const Size(48, 40),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(11),
                                 ),
                               ),
-                            ],
+                              onPressed: item.$2 == 'coach'
+                                  ? onChat
+                                  : item.$2 == '/daily-log'
+                                  ? (onTools ?? () => onRoute('/daily-log'))
+                                  : () => onRoute(item.$2),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (item.$2 == 'coach') ...[
+                                    const Icon(
+                                      Icons.smart_toy_outlined,
+                                      size: 18,
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
+                                  Text(
+                                    item.$1,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: item.$2 == 'coach'
+                                          ? FontWeight.w700
+                                          : FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),

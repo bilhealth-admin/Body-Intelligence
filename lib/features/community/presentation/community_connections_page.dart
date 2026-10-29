@@ -243,14 +243,18 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
         guard: visit!.guard,
       );
       if (draft == null || !mounted || !visit.isCurrent) return;
-      await visit.run(
-        () => visit.repository.report(
-          targetKind: 'profile',
-          targetId: userId,
-          reason: draft.reason,
+      final created = await visit.run(
+        () => submitCommunityReportWithReceipt(
+          context: context,
+          checkOwner: visit.check,
+          send: () => visit.repository.report(
+            targetKind: 'profile',
+            targetId: userId,
+            reason: draft.reason,
+          ),
         ),
       );
-      if (mounted && visit.isCurrent) {
+      if (mounted && visit.isCurrent && created) {
         final copy = _ConnectionsCopy.of(context);
         ScaffoldMessenger.of(
           context,

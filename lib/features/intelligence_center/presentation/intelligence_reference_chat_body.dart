@@ -203,6 +203,10 @@ extension _IntelligenceReferenceChatBody on _IntelligenceCenterPageState {
                                             ),
                                             controller: question,
                                             focusNode: questionFocus,
+                                            // Keep the caret visible/blinking
+                                            // without a per-vsync opacity fade
+                                            // while a draft otherwise rests.
+                                            cursorOpacityAnimates: false,
                                             enabled: conversationInteractive,
                                             minLines: 1,
                                             maxLines:

@@ -28,7 +28,7 @@ class _CommunitySurfaceState extends State<CommunitySurface> {
     final muted = highContrast ? ink : CommunitySapphire.muted(context);
     final line = dark ? const Color(0xFF334459) : const Color(0xFFE6ECF4);
     final scheme = base.colorScheme.copyWith(
-      primary: dark ? const Color(0xFF8BB4FF) : CommunitySapphire.blue,
+      primary: CommunitySapphire.actionBlue(context),
       onPrimary: dark ? CommunitySapphire.navy : Colors.white,
       primaryContainer: dark
           ? const Color(0xFF203E68)

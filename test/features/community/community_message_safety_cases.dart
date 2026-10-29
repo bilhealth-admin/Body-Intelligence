@@ -29,7 +29,16 @@ void _messageSafetyCases(
       auth.dataRequest = (request) async {
         expect(request.url.path, '/rest/v1/bil_community_reports');
         reports.add(jsonDecode(request.body) as Map<String, dynamic>);
-        return http.Response('', 201, request: request);
+        expect(request.url.queryParameters['select'], 'id');
+        expect(request.headers['prefer'], contains('return=representation'));
+        return http.Response(
+          jsonEncode([
+            {'id': '77777777-7777-4777-8777-777777777777'},
+          ]),
+          201,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
       };
       await _mount(tester, repo);
       await tester.pumpAndSettle();
@@ -46,6 +55,41 @@ void _messageSafetyCases(
         'target_id': _messageId,
         'reason': 'harassment',
       });
+      expect(repo.sends, isEmpty);
+      expect(find.text('Report sent for review.'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'duplicate private message report acknowledges the existing report without claiming a new note',
+    (tester) async {
+      final auth = getAuth(), repo = getRepo();
+      var reports = 0;
+      auth.dataRequest = (request) async {
+        expect(request.url.path, '/rest/v1/bil_community_reports');
+        reports++;
+        return http.Response(
+          '[]',
+          201,
+          headers: {'content-type': 'application/json'},
+          request: request,
+        );
+      };
+      await _mount(tester, repo);
+      await tester.pumpAndSettle();
+      await openReport(tester);
+      final send = find.byKey(const Key('community-report-submit'));
+      await tester.ensureVisible(send);
+      await tester.tap(send);
+      await tester.pumpAndSettle();
+      expect(reports, 1);
+      expect(
+        find.text(
+          'You already reported this item. Your new note was not added.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Report sent for review.'), findsNothing);
       expect(repo.sends, isEmpty);
       expect(tester.takeException(), isNull);
     },

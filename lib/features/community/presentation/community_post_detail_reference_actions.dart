@@ -77,13 +77,17 @@ extension _CommunityPostDetailReferenceActions
         return;
       }
       if (action == 'report') {
-        await widget.repository.report(
-          targetKind: 'post',
-          targetId: widget.post.id,
-          reason: reportDraft!.reason,
+        final created = await submitCommunityReportWithReceipt(
+          context: context,
+          checkOwner: _detailOwnerScope.check,
+          send: () => widget.repository.report(
+            targetKind: 'post',
+            targetId: widget.post.id,
+            reason: reportDraft!.reason,
+          ),
         );
         _detailOwnerScope.check();
-        if (mounted && _detailOwnerIsCurrent) {
+        if (mounted && _detailOwnerIsCurrent && created) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(

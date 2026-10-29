@@ -106,6 +106,7 @@ async function handleRequest(
   services: RuntimeServices = productionServices,
 ): Promise<Response> {
   const url = new URL(request.url);
+  // Await delegated deliveries so rejected storage promises reach this boundary.
   try {
     if (request.method === "OPTIONS") {
       return preflight(request, env);
@@ -119,7 +120,7 @@ async function handleRequest(
     if (sourceInformation !== null) return sourceInformation;
     const publicManifest = resolvePublicManifest(url.pathname, env);
     if (publicManifest !== null) {
-      return serveR2(
+      return await serveR2(
         request,
         env.WORKOUTS,
         publicManifest,
@@ -129,7 +130,7 @@ async function handleRequest(
     }
     const recipeImage = resolveRecipeImage(url.pathname);
     if (recipeImage !== null) {
-      return servePublicRecipeMedia(
+      return await servePublicRecipeMedia(
         request,
         env,
         ctx,
@@ -138,7 +139,7 @@ async function handleRequest(
     }
     const recipeThumbnail = resolveRecipeThumbnail(url.pathname);
     if (recipeThumbnail !== null) {
-      return servePublicRecipeMedia(
+      return await servePublicRecipeMedia(
         request,
         env,
         ctx,
@@ -158,7 +159,7 @@ async function handleRequest(
       freePreviewVideoKeys.has(objectKey) ||
       freePreviewPosterKeys.has(objectKey)
     ) {
-      return serveR2(
+      return await serveR2(
         request,
         env.WORKOUTS,
         objectKey,
@@ -200,7 +201,7 @@ async function handleRequest(
         return jsonError("premium_entitlement_required", 403, request, env);
       }
     }
-    return serveR2(
+    return await serveR2(
       request,
       env.WORKOUTS,
       objectKey,

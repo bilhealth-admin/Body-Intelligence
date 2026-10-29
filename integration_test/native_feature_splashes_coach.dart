@@ -184,7 +184,7 @@ Future<GoRouter> _mountNativeCoach(
   // Follow the approved Overview default through the actual member action.
   // This does not override initial state, entitlement, consent or the model.
   expect(find.byKey(const Key('coach-reference-workspace')), findsOneWidget);
-  final openChat = find.byKey(const Key('coach-workspace-open-chat'));
+  final openChat = find.byKey(const Key('coach-workspace-tab-coach'));
   await tester.ensureVisible(openChat);
   await _nativeSettle(tester);
   await tester.tap(openChat);

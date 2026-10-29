@@ -75,6 +75,18 @@ jobs:
         shell: bash
         run: bash .github/scripts/bil_prepare_android_kvm.sh
 
+      - name: Verify offline emulator tooling and select explicit renderer
+        id: emulator-options
+        shell: bash
+        env:
+          BIL_ANDROID_API: ${{ matrix.api-level }}
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tool/release -p 'test_android_emulator_launch_options.py'
+          python3 -m unittest discover -s tool/release -p 'test_android_startup_workflow.py'
+          python3 -m unittest discover -s tool/release -p 'test_verify_android_startup_frame.py'
+          python3 tool/release/android_emulator_launch_options.py --api-level "$BIL_ANDROID_API" >> "$GITHUB_OUTPUT"
+
       - name: Record the hosted VM resource budget before emulator startup
         shell: bash
         run: |
@@ -84,6 +96,7 @@ jobs:
           {
             printf 'host_cpu_threads=%s\nemulator_cpu_cores=2\n' "$(nproc)"
             printf 'emulator_ram_override=%s\n' '${{ matrix.ram-size }}'
+            printf 'emulator_options=%s\n' '${{ steps.emulator-options.outputs.options }}'
             free -m
           } > "$evidence/host-resources.txt"
 
@@ -98,6 +111,7 @@ jobs:
           ram-size: ${{ matrix.ram-size }}
           disable-animations: true
           emulator-boot-timeout: 900
+          emulator-options: ${{ steps.emulator-options.outputs.options }}
           pre-emulator-launch-script: |
             adb kill-server || true
             adb start-server

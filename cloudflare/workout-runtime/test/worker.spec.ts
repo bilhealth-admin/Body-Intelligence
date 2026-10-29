@@ -4,9 +4,11 @@ import {
 } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import worker from "../src/index";
+import { recipeImageDeliveryPath, recipeImageObjectsForContract } from "../src/recipe-images";
+import { recipeThumbnailDeliveryPath, recipeThumbnailObjectsForContract } from "../src/recipe-thumbnails";
 import approvedObjects from "../../../artifacts/workout_media/cloudflare_runtime_v2/protected_object_keys_v2.json";
 import freePreviews from "../../../artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json";
 import { network } from "./network";
@@ -24,11 +26,48 @@ function incoming(path: string, init?: RequestInit): Request {
   return new Request(`https://workouts.bilhealth.com${path}`, init);
 }
 
-async function dispatch(request: Request): Promise<Response> {
+async function dispatch(request: Request, runtimeEnv: Env = env): Promise<Response> {
   const ctx = createExecutionContext();
-  const response = await worker.fetch(request, env, ctx);
+  const response = await worker.fetch(request, runtimeEnv, ctx);
   await waitOnExecutionContext(ctx);
   return response;
+}
+
+function withBucketGet(binding: "WORKOUTS" | "RECIPES", get: R2Bucket["get"]): Env {
+  return {
+    ...env,
+    [binding]: new Proxy(env[binding], {
+      get(target, property) {
+        if (property === "get") return get;
+        const value = Reflect.get(target, property, target);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    }),
+  };
+}
+
+async function expectContainedStorageError(
+  request: Request,
+  runtimeEnv: Env,
+): Promise<void> {
+  const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+  try {
+    const response = await dispatch(request, runtimeEnv);
+    expect(response.status).toBe(500);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("content-type")).toContain("application/json");
+    expect(await response.json()).toEqual({ error: "internal_error" });
+    expect(logged).toHaveBeenCalledTimes(1);
+    expect(logged).toHaveBeenCalledWith(JSON.stringify({
+      error: "TypeError",
+      message: "workout_runtime_request_failed",
+      path: new URL(request.url).pathname,
+      ray: "fixture-storage-ray",
+    }));
+    expect(JSON.stringify(logged.mock.calls)).not.toContain("private-storage-detail");
+  } finally {
+    logged.mockRestore();
+  }
 }
 
 function mockAuthenticated(premium = true): void {
@@ -78,6 +117,88 @@ function mockAuthenticated(premium = true): void {
 }
 
 describe("workout runtime Worker", () => {
+  for (const surface of ["manifest", "preview", "paid", "recipe-image", "recipe-thumbnail"] as const) {
+    it(`contains an asynchronous R2 get rejection on the ${surface} route`, async () => {
+      if (surface === "paid") mockAuthenticated();
+      const key = surface === "manifest"
+        ? `/v2/manifest/${env.PUBLIC_MANIFEST_KEY.split("/").at(-1)}`
+        : surface === "recipe-image"
+        ? recipeImageDeliveryPath(recipeImageObjectsForContract()[0]!)
+        : surface === "recipe-thumbnail"
+        ? recipeThumbnailDeliveryPath(recipeThumbnailObjectsForContract()[0]!)
+        : `/v2/objects/${surface === "paid" ? paidVideoKey : freePreviewKey}`;
+      const get = vi.fn<R2Bucket["get"]>().mockRejectedValue(
+        new TypeError("private-storage-detail: get unavailable"),
+      );
+      await expectContainedStorageError(
+        incoming(key, {
+          method: "HEAD",
+          headers: {
+            "cf-ray": "fixture-storage-ray",
+            ...(surface === "paid" ? { authorization: `Bearer ${hs256Token}` } : {}),
+          },
+        }),
+        withBucketGet(surface.startsWith("recipe-") ? "RECIPES" : "WORKOUTS", get),
+      );
+      expect(get).toHaveBeenCalledTimes(1);
+    });
+  }
+
+  for (const paid of [false, true]) {
+    it(`contains an asynchronous HEAD stream cancellation rejection, paid=${paid}`, async () => {
+      if (paid) mockAuthenticated();
+      const key = paid ? paidVideoKey : freePreviewKey;
+      await env.WORKOUTS.put(key, "0123456789", {
+        httpMetadata: { contentType: "video/mp4" },
+      });
+      const object = await env.WORKOUTS.get(key);
+      if (object === null) throw new Error("Missing local R2 fixture");
+      await object.body.cancel();
+      const cancel = vi.fn().mockRejectedValue(
+        new TypeError("private-storage-detail: cancellation unavailable"),
+      );
+      const body = new ReadableStream<Uint8Array>({ cancel });
+      const failingObject = new Proxy(object, {
+        get(target, property) {
+          if (property === "body") return body;
+          const value = Reflect.get(target, property, target);
+          return typeof value === "function" ? value.bind(target) : value;
+        },
+      });
+      const get = vi.fn<R2Bucket["get"]>().mockResolvedValue(failingObject);
+      await expectContainedStorageError(
+        incoming(`/v2/objects/${key}`, {
+          method: "HEAD",
+          headers: {
+            "cf-ray": "fixture-storage-ray",
+            ...(paid ? { authorization: `Bearer ${hs256Token}` } : {}),
+          },
+        }),
+        withBucketGet("WORKOUTS", get),
+      );
+      expect(get).toHaveBeenCalledTimes(1);
+      expect(cancel).toHaveBeenCalledTimes(1);
+    });
+  }
+
+  for (const authenticated of [false, true]) {
+    it(`does not reach R2 when paid access is denied, authenticated=${authenticated}`, async () => {
+      if (authenticated) mockAuthenticated(false);
+      const get = vi.fn<R2Bucket["get"]>().mockRejectedValue(
+        new TypeError("private-storage-detail: must not be reached"),
+      );
+      const response = await dispatch(
+        incoming(`/v2/objects/${paidVideoKey}`, {
+          method: "HEAD",
+          ...(authenticated ? { headers: { authorization: `Bearer ${hs256Token}` } } : {}),
+        }),
+        withBucketGet("WORKOUTS", get),
+      );
+      expect(response.status).toBe(authenticated ? 403 : 401);
+      expect(get).not.toHaveBeenCalled();
+    });
+  }
+
   it("serves only the exact public SHA-pinned manifest without authentication", async () => {
     const payload = '{"schema_version":2}\n';
     await env.WORKOUTS.put(env.PUBLIC_MANIFEST_KEY, payload, {

@@ -26,6 +26,88 @@ from verify_android_startup_frame import (
     wait_for_boot_broadcast_idle,
     window_check_exit_code,
 )
+import verify_android_startup_frame as startup
+
+
+class BoundedFailureDiagnosticsTest(unittest.TestCase):
+    def test_diagnostic_mode_cannot_bypass_a_startup_or_window_acceptance_check(self):
+        for arguments in (
+            ['--capture-failure-diagnostics', 'unused', '--verify-emulator-before-launch', 'unused'],
+            ['--capture-failure-diagnostics', 'unused', '--window-health-only'],
+            ['--capture-failure-diagnostics', 'unused', '--require-app-focus'],
+            ['--capture-failure-diagnostics', 'unused', 'screen.png', 'tree.xml'],
+        ):
+            with self.subTest(arguments=arguments), \
+                    patch.object(startup.subprocess, 'run') as command, \
+                    contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as error:
+                    startup.main(arguments)
+                self.assertEqual(error.exception.code, 2)
+                command.assert_not_called()
+
+    def test_diagnostic_only_cli_never_claims_readiness_even_when_adb_is_unavailable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(startup.subprocess, 'run', side_effect=OSError('adb unavailable')):
+                with contextlib.redirect_stdout(io.StringIO()) as output:
+                    result = startup.main(['--capture-failure-diagnostics', directory])
+            receipt = json.loads((Path(directory) / 'failure-diagnostics.json').read_text())
+            self.assertEqual(result, 0, 'A diagnostic command is separate from the original ANR exit')
+            self.assertIn('diagnostics_only=true; app_startup_proven=false', output.getvalue())
+            self.assertNotIn('accessible_interactive_app_content=true', output.getvalue())
+            self.assertTrue(all(row['status'] == 'COMMAND_ERROR' for row in receipt['commands']))
+
+    def test_read_only_commands_preserve_real_output_and_a_missing_anr_record(self):
+        seen = []
+
+        def adb(command, **options):
+            seen.append(command)
+            self.assertEqual(options['timeout'], 8)
+            self.assertFalse(options['check'])
+            options['stdout'].write(b'<no ANR has occurred since boot>\n' if
+                                    command[-1] == 'lastanr' else b'read-only diagnostic fixture\n')
+            return subprocess.CompletedProcess(command, 0)
+
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            with patch.object(startup.subprocess, 'run', side_effect=adb):
+                startup.capture_failure_diagnostics(evidence)
+                startup.capture_failure_diagnostics(evidence)
+            receipt = json.loads((evidence / 'failure-diagnostics.json').read_text())
+            self.assertFalse(receipt['app_startup_proven'])
+            self.assertEqual(len(seen), 5, 'The prelaunch guard and EXIT trap must not repeat capture')
+            self.assertEqual(seen, [
+                ['adb', 'shell', 'dumpsys', 'activity', 'lastanr'],
+                ['adb', 'shell', 'dumpsys', 'dropbox', '--print', 'system_app_anr'],
+                ['adb', 'logcat', '-b', 'events', '-d', '-t', '500'],
+                ['adb', 'shell', 'dumpsys', 'cpuinfo'],
+                ['adb', 'shell', 'ps', '-A', '-T', '-o', 'PID,TID,NAME'],
+            ])
+            self.assertIn('<no ANR', (evidence / 'failure-diagnostic-last-anr.txt').read_text())
+            self.assertTrue(all(row['status'] == 'CAPTURED' for row in receipt['commands']))
+
+    def test_timeout_permission_failure_and_output_limit_are_evidence_not_startup_success(self):
+        def adb(command, **options):
+            if command[-1] == 'lastanr':
+                raise subprocess.TimeoutExpired(command, 8)
+            if command[-1] == 'system_app_anr':
+                options['stderr'].write(b'Permission denied\n')
+                return subprocess.CompletedProcess(command, 1)
+            options['stdout'].write(b'x' * (512 * 1024 + 17))
+            return subprocess.CompletedProcess(command, 0)
+
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory)
+            with patch.object(startup.subprocess, 'run', side_effect=adb):
+                startup.capture_failure_diagnostics(evidence)
+            receipt = json.loads((evidence / 'failure-diagnostics.json').read_text())
+            self.assertFalse(receipt['app_startup_proven'])
+            self.assertEqual(receipt['commands'][0]['status'], 'TIMEOUT')
+            self.assertEqual(receipt['commands'][1]['status'], 'NONZERO_EXIT')
+            self.assertIn('Permission denied',
+                          (evidence / 'failure-diagnostic-system-app-anr.txt.errors.txt').read_text())
+            for row in receipt['commands'][2:]:
+                self.assertTrue(row['stdout_truncated'])
+                self.assertEqual((evidence / row['file']).stat().st_size, 512 * 1024)
 
 
 def _chunk(kind: bytes, payload: bytes) -> bytes:
@@ -305,6 +387,15 @@ class VerifyAndroidWindowFocusTest(unittest.TestCase):
                         "mCurrentFocus=Window{abc u0 Application Not Responding: "
                         "com.android.systemui}\n", "",
                     )
+                if command in (
+                    ["adb", "shell", "dumpsys", "activity", "lastanr"],
+                    ["adb", "shell", "dumpsys", "dropbox", "--print", "system_app_anr"],
+                    ["adb", "logcat", "-b", "events", "-d", "-t", "500"],
+                    ["adb", "shell", "dumpsys", "cpuinfo"],
+                    ["adb", "shell", "ps", "-A", "-T", "-o", "PID,TID,NAME"],
+                ):
+                    options['stdout'].write(b'read-only failure detail\n')
+                    return subprocess.CompletedProcess(command, 0)
                 if command == ["adb", "exec-out", "screencap", "-p"]:
                     return subprocess.CompletedProcess(command, 0, picture, b"")
                 if command[1:3] == ["logcat", "-d"]:
@@ -337,7 +428,10 @@ class VerifyAndroidWindowFocusTest(unittest.TestCase):
             self.assertEqual(idle["status"], "IDLE")
             self.assertFalse(idle["app_startup_proven"])
             self.assertEqual(operations[0][-1], "wait-for-broadcast-idle")
-            self.assertEqual(len(operations), 7)
+            self.assertEqual(len(operations), 12)
+            self.assertFalse(any(operation[1] in ('install', 'root', 'reboot')
+                                 or 'start' in operation or 'kill' in operation
+                                 for operation in operations))
 
     def test_missing_system_ui_process_cannot_pass_prelaunch_health(self) -> None:
         def adb_read(command, **options):

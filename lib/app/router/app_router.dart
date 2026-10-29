@@ -605,7 +605,7 @@ class AppRouter {
               state: state,
               child: PremiumRouteGlassGate(
                 feature: PremiumGateFeature.aiCoach,
-                child: IntelligenceCenterPage(
+                child: CoachRepositoryVisitBoundary(
                   startWithVisionCapture:
                       state.uri.queryParameters['vision'] == 'capture',
                   initialBarcode: state.uri.queryParameters['barcode'],

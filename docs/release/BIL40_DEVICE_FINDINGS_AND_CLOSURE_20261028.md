@@ -4,6 +4,14 @@ Snapshot started 28 October 2026; physical follow-up continued 29 October local
 time. This is a source-change and evidence register, not a
 release approval. Physical39 and source40 results are deliberately separate.
 
+Latest assembled-source checkpoint: HEAD
+`0515b294c2836a7922258a94cf90b9b3c4a95062` plus uncommitted follow-up repairs.
+The later sections below add D39-019 through D39-022, requested blue selections,
+the recovered exact0515 CI receipts and the separate phone-recovery window.
+They supersede earlier incomplete checkpoints only for their stated cases.
+There is still no final committed40 SHA, all-green final CI, signed40 artifact,
+physical40 acceptance or completed TestFlight40 upload in this register.
+
 - Physical39 foundation: `69ebb89279f11a8da5ee8e631016a88f3d24333d`, version
   `1.0.0 (39)`, the correctly identified BIL app on the connected iPhone.
 - Candidate40 branch: `codex/bil40-device-fixes-20261028`, based on that foundation.
@@ -79,6 +87,10 @@ regression proof. It never converts a failed39 phone case into a passed40 case.
 | D39-016 / approved component | Segmented waiting glyph initially looked like an older loader. | Existing `BilFeatureWelcomeStatus` is the approved feature-Splash waiting component, documented in `docs/qa_next/BIL39_PURCHASE_WAITING_UI_20261026.md`. | Reviewed the approved component and purchase-waiting document; protected checkout source blobs remain unchanged. | Closed as already approved, not an app defect. No unauthorized replacement of the protected purchase CTA. |
 | D39-017 / medium | Restore → native Apple password sheet → Cancel twice returned “No restorable purchases were found for this account.” Evidence: screenshots 365–368. Retry opened authentication again, so no permanently disabled restore button was established. | `verified_store_purchase_restore.dart` and `verified_store_purchase_processing.dart`: recognized cancellation becomes `restore_cancelled`; iOS void sync with no receipt callback becomes `restore_unconfirmed`, because absence of callbacks cannot prove empty history. Pending receipts stay unknown. Plans page and 25-locale store copy expose neutral outcomes. Existing canonical paid access and prior verification/ownership/finish blockers remain authoritative. | `store_transaction_queue_test.dart`: real adapter/service silent iOS restore, exact native cancellation, stream cancellation, pending receipt, prior-blocker combinations, and active-access/ownership regression. `plans_restore_neutral_outcomes_test.dart`: actual Restore tap, neutral footer/snackbar, enabled retry, no purchase/benefit invocation, late result cannot clear ownership conflict. Copy tests distinguish all 25 locales and terminal states. | Source fix verified locally; final full-suite and analyzer result after the last refinement still required. Physical40 native Cancel/retry/empty-history distinction pending. |
 | D39-018 / high | Exact read-only Markdown request opened plan revision on physical39 before Gemini; no provider request for that turn. The later write occurred only after explicit test confirmation. Screenshots 433–434 and 446, plus read-only usage readback. | Explicit restriction boundary in intent classification, legacy Smart Plan fallback, deterministic parser, local-model action admission and query orchestration. Scoped positive contrasts and literal note bodies are preserved. See detailed disposition below. | Four pre-fix actual assertions failed; final 492/492 affected outcomes and targeted analyzer passed, including seven direct boundary tests and the unchanged architecture guard. | Source40 repair verified locally. Repaired physical40 behavior and exact-SHA CI remain pending; no backend deployment or confirmation bypass. |
+| D39-019 / medium | Same-process bounded idle windows measured approximately 40.47493% of one CPU core for a focused unsent Coach draft, versus 0.28636% unfocused and 0.02514% on Overview. This is a real physical39 performance finding, with a keyboard-geometry caveat. | Existing Coach composer sets `cursorOpacityAnimates: false`; caret, focus, selection, draft, status messages and request behavior remain. Removes a locally demonstrated continuous opacity ticker; does not claim to diagnose Metal backpressure. | `coach_page_caret_idle_cases.dart`: EN/AR each fail before at 124/125 pending-frame slots and pass after at 0/125, while retaining visible caret phases and zero model calls. 99/99 related page/native-presentation cases passed; later combined owner/caret validation passed 263/263. | Source mitigation verified locally. Physical39 finding stays FAILED; signed40 CPU/keyboard comparison remains pending. Frame-slot counts are not native CPU or FPS measurements. |
+| D39-020 / high | Frames543–555 showed repeated account-changed redaction in the test conversation while other account UI remained available. The general message-visit guard is the matching rendering path. Exact event-time cause of543 is unknown. | `intelligence_repository_visit.dart`, page and router retire old callbacks and create a fresh verified visit for legitimate same-owner database replacement, reload the same SQLite history and preserve draft/Overview selection. Foreign/null/error auth transitions remain latched closed, including A → B → A. | Actual same-owner SQLite reopen reproduction failed before. Seven adversarial owner cases, a strengthened same-file history/pending-turn control, scoped analysis and the 263/263 combined run pass. | Reproduced source defect repaired; this is not proof that DB replacement caused frame543. Physical39 redaction stays FAILED; repaired installed40 verification pending. No old action witness is revived. |
+| D39-021 / medium | Physical39 frame594 said report sent, but bounded server readback found only the pre-existing open report and no new QA note. The live duplicate guard returns no inserted row for an already-open report. | `CommunityRepository.report` requires the inserted ID receipt. Empty receipt becomes a typed duplicate acknowledgement; seven existing report entry points explain that the earlier report is pending and the new note was not added. Created feedback requires a real receipt; permission, transport and malformed-receipt errors still fail. | Real Supabase SDK HTTP fixtures and actual EN/AR report UI: five receipt regressions and two duplicate-feedback regressions failed before; final 144/144 affected outcomes and 14-file analysis passed. Existing owner/visit guards and live read-own RLS were retained. | Source40 feedback fix verified locally; historical39 success toast is not evidence that the note was stored. Physical40 submit/duplicate/readback pending. No existing report, RLS or cloud policy was changed. |
+| D39-022 / medium | Owner reported the Overview Premium badge disappearing/reappearing. Separate recovery frames show the badge at a point in time, not a continuous flicker trace. Two actual-provider/UI regressions reproduced quota-loading removal and subscription-error relabeling. | `coach_overview_paid_label_provider.dart` retains only an already verified, same-owner, unexpired tier for header presentation. Exact expiry, verified downgrade, sign-out and owner retirement clear it. Credit/data/action providers and real Personal plan gates are unchanged. | Both regressions failed before; final 13/13 provider/UI cases passed, including error, expiry, zero quota, downgrade, sign-out, delayed and no-render A → B → A, and no hidden polling. Four EN/AR Light/Dark header comparisons are pixel-identical during refresh; scoped analysis clean. | Source40 presentation fix verified locally. Timeout/error continuity can last only for the residual verified lease; it is not fresh online verification or a grant of paid access. Physical40 confirmation pending. |
 
 ### D39-018: a read-only answer request incorrectly opened plan revision
 
@@ -521,3 +533,151 @@ replaced BIL (frame538). No input was sent to that keypad. Focused/unfocused
 chat-draft measurements and restoration of the original Training ON selection
 remain incomplete at this checkpoint. Signing/build40 remains held pending the
 owner-required reachable phone follow-up; final source CI remains independent.
+
+## Later physical39 and locally repaired40 checkpoint
+
+The earlier incomplete idle/Training paragraph is a historical checkpoint.
+The later bounded measurements in
+`coach-three-idle-windows-pid6667-summary.json` completed the comparison and
+found D39-019; this was not a performance PASS. Training was restored ON in
+frame554 and remained ON after leaving/returning in557; Sleep/habits stayed
+OFF. The unsent test draft was cleared without sending in550. Original
+captures and consent distinctions remain private.
+
+Source repair evidence under the local `bil40-20261028` evidence directory:
+
+| Scope | Files / proof | Actual result and limit |
+| --- | --- | --- |
+| D39-019 focused draft workload | `coach-caret-focus-mitigation-review.md`, `coach-caret-focused-before-stable.txt`, `coach-caret-focused-after.txt`, `coach-caret-affected-page-and-native.txt`; production `intelligence_reference_chat_body.dart`, test part `coach_page_caret_idle_cases.dart` | 2 actual frame-budget failures before; 2 passes after; 99 related passes. The iOS caret changes from opacity fading to timed on/off blinking. No SDK or engine upgrade. Physical40 performance remains unmeasured. |
+| D39-020 same-owner visit recovery | `coach-owner-redaction-screen543-source-audit.md`, `owner-visit-recovery-isolated-proof.json`, `owner-visit-recovery-final-adversarial.txt`, `owner-visit-recovery-history-control.txt`; production `intelligence_repository_visit.dart`, `intelligence_center_page.dart`, `app_router.dart` | Real database/repository replacement reproduced redaction while mounted. Old scopes retire; a fresh same-owner visit restores real saved history and the pending user turn, retaining draft and rejecting the old late answer. Event-time543 cause remains unknown. |
+| Combined earlier owner/caret/tool integration | `merged-owner-ci-validation-proof.json`, `merged-owner-caret-native-affected.txt`, `merged-ci-tools-independent-review.json` | 263/263 affected Flutter outcomes; 341/341 Python QA plus 39 Android launch/startup/diagnostic outcomes; scoped analysis, format, YAML/Bash and diff checks passed. This checkpoint precedes later report/Premium/blue additions. Counts overlap isolated runs and must not be added as unique coverage. |
+| D39-021 real report receipt | `community-report-receipt-isolated-review.md`, `community-report-receipt-final-affected.txt`, `community-report-receipt-scoped-analyze-final.txt`; `community_report_receipt_repository_test.dart`, `community_report_receipt_ui_test.dart` | 144/144 affected outcomes, clean 14-file analysis, no baseline change. Duplicate acknowledgement covers all 25 locales and seven existing base-report callers. Local HTTP fixtures are separate from live RLS/readback evidence and physical40 feedback. |
+| D39-022 stable tier label | `premium-overview-flicker-isolated-proof.json`, `premium-overview-postfreeze-readonly-review.json`, `premium-overview-final13.txt`, `premium-overview-scoped-analyze-clean.txt`; `coach_overview_plan_label_refresh_test.dart` | 13/13 final outcomes; 4-file analysis clean; four actual rendered header before/refresh comparisons match exactly. All four readable locale/theme combinations inspected. Related existing commerce/workspace cases contributed 49 passes in a combined run whose new hide/reopen test initially had a localization fixture error; that fixture was corrected and all 13 new cases rerun successfully. The failed checkpoint is preserved, not renamed all-green. |
+
+The Premium label cache does not observe quota/subscription while Overview is
+hidden. Its live presentation cancels its expiry timer on disposal; a hidden
+31-second test adds no quota or subscription loader calls. The auth observer
+retires a previous accepted source future across owner boundaries. An error or
+timeout can retain a previously verified label until its exact residual paid
+period ends, while access checks continue independently. No subscription,
+credits, prices, receipt ownership or permissions were granted by this fix.
+
+## Owner-requested blue actions and selected tabs
+
+This is an explicitly requested visual change, not a newly claimed physical39
+functional failure. `CommunitySapphire` supplies the existing Explore action
+blue and its existing dark-mode counterpart. All six Coach actions, including
+the robot, use those tokens. The profile Friend/Follow controls share them;
+Add Friend has a transparent surface. Community profile Posts/Replies/Media/
+Likes and Moments/Reviews use a translucent blue selection with an underline
+instead of the silver selection. Actual selected-button semantics remain
+merged and enabled; callbacks and relationship/report ownership checks remain.
+
+The final nine-file isolated UI proof is `blue-ui-isolated-proof.json`, patch
+`blue-ui-isolated.patch`; `BLUE_UI_ISOLATED_REVIEW_20261029.md` records the
+scope. Four new selection cases failed before the repair. The related run
+passed 175 outcomes, followed by 8 final-source focused cases and clean nine-file
+analysis after mechanical lint cleanup. Real English/Arabic Light/Dark
+captures were inspected; no Golden baseline was weakened or replaced. The
+separate old seven-file blue patch is superseded. Root applied the later
+nine-file UI change alongside independent Premium/header and receipt hunks;
+final integrated validation is separate and pending at this documentation
+checkpoint. Installed40 visuals are not yet claimed.
+
+## Exact0515 CI: recovered host-suite proof and six failed gates
+
+The completed push runs belong to
+`0515b294c2836a7922258a94cf90b9b3c4a95062` on
+`codex/bil40-device-fixes-20261028`. They do not include later uncommitted
+repairs. `ci-0515-recovered-full-coverage.json` is a real recovered receipt:
+eight exact-run artifacts from run40783274576 were downloaded and digest
+verified, then checked against the unchanged0515 test inventory. All 1,480
+host Flutter files are represented exactly once: 11,232 successes, 0 failures,
+0 errors, 1 reviewed live-range skip, 0 missing/duplicate files. These counts
+were recovered without rerunning Flutter. This proves that host-suite result;
+it does not convert the failed verify workflow into a success or certify the
+later source.
+
+`ci-0515b294-final-failure-triage.md` preserves the six real gate failures:
+
+| Workflow / run | Proven failed boundary | Repair / remaining evidence |
+| --- | --- | --- |
+| verify /40783274576 | Final whole-file artifact collector accepts only the old BIL39 branch, despite successful constituent tests. | Collector now requires one explicitly allowlisted branch and retains exact run/SHA/event/workflow/digest/ZIP controls. Real eight-shard recovery passed; final workflow execution on the new SHA is still required. |
+| CodeQL extended /40783274512 | Android API33 native fixture seeks the deleted separate Open Chat row. | Two shared native fixture locators now target the existing Coach robot action; assertions, readiness and consent remain. Native final-SHA execution pending. |
+| iPhone native /40783274557 | Same obsolete fixture locator; actual native compilation and execution occurred. | Same locator repair. The historical native test failure is not a signing/compiler failure and is not relabeled passed. |
+| iPad native /40783274659 | Same obsolete fixture locator. | Independent iPad workflow remains required; no combined iPhone/iPad rerun or borrowed result. |
+| Android startup /40783274553 | API36 System UI ANR before BIL install/launch. APIs26/29/33/34/35 succeeded. | API36 alone uses the current software-renderer option; five bounded read-only ANR diagnostics added. No retry, dismissed dialog, relaxed blank/ANR guard, SDK upgrade or asserted causal cure. Actual API36 final-SHA check pending. |
+| Video delivery /40783274517 | Release-pinned public HEAD returned HTTP500 before range GET. | Later bounded read-only requests returned HEAD200 and GET206/32 bytes; this does not erase the500. Historical provider exception is unproven. The separate Worker async-boundary fix has local regression proof but no deployment or final live-delivery acceptance here. |
+
+The other four workflows succeeded within their scopes: isolated Coach cloud
+source, supplementary security fixtures, native Coach presentation and Crystal
+focused. Neither they nor the 11,232 host passes establish live Gemini service
+health, native purchase/HealthKit success or final40 approval.
+
+`ci-tools-isolated-proof.json` records the eleven-file tool repair and
+`merged-owner-ci-validation-proof.json` records its earlier combined local
+validation. Branch strictness is preserved; API36 diagnostic queries are
+bounded to 8 seconds each and 512 KiB saved per stream, with truncation recorded.
+`worker-async-rejection-isolated-proof.json` and its review record 77/77
+isolated Worker outcomes, clean TypeScript and existing checks. Awaiting
+delegated responses puts asynchronous storage/cancel errors inside the real
+error boundary; it neither identifies nor fixes the underlying historical
+public HEAD500 cause. This Worker change is prepared locally, not deployed.
+
+## Separate Windows/iPhone recovery window and signing source audit
+
+The recovery subset `resume-20261029-c-recovery-608-612` is distinct from the
+earlier G-drive operator window. Its helper identifies SDK11.43.1 and the
+copied bytecode is Python3.15; original G metadata identifies SDK11.44.0 and
+the prior Python3.14 window. Eight recovery files were copied without
+overwriting the originals, with all source-before/destination/source-after
+SHA256 values equal. `copy-proof.json`, `ledger-checkpoint.md` and
+`reviewed-event-chain-v2-raw-iso.json` preserve that chain. No credentials or
+raw account data belong in this repository.
+
+Frame609 shows Coach entry waiting,610 settled Overview,611 the revealed My
+Plan tab and612 the actual saved active one-week plan. Spacing between these
+captures is not app response time; the earlier runtime reset and unavailable
+G drive break continuity. These images prove this bounded recovered route,
+not a new purchase, a fresh entitlement server read, absence of transient
+badge flicker, or completion of later meal/device tests. Those remain owned
+by the ongoing physical follow-up rather than this source audit.
+
+The read-only signing audit inspected `bil40_internal_testflight.yml`,
+`bil40_internal_build_ci.py`, `bil40_internal_signing_manifest.py`, release
+configuration validation and final artifact identity handling. No new
+hardcoded39-only source gate, wrong40 output path or inconsistent build number
+was identified in this bounded review. Older39 filenames/job labels describe
+reused exact-source simulator QA. The40 signing workflow intentionally runs
+on `codex/bil40-internal-testflight-20261028` at the same immutable SHA whose
+completed push runs must pass on `codex/bil40-device-fixes-20261028`; they are
+different branch roles, not permission to use a different SHA.
+
+Build40, bundle/version, original IPA digest, signing/permission inventory,
+generated exact-source acceptance receipt, Apple processing and expected
+internal groups remain required. The cloud-source SHA variable needs fresh
+operator evidence of deployed-source comparison at the final committed SHA;
+the variable alone cannot prove runtime health. This review did not execute
+signing, inspect current secret availability, set that variable, dispatch CI,
+publish cloud code, upload to TestFlight or submit App Store review.
+
+## Latest merged local verification checkpoint
+
+The assembled working candidate at HEAD
+`0515b294c2836a7922258a94cf90b9b3c4a95062` plus the documented source repairs
+completed one combined targeted command: **421/421 passed across 16 distinct
+test files**, exit 0. This covers the blue UI, report receipts, Premium label,
+Coach lifecycle/owner/caret and native-chat presentation paths with overlapping
+test files deduplicated. All 34 changed Dart files passed `analyze --fatal-infos`
+with no issues; formatting reported 34 files and zero changes; diff checks passed.
+
+The 45 source hashes match before/after that run. Earlier non-blue repairs remain
+preserved, including all prior lines in the two overlapping Premium files.
+All 20 focused blue UI renders match the already reviewed images by SHA256;
+no Golden baseline was replaced. Evidence identifiers:
+`blue-shared-merge-snapshot/merged-blue-report-premium-validation-proof.json`,
+`combined-targeted-tests.txt`, and `all-changed-dart-analyze.txt`.
+
+This supersedes the earlier pending integrated-local checkpoint only for those
+stated checks. Final committed-SHA CI, signed40, physical40 acceptance and
+TestFlight40 upload are still separate and are not claimed by this result.

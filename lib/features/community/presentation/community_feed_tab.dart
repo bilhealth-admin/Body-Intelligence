@@ -389,13 +389,18 @@ class _FeedTabState extends State<_FeedTab>
     }
     setState(() => _managingPost = true);
     var refreshFeed = false;
+    var reportCreated = false;
     try {
       await visit.run(() async {
         if (action == 'report') {
-          await repository.report(
-            targetKind: 'post',
-            targetId: post.id,
-            reason: reportDraft!.reason,
+          reportCreated = await submitCommunityReportWithReceipt(
+            context: context,
+            checkOwner: visit.check,
+            send: () => repository.report(
+              targetKind: 'post',
+              targetId: post.id,
+              reason: reportDraft!.reason,
+            ),
           );
         } else if (action == 'delete') {
           await repository.deletePost(post.id);
@@ -417,6 +422,7 @@ class _FeedTabState extends State<_FeedTab>
           _feed = refreshedFeed;
         });
       }
+      if (action == 'report' && !reportCreated) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(switch (action) {

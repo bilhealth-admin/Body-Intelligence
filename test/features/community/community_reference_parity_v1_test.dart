@@ -37,12 +37,16 @@ class _ReferenceParityRepository extends CommunityRepository {
   int unfollowCalls = 0;
   int viewCalls = 0;
   final reports = <(String, String, String)>[];
+  bool alreadyReported = false;
   @override
   Future<void> report({
     required String targetKind,
     required String targetId,
     required String reason,
-  }) async => reports.add((targetKind, targetId, reason));
+  }) async {
+    reports.add((targetKind, targetId, reason));
+    if (alreadyReported) throw const CommunityReportAlreadyPending();
+  }
 
   @override
   bool get useServerCommunityReferenceParity => true;
@@ -205,6 +209,64 @@ class _ReferenceParityRepository extends CommunityRepository {
 }
 
 void main() {
+  for (final arabic in [false, true]) {
+    testWidgets(
+      'duplicate member report explains the new note was not added arabic=$arabic',
+      (tester) async {
+        final repository = _ReferenceParityRepository()..alreadyReported = true;
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: Locale(arabic ? 'ar' : 'en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: CommunityMemberProfilePage(
+              userId: _creatorId,
+              repository: repository,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('community-member-safety')));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.text(arabic ? 'الإبلاغ عن العضو' : 'Report member'),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('community-report-reason-tap-other')),
+        );
+        await tester.enterText(
+          find.byKey(const Key('community-report-note')),
+          'A new note for the existing report',
+        );
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pumpAndSettle();
+        final send = find.byKey(const Key('community-report-submit'));
+        await tester.ensureVisible(send);
+        await tester.tap(send);
+        await tester.pumpAndSettle();
+        expect(repository.reports, [
+          ('profile', _creatorId, 'other: A new note for the existing report'),
+        ]);
+        expect(
+          find.text(
+            arabic
+                ? 'سبق أن أبلغت عن هذا العنصر. لم تُضف ملاحظتك الجديدة.'
+                : 'You already reported this item. Your new note was not added.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('Report sent for review.'), findsNothing);
+        expect(find.text('تم إرسال البلاغ للمراجعة.'), findsNothing);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
   testWidgets(
     'member profile has an explicit report bound to profile rather than its posts',
     (tester) async {

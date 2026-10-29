@@ -49,6 +49,7 @@ part 'support/coach_page_voice_cases.dart';
 part 'support/coach_page_request_cases.dart';
 part 'support/coach_page_scroll_cases.dart';
 part 'support/coach_page_restart_cases.dart';
+part 'support/coach_page_caret_idle_cases.dart';
 
 class _HeldGateway implements LocalModelGateway {
   final replies = <Completer<LocalModelResult>>[];
@@ -98,6 +99,7 @@ Future<GoRouter> _mount(
   WidgetTester tester, {
   required AppDatabase database,
   required _HeldGateway gateway,
+  AppDatabase Function()? databaseLoader,
   bool gate = false,
   Future<Object?> Function()? usageLoader,
   PreferencesRepository? preferences,
@@ -158,9 +160,9 @@ Future<GoRouter> _mount(
         builder: (_, _) => gate
             ? const PremiumRouteGlassGate(
                 feature: PremiumGateFeature.aiCoach,
-                child: IntelligenceCenterPage(),
+                child: CoachRepositoryVisitBoundary(),
               )
-            : const IntelligenceCenterPage(),
+            : const CoachRepositoryVisitBoundary(),
       ),
       GoRoute(
         path: '/dashboard',
@@ -200,7 +202,10 @@ Future<GoRouter> _mount(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        databaseProvider.overrideWithValue(database),
+        if (databaseLoader == null)
+          databaseProvider.overrideWithValue(database)
+        else
+          databaseProvider.overrideWith((ref) => databaseLoader()),
         if (messageOwnerWitness != null)
           coachNativeOwnerWitnessProvider.overrideWithValue(
             messageOwnerWitness,
@@ -420,6 +425,7 @@ void main() {
   registerCoachRequestCases();
   registerCoachScrollCases();
   registerCoachRestartCases();
+  registerCoachCaretIdleCases();
   testWidgets('Coach welcome brief stays anchored during a data refresh', (
     tester,
   ) async {

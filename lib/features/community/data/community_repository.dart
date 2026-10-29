@@ -43,6 +43,11 @@ part 'community_repository_circle_reports.dart';
 part 'community_repository_review_v2.dart';
 part 'community_repository_safety_review.dart';
 
+/// The server kept an existing active report and did not add the new note.
+class CommunityReportAlreadyPending implements Exception {
+  const CommunityReportAlreadyPending();
+}
+
 class CommunityRepository
     with
         CommunitySocialRepositoryMixin,
@@ -475,12 +480,23 @@ class CommunityRepository
       throw ArgumentError('Invalid Community report');
     }
     operation.check();
-    await _client.from('bil_community_reports').insert({
-      'reporter_id': operation.ownerId,
-      'target_kind': targetKind,
-      'target_id': targetId,
-      'reason': trimmed,
-    });
+    final rows = await _client
+        .from('bil_community_reports')
+        .insert({
+          'reporter_id': operation.ownerId,
+          'target_kind': targetKind,
+          'target_id': targetId,
+          'reason': trimmed,
+        })
+        .select('id');
     operation.check();
+    // The existing server guard returns NULL for an active duplicate. An HTTP
+    // success alone therefore does not mean the new report/note was stored.
+    if (rows.isEmpty) throw const CommunityReportAlreadyPending();
+    if (rows.length != 1 ||
+        rows.single['id'] is! String ||
+        !_uuid.hasMatch(rows.single['id'] as String)) {
+      throw const FormatException('Invalid Community report receipt');
+    }
   });
 }

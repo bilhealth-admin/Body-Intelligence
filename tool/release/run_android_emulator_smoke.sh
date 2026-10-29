@@ -15,6 +15,11 @@ capture_failure_evidence() {
     printf 'exit_status=%s\nstage=%s\n' "$exit_status" "$stage" \
       > "$evidence/failure.txt" || true
     timeout 15s adb devices -l >> "$evidence/failure.txt" 2>&1 || true
+    # Same bounded capture as the prelaunch guard; an existing receipt prevents
+    # duplicate ADB requests. Diagnostic failure never replaces the original exit.
+    timeout 45s python3 tool/release/verify_android_startup_frame.py \
+      --capture-failure-diagnostics "$evidence" \
+      > "$evidence/failure-diagnostics-command.txt" 2>&1 || true
     timeout 15s adb logcat -d -t 1500 \
       > "$evidence/failure-logcat.txt" 2>&1 || true
     if [[ ! -f "$evidence/startup.png" && ! -f "$evidence/failure-screen.png" ]]; then
@@ -32,8 +37,12 @@ capture_failure_evidence() {
       --window-state "$evidence/failure-window-state.txt" \
       > "$evidence/failure-window-check.txt" \
       2> "$evidence/failure-window-errors.txt" || true
-    timeout 15s adb shell dumpsys activity lastanr \
-      > "$evidence/failure-last-anr.txt" 2>&1 || true
+    if [[ -f "$evidence/failure-diagnostic-last-anr.txt" ]]; then
+      cp "$evidence/failure-diagnostic-last-anr.txt" "$evidence/failure-last-anr.txt" || true
+    else
+      timeout 15s adb shell dumpsys activity lastanr \
+        > "$evidence/failure-last-anr.txt" 2>&1 || true
+    fi
     timeout 15s adb logcat -b crash -d -t 1000 \
       > "$evidence/failure-crash-logcat.txt" 2>&1 || true
     timeout 15s adb shell uiautomator dump /sdcard/bil-failure-window.xml \

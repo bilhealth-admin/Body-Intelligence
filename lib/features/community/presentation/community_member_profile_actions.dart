@@ -21,14 +21,18 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
             guard: visit.guard,
           );
           visit.check();
-          if (draft == null) return;
-          await visit.repository.report(
-            targetKind: 'profile',
-            targetId: profile.userId,
-            reason: draft.reason,
+          if (draft == null || !mounted) return;
+          final created = await submitCommunityReportWithReceipt(
+            context: context,
+            checkOwner: visit.check,
+            send: () => visit.repository.report(
+              targetKind: 'profile',
+              targetId: profile.userId,
+              reason: draft.reason,
+            ),
           );
           visit.check();
-          if (mounted) {
+          if (mounted && created) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -405,11 +409,17 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
         visit.check();
         _setProfileState(() => _managingPost = true);
         try {
+          var reportCreated = false;
           if (action == 'report') {
-            await repository.report(
-              targetKind: 'post',
-              targetId: post.id,
-              reason: reportDraft!.reason,
+            if (!mounted) return;
+            reportCreated = await submitCommunityReportWithReceipt(
+              context: context,
+              checkOwner: visit.check,
+              send: () => repository.report(
+                targetKind: 'post',
+                targetId: post.id,
+                reason: reportDraft!.reason,
+              ),
             );
             visit.check();
           } else if (action == 'delete') {
@@ -425,7 +435,10 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
             visit.check();
             if (mounted && visit.isCurrent()) context.pop();
           }
-          if (mounted && visit.isCurrent() && action == 'report') {
+          if (mounted &&
+              visit.isCurrent() &&
+              action == 'report' &&
+              reportCreated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(

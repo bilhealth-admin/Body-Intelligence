@@ -2,8 +2,41 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/bil_modal_bottom_sheet.dart';
 import '../../../shared/widgets/bil_report_reason_option.dart';
+import '../data/community_repository.dart';
 import '../channels/presentation/community_channels_copy.dart';
 import 'community_copy.dart';
+import 'community_report_receipt_copy.dart';
+
+/// Returns true only for a newly stored report. A duplicate keeps the prior
+/// report and cannot claim that the new note was added. Owner/visit validation
+/// remains with the caller, including before any feedback is displayed.
+Future<bool> submitCommunityReportWithReceipt({
+  required BuildContext context,
+  required Future<void> Function() send,
+  required VoidCallback checkOwner,
+}) async {
+  try {
+    await send();
+    checkOwner();
+    return true;
+  } on CommunityReportAlreadyPending {
+    checkOwner();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              CommunityReportReceiptCopy.alreadyReported,
+              'سبق أن أبلغت عن هذا العنصر. لم تُضف ملاحظتك الجديدة.',
+            ),
+          ),
+        ),
+      );
+    }
+    return false;
+  }
+}
 
 enum CommunityReportTarget { post, comment, reply, profile, message, circle }
 

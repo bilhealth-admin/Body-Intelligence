@@ -180,6 +180,7 @@ part 'intelligence_query_decision.dart';
 part 'intelligence_action_flow.dart';
 part 'intelligence_meal_action_flow.dart';
 part 'intelligence_meal_owner.dart';
+part 'intelligence_repository_visit.dart';
 part 'intelligence_native_owner.dart';
 part 'intelligence_native_action_flow.dart';
 part 'intelligence_native_recovery.dart';
@@ -231,10 +232,21 @@ class IntelligenceCenterPage extends ConsumerStatefulWidget {
     super.key,
     this.startWithVisionCapture = false,
     this.initialBarcode,
+  }) : _restoredDraft = null,
+       _restoredOverview = null;
+
+  const IntelligenceCenterPage._restored(
+    this._restoredDraft,
+    this._restoredOverview, {
+    super.key,
+    required this.startWithVisionCapture,
+    required this.initialBarcode,
   });
 
   final bool startWithVisionCapture;
   final String? initialBarcode;
+  final TextEditingValue? _restoredDraft;
+  final bool? _restoredOverview;
 
   @override
   ConsumerState<IntelligenceCenterPage> createState() =>
@@ -340,13 +352,19 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void initState() {
     super.initState();
-    if (widget.startWithVisionCapture ||
+    if (widget._restoredDraft != null) {
+      question.value = widget._restoredDraft!;
+      _referenceOverview = widget._restoredOverview!;
+    } else if (widget.startWithVisionCapture ||
         (widget.initialBarcode?.trim().isNotEmpty ?? false)) {
       _referenceOverview = false;
     }
-    entryWelcomeTimer = Timer(bilFeatureEntryDuration, () {
-      if (mounted) setState(() => entryWelcomeVisible = false);
-    });
+    entryWelcomeVisible = widget._restoredDraft == null;
+    if (entryWelcomeVisible) {
+      entryWelcomeTimer = Timer(bilFeatureEntryDuration, () {
+        if (mounted) setState(() => entryWelcomeVisible = false);
+      });
+    }
     // Riverpod refs are unavailable from dispose. Retain the stable,
     // database-backed repositories while this element is active so the last
     // conversation snapshot can still be queued during teardown.
@@ -382,8 +400,12 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
       if (!mounted) return;
       unawaited(_resumeCoachFastingEffects());
       unawaited(_syncCoachMemory());
-      _applyInitialBarcode(widget.initialBarcode);
-      if (widget.startWithVisionCapture) await _analyzeFoodImageInChat();
+      // Repository recovery reloads history; it must not repeat the camera or
+      // barcode intent that originally opened this route.
+      if (widget._restoredDraft == null) {
+        _applyInitialBarcode(widget.initialBarcode);
+        if (widget.startWithVisionCapture) await _analyzeFoodImageInChat();
+      }
     });
   }
 

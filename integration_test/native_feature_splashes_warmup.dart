@@ -121,7 +121,7 @@ class _NativeEntryWarmupTrace {
     expect(_welcome(kind), findsNothing);
     if (kind == 'coach') {
       final overview = find.byKey(const Key('coach-reference-workspace'));
-      final openChat = find.byKey(const Key('coach-workspace-open-chat'));
+      final openChat = find.byKey(const Key('coach-workspace-tab-coach'));
       bool ready() =>
           overview.hitTestable().evaluate().length == 1 &&
           openChat.evaluate().length == 1 &&

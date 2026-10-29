@@ -333,6 +333,11 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                           if (profile.viewerFollows || profile.allowFollows)
                             OutlinedButton.icon(
                               key: const Key('community-profile-follow-action'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: scheme.primary,
+                                disabledForegroundColor: scheme.onSurface
+                                    .withValues(alpha: .38),
+                              ),
                               onPressed: followBusy || relationshipBusy
                                   ? null
                                   : () {
@@ -465,8 +470,18 @@ class _ProfileRelationshipAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) => switch (profile.relationship) {
     CommunityRelationshipStatus.none when profile.allowFriendRequests =>
-      FilledButton.icon(
+      TextButton.icon(
         key: const Key('community-profile-friend-action'),
+        style: TextButton.styleFrom(
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          disabledForegroundColor: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: .38),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          side: BorderSide.none,
+          minimumSize: const Size(48, 48),
+        ),
         onPressed: busy ? null : onRequestFriend,
         icon: busy
             ? const SizedBox.square(

@@ -103,10 +103,14 @@ class _CommunitySavedPostsPageState extends State<CommunitySavedPostsPage> {
             );
             CommunityOwnerOperation.checkCurrent();
             if (draft == null || !mounted) return;
-            await widget.repository.report(
-              targetKind: 'post',
-              targetId: post.id,
-              reason: draft.reason,
+            await submitCommunityReportWithReceipt(
+              context: context,
+              checkOwner: CommunityOwnerOperation.checkCurrent,
+              send: () => widget.repository.report(
+                targetKind: 'post',
+                targetId: post.id,
+                reason: draft.reason,
+              ),
             );
           },
           ownerId: owner,

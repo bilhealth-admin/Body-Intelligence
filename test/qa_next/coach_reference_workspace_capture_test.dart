@@ -16,6 +16,7 @@ import 'package:body_intelligence_log/features/intelligence_center/domain/coach_
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_message.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_sapphire.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_reference_bottom_bar.dart';
@@ -77,6 +78,7 @@ SubscriptionState _subscription(bool premium) => SubscriptionState(
   plan: premium ? CommercePlan.premiumAiCoach : CommercePlan.free,
   entitlements: premium ? {CommerceEntitlement.advancedIntelligence} : {},
   authority: EntitlementAuthority.verifiedServer,
+  currentPeriodEndsAt: _clock.add(const Duration(hours: 1)),
   isPurchasable: true,
   canRestorePurchases: true,
 );
@@ -144,6 +146,20 @@ Future<void> _mount(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(db),
+        // A paid presentation fixture carries the same owner and exact active
+        // period as its authority snapshot, rather than an unbounded label.
+        verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+          'overview-capture-owner',
+        ),
+        verifiedEntitlementOwnerProvider.overrideWith(
+          (_) => Stream.value('overview-capture-owner'),
+        ),
+        verifiedEntitlementClockProvider.overrideWithValue(
+          () => _clock.toUtc(),
+        ),
+        verifiedEntitlementLoaderProvider.overrideWithValue(
+          () async => _subscription(premium),
+        ),
         verifiedSubscriptionAccessProvider.overrideWithValue(
           AsyncData(_subscription(premium)),
         ),
@@ -230,6 +246,83 @@ void main() {
           '{"localeCode":"en","themeMode":"light","reduceMotion":true}',
     }),
   );
+
+  for (final language in ['en', 'ar']) {
+    for (final dark in [false, true]) {
+      testWidgets(
+        'all six Coach navigation actions use Explore blue $language dark=$dark',
+        (tester) async {
+          final semantics = tester.ensureSemantics();
+          try {
+            final db = AppDatabase.forTesting(NativeDatabase.memory());
+            addTearDown(db.close);
+            final key = GlobalKey();
+            var chats = 0;
+            var tools = 0;
+            final routes = <String>[];
+            await _mount(
+              tester,
+              CoachReferenceWorkspace(
+                snapshot: _snapshot,
+                now: _clock,
+                onChat: () => chats++,
+                onRoute: routes.add,
+                onTools: () => tools++,
+                onQuickAdd: () {},
+                onPhoto: () {},
+                onVoice: () {},
+              ),
+              db,
+              key,
+              language: language,
+              dark: dark,
+            );
+            await _capture(
+              tester,
+              key,
+              'coach_blue_navigation_${language}_${dark ? 'dark' : 'light'}_start',
+            );
+            final blue = dark
+                ? const Color(0xFF8BB4FF)
+                : CommunitySapphire.blue;
+            for (final route in [
+              'coach',
+              '/analytics',
+              '/plan',
+              '/history',
+              '/daily-log',
+              '/smart-plan',
+            ]) {
+              final action = find.byKey(Key('coach-workspace-tab-$route'));
+              await tester.ensureVisible(action);
+              await tester.pumpAndSettle();
+              final button = tester.widget<TextButton>(action);
+              expect(button.style!.foregroundColor!.resolve({}), blue);
+              expect(
+                tester.getSemantics(action).flagsCollection.isSelected,
+                route == 'coach' ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+              );
+              await tester.tap(action);
+              await tester.pumpAndSettle();
+            }
+            await _capture(
+              tester,
+              key,
+              'coach_blue_navigation_${language}_${dark ? 'dark' : 'light'}_end',
+            );
+            expect(chats, 1);
+            expect(tools, 1);
+            expect(routes, ['/analytics', '/plan', '/history', '/smart-plan']);
+            expect(tester.takeException(), isNull);
+            await tester.pumpWidget(const SizedBox.shrink());
+            await tester.pumpAndSettle();
+          } finally {
+            semantics.dispose();
+          }
+        },
+      );
+    }
+  }
 
   for (final dark in [false, true]) {
     for (final language in ['en', 'ar']) {

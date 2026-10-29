@@ -21,14 +21,18 @@ extension _CommunityChatSafety on _CommunityChatPageState {
             target: CommunityReportTarget.message,
           );
           _check(binding);
-          if (draft == null) return;
-          await _repository!.report(
-            targetKind: 'message',
-            targetId: message.id,
-            reason: draft.reason,
+          if (draft == null || !mounted) return;
+          final created = await submitCommunityReportWithReceipt(
+            context: context,
+            checkOwner: () => _check(binding),
+            send: () => _repository!.report(
+              targetKind: 'message',
+              targetId: message.id,
+              reason: draft.reason,
+            ),
           );
           _check(binding);
-          if (!mounted) return;
+          if (!mounted || !created) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(

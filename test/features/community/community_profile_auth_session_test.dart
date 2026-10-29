@@ -210,7 +210,7 @@ void main() {
         tester,
         action == 'follow'
             ? find.byKey(const Key('community-profile-follow-action'))
-            : find.widgetWithText(FilledButton, 'Add Friend'),
+            : find.byKey(const Key('community-profile-friend-action')),
       );
       expect(repository.count(action), 1);
       await _roundTrip(tester, auth);

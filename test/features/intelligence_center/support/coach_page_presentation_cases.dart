@@ -121,6 +121,269 @@ Future<void> _presentationTapVisible(WidgetTester tester, Finder target) async {
 
 void registerCoachPresentationPageCases() {
   testWidgets(
+    'same owner SQLite reopen restores readable history and draft while retiring old reply',
+    (tester) async {
+      final directory = (await tester.runAsync(
+        () => Directory.systemTemp.createTemp('bil-owner-visit-'),
+      ))!;
+      final file = File('${directory.path}/owner.sqlite');
+      final original = AppDatabase.forTesting(
+        NativeDatabase(file),
+        localOwnerId: presentationFixtureOwner,
+      );
+      final reopened = AppDatabase.forTesting(
+        NativeDatabase(file),
+        localOwnerId: presentationFixtureOwner,
+      );
+      var activeDatabase = original;
+      final gateway = _HeldGateway();
+      try {
+        await tester.runAsync(() async {
+          await PreferencesRepository(original).set(
+            'intelligenceConversationV1',
+            jsonEncode([
+              IntelligenceMessage(
+                id: 'saved-before-reopen',
+                role: IntelligenceMessageRole.bil,
+                kind: IntelligenceMessageKind.coach,
+                text: 'Saved same-owner history.',
+                createdAt: presentationFixtureClock,
+              ).toJson(),
+            ]),
+          );
+        });
+        await _mount(
+          tester,
+          database: original,
+          databaseLoader: () => activeDatabase,
+          gateway: gateway,
+          messageOwnerWitness: CoachNativeOwnerWitness(
+            readOwner: () => presentationFixtureOwner,
+            changes: const Stream.empty(),
+          ),
+        );
+        await _presentationPageReady(tester);
+        expect(find.text('Saved same-owner history.'), findsOneWidget);
+        await _send(tester, gateway, question: 'hi');
+        const draft = 'Keep this private unsent draft.';
+        await tester.enterText(
+          find.byKey(const Key('ai-coach-question-field')),
+          draft,
+        );
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(IntelligenceCenterPage)),
+        );
+        activeDatabase = reopened;
+        container.invalidate(databaseProvider);
+        await tester.pump();
+        await tester.pump();
+        await _presentationPageReady(tester);
+        expect(find.text('Saved same-owner history.'), findsOneWidget);
+        expect(find.text('hi'), findsOneWidget);
+        expect(
+          tester
+              .widget<TextField>(
+                find.byKey(const Key('ai-coach-question-field')),
+              )
+              .controller!
+              .text,
+          draft,
+        );
+        expect(
+          find.text('Your account changed. Return to Coach to continue.'),
+          findsNothing,
+        );
+        gateway.finish(text: 'Retired old request must not appear.');
+        await tester.pumpAndSettle();
+        expect(find.text('Retired old request must not appear.'), findsNothing);
+        expect(gateway.calls, 1);
+        final saved = await tester.runAsync(
+          () =>
+              PreferencesRepository(reopened).get('intelligenceConversationV1'),
+        );
+        expect(saved, isNot(contains('Retired old request must not appear.')));
+        expect(tester.takeException(), isNull);
+      } finally {
+        for (final reply in gateway.replies) {
+          if (!reply.isCompleted) {
+            reply.complete(
+              const LocalModelResult.answer(
+                LocalModelAnswer(text: 'Synthetic cleanup.', action: null),
+              ),
+            );
+          }
+        }
+        await _unmount(tester);
+        await tester.runAsync(() async {
+          await original.close();
+          await reopened.close();
+          final expectedPrefix =
+              '${Directory.systemTemp.absolute.path}${Platform.pathSeparator}bil-owner-visit-';
+          if (!directory.absolute.path.startsWith(expectedPrefix)) {
+            throw StateError(
+              'Refusing cleanup outside created fixture directory',
+            );
+          }
+          await directory.delete(recursive: true);
+        });
+      }
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
+
+  for (final withdrawal in [
+    'foreign auth roundtrip',
+    'auth stream error',
+    'foreign database',
+    'auth roundtrip after recovery scheduled',
+  ]) {
+    testWidgets(
+      'repository reopen never revives a withdrawn visit: $withdrawal',
+      (tester) async {
+        final original = await openMessagePresentationDatabase(tester);
+        final replacement = await openMessagePresentationDatabase(
+          tester,
+          localOwnerId: withdrawal == 'foreign database'
+              ? 'synthetic-other-owner'
+              : presentationFixtureOwner,
+        );
+        var activeDatabase = original;
+        var currentOwner = presentationFixtureOwner;
+        final events = StreamController<String?>.broadcast(sync: true);
+        try {
+          await tester.runAsync(() async {
+            for (final entry in [
+              (original, 'Original owner private message.'),
+              (replacement, 'Replacement database private message.'),
+            ]) {
+              await PreferencesRepository(entry.$1).set(
+                'intelligenceConversationV1',
+                jsonEncode([
+                  IntelligenceMessage(
+                    id: 'before-withdrawal',
+                    role: IntelligenceMessageRole.bil,
+                    kind: IntelligenceMessageKind.coach,
+                    text: entry.$2,
+                    createdAt: presentationFixtureClock,
+                  ).toJson(),
+                ]),
+              );
+            }
+          });
+          await _mount(
+            tester,
+            database: original,
+            databaseLoader: () => activeDatabase,
+            gateway: _HeldGateway(),
+            messageOwnerWitness: CoachNativeOwnerWitness(
+              readOwner: () => currentOwner,
+              changes: events.stream,
+            ),
+          );
+          await _presentationPageReady(tester);
+          final originalState = tester.state(
+            find.byType(IntelligenceCenterPage),
+          );
+          expect(find.text('Original owner private message.'), findsOneWidget);
+          void authRoundtrip() {
+            currentOwner = 'synthetic-other-owner';
+            events.add(currentOwner);
+            currentOwner = presentationFixtureOwner;
+            events.add(currentOwner);
+          }
+
+          if (withdrawal == 'foreign auth roundtrip') authRoundtrip();
+          if (withdrawal == 'auth stream error') {
+            events.addError(StateError('Synthetic auth witness unavailable'));
+          }
+          final container = ProviderScope.containerOf(
+            tester.element(find.byType(IntelligenceCenterPage)),
+          );
+          activeDatabase = replacement;
+          container.invalidate(databaseProvider);
+          container.read(databaseProvider);
+          if (withdrawal == 'auth roundtrip after recovery scheduled') {
+            await tester.pump();
+            authRoundtrip();
+          }
+          await tester.pump();
+          await tester.pump();
+          expect(
+            tester.state(find.byType(IntelligenceCenterPage)),
+            same(originalState),
+          );
+          expect(find.text('Original owner private message.'), findsNothing);
+          expect(
+            find.text('Replacement database private message.'),
+            findsNothing,
+          );
+          expect(
+            find.text('Your account changed. Return to Coach to continue.'),
+            findsWidgets,
+          );
+          expect(tester.takeException(), isNull);
+        } finally {
+          await _unmount(tester);
+          await events.close();
+          await tester.runAsync(() async {
+            await original.close();
+            await replacement.close();
+          });
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 60)),
+    );
+  }
+
+  testWidgets(
+    'same owner auth event preserves the existing readable visit',
+    (tester) async {
+      final database = await openMessagePresentationDatabase(tester);
+      final events = StreamController<String?>.broadcast(sync: true);
+      try {
+        await tester.runAsync(
+          () => PreferencesRepository(database).set(
+            'intelligenceConversationV1',
+            jsonEncode([
+              IntelligenceMessage(
+                id: 'same-owner-auth',
+                role: IntelligenceMessageRole.bil,
+                kind: IntelligenceMessageKind.coach,
+                text: 'Same owner remains readable.',
+                createdAt: presentationFixtureClock,
+              ).toJson(),
+            ]),
+          ),
+        );
+        await _mount(
+          tester,
+          database: database,
+          gateway: _HeldGateway(),
+          messageOwnerWitness: CoachNativeOwnerWitness(
+            readOwner: () => presentationFixtureOwner,
+            changes: events.stream,
+          ),
+        );
+        await _presentationPageReady(tester);
+        final originalState = tester.state(find.byType(IntelligenceCenterPage));
+        events.add(presentationFixtureOwner);
+        await tester.pump();
+        expect(
+          tester.state(find.byType(IntelligenceCenterPage)),
+          same(originalState),
+        );
+        expect(find.text('Same owner remains readable.'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await _unmount(tester);
+        await events.close();
+        await tester.runAsync(database.close);
+      }
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
+
+  testWidgets(
     'actual page meal read fold copy share and reopening preserve SQLite facts',
     (tester) async {
       final database = await openMessagePresentationDatabase(tester);

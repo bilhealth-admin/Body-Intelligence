@@ -1,5 +1,80 @@
 part of 'community_hub_page.dart';
 
+/// Profile navigation uses selection semantics, never a disabled button to
+/// represent the current tab. Its translucent Sapphire tint stays local to
+/// these selectors and leaves actual disabled actions unchanged.
+Widget _communityProfileSelectionTab({
+  required BuildContext context,
+  required Key tabKey,
+  required String label,
+  required bool selected,
+  required VoidCallback onPressed,
+}) {
+  final accent = CommunitySapphire.actionBlue(context);
+  final dark = Theme.of(context).brightness == Brightness.dark;
+  return MergeSemantics(
+    child: Semantics(
+      selected: selected,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: selected
+              ? LinearGradient(
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
+                  colors: [
+                    accent.withValues(alpha: dark ? .18 : .10),
+                    accent.withValues(alpha: dark ? .07 : .035),
+                  ],
+                )
+              : null,
+          border: Border.all(
+            color: selected
+                ? accent.withValues(alpha: dark ? .24 : .16)
+                : Colors.transparent,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: TextButton(
+          key: tabKey,
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            foregroundColor: accent,
+            backgroundColor: Colors.transparent,
+            overlayColor: accent.withValues(alpha: .08),
+            minimumSize: const Size(72, 48),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Container(
+                height: 2,
+                width: 24,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? accent.withValues(alpha: .72)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 extension _CommunityMemberProfileContentSlivers
     on _CommunityMemberProfilePageState {
   List<Widget> _profileContentSlivers(CommunityProfileOverview profile) {
@@ -13,39 +88,37 @@ extension _CommunityMemberProfileContentSlivers
         child: Row(
           children: [
             Expanded(
-              child: _contentTab == _CommunityProfileContentTab.moments
-                  ? FilledButton.tonal(
-                      key: const Key('community-profile-tab-moments'),
-                      onPressed: null,
-                      child: Text(communityText(context, 'Moments', 'اللحظات')),
-                    )
-                  : TextButton(
-                      key: const Key('community-profile-tab-moments'),
-                      onPressed: () => _setProfileState(
-                        () => _contentTab = _CommunityProfileContentTab.moments,
-                      ),
-                      child: Text(communityText(context, 'Moments', 'اللحظات')),
-                    ),
+              child: _communityProfileSelectionTab(
+                context: context,
+                tabKey: const Key('community-profile-tab-moments'),
+                label: communityText(context, 'Moments', 'اللحظات'),
+                selected: _contentTab == _CommunityProfileContentTab.moments,
+                onPressed: () {
+                  if (_contentTab == _CommunityProfileContentTab.moments) {
+                    return;
+                  }
+                  _setProfileState(
+                    () => _contentTab = _CommunityProfileContentTab.moments,
+                  );
+                },
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: _contentTab == _CommunityProfileContentTab.reviews
-                  ? FilledButton.tonal(
-                      key: const Key('community-profile-tab-reviews'),
-                      onPressed: null,
-                      child: Text(
-                        communityText(context, 'Reviews', 'المراجعات'),
-                      ),
-                    )
-                  : TextButton(
-                      key: const Key('community-profile-tab-reviews'),
-                      onPressed: () => _setProfileState(
-                        () => _contentTab = _CommunityProfileContentTab.reviews,
-                      ),
-                      child: Text(
-                        communityText(context, 'Reviews', 'المراجعات'),
-                      ),
-                    ),
+              child: _communityProfileSelectionTab(
+                context: context,
+                tabKey: const Key('community-profile-tab-reviews'),
+                label: communityText(context, 'Reviews', 'المراجعات'),
+                selected: _contentTab == _CommunityProfileContentTab.reviews,
+                onPressed: () {
+                  if (_contentTab == _CommunityProfileContentTab.reviews) {
+                    return;
+                  }
+                  _setProfileState(
+                    () => _contentTab = _CommunityProfileContentTab.reviews,
+                  );
+                },
+              ),
             ),
           ],
         ),
