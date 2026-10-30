@@ -90,6 +90,7 @@ Map<String, Object?> nativeQaReplyGeometry(
     sample['native_layout_ready'] = native.nativeLayoutReady;
     sample['native_height_ready'] = native.nativeHeightReady;
     sample['native_paint_gate_scheduled'] = native.nativePaintGateScheduled;
+    sample['native_paint_stage'] = native.nativePaintStage;
     sample['native_measured_height'] = native.nativeMeasuredHeight;
     sample['arrival_opacity'] = sample['reply_opacity'];
     final firstBlock = native.nativeFirstContentBounds;
@@ -184,6 +185,7 @@ Map<String, Object?> _ambiguousNativeReplyState(Element element) {
       'height_ready': state.nativeHeightReady,
       'layout_ready': state.nativeLayoutReady,
       'paint_gate_scheduled': state.nativePaintGateScheduled,
+      'paint_stage': state.nativePaintStage,
       'measured_height': state.nativeMeasuredHeight,
       'first_content_bounds_present': state.nativeFirstContentBounds != null,
       'matching_fallback_child_count': fallbackChildren.length,
@@ -214,6 +216,7 @@ Map<String, Object?> _historyNativeStateSummary() {
         'height_ready': state.nativeHeightReady,
         'layout_ready': state.nativeLayoutReady,
         'paint_gate_scheduled': state.nativePaintGateScheduled,
+        'paint_stage': state.nativePaintStage,
         'measured_height': state.nativeMeasuredHeight,
         'first_content_bounds_present': state.nativeFirstContentBounds != null,
         'render_attached': render?.attached,

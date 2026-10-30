@@ -5,23 +5,24 @@ time. This is a source-change and evidence register, not a
 release approval. Physical39 and source40 results are deliberately separate.
 
 The latest completed-CI checkpoint documented here is
-`978758a25d892be15bda26387e3970bb1f2a9ae0`: eight successful workflows and two
-failed workflows (Android API34 and iPad history stability). This follow-up
-snapshot contains the bounded Android evidence-parser repair and the measured
-Delete-field caret repair, plus native QA observation improvements. The iPad cause remains under investigation; its
-failure is retained. The candidate's immutable SHA is the checked-out Git commit and its
+`6744108f0a0ab3ce6b6840c35af89e6ead3f47ff`: eight successful workflows and two
+failed workflows (Flutter preferences-fixture setup and iPad native timing).
+This follow-up snapshot contains the focused fixture-lifecycle repair and
+native measured-geometry paint gate. Their local results do not replace the
+next candidate's complete native verification. Earlier failures remain retained.
+The candidate's immutable SHA is the checked-out Git commit and its
 actual CI receipts, not a changing "latest HEAD" label inside this versioned
 document. At this checkpoint no all-green replacement SHA, signed40 artifact,
 physical40 acceptance or completed TestFlight40 upload is claimed here.
 Earlier sections retain their historical checkpoints, including the0515 base,
-then-uncommitted repairs and then-unpublished Worker state. The later ef42/978
+then-uncommitted repairs and then-unpublished Worker state. The later ef42/978/674
 CI and verified video-deployment sections supersede those statements only
 for the results they explicitly establish.
 
 - Physical39 foundation: `69ebb89279f11a8da5ee8e631016a88f3d24333d`, version
   `1.0.0 (39)`, the correctly identified BIL app on the connected iPhone.
 - Candidate40 branch: `codex/bil40-device-fixes-20261028`, based on that foundation.
-  Source978 is committed; this document accompanies its subsequent bounded
+  Source674 is committed; this document accompanies its subsequent bounded
   source/tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
   acceptance is recorded by this checkpoint.
 - The owner requires completing the remaining physical39 discovery before
@@ -1021,3 +1022,51 @@ This is four static samples, not all124 images or physical40 acceptance. The
 full archive digest and unextracted PNG hashes remain unverified. Evidence:
 `iphone-range-analysis/iphone-small-native-evidence-proof.json`,
 `offline-native-sampling-proof.json` and `root-offline-native-visual-review.json`.
+
+## Focused follow-up after674 completed8/10
+
+All ten674 workflows finished on their first attempts: eight passed, while
+verify and iPad failed. Android's six APIs and iPhone's five XCTest plus
+4crypto/2settings/41feature cases passed on674. The verify aggregate failure
+follows shard6's first error, not an additional independent application fault.
+
+The preferences matrix's fresh SQLite setup took39211ms before mounting the
+page in2ms, exceeding its existing30s widget timeout. Teardown then attempted
+runAsync while prior host work was still pending. The test-only correction
+prepares and closes one real empty current-schema SQLite seed in host setup,
+copies its closed bytes to independent per-case files, and preserves all24
+UI journeys, gestures, writes, reopen assertions and their30s limits. Setup
+acceptance is separately bounded55s plus close within a shared60s total;
+post-blocking checks reject late results. Arbitrary native FFI is not falsely
+claimed cancellable. Pending initialization/host tasks are tracked, cleanup
+drains actual host work before re-entering runAsync, and unsafe owned paths
+are retained with an explicit error. The final affected runner reported33/33
+passed:24 original UI cases,4 existing negative cases and5 new lifecycle
+controls. Its deliberate child framework timeout produced exactly one expected
+error and then passed the independent next case without reentrant/locked-file
+or late-zone errors. The local parent process exit was not independently
+retained, so this evidence is the complete runner pass marker, not an invented
+exit receipt. Scoped analysis and formatting passed. Evidence:
+`preferences-host-setup/preferences-host-setup-proof.json` and independent review.
+
+The iPad674 failures are exact: Arabic normal reply first readable at2226ms
+against1500ms, and Arabic reduced history at0stable observations against8
+after one3528853microsecond pump. The matched reply count was1, its complete
+height was reserved by988ms, and native visibility was acknowledged later;
+neither ongoing scrolling nor a specific native main-thread cause is inferred.
+The runtime follow-up replaces an unconditional two-frame wait with a post-frame
+check of the actual reserved finite RenderBox width/height. It rechecks current
+visit/generation and geometry after native acknowledgement, hides stale results,
+and retains the3s fallback once per generation without extending it on geometry
+replay. Late errors cannot fail a newer generation. Eighteen production-gate
+widget controls and23 affected presentation/observer controls passed; analysis
+and formatting passed. QA metadata now distinguishes layout wait/native ACK.
+This is a verified local lifecycle/geometry refinement, not proof that either
+iPad timing failure is fixed. The complete new-SHA native sequence must prove
+that before signing. All1500/3500ms/eight-sample thresholds remain unchanged.
+Evidence: `native-paint-gate-analysis/native-geometry-paint-gate-proof.json` and
+`native-paint-gate-independent-review/frozen-four-path-final-review.json`.
+
+Both follow-ups are combined before the next candidate push. No isolated native
+component workflow was pushed, no production cloud code changed, and no40
+signing/upload or physical40 acceptance is claimed at this source checkpoint.

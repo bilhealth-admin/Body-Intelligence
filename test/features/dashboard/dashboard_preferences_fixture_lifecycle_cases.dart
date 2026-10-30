@@ -73,7 +73,7 @@ void _registerFixtureLifecycleCases() {
         (
           stage: 'database',
           dispose: () async {
-            await _finishHost(tester, harness.database.close, 'forced cleanup');
+            await _finishHost(tester, harness.lease.close, 'forced cleanup');
             disposed.add('database');
           },
         ),
@@ -183,7 +183,7 @@ Directory _fixtureDirectory() {
   );
   addTearDown(() {
     expect(directory.parent.absolute.path, Directory.systemTemp.absolute.path);
-    directory.deleteSync(recursive: true);
+    _deleteFixtureDirectory(directory);
   });
   return directory;
 }

@@ -1,5 +1,6 @@
 import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -23,12 +24,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 part 'dashboard_preferences_fixture_lifecycle_cases.dart';
+part 'dashboard_preferences_fixture_host.dart';
+part 'dashboard_preferences_prepared_cases.dart';
 
 // Host-widget evidence only. Entitlements are explicit dated fixtures, and
 // destination anchors prove navigation, not purchases or reviewer access.
 // Preference writes use the real repository and an on-disk SQLite database;
 // no switch callback or persistence API is faked.
 void main() {
+  setUpAll(() async {
+    _preparedPreferencesFixture = _PreparedPreferencesFixture.create();
+    await _preparedPreferencesFixture!.initialize();
+  });
+  tearDownAll(() => _preparedPreferencesFixture?.dispose());
+  if (const bool.fromEnvironment('BIL_PREFERENCES_DEADLINE_PROBE')) {
+    _registerActualDeadlineProbe();
+  } else {
+    _registerPreferencesMatrix();
+    _registerPreparedFixtureCases();
+  }
+}
+
+void _registerPreferencesMatrix() {
   for (final language in const ['en', 'ar']) {
     for (final brightness in Brightness.values) {
       for (final scale in const [1.0, 1.6, 2.0]) {
@@ -52,7 +69,7 @@ void main() {
                   taskDirectory.parent.absolute.path,
                   Directory.systemTemp.absolute.path,
                 );
-                taskDirectory.deleteSync(recursive: true);
+                _deleteFixtureDirectory(taskDirectory);
               });
               final databaseFile = File(
                 '${taskDirectory.path}/preferences.sqlite',
@@ -106,7 +123,8 @@ void main() {
                   expectedSections[section] = !before;
                   expect(tester.widget<SwitchListTile>(tile).value, !before);
                   expect(
-                    await tester.runAsync(
+                    await _fixtureRunAsync(
+                      tester,
                       () =>
                           harness.preferences.get('dashboard.section.$section'),
                     ),
@@ -114,7 +132,8 @@ void main() {
                     reason: 'Actual gesture must commit the SQLite preference',
                   );
                   expect(
-                    await tester.runAsync(
+                    await _fixtureRunAsync(
+                      tester,
                       () => harness.preferences.get('dashboard.preset'),
                     ),
                     'custom',
@@ -198,7 +217,8 @@ void main() {
                   findsOneWidget,
                 );
                 expect(
-                  await tester.runAsync(
+                  await _fixtureRunAsync(
+                    tester,
                     () =>
                         harness.preferences.get('dashboard.nutrientGoalCards'),
                   ),
@@ -256,14 +276,16 @@ void main() {
                 expect(find.byType(BottomSheet), findsNothing);
                 expect(harness.path, '/dashboard/preferences');
                 expect(
-                  await tester.runAsync(
+                  await _fixtureRunAsync(
+                    tester,
                     () =>
                         harness.preferences.get('dashboard.nutrientGoalCards'),
                   ),
                   'fat,fiber',
                 );
                 expect(
-                  await tester.runAsync(
+                  await _fixtureRunAsync(
+                    tester,
                     () => harness.preferences.get('dashboard.preset'),
                   ),
                   'custom',
@@ -279,14 +301,13 @@ void main() {
               }
               await harness.close(tester);
 
-              final reopenedDatabase = AppDatabase.forTesting(
-                NativeDatabase(databaseFile),
-              );
+              final reopenedLease = _TrackedFixtureDatabase(databaseFile);
+              final reopenedDatabase = reopenedLease.database;
               final reopenedCleanup = _FixtureCleanup();
               Future<void> closeReopened() => reopenedCleanup.run(
                 () => _finishHost(
                   tester,
-                  reopenedDatabase.close,
+                  reopenedLease.close,
                   'close reopened SQLite database',
                 ),
               );
@@ -295,20 +316,25 @@ void main() {
                 final readback = PreferencesRepository(reopenedDatabase);
                 for (final entry in expectedSections.entries) {
                   expect(
-                    await tester.runAsync(
+                    await _fixtureRunAsync(
+                      tester,
                       () => readback.get('dashboard.section.${entry.key}'),
                     ),
                     '${entry.value}',
                   );
                 }
                 expect(
-                  await tester.runAsync(
+                  await _fixtureRunAsync(
+                    tester,
                     () => readback.get('dashboard.nutrientGoalCards'),
                   ),
                   'fat,fiber',
                 );
                 expect(
-                  await tester.runAsync(() => readback.get('dashboard.preset')),
+                  await _fixtureRunAsync(
+                    tester,
+                    () => readback.get('dashboard.preset'),
+                  ),
                   'custom',
                 );
               } catch (error, stack) {
@@ -416,7 +442,8 @@ Future<void> _settle(
   var quietFrames = 0;
   for (var attempt = 0; attempt < 100; attempt++) {
     owner?._checkOpen();
-    await tester.runAsync(
+    await _fixtureRunAsync(
+      tester,
       () => Future<void>.delayed(const Duration(milliseconds: 10)),
     );
     // A test timeout does not cancel its async body. A retired fixture must
@@ -490,7 +517,7 @@ Future<void> _finishHost(
     // Returning before completion lets widget-zone cancellation microtasks run.
     // Awaiting database.close directly in runAsync deadlocks Drift watchers whose
     // cancellation needs a fake-zone pump, masking the original test assertion.
-    await tester.runAsync(() async {
+    await _fixtureRunAsync(tester, () async {
       Future<void>.sync(operation).then<void>(
         (_) => complete = true,
         onError: (Object error, StackTrace stack) {
@@ -501,7 +528,8 @@ Future<void> _finishHost(
       );
     });
     for (var attempt = 0; !complete && attempt < 100; attempt++) {
-      await tester.runAsync(
+      await _fixtureRunAsync(
+        tester,
         () => Future<void>.delayed(const Duration(milliseconds: 5)),
       );
       await tester.pump(const Duration(milliseconds: 16));
@@ -678,8 +706,9 @@ Future<void> _disposeFixtureResources(
 }
 
 class _PreferencesHarness {
-  _PreferencesHarness._(this.database);
-  final AppDatabase database;
+  _PreferencesHarness._(this.lease);
+  final _TrackedFixtureDatabase lease;
+  AppDatabase get database => lease.database;
   ProviderContainer? _container;
   GoRouter? _router;
   ProviderContainer get container => _container!;
@@ -701,8 +730,12 @@ class _PreferencesHarness {
     required SubscriptionState subscription,
     Future<void> Function(_PreferencesHarness)? afterWarmup,
   }) async {
-    final database = AppDatabase.forTesting(NativeDatabase(databaseFile));
-    final harness = _PreferencesHarness._(database);
+    if (!databaseFile.existsSync()) {
+      _preparedPreferencesFixture!.materialize(databaseFile);
+    }
+    final lease = _TrackedFixtureDatabase(databaseFile);
+    final database = lease.database;
+    final harness = _PreferencesHarness._(lease);
     _activePreferencesHarness[tester] = harness;
     // Ownership begins before the first real SQLite operation, not after mount.
     // LIFO teardown closes this resource before the caller deletes its directory.
@@ -717,7 +750,7 @@ class _PreferencesHarness {
         // pump. Capture inside runAsync: otherwise it reports errors to the
         // binding and returns null, allowing a broken warmup to mount the page.
         // Keep the original overall30s budget; add no shorter migration limit.
-        await tester.runAsync(() async {
+        await _fixtureRunAsync(tester, () async {
           try {
             await database.customSelect('SELECT 1').get();
           } catch (error, stack) {
@@ -822,28 +855,43 @@ class _PreferencesHarness {
     if (_retired) throw StateError('Preferences fixture has been retired');
   }
 
+  Future<void> _disposeOwned(WidgetTester tester) => _disposeFixtureResources([
+    if (_mountAttempted)
+      (
+        stage: 'unmount',
+        dispose: () async {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
+          _assertNoFrameworkErrors(tester, 'unmount preferences fixture');
+        },
+      ),
+    (stage: 'router', dispose: () async => _router?.dispose()),
+    (stage: 'container', dispose: () async => _container?.dispose()),
+    (
+      stage: 'database',
+      dispose: () =>
+          _finishHost(tester, lease.close, 'close preferences SQLite'),
+    ),
+  ]);
+
   Future<void> close(WidgetTester tester) {
     _retired = true;
-    return _cleanup.run(
-      () => _disposeFixtureResources([
-        if (_mountAttempted)
-          (
-            stage: 'unmount',
-            dispose: () async {
-              await tester.pumpWidget(const SizedBox.shrink());
-              await tester.pump();
-              _assertNoFrameworkErrors(tester, 'unmount preferences fixture');
-            },
-          ),
-        (stage: 'router', dispose: () async => _router?.dispose()),
-        (stage: 'container', dispose: () async => _container?.dispose()),
-        (
-          stage: 'database',
-          dispose: () =>
-              _finishHost(tester, database.close, 'close preferences SQLite'),
-        ),
-      ]),
-    );
+    return _cleanup.run(() async {
+      final hosts = _fixtureHostTasks(tester);
+      try {
+        await hosts.drain();
+      } catch (error, stack) {
+        // If a blocked native call returned late, cleanup is now safe but the
+        // budget failure stays visible. Truly pending work retains its path.
+        if (hosts._pending != null) rethrow;
+        await _preserveFailureDuringCleanup(
+          error,
+          stack,
+          () => _disposeOwned(tester),
+        );
+      }
+      await _disposeOwned(tester);
+    });
   }
 }
 

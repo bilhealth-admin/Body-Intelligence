@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -6,6 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'coach_native_paint_gate.dart';
 
 bool get coachUsesNativeMarkdown => !kIsWeb && Platform.isIOS;
 
@@ -110,14 +111,15 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
   bool _failed = false;
   bool _heightReady = false;
   bool _paintReady = false;
-  bool _paintGateScheduled = false;
+  final _paintGate = CoachNativePaintGate();
+  final _surfaceKey = GlobalKey();
   Rect? _firstContentBounds;
-  Timer? _layoutTimer;
   bool? _reportedReadiness;
   bool _readinessQueued = false;
   bool get nativeLayoutReady => _paintReady;
   bool get nativeHeightReady => _heightReady;
-  bool get nativePaintGateScheduled => _paintGateScheduled;
+  bool get nativePaintGateScheduled => _paintGate.scheduled;
+  String get nativePaintStage => _paintGate.stage;
   double get nativeMeasuredHeight => _height;
   Rect? get nativeFirstContentBounds => _firstContentBounds;
   Map<String, Object>? _parameters;
@@ -173,15 +175,31 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
   Future<void> _update(Map<String, Object> payload) async {
     if (!mounted ||
         !widget.visitIsCurrent() ||
-        payload['generation'] != _generation) {
+        payload['generation'] != _generation ||
+        _channel == null) {
       return;
     }
+    final generation = _generation;
+    _paintGate.beginLayout(
+      generation: generation,
+      isCurrent: () =>
+          mounted &&
+          widget.visitIsCurrent() &&
+          _generation == generation &&
+          !_paintReady &&
+          !_failed,
+      onFailure: () => setState(() => _failed = true),
+    );
     try {
       await _channel?.invokeMethod<void>('update', payload);
     } on PlatformException {
-      if (mounted) setState(() => _failed = true);
+      if (mounted && widget.visitIsCurrent() && _generation == generation) {
+        setState(() => _failed = true);
+      }
     } on MissingPluginException {
-      if (mounted) setState(() => _failed = true);
+      if (mounted && widget.visitIsCurrent() && _generation == generation) {
+        setState(() => _failed = true);
+      }
     }
   }
 
@@ -190,54 +208,37 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
         _firstContentBounds == null ||
         _failed ||
         _paintReady ||
-        _paintGateScheduled) {
+        _paintGate.scheduled) {
       return;
     }
-    _paintGateScheduled = true;
     final generation = _generation;
-    // Let the existing Flutter history measure/reanchor the final native body
-    // before revealing it. This is layout synchronization, not fake streaming.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          if (!mounted || !widget.visitIsCurrent()) return;
-          if (_generation == generation && !_failed) {
-            final channel = _channel;
-            final acknowledged = await channel?.invokeMethod<bool>(
-              'setVisible',
-              {'generation': generation, 'visible': true},
-            );
-            if (!mounted ||
-                !widget.visitIsCurrent() ||
-                _generation != generation ||
-                _failed) {
-              await channel?.invokeMethod<bool>('setVisible', {
-                'generation': generation,
-                'visible': false,
-              });
-              return;
-            }
-            if (mounted &&
-                widget.visitIsCurrent() &&
-                _generation == generation &&
-                acknowledged == true) {
-              _layoutTimer?.cancel();
-              setState(() => _paintReady = true);
-            }
-          }
-        } on PlatformException {
-          if (mounted) setState(() => _failed = true);
-        } on MissingPluginException {
-          if (mounted) setState(() => _failed = true);
-        } finally {
-          _paintGateScheduled = false;
-          if (mounted && widget.visitIsCurrent() && _generation != generation) {
-            _schedulePaintGate();
-          }
+    final channel = _channel;
+    _paintGate.schedule(
+      isCurrent: () =>
+          mounted &&
+          widget.visitIsCurrent() &&
+          _generation == generation &&
+          !_failed &&
+          _heightReady &&
+          _firstContentBounds != null,
+      measuredSize: () => Size(_width ?? 0, _height),
+      surface: () => _surfaceKey.currentContext?.findRenderObject(),
+      setVisible: (visible) async => channel?.invokeMethod<bool>('setVisible', {
+        'generation': generation,
+        'visible': visible,
+      }),
+      onReady: () {
+        setState(() => _paintReady = true);
+      },
+      onFailure: () {
+        if (mounted) setState(() => _failed = true);
+      },
+      onComplete: () {
+        if (mounted && widget.visitIsCurrent() && _generation != generation) {
+          _schedulePaintGate();
         }
-      });
-      WidgetsBinding.instance.scheduleFrame();
-    });
+      },
+    );
   }
 
   Future<Object?> _receive(MethodCall call) async {
@@ -298,7 +299,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
 
   @override
   void dispose() {
-    _layoutTimer?.cancel();
+    _paintGate.dispose();
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
@@ -334,6 +335,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
         }
         _reportReadinessAfterPaint();
         return CoachNativeMarkdownSurface(
+          key: _surfaceKey,
           height: _height,
           ready: nativeLayoutReady,
           child: UiKitView(
@@ -346,12 +348,6 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
               _channel = MethodChannel('bil/coach_markdown/$id')
                 ..setMethodCallHandler(_receive);
               _update(_payload(context));
-              _layoutTimer?.cancel();
-              _layoutTimer = Timer(const Duration(seconds: 3), () {
-                if (mounted && widget.visitIsCurrent() && !nativeLayoutReady) {
-                  setState(() => _failed = true);
-                }
-              });
             },
           ),
         );
