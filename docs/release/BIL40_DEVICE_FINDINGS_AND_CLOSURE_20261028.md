@@ -5,22 +5,24 @@ time. This is a source-change and evidence register, not a
 release approval. Physical39 and source40 results are deliberately separate.
 
 The latest completed-CI checkpoint documented here is
-`ef42de6126325f40e1afa8806c59de93bcfd193b`: nine successful workflows and one
-failed workflow. This follow-up snapshot contains bounded tooling repairs
-above it. The candidate's immutable SHA is the checked-out Git commit and its
+`978758a25d892be15bda26387e3970bb1f2a9ae0`: eight successful workflows and two
+failed workflows (Android API34 and iPad history stability). This follow-up
+snapshot contains the bounded Android evidence-parser repair and the measured
+Delete-field caret repair, plus native QA observation improvements. The iPad cause remains under investigation; its
+failure is retained. The candidate's immutable SHA is the checked-out Git commit and its
 actual CI receipts, not a changing "latest HEAD" label inside this versioned
 document. At this checkpoint no all-green replacement SHA, signed40 artifact,
 physical40 acceptance or completed TestFlight40 upload is claimed here.
 Earlier sections retain their historical checkpoints, including the0515 base,
-then-uncommitted repairs and then-unpublished Worker state. The later ef42
+then-uncommitted repairs and then-unpublished Worker state. The later ef42/978
 CI and verified video-deployment sections supersede those statements only
 for the results they explicitly establish.
 
 - Physical39 foundation: `69ebb89279f11a8da5ee8e631016a88f3d24333d`, version
   `1.0.0 (39)`, the correctly identified BIL app on the connected iPhone.
 - Candidate40 branch: `codex/bil40-device-fixes-20261028`, based on that foundation.
-  Source ef42 is committed; this document accompanies its subsequent bounded
-  CI-tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
+  Source978 is committed; this document accompanies its subsequent bounded
+  source/tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
   acceptance is recorded by this checkpoint.
 - The owner requires completing the remaining physical39 discovery before
   building40. USB was reconnected and the follow-up resumed; interruptions by
@@ -880,3 +882,142 @@ These source and controlled-runtime dispositions do not constitute a live
 production penetration test, disappearance of the open alerts, exhaustive
 policy compliance or App Review approval. Source fixes and all existing
 functional assertions still require the next candidate's exact-SHA CI.
+
+## Additional physical39 verification on30 October
+
+The reconnected phone still reports the installed BIL bundle at version1.0.0,
+build39. The observational collector matched that installed bundle's exact
+executable path to PID633 rather than choosing a process merely named Runner.
+Three bounded15second windows on the actual deletion-confirmation page produced
+87 samples total: unfocused0.10699percent, focused36.44584percent and returned
+unfocused0.29634percent mean CPU, on the SDK's percent-of-one-core scale.
+All three windows matched the same BIL PID/build. No characters were typed on
+the phone and the deletion action was never pressed. Keyboard Done only ended
+editing. This establishes a repeated focus-associated cost on39; keyboard
+geometry differs, so it is not a pure isolated-caret causal experiment and does
+not certify battery behavior or improved physical40 performance. Raw samples,
+endpoint captures631–634, operator events and the hash-verified17-file copy are
+referenced by `resume-20261030-c-recovery-620-634-delete-cpu/copy-and-cpu-aba-proof.json`.
+Two preceding collector identity-shape failures occurred before measurement
+and remain classified as instrumentation failures, not BIL test failures.
+
+The pending meal route also became reachable in this39 session. Actual
+captures645–655 show My Plan opening its saved plan, Review meals opening Meal
+Planner, the Bean and salad wrap detail sheet, and Review and log opening the
+food-matching UI. Its initial no-match state was followed by actual remote
+catalog results. No catalog fallback tap occurred: capture653 is an explicit
+screen-change guard refusal when those results arrived. Back opened the Lunch
+diary with zero foods, and the persistent More button successfully changed to
+More. No food-add confirmation was invoked. This bounded route did not reproduce
+the earlier38 white screen; it does not prove every route or physical40 behavior.
+The temporary notification guard refusals and one unconfirmed scroll-position
+change remain distinct from application defects and successful taps.
+
+## New978 tooling evidence and follow-up scope
+
+The pushed candidate `978758a25d892be15bda26387e3970bb1f2a9ae0` contains the
+bounded native-bootstrap repair and four Google-tool redirect refusals. Its
+source-checks, completed verify workflow40990440623, isolated cloud source,
+security fixtures, video, Crystal and native Coach presentation results are
+recorded separately from its failed Android and iPad results. CodeQL execution
+also completed successfully; the existing open-alert dispositions above remain
+separate from that execution result. iPhone native run
+40990440672 also completed successfully on978; its success is distinct from
+the later candidate and physical40 acceptance. The failed Android
+API34 job123851264547 in run40990440610 remains failed; no rerun, cancellation,
+waiver or signing converted that result into success.
+
+Digest-verified artifact12949975082 shows a Pixel Launcher ANR dialog over
+BIL's onboarding. The launcher ANR was recorded before BIL installation/launch;
+BIL later resumed and completed its first draw. The captured crash buffer is
+empty. Full WindowManager dumps contain a saved LAST ANR snapshot before the
+live policy/display state; the first global focus regex read that history and
+missed the live launcher blocker in the prelaunch check. This is a demonstrated
+classification defect, separate from the unproved underlying OS ANR cause.
+
+The narrow parser follow-up ignores historical focus, accepts identical live
+duplicates, retains the supported focus-field fallback and rejects contradictory
+live values. Any ANR in the selected live values preserves its actual owner
+classification; non-ANR ambiguity fails closed. Both original complete dumps
+replay as EXTERNAL_APP_ANR/exit22 instead of the old prelaunch exit0. Source
+regressions cover historical-only data, healthy current BIL despite history,
+both conflict orders and aliases, null conflicts and legitimate duplicates.
+No ADB command, acceptance condition, timeout, image, core count or OS setting
+is relaxed. This fixes classification and early rejection; preventing the OS
+ANR remains unproved. Evidence: `android34-analysis/android-live-focus-parser-proof-v2.json`
+and its independent review. The superseded first patch and its review finding
+are retained, not relabeled accepted.
+
+The accompanying deletion-field source follow-up disables only per-frame cursor
+opacity interpolation on that actual TextField, retaining the blinking caret.
+The same four actual-page iOS regressions, English/Arabic and Light/Dark, fail
+before the source change at124 scheduled intervals out of125 with one ticker;
+afterward all four pass with0/125 and zero active tickers while visible/hidden
+caret phases, text entry, actual copy-channel action, billing/deletion copy,
+keyboard Done and preparation-only behavior remain. Existing affected contracts
+pass57/57. Scoped analysis completed with exit0 and No issues found; formatting
+reported zero changes. Two earlier invalid fixture attempts are retained separately and are
+not counted as the before/after result. The Flutter framework files in the C/G
+SDK paths are identical; C is a junction to G and the actual iOS default remains
+true. No SDK cursor patch was made. The frozen two-file proof is
+`delete-caret-followup/delete-caret-proof.json`, with independent review in
+`independent-delete-caret-review.json`. Physical40 focused/unfocused measurement
+remains required, and these local results cannot replace next-SHA final CI.
+
+The iPad978 native run40990440662 failed the Arabic reduced-motion2x history
+case before releasing the held synthetic reply: the guard expected eight
+consecutive stable observations and ended at zero. The failure remains a
+release blocker. The extracted failure metadata proves a real400px drag,
+visible older rows, a stopped scroll notifier and a492.4px distance from the
+newest end before the guard. It contains no observations inside the guard;
+zero alone cannot distinguish layout movement from an expensive native pump
+exhausting its3500ms wall budget. Neither explanation is treated as established.
+The failure JSON was recovered with three strictHTTP206 ranges (152369bytes),
+stableETag and matching entryCRC, without downloading or claiming verification
+of the whole790MB archive. Evidence is under `ipad-range-analysis`, including
+`selected-range-read-proof.json` and `failed-history-metadata-triage.json`.
+A separate observability-only diagnostic retained the3500ms/eight-frame/0.1px
+requirements and actual assertions. Its first run41005471319 stopped before
+any Coach case because a default shallow checkout omitted the required base
+commit. That setup failure remains preserved. The diagnostic-only checkout
+was corrected to fetch full ancestry, with actual local Git controls proving
+missing-base exit128, accepted ancestry exit0 and rejected unrelated ancestry
+exit1. The candidate's original native orchestration was not changed by it.
+
+The corrected isolated run41007952209, source206895f5, reached the actual native
+driver and failed three distinct cases: Arabic normal entry exceeded the
+existing settle limit; Arabic normal history completed only one pump taking
+3499143 microseconds within its3500ms window; English normal reveal found no
+exact-one accepted reply within1500ms. The first history observation had a
+stopped scroll notifier and unchanged viewport/insets; it cannot establish
+ongoing scroll movement. Explicit before/after observer overhead was14103
+microseconds, not the entire gap between pump completion and guard exit.
+The five other metadata records completed, including the originally failing
+Arabic reduced-motion history case. No result is transferred retrospectively
+to the failed978 run. Evidence and the three-case independent correlation are
+under `ipad-history-diagnostic/206895f5-range`.
+
+There is also an existing matcher ambiguity: both a native reply parent and its
+legitimate Flutter fallback can match the same text, so a false exact-one flag
+does not distinguish zero matches from two. The accompanying QA-only follow-up
+records actual match counts/types, native readiness/fallback state and each
+history pump's wall time, viewport, insets, geometry and observation overhead.
+Four real-widget controls distinguish zero/two without accepting either,
+retain nine observations for eight stable comparisons, and preserve failure
+after a forced slow pump. Scoped analysis/formatting passed. No acceptance
+condition, deadline, row selection or extra pump/retry was added. These three
+QA files exclude the isolated diagnostic workflow/scripts. The next candidate
+must run the original complete native sequence, including its omitted diagnostic
+prelude, and all required exact-SHA gates before signing. No causal application
+fix for these three debug-simulator timing failures is claimed here.
+
+Additional bounded readback of the successful iPhone978 artifact verified CRC
+for43 small JSON members, source978 in28 scene records, all native result
+receipts and zero transport/launch retries. Four original PNG copies recovered
+from the existing local prefix matched the capture manifest's SHA256 and CRC;
+root visually inspected Arabic Overview, English warm-up and Arabic/English
+Dark sessions, including side-by-side navigation and the Arabic background.
+This is four static samples, not all124 images or physical40 acceptance. The
+full archive digest and unextracted PNG hashes remain unverified. Evidence:
+`iphone-range-analysis/iphone-small-native-evidence-proof.json`,
+`offline-native-sampling-proof.json` and `root-offline-native-visual-review.json`.

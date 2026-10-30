@@ -223,6 +223,119 @@ class VerifyAndroidStartupFrameTest(unittest.TestCase):
 
 
 class VerifyAndroidWindowFocusTest(unittest.TestCase):
+    # Structural slice of the real API34 failure at source978758a2, artifact
+    # 12949975082 (SHA256 f9284084...2dc8303). Unrelated process/window data is
+    # omitted; history and live section order and package ownership are kept.
+    CAPTURED_LAUNCHER_ANR = (
+        "WINDOW MANAGER LAST ANR (dumpsys window lastanr)\n"
+        "  Application at fault: com.google.android.apps.nexuslauncher\n"
+        "Last ANR continued\n"
+        "WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)\n"
+        "  Display: mDisplayId=0 (organized)\n"
+        "  mCurrentFocus=Window{62bb822 u0 com.google.android.apps.nexuslauncher/"
+        "com.google.android.apps.nexuslauncher.NexusLauncherActivity}\n"
+        "WINDOW MANAGER POLICY STATE (dumpsys window policy)\n"
+        "WINDOW MANAGER SESSIONS (dumpsys window sessions)\n"
+        "WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)\n"
+        "  Display: mDisplayId=0 (organized)\n"
+        "  mCurrentFocus=Window{bf8c9af u0 Application Not Responding: "
+        "com.google.android.apps.nexuslauncher}\n"
+        "  mFocusedApp=ActivityRecord{b3855f4 u0 com.google.android.apps.nexuslauncher/"
+        ".NexusLauncherActivity}\n"
+    )
+
+    def test_actual_capture_uses_live_anr_focus_instead_of_last_anr_snapshot(self):
+        result = self._window_result(self.CAPTURED_LAUNCHER_ANR)
+        self.assertEqual(result['window_status'], 'EXTERNAL_APP_ANR')
+        self.assertEqual(result['anr_package'], 'com.google.android.apps.nexuslauncher')
+        self.assertEqual(window_check_exit_code(result, require_app_focus=False), 22)
+        self.assertEqual(window_check_exit_code(result, require_app_focus=True), 22)
+
+    def test_historical_anr_does_not_override_current_healthy_bil_focus(self):
+        state = (
+            'WINDOW MANAGER LAST ANR (dumpsys window lastanr)\n'
+            'Last ANR continued\n'
+            'WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)\n'
+            'mCurrentFocus=Window{old u0 Application Not Responding: com.android.systemui}\n'
+            'WINDOW MANAGER POLICY STATE (dumpsys window policy)\n'
+            'WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)\n'
+            'mCurrentFocus=Window{live u0 com.bilhealth.bodyintelligencelog/.MainActivity}\n'
+        )
+        result = self._window_result(state)
+        self.assertEqual(result['window_status'], 'APP_FOCUSED')
+        self.assertEqual(window_check_exit_code(result, require_app_focus=True), 0)
+
+    def test_history_without_a_live_section_cannot_prove_current_focus(self):
+        state = self.CAPTURED_LAUNCHER_ANR.split('WINDOW MANAGER POLICY STATE', 1)[0]
+        result = self._window_result(state)
+        self.assertEqual(result['window_status'], 'FOCUSED_WINDOW_UNAVAILABLE')
+        self.assertEqual(window_check_exit_code(result, require_app_focus=False), 23)
+
+    def test_prelaunch_live_launcher_anr_blocks_without_waiting_or_dismissing(self):
+        calls = []
+        def adb(command, **options):
+            calls.append(command)
+            if command == ['adb', 'shell', 'pidof', 'com.android.systemui']:
+                return subprocess.CompletedProcess(command, 0, '851\n', '')
+            if command == ['adb', 'shell', 'dumpsys', 'window']:
+                return subprocess.CompletedProcess(command, 0, self.CAPTURED_LAUNCHER_ANR, '')
+            self.fail('Unexpected ADB command: ' + repr(command))
+        with tempfile.TemporaryDirectory() as folder, \
+                patch.object(startup, 'wait_for_boot_broadcast_idle', return_value=True), \
+                patch.object(startup.subprocess, 'run', side_effect=adb), \
+                patch.object(startup, '_capture_prelaunch_blocker') as evidence, \
+                patch.object(startup.time, 'sleep') as sleep, \
+                contextlib.redirect_stderr(io.StringIO()):
+            result = startup.verify_emulator_before_launch(Path(folder))
+        self.assertEqual(result, 22)
+        evidence.assert_called_once_with(Path(folder), 22)
+        sleep.assert_not_called()
+        self.assertEqual(len(calls), 2)
+
+    def test_live_anr_blocks_conflicting_bil_focus_in_both_orders_and_aliases(self):
+        bil = 'Window{bil u0 com.bilhealth.bodyintelligencelog/.MainActivity}'
+        anr = 'Window{anr u0 Application Not Responding: com.google.android.apps.nexuslauncher}'
+        for key in ['mCurrentFocus', 'mFocusedWindow']:
+            for values in [(bil, anr), (anr, bil)]:
+                with self.subTest(key=key, values=values):
+                    state = 'WINDOW MANAGER POLICY STATE (dumpsys window policy)\n'
+                    state += '\n'.join(f'{key}={value}' for value in values)
+                    result = self._window_result(state)
+                    self.assertEqual(result['window_status'], 'EXTERNAL_APP_ANR')
+                    self.assertEqual(result['anr_package'], 'com.google.android.apps.nexuslauncher')
+                    self.assertEqual(window_check_exit_code(result, require_app_focus=False), 22)
+                    self.assertEqual(window_check_exit_code(result, require_app_focus=True), 22)
+
+    def test_conflicting_live_bil_and_launcher_focus_never_passes_in_either_order(self):
+        bil = 'Window{bil u0 com.bilhealth.bodyintelligencelog/.MainActivity}'
+        launcher = 'Window{home u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity}'
+        for key in ['mCurrentFocus', 'mFocusedWindow']:
+            for values in [(bil, launcher), (launcher, bil)]:
+                with self.subTest(key=key, values=values):
+                    result = self._window_result('\n'.join(f'{key}={value}' for value in values))
+                    self.assertEqual(result['window_status'], 'FOCUSED_WINDOW_UNAVAILABLE')
+                    self.assertEqual(result['focus_reason'], 'CONFLICTING_LIVE_FOCUS')
+                    self.assertEqual(window_check_exit_code(result, require_app_focus=False), 23)
+                    self.assertEqual(window_check_exit_code(result, require_app_focus=True), 23)
+
+    def test_identical_duplicate_live_bil_focus_keeps_the_positive_path(self):
+        bil = 'Window{bil u0 com.bilhealth.bodyintelligencelog/.MainActivity}'
+        for key in ['mCurrentFocus', 'mFocusedWindow']:
+            with self.subTest(key=key):
+                result = self._window_result(f'{key}={bil}\n{key}={bil}\n')
+                self.assertEqual(result['window_status'], 'APP_FOCUSED')
+                self.assertEqual(window_check_exit_code(result, require_app_focus=True), 0)
+
+    def test_conflicting_null_and_live_bil_focus_cannot_prove_readiness(self):
+        bil = 'Window{bil u0 com.bilhealth.bodyintelligencelog/.MainActivity}'
+        for key in ['mCurrentFocus', 'mFocusedWindow']:
+            for values in [('null', bil), (bil, 'null')]:
+                with self.subTest(key=key, values=values):
+                    result = self._window_result('\n'.join(f'{key}={value}' for value in values))
+                    self.assertEqual(result['window_status'], 'FOCUSED_WINDOW_UNAVAILABLE')
+                    self.assertEqual(window_check_exit_code(result, require_app_focus=False), 23)
+                    self.assertEqual(window_check_exit_code(result, require_app_focus=True), 23)
+
     def _window_result(self, state: str) -> dict[str, str]:
         with tempfile.TemporaryDirectory() as directory:
             window = Path(directory) / "window.txt"

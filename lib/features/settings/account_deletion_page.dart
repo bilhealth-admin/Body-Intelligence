@@ -306,6 +306,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
               TextField(
                 controller: _confirmation,
                 enabled: !_submitting,
+                cursorOpacityAnimates: false,
                 textCapitalization: TextCapitalization.characters,
                 decoration: InputDecoration(
                   labelText: copy.confirmationLabel,

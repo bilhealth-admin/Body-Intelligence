@@ -327,7 +327,7 @@ Future<Finder> nativeQaEnterOlderHistory(
       continue;
     }
     final anchor = find.byKey(candidates.first.widget.key!);
-    await _settleHistoryAnchor(tester, anchor);
+    await _settleHistoryAnchor(tester, anchor, metadata);
     final overlap = tester.getRect(anchor).intersect(tester.getRect(viewport));
     if (overlap.width > 0 && overlap.height >= 20) {
       metadata['history_anchor_key'] = candidates.first.widget.key.toString();

@@ -196,22 +196,37 @@ def has_interactive_app_content(path: Path) -> bool:
 def inspect_window_state(path: Path) -> dict[str, str]:
     """Use actual input focus, never a resumed app behind a system dialog."""
     state = path.read_text(encoding="utf-8", errors="replace")
-    focus = re.search(r"^\s*mCurrentFocus\s*=\s*(.+)$", state, re.MULTILINE)
-    if focus is None:
-        focus = re.search(r"^\s*mFocusedWindow\s*=\s*(.+)$", state, re.MULTILINE)
-    focused_window = focus.group(1).strip() if focus else ""
+    # A full WindowManager dump starts with saved LAST ANR state, including
+    # historical display/focus lines. Live sections start at POLICY STATE.
+    # Scoped display/window dumps have no LAST ANR header and need no slicing.
+    history = re.search(r"^WINDOW MANAGER LAST ANR\b", state, re.MULTILINE)
+    if history is not None:
+        live = re.search(r"^WINDOW MANAGER POLICY STATE\b",
+                         state[history.end():], re.MULTILINE)
+        # A historical-only dump cannot establish present input focus.
+        state = state[history.end() + live.start():] if live is not None else ""
+    focuses = re.findall(r"^[ \t]*mCurrentFocus[ \t]*=[ \t]*([^\r\n]*)", state, re.MULTILINE)
+    if not focuses:
+        focuses = re.findall(r"^[ \t]*mFocusedWindow[ \t]*=[ \t]*([^\r\n]*)", state, re.MULTILINE)
+    focuses = list(dict.fromkeys(value.strip() for value in focuses))
+    focused_window = " | ".join(focuses)
     result = {"focused_window": focused_window}
-    if not focused_window or focused_window == "null":
+    if len(focuses) > 1:
+        result["focus_reason"] = "CONFLICTING_LIVE_FOCUS"
+    # A live ANR is a blocker even when another live value names the app.
+    for candidate in focuses:
+        anr = re.search(r"Application Not Responding:\s*([\w.]+)", candidate)
+        if anr:
+            owner = anr.group(1)
+            status = (
+                "EMULATOR_SYSTEM_UI_ANR"
+                if owner == SYSTEM_UI_PACKAGE
+                else "APP_ANR" if owner == APP_PACKAGE else "EXTERNAL_APP_ANR"
+            )
+            return {**result, "focused_window": candidate,
+                    "window_status": status, "anr_package": owner}
+    if len(focuses) != 1 or not focused_window or focused_window == "null":
         return {**result, "window_status": "FOCUSED_WINDOW_UNAVAILABLE"}
-    anr = re.search(r"Application Not Responding:\s*([\w.]+)", focused_window)
-    if anr:
-        owner = anr.group(1)
-        status = (
-            "EMULATOR_SYSTEM_UI_ANR"
-            if owner == SYSTEM_UI_PACKAGE
-            else "APP_ANR" if owner == APP_PACKAGE else "EXTERNAL_APP_ANR"
-        )
-        return {**result, "window_status": status, "anr_package": owner}
     app_focused = re.search(
         rf"(?<![\w.]){re.escape(APP_PACKAGE)}(?=[/\s}}]|$)", focused_window
     )
