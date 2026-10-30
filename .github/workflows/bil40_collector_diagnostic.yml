@@ -1,0 +1,33 @@
+name: BIL40 isolated macOS collector diagnosis
+
+on:
+  push:
+    branches: [codex/bil40-collector-diagnostic-20261030]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil40-collector-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  collector:
+    name: Actual Apple PTY and selected Simulator log transport only
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - name: Check out isolated diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Diagnose inherited EOF versus an owned open stdin pipe
+        run: python3 .github/scripts/bil40_collector_diagnostic.py
+      - name: Preserve transport evidence without building or launching BIL
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil40-collector-diagnostic-${{ github.sha }}
+          path: artifacts/qa/bil40-collector-diagnostic
+          if-no-files-found: error
+          retention-days: 14
