@@ -1,5 +1,7 @@
 """Isolated diagnostic ownership/cleanup controls, not actual macOS evidence."""
 import json
+import re
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -90,6 +92,69 @@ class DiagnosticTest(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue(runner.receipt['cleanup_errors'])
         self.assertEqual(runner.receipt['scope'], 'DIAGNOSTIC_ONLY_NOT_RELEASE_ACCEPTANCE')
+
+
+class ActualGitCheckoutTest(unittest.TestCase):
+    def git(self, root, *arguments, check=True):
+        result = subprocess.run(['git', '-c', 'user.name=BIL QA',
+            '-c', 'user.email=bil-qa@example.invalid', *arguments], cwd=root,
+            text=True, capture_output=True, timeout=15)
+        if check:
+            self.assertEqual(result.returncode, 0, result.stderr)
+        return result
+
+    def graph(self, root):
+        origin = root / 'origin'
+        origin.mkdir()
+        self.git(origin, 'init', '--initial-branch=main')
+        base = None
+        for index in range(3):
+            (origin / 'synthetic.txt').write_text(str(index), encoding='utf-8')
+            self.git(origin, 'add', 'synthetic.txt')
+            self.git(origin, 'commit', '-m', 'synthetic-' + str(index))
+            if index == 0:
+                base = self.git(origin, 'rev-parse', 'HEAD').stdout.strip()
+        head = self.git(origin, 'rev-parse', 'HEAD').stdout.strip()
+        self.git(origin, 'checkout', '--orphan', 'unrelated')
+        (origin / 'synthetic.txt').write_text('independent root', encoding='utf-8')
+        self.git(origin, 'add', 'synthetic.txt')
+        self.git(origin, 'commit', '-m', 'unrelated-root')
+        unrelated = self.git(origin, 'rev-parse', 'HEAD').stdout.strip()
+        self.git(origin, 'checkout', 'main')
+        return origin, base, head, unrelated
+
+    def test_actual_depth_one_lacks_base_and_full_ancestry_keeps_unrelated_base_rejected(self):
+        with tempfile.TemporaryDirectory(prefix='bil-history-git-control-') as folder:
+            root = Path(folder)
+            origin, base, head, unrelated = self.graph(root)
+            shallow = root / 'shallow'
+            self.git(root, 'clone', '--depth', '1', origin.as_uri(), str(shallow))
+            self.assertEqual(self.git(shallow, 'rev-parse', '--is-shallow-repository').stdout.strip(), 'true')
+            self.assertEqual(self.git(shallow, 'merge-base', '--is-ancestor', base, 'HEAD', check=False).returncode, 128)
+            full = root / 'full'
+            self.git(root, 'clone', origin.as_uri(), str(full))
+            self.assertEqual(self.git(full, 'rev-parse', 'HEAD').stdout.strip(), head)
+            self.assertEqual(self.git(full, 'merge-base', '--is-ancestor', base, 'HEAD', check=False).returncode, 0)
+            self.git(full, 'cat-file', '-e', unrelated + '^{commit}')
+            self.assertEqual(self.git(full, 'merge-base', '--is-ancestor', unrelated, 'HEAD', check=False).returncode, 1)
+
+    def test_actual_git_clone_using_workflow_checkout_depth_can_verify_original_base(self):
+        workflow = Path(__file__).resolve().parents[1] / 'workflows/bil40_ipad_history_diagnostic.yml'
+        text = workflow.read_text(encoding='utf-8')
+        checkout = text.split('- name: Check out exact diagnostic source', 1)[1].split('- name:', 1)[0]
+        match = re.search(r'^\s+fetch-depth:\s*(\d+)\s*$', checkout, re.MULTILINE)
+        # actions/checkout defaults to one commit; depth0 means full ancestry.
+        depth = int(match.group(1)) if match else 1
+        with tempfile.TemporaryDirectory(prefix='bil-history-workflow-git-') as folder:
+            root = Path(folder)
+            origin, base, head, _ = self.graph(root)
+            clone = root / 'checkout'
+            options = ['--depth', str(depth)] if depth else []
+            self.git(root, 'clone', *options, origin.as_uri(), str(clone))
+            self.assertEqual(self.git(clone, 'rev-parse', 'HEAD').stdout.strip(), head)
+            result = self.git(clone, 'merge-base', '--is-ancestor', base, 'HEAD', check=False)
+            self.assertEqual(result.returncode, 0,
+                'Workflow checkout must retain the original base even after multiple diagnostic commits: ' + result.stderr)
 
 
 if __name__ == '__main__':
