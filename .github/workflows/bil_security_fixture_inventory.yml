@@ -30,6 +30,12 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event_name == 'workflow_dispatch' && inputs.expected_sha || github.sha }}
         run: test "$EXPECTED_SHA" = "$GITHUB_SHA"
+      - name: Verify Google tools refuse redirects using owned loopback servers
+        timeout-minutes: 2
+        # Synthetic payloads and an ephemeral RSA key only; no privileged CLI
+        # main, credentials file or store endpoint is invoked. Keep this outside
+        # the general fixture inventory, whose network-denial guard is unchanged.
+        run: node --test --test-reporter=tap tool/store_media/google_publisher_redirect.test.mjs
       - name: Test discovery and real child isolation
         run: python3 -m unittest discover -s tools/qa -p test_bil_security_fixture_inventory.py -v
       - name: Run every discovered non-live Node unit fixture

@@ -23,6 +23,13 @@ BUNDLE = 'com.bilhealth.bodyintelligencelog'
 NATIVE_BOOTSTRAP_TIMEOUT_SECONDS = 180
 
 
+def bootstrap_remaining(deadline, stage, *, cap=None):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError('Selected-app native bootstrap expired at ' + stage)
+    return min(remaining, cap) if cap is not None else remaining
+
+
 def collector_command(device):
     # macOS log buffers its readiness banner when stdout is a regular file.
     # A PTY makes the real banner line-buffered, before the selected Runner
@@ -30,6 +37,17 @@ def collector_command(device):
     return ['/usr/bin/script', '-q', '/dev/null', 'xcrun', 'simctl', 'spawn',
             device, 'log', 'stream', '--style', 'json', '--predicate',
             'process == "Runner"']
+
+
+def start_collector(command, output):
+    # An inherited CI stdin EOF is forwarded by Apple script as VEOF. Keep our
+    # own pipe open without input until collection ends; cold-start latency is
+    # handled separately by the shared bootstrap deadline, not by this pipe.
+    collector = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=output,
+        stderr=subprocess.STDOUT, start_new_session=True)
+    collector._bil_collector_group = True
+    collector._bil_collector_stdin_owned = True
+    return collector
 
 
 def stop_collector(collector):
@@ -45,15 +63,20 @@ def stop_collector(collector):
             collector.kill()
         else:
             collector.terminate()
-    send(signal.SIGTERM)
     try:
-        collector.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-        send(signal.SIGKILL if os.name == 'posix' else signal.SIGTERM, force=True)
-        collector.wait(timeout=5)
+        if collector.poll() is None:
+            send(signal.SIGTERM)
+            try:
+                collector.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                send(signal.SIGKILL if os.name == 'posix' else signal.SIGTERM, force=True)
+                collector.wait(timeout=5)
+    finally:
+        if getattr(collector, '_bil_collector_stdin_owned', False) is True:
+            collector.stdin.close()
 
 
-def launch_to_file(command, output, timeout=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS, *, receipt=None):
+def launch_to_file(command, output, timeout=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS, *, receipt=None, deadline=None):
     # simctl's launched process can retain inherited descriptors. Waiting for
     # PIPE EOF would then wait for the app, even after simctl itself exited.
     # A queued OS launch may exceed60s before producing its exact PID. Give
@@ -63,14 +86,20 @@ def launch_to_file(command, output, timeout=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS, *,
     process = None
     result = {'scope': 'SIMULATOR_LAUNCH_TRANSPORT_ONLY_NOT_APP_ACCEPTANCE',
               'timeout_seconds': timeout, 'timed_out': False,
+              'shared_bootstrap_deadline': deadline is not None,
               'cleanup_attempted': False, 'retry_count': 0,
               'app_startup_verified': False, 'reason': 'launch_error'}
     try:
         with Path(output).open('wb') as stream:
             process = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)
             try:
-                process.wait(timeout=timeout)
-            except subprocess.TimeoutExpired:
+                wait_timeout = (bootstrap_remaining(deadline, 'launch', cap=timeout)
+                    if deadline is not None else timeout)
+                result['wait_timeout_seconds'] = wait_timeout
+                process.wait(timeout=wait_timeout)
+                if deadline is not None:
+                    bootstrap_remaining(deadline, 'launch')
+            except (subprocess.TimeoutExpired, TimeoutError):
                 result.update(reason='launch_timeout', timed_out=True, cleanup_attempted=True)
                 process.kill()
                 process.wait(timeout=5)
@@ -250,6 +279,13 @@ def main():
     collector = None
     collector_output = None
     stage = 'install'
+    bootstrap_started = None
+    bootstrap_deadline = None
+    bootstrap_finished = None
+    stage_started = None
+    bootstrap_stages = ('log_collector', 'launch', 'discover_vm')
+    result.update(native_bootstrap_total_seconds=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS,
+        bootstrap_stage_elapsed_seconds={}, bootstrap_expired=False)
 
     def command(label, command, timeout=60):
         completed = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
@@ -260,21 +296,34 @@ def main():
     try:
         command('exact-app-install', ['xcrun', 'simctl', 'install', args.device, str(app)], 180)
         stage = 'log_collector'
+        bootstrap_started = stage_started = time.monotonic()
+        bootstrap_deadline = bootstrap_started + NATIVE_BOOTSTRAP_TIMEOUT_SECONDS
         native_log = output / 'selected-runner-events.json'
         collector_output = native_log.open('wb')
-        collector = subprocess.Popen(collector_command(args.device),
-            stdout=collector_output, stderr=subprocess.STDOUT, start_new_session=True)
-        collector._bil_collector_group = True
-        wait_for_collector(native_log, collector)
+        collector = start_collector(collector_command(args.device), collector_output)
+        wait_for_collector(native_log, collector,
+            timeout=bootstrap_remaining(bootstrap_deadline, stage))
+        bootstrap_remaining(bootstrap_deadline, stage)
+        result['bootstrap_stage_elapsed_seconds'][stage] = round(time.monotonic() - stage_started, 3)
         stage = 'launch'
+        stage_started = time.monotonic()
         raw = launch_to_file(['xcrun', 'simctl', 'launch', args.device, BUNDLE,
             '--enable-dart-profiling', '--disable-vm-service-publication', '--start-paused',
             '--enable-checked-mode', '--verify-entry-points'], output / 'exact-app-launch.log',
-            timeout=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS, receipt=output / 'exact-app-launch-result.json')
+            timeout=bootstrap_remaining(bootstrap_deadline, stage),
+            receipt=output / 'exact-app-launch-result.json', deadline=bootstrap_deadline)
+        bootstrap_remaining(bootstrap_deadline, stage)
         pid = launch_pid(raw)
         result['pid'] = pid
+        result['bootstrap_stage_elapsed_seconds'][stage] = round(time.monotonic() - stage_started, 3)
         stage = 'discover_vm'
-        url = discover_vm_from_capture(native_log, pid, collector)
+        stage_started = time.monotonic()
+        url = discover_vm_from_capture(native_log, pid, collector,
+            timeout=bootstrap_remaining(bootstrap_deadline, stage, cap=90))
+        bootstrap_remaining(bootstrap_deadline, stage)
+        bootstrap_finished = time.monotonic()
+        result['bootstrap_stage_elapsed_seconds'][stage] = round(bootstrap_finished - stage_started, 3)
+        result['bootstrap_elapsed_seconds'] = round(bootstrap_finished - bootstrap_started, 3)
         result['vm_discovered_after_seconds'] = round(time.monotonic() - started, 3)
         result['vm_origin'] = 'http://127.0.0.1:' + str(urlsplit(url).port)
         stage = 'native_driver'
@@ -297,13 +346,28 @@ def main():
         result['error_type'] = type(error).__name__
         raise
     finally:
-        if collector is not None:
-            stop_collector(collector)
+        stopped_at = time.monotonic()
+        if bootstrap_started is not None and bootstrap_finished is None:
+            result['bootstrap_elapsed_seconds'] = round(stopped_at - bootstrap_started, 3)
+            if stage in bootstrap_stages:
+                result['bootstrap_stage_elapsed_seconds'][stage] = round(stopped_at - stage_started, 3)
+            if stopped_at >= bootstrap_deadline:
+                result.update(bootstrap_expired=True, bootstrap_expired_stage=stage)
+        cleanup_error = None
+        active_error = sys.exc_info()[0] is not None
+        try:
+            if collector is not None:
+                stop_collector(collector)
+        except Exception as error:
+            cleanup_error = error
+            result['collector_cleanup_error_type'] = type(error).__name__
         if collector_output is not None:
             collector_output.close()
         result['last_stage'] = stage
         result['elapsed_seconds'] = round(time.monotonic() - started, 3)
         (output / 'attachment-receipt.json').write_text(json.dumps(result, indent=2) + '\n')
+        if cleanup_error is not None and not active_error:
+            raise cleanup_error
 
 
 if __name__ == '__main__':

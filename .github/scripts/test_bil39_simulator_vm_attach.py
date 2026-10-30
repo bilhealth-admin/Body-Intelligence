@@ -6,7 +6,7 @@ import tempfile
 import time
 import io
 import os
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import bil39_simulator_vm_attach as attach
 from bil39_simulator_vm_attach import BUNDLE, launch_pid, vm_url_from_log
@@ -96,6 +96,7 @@ class ExactSimulatorVmTests(unittest.TestCase):
     def test_collector_cleanup_signals_only_its_explicitly_owned_group(self):
         from unittest.mock import Mock
         collector = Mock(pid=424242, _bil_collector_group=True)
+        collector.poll.return_value = None
         with patch.object(attach.os, 'name', 'posix'), \
                 patch.object(attach.os, 'killpg', create=True) as kill:
             attach.stop_collector(collector)
@@ -105,6 +106,7 @@ class ExactSimulatorVmTests(unittest.TestCase):
     def test_unresponsive_owned_collector_group_is_killed_with_bounded_waits(self):
         from unittest.mock import Mock, call
         collector = Mock(pid=424242, _bil_collector_group=True)
+        collector.poll.return_value = None
         collector.wait.side_effect = [subprocess.TimeoutExpired('owned', 5), 0]
         with patch.object(attach.os, 'name', 'posix'), \
                 patch.object(attach.signal, 'SIGKILL', 9, create=True), \
@@ -117,6 +119,7 @@ class ExactSimulatorVmTests(unittest.TestCase):
     def test_unmarked_collector_cannot_signal_an_unowned_group(self):
         from unittest.mock import Mock
         collector = Mock(pid=424242, _bil_collector_group=False)
+        collector.poll.return_value = None
         collector.wait.side_effect = [subprocess.TimeoutExpired('owned', 5), 0]
         with patch.object(attach.os, 'name', 'posix'), \
                 patch.object(attach.signal, 'SIGKILL', 9, create=True), \
@@ -138,9 +141,7 @@ class ExactSimulatorVmTests(unittest.TestCase):
                     command = [attach.sys.executable, '-E', '-c', source]
                     if tty:
                         command = ['/usr/bin/script', '-q', '/dev/null', *command]
-                    collector = subprocess.Popen(command, stdout=output,
-                        stderr=subprocess.STDOUT, start_new_session=True)
-                    collector._bil_collector_group = True
+                    collector = attach.start_collector(command, output)
                     try:
                         if tty:
                             attach.wait_for_collector(path, collector, timeout=3)
@@ -223,7 +224,10 @@ class ExactSimulatorVmTests(unittest.TestCase):
                     self.assertEqual(len(commands), 1)
                     self.assertEqual(commands[0][:3], ['xcrun', 'simctl', 'install'])
                     launch.assert_called_once()
-                    self.assertEqual(launch.call_args.kwargs['timeout'], 180)
+                    self.assertGreater(launch.call_args.kwargs['timeout'], 0)
+                    self.assertLessEqual(launch.call_args.kwargs['timeout'], 180)
+                    self.assertIsInstance(launch.call_args.kwargs['deadline'], float)
+                    self.assertIs(collector.call_args.kwargs['stdin'], subprocess.PIPE)
                     self.assertEqual(launch.call_args.kwargs['receipt'], output / 'exact-app-launch-result.json')
                     discovery.assert_called_once()
                     self.assertEqual(discovery.call_args.args[1], 37093)
@@ -245,6 +249,205 @@ class ExactSimulatorVmTests(unittest.TestCase):
                     self.assertEqual(json.loads(receipt)['retry_count'], 0)
                     self.assertEqual(json.loads(receipt)['launch_timeout_seconds'], 180)
                     self.assertEqual(json.loads(receipt)['launch_receipt'], 'exact-app-launch-result.json')
+
+    def controlled_bootstrap(self, *, cold=0, launch_delay=0, vm_delay=0,
+                             creation_delay=0, never_ready=False, unknown_pid=False,
+                             ignore_launch_deadline=False, ignore_vm_deadline=False):
+        clock = [0.0]
+        limits = {}
+        collector = Mock(pid=12345, stdin=io.BytesIO(), returncode=0)
+        collector.poll.return_value = None
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            app = root / 'build/ios/Debug-iphonesimulator/Runner.app'
+            app.mkdir(parents=True)
+            driver = root / 'test_driver/synthetic.dart'
+            driver.parent.mkdir()
+            driver.write_text('// synthetic')
+            output = root / 'artifacts/probe'
+            target = sorted(attach.TARGETS)[0]
+            argv = ['probe', '--qa-simulator-only', '--device',
+                'AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE', '--app', str(app),
+                '--output', str(output), '--target', target, '--driver', str(driver),
+                '--label', 'controlled-drive', '--log', str(root / 'artifacts/drive.log'),
+                '--receipt', str(root / 'artifacts/drive-result.json')]
+
+            def popen(*args, **kwargs):
+                clock[0] += creation_delay
+                return collector
+
+            def consume(stage, delay, timeout, *, ignore=False):
+                limits[stage] = timeout
+                if not ignore and delay > timeout:
+                    clock[0] += timeout
+                    raise TimeoutError('Controlled ' + stage + ' did not become ready')
+                clock[0] += delay
+
+            def wait(path, process, timeout=20):
+                consume('collector', timeout if never_ready else cold, timeout)
+                if never_ready:
+                    raise TimeoutError('Controlled collector never ready')
+
+            def launch(*args, timeout=180, **kwargs):
+                consume('launch', launch_delay, timeout, ignore=ignore_launch_deadline)
+                return ('other: 37093\n' if unknown_pid else BUNDLE + ': 37093\n')
+
+            def discover(*args, timeout=90):
+                consume('vm', vm_delay, timeout, ignore=ignore_vm_deadline)
+                return 'http://127.0.0.1:52553/synthetic-auth=/'
+
+            with patch.object(attach.sys, 'argv', argv), patch.object(attach.sys, 'platform', 'darwin'), \
+                    patch.object(attach.Path, 'cwd', return_value=root), \
+                    patch.object(attach.time, 'monotonic', side_effect=lambda: clock[0]), \
+                    patch.object(attach.subprocess, 'run', return_value=subprocess.CompletedProcess([], 0, '', '')), \
+                    patch.object(attach.subprocess, 'Popen', side_effect=popen), \
+                    patch.object(attach, 'wait_for_collector', side_effect=wait) as waiting, \
+                    patch.object(attach, 'launch_to_file', side_effect=launch) as launching, \
+                    patch.object(attach, 'discover_vm_from_capture', side_effect=discover) as discovery, \
+                    patch.object(attach, 'run_bounded', return_value=0) as driving:
+                error = None
+                try:
+                    code = attach.main()
+                except (TimeoutError, ValueError) as caught:
+                    code, error = None, caught
+                receipt = json.loads((output / 'attachment-receipt.json').read_text())
+        return code, error, receipt, limits, collector, waiting, launching, discovery, driving
+
+    def test_cold_logger_35_and_50_seconds_share_the_existing_total_budget(self):
+        for cold in [35, 50]:
+            with self.subTest(cold=cold):
+                code, error, receipt, limits, collector, _, _, _, drive = self.controlled_bootstrap(
+                    cold=cold, launch_delay=100, vm_delay=29)
+                self.assertIsNone(error)
+                self.assertEqual(code, 0)
+                self.assertEqual(limits, {'collector': 180, 'launch': 180 - cold, 'vm': min(90, 80 - cold)})
+                self.assertEqual(receipt['bootstrap_elapsed_seconds'], cold + 129)
+                self.assertEqual(receipt['native_bootstrap_total_seconds'], 180)
+                self.assertFalse(receipt['bootstrap_expired'])
+                self.assertTrue(collector.stdin.closed)
+                drive.assert_called_once()
+                self.assertEqual(drive.call_args.kwargs['timeout_seconds'], 180)
+                self.assertEqual(drive.call_args.kwargs['running_timeout_seconds'], 1200)
+
+    def test_never_ready_fails_once_without_launch_or_driver(self):
+        _, error, receipt, _, collector, wait, launch, discover, drive = self.controlled_bootstrap(never_ready=True)
+        self.assertIsInstance(error, TimeoutError)
+        wait.assert_called_once()
+        launch.assert_not_called()
+        discover.assert_not_called()
+        drive.assert_not_called()
+        self.assertTrue(receipt['bootstrap_expired'])
+        self.assertEqual(receipt['bootstrap_elapsed_seconds'], 180)
+        self.assertEqual(receipt['bootstrap_expired_stage'], 'log_collector')
+        self.assertTrue(collector.stdin.closed)
+
+    def test_shared_aggregate_cannot_stack_180_seconds_per_stage(self):
+        _, error, receipt, limits, _, _, _, _, drive = self.controlled_bootstrap(cold=50, launch_delay=100, vm_delay=40)
+        self.assertIsInstance(error, TimeoutError)
+        self.assertEqual(limits['vm'], 30)
+        self.assertEqual(receipt['bootstrap_elapsed_seconds'], 180)
+        self.assertTrue(receipt['bootstrap_expired'])
+        drive.assert_not_called()
+
+    def test_vm_keeps_its_independent_90_second_cap(self):
+        _, error, receipt, limits, _, _, _, _, drive = self.controlled_bootstrap(cold=35, launch_delay=10, vm_delay=95)
+        self.assertIsInstance(error, TimeoutError)
+        self.assertEqual(limits['vm'], 90)
+        self.assertFalse(receipt['bootstrap_expired'])
+        self.assertEqual(receipt['last_stage'], 'discover_vm')
+        drive.assert_not_called()
+
+    def test_blocking_collector_creation_cannot_be_accepted_after_total_expiry(self):
+        _, error, receipt, _, collector, wait, launch, _, drive = self.controlled_bootstrap(creation_delay=181)
+        self.assertIsInstance(error, TimeoutError)
+        wait.assert_not_called()
+        launch.assert_not_called()
+        drive.assert_not_called()
+        self.assertTrue(receipt['bootstrap_expired'])
+        self.assertTrue(collector.stdin.closed)
+
+    def test_late_launch_and_vm_returns_are_rejected_before_driver(self):
+        for arguments in [dict(cold=50, launch_delay=131, ignore_launch_deadline=True),
+                          dict(cold=50, launch_delay=100, vm_delay=31, ignore_vm_deadline=True)]:
+            with self.subTest(arguments=arguments):
+                _, error, receipt, _, _, _, _, _, drive = self.controlled_bootstrap(**arguments)
+                self.assertIsInstance(error, TimeoutError)
+                self.assertTrue(receipt['bootstrap_expired'])
+                drive.assert_not_called()
+
+    def test_unknown_launch_pid_never_reaches_vm_or_driver(self):
+        _, error, receipt, _, _, _, launch, discover, drive = self.controlled_bootstrap(cold=35, unknown_pid=True)
+        self.assertIsInstance(error, ValueError)
+        launch.assert_called_once()
+        discover.assert_not_called()
+        drive.assert_not_called()
+        self.assertFalse(receipt['bootstrap_expired'])
+
+    def test_owned_collector_stdin_closes_even_if_signalling_fails(self):
+        collector = Mock(stdin=io.BytesIO(), _bil_collector_stdin_owned=True,
+            _bil_collector_group=False)
+        collector.poll.return_value = None
+        collector.terminate.side_effect = PermissionError('controlled')
+        with self.assertRaises(PermissionError):
+            attach.stop_collector(collector)
+        self.assertTrue(collector.stdin.closed)
+
+    def test_exited_owned_collector_is_not_signalled_and_its_pipe_still_closes(self):
+        collector = Mock(pid=424242, stdin=io.BytesIO(), _bil_collector_group=True,
+            _bil_collector_stdin_owned=True)
+        collector.poll.return_value = 0
+        with patch.object(attach.os, 'name', 'posix'), \
+                patch.object(attach.os, 'killpg', create=True) as kill:
+            attach.stop_collector(collector)
+        kill.assert_not_called()
+        collector.terminate.assert_not_called()
+        collector.kill.assert_not_called()
+        self.assertTrue(collector.stdin.closed)
+
+    def test_launch_constructor_overrun_is_rejected_and_receipted(self):
+        for phase in ['constructor', 'wait-return']:
+            with self.subTest(phase=phase):
+                clock = [0.0]
+                process = Mock(returncode=0)
+                def popen(*args, **kwargs):
+                    if phase == 'constructor':
+                        clock[0] = 181
+                    return process
+                def wait(timeout):
+                    if timeout != 5:
+                        clock[0] = 181
+                    return 0
+                process.wait.side_effect = wait
+                with tempfile.TemporaryDirectory() as folder, \
+                        patch.object(attach.time, 'monotonic', side_effect=lambda: clock[0]), \
+                        patch.object(attach.subprocess, 'Popen', side_effect=popen):
+                    receipt = Path(folder) / 'launch.json'
+                    with self.assertRaises(TimeoutError):
+                        attach.launch_to_file(['synthetic'], Path(folder) / 'launch.log', deadline=180, receipt=receipt)
+                    saved = json.loads(receipt.read_text())
+                process.kill.assert_called_once()
+                self.assertEqual(process.wait.call_args.kwargs['timeout'], 5)
+                self.assertTrue(saved['timed_out'])
+                self.assertTrue(saved['cleanup_attempted'])
+                self.assertTrue(saved['shared_bootstrap_deadline'])
+                self.assertEqual(saved['reason'], 'launch_timeout')
+
+    @unittest.skipUnless(attach.sys.platform == 'darwin', 'Actual macOS owned PTY stdin regression')
+    def test_real_mac_owned_pipe_never_injects_ci_eof_into_the_pty(self):
+        source = ('import select,sys;ready=select.select([sys.stdin],[],[],.3)[0];'
+            'print("UNEXPECTED_EOF" if ready and sys.stdin.read(1)=="" else "PIPE_HELD_OPEN",flush=True)')
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'pipe.log'
+            with path.open('wb') as output:
+                collector = attach.start_collector(['/usr/bin/script', '-q', '/dev/null',
+                    attach.sys.executable, '-E', '-c', source], output)
+                try:
+                    collector.wait(timeout=3)
+                finally:
+                    attach.stop_collector(collector)
+            self.assertTrue(collector.stdin.closed)
+            self.assertIn('PIPE_HELD_OPEN', path.read_text())
+            self.assertNotIn('UNEXPECTED_EOF', path.read_text())
 
     def test_vm_discovery_reads_the_already_captured_stream_without_commands(self):
         with tempfile.TemporaryDirectory() as folder:

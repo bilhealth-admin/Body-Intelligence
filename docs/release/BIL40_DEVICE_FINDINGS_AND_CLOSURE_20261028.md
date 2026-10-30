@@ -4,22 +4,22 @@ Snapshot started 28 October 2026; physical follow-up continued 29 October local
 time. This is a source-change and evidence register, not a
 release approval. Physical39 and source40 results are deliberately separate.
 
-The completed-CI checkpoint documented here is
-`c01316edaa287a39784ec4f31919b9cdcddd8c9c`: seven successful workflows and three
-failed workflows. This follow-up snapshot contains bounded tooling repairs
+The latest completed-CI checkpoint documented here is
+`ef42de6126325f40e1afa8806c59de93bcfd193b`: nine successful workflows and one
+failed workflow. This follow-up snapshot contains bounded tooling repairs
 above it. The candidate's immutable SHA is the checked-out Git commit and its
 actual CI receipts, not a changing "latest HEAD" label inside this versioned
 document. At this checkpoint no all-green replacement SHA, signed40 artifact,
 physical40 acceptance or completed TestFlight40 upload is claimed here.
 Earlier sections retain their historical checkpoints, including the0515 base,
-then-uncommitted repairs and then-unpublished Worker state. The later c013
+then-uncommitted repairs and then-unpublished Worker state. The later ef42
 CI and verified video-deployment sections supersede those statements only
 for the results they explicitly establish.
 
 - Physical39 foundation: `69ebb89279f11a8da5ee8e631016a88f3d24333d`, version
   `1.0.0 (39)`, the correctly identified BIL app on the connected iPhone.
 - Candidate40 branch: `codex/bil40-device-fixes-20261028`, based on that foundation.
-  Source c013 is committed; this document accompanies its subsequent bounded
+  Source ef42 is committed; this document accompanies its subsequent bounded
   CI-tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
   acceptance is recorded by this checkpoint.
 - The owner requires completing the remaining physical39 discovery before
@@ -775,3 +775,108 @@ needed. The separate disk-write report belongs to another app and is excluded.
 These updates do not certify Build40, TestFlight availability, physical40
 performance, all physical routes or App Store readiness. Signing remains held
 until the required final exact-SHA workflows actually pass.
+
+## Completed ef42 CI and the measured iPhone bootstrap defect
+
+All ten push workflows completed on
+`ef42de6126325f40e1afa8806c59de93bcfd193b`, attempt1. Nine succeeded:
+verify40976918016, iPad40976918198, Android40976918042,
+video40976917886, CodeQL40976917840, Crystal40976917918,
+native Coach40976917929, isolated cloud source40976917953 and
+security fixtures40976917947. iPhone40976917766 failed. No rerun or signing
+was used to replace that result.
+
+The verified host receipts represent 11,286 successful outcomes across all
+1,483 distinct Flutter test files, with zero failures/errors and no missing or
+duplicate files. One explicit opt-in live-stream skip is separate from the
+successful exact-SHA video gate that actually exercised the live range path.
+Nine downloaded ZIP digests matched. All six Android API lanes passed;
+API34/36 verified physical720x1280/density320, boot IDLE and interactive
+focused BIL content. Independent iPad execution passed five XCTest, four
+crypto, two settings and41 feature cases, with124 hash/dimension-checked
+captures. Eight selected captures received visual review;124 visual reviews
+are not claimed. Evidence: `ef42-final-ci/EF42_FINAL_CI_SUMMARY.json` and its
+referenced immutable run, job, artifact and visual-review receipts.
+
+The failed iPhone job passed five XCTest cases. Its following crypto scope
+never launched BIL: the collector readiness cutoff expired at20seconds.
+Its four captured bytes were terminal EOF bytes, not a VM event or a passing
+native test. A separate, app-free, controlled macOS diagnostic used two fresh
+simulators and reversed the DEVNULL/held-PIPE order. Both first collectors
+missed20seconds but the same processes emitted real readiness banners after
+34.773 and49.784seconds; the subsequent collectors became ready in1.367 and
+15.947seconds. Both simulators completed boot. No collector was restarted,
+and late readiness did not rewrite the original20second failures as passes.
+Cold log-service setup, rather than stdin choice alone, explains the measured
+order effect. Diagnostic run40984941629 and its digest-verified artifact
+preserve those observations; they are not BIL application acceptance.
+
+The resulting transport repair shares one existing180second bootstrap budget
+across collector creation/readiness, the single selected-app launch and VM
+discovery. Each stage receives only the remaining time; VM discovery retains
+its independent90second maximum. Deadline checks after blocking returns reject
+late results before the driver. Owned PIPE cleanup closes the descriptor even
+when signalling fails and avoids signalling an already-exited child. Driver
+startup180seconds, test execution1200seconds, exact PID/loopback VM validation,
+native assertions and zero retries remain. Both native workflows now run the
+helper regressions before the costly Flutter build, including actual Mac PTY
+checks. Merged local proof:27 passes/two Mac-only skips among29 helper cases,
+seven native-split checks and98 existing iOS helper checks. Controlled35/50second cold-start regressions fail
+against ef42 and succeed within the shared budget after repair; never-ready,
+aggregate expiry, VM-cap, late-return and wrong-PID cases still fail closed.
+Actual next-SHA native acceptance remains required. Evidence:
+`iphone-analysis/shared-native-bootstrap-proof.json`,
+`shared-bootstrap-before-after-final.json` and
+`independent-shared-bootstrap-review.json`; the root's merged run is retained
+in `root-merged-bootstrap-local-proof.json`.
+
+## Security findings: scanner execution and triage are separate
+
+The authenticated exact-ref/ef42 Code Scanning readback returned34 open
+findings: eight high,26 medium, none critical. A green CodeQL workflow means
+analysis completed; it does not mean these findings disappeared. No alert was
+dismissed, excluded or hidden. The private security register retains each
+rule, path, data flow, owner boundary and evidence limitation.
+
+- Six high Android backup findings belong to dependency example applications.
+  BIL's own manifest disables backup and its extraction rules exclude every
+  cloud/device-transfer domain. The Gradle graph includes BIL's app, not those
+  examples. Exact ef42 merged-release-APK proof is not supplied by this source
+  review, and vendor examples were not edited to quiet the scanner.
+- The high generated Dart-worker RTI finding was traced to the actual compiled
+  runtime cache. The write is constrained to six compiler-owned numeric keys;
+  dangerous prototype keys are not accepted metadata. The unchanged ef42
+  worker passed45 actual Node probes, including six legitimate-write positive
+  controls. This is a scoped flow disposition, not certification of all Web
+  behavior or a signed40 artifact. Evidence: `alert48-ef42-reachability-review.json`.
+- The high file-race and related medium HTTP-to-file findings were tested on
+  the unchanged local SQLite fixture source. Its actual exclusive `wx` write
+  rejects a file created during the await and preserves that file's bytes.
+  Six probes passed: new/preexisting/raced files, non-loopback and HTTPS
+  rejection, and an actual refused local redirect. No hosted service or real
+  auth was used. Parent-directory replacement, Windows ACL confidentiality
+  and actual Docker discovery remain outside this proof. Evidence:
+  `alerts52-53-current-scope-proof.json`.
+- The ads SDK content-access finding concerns its optional `registerWebView`
+  method. No BIL `lib` caller exists. This remains a conditional future SDK
+  capability; it is not a blanket advertising/privacy or package-level proof.
+- Four Actions findings concern a legacy fixed-branch integration workflow.
+  Its fixed repository/ref, locked payload digest, successful parent SHA,
+  read-only children and lack of a cross-fork privileged trigger constrain the
+  reviewed path to trusted write-authorized callers. No workflow was deleted
+  or excluded to silence the findings.
+- The remaining privileged CLI findings were reviewed against actual host,
+  token, key, upload and redirect paths. Intentional authorized store uploads
+  are distinct from a proven remote attacker path. A narrow default-redirect
+  weakness in three Google tools was reproduced using synthetic tokens and
+  loopback servers, without a live store call. Its four fetch sites now refuse
+  redirects. Eleven unchanged behavioral assertions cover four direct-success
+  cases and seven redirect controls; the old source failed seven, while the
+  repaired source passed all11 and sent no request to the redirect target.
+  A separate bounded CI step exercises these real-loopback tests; the general
+  fixture inventory's network-denial guard remains intact.
+
+These source and controlled-runtime dispositions do not constitute a live
+production penetration test, disappearance of the open alerts, exhaustive
+policy compliance or App Review approval. Source fixes and all existing
+functional assertions still require the next candidate's exact-SHA CI.

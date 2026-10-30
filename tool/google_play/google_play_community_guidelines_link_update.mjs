@@ -70,6 +70,7 @@ async function accessToken(credentials) {
 async function request(token, method, resource, body) {
   const response = await fetch(`${API_ROOT}${resource}`, {
     method,
+    redirect: 'error',
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',

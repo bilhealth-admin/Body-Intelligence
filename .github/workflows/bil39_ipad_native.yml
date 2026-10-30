@@ -23,6 +23,7 @@ jobs:
           persist-credentials: false
       - name: Verify native preparation and independent device orchestration
         run: |
+          python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
           python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
           python3 -m unittest discover -s tools/qa -p test_bil39_native_split.py -v
       - name: Install Flutter stable

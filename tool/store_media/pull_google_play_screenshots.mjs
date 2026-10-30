@@ -102,6 +102,7 @@ async function googleToken(credentials) {
   const assertion = `${input}.${signature}`;
   const response = await fetch(TOKEN_URL, {
     method: 'POST',
+    redirect: 'error',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
@@ -118,6 +119,7 @@ async function googleToken(credentials) {
 async function api(token, method, resource, body) {
   const response = await fetch(`${API_ROOT}${resource}`, {
     method,
+    redirect: 'error',
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',
