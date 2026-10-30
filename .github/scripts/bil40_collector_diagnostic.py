@@ -22,6 +22,54 @@ MODES = ('devnull', 'pipe-open')
 BASE = 'ef42de6126325f40e1afa8806c59de93bcfd193b'
 
 
+def snapshot(label, collector, *, sample=False):
+    """Read only the owned collector's process ancestry, never host arguments."""
+    receipt = {'collector_pid': collector.pid, 'owned_descendants': []}
+    if collector.poll() is not None:
+        receipt['reason'] = 'COLLECTOR_ALREADY_EXITED_NO_SAMPLING'
+        dump(OUT / (label + '-processes.json'), receipt)
+        return
+    try:
+        raw = subprocess.run(['/bin/ps', '-axo', 'pid=,ppid=,pgid=,comm='],
+            stdin=subprocess.DEVNULL, capture_output=True, text=True,
+            check=True, timeout=5).stdout
+        rows = []
+        for line in raw.splitlines():
+            columns = line.split(None, 3)
+            if len(columns) == 4:
+                rows.append({'pid': int(columns[0]), 'ppid': int(columns[1]),
+                    'pgid': int(columns[2]), 'executable': columns[3]})
+        owned = {collector.pid}
+        for _ in rows:
+            added = {row['pid'] for row in rows if row['ppid'] in owned}
+            if added <= owned:
+                break
+            owned |= added
+        receipt['owned_descendants'] = [row for row in rows if row['pid'] in owned]
+        if sample:
+            selected = [row for row in receipt['owned_descendants']
+                if Path(row['executable']).name in ('script', 'simctl', 'log')][:2]
+            for row in selected:
+                if collector.poll() is not None:
+                    receipt['reason'] = 'COLLECTOR_EXITED_BEFORE_SAMPLING'
+                    break
+                try:
+                    run(label + '-sample-' + str(row['pid']), ['/usr/bin/sample',
+                        str(row['pid']), '1', '1', '-file',
+                        str(OUT / (label + '-sample-' + str(row['pid']) + '.txt'))], timeout=5)
+                except (subprocess.SubprocessError, OSError) as error:
+                    receipt.setdefault('sample_errors', []).append(type(error).__name__)
+    except (subprocess.SubprocessError, OSError) as error:
+        receipt['error_type'] = type(error).__name__
+    dump(OUT / (label + '-processes.json'), receipt)
+
+
+def ready_bytes(path):
+    with path.open('r', encoding='utf-8', errors='replace') as stream:
+        prefix = stream.read(16384)
+    return ('Filtering the log data using' in prefix or bool(attach.decode_events(prefix)[0]))
+
+
 def dump(path, value):
     path.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8')
 
@@ -93,6 +141,23 @@ def capture(label, command, mode, *, synthetic=False):
                     record['ready'] = True
                 except (RuntimeError, TimeoutError) as error:
                     record.update(ready=False, error_type=type(error).__name__)
+                record['acceptance_elapsed_seconds'] = round(time.monotonic() - started, 3)
+                if not record['ready']:
+                    # Supplementary observation is not another readiness test.
+                    # Keep the original20s failure and the very same process.
+                    record.update(late_ready=False, observation_timeout_seconds=80)
+                    observe_started = time.monotonic()
+                    snapshot(label + '-failed-20s', process, sample=True)
+                    while time.monotonic() - observe_started < 80:
+                        if process.poll() is not None:
+                            break
+                        if ready_bytes(path):
+                            record.update(late_ready=True,
+                                late_ready_elapsed_seconds=round(time.monotonic() - started, 3))
+                            break
+                        time.sleep(.25)
+                    record['observation_elapsed_seconds'] = round(time.monotonic() - observe_started, 3)
+                    snapshot(label + '-after-observation', process)
                 record['returncode_before_cleanup'] = process.poll()
             record['capture_elapsed_seconds'] = round(time.monotonic() - started, 3)
     finally:
@@ -174,11 +239,33 @@ def main():
             summary['owned_simulators'].append(device)
             try:
                 run(label + '-boot', ['xcrun', 'simctl', 'boot', device], timeout=120)
-                run(label + '-bootstatus', ['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=180)
+                setup_incomplete = False
+                try:
+                    run(label + '-bootstatus', ['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=180)
+                except subprocess.TimeoutExpired:
+                    # Preserve the failed180s receipt and migration stdout.
+                    # Reading transport on a Booted-but-migrating guest is
+                    # diagnostic data, never a healthy baseline or app PASS.
+                    setup_incomplete = True
+                listed = json.loads(run(label + '-booted-state',
+                    ['xcrun', 'simctl', 'list', 'devices', '-j']))
+                selected = [item for items in listed['devices'].values() for item in items
+                    if item['udid'] == device]
+                if len(selected) != 1:
+                    raise RuntimeError('Owned Simulator readback was not unique')
+                dump(OUT / (label + '-selected-state.json'), selected[0])
+                if selected[0]['state'] != 'Booted':
+                    summary.setdefault('unrun_pairs', []).append({'pair': index,
+                        'reason': 'owned_simulator_not_booted', 'state': selected[0]['state']})
+                    continue
                 for order, mode in enumerate(modes, 1):
                     record = capture(label + '-' + str(order) + '-' + mode,
                         attach.collector_command(device), mode)
-                    record.update(pair=index, order=order, device=device)
+                    record.update(pair=index, order=order, device=device,
+                        setup_incomplete=setup_incomplete,
+                        boot_complete_at_start=None if setup_incomplete else True,
+                        boot_completion_after_failed_probe=(
+                            'UNKNOWN_OBSERVER_RETIRED_AT_180S' if setup_incomplete else None))
                     summary['cases'].append(record)
             finally:
                 for operation in ['shutdown', 'delete']:
