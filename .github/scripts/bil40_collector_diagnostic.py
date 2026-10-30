@@ -107,9 +107,10 @@ def capture(label, command, mode, *, synthetic=False):
     started = time.monotonic()
     path = OUT / (label + '.log')
     record = {'mode': mode, 'command': command, 'readiness_timeout_seconds': 20,
-        'retry_count': 0, 'synthetic': synthetic,
+        'retry_count': 0, 'synthetic': synthetic, 'ready': False,
         'scope': 'TRANSPORT_DIAGNOSIS_ONLY_NOT_APP_ACCEPTANCE'}
     process = None
+    phase = 'popen'
     try:
         with path.open('wb') as output:
             kwargs = {'stdout': output, 'stderr': subprocess.STDOUT,
@@ -125,6 +126,7 @@ def capture(label, command, mode, *, synthetic=False):
             record['collector_pid'] = process.pid
             record['stdin_pipe_open_during_capture'] = (
                 process.stdin is not None and not process.stdin.closed)
+            phase = 'wait'
             if synthetic:
                 try:
                     process.wait(timeout=10)
@@ -160,13 +162,21 @@ def capture(label, command, mode, *, synthetic=False):
                     snapshot(label + '-after-observation', process)
                 record['returncode_before_cleanup'] = process.poll()
             record['capture_elapsed_seconds'] = round(time.monotonic() - started, 3)
+    except Exception as error:
+        record.update(ready=False, error_type=type(error).__name__,
+            capture_error_phase=phase)
     finally:
         try:
             if process is not None and process.poll() is None:
                 attach.stop_collector(process)
+        except Exception as error:
+            record['cleanup_error_type'] = type(error).__name__
         finally:
             if process is not None and process.stdin is not None:
-                process.stdin.close()
+                try:
+                    process.stdin.close()
+                except Exception as error:
+                    record['stdin_close_error_type'] = type(error).__name__
             data = path.read_bytes() if path.exists() else b''
             record.update(byte_count=len(data), first_64_bytes_hex=data[:64].hex(),
                 sha256=hashlib.sha256(data).hexdigest(),
@@ -207,14 +217,23 @@ def main():
         'app_launched': False, 'cleanup_errors': []}
     fatal = None
     try:
-        summary['source_sha'] = run('source-sha', ['git', 'rev-parse', 'HEAD']).strip()
-        summary['os_version'] = run('os-version', ['sw_vers'])
-        summary['xcode_version'] = run('xcode-version', ['xcodebuild', '-version'])
+        for key, label, command in [
+            ('source_sha', 'source-sha', ['git', 'rev-parse', 'HEAD']),
+            ('os_version', 'os-version', ['sw_vers']),
+            ('xcode_version', 'xcode-version', ['xcodebuild', '-version']),
+        ]:
+            try:
+                summary[key] = run(label, command).strip()
+            except (OSError, subprocess.SubprocessError) as error:
+                summary[key] = {'status': 'UNKNOWN', 'error_type': type(error).__name__}
         summary['python_version'] = sys.version
         summary['parent_stdin_is_tty'] = os.isatty(0)
         for binary in ['/usr/bin/script', '/usr/bin/log', '/usr/bin/xcrun']:
-            summary.setdefault('binary_sha256', {})[binary] = hashlib.sha256(
-                Path(binary).read_bytes()).hexdigest()
+            try:
+                value = hashlib.sha256(Path(binary).read_bytes()).hexdigest()
+            except OSError as error:
+                value = {'status': 'UNKNOWN', 'error_type': type(error).__name__}
+            summary.setdefault('binary_sha256', {})[binary] = value
         # Actual Apple script + canonical PTY observation, not a simulated stall.
         source = ('import select,sys,time;time.sleep(.1);'
             'ready=select.select([sys.stdin],[],[],1)[0];'
@@ -238,34 +257,32 @@ def main():
                 raise RuntimeError('Invalid created Simulator identity; no broad cleanup permitted')
             summary['owned_simulators'].append(device)
             try:
-                run(label + '-boot', ['xcrun', 'simctl', 'boot', device], timeout=120)
                 setup_incomplete = False
-                try:
-                    run(label + '-bootstatus', ['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=180)
-                except subprocess.TimeoutExpired:
-                    # Preserve the failed180s receipt and migration stdout.
-                    # Reading transport on a Booted-but-migrating guest is
-                    # diagnostic data, never a healthy baseline or app PASS.
-                    setup_incomplete = True
-                listed = json.loads(run(label + '-booted-state',
-                    ['xcrun', 'simctl', 'list', 'devices', '-j']))
-                selected = [item for items in listed['devices'].values() for item in items
-                    if item['udid'] == device]
-                if len(selected) != 1:
-                    raise RuntimeError('Owned Simulator readback was not unique')
-                dump(OUT / (label + '-selected-state.json'), selected[0])
-                if selected[0]['state'] != 'Booted':
-                    summary.setdefault('unrun_pairs', []).append({'pair': index,
-                        'reason': 'owned_simulator_not_booted', 'state': selected[0]['state']})
-                    continue
+                for operation, command, limit in [
+                    ('boot', ['xcrun', 'simctl', 'boot', device], 120),
+                    ('bootstatus', ['xcrun', 'simctl', 'bootstatus', device, '-b'], 180),
+                ]:
+                    try:
+                        run(label + '-' + operation, command, timeout=limit)
+                    except (OSError, subprocess.SubprocessError) as error:
+                        setup_incomplete = True
+                        summary.setdefault('setup_failures', []).append({'pair': index,
+                            'operation': operation, 'error_type': type(error).__name__,
+                            'precondition': 'UNKNOWN'})
+                # These collectors only observe this owned UUID. An unknown or
+                # failed setup is recorded, rather than placing another simctl
+                # query before the actual experiment. No BIL app is launched.
+                state_evidence = ('UNKNOWN_SETUP_FAILED' if setup_incomplete else
+                    'exact_uuid_bootstatus_exit_zero')
                 for order, mode in enumerate(modes, 1):
                     record = capture(label + '-' + str(order) + '-' + mode,
                         attach.collector_command(device), mode)
                     record.update(pair=index, order=order, device=device,
                         setup_incomplete=setup_incomplete,
+                        state_evidence=state_evidence,
                         boot_complete_at_start=None if setup_incomplete else True,
                         boot_completion_after_failed_probe=(
-                            'UNKNOWN_OBSERVER_RETIRED_AT_180S' if setup_incomplete else None))
+                            'UNKNOWN_SETUP_FAILED' if setup_incomplete else None))
                     summary['cases'].append(record)
             finally:
                 for operation in ['shutdown', 'delete']:
@@ -274,6 +291,13 @@ def main():
                     except BaseException as error:
                         summary['cleanup_errors'].append({'device': device,
                             'operation': operation, 'error_type': type(error).__name__})
+        for record in summary['cases']:
+            for field in ['cleanup_error_type', 'stdin_close_error_type']:
+                if field in record:
+                    summary['cleanup_errors'].append({'scope': 'collector',
+                        'pair': record.get('pair'), 'device': record.get('device'),
+                        'mode': record['mode'], 'operation': field,
+                        'error_type': record[field]})
         summary['experiment_completed'] = True
     except BaseException as error:
         fatal = error
@@ -283,7 +307,7 @@ def main():
     if fatal:
         raise fatal
     if summary['cleanup_errors']:
-        raise RuntimeError('Owned Simulator cleanup failed; inspect receipts')
+        raise RuntimeError('Owned diagnostic resource cleanup failed; inspect receipts')
     # Readiness failures are experiment data, never a passed BIL app test.
     print('Completed controlled no-app transport experiment; inspect per-case outcomes.', flush=True)
     return 0
