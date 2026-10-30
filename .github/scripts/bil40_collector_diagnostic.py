@@ -175,7 +175,6 @@ def main():
             try:
                 run(label + '-boot', ['xcrun', 'simctl', 'boot', device], timeout=120)
                 run(label + '-bootstatus', ['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=180)
-                run(label + '-appearance', ['xcrun', 'simctl', 'ui', device, 'appearance', 'light'])
                 for order, mode in enumerate(modes, 1):
                     record = capture(label + '-' + str(order) + '-' + mode,
                         attach.collector_command(device), mode)
