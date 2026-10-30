@@ -4,27 +4,33 @@ Snapshot started 28 October 2026; physical follow-up continued 29 October local
 time. This is a source-change and evidence register, not a
 release approval. Physical39 and source40 results are deliberately separate.
 
-Latest assembled-source checkpoint: HEAD
-`0515b294c2836a7922258a94cf90b9b3c4a95062` plus uncommitted follow-up repairs.
-The later sections below add D39-019 through D39-022, requested blue selections,
-the recovered exact0515 CI receipts and the separate phone-recovery window.
-They supersede earlier incomplete checkpoints only for their stated cases.
-There is still no final committed40 SHA, all-green final CI, signed40 artifact,
-physical40 acceptance or completed TestFlight40 upload in this register.
+The completed-CI checkpoint documented here is
+`c01316edaa287a39784ec4f31919b9cdcddd8c9c`: seven successful workflows and three
+failed workflows. This follow-up snapshot contains bounded tooling repairs
+above it. The candidate's immutable SHA is the checked-out Git commit and its
+actual CI receipts, not a changing "latest HEAD" label inside this versioned
+document. At this checkpoint no all-green replacement SHA, signed40 artifact,
+physical40 acceptance or completed TestFlight40 upload is claimed here.
+Earlier sections retain their historical checkpoints, including the0515 base,
+then-uncommitted repairs and then-unpublished Worker state. The later c013
+CI and verified video-deployment sections supersede those statements only
+for the results they explicitly establish.
 
 - Physical39 foundation: `69ebb89279f11a8da5ee8e631016a88f3d24333d`, version
   `1.0.0 (39)`, the correctly identified BIL app on the connected iPhone.
 - Candidate40 branch: `codex/bil40-device-fixes-20261028`, based on that foundation.
-  At this snapshot the candidate is an uncommitted working tree. No final40 SHA,
-  exact-SHA CI success, signed40 IPA or physical40 acceptance is recorded here.
+  Source c013 is committed; this document accompanies its subsequent bounded
+  CI-tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
+  acceptance is recorded by this checkpoint.
 - The owner requires completing the remaining physical39 discovery before
   building40. USB was reconnected and the follow-up resumed; interruptions by
   other applications and phone calls are recorded separately from BIL outcomes.
   Unobserved outcomes remain incomplete. There is no claim of exhaustive
   app, network, accessibility or policy coverage.
-- No main, protected38/39 ref, price, subscription right, protected purchase
-  arrow or Production cloud runtime was changed for these repairs. No App Store
-  submission is authorized by this register.
+- No main, protected38/39 ref, price, subscription right or protected purchase
+  arrow was changed. The authorized video Worker publication is documented
+  separately below; Supabase/RLS and balances were not changed by it. No App
+  Store submission is authorized by this register.
 
 ## Evidence boundaries
 
@@ -622,7 +628,9 @@ bounded to 8 seconds each and 512 KiB saved per stream, with truncation recorded
 isolated Worker outcomes, clean TypeScript and existing checks. Awaiting
 delegated responses puts asynchronous storage/cancel errors inside the real
 error boundary; it neither identifies nor fixes the underlying historical
-public HEAD500 cause. This Worker change is prepared locally, not deployed.
+public HEAD500 cause. At this historical0515 checkpoint the Worker change was
+prepared locally, not deployed; the later verified publication section records
+the subsequent authorized c013 deployment and its bounded live readback.
 
 ## Separate Windows/iPhone recovery window and signing source audit
 
@@ -661,7 +669,7 @@ the variable alone cannot prove runtime health. This review did not execute
 signing, inspect current secret availability, set that variable, dispatch CI,
 publish cloud code, upload to TestFlight or submit App Store review.
 
-## Latest merged local verification checkpoint
+## Historical merged local verification before the c013 commit
 
 The assembled working candidate at HEAD
 `0515b294c2836a7922258a94cf90b9b3c4a95062` plus the documented source repairs
@@ -681,3 +689,89 @@ no Golden baseline was replaced. Evidence identifiers:
 This supersedes the earlier pending integrated-local checkpoint only for those
 stated checks. Final committed-SHA CI, signed40, physical40 acceptance and
 TestFlight40 upload are still separate and are not claimed by this result.
+
+## Committed c013 final-CI results and bounded tooling follow-up
+
+The first final push is `c01316edaa287a39784ec4f31919b9cdcddd8c9c`.
+Its ten push workflows completed with seven successes and three failures:
+
+| Workflow | Actual result | Evidence and disposition |
+| --- | --- | --- |
+| iPad native /40962740952 | Success | Actual independent iPad execution on c013. |
+| CodeQL /40962740707 | Success | Includes the Android API33 native fixture; the prior stale Coach locator no longer blocks it. |
+| Native Coach /40962740789 | Success | Both native presentation scopes passed. |
+| Video /40962740636 | Success | Worker tests and actual public HEAD/MP4 range assertions passed. |
+| Coach cloud source /40962740873 | Success | Isolated handler assertions; separate from live inference. |
+| Security fixtures /40962740668 | Success | Supplementary negative fixtures; not a production penetration-test claim. |
+| Crystal /40962740931 | Success | Both configured host jobs passed. |
+| Android /40962740833 | Failure | APIs26/29/33/35 passed. API34's Pixel Launcher ANR preceded BIL installation; API36's System UI ANR occurred before installation. Artifact images, XML, system ANR timestamps and CPU-pressure diagnostics establish the OS owners. They do not establish a BIL crash or prove a cure. |
+| iPhone /40962740667 | Failure | Five Runner XCTest, four crypto and two settings cases passed. The later feature-splashes scope never reached its driver: simctl exceeded the inner60second launch cutoff. Native logs show the exact process starting after that cutoff; no feature-splashes assertion verdict exists. |
+| verify /40962740655 | Failure | Shard6's first dashboard-preferences matrix case timed out, followed by SQLite file-lock and guarded-pump cleanup errors. This is not an all-suite pass. The same isolated case passed locally in10seconds; the initial CI stall is not thereby explained. |
+
+The iPhone transport follow-up uses the existing180second native-bootstrap
+allowance for its single launch command and writes an explicit transport-only
+receipt. PID/VM identity, application assertions, VM/test deadlines and zero-retry
+policy remain. Local helper verification:17 passes and one unchanged macOS-only
+skip; native split checks:7 passes. A real owned child timeout/kill was also
+verified. Actual repaired iPhone execution remains required on the next SHA.
+
+The Android follow-up configures only API34/36's physical framebuffer to
+720x1280/density320 before boot and requires actual `wm` physical readback before
+APK installation. The original ANR guard retains priority; neither ANR dialogs
+nor startup/blank-frame assertions are bypassed. OS images, GPU/cores, launch
+timeouts and the four other API configurations remain. Local tooling checks:
+56/56 passes, with independent review and matching frozen source hashes. This
+is a measured-load mitigation, not proof that the observed ANRs are cured.
+
+Private evidence identifiers: `c013-final-ci/iphone-analysis/`,
+`c013-final-ci/android-failure-artifacts/`, `android-display-isolated-proof.json`,
+`independent-android-display-review.json`, and `root-verify-shard6.log`.
+
+The preferences fixture follow-up changes only its test harness and four added
+lifecycle regressions. Owned SQLite teardown is registered before native
+warmup; host errors are captured inside runAsync and rethrown outside. Cleanup
+attempts every resource and preserves both the original and cleanup failures;
+retired continuations cannot borrow the next fixture. The original24 journeys,
+30second outer timeout, hydration/reachability bounds and assertions remain.
+Before repair, an injected unmount failure reproduced an actual WindowsError32
+file lock. Final local source passed all28 cases in3m08s and scoped analysis;
+the first full journey took9seconds, with320ms warmup,167ms mount and758ms
+hydration. No newly tighter warmup deadline was introduced. This fixes the
+proven cleanup/error-ownership defects and improves diagnostics; the initial
+CI30second stall itself is still unproved and requires next-SHA acceptance.
+Evidence: `dashboard-fixture-repair-proof-v2.json` and
+`dashboard-preferences-fixture-isolated-v2.patch` under `c013-final-ci/`.
+
+## Verified video-runtime deployment, separate from app signing
+
+The authorized Worker async storage-error boundary was published from c013's
+unchanged Worker source. Deployment readback reports version
+`7bff7fbf-8b32-4427-8cbf-0fa9271a0247` at100percent. A bounded actual Dart SDK
+HttpClient check, with its default user agent and no retries, verified:
+public HEAD200 with the release-pinned byte length; GET206 with32actual MP4
+bytes and the exact Content-Range; protected/no-auth401; invalid-route404.
+The original Python-default-agent probes received Cloudflare1010 before the
+Worker; those failed probes are retained separately. This matches the official
+[client-signature diagnosis](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1010/).
+No WAF setting was relaxed.
+This does not identify or reproduce the earlier historical storage500 cause.
+No Supabase/RLS, prices, rights or balances were changed by this deployment.
+Evidence: `worker-deploy-c01316ed-private.log`,
+`worker-deployments-after-c013-private.json`, and
+`worker-postdeploy-dart-client-readback.json` under `c013-final-ci/`.
+
+## Latest physical39 performance limitation
+
+A second BIL39 resource report matched the same exact Flutter engine and native
+nextDrawable/nextTexture path, with84percent CPU over107seconds. Its interval
+lies between a focused Delete account confirmation field and the following
+invalid-confirmation action. There is no continuous focus trace and no proven
+trigger. This remains the existing open performance concern, not a new proven
+P1 or an application crash. Coach-only caret mitigation cannot certify every
+input surface: physical40 acceptance must measure both Coach and the deletion
+confirmation field while focused and unfocused. No actual account deletion is
+needed. The separate disk-write report belongs to another app and is excluded.
+
+These updates do not certify Build40, TestFlight availability, physical40
+performance, all physical routes or App Store readiness. Signing remains held
+until the required final exact-SHA workflows actually pass.

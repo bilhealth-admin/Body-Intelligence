@@ -102,6 +102,10 @@ stage='verify-emulator-system-ui-before-launch'
 python3 tool/release/verify_android_startup_frame.py \
   --verify-emulator-before-launch "$evidence"
 
+stage='verify-emulator-display-budget'
+python3 tool/release/configure_android_emulator_display.py verify-runtime \
+  --api-level "$api_level" --evidence-dir "$evidence"
+
 stage='install-debug-apk'
 adb install "$apk"
 stage='clear-app-data'

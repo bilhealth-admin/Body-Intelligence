@@ -1,4 +1,5 @@
 import '../../support/bil_waiting_indicators.dart';
+import 'dart:async';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -20,6 +21,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+
+part 'dashboard_preferences_fixture_lifecycle_cases.dart';
 
 // Host-widget evidence only. Entitlements are explicit dated fixtures, and
 // destination anchors prove navigation, not purchases or reviewer access.
@@ -267,13 +270,27 @@ void main() {
                 );
                 await _tapFooter(tester);
                 expect(harness.path, '/dashboard');
-              } finally {
-                await harness.close(tester);
+              } catch (error, stack) {
+                await _preserveFailureDuringCleanup(
+                  error,
+                  stack,
+                  () => harness.close(tester),
+                );
               }
+              await harness.close(tester);
 
               final reopenedDatabase = AppDatabase.forTesting(
                 NativeDatabase(databaseFile),
               );
+              final reopenedCleanup = _FixtureCleanup();
+              Future<void> closeReopened() => reopenedCleanup.run(
+                () => _finishHost(
+                  tester,
+                  reopenedDatabase.close,
+                  'close reopened SQLite database',
+                ),
+              );
+              addTearDown(closeReopened);
               try {
                 final readback = PreferencesRepository(reopenedDatabase);
                 for (final entry in expectedSections.entries) {
@@ -294,13 +311,14 @@ void main() {
                   await tester.runAsync(() => readback.get('dashboard.preset')),
                   'custom',
                 );
-              } finally {
-                await _finishHost(
-                  tester,
-                  reopenedDatabase.close,
-                  'close reopened SQLite database',
+              } catch (error, stack) {
+                await _preserveFailureDuringCleanup(
+                  error,
+                  stack,
+                  closeReopened,
                 );
               }
+              await closeReopened();
             },
             timeout: const Timeout(Duration(seconds: 30)),
           );
@@ -308,6 +326,7 @@ void main() {
       }
     }
   }
+  _registerFixtureLifecycleCases();
 }
 
 SubscriptionState _verifiedPremiumFixture() => SubscriptionState(
@@ -337,13 +356,16 @@ Future<void> _reach(
   Finder target,
   Finder scrollable,
 ) async {
+  final owner = _activePreferencesHarness[tester];
   expect(scrollable, findsOneWidget);
   // Both forward and backward navigation use real pointer drags. A programmatic
   // ensureVisible or callback invocation would not prove user reachability.
   for (var gesture = 0; gesture < 60; gesture++) {
+    owner?._checkOpen();
     if (target.evaluate().isEmpty) {
       await tester.drag(scrollable, const Offset(0, -160));
-      await _settle(tester, 'discover $target');
+      owner?._checkOpen();
+      await _settle(tester, 'discover $target', owner: owner);
       continue;
     }
     expect(target, findsOneWidget);
@@ -368,7 +390,8 @@ Future<void> _reach(
       scrollable,
       Offset(0, delta + delta.sign * kDragSlopDefault),
     );
-    await _settle(tester, 'scroll to $target');
+    owner?._checkOpen();
+    await _settle(tester, 'scroll to $target', owner: owner);
   }
   fail(
     'Control was not fully reachable with 60 bounded pointer drags: $target; '
@@ -379,17 +402,28 @@ Future<void> _reach(
   );
 }
 
-Future<void> _settle(WidgetTester tester, String stage) async {
+Future<void> _settle(
+  WidgetTester tester,
+  String stage, {
+  _PreferencesHarness? owner,
+}) async {
   // Native SQLite/assets and Drift watched queries need the real event loop;
   // pumpAndSettle's repeated fake-clock frames starve that loop while a real
   // query is still pending and its indeterminate indicator schedules frames.
   // Alternate both clocks, bounded like the existing real-DB profile fixture.
+  owner ??= _activePreferencesHarness[tester];
+  final elapsed = Stopwatch()..start();
   var quietFrames = 0;
   for (var attempt = 0; attempt < 100; attempt++) {
+    owner?._checkOpen();
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 10)),
     );
+    // A test timeout does not cancel its async body. A retired fixture must
+    // never resume pumping into the next case after its host wait completes.
+    owner?._checkOpen();
     await tester.pump(const Duration(milliseconds: 50));
+    owner?._checkOpen();
     _assertNoFrameworkErrors(tester, stage);
     final loading = bilWaitingIndicators().evaluate().isNotEmpty;
     quietFrames =
@@ -398,7 +432,15 @@ Future<void> _settle(WidgetTester tester, String stage) async {
             !tester.binding.hasScheduledFrame
         ? quietFrames + 1
         : 0;
-    if (quietFrames >= 2) return;
+    if (quietFrames >= 2) {
+      if (stage == 'mount real preferences page') {
+        debugPrint(
+          'PREFERENCES_FIXTURE stage=hydrate elapsed_ms=${elapsed.elapsedMilliseconds} '
+          'attempts=${attempt + 1}',
+        );
+      }
+      return;
+    }
   }
   fail(
     'Real SQLite/UI hydration did not complete within the bounded fixture '
@@ -438,34 +480,45 @@ Future<void> _finishHost(
   Future<void> Function() operation,
   String stage,
 ) async {
-  var complete = false;
-  Object? failure;
-  StackTrace? failureStack;
-  // Returning before completion lets widget-zone cancellation microtasks run.
-  // Awaiting database.close directly in runAsync deadlocks Drift watchers whose
-  // cancellation needs a fake-zone pump, masking the original test assertion.
-  await tester.runAsync(() async {
-    Future<void>.sync(operation).then<void>(
-      (_) => complete = true,
-      onError: (Object error, StackTrace stack) {
-        failure = error;
-        failureStack = stack;
-        complete = true;
-      },
+  debugPrint('PREFERENCES_FIXTURE stage=$stage phase=start');
+  final elapsed = Stopwatch()..start();
+  var succeeded = false;
+  try {
+    var complete = false;
+    Object? failure;
+    StackTrace? failureStack;
+    // Returning before completion lets widget-zone cancellation microtasks run.
+    // Awaiting database.close directly in runAsync deadlocks Drift watchers whose
+    // cancellation needs a fake-zone pump, masking the original test assertion.
+    await tester.runAsync(() async {
+      Future<void>.sync(operation).then<void>(
+        (_) => complete = true,
+        onError: (Object error, StackTrace stack) {
+          failure = error;
+          failureStack = stack;
+          complete = true;
+        },
+      );
+    });
+    for (var attempt = 0; !complete && attempt < 100; attempt++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(
+      complete,
+      isTrue,
+      reason: 'Real SQLite host operation stalled: $stage',
     );
-  });
-  for (var attempt = 0; !complete && attempt < 100; attempt++) {
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 5)),
+    if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
+    succeeded = true;
+  } finally {
+    debugPrint(
+      'PREFERENCES_FIXTURE stage=$stage phase=end success=$succeeded '
+      'elapsed_ms=${elapsed.elapsedMilliseconds}',
     );
-    await tester.pump(const Duration(milliseconds: 16));
   }
-  expect(
-    complete,
-    isTrue,
-    reason: 'Real SQLite host operation stalled: $stage',
-  );
-  if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
 }
 
 void _assertNoFrameworkErrors(WidgetTester tester, String stage) {
@@ -542,12 +595,98 @@ Future<void> _assertPersistedSections(
   }
 }
 
+final _activePreferencesHarness = Expando<_PreferencesHarness>();
+
+// Keep the first failure and every cleanup failure, including their stacks.
+// Cleanup errors must not replace the assertion/warmup failure that caused it.
+class _FixtureFailure implements Exception {
+  _FixtureFailure(this.failures);
+  final List<({String stage, Object error, StackTrace stack})> failures;
+
+  @override
+  String toString() => failures
+      .map((failure) => '${failure.stage}: ${failure.error}\n${failure.stack}')
+      .join('\n');
+}
+
+class _FixtureCleanup {
+  Future<void>? _inFlight;
+  bool _complete = false;
+  Object? _failure;
+  StackTrace? _failureStack;
+
+  Future<void> run(Future<void> Function() operation) async {
+    // A completed fake-zone Future cannot be awaited again by host-zone
+    // tearDown: its scheduled continuation can stall without another pump.
+    // Replay completion/failure in the caller's zone, preserving diagnostics.
+    if (_complete) {
+      if (_failure != null) {
+        Error.throwWithStackTrace(_failure!, _failureStack!);
+      }
+      return;
+    }
+    await (_inFlight ??= _run(operation));
+  }
+
+  Future<void> _run(Future<void> Function() operation) async {
+    try {
+      await operation();
+    } catch (error, stack) {
+      _failure = error;
+      _failureStack = stack;
+      rethrow;
+    } finally {
+      _complete = true;
+    }
+  }
+}
+
+Future<Never> _preserveFailureDuringCleanup(
+  Object error,
+  StackTrace stack,
+  Future<void> Function() cleanup,
+) async {
+  try {
+    await cleanup();
+  } catch (cleanupError, cleanupStack) {
+    Error.throwWithStackTrace(
+      _FixtureFailure([
+        (stage: 'original', error: error, stack: stack),
+        (stage: 'cleanup', error: cleanupError, stack: cleanupStack),
+      ]),
+      stack,
+    );
+  }
+  Error.throwWithStackTrace(error, stack);
+}
+
+Future<void> _disposeFixtureResources(
+  List<({String stage, Future<void> Function() dispose})> resources,
+) async {
+  final failures = <({String stage, Object error, StackTrace stack})>[];
+  for (final resource in resources) {
+    try {
+      await resource.dispose();
+    } catch (error, stack) {
+      failures.add((stage: resource.stage, error: error, stack: stack));
+    }
+  }
+  if (failures.length == 1) {
+    Error.throwWithStackTrace(failures.single.error, failures.single.stack);
+  }
+  if (failures.isNotEmpty) throw _FixtureFailure(failures);
+}
+
 class _PreferencesHarness {
-  _PreferencesHarness(this.database, this.container, this.router);
+  _PreferencesHarness._(this.database);
   final AppDatabase database;
-  final ProviderContainer container;
-  final GoRouter router;
-  bool _closed = false;
+  ProviderContainer? _container;
+  GoRouter? _router;
+  ProviderContainer get container => _container!;
+  GoRouter get router => _router!;
+  bool _retired = false;
+  bool _mountAttempted = false;
+  final _cleanup = _FixtureCleanup();
   PreferencesRepository get preferences => PreferencesRepository(database);
   // GoRouter intentionally restores the base browser URL after push(); use the
   // actual top route state, also asserted against the visible destination.
@@ -560,44 +699,80 @@ class _PreferencesHarness {
     required Brightness brightness,
     required double scale,
     required SubscriptionState subscription,
+    Future<void> Function(_PreferencesHarness)? afterWarmup,
   }) async {
     final database = AppDatabase.forTesting(NativeDatabase(databaseFile));
-    await tester.runAsync(() => database.customSelect('SELECT 1').get());
-    final container = ProviderContainer(
-      overrides: [
-        databaseProvider.overrideWithValue(database),
-        verifiedSubscriptionStateProvider.overrideWithValue(
-          AsyncData(subscription),
-        ),
-        verifiedEntitlementClockProvider.overrideWithValue(
-          () => DateTime.utc(2026, 10, 4),
-        ),
-      ],
-    );
-    final router = GoRouter(
-      initialLocation: '/dashboard/preferences',
-      routes: [
-        GoRoute(
-          path: '/dashboard/preferences',
-          builder: (_, _) => const DashboardPreferencesPage(),
-        ),
-        GoRoute(
-          path: '/dashboard',
-          builder: (_, _) => const _DestinationAnchor('dashboard'),
-        ),
-        GoRoute(
-          path: '/settings/nutrition-goals',
-          builder: (_, _) => const _DestinationAnchor('goals'),
-        ),
-        GoRoute(
-          path: '/plans',
-          builder: (_, _) => const _DestinationAnchor('plans'),
-        ),
-      ],
-    );
-    final harness = _PreferencesHarness(database, container, router);
+    final harness = _PreferencesHarness._(database);
+    _activePreferencesHarness[tester] = harness;
+    // Ownership begins before the first real SQLite operation, not after mount.
+    // LIFO teardown closes this resource before the caller deletes its directory.
+    addTearDown(() => harness.close(tester));
     try {
+      var elapsed = Stopwatch()..start();
+      Object? warmupError;
+      StackTrace? warmupStack;
+      debugPrint('PREFERENCES_FIXTURE stage=warmup phase=start');
+      try {
+        // No providers/watchers exist yet, so native warmup needs no fake-clock
+        // pump. Capture inside runAsync: otherwise it reports errors to the
+        // binding and returns null, allowing a broken warmup to mount the page.
+        // Keep the original overall30s budget; add no shorter migration limit.
+        await tester.runAsync(() async {
+          try {
+            await database.customSelect('SELECT 1').get();
+          } catch (error, stack) {
+            warmupError = error;
+            warmupStack = stack;
+          }
+        });
+        if (warmupError != null) {
+          Error.throwWithStackTrace(warmupError!, warmupStack!);
+        }
+      } finally {
+        debugPrint(
+          'PREFERENCES_FIXTURE stage=warmup phase=end '
+          'success=${warmupError == null} elapsed_ms=${elapsed.elapsedMilliseconds}',
+        );
+      }
+      harness._checkOpen();
+      if (afterWarmup != null) await afterWarmup(harness);
+      harness._checkOpen();
+      final container = harness._container = ProviderContainer(
+        overrides: [
+          databaseProvider.overrideWithValue(database),
+          verifiedSubscriptionStateProvider.overrideWithValue(
+            AsyncData(subscription),
+          ),
+          verifiedEntitlementClockProvider.overrideWithValue(
+            () => DateTime.utc(2026, 10, 4),
+          ),
+        ],
+      );
+      final router = harness._router = GoRouter(
+        initialLocation: '/dashboard/preferences',
+        routes: [
+          GoRoute(
+            path: '/dashboard/preferences',
+            builder: (_, _) => const DashboardPreferencesPage(),
+          ),
+          GoRoute(
+            path: '/dashboard',
+            builder: (_, _) => const _DestinationAnchor('dashboard'),
+          ),
+          GoRoute(
+            path: '/settings/nutrition-goals',
+            builder: (_, _) => const _DestinationAnchor('goals'),
+          ),
+          GoRoute(
+            path: '/plans',
+            builder: (_, _) => const _DestinationAnchor('plans'),
+          ),
+        ],
+      );
       final arabic = language == 'ar';
+      elapsed = Stopwatch()..start();
+      harness._mountAttempted = true;
+      debugPrint('PREFERENCES_FIXTURE stage=mount phase=start');
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
@@ -621,6 +796,10 @@ class _PreferencesHarness {
           ),
         ),
       );
+      harness._checkOpen();
+      debugPrint(
+        'PREFERENCES_FIXTURE stage=mount elapsed_ms=${elapsed.elapsedMilliseconds}',
+      );
       await _settle(tester, 'mount real preferences page');
       expect(
         Directionality.of(
@@ -629,22 +808,42 @@ class _PreferencesHarness {
         arabic ? TextDirection.rtl : TextDirection.ltr,
       );
       return harness;
-    } catch (_) {
-      await harness.close(tester);
-      rethrow;
+    } catch (error, stack) {
+      debugPrint('PREFERENCES_FIXTURE stage=open phase=failed error=$error');
+      await _preserveFailureDuringCleanup(
+        error,
+        stack,
+        () => harness.close(tester),
+      );
     }
   }
 
-  Future<void> close(WidgetTester tester) async {
-    if (_closed) {
-      return;
-    }
-    _closed = true;
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
-    router.dispose();
-    container.dispose();
-    await _finishHost(tester, database.close, 'close preferences SQLite');
+  void _checkOpen() {
+    if (_retired) throw StateError('Preferences fixture has been retired');
+  }
+
+  Future<void> close(WidgetTester tester) {
+    _retired = true;
+    return _cleanup.run(
+      () => _disposeFixtureResources([
+        if (_mountAttempted)
+          (
+            stage: 'unmount',
+            dispose: () async {
+              await tester.pumpWidget(const SizedBox.shrink());
+              await tester.pump();
+              _assertNoFrameworkErrors(tester, 'unmount preferences fixture');
+            },
+          ),
+        (stage: 'router', dispose: () async => _router?.dispose()),
+        (stage: 'container', dispose: () async => _container?.dispose()),
+        (
+          stage: 'database',
+          dispose: () =>
+              _finishHost(tester, database.close, 'close preferences SQLite'),
+        ),
+      ]),
+    );
   }
 }
 

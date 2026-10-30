@@ -20,6 +20,7 @@ from bil_native_bounded_command import run_bounded
 from bil_ios_simulator_adhoc_sign import TARGETS
 
 BUNDLE = 'com.bilhealth.bodyintelligencelog'
+NATIVE_BOOTSTRAP_TIMEOUT_SECONDS = 180
 
 
 def collector_command(device):
@@ -52,20 +53,38 @@ def stop_collector(collector):
         collector.wait(timeout=5)
 
 
-def launch_to_file(command, output, timeout=60):
+def launch_to_file(command, output, timeout=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS, *, receipt=None):
     # simctl's launched process can retain inherited descriptors. Waiting for
     # PIPE EOF would then wait for the app, even after simctl itself exited.
-    with Path(output).open('wb') as stream:
-        process = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)
-        try:
-            process.wait(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=5)
-            raise
-    if process.returncode:
-        raise subprocess.CalledProcessError(process.returncode, ['selected-simulator-launch'])
-    return Path(output).read_text(encoding='utf-8', errors='replace')
+    # A queued OS launch may exceed60s before producing its exact PID. Give
+    # this single command the existing native bootstrap allowance, not a retry
+    # or permission to bypass PID/VM discovery or any application assertion.
+    started = time.monotonic()
+    process = None
+    result = {'scope': 'SIMULATOR_LAUNCH_TRANSPORT_ONLY_NOT_APP_ACCEPTANCE',
+              'timeout_seconds': timeout, 'timed_out': False,
+              'cleanup_attempted': False, 'retry_count': 0,
+              'app_startup_verified': False, 'reason': 'launch_error'}
+    try:
+        with Path(output).open('wb') as stream:
+            process = subprocess.Popen(command, stdout=stream, stderr=subprocess.STDOUT)
+            try:
+                process.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                result.update(reason='launch_timeout', timed_out=True, cleanup_attempted=True)
+                process.kill()
+                process.wait(timeout=5)
+                raise
+        if process.returncode:
+            result['reason'] = 'launch_nonzero_exit'
+            raise subprocess.CalledProcessError(process.returncode, ['selected-simulator-launch'])
+        result['reason'] = 'launch_command_exit_zero'
+        return Path(output).read_text(encoding='utf-8', errors='replace')
+    finally:
+        result['elapsed_seconds'] = round(time.monotonic() - started, 3)
+        result['raw_returncode'] = process.returncode if process is not None else None
+        if receipt is not None:
+            Path(receipt).write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
 
 
 def decode_events(buffer):
@@ -225,7 +244,9 @@ def main():
             parser.error('Native evidence may not be symlinked')
     started = time.monotonic()
     result = {'scope': 'QA_SIMULATOR_TRANSPORT_ONLY_NOT_A_TEST_VERDICT', 'device': args.device,
-              'target': args.target, 'vm_uri_saved_in_receipt': False, 'retry_count': 0}
+              'target': args.target, 'vm_uri_saved_in_receipt': False, 'retry_count': 0,
+              'launch_timeout_seconds': NATIVE_BOOTSTRAP_TIMEOUT_SECONDS,
+              'launch_receipt': 'exact-app-launch-result.json'}
     collector = None
     collector_output = None
     stage = 'install'
@@ -248,7 +269,8 @@ def main():
         stage = 'launch'
         raw = launch_to_file(['xcrun', 'simctl', 'launch', args.device, BUNDLE,
             '--enable-dart-profiling', '--disable-vm-service-publication', '--start-paused',
-            '--enable-checked-mode', '--verify-entry-points'], output / 'exact-app-launch.log')
+            '--enable-checked-mode', '--verify-entry-points'], output / 'exact-app-launch.log',
+            timeout=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS, receipt=output / 'exact-app-launch-result.json')
         pid = launch_pid(raw)
         result['pid'] = pid
         stage = 'discover_vm'
@@ -265,7 +287,8 @@ def main():
             '--pid', str(pid), '--', *command_line]
         code = run_bounded(relay, label=args.label,
             log_path=raw_log, receipt_path=native_receipt,
-            timeout_seconds=180, running_timeout_seconds=1200, summary_grace_seconds=60,
+            timeout_seconds=NATIVE_BOOTSTRAP_TIMEOUT_SECONDS,
+            running_timeout_seconds=1200, summary_grace_seconds=60,
             fail_on_launch_error=True,
             allow_capture_progress=args.target == 'integration_test/native_feature_splashes_test.dart')
         result['drive_exit'] = code

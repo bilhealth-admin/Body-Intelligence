@@ -13,6 +13,81 @@ from bil39_simulator_vm_attach import BUNDLE, launch_pid, vm_url_from_log
 
 
 class ExactSimulatorVmTests(unittest.TestCase):
+    def test_queued_simulator_launch_can_finish_after_legacy_60s_within_180s_bootstrap(self):
+        # Model the observed OS queue: no PID is available at60s, but the owned
+        # simctl command completes at90s. It must execute once, not be retried.
+        class QueuedLaunch:
+            returncode = None
+
+            def __init__(self):
+                self.waits = []
+                self.kills = 0
+
+            def wait(self, timeout):
+                self.waits.append(timeout)
+                if self.kills:
+                    self.returncode = -9
+                    return self.returncode
+                if timeout < 90:
+                    raise subprocess.TimeoutExpired('synthetic-queued-simctl', timeout)
+                self.output.write((BUNDLE + ': 37093\n').encode())
+                self.output.flush()
+                self.returncode = 0
+                return 0
+
+            def kill(self):
+                self.kills += 1
+
+        queued = QueuedLaunch()
+
+        def popen(command, **kwargs):
+            queued.output = kwargs['stdout']
+            return queued
+
+        with tempfile.TemporaryDirectory() as folder, \
+                patch.object(attach.subprocess, 'Popen', side_effect=popen) as start:
+            raw = attach.launch_to_file(['synthetic-queued-simctl'], Path(folder) / 'launch.log')
+        self.assertEqual(launch_pid(raw), 37093)
+        self.assertEqual(queued.waits, [180])
+        self.assertEqual(queued.kills, 0)
+        start.assert_called_once()
+
+    def test_real_launch_timeout_preserves_a_failure_receipt_and_kills_the_owned_child(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            receipt = root / 'launch-result.json'
+            with self.assertRaises(subprocess.TimeoutExpired):
+                attach.launch_to_file(
+                    [attach.sys.executable, '-E', '-c', 'import time;time.sleep(10)'],
+                    root / 'launch.log', timeout=.1, receipt=receipt,
+                )
+            result = json.loads(receipt.read_text())
+        self.assertEqual(result['reason'], 'launch_timeout')
+        self.assertTrue(result['timed_out'])
+        self.assertTrue(result['cleanup_attempted'])
+        self.assertIsInstance(result['raw_returncode'], int)
+        self.assertNotEqual(result['raw_returncode'], 0)
+        self.assertEqual(result['timeout_seconds'], .1)
+        self.assertGreaterEqual(result['elapsed_seconds'], .09)
+        self.assertEqual(result['retry_count'], 0)
+        self.assertFalse(result['app_startup_verified'])
+
+    def test_real_nonzero_launch_is_not_hidden_by_the_bootstrap_allowance(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            receipt = root / 'launch-result.json'
+            with self.assertRaises(subprocess.CalledProcessError):
+                attach.launch_to_file(
+                    [attach.sys.executable, '-E', '-c', 'raise SystemExit(7)'],
+                    root / 'launch.log', receipt=receipt,
+                )
+            result = json.loads(receipt.read_text())
+        self.assertEqual(result['reason'], 'launch_nonzero_exit')
+        self.assertEqual(result['raw_returncode'], 7)
+        self.assertFalse(result['timed_out'])
+        self.assertEqual(result['retry_count'], 0)
+        self.assertFalse(result['app_startup_verified'])
+
     def test_collector_uses_a_local_pty_without_changing_selected_app_filter(self):
         command = attach.collector_command('AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE')
         self.assertEqual(command[:4], ['/usr/bin/script', '-q', '/dev/null', 'xcrun'])
@@ -138,7 +213,7 @@ class ExactSimulatorVmTests(unittest.TestCase):
                             patch.object(attach.Path, 'cwd', return_value=root), \
                             patch.object(attach.subprocess, 'run', side_effect=run), \
                             patch.object(attach.subprocess, 'Popen') as collector, \
-                            patch.object(attach, 'launch_to_file', return_value=BUNDLE + ': 37093\n'), \
+                            patch.object(attach, 'launch_to_file', return_value=BUNDLE + ': 37093\n') as launch, \
                             patch.object(attach, 'wait_for_collector'), \
                             patch.object(attach, 'discover_vm_from_capture',
                                 return_value='http://127.0.0.1:52553/synthetic-auth=/') as discovery, \
@@ -147,6 +222,9 @@ class ExactSimulatorVmTests(unittest.TestCase):
                         self.assertEqual(attach.main(), 0)
                     self.assertEqual(len(commands), 1)
                     self.assertEqual(commands[0][:3], ['xcrun', 'simctl', 'install'])
+                    launch.assert_called_once()
+                    self.assertEqual(launch.call_args.kwargs['timeout'], 180)
+                    self.assertEqual(launch.call_args.kwargs['receipt'], output / 'exact-app-launch-result.json')
                     discovery.assert_called_once()
                     self.assertEqual(discovery.call_args.args[1], 37093)
                     collector.return_value.terminate.assert_called_once()
@@ -165,6 +243,8 @@ class ExactSimulatorVmTests(unittest.TestCase):
                     receipt = (output / 'attachment-receipt.json').read_text()
                     self.assertNotIn('synthetic-auth', receipt)
                     self.assertEqual(json.loads(receipt)['retry_count'], 0)
+                    self.assertEqual(json.loads(receipt)['launch_timeout_seconds'], 180)
+                    self.assertEqual(json.loads(receipt)['launch_receipt'], 'exact-app-launch-result.json')
 
     def test_vm_discovery_reads_the_already_captured_stream_without_commands(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -200,10 +280,16 @@ class ExactSimulatorVmTests(unittest.TestCase):
             subprocess.run([attach.sys.executable, '-c', parent], capture_output=True, timeout=.25)
         with tempfile.TemporaryDirectory() as folder:
             started = time.monotonic()
+            receipt = Path(folder) / 'launch-result.json'
             raw = attach.launch_to_file([attach.sys.executable, '-c', parent],
-                                        Path(folder) / 'launch.log', timeout=2)
+                                        Path(folder) / 'launch.log', timeout=2, receipt=receipt)
             self.assertEqual(launch_pid(raw), 37093)
             self.assertLess(time.monotonic() - started, 2)
+            result = json.loads(receipt.read_text())
+            self.assertEqual(result['reason'], 'launch_command_exit_zero')
+            self.assertEqual(result['raw_returncode'], 0)
+            self.assertFalse(result['timed_out'])
+            self.assertFalse(result['app_startup_verified'])
             # Reap the synthetic grandchild naturally before Windows removes its file.
             time.sleep(2.6)
 

@@ -102,6 +102,21 @@ class AndroidStartupWorkflowTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown selector grammar"):
             selected_matrix(changed, None)
 
+    def test_display_is_configured_in_the_actual_prelaunch_hook(self) -> None:
+        hook = self.source.split('          pre-emulator-launch-script: |\n', 1)[1].split('          script:', 1)[0]
+        self.assertIn('configure_android_emulator_display.py configure --api-level ${{ matrix.api-level }}', hook)
+        self.assertIn('--config "$ANDROID_AVD_HOME/test.avd/config.ini"', hook)
+        self.assertLess(hook.index('configure_android_emulator_display.py'), hook.index('adb kill-server'))
+        self.assertIn("test_configure_android_emulator_display.py", self.source)
+
+    def test_existing_anr_gate_retains_priority_and_display_readback_precedes_app(self) -> None:
+        script = (ROOT / 'tool/release/run_android_emulator_smoke.sh').read_text(encoding='utf-8')
+        self.assertLess(script.index('--verify-emulator-before-launch'), script.index('configure_android_emulator_display.py verify-runtime'))
+        self.assertLess(script.index('configure_android_emulator_display.py verify-runtime'), script.index('adb install "$apk"'))
+        self.assertLess(script.index('--verify-emulator-before-launch'), script.index('adb install "$apk"'))
+        self.assertIn('--window-health-only --require-app-focus', script)
+        self.assertIn('if (( window_exit >= 20 && window_exit <= 22 )); then', script)
+
 
 if __name__ == "__main__":
     unittest.main()
