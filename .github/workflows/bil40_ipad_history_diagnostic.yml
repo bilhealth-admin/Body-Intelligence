@@ -1,0 +1,59 @@
+name: BIL40 isolated iPad history diagnostic
+
+on:
+  push:
+    branches: [codex/bil40-ipad-history-diagnostic-20261030]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil40-ipad-history-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  history:
+    name: Observe eight Coach cases on actual iPad simulator
+    runs-on: macos-26
+    timeout-minutes: 70
+    steps:
+      - name: Check out exact diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify existing native transport and diagnostic isolation
+        run: |
+          python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
+          python3 -m unittest discover -s .github/scripts -p test_bil40_ipad_history_diagnostic.py -v
+      - name: Install unchanged Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Select exact isolated CocoaPods
+        run: >
+          python3 .github/scripts/install_isolated_cocoapods.py
+          --output artifacts/qa/bil40-ipad-history-diagnostic/cocoapods-installation.json
+      - name: Resolve existing dependencies and native pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          pod install --project-directory=ios
+      - name: Check observer and existing native composition locally
+        run: >
+          flutter test --no-pub --concurrency=1
+          test/features/intelligence_center/native_history_settle_diagnostic_test.dart
+          test/features/intelligence_center/coach_native_chat_presentation_test.dart
+          test/features/intelligence_center/coach_reply_arrival_test.dart
+      - name: Drive Coach diagnostic only, never release certification
+        run: python3 .github/scripts/bil40_ipad_history_diagnostic.py
+      - name: Preserve bounded diagnostic evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil40-ipad-history-diagnostic-${{ github.sha }}
+          path: artifacts/qa/bil40-ipad-history-diagnostic
+          if-no-files-found: error
+          retention-days: 7

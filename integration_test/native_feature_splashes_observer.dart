@@ -149,33 +149,161 @@ Map<String, Object?> nativeQaReplyGeometry(
 
 // Idle scroll metrics can precede the end of Android's overscroll stretch.
 // Wait for painted geometry as well, before releasing the held model reply.
-Future<void> _settleHistoryAnchor(WidgetTester tester, Finder anchor) async {
+Map<String, Object?> _historyNativeStateSummary() {
+  // Read existing state only: no layout, visibility ack, update or frame request.
+  try {
+    final rows = <Map<String, Object?>>[];
+    for (final element in find.byType(CoachNativeMarkdown).evaluate()) {
+      final widget = element.widget as CoachNativeMarkdown;
+      final state =
+          (element as StatefulElement).state as CoachNativeMarkdownState;
+      final render = element.findRenderObject();
+      rows.add({
+        'key': widget.key.toString(),
+        'state_identity': identityHashCode(state),
+        'mounted': state.mounted,
+        'height_ready': state.nativeHeightReady,
+        'layout_ready': state.nativeLayoutReady,
+        'paint_gate_scheduled': state.nativePaintGateScheduled,
+        'measured_height': state.nativeMeasuredHeight,
+        'first_content_bounds_present': state.nativeFirstContentBounds != null,
+        'render_attached': render?.attached,
+        if (render is RenderBox && render.attached && render.hasSize)
+          'render_height': render.size.height,
+      });
+    }
+    return {'mounted_rows': rows};
+  } catch (error) {
+    // Diagnostic inspection must not replace the original test error.
+    return {'observer_error_type': error.runtimeType.toString()};
+  }
+}
+
+Map<String, Object?> _historyViewportStateSummary(
+  WidgetTester tester,
+  Finder viewport,
+) {
+  try {
+    final element = viewport.evaluate().single;
+    final rectangle = _nativeRect(viewport);
+    final media = element.getInheritedWidgetOfExactType<MediaQuery>()?.data;
+    return {
+      'viewport_top': rectangle.top,
+      'viewport_bottom': rectangle.bottom,
+      'viewport_height': rectangle.height,
+      'view_insets_bottom_physical': tester.view.viewInsets.bottom,
+      'view_padding_bottom_physical': tester.view.viewPadding.bottom,
+      'physical_height': tester.view.physicalSize.height,
+      'device_pixel_ratio': tester.view.devicePixelRatio,
+      'media_query_insets_bottom': media?.viewInsets.bottom,
+      'media_query_padding_bottom': media?.viewPadding.bottom,
+      'primary_focus_has_focus': FocusManager.instance.primaryFocus?.hasFocus,
+      'scheduled_frame': tester.binding.hasScheduledFrame,
+      'transient_callbacks': tester.binding.transientCallbackCount,
+    };
+  } catch (error) {
+    return {'observer_error_type': error.runtimeType.toString()};
+  }
+}
+
+Future<void> _settleHistoryAnchor(
+  WidgetTester tester,
+  Finder anchor,
+  Map<String, Object?> metadata,
+) async {
   final viewport = find.byType(ChatHistoryViewport);
   final controller = tester.widget<ChatHistoryViewport>(viewport).controller;
   final watch = Stopwatch()..start();
+  final samples = <Map<String, Object?>>[];
+  final diagnostic = <String, Object?>{
+    'scope': 'read-only completed-pump observations, not native frame counts',
+    'wall_deadline_ms': 3500,
+    'required_consecutive_samples': 8,
+    'maximum_delta_exclusive': .1,
+    'anchor': anchor.toString(),
+    'samples': samples,
+    'completed': false,
+  };
+  metadata['history_anchor_settle'] = diagnostic;
   double? previousTop, previousOffset;
   var stable = 0;
-  while (watch.elapsedMilliseconds < 3500 && stable < 8) {
-    await tester.pump(const Duration(milliseconds: 16));
-    final top = tester.getTopLeft(anchor).dy;
-    final offset = controller.offset;
-    if (!controller.position.isScrollingNotifier.value &&
-        previousTop != null &&
-        (top - previousTop).abs() < .1 &&
-        previousOffset != null &&
-        (offset - previousOffset).abs() < .1) {
-      stable++;
-    } else {
-      stable = 0;
+  try {
+    while (watch.elapsedMilliseconds < 3500 && stable < 8) {
+      final sample = <String, Object?>{
+        'index': samples.length,
+        'iteration_start_us': watch.elapsedMicroseconds,
+        'stable_before': stable,
+        'scrolling_before': controller.position.isScrollingNotifier.value,
+        'completed_pump': false,
+      };
+      samples.add(sample);
+      final beforeObserver = watch.elapsedMicroseconds;
+      sample['native_before'] = _historyNativeStateSummary();
+      sample['viewport_before'] = _historyViewportStateSummary(
+        tester,
+        viewport,
+      );
+      sample['before_observer_wall_us'] =
+          watch.elapsedMicroseconds - beforeObserver;
+      sample['before_pump_us'] = watch.elapsedMicroseconds;
+      try {
+        await tester.pump(const Duration(milliseconds: 16));
+        sample['completed_pump'] = true;
+      } catch (error) {
+        sample['pump_error_type'] = error.runtimeType.toString();
+        rethrow;
+      } finally {
+        sample['after_pump_us'] = watch.elapsedMicroseconds;
+        sample['pump_wall_us'] =
+            watch.elapsedMicroseconds - (sample['before_pump_us'] as int);
+      }
+      final top = tester.getTopLeft(anchor).dy;
+      final offset = controller.offset;
+      final scrolling = controller.position.isScrollingNotifier.value;
+      if (!scrolling &&
+          previousTop != null &&
+          (top - previousTop).abs() < .1 &&
+          previousOffset != null &&
+          (offset - previousOffset).abs() < .1) {
+        stable++;
+      } else {
+        stable = 0;
+      }
+      sample.addAll({
+        'top': top,
+        'top_delta': previousTop == null ? null : top - previousTop,
+        'offset': offset,
+        'offset_delta': previousOffset == null ? null : offset - previousOffset,
+        'scrolling_after': scrolling,
+        'stable_after': stable,
+        'scroll_activity': controller.position.toString(),
+        'after_measure_us': watch.elapsedMicroseconds,
+      });
+      previousTop = top;
+      previousOffset = offset;
+      final afterObserver = watch.elapsedMicroseconds;
+      sample['native_after'] = _historyNativeStateSummary();
+      sample['viewport_after'] = _historyViewportStateSummary(tester, viewport);
+      sample['after_observer_wall_us'] =
+          watch.elapsedMicroseconds - afterObserver;
+      sample['iteration_end_us'] = watch.elapsedMicroseconds;
     }
-    previousTop = top;
-    previousOffset = offset;
+    expect(
+      stable,
+      8,
+      reason: 'History must settle before the reply is released.',
+    );
+    diagnostic['completed'] = true;
+  } catch (error) {
+    diagnostic['error_type'] = error.runtimeType.toString();
+    rethrow;
+  } finally {
+    diagnostic['elapsed_us'] = watch.elapsedMicroseconds;
+    diagnostic['stable_at_exit'] = stable;
+    diagnostic['completed_pumps'] = samples
+        .where((sample) => sample['completed_pump'] == true)
+        .length;
   }
-  expect(
-    stable,
-    8,
-    reason: 'History must settle before the reply is released.',
-  );
 }
 
 class _NativeReplyFrameTrace {
