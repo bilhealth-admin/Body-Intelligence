@@ -5,16 +5,16 @@ time. This is a source-change and evidence register, not a
 release approval. Physical39 and source40 results are deliberately separate.
 
 The latest completed-CI checkpoint documented here is
-`73522fc4812ebc24d92911c998a5ef01716fca27`: seven successful workflows and three
-failed workflows (iPad history setup, Android API34 pre-app launcher ANR, and
-the isolated purchase-test completion observer). The Flutter suite passed
-11,317 outcomes with zero failures/errors and one explicit live-network skip.
-The native measured-geometry paint gate passed all four iPad first-readable
-reply checks, including Arabic normal motion at846ms. These results do not
-convert the remaining failures into passes.
-This follow-up contains only the three bounded test/bootstrap repairs described
-below; their local results do not replace the next candidate's complete native
-verification. Earlier failures remain retained.
+`42db4553d09be845e403051c526b92678d3684d0`: nine successful workflows and one
+failed Android workflow. Both complete iPhone/iPad native workflows passed,
+as did CodeQL and all11,320 non-skipped host Flutter outcomes; one explicit
+live-network skip remains separate. API34's state-aware bootstrap passed,
+but API35's original upstream bootstrap failed with a GoogleSdkSetup ANR before
+BIL installation/launch. The other five Android APIs passed.
+This follow-up generalizes the verified bootstrap to all six declared APIs,
+with the legacy policy parser and explicit per-job SDK checks described below.
+Its111 local controls and independent review do not replace the next exact-SHA
+Android execution or signed40 evidence. Earlier failures remain retained.
 The candidate's immutable SHA is the checked-out Git commit and its
 actual CI receipts, not a changing "latest HEAD" label inside this versioned
 document. At this checkpoint no all-green replacement SHA, signed40 artifact,
@@ -27,8 +27,8 @@ for the results they explicitly establish.
 - Physical39 foundation: `69ebb89279f11a8da5ee8e631016a88f3d24333d`, version
   `1.0.0 (39)`, the correctly identified BIL app on the connected iPhone.
 - Candidate40 branch: `codex/bil40-device-fixes-20261028`, based on that foundation.
-  Source735 is committed; this document accompanies its subsequent bounded
-  test/tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
+  Source42db is committed; this document accompanies its bounded Android
+  bootstrap follow-up. No fully accepted40 SHA, signed40 IPA or physical40
   acceptance is recorded by this checkpoint.
 - The owner requires completing the remaining physical39 discovery before
   building40. USB was reconnected and the follow-up resumed; interruptions by
@@ -1099,3 +1099,52 @@ unchanged by this follow-up. Prior failed runs and development-control failures
 remain available; no retry converts them into earlier successes. The next
 candidate must pass all ten required workflows before the exact tested SHA is
 used for the separate signed internal-TestFlight build.
+
+## Source42 native/host closure and common emulator bootstrap
+
+All ten first-attempt42 workflows completed: nine succeeded, while Android
+failed only at API35. iPhone ran five XCTest, four crypto, two settings and41
+feature outcomes successfully, including all eight Coach scenes; readable
+reply times were322–534ms. Verify's raw receipts establish11,320 successes,
+zero failures/errors, one explicit skip and1,486 source-bound files. The
+earlier purchase-test and iPad history failures did not recur on this SHA.
+These are simulator/source results, not an installed40 or store acceptance.
+The iPad raw closure also retains a4.994154-second Arabic reduced-motion
+keyboard/viewport preparation across two pumps, before the reading guard;
+the subsequent unchanged guard completed in667615microseconds. Passing that
+reading guard does not establish that every keyboard transition is fast on
+physical40. The simulator setup wall cost and later physical acceptance must
+remain distinct, rather than hiding the earlier delay in a success count.
+
+API35's failed stage was the pre-app emulator health check. GoogleSdkSetup's
+DefaultActivity was already inside onCreate waiting for a content provider
+before the action injected KEYCODE_MENU82 at12:04:01.642Z. The no-focused-window
+ANR appeared at12:04:06.195Z. AOSP documents that a focused key event can start
+that timer without a ready window; the input is an avoidable bootstrap hazard,
+not proof of the provider wait's cause. No exact image/provider fix or memory
+cause is claimed. See [AOSP input dispatch ANRs](https://android.googlesource.com/platform/frameworks/native/+/2f8fa1367c/services/inputflinger/docs/anr.md).
+
+The owned exact-pinned action now replaces its one unconditional MENU statement
+for every declared matrix API26/29/33/34/35/36. One generic helper replaces the
+API34-only implementation. It validates expected SDK, qemu identity and the
+single emulator target; awake/unlocked devices receive zero input. Supported
+WAKEUP224 and keyguard dismissal remain at most once when actually needed.
+Initial unknown policy/focus is observed read-only within the same30seconds;
+ANR, contradictions, multiple delegates and unknown state after input fail.
+Legacy delegate blocks from actual26/29/33 dumps are parsed by indentation,
+without borrowing fields across blocks. One bounded pre-input events/crash
+capture preserves earlier evidence; it neither clears logs nor extends the
+deadline. No HOME/provisioning/provider-readiness claim is added.
+
+All111 affected Python outcomes passed. Three new cross-delegate controls
+failed before the repair and passed afterwards; actual six-API full dumps were
+checked, with the recorded35 ANR still rejected. The actual pinned JavaScript
+entrypoint changed one line only: controlled execution called the expected35
+helper once, never MENU, and retained all three animation commands. The image,
+RAM, CPU/GPU, eleven action inputs,900-second boot limit, app payload, strict
+SystemUI/ANR checks and app first-frame/crash assertions are unchanged.
+The four API34-only files were replaced, not retained as a parallel mechanism.
+Local proof: `generic-bootstrap-fix/generic-bootstrap-local-proof-v2.json`;
+independent review: `independent-frozen-generic-bootstrap-v2-review.json`,
+both under private `42db4553-final-ci`. The next exact-SHA native/Android gates
+and signed40/internal-TestFlight availability remain required.

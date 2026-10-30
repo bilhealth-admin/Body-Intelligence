@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Patch one MENU injection in an owned, exact-pinned API34 action checkout."""
+"""Patch one MENU injection in the owned, exact-pinned emulator action."""
 from __future__ import annotations
 
 import argparse
@@ -11,8 +11,8 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[2]
 PIN = '4c44018e59b437e86cdfc41da381398f93ed8808'
 COMMIT = 'a421e43855164a8197daf9d8d40fe71c6996bb0d'
-OWNED = Path('artifacts/tooling/bil-api34-emulator-action')
-EVIDENCE = Path('artifacts/release/android_emulator_smoke/api-34')
+OWNED = Path('artifacts/tooling/bil-android-emulator-action')
+SUPPORTED_APIS = (26, 29, 33, 34, 35, 36)
 PINNED_FILES = {
     'action.yml': ('a7c4de9a466ae7d70a599ffdc5a27b2bccadd7b2d602e24b44f8b490cb7bbdfe',
                    '4f9767ce6c4ecbe37e35cf0c1246ec1c79dfd51a'),
@@ -24,18 +24,24 @@ PINNED_FILES = {
 MENU = b'        await adb(port, `shell input keyevent 82`);\n'
 
 
+def evidence_relative(api_level: int) -> Path:
+    if type(api_level) is not int or api_level not in SUPPORTED_APIS:
+        raise ValueError('Expected one explicitly supported emulator API')
+    return Path(f'artifacts/release/android_emulator_smoke/api-{api_level}')
+
+
 def checked_path(value: Path, expected: Path) -> Path:
     target = ROOT / value
     expected = ROOT / expected
     if target.absolute() != expected.absolute():
-        raise ValueError('Refusing a path outside the exact owned API34 location')
+        raise ValueError('Refusing a path outside the exact owned emulator location')
     for path in (target, *target.parents):
         if path.is_symlink():
-            raise ValueError('Refusing a symlinked API34 tooling path')
+            raise ValueError('Refusing a symlinked emulator tooling path')
         if path == ROOT:
             break
     if target.resolve() != expected.absolute():
-        raise ValueError('Owned API34 path did not resolve as expected')
+        raise ValueError('Owned emulator path did not resolve as expected')
     return target
 
 
@@ -46,9 +52,9 @@ def git(action: Path, *args: str) -> str:
     ).strip()
 
 
-def prepare(action_dir: Path, evidence_dir: Path) -> dict:
+def prepare(action_dir: Path, evidence_dir: Path, *, api_level: int) -> dict:
     action = checked_path(action_dir, OWNED)
-    evidence = checked_path(evidence_dir, EVIDENCE)
+    evidence = checked_path(evidence_dir, evidence_relative(api_level))
     if not (action / '.git').is_dir() or (action / '.git').is_symlink():
         raise ValueError('A separate owned Git checkout is required')
     if git(action, 'rev-parse', '--show-toplevel').replace('\\', '/') != action.as_posix():
@@ -82,11 +88,12 @@ def prepare(action_dir: Path, evidence_dir: Path) -> dict:
     source = sources['lib/emulator-manager.js']
     if source.count(MENU) != 1:
         raise ValueError('Expected exactly one reviewed unconditional MENU statement')
-    helper = ROOT / 'tool/release/android_api34_unlock.py'
+    helper = ROOT / 'tool/release/android_emulator_unlock.py'
     if not helper.is_file() or helper.is_symlink():
         raise ValueError('The reviewed state-aware helper is unavailable')
     # exec receives an argv array; neither workspace nor evidence paths become shell code.
     replacement = ('        await exec.exec(\'python3\', [' + json.dumps(str(helper)) +
+                   ', \'--expected-api\', ' + json.dumps(str(api_level)) +
                    ', \'--serial\', `emulator-${port}`, \'--evidence-dir\', ' +
                    json.dumps(str(evidence)) + ']);\n').encode()
     patched = source.replace(MENU, replacement)
@@ -94,6 +101,7 @@ def prepare(action_dir: Path, evidence_dir: Path) -> dict:
     return {
         'status': 'PIN_VERIFIED_SINGLE_MENU_REPLACED',
         'action_pin_object': PIN, 'action_commit': COMMIT,
+        'expected_api': api_level,
         'action_path': str(action), 'original_files': {
             name: {'sha256': hashes[0], 'git_blob': hashes[1]}
             for name, hashes in PINNED_FILES.items()
@@ -101,22 +109,23 @@ def prepare(action_dir: Path, evidence_dir: Path) -> dict:
         'changed_file': 'lib/emulator-manager.js', 'replacements': 1,
         'patched_sha256': hashlib.sha256(patched).hexdigest(),
         'helper_sha256': hashlib.sha256(helper.read_bytes()).hexdigest(),
-        'scope': 'Owned API34 bootstrap only; no emulator or BIL acceptance claim',
+        'scope': 'Owned emulator bootstrap only; no provisioning, provider or BIL readiness claim',
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--action-dir', type=Path, required=True)
+    parser.add_argument('--api-level', type=int, choices=SUPPORTED_APIS, required=True)
     parser.add_argument('--evidence-dir', type=Path, required=True)
     args = parser.parse_args()
-    evidence = checked_path(args.evidence_dir, EVIDENCE)
+    evidence = checked_path(args.evidence_dir, evidence_relative(args.api_level))
     evidence.mkdir(parents=True, exist_ok=True)
-    receipt = evidence / 'api34-action-preparation.json'
+    receipt = evidence / 'android-action-preparation.json'
     if receipt.exists():
         raise ValueError('Preserving an existing action preparation receipt')
     try:
-        result = prepare(args.action_dir, args.evidence_dir)
+        result = prepare(args.action_dir, args.evidence_dir, api_level=args.api_level)
         code = 0
     except (ValueError, OSError, subprocess.SubprocessError) as error:
         result = {'status': 'FAIL', 'error_type': type(error).__name__,

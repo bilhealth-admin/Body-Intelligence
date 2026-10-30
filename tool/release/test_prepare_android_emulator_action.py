@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-import prepare_api34_emulator_action as prepare
+import prepare_android_emulator_action as prepare
 
 
 def hashes(data):
@@ -13,7 +13,7 @@ def hashes(data):
             hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest())
 
 
-class PrepareApi34ActionTest(unittest.TestCase):
+class PrepareAndroidActionTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
@@ -28,7 +28,7 @@ class PrepareApi34ActionTest(unittest.TestCase):
                         'lib/emulator-manager.js': b'prefix\n' + prepare.MENU + b'suffix\n'}
         for name, data in self.sources.items():
             (self.action / name).write_bytes(data)
-        helper = self.root / 'tool/release/android_api34_unlock.py'
+        helper = self.root / 'tool/release/android_emulator_unlock.py'
         helper.parent.mkdir(parents=True); helper.write_text('# fixture only\n')
         self.head = self.peeled = prepare.COMMIT
         self.object_type = 'tag'
@@ -50,7 +50,7 @@ class PrepareApi34ActionTest(unittest.TestCase):
                 ('ls-files', '--others', '--ignored', '--exclude-standard'): self.ignored}[args]
 
     def call(self):
-        return prepare.prepare(prepare.OWNED, prepare.EVIDENCE)
+        return prepare.prepare(prepare.OWNED, prepare.evidence_relative(34), api_level=34)
 
     def assert_unchanged(self):
         self.assertEqual((self.action / 'lib/emulator-manager.js').read_bytes(), self.sources['lib/emulator-manager.js'])
@@ -62,9 +62,11 @@ class PrepareApi34ActionTest(unittest.TestCase):
         self.assertEqual(result['replacements'], 1)
         self.assertEqual(result['action_pin_object'], prepare.PIN)
         self.assertEqual(result['action_commit'], prepare.COMMIT)
+        self.assertEqual(result['expected_api'], 34)
         self.assertNotIn(prepare.MENU, actual)
         self.assertIn(b"await exec.exec('python3', [", actual)
         self.assertIn(b"'--serial', `emulator-${port}`", actual)
+        self.assertIn(b"'--expected-api', \"34\"", actual)
         self.assertEqual(actual.splitlines()[0], original.splitlines()[0])
         self.assertEqual(actual.splitlines()[-1], original.splitlines()[-1])
         self.assertEqual(len(actual.splitlines()), len(original.splitlines()))
@@ -99,8 +101,8 @@ class PrepareApi34ActionTest(unittest.TestCase):
             self.assertEqual(path.read_bytes(), source)
 
     def test_global_cache_or_other_checkout_cannot_be_patched(self):
-        with self.assertRaisesRegex(ValueError, 'owned API34'):
-            prepare.prepare(Path('artifacts/../_actions/cache'), prepare.EVIDENCE)
+        with self.assertRaisesRegex(ValueError, 'owned emulator'):
+            prepare.prepare(Path('artifacts/../_actions/cache'), prepare.evidence_relative(34), api_level=34)
         self.assert_unchanged()
 
     def test_symlink_path_is_refused(self):
@@ -123,6 +125,26 @@ class PrepareApi34ActionTest(unittest.TestCase):
         after = (self.action / 'lib/emulator-manager.js').read_bytes()
         with self.assertRaisesRegex(ValueError, 'identity mismatch'): self.call()
         self.assertEqual((self.action / 'lib/emulator-manager.js').read_bytes(), after)
+
+    def test_each_matrix_api_is_bound_into_the_single_replacement_and_evidence_path(self):
+        for api in (26, 29, 33, 34, 35, 36):
+            with self.subTest(api=api):
+                (self.action / 'lib/emulator-manager.js').write_bytes(self.sources['lib/emulator-manager.js'])
+                result = prepare.prepare(prepare.OWNED, prepare.evidence_relative(api), api_level=api)
+                patched = (self.action / 'lib/emulator-manager.js').read_bytes()
+                self.assertEqual(result['expected_api'], api)
+                self.assertIn(f"'--expected-api', \"{api}\"".encode(), patched)
+                self.assertIn(f'api-{api}'.encode(), patched)
+                self.assertEqual(len(patched.splitlines()), len(self.sources['lib/emulator-manager.js'].splitlines()))
+
+    def test_unsupported_api_or_mismatched_evidence_is_refused_before_patching(self):
+        for api in (25, 27, 37, -1, True, '34', None):
+            with self.subTest(api=api), self.assertRaises(ValueError):
+                prepare.prepare(prepare.OWNED, Path('artifacts/release/android_emulator_smoke/api-34'), api_level=api)
+            self.assert_unchanged()
+        with self.assertRaisesRegex(ValueError, 'owned emulator'):
+            prepare.prepare(prepare.OWNED, prepare.evidence_relative(34), api_level=29)
+        self.assert_unchanged()
 
 
 if __name__ == '__main__':
