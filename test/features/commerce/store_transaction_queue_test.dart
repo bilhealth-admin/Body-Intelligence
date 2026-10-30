@@ -1663,13 +1663,12 @@ void main() {
       final replayed = _receipt(purchaseId: 'replayed-transaction');
 
       native.updates.add([replayed, replayed]);
-      await verificationStarted.future;
+      await verificationStarted.future.timeout(const Duration(seconds: 2));
       expect(verificationCalls, 1);
 
       // This is a second StoreKit stream delivery while the first verification
       // remains in flight. It must not become a second server request.
       native.updates.add([replayed]);
-      await drain();
       expect(verificationCalls, 1);
 
       verification.complete(
@@ -1679,13 +1678,34 @@ void main() {
           headers: {'content-type': 'application/json'},
         ),
       );
-      await drain();
+      // A response completer releases the mock HTTP response, not the real
+      // service's async verification/queue. Observe its terminal receipt state.
+      await waitForStoreCondition(
+        () => store.state == VerifiedStoreState.failed && !store.busy,
+      );
+      expect(verificationCalls, 1);
       expect(native.completionCalls, 0);
 
       // A distinct platform transaction is never covered by the replay key.
+      verification = Completer<http.Response>();
+      verificationStarted = Completer<void>();
       native.updates.add([_receipt(purchaseId: 'new-transaction')]);
-      await drain();
+      await verificationStarted.future.timeout(const Duration(seconds: 2));
       expect(verificationCalls, 2);
+      expect(store.busy, isTrue);
+      expect(native.completionCalls, 0);
+      verification.complete(
+        http.Response(
+          '{"verified":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await waitForStoreCondition(
+        () => store.state == VerifiedStoreState.failed && !store.busy,
+      );
+      expect(verificationCalls, 2);
+      expect(native.completionCalls, 0);
     },
   );
   test(

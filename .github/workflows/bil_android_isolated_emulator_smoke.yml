@@ -86,6 +86,8 @@ jobs:
           python3 -m unittest discover -s tool/release -p 'test_configure_android_emulator_display.py'
           python3 -m unittest discover -s tool/release -p 'test_android_startup_workflow.py'
           python3 -m unittest discover -s tool/release -p 'test_verify_android_startup_frame.py'
+          python3 -m unittest discover -s tool/release -p 'test_prepare_api34_emulator_action.py'
+          python3 -m unittest discover -s tool/release -p 'test_android_api34_unlock.py'
           python3 tool/release/android_emulator_launch_options.py --api-level "$BIL_ANDROID_API" >> "$GITHUB_OUTPUT"
 
       - name: Record the hosted VM resource budget before emulator startup
@@ -101,8 +103,46 @@ jobs:
             free -m
           } > "$evidence/host-resources.txt"
 
+      - name: Checkout the exact emulator action into owned API34 tooling
+        if: ${{ matrix.api-level == 34 }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ReactiveCircus/android-emulator-runner
+          ref: 4c44018e59b437e86cdfc41da381398f93ed8808
+          path: artifacts/tooling/bil-api34-emulator-action
+          persist-credentials: false
+
+      - name: Verify and prepare the owned API34 bootstrap
+        if: ${{ matrix.api-level == 34 }}
+        shell: bash
+        run: >-
+          python3 tool/release/prepare_api34_emulator_action.py
+          --action-dir artifacts/tooling/bil-api34-emulator-action
+          --evidence-dir artifacts/release/android_emulator_smoke/api-34
+
       - name: Install and launch BIL offline on API ${{ matrix.api-level }}
+        if: ${{ matrix.api-level != 34 }}
         uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: x86_64
+          target: google_apis
+          profile: ${{ matrix.profile }}
+          cores: 2
+          ram-size: ${{ matrix.ram-size }}
+          disable-animations: true
+          emulator-boot-timeout: 900
+          emulator-options: ${{ steps.emulator-options.outputs.options }}
+          pre-emulator-launch-script: |
+            python3 tool/release/configure_android_emulator_display.py configure --api-level ${{ matrix.api-level }} --config "$ANDROID_AVD_HOME/test.avd/config.ini" --evidence-dir 'artifacts/release/android_emulator_smoke/api-${{ matrix.api-level }}'
+            adb kill-server || true
+            adb start-server
+            adb version
+          script: BIL_ANDROID_EMULATOR_API=${{ matrix.api-level }} bash tool/release/run_android_emulator_smoke.sh
+
+      - name: Install and launch BIL offline on API34 with state-aware bootstrap
+        if: ${{ matrix.api-level == 34 }}
+        uses: ./artifacts/tooling/bil-api34-emulator-action
         with:
           api-level: ${{ matrix.api-level }}
           arch: x86_64

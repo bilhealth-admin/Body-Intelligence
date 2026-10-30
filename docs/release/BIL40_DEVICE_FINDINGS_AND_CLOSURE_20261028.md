@@ -5,11 +5,16 @@ time. This is a source-change and evidence register, not a
 release approval. Physical39 and source40 results are deliberately separate.
 
 The latest completed-CI checkpoint documented here is
-`6744108f0a0ab3ce6b6840c35af89e6ead3f47ff`: eight successful workflows and two
-failed workflows (Flutter preferences-fixture setup and iPad native timing).
-This follow-up snapshot contains the focused fixture-lifecycle repair and
-native measured-geometry paint gate. Their local results do not replace the
-next candidate's complete native verification. Earlier failures remain retained.
+`73522fc4812ebc24d92911c998a5ef01716fca27`: seven successful workflows and three
+failed workflows (iPad history setup, Android API34 pre-app launcher ANR, and
+the isolated purchase-test completion observer). The Flutter suite passed
+11,317 outcomes with zero failures/errors and one explicit live-network skip.
+The native measured-geometry paint gate passed all four iPad first-readable
+reply checks, including Arabic normal motion at846ms. These results do not
+convert the remaining failures into passes.
+This follow-up contains only the three bounded test/bootstrap repairs described
+below; their local results do not replace the next candidate's complete native
+verification. Earlier failures remain retained.
 The candidate's immutable SHA is the checked-out Git commit and its
 actual CI receipts, not a changing "latest HEAD" label inside this versioned
 document. At this checkpoint no all-green replacement SHA, signed40 artifact,
@@ -22,8 +27,8 @@ for the results they explicitly establish.
 - Physical39 foundation: `69ebb89279f11a8da5ee8e631016a88f3d24333d`, version
   `1.0.0 (39)`, the correctly identified BIL app on the connected iPhone.
 - Candidate40 branch: `codex/bil40-device-fixes-20261028`, based on that foundation.
-  Source674 is committed; this document accompanies its subsequent bounded
-  source/tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
+  Source735 is committed; this document accompanies its subsequent bounded
+  test/tooling follow-up. No fully accepted40 SHA, signed40 IPA or physical40
   acceptance is recorded by this checkpoint.
 - The owner requires completing the remaining physical39 discovery before
   building40. USB was reconnected and the follow-up resumed; interruptions by
@@ -1070,3 +1075,27 @@ Evidence: `native-paint-gate-analysis/native-geometry-paint-gate-proof.json` and
 Both follow-ups are combined before the next candidate push. No isolated native
 component workflow was pushed, no production cloud code changed, and no40
 signing/upload or physical40 acceptance is claimed at this source checkpoint.
+
+## Source735 closure and bounded test/bootstrap follow-up
+
+The first-attempt735 cohort completed seven successful workflows and three
+failed workflows. All11,317 non-skipped host Flutter outcomes passed; the
+explicit live-network skip was not counted as a pass. iPhone, Crystal, cloud,
+video, security fixtures and NativeCoach workflows also passed. The private
+`73522fc4-final-ci/cohort-evidence-closure.json` binds actual run/job results;
+`verify-artifacts/source-bound-flutter-closure.json` binds all1,486 immutable
+test files and their result streams. No signing or TestFlight40 upload occurred.
+
+| Remaining735 failure | Actual evidence and repair | Local result and limit |
+| --- | --- | --- |
+| Isolated purchase queue test | The real service's second HTTP verification had not started when a15-zero-delay drain returned. The single case now waits for actual request start and terminal failed/not-busy state, retaining deduplication, two distinct request IDs, and zero transaction completions. No purchase implementation changed. | The same six isolated commerce suites passed115/115 with payments enabled; analyzer/format/diff passed. `queued-receipt-sync/queued-receipt-test-sync-proof.json` and independent frozen-case review. Not physical StoreKit proof. |
+| iPad Arabic reduced-motion history | The stability guard began while the keyboard's native bottom inset was5.38656 and the viewport was still resizing. Post-drag preparation now requires zero native/MediaQuery keyboard insets, idle scroll and two stable viewport comparisons inside the existing80-pump cap. An unmet precondition explicitly fails before the original guard. | Ten actual widget controls passed, including never-ready failures and the retained3650ms stall rejecting the3500ms guard. The original3500ms/eight-comparison and1500ms readable-reply assertions are unchanged. `history-reading-precondition/native-history-reading-precondition-proof.json` and independent frozen-two-path review. No production scrolling change or native pass claimed. |
+| Android API34 pre-app launcher ANR | The exact pinned emulator action unconditionally sent KEYCODE_MENU82, matching the Wallpaper/Widgets popup behind the observed launcher ANR. API34 alone now uses an owned ignored checkout, verifies the immutable annotated tag/peeled commit and three entrypoint hashes, and replaces exactly that MENU statement with state-aware wake/unlock. All other action inputs, five APIs and strict startup/ANR checks remain unchanged. |98 actual Python controls passed; actual pinned JS syntax and controlled entrypoint execution passed. Initial unavailable policy/focus is observed read-only inside30seconds; ANR/contradictions fail immediately. Wake/dismiss occurs at most once when needed, never on physical devices. `api34-bootstrap-fix/api34-bootstrap-local-proof-readiness-v2.json` and independent v2 review. The MENU popup link does not establish the sole ANR cause; a new exact-SHA API34 run is still required. |
+
+These nine test/bootstrap paths are combined once before the next candidate
+push. Production Flutter/Swift/Supabase code, prices, rights, credits, protected
+purchase controls, dependency versions and the accepted geometry gate are
+unchanged by this follow-up. Prior failed runs and development-control failures
+remain available; no retry converts them into earlier successes. The next
+candidate must pass all ten required workflows before the exact tested SHA is
+used for the separate signed internal-TestFlight build.

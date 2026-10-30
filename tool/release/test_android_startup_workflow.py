@@ -117,6 +117,39 @@ class AndroidStartupWorkflowTest(unittest.TestCase):
         self.assertIn('--window-health-only --require-app-focus', script)
         self.assertIn('if (( window_exit >= 20 && window_exit <= 22 )); then', script)
 
+    def test_api34_local_action_is_conditional_and_preserves_other_api_inputs(self) -> None:
+        steps = re.split(r'(?m)^      - name: ', self.source)[1:]
+        original = next(step for step in steps if
+                        'uses: reactivecircus/android-emulator-runner@' in step)
+        local = next((step for step in steps if
+                      'uses: ./artifacts/tooling/bil-api34-emulator-action' in step), None)
+        self.assertIsNotNone(local, 'API34 must avoid the pinned action\'s unconditional MENU')
+        self.assertIn('if: ${{ matrix.api-level != 34 }}', original)
+        self.assertIn('if: ${{ matrix.api-level == 34 }}', local)
+        self.assertEqual(original.split('        with:\n', 1)[1],
+                         local.split('        with:\n', 1)[1])
+        self.assertIn('repository: ReactiveCircus/android-emulator-runner', self.source)
+        self.assertIn('ref: 4c44018e59b437e86cdfc41da381398f93ed8808', self.source)
+        self.assertIn('test_prepare_api34_emulator_action.py', self.source)
+        self.assertIn('test_android_api34_unlock.py', self.source)
+
+    def test_owned_checkout_is_conditional_pinned_and_prepared_before_use(self) -> None:
+        steps = re.split(r'(?m)^      - name: ', self.source)[1:]
+        checkout = next(step for step in steps if
+                        'repository: ReactiveCircus/android-emulator-runner' in step)
+        prepared = next(step for step in steps if
+                        'python3 tool/release/prepare_api34_emulator_action.py' in step)
+        local = next(step for step in steps if
+                     'uses: ./artifacts/tooling/bil-api34-emulator-action' in step)
+        self.assertIn('if: ${{ matrix.api-level == 34 }}', checkout)
+        self.assertIn('if: ${{ matrix.api-level == 34 }}', prepared)
+        self.assertIn('persist-credentials: false', checkout)
+        self.assertIn('path: artifacts/tooling/bil-api34-emulator-action', checkout)
+        self.assertLess(steps.index(checkout), steps.index(prepared))
+        self.assertLess(steps.index(prepared), steps.index(local))
+        self.assertEqual(self.source.count('uses: reactivecircus/android-emulator-runner@'), 1)
+        self.assertEqual(self.source.count('uses: ./artifacts/tooling/bil-api34-emulator-action'), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

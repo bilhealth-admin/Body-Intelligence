@@ -10,31 +10,38 @@ import '../../../integration_test/native_feature_splashes_test.dart' as native;
 
 Future<void> _mountHistory(
   WidgetTester tester,
-  ScrollController controller,
-) async {
+  ScrollController controller, {
+  ValueNotifier<double>? viewportHeight,
+}) async {
+  Widget history(double height) => SizedBox(
+    height: height,
+    child: ChatHistoryViewport(
+      controller: controller,
+      latestMessageId: '29',
+      child: ListView.builder(
+        controller: controller,
+        reverse: true,
+        itemCount: 30,
+        itemExtent: 120,
+        itemBuilder: (_, index) => CoachMessageText(
+          key: ValueKey('diagnostic-history-$index'),
+          text: 'Synthetic local history $index: local observer fixture.',
+          createdAt: DateTime(2026),
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    ),
+  );
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(platform: TargetPlatform.android),
       home: Scaffold(
-        body: SizedBox(
-          height: 400,
-          child: ChatHistoryViewport(
-            controller: controller,
-            latestMessageId: '29',
-            child: ListView.builder(
-              controller: controller,
-              reverse: true,
-              itemCount: 30,
-              itemExtent: 120,
-              itemBuilder: (_, index) => CoachMessageText(
-                key: ValueKey('diagnostic-history-$index'),
-                text: 'Synthetic local history $index: local observer fixture.',
-                createdAt: DateTime(2026),
-                textDirection: TextDirection.ltr,
+        body: viewportHeight == null
+            ? history(400)
+            : ValueListenableBuilder<double>(
+                valueListenable: viewportHeight,
+                builder: (_, height, _) => history(height),
               ),
-            ),
-          ),
-        ),
       ),
     ),
   );
@@ -42,6 +49,180 @@ Future<void> _mountHistory(
 }
 
 void main() {
+  testWidgets(
+    'real drag preparation waits for keyboard end and a later viewport resize',
+    (tester) async {
+      final controller = ScrollController();
+      final height = ValueNotifier(400.0);
+      final metadata = <String, Object?>{};
+      tester.view.viewInsets = FakeViewPadding(bottom: 100);
+      addTearDown(tester.view.resetViewInsets);
+      var active = true;
+      var dismissalRequested = false;
+      void observe(Duration _) {
+        if (!active) return;
+        final preparations = metadata['history_drag_preparation'];
+        if (preparations is List && preparations.isNotEmpty) {
+          final samples = (preparations.last as Map)['samples'] as List;
+          if (samples.length == 3 && !dismissalRequested) {
+            dismissalRequested = true;
+            tester.view.viewInsets = FakeViewPadding.zero;
+            // Resize on the following frame's layout, after the native inset
+            // has reached zero. Post-frame callback count is not pump count.
+            WidgetsBinding.instance.scheduleFrameCallback((_) {
+              if (active) height.value = 320;
+            });
+          }
+        }
+        WidgetsBinding.instance.addPostFrameCallback(observe);
+        WidgetsBinding.instance.scheduleFrame();
+      }
+
+      try {
+        await _mountHistory(tester, controller, viewportHeight: height);
+        WidgetsBinding.instance.addPostFrameCallback(observe);
+        final anchor = await native.nativeQaEnterOlderHistory(
+          tester,
+          language: 'en',
+          metadata: metadata,
+          maximumDrags: 1,
+        );
+        expect(anchor, findsOneWidget);
+        final preparations = metadata['history_drag_preparation'] as List;
+        final preparation = preparations.single as Map;
+        final samples = (preparation['samples'] as List).cast<Map>();
+        expect(preparation['completed'], isTrue);
+        expect(preparation['maximum_pumps'], 80);
+        expect(preparation['settled_comparisons_at_exit'], 2);
+        expect(preparation['completed_pumps'], greaterThanOrEqualTo(6));
+        expect(
+          samples.any((sample) => (sample['native_keyboard_inset'] as num) > 0),
+          isTrue,
+        );
+        expect(
+          samples.any(
+            (sample) => (sample['viewport_edge_deltas'] as List)
+                .cast<num>()
+                .any((delta) => delta.abs() >= .1),
+          ),
+          isTrue,
+        );
+        final last = samples.last;
+        expect(last['native_keyboard_inset'], 0);
+        expect(last['media_keyboard_inset'], 0);
+        expect((last['viewport'] as Map)['viewport_height'], 320);
+        final guard = metadata['history_anchor_settle'] as Map;
+        final firstGuard = (guard['samples'] as List).first as Map;
+        expect(guard['completed'], isTrue);
+        expect(guard['stable_at_exit'], 8);
+        expect(guard['wall_deadline_ms'], 3500);
+        expect((firstGuard['viewport_before'] as Map)['viewport_height'], 320);
+        expect(
+          (firstGuard['viewport_before'] as Map)['view_insets_bottom_physical'],
+          0,
+        );
+      } finally {
+        active = false;
+        await tester.pumpWidget(const SizedBox.shrink());
+        controller.dispose();
+        height.dispose();
+      }
+    },
+  );
+
+  testWidgets('a never-dismissed keyboard refuses setup before the guard', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    final metadata = <String, Object?>{};
+    tester.view.viewInsets = FakeViewPadding(bottom: 24);
+    addTearDown(tester.view.resetViewInsets);
+    try {
+      await _mountHistory(tester, controller);
+      Object? caught;
+      try {
+        await native.nativeQaEnterOlderHistory(
+          tester,
+          language: 'en',
+          metadata: metadata,
+        );
+      } catch (error) {
+        caught = error;
+      }
+      expect(
+        caught,
+        isA<StateError>().having(
+          (error) => error.message,
+          'explicit setup failure',
+          contains('native_history_drag_setup_not_ready_after_80_frames'),
+        ),
+      );
+      expect(controller.offset, greaterThan(72));
+      expect(metadata.containsKey('history_anchor_settle'), isFalse);
+      expect(metadata['history_anchor_search'], isEmpty);
+      final preparation =
+          (metadata['history_drag_preparation'] as List).single as Map;
+      expect(preparation['completed'], isFalse);
+      expect(preparation['completed_pumps'], 80);
+      expect(preparation['settled_comparisons_at_exit'], 0);
+      expect(preparation['error_type'], 'StateError');
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      controller.dispose();
+    }
+  });
+
+  testWidgets('an unsettled viewport refuses setup within the same80 pumps', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    final height = ValueNotifier(400.0);
+    final metadata = <String, Object?>{};
+    var active = true;
+    void observe(Duration _) {
+      if (!active) return;
+      final preparations = metadata['history_drag_preparation'];
+      if (preparations is List && preparations.isNotEmpty) {
+        height.value = height.value == 400 ? 320 : 400;
+      }
+      WidgetsBinding.instance.addPostFrameCallback(observe);
+      WidgetsBinding.instance.scheduleFrame();
+    }
+
+    try {
+      await _mountHistory(tester, controller, viewportHeight: height);
+      WidgetsBinding.instance.addPostFrameCallback(observe);
+      Object? caught;
+      try {
+        await native.nativeQaEnterOlderHistory(
+          tester,
+          language: 'en',
+          metadata: metadata,
+        );
+      } catch (error) {
+        caught = error;
+      }
+      expect(
+        caught,
+        isA<StateError>().having(
+          (error) => error.message,
+          'explicit setup failure',
+          contains('native_history_drag_setup_not_ready_after_80_frames'),
+        ),
+      );
+      expect(metadata.containsKey('history_anchor_settle'), isFalse);
+      final preparation =
+          (metadata['history_drag_preparation'] as List).single as Map;
+      expect(preparation['completed'], isFalse);
+      expect(preparation['completed_pumps'], 80);
+    } finally {
+      active = false;
+      await tester.pumpWidget(const SizedBox.shrink());
+      controller.dispose();
+      height.dispose();
+    }
+  });
+
   for (final fallback in [false, true]) {
     testWidgets(
       'reply metadata distinguishes ${fallback ? 'two matching fallback elements' : 'zero matching elements'} without accepting either',
@@ -176,6 +357,10 @@ void main() {
           io.sleep(const Duration(milliseconds: 3650));
         }
         WidgetsBinding.instance.addPostFrameCallback(observe);
+        // The preparation now drains idle frames. This local stall probe must
+        // request its own bounded control frames rather than depend on an app
+        // animation to happen to schedule the guarded callback.
+        WidgetsBinding.instance.scheduleFrame();
       }
 
       try {

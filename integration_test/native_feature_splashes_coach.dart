@@ -253,6 +253,100 @@ Future<void> _captureReply(
   });
 }
 
+Future<void> _prepareNativeHistoryReading(
+  WidgetTester tester,
+  Finder viewport,
+  ScrollController controller,
+  List<Map<String, Object?>> preparations, {
+  required int dragIndex,
+}) async {
+  final watch = Stopwatch()..start();
+  final samples = <Map<String, Object?>>[];
+  final diagnostic = <String, Object?>{
+    'scope': 'post-drag setup only; original3500ms anchor guard starts later',
+    'drag_index': dragIndex,
+    'maximum_pumps': 80,
+    'required_consecutive_viewport_comparisons': 2,
+    'maximum_viewport_delta_exclusive': .1,
+    'initial_viewport': _historyViewportStateSummary(tester, viewport),
+    'samples': samples,
+    'completed': false,
+  };
+  preparations.add(diagnostic);
+  var previous = tester.getRect(viewport);
+  var settled = 0;
+  try {
+    for (var frame = 0; frame < 80; frame++) {
+      final sample = <String, Object?>{
+        'index': frame,
+        'before_pump_us': watch.elapsedMicroseconds,
+        'completed_pump': false,
+      };
+      samples.add(sample);
+      try {
+        await tester.pump(const Duration(milliseconds: 16));
+        sample['completed_pump'] = true;
+      } finally {
+        sample['after_pump_us'] = watch.elapsedMicroseconds;
+        sample['pump_wall_us'] =
+            watch.elapsedMicroseconds - (sample['before_pump_us'] as int);
+      }
+      final observerStart = watch.elapsedMicroseconds;
+      final current = tester.getRect(viewport);
+      final media = viewport
+          .evaluate()
+          .single
+          .getInheritedWidgetOfExactType<MediaQuery>()
+          ?.data;
+      final nativeInset = tester.view.viewInsets.bottom;
+      final mediaInset = media?.viewInsets.bottom;
+      final scrolling = controller.position.isScrollingNotifier.value;
+      final deltas = [
+        current.left - previous.left,
+        current.top - previous.top,
+        current.right - previous.right,
+        current.bottom - previous.bottom,
+      ];
+      if (!scrolling &&
+          nativeInset == 0 &&
+          mediaInset == 0 &&
+          deltas.every((delta) => delta.isFinite && delta.abs() < .1)) {
+        settled++;
+      } else {
+        settled = 0;
+      }
+      sample.addAll({
+        'viewport': _historyViewportStateSummary(tester, viewport),
+        'viewport_edge_deltas': deltas,
+        'scrolling': scrolling,
+        'native_keyboard_inset': nativeInset,
+        'media_keyboard_inset': mediaInset,
+        'settled_comparisons': settled,
+        'observer_wall_us': watch.elapsedMicroseconds - observerStart,
+      });
+      previous = current;
+      if (settled == 2) {
+        diagnostic['completed'] = true;
+        return;
+      }
+    }
+    throw StateError(
+      'native_history_drag_setup_not_ready_after_80_frames: '
+      'drag=$dragIndex settled_comparisons=$settled '
+      'last_viewport=${jsonEncode(samples.last['viewport'])}',
+    );
+  } catch (error) {
+    diagnostic['error_type'] = error.runtimeType.toString();
+    rethrow;
+  } finally {
+    diagnostic['elapsed_us'] = watch.elapsedMicroseconds;
+    diagnostic['completed_pumps'] = samples
+        .where((sample) => sample['completed_pump'] == true)
+        .length;
+    diagnostic['settled_comparisons_at_exit'] = settled;
+  }
+}
+
 Future<Finder> nativeQaEnterOlderHistory(
   WidgetTester tester, {
   required String language,
@@ -262,7 +356,9 @@ Future<Finder> nativeQaEnterOlderHistory(
   final viewport = find.byType(ChatHistoryViewport);
   final controller = tester.widget<ChatHistoryViewport>(viewport).controller;
   final attempts = <Map<String, Object?>>[];
+  final preparations = <Map<String, Object?>>[];
   metadata['history_anchor_search'] = attempts;
+  metadata['history_drag_preparation'] = preparations;
   for (var attempt = 0; attempt < maximumDrags; attempt++) {
     final before = controller.offset;
     final distance = (tester.getSize(viewport).height * .55)
@@ -272,13 +368,16 @@ Future<Finder> nativeQaEnterOlderHistory(
     // Pointer delivery can finish before the next layout/ballistic frame.
     // Always observe one frame before inspecting visibility or scroll state.
     await tester.pump(const Duration(milliseconds: 16));
-    for (
-      var frame = 0;
-      frame < 80 && controller.position.isScrollingNotifier.value;
-      frame++
-    ) {
-      await tester.pump(const Duration(milliseconds: 16));
-    }
+    // An idle ScrollPosition can coexist with a dismissing native keyboard and
+    // a not-yet-painted viewport resize. Establish the reading setup inside the
+    // existing80-frame preparation cap before choosing the stability anchor.
+    await _prepareNativeHistoryReading(
+      tester,
+      viewport,
+      controller,
+      preparations,
+      dragIndex: attempt + 1,
+    );
     final bounds = tester.getRect(viewport);
     final candidates = find.byType(CoachMessageText).evaluate().where((
       element,
