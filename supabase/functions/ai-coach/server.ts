@@ -733,9 +733,11 @@ function estimateCost(
     : null;
 }
 
-// Bound primary + fallback to a 20-second provider budget. The client keeps
-// eight additional seconds for Edge Function/RPC overhead.
-export const geminiAttemptTimeoutMs = 10_000;
+// Give the first model more room to finish reasoning instead of aborting at
+// ten seconds. Later calls retain ten seconds at most, within the unchanged
+// absolute24s request window and the client's28s deadline.
+export const geminiAttemptTimeoutMs = 14_000;
+export const geminiLaterAttemptTimeoutMs = 10_000;
 
 export function thinkingConfigForModel(
   model: string,
@@ -1095,6 +1097,22 @@ export type AiCoachHandlerDependencies = {
   now?: () => number;
   requireIntegrity?: typeof requireMobileIntegrityGrant;
   diagnosticLog?: (event: AiCoachFailureDiagnostic) => void;
+  providerDiagnosticLog?: (event: AiCoachProviderDiagnostic) => void;
+};
+
+type AiCoachProviderAttempt = {
+  model: string;
+  thinking: "LOW" | "MEDIUM" | "HIGH";
+  budget_ms: number;
+  elapsed_ms: number;
+  error_code: string | null;
+};
+
+type AiCoachProviderDiagnostic = {
+  event: "ai_coach_provider_summary";
+  request_id_hash: string | null;
+  provider_attempts: number;
+  provider_trace: AiCoachProviderAttempt[];
 };
 
 type AiCoachFailureDiagnostic = {
@@ -1108,6 +1126,7 @@ type AiCoachFailureDiagnostic = {
   compensation_attempted: boolean;
   compensation_succeeded: boolean | null;
   provider_attempts: number;
+  provider_trace: AiCoachProviderAttempt[];
 };
 
 const safeAiCoachDiagnosticCodes = new Set([
@@ -1223,23 +1242,46 @@ export async function handler(
   let reserved = false;
   let failureStage = "authentication";
   let providerAttempts = 0;
+  const providerTrace: AiCoachProviderAttempt[] = [];
   const successfulProviderCosts: Array<number | null> = [];
   // The existing provider24s/three-call maximum is shared by primary, independent
   // fallback and citation repair. A repair must not create a fourth attempt or
   // a fresh reservation, even when a provider fails before reporting usage.
   const boundedGemini: typeof geminiCall = async (...args) => {
-    const remaining = 24_000 - (now() - started);
+    const attemptStarted = now();
+    const remaining = 24_000 - (attemptStarted - started);
     if (remaining < 1500 || providerAttempts >= 3) throw new Error("provider_timeout");
-    const budget = Math.min(args[8] ?? geminiAttemptTimeoutMs, geminiAttemptTimeoutMs, remaining);
-    // Omitted means the same inspected10s default, preserving the old seam.
+    const cap = providerAttempts === 0 ? geminiAttemptTimeoutMs : geminiLaterAttemptTimeoutMs;
+    const budget = Math.min(args[8] ?? cap, cap, remaining);
+    // Omitted means the first call's inspected14s transport default.
     if (args[8] !== undefined || budget < geminiAttemptTimeoutMs) args[8] = budget;
     providerAttempts++;
-    const value = await callGemini(...args);
-    if (now() - started >= 24_000) throw new Error("provider_timeout");
-    const usage = (value.data.usageMetadata ?? {}) as Record<string, unknown>;
-    successfulProviderCosts.push(estimateCost(args[0], Number(usage.promptTokenCount ?? 0),
-      Number(usage.candidatesTokenCount ?? 0) + Number(usage.thoughtsTokenCount ?? 0)));
-    return value;
+    const trace: AiCoachProviderAttempt = {
+      model: /^(?:models\/)?gemini-[a-z0-9._-]{1,70}$/i.test(args[0]) ? args[0] : "unrecognized_model",
+      thinking: args[5] ?? "MEDIUM",
+      budget_ms: budget,
+      elapsed_ms: 0,
+      error_code: null,
+    };
+    providerTrace.push(trace);
+    try {
+      const value = await callGemini(...args);
+      const finished = now();
+      // Also fence injected/deferred transports that return after their own
+      // deadline. A late answer cannot consume credits or become a success.
+      if (finished - started >= 24_000 || finished - attemptStarted >= budget) {
+        throw new Error("provider_timeout");
+      }
+      const usage = (value.data.usageMetadata ?? {}) as Record<string, unknown>;
+      successfulProviderCosts.push(estimateCost(args[0], Number(usage.promptTokenCount ?? 0),
+        Number(usage.candidatesTokenCount ?? 0) + Number(usage.thoughtsTokenCount ?? 0)));
+      return value;
+    } catch (error) {
+      trace.error_code = safeAiCoachDiagnosticCode(error instanceof Error ? error.message : "provider_failed");
+      throw error;
+    } finally {
+      trace.elapsed_ms = Math.max(0, Math.min(60_000, now() - attemptStarted));
+    }
   };
   try {
     const authorization = request.headers.get("authorization") ?? "";
@@ -1554,6 +1596,16 @@ export async function handler(
       settleError ||
       (settlement as Record<string, unknown> | null)?.state !== "succeeded"
     ) throw new Error("settlement_failed");
+    const providerDiagnostic: AiCoachProviderDiagnostic = {
+      event: "ai_coach_provider_summary",
+      request_id_hash: await requestCorrelationHash(requestId),
+      provider_attempts: providerAttempts,
+      provider_trace: providerTrace,
+    };
+    try {
+      if (dependencies.providerDiagnosticLog) dependencies.providerDiagnosticLog(providerDiagnostic);
+      else console.info(JSON.stringify(providerDiagnostic));
+    } catch { /* Diagnostics must never change settlement or the answer. */ }
     return json({
       ...result,
       ...(qualityRecovery == null ? {} : { quality_recovery: qualityRecovery }),
@@ -1625,6 +1677,7 @@ export async function handler(
       compensation_attempted: compensationAttempted,
       compensation_succeeded: compensationSucceeded,
       provider_attempts: providerAttempts,
+      provider_trace: providerTrace,
     };
     writeAiCoachFailureDiagnostic(diagnostic, dependencies.diagnosticLog);
     return json({ error: code }, status);

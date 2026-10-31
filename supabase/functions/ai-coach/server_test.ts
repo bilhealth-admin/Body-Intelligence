@@ -11,6 +11,7 @@ import {
   boundedMessages,
   extractModelText,
   geminiAttemptTimeoutMs,
+  geminiLaterAttemptTimeoutMs,
   geminiCall,
   geminiCallWithFallback,
   geminiSafetySettings,
@@ -462,7 +463,9 @@ function providerSuccess() {
 }
 
 Deno.test("Gemini provider budget fits the client deadline", async () => {
-  assertEquals(geminiAttemptTimeoutMs, 10_000);
+  assertEquals(geminiAttemptTimeoutMs, 14_000);
+  assertEquals(geminiLaterAttemptTimeoutMs, 10_000);
+  assertEquals(geminiAttemptTimeoutMs + geminiLaterAttemptTimeoutMs, 24_000);
   assertEquals(isRetryableGeminiStatus(429), true);
   assertEquals(isRetryableGeminiStatus(503), true);
   assertEquals(isRetryableGeminiStatus(400), false);
@@ -2158,7 +2161,19 @@ Deno.test("citation repair uses one normal bounded attempt within the existing t
     let now = 1000, calls = 0;
     const deadlines: Array<number | undefined> = [];
     const response = await handler(requestBody(), {
-      clients: fake.create as never, now: () => now,
+      // Spend this fixture's optional overhead before dispatch. A fake
+      // successful20s provider response violates the real14s transport cap
+      // and must now be rejected, not used to manufacture a repair budget.
+      clients: ((authorization: string) => {
+        const client = fake.create(authorization);
+        const getUser = client.auth.auth.getUser;
+        client.auth.auth.getUser = async () => {
+          const result = await getUser();
+          now = 1000 + elapsed;
+          return result;
+        };
+        return client;
+      }) as never, now: () => now,
       geminiCall: async (...args) => {
         calls++; deadlines.push(args[8]);
         now = 1000 + elapsed;
@@ -2170,7 +2185,7 @@ Deno.test("citation repair uses one normal bounded attempt within the existing t
     });
     assertEquals(response.status, 200);
     assertEquals(calls, 2);
-    assertEquals(deadlines, [undefined, expectedBudget]);
+    assertEquals(deadlines, [elapsed === 0 ? undefined : 4000, expectedBudget]);
     assertEquals(fake.settlements.length, 1);
     assertEquals(fake.settlements[0].p_succeeded, true);
   }
