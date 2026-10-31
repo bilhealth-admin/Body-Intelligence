@@ -1673,12 +1673,12 @@ export async function exerciseHealthCitationHandlerContract({
     headers: baseRequest.headers,
     body: JSON.stringify(body),
   });
-  let clockReads = 0;
+  let testNow = 0;
   return await withGeminiTestKey(async () => {
     const response = await handlerUnderTest(request, {
       now: elapsedBeforeValidationMs === undefined
         ? undefined
-        : () => clockReads++ === 0 ? 0 : elapsedBeforeValidationMs,
+        : () => testNow,
       clients: ((authorization: string) => {
         const client = fake.create(authorization);
         const rpc = client.admin.rpc;
@@ -1720,6 +1720,10 @@ export async function exerciseHealthCitationHandlerContract({
                 ),
               );
             }
+            // Advance at the event this fixture names: after a successful
+            // provider response, before strict decoding/citation validation.
+            // A request budget may read the clock before dispatch as well.
+            testNow = elapsedBeforeValidationMs ?? testNow;
             return Promise.resolve(
               new Response(
                 JSON.stringify({
