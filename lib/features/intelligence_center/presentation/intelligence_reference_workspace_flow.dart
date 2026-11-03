@@ -155,7 +155,7 @@ extension _ReferenceWorkspaceFlow on _IntelligenceCenterPageState {
     // reduced-motion mode. Entering a conversation later does not replay it.
     if (entryWelcomeVisible) return const _AiCoachEntryWelcome();
     if (_referenceOverview) {
-      final overview = ref.watch(coachOverviewContextProvider).asData?.value;
+      final overview = ref.watch(coachOverviewPresentationContextProvider);
       return CoachReferenceWorkspace(
         snapshot: overview?.snapshot,
         recordedMealCount: overview?.recordedMealCount,

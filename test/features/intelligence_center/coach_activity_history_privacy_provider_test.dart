@@ -122,6 +122,23 @@ void main() {
           question: 'Explain my recorded sleep trend',
           context: snapshot,
         );
+        final dayReview = projectCoachCloudContext(
+          question: 'Review my day',
+          context: snapshot,
+        );
+        final dayReviewJson = jsonEncode(dayReview.context);
+        if (selected.contains(CoachContextFocus.habits)) {
+          expect(dayReviewJson, contains('7.25'));
+        } else {
+          expect(dayReviewJson, isNot(contains('sleepHours')));
+          expect(dayReviewJson, isNot(contains('7.25')));
+        }
+        expect(dayReviewJson, isNot(contains('consumedCaloriesKcal')));
+        expect(dayReviewJson, isNot(contains('dailyTargets')));
+        expect(
+          dayReview.disclosure['included_context_fields'],
+          dayReview.context.keys.toList()..sort(),
+        );
         if (!selected.contains(CoachContextFocus.habits)) {
           expect(jsonEncode(remote.context), isNot(contains('sleepHours')));
           expect(jsonEncode(remote.context), isNot(contains('7.25')));

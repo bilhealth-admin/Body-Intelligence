@@ -83,6 +83,14 @@ final coachHealthBriefProvider =
       // clock; frozen local sessions/tests cannot accidentally read tomorrow.
       final now = ref.watch(intelligenceConversationClockProvider)();
       final today = healthCivilDay(now);
+      // A still-observed brief must follow the civil day even when no diary
+      // table changes at midnight. Overview must not re-stamp yesterday's
+      // cached totals or dated nutrition schedule as today's data.
+      final midnight = Timer(
+        DateTime(now.year, now.month, now.day + 1).difference(now),
+        ref.invalidateSelf,
+      );
+      ref.onDispose(midnight.cancel);
       allowedRaw = await checkedHealthAwait(
         () => preferences.get(CoachContextPreferences.storageKey),
         check,

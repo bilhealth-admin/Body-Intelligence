@@ -116,8 +116,8 @@ void main() {
                 (ref) async => _snapshot,
               ),
               coachHealthBriefProvider.overrideWith((ref) async => _snapshot),
-              coachOverviewContextProvider.overrideWith(
-                (ref) async => CoachOverviewContext(snapshot: _snapshot),
+              coachOverviewPresentationContextProvider.overrideWith(
+                (ref) => CoachOverviewContext(snapshot: _snapshot),
               ),
               intelligenceHealthContextProvider.overrideWith(
                 (ref) async => const IntelligenceHealthContext(

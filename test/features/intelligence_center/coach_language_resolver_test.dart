@@ -5,6 +5,23 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const resolver = CoachLanguageResolver();
 
+  for (final question in [
+    'Review my day',
+    'Review my day from my saved BIL data and tell me the most useful next step.',
+    'Review my day using only records shared in this request. If data is missing, say it cannot be verified. Use a heading and three bullets. Do not log or change anything.',
+  ]) {
+    test('English day review overrides prior Arabic writing: $question', () {
+      final result = resolver.resolve(
+        input: question,
+        uiLocale: 'ar',
+        previousClearLanguageTag: 'ar',
+      );
+      expect(result.languageTag, 'en');
+      expect(result.detected, isTrue);
+      expect(result.usedPreviousInput, isFalse);
+    });
+  }
+
   test('language detection is independent from UI locale', () {
     expect(
       resolver.resolve(input: 'كم بقي من السعرات؟', uiLocale: 'en').languageTag,

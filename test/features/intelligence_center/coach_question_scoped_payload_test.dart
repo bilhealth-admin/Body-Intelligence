@@ -6,6 +6,144 @@ import 'package:body_intelligence_log/features/intelligence_center/services/loca
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const dayReviewQuestions = <String>[
+    'Review my day',
+    'Review my day from my saved BIL data and tell me the most useful next step.',
+    'Review my day using only records shared in this request. If data is missing, say it cannot be verified. Use a heading and three bullets. Do not log or change anything.',
+    'How was my day?',
+    'راجع يومي',
+    'حلّل يومي',
+    'حلل يومي من بياناتي المحفوظة دون تغيير أي شيء',
+    'كيف كان يومي؟',
+    'شو رأيك بيومي؟',
+    'شوف يومي وقولي كيف كان',
+    'أريد مراجعة يومي',
+    'بدي تراجع يومي',
+    'ممكن تحلل يومي؟',
+  ];
+  for (final question in dayReviewQuestions) {
+    test('day review retains selected categories after weight: $question', () {
+      for (final history in <List<CoachConversationTurn>>[
+        const [],
+        const [
+          CoachConversationTurn(role: 'user', content: 'Review my weight'),
+          CoachConversationTurn(role: 'assistant', content: 'Weight reviewed'),
+        ],
+      ]) {
+        final projection = projectCoachCloudContext(
+          question: question,
+          context: _richContext(),
+          conversation: history,
+        );
+        expect(projection.context['nutritionHistory'], isNotEmpty);
+        expect(projection.context['waterHistory'], isNotEmpty);
+        expect(projection.context['activityHistory'], isNotEmpty);
+        expect(projection.context['weight'], contains('history'));
+        final today =
+            (projection.context['computedHealth']! as Map)['today'] as Map;
+        expect(
+          today.keys,
+          containsAll(['nutrition', 'exerciseEnergy', 'sleep']),
+        );
+        _expectDisclosureMatches(projection, const [
+          'nutrition_water',
+          'sleep_habits',
+          'training_activity',
+          'weight_measurements_goal',
+        ]);
+        expect(
+          jsonEncode(projection.context),
+          isNot(contains('private-marker')),
+        );
+      }
+    });
+  }
+
+  test('new general question never inherits a previous private category', () {
+    for (final prior in ['Review my weight', 'Review my day']) {
+      final projection = projectCoachCloudContext(
+        question: 'Tell me something encouraging',
+        context: _richContext(),
+        conversation: [CoachConversationTurn(role: 'user', content: prior)],
+      );
+      expect(projection.context.keys, {'schema', 'generatedAt'});
+      _expectDisclosureMatches(projection, const []);
+    }
+  });
+
+  test('day words do not expand an explicit weight or nutrition question', () {
+    for (final question in [
+      'Review my weight today',
+      'My goal weight is 60 kg',
+    ]) {
+      _expectDisclosureMatches(_project(question), const [
+        'weight_measurements_goal',
+      ]);
+    }
+    _expectDisclosureMatches(_project('Review my meals today'), const [
+      'nutrition_water',
+    ]);
+  });
+
+  test(
+    'day review wire payload shares prepared activity and no prior withheld weight',
+    () async {
+      final cloud = _DayReviewCloudSpy();
+      final selected = CoachContextSnapshot(
+        generatedAt: DateTime.utc(2026, 11, 1),
+        profile: const {},
+        weights: const [],
+        weightReadStatus: CoachWeightReadStatus.withheld,
+        nutritionDays: const [],
+        waterHistory: const [],
+        activityHistory: const [
+          {'day': '2026-11-01', 'steps': 3500},
+        ],
+        computedHealth: const {
+          'today': {
+            'day': '2026-11-01',
+            'exerciseEnergy': {'verifiedBurnedKcal': 177},
+          },
+        },
+      );
+      final result = await LlamaCppLocalGateway(cloudAccess: cloud).answer(
+        question: 'Review my day',
+        locale: 'en',
+        languageDetected: true,
+        context: selected,
+        conversation: const [
+          CoachConversationTurn(
+            role: 'user',
+            content: 'Review my weight private-marker',
+          ),
+          CoachConversationTurn(
+            role: 'assistant',
+            content: 'private-marker weight report',
+          ),
+        ],
+      );
+      expect(result.answer?.text, 'Fixture day review');
+      expect(cloud.consentReads, 1);
+      expect(cloud.requests, hasLength(1));
+      final body = cloud.requests.single;
+      expect(body['locale'], 'en');
+      expect(body['language_hint'], 'en');
+      final context = body['context']! as Map;
+      final disclosure = body['context_disclosure']! as Map;
+      expect(disclosure['categories'], ['training_activity']);
+      expect(
+        disclosure['included_context_fields'],
+        context.keys.toList()..sort(),
+      );
+      expect(context['activityHistory'], selected.activityHistory);
+      expect(context, isNot(contains('weight')));
+      expect(context, isNot(contains('nutritionHistory')));
+      expect(context, isNot(contains('bodyContextHistory')));
+      expect(disclosure['included_prior_turn_count'], 0);
+      expect(jsonEncode(body), isNot(contains('private-marker')));
+    },
+  );
+
   for (final question in ['How old am I?', 'What is my age?', 'كم عمري؟']) {
     test('saved age reaches Cloud for: $question', () {
       final projection = _project(question);
@@ -385,3 +523,26 @@ CoachContextSnapshot _richContext() => CoachContextSnapshot(
     <String, Object?>{'hypothesis': 'protein meal helps'},
   ],
 );
+
+final class _DayReviewCloudSpy implements CoachCloudAccess {
+  int consentReads = 0;
+  final requests = <Map<String, Object?>>[];
+  @override
+  bool get hasAuthenticatedSession => true;
+  @override
+  Future<Object?> readRemoteAiConsent() async {
+    consentReads++;
+    return const {'granted': true, 'policy_version': '3'};
+  }
+
+  @override
+  Future<CoachCloudFunctionResponse> invokeCoach(
+    Map<String, Object?> body,
+  ) async {
+    requests.add(body);
+    return const CoachCloudFunctionResponse(
+      status: 200,
+      data: {'reply': 'Fixture day review'},
+    );
+  }
+}

@@ -23,7 +23,17 @@ final _now = DateTime(2026, 10, 25, 12);
 class _HeldNamePreferences extends PreferencesRepository {
   _HeldNamePreferences(super.database);
   Completer<String?>? hold;
+  bool suppressScopeEvents = false;
+  StreamController<String?>? scopeEvents;
   final entered = Completer<void>();
+
+  @override
+  Stream<String?> watch(String key) =>
+      key == CoachContextPreferences.storageKey && suppressScopeEvents
+      ? const Stream.empty()
+      : key == CoachContextPreferences.storageKey && scopeEvents != null
+      ? scopeEvents!.stream
+      : super.watch(key);
 
   @override
   Future<String?> get(String key) {
@@ -44,6 +54,10 @@ class _Fixture {
   );
   final owners = StreamController<String?>.broadcast(sync: true);
   String? owner = 'owner-a';
+  DateTime now = _now;
+  double calories = 300;
+  double targetCalories = 1800;
+  Object? briefFailure;
   late final preferences = _HeldNamePreferences(db);
   late ProviderContainer container;
   int fullContextReads = 0;
@@ -57,7 +71,7 @@ class _Fixture {
       overrides: [
         databaseProvider.overrideWithValue(db),
         preferencesRepositoryProvider.overrideWithValue(preferences),
-        intelligenceConversationClockProvider.overrideWithValue(() => _now),
+        intelligenceConversationClockProvider.overrideWithValue(() => now),
         coachNativeOwnerWitnessProvider.overrideWithValue(
           CoachNativeOwnerWitness(
             readOwner: () => owner,
@@ -68,16 +82,17 @@ class _Fixture {
           fullContextReads++;
           throw StateError('Overview must never assemble model context');
         }),
-        coachHealthBriefProvider.overrideWith(
-          (ref) async => CoachContextSnapshot(
-            generatedAt: _now,
+        coachHealthBriefProvider.overrideWith((ref) async {
+          if (briefFailure != null) throw briefFailure!;
+          return CoachContextSnapshot(
+            generatedAt: now,
             profile: const {'private': 'unneeded profile payload'},
             weights: [CoachWeightPoint(at: _now, kg: 81)],
-            nutritionDays: const [
+            nutritionDays: [
               CoachNutritionDay(
-                day: '2026-10-25',
+                day: dayKeyFor(now),
                 meals: [],
-                calories: 300,
+                calories: calories,
                 protein: 10,
                 carbs: 20,
                 fat: 8,
@@ -85,14 +100,14 @@ class _Fixture {
               ),
             ],
             waterHistory: const [],
-            computedHealth: const {
-              'dailyTargets': {'caloriesKcal': 1800},
+            computedHealth: {
+              'dailyTargets': {'caloriesKcal': targetCalories},
             },
             activityHistory: const [
               {'day': '2026-10-25', 'steps': 1234, 'notes': 'private note'},
             ],
-          ),
-        ),
+          );
+        }),
       ],
     );
   }
@@ -128,6 +143,285 @@ class _Fixture {
 }
 
 void main() {
+  test('a silent permission stream fails within its bounded read', () async {
+    final fixture = _Fixture();
+    await fixture.open();
+    fixture.briefFailure = StateError('early unavailable brief');
+    fixture.preferences.suppressScopeEvents = true;
+    addTearDown(fixture.close);
+    final subscription = fixture.container.listen(
+      coachOverviewPresentationContextProvider,
+      (_, _) {},
+    );
+    addTearDown(subscription.close);
+    await expectLater(
+      fixture.container.read(coachOverviewContextProvider.future),
+      throwsA(isA<TimeoutException>()),
+    );
+    expect(
+      fixture.container.read(coachOverviewPresentationContextProvider),
+      isNull,
+    );
+    expect(fixture.fullContextReads, 0);
+  });
+
+  test(
+    'a fresh consent event recovers after a transient stream error',
+    () async {
+      final fixture = _Fixture();
+      await fixture.open();
+      final events = StreamController<String?>.broadcast(sync: true);
+      fixture.preferences.scopeEvents = events;
+      addTearDown(() async {
+        await fixture.close();
+        await events.close();
+      });
+      final subscription = fixture.container.listen(
+        coachOverviewPresentationContextProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      final scope = const CoachContextPreferences().encode();
+      events.add(scope);
+      await fixture.container.read(coachOverviewContextProvider.future);
+      expect(
+        fixture.container.read(coachOverviewPresentationContextProvider),
+        isNotNull,
+      );
+      events.addError(StateError('synthetic permission stream unavailable'));
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(
+        fixture.container.read(coachOverviewPresentationContextProvider),
+        isNull,
+      );
+      fixture.container.read(coachOverviewContextProvider.future).ignore();
+      events.add(scope);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await fixture.container.read(coachOverviewContextProvider.future);
+      expect(
+        fixture.container.read(coachOverviewPresentationContextProvider),
+        isNotNull,
+      );
+    },
+  );
+
+  test(
+    'same-visit local refresh keeps the exact previous snapshot until the new value arrives',
+    () async {
+      final fixture = _Fixture();
+      await fixture.open();
+      addTearDown(fixture.close);
+      final subscription = fixture.container.listen(
+        coachOverviewPresentationContextProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await fixture.container.read(coachOverviewContextProvider.future);
+      final before = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      )!;
+      final held = Completer<String?>();
+      fixture.preferences.hold = held;
+      await fixture.preferences.set('displayName', 'New current name');
+      await fixture.preferences.entered.future;
+      expect(
+        fixture.container.read(coachOverviewContextProvider).isLoading,
+        isTrue,
+      );
+      expect(
+        identical(
+          fixture.container.read(coachOverviewPresentationContextProvider),
+          before,
+        ),
+        isTrue,
+      );
+      expect(before.snapshot.nutritionDays.single.calories, 300);
+      held.complete('New current name');
+      await fixture.container.read(coachOverviewContextProvider.future);
+      final after = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      )!;
+      expect(after.snapshot.minimalIdentity['displayName'], 'New current name');
+      expect(identical(after, before), isFalse);
+    },
+  );
+
+  test(
+    'permission revocation cannot retain old nutrition or accept a late private snapshot',
+    () async {
+      final fixture = _Fixture();
+      await fixture.open();
+      addTearDown(fixture.close);
+      final subscription = fixture.container.listen(
+        coachOverviewPresentationContextProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await fixture.container.read(coachOverviewContextProvider.future);
+      expect(
+        fixture.container
+            .read(coachOverviewPresentationContextProvider)!
+            .snapshot
+            .nutritionDays,
+        isNotEmpty,
+      );
+      final held = Completer<String?>();
+      fixture.preferences.hold = held;
+      await fixture.preferences.set('displayName', 'pending private name');
+      await fixture.preferences.entered.future;
+      fixture.container.read(coachOverviewContextProvider.future).ignore();
+      await fixture.preferences.set(
+        CoachContextPreferences.storageKey,
+        const CoachContextPreferences(focuses: {}).encode(),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      final during = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      );
+      expect(during?.snapshot.nutritionDays ?? const [], isEmpty);
+      held.complete('retired private name');
+      await fixture.container.read(coachOverviewContextProvider.future);
+      final after = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      )!;
+      expect(after.snapshot.nutritionDays, isEmpty);
+      expect(after.snapshot.computedHealth, isEmpty);
+      expect(
+        after.snapshot.minimalIdentity['displayName'],
+        isNot('retired private name'),
+      );
+    },
+  );
+
+  test(
+    'a rapid owner visit clears retained presentation until a fresh read',
+    () async {
+      final fixture = _Fixture();
+      await fixture.open();
+      addTearDown(fixture.close);
+      final subscription = fixture.container.listen(
+        coachOverviewPresentationContextProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await fixture.container.read(coachOverviewContextProvider.future);
+      final before = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      )!;
+      final held = Completer<String?>();
+      fixture.preferences.hold = held;
+      await fixture.preferences.set('displayName', 'new visit name');
+      await fixture.preferences.entered.future;
+      final retired = expectLater(
+        fixture.container.read(coachOverviewContextProvider.future),
+        throwsA(isA<CoachNativeConflict>()),
+      );
+      fixture.owner = 'owner-b';
+      fixture.owners.add('owner-b');
+      fixture.owner = 'owner-a';
+      fixture.owners.add('owner-a');
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(
+        identical(
+          fixture.container.read(coachOverviewPresentationContextProvider),
+          before,
+        ),
+        isFalse,
+      );
+      held.complete('retired owner name');
+      await retired;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await fixture.container.read(coachOverviewContextProvider.future);
+      final after = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      )!;
+      expect(after.snapshot.minimalIdentity['displayName'], 'new visit name');
+    },
+  );
+
+  test(
+    'a fresh diary and target result replaces the retained snapshot',
+    () async {
+      final fixture = _Fixture();
+      await fixture.open();
+      addTearDown(fixture.close);
+      final subscription = fixture.container.listen(
+        coachOverviewPresentationContextProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await fixture.container.read(coachOverviewContextProvider.future);
+      final before = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      )!;
+      final held = Completer<String?>();
+      fixture.preferences.hold = held;
+      fixture.calories = 500;
+      fixture.targetCalories = 2100;
+      fixture.container.invalidate(coachHealthBriefProvider);
+      await fixture.preferences.entered.future;
+      expect(
+        identical(
+          fixture.container.read(coachOverviewPresentationContextProvider),
+          before,
+        ),
+        isTrue,
+      );
+      held.complete('Alex');
+      await fixture.container.read(coachOverviewContextProvider.future);
+      final after = fixture.container.read(
+        coachOverviewPresentationContextProvider,
+      )!;
+      expect(after.snapshot.nutritionDays.single.calories, 500);
+      expect(after.snapshot.computedHealth['dailyTargets'], {
+        'caloriesKcal': 2100.0,
+      });
+      expect(identical(after, before), isFalse);
+    },
+  );
+
+  test('a new civil day never displays yesterday during its read', () async {
+    final fixture = _Fixture();
+    await fixture.open();
+    addTearDown(fixture.close);
+    final subscription = fixture.container.listen(
+      coachOverviewPresentationContextProvider,
+      (_, _) {},
+    );
+    addTearDown(subscription.close);
+    await fixture.container.read(coachOverviewContextProvider.future);
+    fixture.now = _now.add(const Duration(days: 1));
+    // Model the day refresh fired by the boundary's midnight timer. The clock
+    // override itself is one stable callback, so invalidating that callback
+    // alone would not notify dependents in Riverpod.
+    fixture.container.invalidate(coachOverviewContextProvider);
+    expect(
+      fixture.container.read(coachOverviewPresentationContextProvider),
+      isNull,
+    );
+    await expectLater(
+      fixture.container.read(coachOverviewContextProvider.future),
+      throwsStateError,
+    );
+    // Model the brief's independent midnight invalidation too. A cached
+    // yesterday brief is refused before that source provides the new day.
+    final held = Completer<String?>();
+    fixture.preferences.hold = held;
+    fixture.container.invalidate(coachHealthBriefProvider);
+    await fixture.preferences.entered.future;
+    expect(
+      fixture.container.read(coachOverviewPresentationContextProvider),
+      isNull,
+    );
+    held.complete('Alex');
+    await fixture.container.read(coachOverviewContextProvider.future);
+    final after = fixture.container.read(
+      coachOverviewPresentationContextProvider,
+    )!;
+    expect(after.snapshot.generatedAt, fixture.now);
+    expect(after.snapshot.nutritionDays.single.day, '2026-10-26');
+  });
+
   test(
     'Overview reads only actual current-day counts and latest water, without rich context or food text',
     () async {

@@ -25,17 +25,21 @@ const _ownerA = 'overview-owner-a';
 const _ownerB = 'overview-owner-b';
 
 class _OverviewFixture {
-  _OverviewFixture() {
+  _OverviewFixture({bool coalescedOwnerProjection = false}) {
     subscription = Future.value(paid());
     usage = Future.value(quota(2500));
     container = ProviderContainer(
       overrides: [
         verifiedEntitlementOwnerSeedProvider.overrideWithValue(_ownerA),
         verifiedEntitlementOwnerProvider.overrideWith((_) => owners.stream),
+        if (coalescedOwnerProjection)
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(_ownerA),
         verifiedEntitlementClockProvider.overrideWithValue(() => now),
         verifiedEntitlementLoaderProvider.overrideWithValue(() {
           subscriptionLoads++;
-          return subscription;
+          return subscriptionQueue.isEmpty
+              ? subscription
+              : subscriptionQueue.removeAt(0);
         }),
         aiCoachUsageStatusLoaderProvider.overrideWithValue(() {
           usageLoads++;
@@ -51,6 +55,7 @@ class _OverviewFixture {
   DateTime now = DateTime.utc(2026, 10, 29, 12);
   final owners = StreamController<String?>.broadcast(sync: true);
   late Future<SubscriptionState> subscription;
+  final subscriptionQueue = <Future<SubscriptionState>>[];
   late Future<Object?> usage;
   late ProviderContainer container;
   final boundaryKey = GlobalKey();
@@ -391,6 +396,138 @@ void main() {
         expect(find.byKey(_label), findsNothing);
         expect(find.byKey(_authorized, skipOffstage: false), findsNothing);
       } finally {
+        await fixture.close(tester);
+      }
+    },
+  );
+
+  testWidgets(
+    'a modeled coalesced scalar retires the old pending label until a new read',
+    (tester) async {
+      // Model Riverpod delivering both raw owner events while the scalar
+      // dependency remains A. The separate real-projection case below supplies
+      // an independent producer Future to every actual loader invocation.
+      final fixture = _OverviewFixture(coalescedOwnerProjection: true);
+      final old = Completer<SubscriptionState>();
+      try {
+        await fixture.mount(tester);
+        fixture.subscription = old.future;
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
+        await tester.pump();
+        final retired = fixture.container.read(
+          verifiedSubscriptionStateProvider.future,
+        );
+        retired.ignore();
+        final loadsBeforeVisit = fixture.subscriptionLoads;
+        fixture.emitOwner(_ownerB);
+        fixture.emitOwner(_ownerA);
+        await tester.pump();
+        await tester.pump();
+        expect(
+          fixture.subscriptionLoads,
+          loadsBeforeVisit,
+          reason:
+              'A coalesced account visit must not start a hidden intermediate read.',
+        );
+        old.complete(fixture.paid());
+        await retired;
+        await tester.pump();
+        expect(find.text('Premium AI Coach'), findsNothing);
+        fixture.subscription = Future.value(
+          fixture.paid(plan: CommercePlan.premium),
+        );
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
+        await fixture.container.read(verifiedSubscriptionStateProvider.future);
+        await tester.pump();
+        expect(fixture.label(tester), 'Premium');
+        expect(fixture.subscriptionLoads, loadsBeforeVisit + 1);
+      } finally {
+        if (!old.isCompleted) old.complete(_free());
+        await fixture.close(tester);
+      }
+    },
+  );
+
+  testWidgets(
+    'real owner visits ignore old producer results and accept the current producer',
+    (tester) async {
+      final fixture = _OverviewFixture();
+      final old = Completer<SubscriptionState>();
+      final ownerB = Completer<SubscriptionState>();
+      final ownerA = Completer<SubscriptionState>();
+      try {
+        await fixture.mount(tester);
+        fixture.subscription = old.future;
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
+        await tester.pump();
+        fixture.container
+            .read(verifiedSubscriptionStateProvider.future)
+            .ignore();
+        final loads = fixture.subscriptionLoads;
+        fixture.subscriptionQueue.addAll([ownerB.future, ownerA.future]);
+        fixture.emitOwner(_ownerB);
+        await tester.pump();
+        fixture.emitOwner(_ownerA);
+        await tester.pump();
+        expect(fixture.subscriptionLoads, loads + 2);
+        old.complete(fixture.paid());
+        await tester.pump();
+        expect(find.text('Premium AI Coach'), findsNothing);
+        ownerB.complete(fixture.paid());
+        await tester.pump();
+        expect(find.text('Premium AI Coach'), findsNothing);
+        ownerA.complete(fixture.paid(plan: CommercePlan.premium));
+        await fixture.container.read(verifiedSubscriptionStateProvider.future);
+        await tester.pump();
+        expect(fixture.label(tester), 'Premium');
+        expect(fixture.subscriptionLoads, loads + 2);
+      } finally {
+        if (!old.isCompleted) old.complete(_free());
+        if (!ownerB.isCompleted) ownerB.complete(_free());
+        if (!ownerA.isCompleted) ownerA.complete(_free());
+        await fixture.close(tester);
+      }
+    },
+  );
+
+  testWidgets(
+    'a read begun while Overview is hidden is retired before the next UI pump',
+    (tester) async {
+      final fixture = _OverviewFixture(coalescedOwnerProjection: true);
+      final old = Completer<SubscriptionState>();
+      final authorityObserver = fixture.container.listen(
+        verifiedSubscriptionStateProvider,
+        (_, _) {},
+      );
+      try {
+        await fixture.mount(tester);
+        await fixture.mount(tester, showOverview: false);
+        fixture.subscription = old.future;
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
+        final pending = fixture.container.read(
+          verifiedSubscriptionStateProvider.future,
+        );
+        pending.ignore();
+        final loads = fixture.subscriptionLoads;
+        fixture.emitOwner(_ownerB);
+        fixture.emitOwner(_ownerA);
+        await tester.pump();
+        expect(fixture.subscriptionLoads, loads);
+        old.complete(fixture.paid());
+        await pending;
+        await fixture.mount(tester);
+        expect(find.text('Premium AI Coach'), findsNothing);
+        fixture.subscription = Future.value(
+          fixture.paid(plan: CommercePlan.premium),
+        );
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
+        await fixture.container.read(verifiedSubscriptionStateProvider.future);
+        await tester.pump();
+        expect(fixture.label(tester), 'Premium');
+        expect(fixture.subscriptionLoads, loads + 1);
+      } finally {
+        if (!old.isCompleted) old.complete(_free());
+        authorityObserver.close();
         await fixture.close(tester);
       }
     },

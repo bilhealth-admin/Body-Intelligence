@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/widgets/bil_coach_identity.dart';
 import '../../../community/presentation/community_sapphire.dart';
 import '../../../commerce/domain/commerce_plan.dart';
-import '../../../commerce/providers/commerce_providers.dart';
 import '../../../commerce/presentation/bil_store_copy.dart';
 import '../../domain/coach_context_snapshot.dart';
 import '../../intelligence_locale_copy.dart';
@@ -52,8 +51,7 @@ class CoachReferenceWorkspace extends ConsumerWidget {
     final paidPlan = ref.watch(coachOverviewPaidLabelProvider);
     // Same server-authoritative quota decision as the existing Coach gate.
     // Verified paid Boost can grant Coach access without a subscription.
-    final unlocked =
-        ref.watch(aiCoachCreditAccessProvider).asData?.value == true;
+    final unlocked = ref.watch(coachOverviewCreditAccessProvider);
     final paidLabel = paidPlan != null;
     final name = snapshot?.minimalIdentity['displayName']?.toString();
     final date =
@@ -170,40 +168,57 @@ class CoachReferenceWorkspace extends ConsumerWidget {
                           key: const Key('coach-workspace-greeting-detail'),
                           style: TextStyle(fontSize: 12, color: muted),
                         ),
-                        if (paidLabel || unlocked) ...[
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: scheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              paidLabel
-                                  ? BilStoreCopy.text(
-                                      Localizations.localeOf(
-                                        context,
-                                      ).toLanguageTag(),
-                                      paidPlan == CommercePlan.premiumAiCoach
-                                          ? 'premium_ai_coach'
-                                          : 'premium',
-                                    )
-                                  : t(
-                                      'Verified AI Boost access',
-                                      'وصول موثق عبر AI Boost',
-                                    ),
-                              key: const Key('coach-workspace-plan-label'),
-                              style: TextStyle(
-                                color: scheme.onPrimaryContainer,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: _CoachAccessLabelSlot(
+                            visible: paidLabel || unlocked,
+                            labels: [
+                              BilStoreCopy.text(
+                                Localizations.localeOf(context).toLanguageTag(),
+                                'premium',
+                              ),
+                              BilStoreCopy.text(
+                                Localizations.localeOf(context).toLanguageTag(),
+                                'premium_ai_coach',
+                              ),
+                              t(
+                                'Verified AI Boost access',
+                                'وصول موثق عبر AI Boost',
+                              ),
+                            ],
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: scheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Text(
+                                paidLabel
+                                    ? BilStoreCopy.text(
+                                        Localizations.localeOf(
+                                          context,
+                                        ).toLanguageTag(),
+                                        paidPlan == CommercePlan.premiumAiCoach
+                                            ? 'premium_ai_coach'
+                                            : 'premium',
+                                      )
+                                    : t(
+                                        'Verified AI Boost access',
+                                        'وصول موثق عبر AI Boost',
+                                      ),
+                                key: const Key('coach-workspace-plan-label'),
+                                style: TextStyle(
+                                  color: scheme.onPrimaryContainer,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ],
                     ),
                   ),

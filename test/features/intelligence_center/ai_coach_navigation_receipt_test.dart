@@ -24,6 +24,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
+  testWidgets('day review English Arabic English switches actual gateway hint', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 932));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final gateway = _RecordingLanguageGateway();
+    await tester.pumpWidget(
+      _coachApp(
+        database: database,
+        navigation: (context, path, push) async {},
+        gateway: gateway,
+      ),
+    );
+    await openCoachConversationFromOverview(tester);
+    await tester.pumpAndSettle();
+    await _send(tester, 'Review my day');
+    await _pumpUntilCalls(tester, gateway, 1);
+    await _send(tester, 'اشرح لي تعافي جسمي اليوم');
+    await _pumpUntilCalls(tester, gateway, 2);
+    await _send(
+      tester,
+      'Review my day using only records shared in this request. If data is missing, say it cannot be verified. Use a heading and three bullets. Do not log or change anything.',
+    );
+    await _pumpUntilCalls(tester, gateway, 3);
+    expect(gateway.locales, ['en', 'ar', 'en']);
+    expect(gateway.detected, everyElement(isTrue));
+    await _disposeCoachAndFlushDrift(tester);
+  });
+
   testWidgets(
     'typed replies use current text then the last clear writing language',
     (tester) async {

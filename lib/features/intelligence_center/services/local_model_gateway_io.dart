@@ -376,6 +376,7 @@ class LlamaCppLocalGateway
       final scopedConversation = questionScopedCoachCloudConversation(
         question: question,
         conversation: conversation,
+        context: context,
       );
       final cloudMessages = _conversationMessages(
         question: question,

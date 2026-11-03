@@ -14,6 +14,7 @@ import { validateCoachHealthBoundaries } from "./coach_health_safety.ts";
 import { verifiedWeightProposalCopy } from "./coach_verified_weight_proposal.ts";
 import { verifiedWorkoutReviewCopy } from "./coach_workout_review_copy.ts";
 import { correctWeightRecordAbsence } from "./coach_weight_truth.ts";
+import { coachRecordCoverage, correctCoachRecordAbsence } from "./coach_record_truth.ts";
 import { decodeCoachToolArguments } from "./coach_tool_arguments.ts";
 import {
   disclosedGeminiEndpoint,
@@ -732,9 +733,11 @@ function estimateCost(
     : null;
 }
 
-// Bound primary + fallback to a 20-second provider budget. The client keeps
-// eight additional seconds for Edge Function/RPC overhead.
-export const geminiAttemptTimeoutMs = 10_000;
+// Give the first model more room to finish reasoning instead of aborting at
+// ten seconds. Later calls retain ten seconds at most, within the unchanged
+// absolute24s request window and the client's28s deadline.
+export const geminiAttemptTimeoutMs = 14_000;
+export const geminiLaterAttemptTimeoutMs = 10_000;
 
 export function thinkingConfigForModel(
   model: string,
@@ -870,6 +873,7 @@ export async function geminiCallWithFallback(
   requireTranscript = false,
   thinkingLevel: "LOW" | "MEDIUM" | "HIGH" = "MEDIUM",
   citationCatalogVersion: HealthCitationCatalogVersion = 1,
+  attemptTimeoutMs?: number,
 ) {
   try {
     return {
@@ -882,6 +886,7 @@ export async function geminiCallWithFallback(
         thinkingLevel,
         undefined,
         citationCatalogVersion,
+        attemptTimeoutMs,
       ),
       model: primaryModel,
       fallbackUsed: false,
@@ -901,6 +906,7 @@ export async function geminiCallWithFallback(
       thinkingLevel === "HIGH" ? "MEDIUM" : thinkingLevel,
       undefined,
       citationCatalogVersion,
+      attemptTimeoutMs,
     );
     return {
       provider: { ...recovered, attempts: recovered.attempts + 1 },
@@ -996,10 +1002,20 @@ export async function geminiCall(
     // Keep response parsing outside the transport retry boundary. A malformed
     // successful body is a provider contract error, not a transient network
     // failure, and must not trigger a second charged upstream call.
-    return {
-      data: await response.json() as Record<string, unknown>,
-      attempts: attempt,
-    };
+    try {
+      return {
+        data: await response.json() as Record<string, unknown>,
+        attempts: attempt,
+      };
+    } catch (error) {
+      // The same fetch signal also bounds response-body consumption. A body
+      // timeout may recover on the independent model; malformed JSON may not.
+      if (error instanceof DOMException &&
+        (error.name === "AbortError" || error.name === "TimeoutError")) {
+        throw new Error("provider_timeout");
+      }
+      throw error;
+    }
   }
   throw new Error(last);
 }
@@ -1081,6 +1097,22 @@ export type AiCoachHandlerDependencies = {
   now?: () => number;
   requireIntegrity?: typeof requireMobileIntegrityGrant;
   diagnosticLog?: (event: AiCoachFailureDiagnostic) => void;
+  providerDiagnosticLog?: (event: AiCoachProviderDiagnostic) => void;
+};
+
+type AiCoachProviderAttempt = {
+  model: string;
+  thinking: "LOW" | "MEDIUM" | "HIGH";
+  budget_ms: number;
+  elapsed_ms: number;
+  error_code: string | null;
+};
+
+type AiCoachProviderDiagnostic = {
+  event: "ai_coach_provider_summary";
+  request_id_hash: string | null;
+  provider_attempts: number;
+  provider_trace: AiCoachProviderAttempt[];
 };
 
 type AiCoachFailureDiagnostic = {
@@ -1093,6 +1125,8 @@ type AiCoachFailureDiagnostic = {
   reservation_established: boolean;
   compensation_attempted: boolean;
   compensation_succeeded: boolean | null;
+  provider_attempts: number;
+  provider_trace: AiCoachProviderAttempt[];
 };
 
 const safeAiCoachDiagnosticCodes = new Set([
@@ -1207,6 +1241,48 @@ export async function handler(
   let admin: ReturnType<typeof clients>["admin"] | null = null;
   let reserved = false;
   let failureStage = "authentication";
+  let providerAttempts = 0;
+  const providerTrace: AiCoachProviderAttempt[] = [];
+  const successfulProviderCosts: Array<number | null> = [];
+  // The existing provider24s/three-call maximum is shared by primary, independent
+  // fallback and citation repair. A repair must not create a fourth attempt or
+  // a fresh reservation, even when a provider fails before reporting usage.
+  const boundedGemini: typeof geminiCall = async (...args) => {
+    const attemptStarted = now();
+    const remaining = 24_000 - (attemptStarted - started);
+    if (remaining < 1500 || providerAttempts >= 3) throw new Error("provider_timeout");
+    const cap = providerAttempts === 0 ? geminiAttemptTimeoutMs : geminiLaterAttemptTimeoutMs;
+    const budget = Math.min(args[8] ?? cap, cap, remaining);
+    // Omitted means the first call's inspected14s transport default.
+    if (args[8] !== undefined || budget < geminiAttemptTimeoutMs) args[8] = budget;
+    providerAttempts++;
+    const trace: AiCoachProviderAttempt = {
+      model: /^(?:models\/)?gemini-[a-z0-9._-]{1,70}$/i.test(args[0]) ? args[0] : "unrecognized_model",
+      thinking: args[5] ?? "MEDIUM",
+      budget_ms: budget,
+      elapsed_ms: 0,
+      error_code: null,
+    };
+    providerTrace.push(trace);
+    try {
+      const value = await callGemini(...args);
+      const finished = now();
+      // Also fence injected/deferred transports that return after their own
+      // deadline. A late answer cannot consume credits or become a success.
+      if (finished - started >= 24_000 || finished - attemptStarted >= budget) {
+        throw new Error("provider_timeout");
+      }
+      const usage = (value.data.usageMetadata ?? {}) as Record<string, unknown>;
+      successfulProviderCosts.push(estimateCost(args[0], Number(usage.promptTokenCount ?? 0),
+        Number(usage.candidatesTokenCount ?? 0) + Number(usage.thoughtsTokenCount ?? 0)));
+      return value;
+    } catch (error) {
+      trace.error_code = safeAiCoachDiagnosticCode(error instanceof Error ? error.message : "provider_failed");
+      throw error;
+    } finally {
+      trace.elapsed_ms = Math.max(0, Math.min(60_000, now() - attemptStarted));
+    }
+  };
   try {
     const authorization = request.headers.get("authorization") ?? "";
     if (!authorization) throw new Error("authentication_required");
@@ -1300,14 +1376,16 @@ export async function handler(
         JSON.stringify(providerContext)
       }</context>`;
     const toolArgumentContract = toolContractForCapability(body.smart_plan_tools_version);
-    const system = `${toolArgumentContract} ${healthCitationContract} ${systemCore} ${focusInstruction}`;
+    const coverage = coachRecordCoverage(context, body.context_disclosure);
+    const availabilityContract = `Request-local record coverage: ${JSON.stringify(coverage)}. This is partial context, not a complete diary audit. Missing fields, empty arrays, zero totals without a verified read receipt, and not_in_request/not_verified categories never prove no records exist. Say that those records could not be verified in this request; never turn unshared data into an empty diary. Do not retrieve omitted data or infer a new permission. A supplied entry is evidence only for its own date and source.`;
+    const system = `${toolArgumentContract} ${healthCitationContract} ${systemCore} ${focusInstruction} ${availabilityContract}`;
     const contents = messages.map((message) => ({
       role: message.role === "assistant" ? "model" : "user",
       parts: [{ text: message.content }],
     }));
     failureStage = "gemini_provider";
     const providerCall = await geminiCallWithFallback(
-      callGemini,
+      boundedGemini,
       model,
       contents,
       system,
@@ -1317,9 +1395,10 @@ export async function handler(
       citationCatalogVersion,
     );
     let provider = providerCall.provider;
-    const servedModel = providerCall.model;
+    let servedModel = providerCall.model;
+    let fallbackUsed = providerCall.fallbackUsed;
     failureStage = "gemini_response_validation";
-    let qualityRecovery: "verified_workout_review" | "weight_record_truth" | null = null;
+    let qualityRecovery: "verified_workout_review" | "weight_record_truth" | "record_availability" | null = null;
     const decode = (data: Record<string, unknown>) => {
       const candidate = requireSafeGeminiCandidate(data);
       const content = candidate.content as Record<string, unknown> | undefined;
@@ -1341,10 +1420,15 @@ export async function handler(
         const prose = `${preliminary.reply}\n${preliminary.spoken_reply}`;
         validateCoachHealthBoundaries(prose, messages, context);
         validateCoachFoodBoundaries(prose, messages, context);
-        const correction = correctWeightRecordAbsence({
+        const weightCorrection = correctWeightRecordAbsence({
           reply: preliminary.reply,
           spoken_reply: preliminary.spoken_reply,
         }, context, locale);
+        const recordCorrection = correctCoachRecordAbsence({
+          reply: preliminary.reply,
+          spoken_reply: preliminary.spoken_reply,
+        }, locale, messages.at(-1)?.content ?? "");
+        const correction = recordCorrection ?? weightCorrection;
         if (correction !== null) {
           if (!preliminary.reply.trim() || preliminary.reply.length > 8000) {
             throw new Error("malformed_response");
@@ -1364,7 +1448,7 @@ export async function handler(
           // Discard all provider prose and proposals. Validate app-owned facts
           // through the unchanged strict parser and final safety gates. No
           // citation-repair request or additional credit reservation is made.
-          qualityRecovery = "weight_record_truth";
+          qualityRecovery = recordCorrection ? "record_availability" : "weight_record_truth";
           return parseModelJson(JSON.stringify(correction), false,
             citationCatalogVersion, body.smart_plan_tools_version === 1 ? 1 : 0);
         }
@@ -1404,7 +1488,8 @@ export async function handler(
           string,
           unknown
         >;
-        const repair = await callGemini(
+        const repairedCall = await geminiCallWithFallback(
+          boundedGemini,
           servedModel,
           contents,
           system +
@@ -1412,10 +1497,12 @@ export async function handler(
           4096,
           false,
           "LOW",
-          undefined,
           citationCatalogVersion,
           budget,
         );
+        const repair = repairedCall.provider;
+        servedModel = repairedCall.model;
+        fallbackUsed ||= repairedCall.fallbackUsed;
         result = decode(repair.data);
         const repairedUsage = (repair.data.usageMetadata ?? {}) as Record<
           string,
@@ -1484,7 +1571,11 @@ export async function handler(
     const thinkingTokens = Number(usage.thoughtsTokenCount ?? 0);
     const billedOutputTokens = visibleOutputTokens + thinkingTokens;
     const latency = now() - started;
-    const cost = estimateCost(servedModel, inputTokens, billedOutputTokens);
+    // A repaired response can use a different model; price each successful
+    // call at its own rate instead of assigning all tokens to the last model.
+    const cost = successfulProviderCosts.some((value) => value === null)
+      ? null
+      : successfulProviderCosts.reduce<number>((sum, value) => sum + value!, 0);
     failureStage = "credit_settlement";
     const { data: settlement, error: settleError } = await adminClient.rpc(
       "bil_settle_ai_usage",
@@ -1505,6 +1596,16 @@ export async function handler(
       settleError ||
       (settlement as Record<string, unknown> | null)?.state !== "succeeded"
     ) throw new Error("settlement_failed");
+    const providerDiagnostic: AiCoachProviderDiagnostic = {
+      event: "ai_coach_provider_summary",
+      request_id_hash: await requestCorrelationHash(requestId),
+      provider_attempts: providerAttempts,
+      provider_trace: providerTrace,
+    };
+    try {
+      if (dependencies.providerDiagnosticLog) dependencies.providerDiagnosticLog(providerDiagnostic);
+      else console.info(JSON.stringify(providerDiagnostic));
+    } catch { /* Diagnostics must never change settlement or the answer. */ }
     return json({
       ...result,
       ...(qualityRecovery == null ? {} : { quality_recovery: qualityRecovery }),
@@ -1512,7 +1613,7 @@ export async function handler(
       response_locale: locale,
       provider: "gemini",
       model: servedModel,
-      fallback_used: providerCall.fallbackUsed,
+      fallback_used: fallbackUsed,
       latency_ms: latency,
       attempts: provider.attempts,
       usage: {
@@ -1575,6 +1676,8 @@ export async function handler(
       reservation_established: reserved,
       compensation_attempted: compensationAttempted,
       compensation_succeeded: compensationSucceeded,
+      provider_attempts: providerAttempts,
+      provider_trace: providerTrace,
     };
     writeAiCoachFailureDiagnostic(diagnostic, dependencies.diagnosticLog);
     return json({ error: code }, status);

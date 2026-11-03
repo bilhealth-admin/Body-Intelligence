@@ -199,13 +199,29 @@ void Function() _observedAuthorityReload(
   };
 }
 
+/// A local read identity, containing no entitlement or user data. Riverpod may
+/// forward one pending `.future` through several refreshes, so display-only
+/// consumers cannot use Future identity to identify a genuinely new read.
+final class VerifiedSubscriptionReadWitness {
+  int _generation = 0;
+  int get generation => _generation;
+  void begin() => _generation += 1;
+}
+
+final verifiedSubscriptionReadWitnessProvider =
+    Provider<VerifiedSubscriptionReadWitness>(
+      (_) => VerifiedSubscriptionReadWitness(),
+    );
+
 final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
   ref,
 ) async {
   ref.watch(verifiedEntitlementOwnerIdProvider);
   final loaded = _observedAuthorityReload(ref, ref.invalidateSelf);
   try {
-    return await ref.watch(verifiedEntitlementLoaderProvider)();
+    final loader = ref.watch(verifiedEntitlementLoaderProvider);
+    ref.read(verifiedSubscriptionReadWitnessProvider).begin();
+    return await loader();
   } finally {
     loaded();
   }

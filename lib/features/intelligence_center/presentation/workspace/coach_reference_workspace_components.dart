@@ -1,5 +1,49 @@
 part of 'coach_reference_workspace.dart';
 
+/// Reserve the translated, scaled badge height even before verification.
+/// A missing/expired badge has no hidden label or semantics, but cannot move
+/// the tabs and diary cards while its authority is refreshing.
+class _CoachAccessLabelSlot extends StatelessWidget {
+  const _CoachAccessLabelSlot({
+    required this.visible,
+    required this.labels,
+    required this.child,
+  });
+  final bool visible;
+  final List<String> labels;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final style = DefaultTextStyle.of(
+        context,
+      ).style.merge(const TextStyle(fontSize: 14, fontWeight: FontWeight.w600));
+      var textHeight = 0.0;
+      for (final label in labels) {
+        final painter = TextPainter(
+          text: TextSpan(text: label, style: style),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          locale: Localizations.localeOf(context),
+        );
+        painter.layout(
+          maxWidth: (constraints.maxWidth - 20).clamp(1.0, double.infinity),
+        );
+        if (painter.height > textHeight) textHeight = painter.height;
+        painter.dispose();
+      }
+      return SizedBox(
+        height: textHeight + 10,
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: visible ? child : const SizedBox.shrink(),
+        ),
+      );
+    },
+  );
+}
+
 class _WorkspaceCard extends StatelessWidget {
   const _WorkspaceCard({required this.child});
   final Widget child;

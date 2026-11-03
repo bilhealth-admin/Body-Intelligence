@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/exercise_calorie_controls/provide
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_preferences.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/coach_cloud_privacy_boundary.dart';
 import 'package:body_intelligence_log/features/life_context/providers/life_context_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import 'package:drift/drift.dart' show Value;
@@ -247,6 +248,20 @@ void main() {
       final today = snapshot.computedHealth['today']! as Map;
       final nutrition = today['nutrition']! as Map;
       final energy = today['exerciseEnergy']! as Map;
+      final dayReview = projectCoachCloudContext(
+        question: 'Review my day',
+        context: snapshot,
+      );
+      final remoteToday =
+          (dayReview.context['computedHealth']! as Map)['today'] as Map;
+      expect(remoteToday['nutrition'], nutrition);
+      expect(remoteToday['exerciseEnergy'], energy);
+      expect(remoteToday, isNot(contains('sleep')));
+      expect(dayReview.context, isNot(contains('bodyContextHistory')));
+      expect(
+        dayReview.disclosure['included_context_fields'],
+        dayReview.context.keys.toList()..sort(),
+      );
       final targets = snapshot.computedHealth['dailyTargets']! as Map;
       final sources = snapshot.computedHealth['dailyTargetSources']! as Map;
       expect(days.map(dayKeyFor), contains(today['day']));

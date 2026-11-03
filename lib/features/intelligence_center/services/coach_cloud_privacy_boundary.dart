@@ -76,8 +76,19 @@ Set<CoachCloudContextCategory> coachCloudContextCategoriesForQuestion({
   required String question,
   List<CoachConversationTurn> conversation = const [],
 }) {
-  final direct = _coachCloudCategoriesInText(question);
-  if (direct.isNotEmpty) return direct;
+  return _coachCloudCategoriesInText(
+    _coachCloudScopeText(question, conversation),
+  );
+}
+
+String _coachCloudScopeText(
+  String question,
+  List<CoachConversationTurn> conversation,
+) {
+  if (_coachCloudCategoriesInText(question).isNotEmpty ||
+      !_isCoachCategoryFollowUp(question)) {
+    return question;
+  }
   for (final turn in conversation.reversed) {
     if (turn.role != 'user') continue;
     final prior = turn.content.trim();
@@ -86,9 +97,195 @@ Set<CoachCloudContextCategory> coachCloudContextCategoriesForQuestion({
     // Short slot answers such as "83", "today", or "yes" do not carry a
     // category by themselves. Keep walking back to the nearest explicit user
     // topic instead of dropping the task that the Coach is completing.
-    if (priorCategories.isNotEmpty) return priorCategories;
+    if (priorCategories.isNotEmpty) return prior;
+    // A fresh general question ends the old private topic. Only slot answers
+    // and bounded follow-ups may be skipped when resolving a clarification.
+    if (!_isCoachCategoryFollowUp(prior)) break;
   }
-  return const <CoachCloudContextCategory>{};
+  return question;
+}
+
+bool _isCoachCategoryFollowUp(String source) {
+  final text = source.trim().toLowerCase().replaceAll(RegExp(r'[؟?!.]+$'), '');
+  if (RegExp(r'^[0-9٠-٩۰-۹]+(?:[.,٫][0-9٠-٩۰-۹]+)?$').hasMatch(text)) {
+    return true;
+  }
+  if (const {
+    'yes',
+    'no',
+    'ok',
+    'okay',
+    'today',
+    'yesterday',
+    'tomorrow',
+    'why',
+    'why is that happening',
+    'why is that',
+    'continue',
+    'explain more',
+    'نعم',
+    'لا',
+    'تمام',
+    'موافق',
+    'اليوم',
+    'امس',
+    'أمس',
+    'بكرا',
+    'غدا',
+    'لماذا',
+    'ليش',
+    'كمل',
+    'اكمل',
+    'أكمل',
+    'اشرح اكثر',
+    'اشرح أكثر',
+  }.contains(text)) {
+    return true;
+  }
+  return text.length <= 80 &&
+      RegExp(
+        r'^(?:and\b|what about\b|how about\b|وماذا عن|ومبارح|وماذا|طيب وبالنسبة|والامس|وبكرا)',
+      ).hasMatch(text);
+}
+
+bool _isCoachDayReview(String source) {
+  final text = _normalizedCoachScopeText(source);
+  return RegExp(
+    r'^(?:please[, ]+|(?:can|could|would)\s+you\s+)?'
+    r'(?:review|analyse|analyze|assess|summari[sz]e)\s+my\s+day\b|'
+    r'^how\s+(?:was|is)\s+my\s+day\b|'
+    r'^(?:(?:ممكن|اريد|بدي|ابي|ابغى|عايز|عاوز)\s+(?:منك\s+)?)?'
+    r'(?:ت?راجع|ت?حلل|مراجع[ةه]|تحليل|قيم|لخص|شوف)\s+(?:لي\s+)?يومي|'
+    r'^(?:كيف|شلون|ازاي)\s+(?:كان\s+)?يومي|'
+    r'^(?:شو|شنو|ايه)\s+رايك\s+(?:ب|في\s*)يومي',
+    unicode: true,
+  ).hasMatch(text);
+}
+
+String _normalizedCoachScopeText(String source) => source
+    .trim()
+    .toLowerCase()
+    .replaceAll(RegExp(r'[\u064b-\u065f\u0670]'), '')
+    .replaceAll(RegExp('[أإآٱ]'), 'ا');
+
+Set<CoachCloudContextCategory> _coachDayReviewCategories(String source) {
+  final allowed = CoachCloudContextCategory.values.toSet();
+  final excluded = <CoachCloudContextCategory>{};
+  // Bounded, explicit category constraints narrow the review. These are data
+  // choices, not a new consent grant. The prepared-context intersection below
+  // still applies. Excluding a field excludes its entire approved data group.
+  final onlyPrefix = RegExp(
+    r'\bonly\s+(?=(?:(?:my|the|recorded|saved)\s+|'
+    r'nutrition\b|meals?\b|foods?\b|water\b|sleep\b|training\b|activity\b|'
+    r'exercises?\b|workouts?\b|steps?\b|weight\b))|'
+    r'(?:^|\s)(?:فقط|بس)\s+(?=(?:ال)?(?:تغذي|غذا|وجب|طعام|اكل|ماء|ميه|'
+    r'نوم|وزن|تمرين|تمارين|تدريب|نشاط|خطوات))',
+    unicode: true,
+  );
+  final onlySuffix = RegExp(
+    r'\bonly\b|(?:^|\s)(?:فقط|بس)(?=\s|$)',
+    unicode: true,
+  );
+  final exclusion = RegExp(
+    r'\b(?:without|excluding|except(?: for)?|exclude|leave out|'
+    r'(?:do not|don\x27t)\s+(?:include|use|send|read|consider))\s+|'
+    r'(?:^|\s)(?:دون|بدون|باستثناء|عدا|من غير)\s+|'
+    r'(?:^|\s)لا\s+(?:تستخدم|تشمل|تضم|ترسل|تقرا|تذكر)\s+',
+    unicode: true,
+  );
+  final actionConstraint = RegExp(
+    r'^(?:changing|logging|recording|editing|updating|saving|deleting)\b|'
+    r'^(?:تغيير|تسجيل|تعديل|حفظ|حذف|زيادة|انقاص)(?:\s|$)',
+    unicode: true,
+  );
+  final factClause = RegExp(
+    r'\b(?:i|we)\s+(?:have\s+)?(?:only\s+)?(?:ate|drank|logged|recorded|slept)\b|'
+    r'(?:^|\s)(?:اكلت|شربت|نمت|سجلت)(?:\s|$)',
+    unicode: true,
+  );
+  final continuation = RegExp(
+    r'\b(?:without|excluding|except|but|do not|don\x27t|and then)\b|'
+    r'\band\s+(?:tell|give|suggest|recommend|explain)\b|'
+    r'(?:^|\s)(?:دون|بدون|باستثناء|عدا|لكن|ثم|وقل|واشرح|واقترح|واخبر)(?:\s|$)',
+    unicode: true,
+  );
+  Set<CoachCloudContextCategory> categoriesIn(String text) =>
+      _coachCloudCategoriesInText(text, expandWholeContext: false);
+  for (final clause in _normalizedCoachScopeText(
+    source,
+  ).split(RegExp(r'[.,;!?؛،\n]'))) {
+    for (final match in onlyPrefix.allMatches(clause)) {
+      final tail = clause.substring(match.end).split(continuation).first;
+      final categories = categoriesIn(tail);
+      if (categories.isNotEmpty) allowed.retainAll(categories);
+    }
+    for (final match in onlySuffix.allMatches(clause)) {
+      final prefix = clause.substring(0, match.start).trim();
+      final tail = clause.substring(match.end).trim();
+      if (factClause.hasMatch(prefix) ||
+          RegExp(r'^(?:if|when|whether)\b').hasMatch(tail)) {
+        continue;
+      }
+      final categories = categoriesIn(prefix);
+      if (categories.isNotEmpty) allowed.retainAll(categories);
+    }
+    for (final match in exclusion.allMatches(clause)) {
+      final tail = clause.substring(match.end).trim();
+      // "Without changing my weight" forbids a write, not a weight read.
+      if (actionConstraint.hasMatch(tail)) continue;
+      excluded.addAll(categoriesIn(tail.split(continuation).first));
+    }
+  }
+  return allowed..removeAll(excluded);
+}
+
+Set<CoachCloudContextCategory> _preparedCoachCloudCategories({
+  required String question,
+  required CoachContextSnapshot context,
+  required List<CoachConversationTurn> conversation,
+}) {
+  final topic = _coachCloudScopeText(question, conversation);
+  final categories = _coachCloudCategoriesInText(topic);
+  if (!_isCoachDayReview(topic)) return categories;
+  // A whole-day review is scoped to payloads already prepared by the selected
+  // focus provider. Missing groups do not grant permission or prove emptiness.
+  // Use the same set for context, conversation and disclosure.
+  final today = context.computedHealth['today'];
+  bool todayHas(String key) => today is Map && today[key] != null;
+  return categories
+      .where(
+        (category) => switch (category) {
+          CoachCloudContextCategory.weightMeasurementsAndGoal =>
+            context.weightReadStatus == CoachWeightReadStatus.verified ||
+                (context.weightReadStatus != CoachWeightReadStatus.withheld &&
+                    const [
+                      'currentWeightKg',
+                      'targetWeightKg',
+                      'waistCm',
+                    ].any((key) => context.profile[key] != null)),
+          CoachCloudContextCategory.nutritionAndWater =>
+            context.nutritionDays.isNotEmpty ||
+                context.waterHistory.isNotEmpty ||
+                todayHas('nutrition') ||
+                context.computedHealth['dailyTargets'] != null ||
+                context.profile['dietaryPreferences'] != null ||
+                context.smartPlan['mealSuggestions'] != null,
+          CoachCloudContextCategory.trainingAndActivity =>
+            todayHas('exerciseEnergy') ||
+                context.profile['exercises'] != null ||
+                context.activityHistory.any(
+                  (row) => row['steps'] != null || row['exercises'] != null,
+                ) ||
+                context.smartPlan['plannedWorkout'] != null,
+          CoachCloudContextCategory.sleepAndHabits =>
+            todayHas('sleep') ||
+                todayHas('fasting') ||
+                todayHas('bodyContext') ||
+                context.bodyContextHistory.isNotEmpty ||
+                context.activityHistory.any((row) => row['sleepHours'] != null),
+        },
+      )
+      .toSet();
 }
 
 /// Keeps only prior user/assistant turns whose detected categories are a
@@ -97,11 +294,18 @@ Set<CoachCloudContextCategory> coachCloudContextCategoriesForQuestion({
 List<CoachConversationTurn> questionScopedCoachCloudConversation({
   required String question,
   List<CoachConversationTurn> conversation = const [],
+  CoachContextSnapshot? context,
 }) {
-  final categories = coachCloudContextCategoriesForQuestion(
-    question: question,
-    conversation: conversation,
-  );
+  final categories = context == null
+      ? coachCloudContextCategoriesForQuestion(
+          question: question,
+          conversation: conversation,
+        )
+      : _preparedCoachCloudCategories(
+          question: question,
+          context: context,
+          conversation: conversation,
+        );
   if (categories.isEmpty) return const <CoachConversationTurn>[];
   final values = conversation
       .where(
@@ -144,7 +348,10 @@ List<CoachConversationTurn> questionScopedCoachCloudConversation({
       : retained.sublist(retained.length - 8);
 }
 
-Set<CoachCloudContextCategory> _coachCloudCategoriesInText(String source) {
+Set<CoachCloudContextCategory> _coachCloudCategoriesInText(
+  String source, {
+  bool expandWholeContext = true,
+}) {
   final text = source.toLowerCase();
   final categories = <CoachCloudContextCategory>{};
   // This explicit Overview starter asks about the selected BIL context as a
@@ -152,10 +359,17 @@ Set<CoachCloudContextCategory> _coachCloudCategoriesInText(String source) {
   // every personal category, even when the prepared snapshot contained verified
   // activity. The snapshot provider still applies each saved category choice;
   // this does not grant a withheld category or expand native permissions.
-  if (text.contains('based on my selected bil context') ||
-      text.contains('بناءً على سياق bil الذي اخترته') ||
-      text.contains('بناء على سياق bil الذي اخترته')) {
+  if (expandWholeContext &&
+      (text.contains('based on my selected bil context') ||
+          text.contains('بناءً على سياق bil الذي اخترته') ||
+          text.contains('بناء على سياق bil الذي اخترته'))) {
     return CoachCloudContextCategory.values.toSet();
+  }
+  // The starter's "next step" is a recommendation, not an exercise-step
+  // category. Resolve the explicit day-review request before incidental words.
+  // The prepared-context filter below still excludes withheld groups.
+  if (expandWholeContext && _isCoachDayReview(source)) {
+    return _coachDayReviewCategories(source);
   }
   bool has(RegExp pattern) => pattern.hasMatch(text);
   if (has(
@@ -214,16 +428,26 @@ CoachCloudContextProjection projectCoachCloudContext({
   required CoachContextSnapshot context,
   List<CoachConversationTurn> conversation = const [],
 }) {
-  final categories = coachCloudContextCategoriesForQuestion(
+  final categories = _preparedCoachCloudCategories(
     question: question,
+    context: context,
     conversation: conversation,
   );
+  final topic = _coachCloudScopeText(question, conversation);
+  final strictCategoryScope =
+      _isCoachDayReview(topic) &&
+      _coachDayReviewCategories(topic).length <
+          CoachCloudContextCategory.values.length;
   final full = context.toJson();
   final projected = <String, Object?>{
     'schema': full['schema'],
     'generatedAt': full['generatedAt'],
   };
-  final profile = _projectCoachProfile(context.profile, categories);
+  final profile = _projectCoachProfile(
+    context.profile,
+    categories,
+    strictCategoryScope: strictCategoryScope,
+  );
   if (profile.isNotEmpty) projected['profile'] = profile;
 
   if (categories.contains(
@@ -243,7 +467,11 @@ CoachCloudContextProjection projectCoachCloudContext({
         .toList(growable: false);
   }
 
-  final computed = _projectComputedHealth(context.computedHealth, categories);
+  final computed = _projectComputedHealth(
+    context.computedHealth,
+    categories,
+    strictCategoryScope: strictCategoryScope,
+  );
   if (computed.isNotEmpty) projected['computedHealth'] = computed;
 
   if (categories.contains(
@@ -361,6 +589,7 @@ CoachCloudContextProjection projectCoachCloudContext({
     context.explicitMemories,
     categories,
     20,
+    strictCategoryScope: strictCategoryScope,
   );
   if (relevantMemories.isNotEmpty) {
     projected['explicitMemories'] = relevantMemories;
@@ -369,6 +598,7 @@ CoachCloudContextProjection projectCoachCloudContext({
     context.decisionMemory,
     categories,
     10,
+    strictCategoryScope: strictCategoryScope,
   );
   if (relevantDecisions.isNotEmpty) {
     projected['decisionMemory'] = relevantDecisions;
@@ -377,6 +607,7 @@ CoachCloudContextProjection projectCoachCloudContext({
     context.personalExperiments,
     categories,
     6,
+    strictCategoryScope: strictCategoryScope,
   );
   if (relevantExperiments.isNotEmpty) {
     projected['personalExperiments'] = relevantExperiments;
@@ -397,8 +628,9 @@ CoachCloudContextProjection projectCoachCloudContext({
 
 Map<String, Object?> _projectCoachProfile(
   Map<String, Object?> profile,
-  Set<CoachCloudContextCategory> categories,
-) {
+  Set<CoachCloudContextCategory> categories, {
+  bool strictCategoryScope = false,
+}) {
   final keys = <String>{};
   if (categories.contains(
     CoachCloudContextCategory.weightMeasurementsAndGoal,
@@ -420,31 +652,38 @@ Map<String, Object?> _projectCoachProfile(
     });
   }
   if (categories.contains(CoachCloudContextCategory.nutritionAndWater)) {
-    keys.addAll(const <String>{
-      'age',
-      'gender',
-      'heightCm',
-      'currentWeightKg',
-      'targetWeightKg',
-      'activityLevel',
-      'dietaryPreferences',
-      'selectedGoals',
-      'goalConsumers',
-    });
+    keys.add('dietaryPreferences');
+    if (!strictCategoryScope) {
+      keys.addAll(const <String>{
+        'age',
+        'gender',
+        'heightCm',
+        'currentWeightKg',
+        'targetWeightKg',
+        'activityLevel',
+        'dietaryPreferences',
+        'selectedGoals',
+        'goalConsumers',
+      });
+    }
   }
   if (categories.contains(CoachCloudContextCategory.trainingAndActivity)) {
-    keys.addAll(const <String>{
-      'age',
-      'gender',
-      'heightCm',
-      'currentWeightKg',
-      'activityLevel',
-      'exercises',
-      'selectedGoals',
-      'goalConsumers',
-    });
+    keys.addAll(const <String>{'activityLevel', 'exercises'});
+    if (!strictCategoryScope) {
+      keys.addAll(const <String>{
+        'age',
+        'gender',
+        'heightCm',
+        'currentWeightKg',
+        'activityLevel',
+        'exercises',
+        'selectedGoals',
+        'goalConsumers',
+      });
+    }
   }
-  if (categories.contains(CoachCloudContextCategory.sleepAndHabits)) {
+  if (!strictCategoryScope &&
+      categories.contains(CoachCloudContextCategory.sleepAndHabits)) {
     keys.addAll(const <String>{'selectedGoals', 'goalConsumers'});
   }
   return <String, Object?>{
@@ -475,8 +714,9 @@ const Set<String> _weightComputedHealthKeys = <String>{
 
 Map<String, Object?> _projectComputedHealth(
   Map<String, Object?> health,
-  Set<CoachCloudContextCategory> categories,
-) {
+  Set<CoachCloudContextCategory> categories, {
+  bool strictCategoryScope = false,
+}) {
   if (categories.isEmpty) return const <String, Object?>{};
   final result = <String, Object?>{};
   if (health['status'] != null) result['status'] = health['status'];
@@ -500,7 +740,8 @@ Map<String, Object?> _projectComputedHealth(
       }
     }
   }
-  if (categories.contains(CoachCloudContextCategory.trainingAndActivity)) {
+  if (!strictCategoryScope &&
+      categories.contains(CoachCloudContextCategory.trainingAndActivity)) {
     for (final key in const <String>{'bmrKcal', 'tdeeKcal'}) {
       if (health.containsKey(key) && health[key] != null) {
         result[key] = health[key];
@@ -595,13 +836,17 @@ Map<String, Object?> _scopedActivityEntry(
 List<Map<String, Object?>> _categoryRelevantEntries(
   List<Map<String, Object?>> source,
   Set<CoachCloudContextCategory> categories,
-  int limit,
-) {
+  int limit, {
+  bool strictCategoryScope = false,
+}) {
   if (categories.isEmpty) return const <Map<String, Object?>>[];
   return source
       .where((entry) {
         final entryCategories = _coachCloudCategoriesInText(jsonEncode(entry));
-        return entryCategories.any(categories.contains);
+        return strictCategoryScope
+            ? entryCategories.isNotEmpty &&
+                  entryCategories.every(categories.contains)
+            : entryCategories.any(categories.contains);
       })
       .take(limit)
       .toList(growable: false);

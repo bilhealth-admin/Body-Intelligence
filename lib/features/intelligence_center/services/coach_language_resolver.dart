@@ -218,6 +218,15 @@ class CoachLanguageResolver {
         'general',
         'short',
         'tip',
+        // Day-review wording must not fall back to a previous Arabic turn and
+        // become a high-priority stale language_hint in the cloud request.
+        'review',
+        'day',
+        'records',
+        'shared',
+        'request',
+        'heading',
+        'bullets',
       },
       'id': {'tersisa', 'kebutuhan', 'asupan', 'kemarin'},
       'ms': {'berbaki', 'keperluan', 'pengambilan', 'semalam'},
