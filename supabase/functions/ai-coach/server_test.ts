@@ -1723,10 +1723,6 @@ export async function exerciseHealthCitationHandlerContract({
                 ),
               );
             }
-            // Advance at the event this fixture names: after a successful
-            // provider response, before strict decoding/citation validation.
-            // A request budget may read the clock before dispatch as well.
-            testNow = elapsedBeforeValidationMs ?? testNow;
             return Promise.resolve(
               new Response(
                 JSON.stringify({
@@ -1755,7 +1751,21 @@ export async function exerciseHealthCitationHandlerContract({
             );
           },
           catalogVersion,
-        ),
+        ).then((provider) => {
+          if (elapsedBeforeValidationMs === undefined) return provider;
+          return {
+            ...provider,
+            data: new Proxy(provider.data, {
+              get(target, property, receiver) {
+                // The provider returns inside its own14s transport budget.
+                // Advance only when strict decoding reads the candidates,
+                // after boundedGemini has accepted the provider response.
+                if (property === "candidates") testNow = elapsedBeforeValidationMs;
+                return Reflect.get(target, property, receiver);
+              },
+            }),
+          };
+        }),
     });
     return {
       response,
