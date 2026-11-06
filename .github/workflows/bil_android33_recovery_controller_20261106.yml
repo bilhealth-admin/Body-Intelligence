@@ -1,0 +1,965 @@
+name: BIL Android33 immutable S3 recovery controller
+run-name: "Android33 app S3; separate controller provenance; no Play submission"
+on:
+  push:
+    branches: [codex/bil-android33-recovery-controller-20261106]
+permissions:
+  contents: read
+  actions: read
+  security-events: read
+concurrency:
+  group: bil-android33-recovery-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  BIL_TESTED_SOURCE_SHA: 4c23f40391362b73ae7f6fe850bbdb7f70037130
+  BIL_SIGNING_ORCHESTRATION_SHA: ${{ github.sha }}
+  BIL_RELEASE_BRANCH: codex/bil41-android33-release-20261106
+  BIL_RELEASE_CONFIGURATION_PATH: docs/release/BIL_ANDROID33_CONFIGURATION_20261106.md
+  BIL_ORIGINAL_SHA: 0c94cf2a75c01ebb7cbea74704a18a8109831194
+jobs:
+  signed-android-aab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout the immutable tested application source S3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 4c23f40391362b73ae7f6fe850bbdb7f70037130
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prove separate controller and pristine S3; require original live all10 gate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/controller_manifest.py" <<'PY_CONTROLLER'
+          """Source-pinned Android33 controller provenance; never changes app source."""
+          from __future__ import annotations
+          
+          import argparse
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          import sys
+          
+          sys.dont_write_bytecode = True
+          APP_SOURCE = '4c23f40391362b73ae7f6fe850bbdb7f70037130'
+          REPOSITORY = 'bilhealth-admin/Body-Intelligence'
+          CONTROLLER_BRANCH = 'codex/bil-android33-recovery-controller-20261106'
+          WORKFLOW = '.github/workflows/bil_android33_recovery_controller_20261106.yml'
+          GATE = 'tools/qa/bil41_internal_build_ci.py'
+          RENDERER = 'tools/qa/bil41_internal_signing_manifest.py'
+          PINNED_TOOLS = {
+              GATE: '48c29e7860c6f04ead8653ca7be2f64231146712f53b17255dfaae68b4166e16',
+              RENDERER: '7724f4fa7fa0e1d410aeb894b507faabba8de1acfe5359184404d51d1cacd964',
+          }
+          
+          
+          def git(root: Path, *args: str) -> str:
+              return subprocess.check_output(['git', *args], cwd=root, text=True).strip()
+          
+          
+          def digest(path: Path) -> str:
+              return hashlib.sha256(path.read_bytes()).hexdigest()
+          
+          
+          def positive(raw: str, name: str) -> int:
+              if not re.fullmatch('[1-9][0-9]*', raw):
+                  raise ValueError('Positive actual GitHub ' + name + ' required')
+              return int(raw)
+          
+          
+          def verify_provenance(root: Path, env: dict, *, source: str = APP_SOURCE) -> dict:
+              """The source override exists for isolated Git-graph tests, not the CLI."""
+              controller = env.get('GITHUB_SHA', '')
+              ref = 'refs/heads/' + CONTROLLER_BRANCH
+              if (not re.fullmatch('[0-9a-f]{40}', source)
+                      or not re.fullmatch('[0-9a-f]{40}', controller) or controller == source
+                      or env.get('GITHUB_REPOSITORY') != REPOSITORY
+                      or env.get('GITHUB_EVENT_NAME') != 'push'
+                      or env.get('GITHUB_REF') != ref
+                      or env.get('GITHUB_REF_NAME') != CONTROLLER_BRANCH
+                      or env.get('GITHUB_WORKFLOW_SHA') != controller
+                      or env.get('GITHUB_WORKFLOW_REF') != REPOSITORY + '/' + WORKFLOW + '@' + ref):
+                  raise ValueError('Actual controller SHA, workflow and push branch are required')
+              run = positive(env.get('GITHUB_RUN_ID', ''), 'run id')
+              attempt = positive(env.get('GITHUB_RUN_ATTEMPT', ''), 'run attempt')
+              if git(root, 'rev-parse', 'HEAD') != source:
+                  raise ValueError('Checkout must be the exact original application source')
+              if git(root, 'status', '--porcelain=v1', '--untracked-files=all'):
+                  raise ValueError('Application checkout must be pristine before prerequisites')
+              if git(root, 'rev-parse', controller + '^{commit}') != controller:
+                  raise ValueError('The controller must be a real available commit')
+              if git(root, 'show', '-s', '--format=%P', controller).split() != [source]:
+                  raise ValueError('The sole controller parent must be the application source')
+              changed = git(root, 'diff-tree', '--no-commit-id', '--name-status',
+                            '--no-renames', '-r', source, controller)
+              if changed != 'A\t' + WORKFLOW:
+                  raise ValueError('Controller may only add its single expected workflow')
+              tree = git(root, 'ls-tree', controller, '--', WORKFLOW)
+              if not re.fullmatch(r'100644 blob [0-9a-f]{40}\t' + re.escape(WORKFLOW), tree):
+                  raise ValueError('Controller workflow must be one regular non-executable file')
+              return {'status': 'STRICT_CONTROLLER_PROVENANCE_PASS', 'source_sha': source,
+                      'workflow_sha': controller, 'controller_parent_sha': source,
+                      'controller_branch': CONTROLLER_BRANCH, 'controller_workflow': WORKFLOW,
+                      'controller_workflow_blob': tree.split()[2],
+                      'controller_diff': changed, 'event': 'push', 'checkout_clean': True,
+                      'run_id': run, 'run_attempt': attempt}
+          
+          
+          def source_contract(root: Path) -> dict:
+              for name, expected in PINNED_TOOLS.items():
+                  if digest(root / name) != expected:
+                      raise ValueError('Pinned source tool changed: ' + name)
+              folder = str(root / 'tools/qa')
+              sys.path.insert(0, folder)
+              try:
+                  spec = importlib.util.spec_from_file_location('original_source_ci_gate', root / GATE)
+                  module = importlib.util.module_from_spec(spec)
+                  spec.loader.exec_module(module)
+              finally:
+                  sys.path.remove(folder)
+              if module.REPOSITORY != REPOSITORY or len(module.WORKFLOWS) != 10:
+                  raise ValueError('Original ten-workflow source contract required')
+              return {'branch': module.BRANCH, 'cloud_source': module.CLOUD_SOURCE,
+                      'workflows': module.WORKFLOWS, 'repository': module.REPOSITORY}
+          
+          
+          def validate_source_receipt(receipt: dict, contract: dict, *, source: str = APP_SOURCE) -> None:
+              """Preserve every source-receipt check from the pinned original renderer.
+          
+              Its source==orchestration assumption is replaced by verify_provenance,
+              never by a synthetic workflow_sha or a changed GitHub environment.
+              """
+              if (not re.fullmatch('[0-9a-f]{40}', source)
+                      or receipt.get('source_sha') != source
+                      or receipt.get('source_branch') != contract['branch']
+                      or receipt.get('platform') != 'android'
+                      or receipt.get('status') != 'INTERNAL_BUILD_PREREQUISITES_PASS'
+                      or type(receipt.get('build')) is not int or receipt['build'] != 33
+                      or receipt.get('app_store_submission_approved') is not False
+                      or receipt.get('public_release_approved') is not False
+                      or receipt.get('physical_device_acceptance') != 'PENDING_INSTALLATION_OF_NEW_ARTIFACT'
+                      or receipt.get('signed_artifact_identity') != 'MUST_PASS_AFTER_BUILD'):
+                  raise ValueError('Exact original-source internal Android33 prerequisites required')
+              cloud = receipt.get('cloud_source_parity', {})
+              if (cloud.get('status') != 'RECORDED_DEPLOYED_SOURCE_PARITY_PASS'
+                      or cloud.get('source_commit') != contract['cloud_source']
+                      or cloud.get('runtime_file_count') != 15 or cloud.get('deployed_version') != 134
+                      or cloud.get('new_model_requests') != 0
+                      or cloud.get('live_model_health') != 'NOT_TESTED_BY_THIS_GATE'
+                      or not re.fullmatch('[0-9a-f]{64}', cloud.get('receipt_sha256', ''))):
+                  raise ValueError('Separate recorded deployed-source parity is required')
+              ci = receipt.get('ci')
+              expected = contract['workflows']
+              if (not isinstance(ci, list) or len(ci) != len(expected)
+                      or {row.get('workflow') for row in ci} != set(expected)):
+                  raise ValueError('All distinct ten exact-source workflows are required')
+              run_ids = set()
+              for row in ci:
+                  run, jobs = row.get('run_id'), row.get('required_jobs')
+                  if (type(run) is not int or run <= 0 or run in run_ids
+                          or row.get('source_sha') != source
+                          or row.get('source_branch') != contract['branch']
+                          or row.get('status') != 'PASS'
+                          or row.get('url') != f'https://github.com/{REPOSITORY}/actions/runs/{run}'
+                          or not isinstance(jobs, list) or len(jobs) != len(set(jobs))
+                          or set(jobs) != expected[row['workflow']]):
+                      raise ValueError('Mismatched original source, run, job coverage or outcome')
+                  run_ids.add(run)
+          
+          
+          def output_paths(root: Path, env: dict, provenance: dict, paths: list[Path]) -> None:
+              temp = Path(env.get('RUNNER_TEMP', '')).resolve(strict=True)
+              if not temp.is_dir() or temp.is_relative_to(root.resolve()):
+                  raise ValueError('Runner-private output directory must be outside the app checkout')
+              suffix = f'-r{provenance["run_id"]}-a{provenance["run_attempt"]}'
+              resolved = []
+              for path in paths:
+                  target = path.resolve()
+                  if (target.parent != temp or target.exists() or path.is_symlink()
+                          or not target.stem.endswith(suffix)):
+                      raise ValueError('New direct RUNNER_TEMP outputs with run/attempt suffix are required')
+                  resolved.append(target)
+              if len(set(resolved)) != len(paths):
+                  raise ValueError('Receipt, manifest and proof must have distinct new paths')
+          
+          
+          def render(receipt: dict, contract: dict, provenance: dict) -> str:
+              validate_source_receipt(receipt, contract)
+              if (provenance.get('status') != 'STRICT_CONTROLLER_PROVENANCE_PASS'
+                      or provenance.get('source_sha') != APP_SOURCE
+                      or provenance.get('controller_parent_sha') != APP_SOURCE
+                      or provenance.get('controller_diff') != 'A\t' + WORKFLOW
+                      or not re.fullmatch('[0-9a-f]{40}', provenance.get('workflow_sha', ''))
+                      or provenance['workflow_sha'] == APP_SOURCE):
+                  raise ValueError('Independently verified distinct controller provenance required')
+              lines = [
+                  '# Android33 exact-source internal prerequisites; separate controller', '',
+                  'ACCEPTANCE_SCOPE: INTERNAL_ANDROID_ARTIFACT_ONLY',
+                  'STAGING_MANIFEST_COMPLETE: YES', 'CANDIDATE_FROZEN_OR_ACCEPTED: YES',
+                  'UNRESOLVED_REVIEW_COUNT: 0', 'RELEASE_VERSION: 1.0.0',
+                  'RELEASE_BUILD_NUMBER: 33', 'SOURCE_SHA: ' + APP_SOURCE,
+                  'SIGNING_ORCHESTRATION_SHA: ' + provenance['workflow_sha'],
+                  'CONTROLLER_PARENT_SHA: ' + APP_SOURCE,
+                  'CONTROLLER_WORKFLOW: ' + WORKFLOW,
+                  'CONTROLLER_RUN_ID: ' + str(provenance['run_id']),
+                  'CONTROLLER_RUN_ATTEMPT: ' + str(provenance['run_attempt']),
+                  'PUBLIC_RELEASE_APPROVED: NO', 'APP_STORE_SUBMISSION_APPROVED: NO',
+                  'PHYSICAL_ARTIFACT_ACCEPTANCE: PENDING_INSTALLATION',
+                  'SIGNED_ARTIFACT_ACCEPTANCE: MUST_PASS_AFTER_BUILD',
+                  'STAGING_ENVIRONMENT_CREATED: NO',
+                  'DEPLOYED_COACH_SOURCE_COMMIT: ' + contract['cloud_source'],
+                  'DEPLOYED_COACH_VERSION: 134', 'LIVE_MODEL_HEALTH: NOT_TESTED_BY_THIS_GATE', '',
+                  'The application checkout and all ten CI runs are the immutable source above.',
+                  'The different controller commit only adds the named workflow to that source.',
+                  'The legacy staging marker describes this prerequisite record, not deployment.',
+                  'Physical acceptance, signed binary identity and store delivery remain pending.', '',
+              ]
+              lines += [f'- {r["workflow"]}: {r["url"]} (PASS, source {APP_SOURCE})'
+                        for r in sorted(receipt['ci'], key=lambda row: row['workflow'])]
+              return '\n'.join(lines) + '\n'
+          
+          
+          def run_source_gate(root: Path, receipt: Path) -> None:
+              subprocess.run([sys.executable, str(root / GATE), '--sha', APP_SOURCE,
+                              '--branch', 'codex/bil41-android33-release-20261106',
+                              '--platform', 'android', '--output', str(receipt)], cwd=root, check=True)
+          
+          
+          def execute(root: Path, env: dict, receipt_path: Path, manifest_path: Path,
+                      proof_path: Path) -> dict:
+              root = root.resolve(strict=True)
+              provenance = verify_provenance(root, env)
+              output_paths(root, env, provenance, [receipt_path, manifest_path, proof_path])
+              contract = source_contract(root)
+              # Production main cannot opt out or select a different gate implementation.
+              run_source_gate(root, receipt_path)
+              if verify_provenance(root, env) != provenance:
+                  raise ValueError('Source/controller changed while original CI gate ran')
+              raw = receipt_path.read_bytes()
+              receipt = json.loads(raw)
+              text = render(receipt, contract, provenance)
+              with manifest_path.open('xb') as stream:
+                  stream.write(text.encode('utf-8'))
+              proof = {**provenance, 'platform': 'android', 'build': 33,
+                       'pre_signing_receipt_sha256': hashlib.sha256(raw).hexdigest(),
+                       'manifest_sha256': digest(manifest_path), 'scope': 'INTERNAL_BUILD_ONLY',
+                       'all10_original_source_runs_verified_by_live_gate': True,
+                       'public_release_approved': False, 'app_store_submission_approved': False,
+                       'physical_device_acceptance': 'PENDING',
+                       'source_tools': PINNED_TOOLS, 'controller_only_change': True}
+              with proof_path.open('x', encoding='utf-8') as stream:
+                  stream.write(json.dumps(proof, indent=2) + '\n')
+              return proof
+          
+          
+          def main() -> None:
+              parser = argparse.ArgumentParser(description=__doc__)
+              parser.add_argument('--app-root', type=Path, required=True)
+              parser.add_argument('--receipt-output', type=Path, required=True)
+              parser.add_argument('--manifest-output', type=Path, required=True)
+              parser.add_argument('--proof-output', type=Path, required=True)
+              args = parser.parse_args()
+              env = dict(os.environ)
+              temp = Path(env['RUNNER_TEMP']).resolve(strict=True)
+              github_env = Path(env['GITHUB_ENV'])
+              if (github_env.is_symlink() or not github_env.resolve().is_relative_to(temp)
+                      or not github_env.is_file()):
+                  raise ValueError('Actual runner-private GITHUB_ENV command file required')
+              proof = execute(args.app_root, env, args.receipt_output,
+                              args.manifest_output, args.proof_output)
+              with github_env.open('a', encoding='utf-8') as stream:
+                  for key, value in {
+                      'BIL_RELEASE_MANIFEST_PATH': str(args.manifest_output.resolve()),
+                      'BIL_AUDITED_FREEZE_MANIFEST_SHA256': proof['manifest_sha256'],
+                      'BIL_CONTROLLER_CI_RECEIPT_PATH': str(args.receipt_output.resolve()),
+                      'BIL_CONTROLLER_PROOF_PATH': str(args.proof_output.resolve()),
+                  }.items():
+                      stream.write(key + '=' + value + '\n')
+              print('SOURCE_S3_CI_AND_SEPARATE_CONTROLLER_PROVENANCE=PASS; NO_PUBLIC_APPROVAL')
+          
+          
+          if __name__ == '__main__':
+              main()
+          PY_CONTROLLER
+          python3 "$RUNNER_TEMP/controller_manifest.py" \
+            --app-root "$GITHUB_WORKSPACE" \
+            --receipt-output "$RUNNER_TEMP/BIL33-pre-signing-ci-r${GITHUB_RUN_ID}-a${GITHUB_RUN_ATTEMPT}.json" \
+            --manifest-output "$RUNNER_TEMP/BIL-android33-internal-acceptance-r${GITHUB_RUN_ID}-a${GITHUB_RUN_ATTEMPT}.md" \
+            --proof-output "$RUNNER_TEMP/BIL-android33-controller-provenance-r${GITHUB_RUN_ID}-a${GITHUB_RUN_ATTEMPT}.json"
+          cp "$RUNNER_TEMP/BIL33-pre-signing-ci-r${GITHUB_RUN_ID}-a${GITHUB_RUN_ATTEMPT}.json" BIL33-pre-signing-ci.json
+          cp "$RUNNER_TEMP/BIL-android33-controller-provenance-r${GITHUB_RUN_ID}-a${GITHUB_RUN_ATTEMPT}.json" BIL-android33-controller-provenance.json
+          cp "$RUNNER_TEMP/BIL-android33-internal-acceptance-r${GITHUB_RUN_ID}-a${GITHUB_RUN_ATTEMPT}.md" BIL-android33-internal-acceptance.md
+
+      - name: Preflight actual Ubuntu apksigner API on authenticated existing S3 debug APK; no app build
+        id: apk_signer_preflight
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          APKSIGNER="$(find "${ANDROID_HOME:?}/build-tools" -maxdepth 2 -name apksigner -type f | sort -V | tail -n 1)"
+          test -n "$APKSIGNER" && test -x "$APKSIGNER"
+          APKSIGNER_JAR="$(dirname "$APKSIGNER")/lib/apksigner.jar"
+          test -s "$APKSIGNER_JAR"
+          mkdir "$RUNNER_TEMP/bil-apk-der-classes"
+          cat > "$RUNNER_TEMP/VerifyApkCertificate.java" <<'JAVA_DER'
+          import com.android.apksig.ApkVerifier;
+          import java.io.File;
+          import java.nio.charset.StandardCharsets;
+          import java.nio.file.Files;
+          import java.nio.file.Path;
+          import java.security.MessageDigest;
+          import java.security.cert.X509Certificate;
+          import java.util.HexFormat;
+          import java.util.LinkedHashSet;
+          import java.util.Set;
+          
+          /** Verifies APK signatures and DER identities; CLI presentation is not a trust input. */
+          public final class VerifyApkCertificate {
+              private static String digest(X509Certificate certificate) throws Exception {
+                  return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                          .digest(certificate.getEncoded()));
+              }
+          
+              private static void require(boolean condition, String code) {
+                  if (!condition) throw new IllegalStateException(code);
+              }
+          
+              public static void main(String[] args) {
+                  try {
+                      require(args.length == 3, "ARGUMENTS");
+                      String expected = System.getenv("EXPECTED_UPLOAD_CERT_SHA256");
+                      require(expected != null, "EXPECTED_CERT_MISSING");
+                      boolean discoverDebugOnly = args[2].equals("debug-preflight")
+                              && expected.equals("DISCOVER_VERIFIED_DEBUG_IDENTITY_ONLY");
+                      expected = expected.replaceAll("[:\\s]", "").toLowerCase(java.util.Locale.ROOT);
+                      require(discoverDebugOnly || expected.matches("[0-9a-f]{64}"), "EXPECTED_CERT_FORMAT");
+                      File apk = new File(args[0]);
+                      Path output = Path.of(args[1]);
+                      require(apk.isFile() && apk.length() > 0 && !Files.exists(output), "INPUT_OUTPUT");
+                      require(args[2].equals("release") || args[2].equals("debug-preflight"), "SCOPE");
+                      ApkVerifier.Result result = new ApkVerifier.Builder(apk).build().verify();
+                      require(result.isVerified() && !result.containsErrors(), "APK_SIGNATURE_INVALID");
+                      require(result.getSignerCertificates().size() == 1, "APK_SIGNER_COUNT");
+                      if (discoverDebugOnly) expected = digest(result.getSignerCertificates().get(0));
+                      Set<String> identities = new LinkedHashSet<>();
+                      identities.add(digest(result.getSignerCertificates().get(0)));
+                      for (var signer : result.getV1SchemeSigners()) {
+                          require(!signer.containsErrors(), "V1_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV2SchemeSigners()) {
+                          require(!signer.containsErrors(), "V2_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV3SchemeSigners()) {
+                          require(!signer.containsErrors(), "V3_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV31SchemeSigners()) {
+                          require(!signer.containsErrors(), "V31_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV4SchemeSigners()) {
+                          require(!signer.containsErrors(), "V4_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      require(identities.size() == 1 && identities.contains(expected), "APK_CERTIFICATE_MISMATCH");
+                      String json = "{\n"
+                              + "  \"status\": \"VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY\",\n"
+                              + "  \"scope\": \"" + args[2] + "\",\n"
+                              + "  \"apk_signature_verified\": true,\n"
+                              + "  \"current_signer_count\": 1,\n"
+                              + "  \"distinct_verified_scheme_leaf_certificates\": 1,\n"
+                              + "  \"certificate_sha256\": \"" + expected + "\",\n"
+                              + "  \"verified_v1\": " + result.isVerifiedUsingV1Scheme() + ",\n"
+                              + "  \"verified_v2\": " + result.isVerifiedUsingV2Scheme() + ",\n"
+                              + "  \"verified_v3\": " + result.isVerifiedUsingV3Scheme() + ",\n"
+                              + "  \"verified_v31\": " + result.isVerifiedUsingV31Scheme() + ",\n"
+                              + "  \"verified_v4\": " + result.isVerifiedUsingV4Scheme() + ",\n"
+                              + "  \"play_delivery_proven\": false\n}\n";
+                      Files.writeString(output, json, StandardCharsets.UTF_8,
+                              java.nio.file.StandardOpenOption.CREATE_NEW);
+                      System.out.println("APK_SIGNATURE_AND_DER_CERTIFICATE=PASS");
+                  } catch (Exception exception) {
+                      // Neither tool exceptions nor environment values belong in diagnostic artifacts.
+                      System.err.println("APK_SIGNATURE_AND_DER_CERTIFICATE=FAIL");
+                      System.exit(1);
+                  }
+              }
+          }
+          JAVA_DER
+          javac --release 17 -cp "$APKSIGNER_JAR" -d "$RUNNER_TEMP/bil-apk-der-classes" "$RUNNER_TEMP/VerifyApkCertificate.java"
+          {
+            echo "BIL_APKSIGNER=$APKSIGNER"
+            echo "BIL_APKSIGNER_JAR=$APKSIGNER_JAR"
+            echo "BIL_DER_VERIFIER_CLASSES=$RUNNER_TEMP/bil-apk-der-classes"
+          } >> "$GITHUB_ENV"
+          "$APKSIGNER" version > BIL-apksigner-tool-version.txt
+          sha256sum "$APKSIGNER_JAR" > BIL-apksigner-tool-jar.sha256
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/artifacts/13470321068 > "$RUNNER_TEMP/debug-artifact-metadata.json"
+          python3 - <<'PY_DEBUG_META'
+          import json,pathlib,os
+          meta=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'debug-artifact-metadata.json').read_text())
+          receipt=json.loads(pathlib.Path('BIL33-pre-signing-ci.json').read_text())
+          native=[r for r in receipt['ci'] if r['workflow']=='bil_codeql_security_extended.yml']
+          assert len(native)==1 and native[0]['run_id']==42144515551
+          assert meta['id']==13470321068 and meta['expired'] is False
+          assert meta['name']=='bil-android-codeql-apk-4c23f40391362b73ae7f6fe850bbdb7f70037130-1'
+          assert meta['digest']=='sha256:2c5b7f393edd90da87d2cfab68ebbcd8bf0f83cfd9b8862a3e33e6f0a1611075'
+          assert meta['workflow_run']['id']==42144515551 and meta['workflow_run']['head_sha']==os.environ['BIL_TESTED_SOURCE_SHA']
+          assert meta['workflow_run']['head_branch']=='codex/bil41-android33-release-20261106'
+          pathlib.Path('BIL-apksigner-preflight-artifact.json').write_text(json.dumps({'artifact_id':meta['id'],'name':meta['name'],'zip_digest':meta['digest'],'run_id':42144515551,'source_sha':os.environ['BIL_TESTED_SOURCE_SHA'],'scope':'DEBUG_APK_TOOL_PREFLIGHT_ONLY_NOT_UPLOAD_CERTIFICATE_PROOF'},indent=2)+'\n')
+          PY_DEBUG_META
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/artifacts/13470321068/zip > "$RUNNER_TEMP/bil-s3-debug-apk.zip"
+          echo "2c5b7f393edd90da87d2cfab68ebbcd8bf0f83cfd9b8862a3e33e6f0a1611075  $RUNNER_TEMP/bil-s3-debug-apk.zip" | sha256sum --check -
+          python3 - <<'PY_DEBUG_ZIP'
+          import hashlib,os,pathlib,zipfile
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          with zipfile.ZipFile(root/'bil-s3-debug-apk.zip') as archive:
+              candidates=[i for i in archive.infolist() if not i.is_dir() and pathlib.PurePosixPath(i.filename).suffix.lower()=='.apk']
+              assert len(candidates)==1 and candidates[0].filename=='offline-debug-build33.apk'
+              assert candidates[0].file_size==315355803
+              with archive.open(candidates[0]) as source,(root/'bil-s3-debug.apk').open('xb') as target:
+                  import shutil
+                  shutil.copyfileobj(source,target)
+          with (root/'bil-s3-debug.apk').open('rb') as source:
+              actual=hashlib.file_digest(source,'sha256').hexdigest()
+          assert actual=='309e3ce10be369fc5f85d8e9396b81d5df80fef36628db0201f30cb2b8c0c65b'
+          proof=pathlib.Path('BIL-apksigner-preflight-artifact.json')
+          data=__import__('json').loads(proof.read_text())
+          data.update({'apk_member':'offline-debug-build33.apk','apk_member_bytes':315355803,'apk_sha256':actual,'apk_member_count':1})
+          proof.write_text(__import__('json').dumps(data,indent=2)+'\n')
+          PY_DEBUG_ZIP
+          "$APKSIGNER" verify --verbose --print-certs "$RUNNER_TEMP/bil-s3-debug.apk" > BIL-apksigner-preflight-cli.txt
+          EXPECTED_UPLOAD_CERT_SHA256=DISCOVER_VERIFIED_DEBUG_IDENTITY_ONLY \
+            java -cp "$RUNNER_TEMP/bil-apk-der-classes:$APKSIGNER_JAR" VerifyApkCertificate \
+            "$RUNNER_TEMP/bil-s3-debug.apk" BIL-apksigner-preflight-der.json debug-preflight
+          if EXPECTED_UPLOAD_CERT_SHA256=0000000000000000000000000000000000000000000000000000000000000000 \
+            java -cp "$RUNNER_TEMP/bil-apk-der-classes:$APKSIGNER_JAR" VerifyApkCertificate \
+            "$RUNNER_TEMP/bil-s3-debug.apk" "$RUNNER_TEMP/debug-negative-must-not-exist.json" debug-preflight >/dev/null 2>&1; then
+            echo 'APK_DER_NEGATIVE_IDENTITY_FIXTURE=FAIL' >&2
+            exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/debug-negative-must-not-exist.json"
+          python3 - <<'PY_DEBUG_RESULT'
+          import json,pathlib,re
+          result=json.loads(pathlib.Path('BIL-apksigner-preflight-der.json').read_text())
+          assert result['status']=='VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY' and result['scope']=='debug-preflight'
+          assert result['apk_signature_verified'] is True and result['current_signer_count']==1
+          text=pathlib.Path('BIL-apksigner-preflight-cli.txt').read_text()
+          result['legacy_signer_number_regex_matches']=len(re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F:]+)$',text,re.M))
+          result['sdk_scoped_cli_records']=len(re.findall(r'^Signer \(minSdkVersion=.*certificate SHA-256 digest:',text,re.M))
+          result['negative_expected_identity_rejected']=True
+          pathlib.Path('BIL-apksigner-preflight-der.json').write_text(json.dumps(result,indent=2)+'\n')
+          PY_DEBUG_RESULT
+          rm -f "$RUNNER_TEMP/bil-s3-debug-apk.zip" "$RUNNER_TEMP/bil-s3-debug.apk"
+          echo 'APK_DER_TOOL_PREFLIGHT=PASS;DEBUG_CERTIFICATE_IS_NOT_RELEASE_IDENTITY_PROOF'
+
+      - name: Preserve public signer-tool preflight evidence before application compilation
+        if: ${{ always() && steps.apk_signer_preflight.outcome != 'skipped' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android33-tool-preflight-4c23f40391362b73ae7f6fe850bbdb7f70037130-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Validate release build number
+        shell: bash
+        env:
+          BUILD_NUMBER: '33'
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
+            echo 'build_number must be a positive integer.' >&2
+            exit 1
+          }
+          (( BUILD_NUMBER == 33 )) || {
+            echo 'build_number must be exactly 33 for the Android release candidate; build 32 and earlier must never be promoted.' >&2
+            exit 1
+          }
+
+      - name: Require release signing secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+        run: |
+          set -euo pipefail
+          test -n "${KEYSTORE_BASE64:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_BASE64'; exit 1; }
+          test -n "${STORE_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_PASSWORD'; exit 1; }
+          test -n "${KEY_ALIAS:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_ALIAS'; exit 1; }
+          test -n "${KEY_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_PASSWORD'; exit 1; }
+          test -n "${EXPECTED_UPLOAD_CERT_SHA256:-}" || { echo 'Missing GitHub secret: ANDROID_UPLOAD_CERTIFICATE_SHA256'; exit 1; }
+          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
+          [[ "${PLAY_INTEGRITY_PROJECT_NUMBER:-}" =~ ^[1-9][0-9]+$ ]] || { echo 'OWNER_INPUT_REQUIRED: numeric BIL_PLAY_INTEGRITY_PROJECT_NUMBER repository variable from the Play-linked Cloud project'; exit 1; }
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo 'storeFile=app/upload-keystore.jks'
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Resolve dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Prepare pinned Android policy library repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+
+      - name: Analyze release source
+        run: flutter analyze --no-pub
+
+      - name: Validate frozen production configuration
+        shell: bash
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: android
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: true
+          BIL_AD_PROVIDER_READY: true
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+          BIL_PUSH_ENABLED: true
+          BIL_PUSH_PROVIDER_READY: true
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_SOURCE_COMMIT: 4c23f40391362b73ae7f6fe850bbdb7f70037130
+          BIL_AUDITED_SOURCE_COMMIT: 4c23f40391362b73ae7f6fe850bbdb7f70037130
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: 4c23f40391362b73ae7f6fe850bbdb7f70037130
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: '33'
+        run: dart run tool/release/validate_release_configuration.dart
+
+      - name: Verify focused payment and subscription regressions only
+        # The broader owner suite is running independently; no repeat of 9k tests.
+        run: |
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
+
+      - name: Run explicit system-crypto source gate
+        run: >-
+          flutter test --no-pub
+          test/launch_readiness/system_crypto_export_compliance_contract_test.dart
+          --timeout 2m
+
+      - name: Bind the completed exact-source native AES-GCM CI evidence
+        id: native_crypto_runtime_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib
+          receipt=json.loads(pathlib.Path('BIL33-pre-signing-ci.json').read_text())
+          assert receipt['status']=='INTERNAL_BUILD_PREREQUISITES_PASS'
+          assert receipt['source_sha']==os.environ['BIL_TESTED_SOURCE_SHA']
+          assert receipt['source_sha']==__import__('subprocess').check_output(['git','rev-parse','HEAD'],text=True).strip()
+          controller=json.loads(pathlib.Path('BIL-android33-controller-provenance.json').read_text())
+          assert controller['workflow_sha']==os.environ['GITHUB_SHA']==os.environ['BIL_SIGNING_ORCHESTRATION_SHA']
+          assert controller['source_sha']==receipt['source_sha']
+          assert receipt['platform']=='android' and receipt['build']==33
+          native=[item for item in receipt['ci'] if item['workflow']=='bil_codeql_security_extended.yml']
+          assert len(native)==1 and native[0]['status']=='PASS'
+          assert 'Android API 33 native integration without CodeQL tracing' in native[0]['required_jobs']
+          pathlib.Path('BIL-android-native-crypto-gate.txt').write_text(
+              'NATIVE_CRYPTO_RUNTIME_GATE=PASS\n'
+              'NATIVE_CRYPTO_RUNTIME_SCOPE=COMPLETED_EXACT_SHA_FINAL_CI_ANDROID_API33\n'
+              'SOURCE_SHA='+receipt['source_sha']+'\n'
+              'NATIVE_CI_URL='+native[0]['url']+'\n')
+          PY
+
+      - name: Exclude dev-only native plugins from Android release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
+      - name: Validate production AdMob configuration
+        shell: bash
+        env:
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+        run: |
+          set -euo pipefail
+          python3 tool/release/test_validate_admob_production_configuration.py
+          python3 tool/release/validate_admob_production_configuration.py \
+            | tee BIL-android-production-admob-source.txt
+
+      - name: Build signed Android App Bundle
+        id: android_aab_build
+        env:
+          BUILD_NUMBER: '33'
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+        run: >-
+          flutter build appbundle --release --no-pub
+          --build-number "$BUILD_NUMBER"
+          --dart-define=BIL_ENVIRONMENT=production
+          --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true
+          --dart-define=BIL_PLAY_INTEGRITY_PROJECT_NUMBER="$PLAY_INTEGRITY_PROJECT_NUMBER"
+          --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true
+          --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms
+          --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy
+          --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal
+          --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json
+          --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_READY=true
+          --dart-define=BIL_PUSH_ENABLED=true
+          --dart-define=BIL_PUSH_PROVIDER_READY=true
+          --dart-define=BIL_ADS_ENABLED=true
+          --dart-define=BIL_AD_PROVIDER_READY=true
+          --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509
+          --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410
+          --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211
+          --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347
+          --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944
+          --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Verify final AAB SDK, optional hardware, 16 KB packaging, and ELF alignment
+        id: android_16k_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          BUNDLETOOL_VERSION=1.18.3
+          BUNDLETOOL_SHA256=a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+          BUNDLETOOL_URL="https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          EVIDENCE_DIR=BIL-android-16k-evidence
+          mkdir -p "$EVIDENCE_DIR"
+          {
+            echo "BUNDLETOOL_VERSION=$BUNDLETOOL_VERSION"
+            echo "BUNDLETOOL_URL=$BUNDLETOOL_URL"
+            echo "EXPECTED_BUNDLETOOL_SHA256=$BUNDLETOOL_SHA256"
+            echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=NOT_COMPLETED'
+          } > "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test -s "$AAB" || {
+            echo 'The final release AAB is missing or empty.' >&2
+            exit 1
+          }
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$BUNDLETOOL_JAR" "$BUNDLETOOL_URL"
+          ACTUAL_BUNDLETOOL_SHA256="$(sha256sum "$BUNDLETOOL_JAR" | cut -d ' ' -f 1)"
+          echo "ACTUAL_BUNDLETOOL_SHA256=$ACTUAL_BUNDLETOOL_SHA256" \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test "$ACTUAL_BUNDLETOOL_SHA256" = "$BUNDLETOOL_SHA256" || {
+            echo 'Pinned official bundletool checksum mismatch.' >&2
+            exit 1
+          }
+          echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=PASS' \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          java -jar "$BUNDLETOOL_JAR" dump manifest \
+            --bundle="$AAB" \
+            --module=base \
+            > "$EVIDENCE_DIR/BIL-android-base-manifest.xml"
+          BIL_ADMOB_PRODUCTION_READY=true \
+          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+          python3 tool/release/validate_admob_production_configuration.py \
+            --android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            | tee "$EVIDENCE_DIR/BIL-android-production-admob.txt"
+          python3 tool/release/verify_android_target_sdk.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.json"
+          python3 tool/release/verify_android_optional_device_features.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.json"
+          python3 tool/release/verify_android_16k_alignment.py \
+            --aab "$AAB" \
+            --bundletool "$BUNDLETOOL_JAR" \
+            --bundletool-version "$BUNDLETOOL_VERSION" \
+            --readelf readelf \
+            --evidence-dir "$EVIDENCE_DIR"
+
+      - name: Upload final AAB platform evidence
+        if: ${{ always() && steps.android_aab_build.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android-16k-4c23f40391362b73ae7f6fe850bbdb7f70037130-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-android-16k-evidence/BIL-android-bundletool-install.txt
+            BIL-android-16k-evidence/BIL-android-base-manifest.xml
+            BIL-android-16k-evidence/BIL-android-production-admob.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.json
+            BIL-android-16k-evidence/BIL-android-optional-hardware.txt
+            BIL-android-16k-evidence/BIL-android-optional-hardware.json
+            BIL-android-16k-evidence/BIL-android-16k-bundletool.txt
+            BIL-android-16k-evidence/BIL-android-16k-elf.txt
+            BIL-android-16k-evidence/BIL-android-16k-summary.json
+
+      - name: Capture release evidence
+        shell: bash
+        env:
+          BUILD_NUMBER: '33'
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify -verbose -certs "$AAB" > BIL-android-signature.txt
+          ACTUAL_UPLOAD_CERT_SHA256="$(keytool -printcert -rfc -jarfile "$AAB" \
+            | openssl x509 -noout -fingerprint -sha256 \
+            | cut -d '=' -f 2 \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          EXPECTED_NORMALIZED="$(printf '%s' "$EXPECTED_UPLOAD_CERT_SHA256" \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          test -n "$ACTUAL_UPLOAD_CERT_SHA256"
+          test "$ACTUAL_UPLOAD_CERT_SHA256" = "$EXPECTED_NORMALIZED" || {
+            echo 'Signed AAB certificate does not match the expected Play upload certificate.' >&2
+            exit 1
+          }
+          printf '%s\n' 'ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH' \
+            > BIL-android-upload-certificate.txt
+          python3 -m unittest discover -s tool/release \
+            -p test_verify_final_artifact_identity.py -v
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build "$BUILD_NUMBER" \
+            --output BIL-android-final-artifact-identity.json
+          sha256sum "$AAB" | tee BIL-android-aab.sha256
+          stat --printf='%s\n' "$AAB" | tee BIL-android-aab.size
+          git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
+
+      - name: Reject forbidden bundled crypto implementations in signed AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          SCAN_DIR="$RUNNER_TEMP/bil-android-crypto-scan"
+          rm -rf "$SCAN_DIR"
+          mkdir -p "$SCAN_DIR"
+          unzip -qq "$AAB" -d "$SCAN_DIR"
+          if find "$SCAN_DIR" -type f -name '*.so' \
+            -exec strings {} + 2>/dev/null \
+            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
+            echo 'Forbidden non-OS crypto implementation marker found in signed AAB.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'SIGNED_AAB_FORBIDDEN_CRYPTO_MARKERS=0' \
+            | tee BIL-android-crypto-scan.txt
+
+      - name: Derive a signed recording APK from the verified final AAB
+        shell: bash
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-1.18.3.jar"
+          echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $BUNDLETOOL_JAR" | sha256sum --check -
+          SECRET_DIR="$(mktemp -d "$RUNNER_TEMP/bil-apk-secret.XXXXXX")"
+          trap 'rm -f "$SECRET_DIR/store.pass" "$SECRET_DIR/key.pass"; rmdir "$SECRET_DIR"' EXIT
+          printf '%s' "$STORE_PASSWORD" > "$SECRET_DIR/store.pass"
+          printf '%s' "$KEY_PASSWORD" > "$SECRET_DIR/key.pass"
+          mkdir -p build/app/outputs/recording-apk
+          java -jar "$BUNDLETOOL_JAR" build-apks \
+            --bundle=build/app/outputs/bundle/release/app-release.aab \
+            --output="$RUNNER_TEMP/bil-android33-recording.apks" --mode=universal \
+            --ks=android/app/upload-keystore.jks --ks-key-alias="$KEY_ALIAS" \
+            --ks-pass="file:$SECRET_DIR/store.pass" --key-pass="file:$SECRET_DIR/key.pass"
+          APK=build/app/outputs/recording-apk/BIL-Android33-derived-universal.apk
+          unzip -p "$RUNNER_TEMP/bil-android33-recording.apks" universal.apk > "$APK"
+          APKSIGNER="${BIL_APKSIGNER:?}"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > BIL-android-recording-apk-signature.txt
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/apkanalyzer" manifest print "$APK" > BIL-android-recording-apk-manifest.xml
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-recording-apk-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog --version 1.0.0 --build 33 \
+            --output BIL-android-recording-apk-identity.json
+          java -cp "$BIL_DER_VERIFIER_CLASSES:$BIL_APKSIGNER_JAR" VerifyApkCertificate \
+            "$APK" BIL-android-recording-apk-der-certificate.json release
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,re,subprocess
+          def digest(path):
+              with pathlib.Path(path).open('rb') as stream:
+                  return hashlib.file_digest(stream,'sha256').hexdigest()
+          identity=json.loads(pathlib.Path('BIL-android-recording-apk-der-certificate.json').read_text())
+          expected=re.sub(r'[:\s]','',os.environ['EXPECTED_UPLOAD_CERT_SHA256']).lower()
+          assert re.fullmatch('[0-9a-f]{64}',expected)
+          assert identity['status']=='VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY' and identity['scope']=='release'
+          assert identity['apk_signature_verified'] is True and identity['current_signer_count']==1
+          assert identity['distinct_verified_scheme_leaf_certificates']==1 and identity['certificate_sha256']==expected
+          aab=digest('build/app/outputs/bundle/release/app-release.aab')
+          assert pathlib.Path('BIL-android-aab.sha256').read_text().split()[0]==aab
+          source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          assert source==os.environ['BIL_TESTED_SOURCE_SHA'] and re.fullmatch('[0-9a-f]{40}',source)
+          controller=json.loads(pathlib.Path('BIL-android33-controller-provenance.json').read_text())
+          assert controller['workflow_sha']==os.environ['GITHUB_SHA']==os.environ['BIL_SIGNING_ORCHESTRATION_SHA']
+          assert controller['source_sha']==source
+          receipt={'status':'VERIFIED_DERIVED_SIGNED_QA_APK','source_sha':source,'signing_orchestration_sha':os.environ['GITHUB_SHA'],'run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'build':33,'package':'com.bilhealth.bodyintelligencelog','aab_sha256':aab,'apk_sha256':digest('build/app/outputs/recording-apk/BIL-Android33-derived-universal.apk'),'certificate_sha256':expected,'installation_source':'not_installed','scope':'Universal APK derived from the verified final AAB and signed with the upload certificate. Not Play-delivered, not proof of Play App Signing, billing or Integrity recognition.','app_recompiled':False,'play_upload_performed':False}
+          pathlib.Path('BIL-android-recording-apk-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print('DERIVED_SIGNED_ANDROID33_QA_APK_IDENTITY=PASS;PLAY_DELIVERY=NOT_PROVEN')
+          PY
+
+      - name: Record code and physical-device gate boundary
+        shell: bash
+        env:
+          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
+        run: |
+          test "$NATIVE_CRYPTO_OUTCOME" = success
+          NATIVE_CRYPTO_GATE_STATUS='PASS'
+          printf '%s\n' \
+            'CODE_GATE=PASS' \
+            "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            'FACEBOOK_LOGIN_COMPILED_GATE=SUPABASE_BROWSER_OAUTH_SOURCE_PRESENT' \
+            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
+            'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=PASS' \
+            'ADMOB_ANDROID_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED' \
+            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
+            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
+            'BLUETOOTH_ANDROID33=DISABLED_NO_RUNTIME_PERMISSIONS' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=Google Credential Manager sign-in and Facebook OAuth browser flow with Supabase token exchange,Play Integrity JIT token/request binding/replay denial,Health Connect,Wear OS via Health Connect,Play billing,AdMob consent and served ad review' \
+            > BIL-android-gate-status.txt
+          printf '%s\n' "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify the exact Android33 Google review permission scope in both artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tool/release -p test_verify_android33_review_scope.py -v
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --output BIL-android33-final-aab-permission-scope.json
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-recording-apk-manifest.xml \
+            --output BIL-android33-final-apk-permission-scope.json
+
+      - name: Upload signed release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android33-signed-4c23f40391362b73ae7f6fe850bbdb7f70037130-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/recording-apk/BIL-Android33-derived-universal.apk
+            BIL-android-recording-apk-receipt.json
+            BIL-android33-final-aab-permission-scope.json
+            BIL-android33-final-apk-permission-scope.json
+            BIL33-pre-signing-ci.json
+            BIL-android33-controller-provenance.json
+            BIL-android33-internal-acceptance.md
+            BIL-android-recording-apk-der-certificate.json
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+            BIL-android-native-crypto-gate.txt
+            BIL-android-recording-apk-identity.json
+            BIL-android-recording-apk-signature.txt
+            BIL-android-recording-apk-manifest.xml
+            BIL-android-signature.txt
+            BIL-android-aab.sha256
+            BIL-android-aab.size
+            BIL-android-crypto-scan.txt
+            BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
+            BIL-android-production-admob-source.txt
+            BIL-android-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-android-16k-evidence/
+
+      - name: Preserve public AAB and available derivation diagnostics on failure
+        if: ${{ failure() && steps.android_aab_build.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android33-INCOMPLETE-diagnostics-4c23f40391362b73ae7f6fe850bbdb7f70037130-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/recording-apk/BIL-Android33-derived-universal.apk
+            BIL33-pre-signing-ci.json
+            BIL-android33-controller-provenance.json
+            BIL-android33-internal-acceptance.md
+            BIL-android-recording-apk-der-certificate.json
+            BIL-android-recording-apk-receipt.json
+            BIL-android-recording-apk-signature.txt
+            BIL-android-recording-apk-manifest.xml
+            BIL-android-recording-apk-identity.json
+            BIL-android33-final-aab-permission-scope.json
+            BIL-android33-final-apk-permission-scope.json
+            BIL-android-signature.txt
+            BIL-android-aab.sha256
+            BIL-android-aab.size
+            BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
+            BIL-android-native-crypto-gate.txt
+            BIL-android-crypto-scan.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+            BIL-android-16k-evidence/
+
+      - name: Remove signing material
+        if: always()
+        shell: bash
+        run: rm -f android/app/upload-keystore.jks android/key.properties
