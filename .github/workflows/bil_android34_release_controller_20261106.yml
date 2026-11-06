@@ -1,0 +1,1663 @@
+name: BIL Android34 immutable e90 release controller
+run-name: "Android34 app e90; separate controller provenance; no Play submission"
+on:
+  push:
+    branches: [codex/bil-android34-controller-20261106]
+permissions:
+  contents: read
+  actions: read
+  security-events: read
+concurrency:
+  group: bil-android34-recovery-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  BIL_TESTED_SOURCE_SHA: e90e04890d5c322cfd8b3554ff1f03fb3165414c
+  BIL_SIGNING_ORCHESTRATION_SHA: ${{ github.sha }}
+  BIL_RELEASE_BRANCH: codex/bil-full-fix-batch-20261106
+  BIL_ORIGINAL_SHA: 0c94cf2a75c01ebb7cbea74704a18a8109831194
+jobs:
+  signed-android-aab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout immutable verified application source e90
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: e90e04890d5c322cfd8b3554ff1f03fb3165414c
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require strict exact-source full-ten-lane prerequisites and separate controller before credentials
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/bil_e90_shared_pre_signing_gate.py" <<'PY_BIL_FULL10_GATE'
+          """Strict e90 ten-lane prerequisites for internal iOS42 / Android34 signing.
+          
+          Application source, native QA controllers and the signing controller have
+          separate identities. This read-only gate does not authorize store submission,
+          certify a future signed binary, or infer Production model/device health.
+          """
+          from __future__ import annotations
+          
+          import argparse
+          import base64
+          from datetime import datetime
+          import hashlib
+          import importlib.util
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import subprocess
+          import sys
+          import time
+          import urllib.request
+          import zipfile
+          
+          sys.dont_write_bytecode = True
+          SOURCE = 'e90e04890d5c322cfd8b3554ff1f03fb3165414c'
+          SOURCE_TREE = 'a6b84c00e4639c051eac5f8c8800e1c217579d20'
+          SOURCE_BRANCH = 'codex/bil-full-fix-batch-20261106'
+          REPOSITORY = 'bilhealth-admin/Body-Intelligence'
+          GATE = 'tools/qa/bil41_internal_build_ci.py'
+          GATE_SHA256 = '48c29e7860c6f04ead8653ca7be2f64231146712f53b17255dfaae68b4166e16'
+          NATIVE_BRANCH = 'codex/bil42-native-controller-20261106'
+          NATIVE_SHA = 'f04243ec12cb5eb2cf4e7c14790a5e6591162193'
+          CODEQL = 'bil_codeql_security_extended.yml'
+          SEMGREP = 'Isolated Semgrep source audit'
+          SOURCE_AUDIT_JOBS = {'CodeQL (actions)', 'CodeQL (javascript-typescript)', 'CodeQL (python)',
+                               SEMGREP, 'Bounded macro editor generated checks, mutants and VM coverage'}
+          RELEASE = {
+              'ios': {'build': 42, 'branch': 'codex/bil-ios42-controller-20261106',
+                      'workflow': '.github/workflows/bil_ios42_controller_20261106.yml'},
+              'android': {'build': 34, 'branch': 'codex/bil-android34-controller-20261106',
+                          'workflow': '.github/workflows/bil_android34_release_controller_20261106.yml'},
+          }
+          NATIVE_WORKFLOWS = {
+              '.github/workflows/bil42_iphone_native_controller_20261106.yml': '62ccb072b207bb1fe8fa1ba081627cfc2ec4d24439c0577193d35f17a99be3e6',
+              '.github/workflows/bil42_ipad_native_controller_20261106.yml': 'f37950936fda8afeb2bfbbfeeaff81ccb60e8ca920448ac0b4ab7cacc2442fdc',
+          }
+          PROTECTED_REFS = {
+              'work/ios38-safe-fixes-20261025': '155b079696430919f8272df934371f033fb11be2',
+              'codex/bil40-device-fixes-20261028': '0c94cf2a75c01ebb7cbea74704a18a8109831194',
+              SOURCE_BRANCH: SOURCE,
+              NATIVE_BRANCH: NATIVE_SHA,
+          }
+          MAX_ARCHIVE = 768 * 1024 * 1024
+          MAX_ARCHIVE_HARD_CAP = 1024 * 1024 * 1024
+          # Reviewed real iPad attempt2 artifact exceeds the default archive resource
+          # budget by398448 bytes. This exception identifies the original ZIP exactly;
+          # no source, native assertions, member limit or provenance check is waived.
+          REVIEWED_ARCHIVE_EXCEPTION = {
+              'id': 13539144494,
+              'size_in_bytes': 805704816,
+              'digest': 'sha256:43eb51aec457cb2aa203031dbe5958395b541f09fd98fe547af89a81b200cea3',
+          }
+          MAX_MEMBER = 256 * 1024 * 1024
+          MAX_CI_WAIT_SECONDS = 75 * 60
+          LEGACY_TRANSPORT = {
+              'run_id': 42240593353, 'run_attempt': 2, 'job_id': 128132429139,
+              'job_name': 'iPhone and iPad native tests from exact simulator bundles',
+              'job_log_bytes': 15266966,
+              'job_log_sha256': 'd842ce83bb9d995207cc789247f485978e68c5975d7f54a4848f4ce14f3b5df2',
+              'artifact_id': 13541126762, 'artifact_bytes': 1714733,
+              'artifact_digest': 'sha256:199d7adfaafea39a28d86c470186a433f04a3751cd718b010d687795acbc587a',
+              'result_sha256': 'faf8fdb182ab6deaac89d4fd3e29c9fa77a40ea1922be1cca816d9bb3e1891b8',
+              'drive_log_sha256': '73b1463d941033bcc00bbc3937df5b79db9041b5af9a217f5fb1c4be976b8991',
+          }
+          CRYPTO_DRIVER_SHA256 = '919ffcd34b13d8fa70a772645eb5eda3bc25b6283d3261f83fe18efe7ec1d623'
+          RUNNER_TEST_SOURCE_SHA256 = 'b51511f0a2f5cc59fa3ba2deab34a20efe4c40449f232658a15e4b38eb70af22'
+          NATIVE_SCOPE_SOURCE_PINS = {
+              'integration_test/system_crypto_bridge_integration_test.dart': '5cbcc835a16c7468dbd0a9720a885012d335d4abab7e7b23a23e0e397ce94fd0',
+              'integration_test/native_settings_polish_test.dart': 'e5fc6485c27b35bf9174909db241ddac8670902b9613bc89cc9111979767e977',
+              'integration_test/native_feature_splashes_test.dart': '2d9c8510baed15aa445c00283829e56c65a76f24ebf4cff512d9e0dcafe1c5f2',
+              'test_driver/native_settings_capture_driver.dart': 'db4d996d9294c1cb8c74b0d9de6df4e7f763f8efea6f57c94d68506f57f4f4ef',
+              'test_driver/native_feature_splashes_driver.dart': '3c03e73cba7cde627b6fa9e1b0ec2fe1ef71e75d350d35f323518afc04a0af7e',
+              'ios/RunnerTests/RunnerTests.swift': RUNNER_TEST_SOURCE_SHA256,
+              '.github/scripts/bil_ios37_native_integration.sh': '68625566fd2fc38280ed3daec9851ec4d2539965a2a85d9a8d91cfddc07bc314',
+              '.github/scripts/bil39_ios_native_integration.sh': 'dc312fd4d2704fb6c633bd2437ffece9383cd945be25604a69af43d3e55d844b',
+              '.github/scripts/bil39_simulator_vm_attach.py': '966c678ac76e927810729144f89287bc68469732d86082f5b0f4a25282fafb76',
+          }
+          
+          
+          def require(condition, message):
+              if not condition:
+                  raise ValueError(message)
+          
+          
+          def sha256(raw):
+              return hashlib.sha256(raw).hexdigest()
+          
+          
+          def git(root, *args):
+              return subprocess.check_output(['git', *args], cwd=root, text=True).strip()
+          
+          
+          class GitHub:
+              def __init__(self, token, temp):
+                  require(bool(token), 'GitHub read credential required')
+                  self.token, self.temp = token, temp
+          
+              def api(self, path):
+                  require(path.startswith('/') and '://' not in path, 'Repository-scoped API path required')
+                  request = urllib.request.Request('https://api.github.com/repos/' + REPOSITORY + path,
+                      headers={'Authorization': 'Bearer ' + self.token, 'Accept': 'application/vnd.github+json',
+                               'X-GitHub-Api-Version': '2022-11-28'})
+                  with urllib.request.urlopen(request, timeout=45) as response:
+                      return json.load(response)
+          
+              def all_jobs(self, run_id):
+                  jobs = []
+                  for page in range(1, 11):
+                      document = self.api(f'/actions/runs/{run_id}/jobs?filter=latest&per_page=100&page={page}')
+                      batch = document['jobs']
+                      jobs.extend(batch)
+                      if len(batch) < 100:
+                          require(document.get('total_count') == len(jobs), 'Complete job inventory required')
+                          return jobs
+                  raise ValueError('Unbounded job inventory')
+          
+              def artifact(self, meta):
+                  path = self.temp / f'native-artifact-{meta["id"]}.zip'
+                  if not hasattr(self, '_downloaded_artifacts'):
+                      self._downloaded_artifacts = set()
+                  require(not path.is_symlink(), 'Regular private artifact path required')
+                  if path.exists():
+                      require(meta['id'] in self._downloaded_artifacts and path.is_file(),
+                              'Only this client own previously verified artifact may be reused')
+                  else:
+                      with path.open('xb') as output:
+                          subprocess.run(['gh', 'api', f'repos/{REPOSITORY}/actions/artifacts/{meta["id"]}/zip'],
+                                         stdout=output, check=True)
+                  require(path.stat().st_size == meta['size_in_bytes'], 'Artifact ZIP size mismatch')
+                  with path.open('rb') as stream:
+                      require(hashlib.file_digest(stream, 'sha256').hexdigest() == meta['digest'][7:],
+                              'Artifact archive digest mismatch')
+                  self._downloaded_artifacts.add(meta['id'])
+                  return path
+          
+              def legacy_job_log(self):
+                  path = self.temp / f'legacy-transport-job-{LEGACY_TRANSPORT["job_id"]}.log'
+                  require(not path.is_symlink(), 'Regular private original-log path required')
+                  if path.exists():
+                      require(getattr(self, '_legacy_log_downloaded', False) and path.is_file(),
+                              'Only this client own verified original log may be reused')
+                  else:
+                      with path.open('xb') as output:
+                          subprocess.run(['gh', 'api', '--allow-escape-sequences',
+                              f'repos/{REPOSITORY}/actions/jobs/{LEGACY_TRANSPORT["job_id"]}/logs'], stdout=output, check=True)
+                  require(path.stat().st_size == LEGACY_TRANSPORT['job_log_bytes'], 'Exact original failed-job log size required')
+                  raw = path.read_bytes()
+                  require(sha256(raw) == LEGACY_TRANSPORT['job_log_sha256'], 'Exact authenticated failed-job log hash required')
+                  self._legacy_log_downloaded = True
+                  return raw
+          
+          
+          def source_contract(root):
+              require(sha256((root / GATE).read_bytes()) == GATE_SHA256, 'Original prerequisite implementation changed')
+              sys.path.insert(0, str(root / 'tools/qa'))
+              try:
+                  spec = importlib.util.spec_from_file_location('original_bil41_source_contract', root / GATE)
+                  module = importlib.util.module_from_spec(spec)
+                  spec.loader.exec_module(module)
+              finally:
+                  sys.path.pop(0)
+              require(module.REPOSITORY == REPOSITORY and len(module.WORKFLOWS) == 10,
+                      'Original distinct ten-workflow contract required')
+              for path, blob in module.PROTECTED.items():
+                  require(git(root, 'hash-object', path) == blob, 'Protected purchase source changed: ' + path)
+              return module
+          
+          
+          def clean_source(root):
+              require(git(root, 'rev-parse', 'HEAD') == SOURCE and git(root, 'rev-parse', 'HEAD^{tree}') == SOURCE_TREE,
+                      'Exact immutable app HEAD and tree required')
+              require(not git(root, 'status', '--porcelain=v1', '--untracked-files=all'),
+                      'Pristine signing checkout required before prerequisites and credentials')
+          
+          
+          def validate_commit(commit, sha, allowed_files):
+              require(commit.get('sha') == sha and [p.get('sha') for p in commit.get('parents', [])] == [SOURCE],
+                      'Controller must have the single app-source parent')
+              files = commit.get('files')
+              require(isinstance(files, list) and len(files) == len(allowed_files)
+                      and len({f.get('filename') for f in files}) == len(files)
+                      and {f.get('filename') for f in files} == set(allowed_files)
+                      and all(f.get('status') == 'added' and not f.get('previous_filename')
+                              and re.fullmatch('[0-9a-f]{40}', f.get('sha', '')) for f in files),
+                      'Controller may only add the exact allowed workflow file set')
+              return {f['filename']: f['sha'] for f in files}
+          
+          
+          def validate_blob(blob, expected_blob, expected_digest=None):
+              require(blob.get('sha') == expected_blob and blob.get('encoding') == 'base64',
+                      'Authenticated regular workflow blob required')
+              raw = base64.b64decode(''.join(blob.get('content', '').split()), validate=True)
+              actual_blob = hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest()
+              require(actual_blob == expected_blob and blob.get('size') == len(raw), 'Workflow Git object mismatch')
+              if expected_digest is not None:
+                  require(sha256(raw) == expected_digest, 'Native controller workflow bytes changed')
+              return sha256(raw)
+          
+          
+          def regular_workflow_modes(client, commit, blobs):
+              """Read the two containing trees, without an unbounded recursive listing."""
+              tree_sha = commit.get('commit', {}).get('tree', {}).get('sha', '')
+              require(re.fullmatch('[0-9a-f]{40}', tree_sha), 'Controller tree identity required')
+              for directory in ('.github', 'workflows'):
+                  tree = client.api('/git/trees/' + tree_sha)
+                  require(tree.get('sha') == tree_sha and tree.get('truncated') is False, 'Complete workflow directory tree required')
+                  items = [r for r in tree.get('tree', []) if r.get('path') == directory]
+                  require(len(items) == 1 and items[0].get('mode') == '040000' and items[0].get('type') == 'tree',
+                          'Normal workflow parent directory required')
+                  tree_sha = items[0]['sha']
+              tree = client.api('/git/trees/' + tree_sha)
+              require(tree.get('sha') == tree_sha and tree.get('truncated') is False, 'Complete workflows tree required')
+              for path, blob in blobs.items():
+                  items = [r for r in tree.get('tree', []) if r.get('path') == PurePosixPath(path).name]
+                  require(len(items) == 1 and items[0].get('type') == 'blob' and items[0].get('mode') == '100644'
+                          and items[0].get('sha') == blob, 'Regular non-executable controller workflow required')
+          
+          
+          def controller_provenance(root, env, platform, client):
+              target = RELEASE[platform]
+              controller = env.get('GITHUB_SHA', '')
+              ref = 'refs/heads/' + target['branch']
+              require(re.fullmatch('[0-9a-f]{40}', controller) and controller != SOURCE
+                  and env.get('GITHUB_REPOSITORY') == REPOSITORY and env.get('GITHUB_EVENT_NAME') == 'push'
+                  and env.get('GITHUB_REF') == ref and env.get('GITHUB_REF_NAME') == target['branch']
+                  and env.get('GITHUB_WORKFLOW_SHA') == controller
+                  and env.get('BIL_SIGNING_ORCHESTRATION_SHA') == controller
+                  and env.get('GITHUB_WORKFLOW_REF') == REPOSITORY + '/' + target['workflow'] + '@' + ref
+                  and env.get('BIL_TESTED_SOURCE_SHA') == SOURCE,
+                  'Actual platform signing-controller event and separate source identity required')
+              for name in ('GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT'):
+                  require(re.fullmatch('[1-9][0-9]*', env.get(name, '')), 'Actual positive run identity required')
+              run_id, attempt = int(env['GITHUB_RUN_ID']), int(env['GITHUB_RUN_ATTEMPT'])
+              require(attempt == 1, 'Signing controller must use its first attempt; inspect prior outcomes instead of blind retry')
+              require(client.api('/git/ref/heads/' + target['branch'])['object']['sha'] == controller,
+                      'Signing controller branch moved')
+              commit = client.api('/commits/' + controller)
+              blobs = validate_commit(commit, controller, [target['workflow']])
+              regular_workflow_modes(client, commit, blobs)
+              workflow_digest = validate_blob(client.api('/git/blobs/' + blobs[target['workflow']]), blobs[target['workflow']])
+              run = client.api(f'/actions/runs/{run_id}')
+              require(run.get('id') == run_id and run.get('run_attempt') == attempt and run.get('head_sha') == controller
+                      and run.get('head_branch') == target['branch'] and run.get('event') == 'push'
+                      and run.get('path') == target['workflow']
+                      and run.get('repository', {}).get('full_name') == REPOSITORY
+                      and run.get('html_url') == f'https://github.com/{REPOSITORY}/actions/runs/{run_id}',
+                      'Live signing run metadata does not match actual environment')
+              # Fetch-depth0 provides the current controller object without changing app HEAD.
+              require(git(root, 'show', '-s', '--format=%P', controller).split() == [SOURCE]
+                      and git(root, 'diff-tree', '--no-commit-id', '--name-status', '--no-renames', '-r', SOURCE, controller)
+                      == 'A\t' + target['workflow'], 'Local Git graph differs from authenticated controller')
+              require(git(root, 'ls-tree', controller, '--', target['workflow'])
+                      == '100644 blob ' + blobs[target['workflow']] + '\t' + target['workflow'],
+                      'Local controller workflow is not the authenticated regular file')
+              return {'status': 'STRICT_CONTROLLER_PROVENANCE_PASS', 'source_sha': SOURCE,
+                      'source_tree': SOURCE_TREE, 'workflow_sha': controller, 'controller_parent_sha': SOURCE,
+                      'controller_branch': target['branch'], 'controller_workflow': target['workflow'],
+                      'controller_workflow_blob': blobs[target['workflow']], 'controller_workflow_sha256': workflow_digest,
+                      'controller_only_change': True, 'checkout_clean': True, 'run_id': run_id, 'run_attempt': attempt}
+          
+          
+          def validate_run_identity(run, pin):
+              expected_sha = NATIVE_SHA if pin.get('device') else SOURCE
+              expected_branch = NATIVE_BRANCH if pin.get('device') else SOURCE_BRANCH
+              run_id = pin['run_id']
+              require(run.get('id') == run_id and run.get('run_attempt') == pin['run_attempt']
+                      and run.get('head_sha') == expected_sha and run.get('head_branch') == expected_branch
+                      and run.get('path') == pin['actual_workflow'] and run.get('event') == pin['event']
+                      and run.get('repository', {}).get('full_name') == REPOSITORY
+                      and run.get('html_url') == f'https://github.com/{REPOSITORY}/actions/runs/{run_id}',
+                      'Mismatched pinned CI run identity or attempt: ' + pin['workflow'])
+          
+          
+          def validate_legacy_job_inventory(run, jobs, pin, required):
+              validate_run_identity(run, pin)
+              require(pin['workflow'] == CODEQL and pin['scope'] == 'full'
+                      and pin['run_id'] == LEGACY_TRANSPORT['run_id'] and pin['run_attempt'] == 2
+                      and run.get('status') == 'completed' and run.get('conclusion') == 'failure',
+                      'Only the exact reviewed legacy transport run/attempt failure is eligible')
+              require(isinstance(jobs, list) and jobs and len({j.get('id') for j in jobs}) == len(jobs),
+                      'Complete distinct job inventory required for scoped legacy review')
+              failures = [j for j in jobs if j.get('conclusion') not in ('success', 'skipped')]
+              require(len(failures) == 1 and failures[0].get('id') == LEGACY_TRANSPORT['job_id']
+                      and failures[0].get('name') == LEGACY_TRANSPORT['job_name']
+                      and failures[0].get('conclusion') == 'failure' and failures[0].get('run_attempt') == 2,
+                      'Any different/additional failed or pending job blocks supersession')
+              for job in jobs:
+                  require(job.get('run_id') == pin['run_id'] and job.get('head_sha') == SOURCE
+                          and job.get('status') == 'completed', 'Foreign or incomplete job in scoped legacy run')
+              for name in required:
+                  matches = [j for j in jobs if j.get('name') == name]
+                  require(len(matches) == 1 and matches[0].get('conclusion') == 'success',
+                          'Every original required job must pass before legacy supersession: ' + name)
+              return failures[0]
+          
+          
+          def validate_lane(run, jobs, pin, required, *, legacy_proof=None):
+              validate_run_identity(run, pin)
+              expected_sha = NATIVE_SHA if pin.get('device') else SOURCE
+              expected_branch = NATIVE_BRANCH if pin.get('device') else SOURCE_BRANCH
+              run_id = pin['run_id']
+              scoped_legacy = run.get('conclusion') == 'failure' and legacy_proof is not None
+              if scoped_legacy:
+                  validate_legacy_job_inventory(run, jobs, pin, required)
+                  require(legacy_proof.get('status') == 'EXACT_LEGACY_TRANSPORT_FAILURE_AUTHENTICATED'
+                          and legacy_proof.get('run_id') == LEGACY_TRANSPORT['run_id']
+                          and legacy_proof.get('run_attempt') == 2
+                          and legacy_proof.get('job_id') == LEGACY_TRANSPORT['job_id']
+                          and legacy_proof.get('job_log_sha256') == LEGACY_TRANSPORT['job_log_sha256']
+                          and legacy_proof.get('artifact_digest') == LEGACY_TRANSPORT['artifact_digest']
+                          and legacy_proof.get('failed_result_sha256') == LEGACY_TRANSPORT['result_sha256']
+                          and legacy_proof.get('failed_drive_log_sha256') == LEGACY_TRANSPORT['drive_log_sha256'],
+                          'Exact authenticated legacy signature proof required')
+              else:
+                  require(run.get('status') == 'completed' and run.get('conclusion') == 'success',
+                          'Missing, failed or pending pinned CI run: ' + pin['workflow'])
+              require(isinstance(jobs, list) and jobs and len({j.get('id') for j in jobs}) == len(jobs),
+                      'Complete distinct job inventory required')
+              for job in jobs:
+                  require(job.get('run_id') == run_id and job.get('head_sha') == expected_sha
+                          and job.get('status') == 'completed' and (job.get('conclusion') in ('success', 'skipped')
+                              or (scoped_legacy and job.get('id') == LEGACY_TRANSPORT['job_id'])),
+                          'Additional job failed, pending or belongs to another source/run')
+              for name in required:
+                  matches = [j for j in jobs if j.get('name') == name]
+                  require(len(matches) == 1 and matches[0].get('conclusion') == 'success',
+                          'Required job absent, duplicated, skipped or failed: ' + name)
+              if pin['workflow'] == 'verify.yml':
+                  require(len(jobs) == 30 and all(j['conclusion'] == 'success' for j in jobs), 'All thirty host verify jobs required')
+              row = {'workflow': pin['workflow'], 'scope': pin['scope'], 'actual_workflow': pin['actual_workflow'],
+                      'source_sha': SOURCE, 'source_branch': SOURCE_BRANCH, 'run_head_sha': expected_sha,
+                      'run_branch': expected_branch, 'event': pin['event'], 'run_id': run_id,
+                      'run_attempt': pin['run_attempt'], 'url': run['html_url'],
+                      'required_jobs': sorted(required), 'status': 'PASS', 'raw_run_conclusion': run['conclusion']}
+              if scoped_legacy:
+                  row.update(status='REQUIRED_JOB_SET_PASS_PENDING_EXACT_NATIVE_SUPERSESSION',
+                      required_job_set='PASS', full_workflow_success=False, legacy_transport=legacy_proof)
+              return row
+          
+          
+          def wait_for_pinned_runs(root, env, platform, config, client, *, workflows,
+                                   timeout_seconds=MAX_CI_WAIT_SECONDS, poll_seconds=60,
+                                   monotonic=time.monotonic, sleep=time.sleep):
+              """Wait only for the eleven immutable pins; never retry/swap runs/attempts.
+          
+              All requests use GitHub authentication. Any wrong identity or completed
+              failure stops before signing credentials. Full verify_all remains required.
+              """
+              require(type(timeout_seconds) is int and 0 < timeout_seconds <= MAX_CI_WAIT_SECONDS,
+                      'CI wait must be positive and bounded at75 minutes')
+              require(type(poll_seconds) is int and 0 < poll_seconds <= 60, 'Bounded CI poll interval required')
+              validate_config(config, workflows)
+              clean_source(root)
+              before = controller_provenance(root, env, platform, client)
+              started = monotonic()
+              next_ref_check = started
+              previous = None
+              checks = 0
+              remaining = list(config['lanes'])
+              completed = set()
+              scoped_failure = []
+              def check_refs():
+                  for branch, expected in {**PROTECTED_REFS, RELEASE[platform]['branch']: before['workflow_sha']}.items():
+                      require(client.api('/git/ref/heads/' + branch)['object']['sha'] == expected,
+                              'Source or controller branch moved while waiting: ' + branch)
+              while True:
+                  if monotonic() >= next_ref_check:
+                      check_refs()
+                      next_ref_check = monotonic() + 300
+                  pending = []
+                  next_remaining = []
+                  for pin in remaining:
+                      run = client.api(f'/actions/runs/{pin["run_id"]}')
+                      validate_run_identity(run, pin)
+                      if run.get('status') == 'completed':
+                          jobs = client.all_jobs(pin['run_id'])
+                          proof = (legacy_transport_evidence(root, client, run, jobs, pin, required_jobs(pin, workflows))
+                                   if run.get('conclusion') == 'failure' else None)
+                          validate_lane(run, jobs, pin, required_jobs(pin, workflows), legacy_proof=proof)
+                          if proof is not None:
+                              scoped_failure.append({'run_id': pin['run_id'], 'run_attempt': pin['run_attempt'],
+                                  'raw_run_conclusion': 'failure', 'native_replacement_acceptance': 'PENDING_FINAL_STRICT_NATIVE_ZIPS'})
+                          completed.add(pin['run_id'])
+                      else:
+                          require(run.get('status') in ('queued', 'in_progress', 'waiting', 'requested', 'pending')
+                                  and run.get('conclusion') is None, 'Unexpected pinned CI state while waiting')
+                          pending.append({'run_id': pin['run_id'], 'run_attempt': pin['run_attempt'],
+                                          'workflow': pin['workflow'], 'status': run['status']})
+                          next_remaining.append(pin)
+                  remaining = next_remaining
+                  checks += 1
+                  clean_source(root)
+                  elapsed = monotonic() - started
+                  if pending != previous:
+                      print('PINNED_CI_WAIT=' + json.dumps({'pending': pending, 'checks': checks,
+                            'elapsed_seconds': round(elapsed)}, sort_keys=True), flush=True)
+                      previous = pending
+                  if not pending:
+                      check_refs()
+                      require(controller_provenance(root, env, platform, client) == before,
+                              'Controller/source identity changed during CI wait')
+                      return {'status': ('PINNED_REQUIRED_JOB_SETS_COMPLETE_NATIVE_SUPERSESSION_PENDING' if scoped_failure
+                                        else 'ALL_PINNED_CI_COMPLETED_SUCCESS'), 'checks': checks,
+                              'raw_failed_runs_preserved': scoped_failure,
+                              'elapsed_seconds': round(elapsed), 'max_seconds': timeout_seconds,
+                              'run_attempts': {str(p['run_id']): p['run_attempt'] for p in config['lanes']},
+                              'completed_pins_cached_until_final_strict_revalidation': len(completed),
+                              'poll_seconds': poll_seconds, 'ref_check_interval_seconds': 300,
+                              'automatic_ci_retries': 0, 'run_or_attempt_substitution': False}
+                  require(elapsed < timeout_seconds, 'Pinned CI remains pending after bounded75-minute wait; credentials blocked')
+                  sleep(min(poll_seconds, max(0, timeout_seconds - elapsed)))
+          
+          
+          def required_jobs(pin, workflows):
+              original = workflows[pin['workflow']]
+              if pin['workflow'] == CODEQL:
+                  return original - {SEMGREP} if pin['scope'] == 'full' else SOURCE_AUDIT_JOBS
+              return original
+          
+          
+          def aggregate_workflows(rows, workflows):
+              """Keep all eleven real run receipts and make ten explicit workflow rows."""
+              result = []
+              for workflow, expected in workflows.items():
+                  selected = [r for r in rows if r['workflow'] == workflow]
+                  if workflow != CODEQL:
+                      require(len(selected) == 1, 'One run per ordinary prerequisite workflow required')
+                      result.append(selected[0])
+                      continue
+                  require(len(selected) == 2 and {r['scope'] for r in selected} == {'full', 'source-audit'},
+                          'Both disjoint CodeQL/source-audit run scopes required')
+                  require(set().union(*(set(r['required_jobs']) for r in selected)).issuperset(expected),
+                          'Combined CodeQL scopes must cover every original required job')
+                  full = next(r for r in selected if r['scope'] == 'full')
+                  result.append({**full, 'scope': 'COMBINED_DISJOINT_FULL_AND_SOURCE_AUDIT_RUNS',
+                      'required_jobs': sorted(expected), 'supplementary_run_id': next(r['run_id'] for r in selected if r['scope'] == 'source-audit'),
+                      'required_job_evidence': {name: [{'run_id': r['run_id'], 'url': r['url'], 'scope': r['scope']}
+                          for r in selected if name in r['required_jobs']] for name in sorted(expected)},
+                      'scoped_runs': selected,
+                      'scope_note': 'Semgrep was skipped in full run and required successful in separate exact-source source-audit run'})
+              return result
+          
+          
+          def archive_members(archive):
+              result = {}
+              for item in archive.infolist():
+                  path = PurePosixPath(item.filename)
+                  require(item.orig_filename == item.filename and '\\' not in item.orig_filename
+                          and not path.is_absolute() and '..' not in path.parts and '\\' not in item.filename
+                          and str(path) == item.filename.rstrip('/') and not (item.flag_bits & 1)
+                          and (item.external_attr >> 16) & 0o170000 != 0o120000,
+                          'Unsafe native archive member')
+                  if not item.is_dir():
+                      require(item.filename not in result and item.file_size <= MAX_MEMBER, 'Duplicate or oversized native member')
+                      result[item.filename] = item
+              return result
+          
+          
+          def legacy_archive_signature(archive):
+              members = archive_members(archive)
+              def raw(name):
+                  matches = [p for p in members if p == name or p.endswith('/' + name)]
+                  require(len(matches) == 1, 'Missing/ambiguous legacy transport member: ' + name)
+                  return archive.read(members[matches[0]])
+              result_raw, log = raw('ipad-system-crypto-drive-result.json'), raw('ipad-system-crypto.log')
+              require(sha256(result_raw) == LEGACY_TRANSPORT['result_sha256']
+                      and len(log) == 115 and sha256(log) == LEGACY_TRANSPORT['drive_log_sha256'],
+                      'Exact reviewed pre-first-test result/log bytes required; assertion or altered error blocks')
+              result = json.loads(result_raw)
+              require(result.get('label') == 'ipad-system-crypto-drive'
+                      and result.get('first_test_after_seconds') is None
+                      and result.get('terminal_summary_after_seconds') is None and result.get('native_summary') is None
+                      and result.get('native_failure_summary_seen') is False and result.get('timed_out') is True
+                      and result.get('reason') == 'bootstrap_timeout' and result.get('effective_returncode') == 124
+                      and result.get('elapsed_seconds') == 1800.41 and result.get('bootstrap_timeout_seconds') == 1800.0
+                      and result.get('raw_returncode') == 0 and result.get('launch_error') is None
+                      and result.get('supervisor_error') is None and result.get('output_complete') is True
+                      and result.get('output_bytes') == len(log) and result.get('output_sha256') == sha256(log)
+                      and log == b'Error waiting for a debug connection: The log reader failed unexpectedly\nApplication failed to start on attempt: 1\n',
+                      'Only exact VM transport failure before any iPad application assertion may be superseded')
+              require(sha256(raw('crypto-driver.dart')) == CRYPTO_DRIVER_SHA256,
+                      'Legacy and split native crypto driver source must match')
+              xctest = json.loads(raw('runner-tests/runner-tests-result.json'))
+              require(xctest.get('source_test_sha256') == RUNNER_TEST_SOURCE_SHA256
+                      and xctest.get('build_number') == '37' and xctest.get('status') == 'PASS'
+                      and xctest.get('summary', {}).get('passedTests') == 5
+                      and xctest.get('summary', {}).get('failedTests') == 0
+                      and xctest.get('summary', {}).get('skippedTests') == 0,
+                      'Original unchanged five RunnerTests evidence required')
+              return {'failed_result_sha256': sha256(result_raw), 'failed_drive_log_sha256': sha256(log),
+                      'first_ipad_test_started': False, 'application_assertion_failure': False,
+                      'generated_crypto_driver_sha256': CRYPTO_DRIVER_SHA256,
+                      'runner_test_source_sha256': RUNNER_TEST_SOURCE_SHA256}
+          
+          
+          def legacy_transport_evidence(root, client, run, jobs, pin, required):
+              failed = validate_legacy_job_inventory(run, jobs, pin, required)
+              for path, expected in NATIVE_SCOPE_SOURCE_PINS.items():
+                  require(sha256((root / path).read_bytes()) == expected,
+                          'Reviewed identical native test/driver/transport source changed: ' + path)
+              actual = client.api(f'/actions/jobs/{LEGACY_TRANSPORT["job_id"]}')
+              require(all(actual.get(key) == failed.get(key) for key in
+                      ('id', 'name', 'run_id', 'run_attempt', 'head_sha', 'status', 'conclusion')),
+                      'Authenticated exact failed-job metadata required')
+              job_log = client.legacy_job_log()
+              require(len(job_log) == LEGACY_TRANSPORT['job_log_bytes']
+                      and sha256(job_log) == LEGACY_TRANSPORT['job_log_sha256'],
+                      'Original full failed-job log differs from reviewed transport-only failure')
+              meta = client.api(f'/actions/artifacts/{LEGACY_TRANSPORT["artifact_id"]}')
+              identity = meta.get('workflow_run', {})
+              require(meta.get('id') == LEGACY_TRANSPORT['artifact_id'] and meta.get('expired') is False
+                      and meta.get('name') == 'bil-ios37-native-only-' + SOURCE
+                      and meta.get('size_in_bytes') == LEGACY_TRANSPORT['artifact_bytes']
+                      and meta.get('digest') == LEGACY_TRANSPORT['artifact_digest']
+                      and identity.get('id') == pin['run_id'] and identity.get('head_sha') == SOURCE
+                      and identity.get('head_branch') == SOURCE_BRANCH
+                      and identity.get('repository_id') == 1300988782 and identity.get('head_repository_id') == 1300988782,
+                      'Exact authenticated original failed-attempt artifact required')
+              attempt = client.api(f'/actions/runs/{pin["run_id"]}/attempts/2')
+              validate_run_identity(attempt, pin)
+              require(attempt.get('status') == 'completed' and attempt.get('conclusion') == 'failure'
+                      and api_timestamp(attempt['run_started_at']) <= api_timestamp(meta['created_at']) <= api_timestamp(attempt['updated_at']),
+                      'Original failure artifact must belong to exact authenticated attempt2 time window')
+              archive_path = client.artifact(meta)
+              with zipfile.ZipFile(archive_path) as archive:
+                  require(archive.testzip() is None, 'Original legacy artifact CRC failure')
+                  signature = legacy_archive_signature(archive)
+              return {'status': 'EXACT_LEGACY_TRANSPORT_FAILURE_AUTHENTICATED', 'run_id': pin['run_id'],
+                  'run_attempt': 2, 'job_id': failed['id'], 'raw_run_conclusion': 'failure',
+                  'job_log_sha256': sha256(job_log), 'artifact_id': meta['id'], 'artifact_digest': meta['digest'],
+                  'artifact_bytes': meta['size_in_bytes'], 'native_replacement_acceptance': 'PENDING_FINAL_STRICT_NATIVE_ZIPS',
+                  'scope': 'Exact obsolete VM transport failure only; no application assertion was executed on iPad',
+                  'native_scope_source_pins': NATIVE_SCOPE_SOURCE_PINS, **signature}
+          
+          
+          def native_evidence(archive, device, run_id, attempt):
+              members = archive_members(archive)
+              def raw(name):
+                  # The upload root is a directory's contents; allow one unambiguous
+                  # suffix in GitHub archives without extracting paths to the filesystem.
+                  matches = [p for p in members if p == name or p.endswith('/' + name)]
+                  require(len(matches) == 1, 'Missing or ambiguous actual native member: ' + name)
+                  return archive.read(members[matches[0]])
+              def document(name):
+                  data = raw(name)
+                  require(len(data) <= 1024 * 1024, 'Native JSON receipt too large')
+                  return json.loads(data)
+              provenance = document('controller-provenance.json')
+              actual_workflow = f'.github/workflows/bil42_{device}_native_controller_20261106.yml'
+              require(provenance.get('schema') == 'bil42.pinned-source-native-controller.v1'
+                  and provenance.get('application_source_sha') == SOURCE and provenance.get('application_source_tree') == SOURCE_TREE
+                  and provenance.get('controller_sha') == NATIVE_SHA
+                  and provenance.get('controller_ref') == 'refs/heads/' + NATIVE_BRANCH
+                  and provenance.get('controller_workflow_ref') == REPOSITORY + '/' + actual_workflow + '@refs/heads/' + NATIVE_BRANCH
+                  and provenance.get('run_id') == str(run_id) and provenance.get('run_attempt') == str(attempt)
+                  and provenance.get('device') == device and provenance.get('qa_harness_build') == 39
+                  and provenance.get('signed_ios42_device_acceptance') is False
+                  and provenance.get('physical_device_acceptance') is False,
+                  'Native app source, controller provenance or harness scope mismatch')
+              complete = document('native-complete-result.json')
+              require(complete.get('schema') == 'bil39.single-device-native.v1'
+                  and complete.get('source_sha') == SOURCE and complete.get('device') == device and complete.get('status') == 'PASS',
+                  'Actual complete native source receipt required')
+              scopes = complete.get('scopes', [])
+              kinds = ('system-crypto', 'native-settings', 'feature-splashes')
+              require(len(scopes) == 3 and {r.get('kind') for r in scopes} == set(kinds), 'Every original native scope required')
+              for kind in kinds:
+                  name = f'{device}-{kind}'
+                  result_raw, log = raw(name + '-drive-result.json'), raw(name + '.log')
+                  result = json.loads(result_raw)
+                  row = next(r for r in scopes if r['kind'] == kind)
+                  require(result.get('label') == name + '-drive' and result.get('raw_returncode') == 0
+                      and result.get('effective_returncode') == 0 and result.get('timed_out') is False
+                      and result.get('supervisor_error') is None and result.get('launch_error') is None
+                      and result.get('first_test_after_seconds') is not None and result.get('terminal_summary_after_seconds') is not None
+                      and result.get('native_failure_summary_seen') is False and result.get('output_complete') is True
+                      and re.fullmatch(r'\d{1,2}:\d{2}(?:\.\d+)? \+\d+: All tests passed[.!]', result.get('native_summary') or '')
+                      and sha256(log) == result.get('output_sha256') == row.get('log_sha256')
+                      and sha256(result_raw) == row.get('result_sha256') and result.get('native_summary') == row.get('summary'),
+                      'Actual native scope result/log/complete receipt mismatch: ' + kind)
+              xctest = document('runner-tests/runner-tests-result.json')
+              require(xctest.get('status') == 'PASS' and xctest.get('build_number') == '39'
+                      and xctest.get('source_test_sha256') == RUNNER_TEST_SOURCE_SHA256
+                      and xctest.get('summary', {}).get('passedTests') == 5
+                      and xctest.get('summary', {}).get('failedTests') == 0
+                      and xctest.get('summary', {}).get('skippedTests') == 0
+                      and complete.get('xctest') == xctest['summary'], 'All five actual RunnerTests required')
+              require(sha256(raw('crypto-driver.dart')) == CRYPTO_DRIVER_SHA256,
+                      'Actual split crypto driver must match reviewed legacy test driver')
+              return {'status': 'EXACT_SOURCE_NATIVE_SIMULATOR_PASS', 'device': device, 'source_sha': SOURCE,
+                      'source_tree': SOURCE_TREE, 'controller_sha': NATIVE_SHA, 'qa_harness_build': 39,
+                      'complete_receipt_sha256': sha256(raw('native-complete-result.json')),
+                      'controller_provenance_sha256': sha256(raw('controller-provenance.json')),
+                      'scopes': scopes, 'xctest': xctest['summary'],
+                      'generated_crypto_driver_sha256': CRYPTO_DRIVER_SHA256,
+                      'runner_test_source_sha256': RUNNER_TEST_SOURCE_SHA256,
+                      'signed_ios42_device_acceptance': False, 'physical_device_acceptance': False}
+          
+          
+          def close_native_supersession(rows):
+              scoped = [r for r in rows if r.get('legacy_transport')]
+              if not scoped:
+                  return
+              require(len(scoped) == 1 and scoped[0]['run_id'] == LEGACY_TRANSPORT['run_id']
+                      and scoped[0].get('raw_run_conclusion') == 'failure', 'One explicit original failed run only')
+              native = [r for r in rows if r['workflow'] in ('bil39_iphone_native.yml', 'bil39_ipad_native.yml')]
+              require(len(native) == 2 and {r['workflow'] for r in native} == {'bil39_iphone_native.yml', 'bil39_ipad_native.yml'},
+                      'Both independently verified native replacement rows required')
+              replacements = []
+              for device in ('iphone', 'ipad'):
+                  row = next(r for r in native if r['workflow'] == f'bil39_{device}_native.yml')
+                  evidence = row.get('native_source_evidence', {})
+                  require(row['status'] == 'PASS' and row['source_sha'] == SOURCE
+                          and row['run_id'] == (42241888280 if device == 'iphone' else 42241888218)
+                          and row['run_attempt'] == (1 if device == 'iphone' else 2)
+                          and evidence.get('status') == 'EXACT_SOURCE_NATIVE_SIMULATOR_PASS'
+                          and evidence.get('device') == device and evidence.get('source_sha') == SOURCE
+                          and evidence.get('source_tree') == SOURCE_TREE and evidence.get('controller_sha') == NATIVE_SHA
+                          and evidence.get('qa_harness_build') == 39
+                          and evidence.get('generated_crypto_driver_sha256') == CRYPTO_DRIVER_SHA256
+                          and evidence.get('runner_test_source_sha256') == RUNNER_TEST_SOURCE_SHA256
+                          and {s.get('kind') for s in evidence.get('scopes', [])} == {'system-crypto', 'native-settings', 'feature-splashes'}
+                          and evidence.get('xctest', {}).get('passedTests') == 5
+                          and evidence.get('xctest', {}).get('failedTests') == 0
+                          and evidence.get('xctest', {}).get('skippedTests') == 0
+                          and evidence.get('artifact_id') == (13518598486 if device == 'iphone' else 13539144494)
+                          and evidence.get('signed_ios42_device_acceptance') is False,
+                          'Every exact-source native scope and current original artifact must pass before supersession')
+                  replacements.append({'device': device, 'run_id': row['run_id'], 'run_attempt': row['run_attempt'],
+                      'artifact_id': evidence['artifact_id'], 'complete_receipt_sha256': evidence['complete_receipt_sha256'],
+                      'status': evidence['status'], 'qa_harness_build': 39})
+              scoped[0]['status'] = 'REQUIRED_JOB_SET_PASS_WITH_EXACT_NATIVE_SUPERSESSION'
+              scoped[0]['legacy_transport'].update(
+                  native_replacement_acceptance='SUPERSEDED_BY_EXACT_SOURCE_SEPARATE_NATIVE_EVIDENCE',
+                  native_replacements=replacements, full_workflow_success=False)
+          
+          
+          def api_timestamp(value):
+              require(isinstance(value, str), 'Authenticated timestamp required')
+              stamp = datetime.fromisoformat(value.replace('Z', '+00:00'))
+              require(stamp.utcoffset() is not None, 'Timezone-aware authenticated timestamp required')
+              return stamp
+          
+          
+          def select_attempt_artifact(client, pin, data):
+              """Select one artifact created inside the exact authenticated attempt window."""
+              attempt = client.api(f'/actions/runs/{pin["run_id"]}/attempts/{pin["run_attempt"]}')
+              validate_run_identity(attempt, pin)
+              require(attempt.get('status') == 'completed' and attempt.get('conclusion') == 'success',
+                      'Current native attempt must complete successfully before artifact acceptance')
+              start, end = api_timestamp(attempt.get('run_started_at')), api_timestamp(attempt.get('updated_at'))
+              require(start <= end, 'Invalid current-attempt time window')
+              name = f'bil42-{pin["device"]}-native-app-{SOURCE}-harness39'
+              same_name = [a for a in data['artifacts'] if a.get('name') == name and a.get('expired') is False]
+              matches = [a for a in same_name if start <= api_timestamp(a.get('created_at')) <= end]
+              require(len(matches) == 1, 'One unambiguous native artifact from exact current attempt window required')
+              return matches[0], {'run_attempt': pin['run_attempt'], 'run_started_at': attempt['run_started_at'],
+                  'completed_updated_at': attempt['updated_at'], 'artifact_created_at': matches[0]['created_at'],
+                  'older_same_name_artifacts_preserved': len(same_name) - 1}
+          
+          
+          def native_archive_budget(meta):
+              size = meta.get('size_in_bytes')
+              require(type(size) is int and 0 < size <= MAX_ARCHIVE_HARD_CAP,
+                      'Native archive must remain within absolute1GiB resource cap')
+              if size <= MAX_ARCHIVE:
+                  return 'DEFAULT_768_MIB_ARCHIVE_BUDGET'
+              require(all(meta.get(key) == value for key, value in REVIEWED_ARCHIVE_EXCEPTION.items()),
+                      'Only the exact reviewed iPad ZIP identity/digest/size may exceed default768MiB')
+              return 'EXACT_REVIEWED_IPAD_ATTEMPT2_ARCHIVE_RESOURCE_EXCEPTION'
+          
+          
+          def native_artifact(client, pin):
+              data = client.api(f'/actions/runs/{pin["run_id"]}/artifacts?per_page=100')
+              require(data.get('total_count') == len(data.get('artifacts', [])) <= 100, 'Complete bounded native artifact inventory required')
+              meta, attempt_window = select_attempt_artifact(client, pin, data)
+              archive_budget = native_archive_budget(meta)
+              require(type(meta.get('id')) is int and meta['id'] > 0
+                      and re.fullmatch('sha256:[0-9a-f]{64}', meta.get('digest', ''))
+                      and meta.get('workflow_run', {}).get('id') == pin['run_id']
+                      and meta['workflow_run'].get('head_sha') == NATIVE_SHA
+                      and meta['workflow_run'].get('head_branch') == NATIVE_BRANCH, 'Native artifact source/run/digest mismatch')
+              path = client.artifact(meta)
+              with zipfile.ZipFile(path) as archive:
+                  result = native_evidence(archive, pin['device'], pin['run_id'], pin['run_attempt'])
+              return {**result, 'artifact_id': meta['id'], 'artifact_digest': meta['digest'],
+                      'authenticated_attempt_window': attempt_window,
+                      'archive_resource_budget': archive_budget}
+          
+          
+          def validate_config(config, workflows):
+              require(config.get('schema') == 'BIL_E90_FULL10_PINNED_RUNS_V1' and config.get('source_sha') == SOURCE
+                      and config.get('source_tree') == SOURCE_TREE and config.get('source_branch') == SOURCE_BRANCH
+                      and config.get('native_controller_sha') == NATIVE_SHA
+                      and re.fullmatch('[0-9a-f]{64}', config.get('cloud_receipt_sha256', '')), 'Fixed e90 gate config required')
+              lanes = config.get('lanes', [])
+              require(len(lanes) == 11 and {p.get('workflow') for p in lanes} == set(workflows)
+                      and len({p.get('run_id') for p in lanes}) == 11
+                      and len({(p.get('workflow'), p.get('scope')) for p in lanes}) == 11,
+                      'Ten workflow lanes and eleven distinct scoped pinned runs required')
+              codeql = [p for p in lanes if p.get('workflow') == CODEQL]
+              require(len(codeql) == 2 and {p.get('scope') for p in codeql} == {'full', 'source-audit'},
+                      'Both full and source-audit CodeQL pins required')
+              for pin in lanes:
+                  require(type(pin.get('run_id')) is int and pin['run_id'] > 0
+                          and type(pin.get('run_attempt')) is int and pin['run_attempt'] > 0,
+                          'Pinned positive run and explicit positive attempt required')
+                  if pin.get('device'):
+                      device = pin['device']
+                      require(device in ('iphone', 'ipad') and pin['workflow'] == f'bil39_{device}_native.yml'
+                              and pin['actual_workflow'] == f'.github/workflows/bil42_{device}_native_controller_20261106.yml'
+                              and pin['event'] == 'push', 'Only exact approved native controller remapping allowed')
+                  else:
+                      require(pin['actual_workflow'] == '.github/workflows/' + pin['workflow']
+                              and pin['event'] == ('push' if pin['workflow'] in
+                                  ('verify.yml', 'bil39_cloud_source_qa.yml', 'bil39_video_source_qa.yml') else 'workflow_dispatch'),
+                              'Exact original source workflow and actual event required')
+                  require(pin['scope'] in ('full', 'source-audit') if pin['workflow'] == CODEQL else pin['scope'] == 'complete',
+                          'Unexpected partial or duplicate prerequisite scope')
+          
+          
+          def verify_all(root, env, platform, config, cloud_raw, client):
+              clean_source(root)
+              module = source_contract(root)
+              validate_config(config, module.WORKFLOWS)
+              require(sha256(cloud_raw) == config['cloud_receipt_sha256'], 'Current read-only cloud receipt digest mismatch')
+              cloud_receipt = json.loads(cloud_raw)
+              require(cloud_receipt.get('app_source_sha') == SOURCE and cloud_receipt.get('checked_application_git_head') == SOURCE,
+                      'Current cloud parity receipt must bind exact e90 application source')
+              cloud = module.cloud_parity(root, cloud_receipt)
+              cloud['receipt_sha256'] = sha256(cloud_raw)
+              cloud['scope'] = 'Authenticated recorded read-only byte equality only; not fresh model or device health'
+              before = controller_provenance(root, env, platform, client)
+              for branch, expected in PROTECTED_REFS.items():
+                  require(client.api('/git/ref/heads/' + branch)['object']['sha'] == expected, 'Protected/audited branch moved: ' + branch)
+              native_commit = client.api('/commits/' + NATIVE_SHA)
+              native_blobs = validate_commit(native_commit, NATIVE_SHA, NATIVE_WORKFLOWS)
+              regular_workflow_modes(client, native_commit, native_blobs)
+              for path, expected in NATIVE_WORKFLOWS.items():
+                  validate_blob(client.api('/git/blobs/' + native_blobs[path]), native_blobs[path], expected)
+              receipts = []
+              for pin in config['lanes']:
+                  run = client.api(f'/actions/runs/{pin["run_id"]}')
+                  jobs = client.all_jobs(pin['run_id'])
+                  required = required_jobs(pin, module.WORKFLOWS)
+                  legacy = (legacy_transport_evidence(root, client, run, jobs, pin, required)
+                            if run.get('conclusion') == 'failure' else None)
+                  row = validate_lane(run, jobs, pin, required, legacy_proof=legacy)
+                  if pin.get('device'):
+                      row['native_source_evidence'] = native_artifact(client, pin)
+                  receipts.append(row)
+              close_native_supersession(receipts)
+              clean_source(root)
+              require(controller_provenance(root, env, platform, client) == before,
+                      'Signing controller/source identity changed during read-only verification')
+              aggregates = aggregate_workflows(receipts, module.WORKFLOWS)
+              receipt = {'status': 'INTERNAL_BUILD_PREREQUISITES_PASS', 'source_sha': SOURCE, 'source_tree': SOURCE_TREE,
+                  'source_branch': SOURCE_BRANCH, 'platform': platform, 'build': RELEASE[platform]['build'], 'ci': receipts,
+                  'cloud_source_parity': cloud, 'all10_original_required_job_sets_verified': True,
+                  'native_controller_sha': NATIVE_SHA, 'native_scope': 'exact-e90 simulator QA using unchanged harness39',
+                  'whole_codeql_workflow_success': not any(r.get('legacy_transport') for r in receipts),
+                  'legacy_transport_policy': 'Exact authenticated pre-test failure superseded only by both unchanged split native test suites',
+                  'physical_device_acceptance': 'PENDING_INSTALLATION_OF_NEW_ARTIFACT',
+                  'signed_artifact_identity': 'MUST_PASS_AFTER_BUILD', 'app_store_submission_approved': False,
+                  'public_release_approved': False, 'signed_ios42_device_acceptance': False,
+                  'verified_at_utc': datetime.now().astimezone().isoformat(), 'gate_config_sha256': sha256(json.dumps(config, sort_keys=True).encode())}
+              receipt['ci_runs'], receipt['ci'] = receipts, aggregates
+              return receipt, before
+          
+          
+          def write_outputs(root, temp, github_env, platform, receipt, provenance):
+              build = RELEASE[platform]['build']
+              suffix = f'-r{provenance["run_id"]}-a{provenance["run_attempt"]}'
+              names = (['BIL42-pre-signing-ci.json', 'BIL42-internal-acceptance.md', 'BIL42-signing-manifest-proof.json']
+                       if platform == 'ios' else ['BIL34-pre-signing-ci.json', 'BIL-android34-internal-acceptance.md', 'BIL-android34-controller-provenance.json'])
+              require(temp.is_dir() and not temp.is_relative_to(root) and github_env.is_file()
+                      and not github_env.is_symlink() and github_env.resolve().is_relative_to(temp),
+                      'Actual private runner output and command-file paths required')
+              private = [temp / (Path(n).stem + suffix + Path(n).suffix) for n in names]
+              public = [root / n for n in names]
+              evidence = root / 'evidence'
+              require(not evidence.is_symlink() and (not evidence.exists() or evidence.is_dir()), 'Safe evidence directory required')
+              copies = [evidence / n for n in names]
+              require(all(not p.exists() and not p.is_symlink() and p.resolve().parent == p.parent.resolve()
+                          for p in private + public + copies), 'All manifest/proof/receipt output paths must be fresh')
+              manifest = '\n'.join([f'# Internal {platform} build{build} prerequisites; separate exact-source controllers', '',
+                  'ACCEPTANCE_SCOPE: INTERNAL_BUILD_ONLY', 'STAGING_MANIFEST_COMPLETE: YES', 'CANDIDATE_FROZEN_OR_ACCEPTED: YES',
+                  'UNRESOLVED_REVIEW_COUNT: 0', 'RELEASE_VERSION: 1.0.0', f'RELEASE_BUILD_NUMBER: {build}', 'SOURCE_SHA: ' + SOURCE,
+                  'SIGNING_ORCHESTRATION_SHA: ' + provenance['workflow_sha'], 'NATIVE_QA_HARNESS_BUILD: 39',
+                  'PUBLIC_RELEASE_APPROVED: NO', 'APP_STORE_SUBMISSION_APPROVED: NO', 'PHYSICAL_ARTIFACT_ACCEPTANCE: PENDING_INSTALLATION',
+                  'SIGNED_ARTIFACT_ACCEPTANCE: MUST_PASS_AFTER_BUILD', 'STAGING_ENVIRONMENT_CREATED: NO',
+                  'LIVE_MODEL_HEALTH: NOT_TESTED_BY_THIS_GATE', '',
+                  'Legacy complete/accepted markers describe internal prerequisites only; no staging environment was created.',
+                  'Every original ten-lane required job set passed. Simulator harness39 is not signed42/device acceptance.',
+                  'Recorded cloud byte parity is separate from current live model health.', '',
+                  'Legacy combined CodeQL native job remains FAILED; only the original required job set and identical split native coverage are accepted.',
+                  *[f'- {r["workflow"]}: {r["url"]} (actual workflow {r["actual_workflow"]}; required-job status {r["status"]}; raw workflow {r.get("raw_run_conclusion", "not recorded")}; app source {SOURCE})' for r in receipt['ci']], ''])
+              receipt_raw, manifest_raw = (json.dumps(receipt, indent=2) + '\n').encode(), manifest.encode()
+              proof = {**provenance, 'platform': platform, 'build': build,
+                  'pre_signing_receipt_sha256': sha256(receipt_raw), 'manifest_sha256': sha256(manifest_raw),
+                  'all10_original_required_job_sets_verified': True, 'native_qa_harness_build': 39,
+                  'scope': 'INTERNAL_BUILD_PREREQUISITES_ONLY', 'physical_device_acceptance': 'PENDING',
+                  'signed_ios42_device_acceptance': False, 'public_release_approved': False, 'app_store_submission_approved': False}
+              payloads = [receipt_raw, manifest_raw, (json.dumps(proof, indent=2) + '\n').encode()]
+              evidence.mkdir(exist_ok=True)
+              for destinations in (private, public, copies):
+                  for path, raw in zip(destinations, payloads):
+                      with path.open('xb') as output:
+                          output.write(raw)
+              with github_env.open('a', encoding='utf-8') as output:
+                  for key, value in {'BIL_RELEASE_MANIFEST_PATH': str(private[1]),
+                      'BIL_AUDITED_FREEZE_MANIFEST_SHA256': proof['manifest_sha256'],
+                      'BIL_CONTROLLER_CI_RECEIPT_PATH': str(private[0]), 'BIL_CONTROLLER_PROOF_PATH': str(private[2])}.items():
+                      require('\n' not in value and '\r' not in value, 'Unsafe environment output')
+                      output.write(key + '=' + value + '\n')
+              return proof
+          
+          
+          def main():
+              parser = argparse.ArgumentParser(description=__doc__)
+              parser.add_argument('--platform', required=True, choices=sorted(RELEASE))
+              parser.add_argument('--config', type=Path, required=True)
+              parser.add_argument('--cloud-receipt', type=Path, required=True)
+              args = parser.parse_args()
+              env = dict(os.environ)
+              root = Path(env['GITHUB_WORKSPACE']).resolve(strict=True)
+              temp = Path(env['RUNNER_TEMP']).resolve(strict=True)
+              require(not temp.is_relative_to(root), 'Private runner temp must be outside app checkout')
+              client = GitHub(env.get('GH_TOKEN', ''), temp)
+              config = json.loads(args.config.read_bytes())
+              contract = source_contract(root)
+              waiting = wait_for_pinned_runs(root, env, args.platform, config, client, workflows=contract.WORKFLOWS)
+              receipt, provenance = verify_all(root, env, args.platform, config,
+                                               args.cloud_receipt.read_bytes(), client)
+              receipt['bounded_ci_wait'] = waiting
+              write_outputs(root, temp, Path(env['GITHUB_ENV']), args.platform, receipt, provenance)
+              print(f'BIL_E90_FULL10_INTERNAL_{args.platform.upper()}_PRE_SIGNING_GATE=PASS;NO_STORE_APPROVAL')
+          
+          
+          if __name__ == '__main__':
+              main()
+          PY_BIL_FULL10_GATE
+          cat > "$RUNNER_TEMP/bil_e90_pinned_full10_runs.json" <<'JSON_BIL_FULL10_PINS'
+          {
+            "schema": "BIL_E90_FULL10_PINNED_RUNS_V1",
+            "source_sha": "e90e04890d5c322cfd8b3554ff1f03fb3165414c",
+            "source_tree": "a6b84c00e4639c051eac5f8c8800e1c217579d20",
+            "source_branch": "codex/bil-full-fix-batch-20261106",
+            "native_controller_sha": "f04243ec12cb5eb2cf4e7c14790a5e6591162193",
+            "cloud_receipt_sha256": "c4648b30780a2ca51785b0520c028550c2358dd88702dfb67ef6258825f0fdd3",
+            "lanes": [
+              {
+                "workflow": "verify.yml",
+                "run_id": 42233886050,
+                "run_attempt": 1,
+                "event": "push",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/verify.yml"
+              },
+              {
+                "workflow": "bil_codeql_security_extended.yml",
+                "run_id": 42240593353,
+                "run_attempt": 2,
+                "event": "workflow_dispatch",
+                "scope": "full",
+                "actual_workflow": ".github/workflows/bil_codeql_security_extended.yml"
+              },
+              {
+                "workflow": "bil_codeql_security_extended.yml",
+                "run_id": 42242038241,
+                "run_attempt": 1,
+                "event": "workflow_dispatch",
+                "scope": "source-audit",
+                "actual_workflow": ".github/workflows/bil_codeql_security_extended.yml"
+              },
+              {
+                "workflow": "bil39_iphone_native.yml",
+                "run_id": 42241888280,
+                "run_attempt": 1,
+                "event": "push",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil42_iphone_native_controller_20261106.yml",
+                "device": "iphone"
+              },
+              {
+                "workflow": "bil39_ipad_native.yml",
+                "run_id": 42241888218,
+                "run_attempt": 2,
+                "event": "push",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil42_ipad_native_controller_20261106.yml",
+                "device": "ipad"
+              },
+              {
+                "workflow": "bil_android_isolated_emulator_smoke.yml",
+                "run_id": 42240602111,
+                "run_attempt": 1,
+                "event": "workflow_dispatch",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil_android_isolated_emulator_smoke.yml"
+              },
+              {
+                "workflow": "bil39_cloud_source_qa.yml",
+                "run_id": 42233886071,
+                "run_attempt": 1,
+                "event": "push",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil39_cloud_source_qa.yml"
+              },
+              {
+                "workflow": "bil39_video_source_qa.yml",
+                "run_id": 42233886062,
+                "run_attempt": 1,
+                "event": "push",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil39_video_source_qa.yml"
+              },
+              {
+                "workflow": "bil39-crystal.yml",
+                "run_id": 42240612687,
+                "run_attempt": 1,
+                "event": "workflow_dispatch",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil39-crystal.yml"
+              },
+              {
+                "workflow": "bil39_coach_native_ui.yml",
+                "run_id": 42240621712,
+                "run_attempt": 1,
+                "event": "workflow_dispatch",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil39_coach_native_ui.yml"
+              },
+              {
+                "workflow": "bil_security_fixture_inventory.yml",
+                "run_id": 42240631321,
+                "run_attempt": 1,
+                "event": "workflow_dispatch",
+                "scope": "complete",
+                "actual_workflow": ".github/workflows/bil_security_fixture_inventory.yml"
+              }
+            ]
+          }
+          JSON_BIL_FULL10_PINS
+          python3 - <<'PY_BIL_CLOUD_PARITY_BYTES'
+          import base64, os
+          from pathlib import Path
+          target = Path(os.environ["RUNNER_TEMP"]) / "bil_e90_current_cloud_parity.json"
+          with target.open("xb") as output:
+              output.write(base64.b64decode("ew0KICAic2NoZW1hIjogIkJJTF9ERVBMT1lFRF9FREdFX1NPVVJDRV9QQVJJVFlfVjEiLA0KICAic291cmNlX2NvbW1pdCI6ICI1MzkyNDE5OGU5NjBlZGFlMGEwNmM4MjM0Y2IwZDIxNmE3Zjg5NDM3IiwNCiAgImFwcF9zb3VyY2Vfc2hhIjogImU5MGUwNDg5MGQ1YzMyMmNmZDhiMzU1NGZmMWYwM2ZiMzE2NTQxNGMiLA0KICAicHJvamVjdF9yZWYiOiAidGdtYW56aHF1bGtzeWtoc2xyemIiLA0KICAiZnVuY3Rpb25fc2x1ZyI6ICJhaS1jb2FjaCIsDQogICJ2ZXJzaW9uIjogMTM0LA0KICAic3RhdHVzIjogIkFDVElWRSIsDQogICJ2ZXJpZmllZF9hdF91dGMiOiAiMjAyNi0xMS0wNlQxNToxNToyMS42MzBaIiwNCiAgImRlcGxveWVkX2FyY2hpdmVfc2hhMjU2IjogImFmNjUxZTA3MjgxODEzMTQ5NDVkMTMzZDVjNzZiZjFkYzMyNzI2YmQ1ODJjZjEwNjVhMWU5ZDE2MzFkZjMxNjAiLA0KICAicmVtb3RlX3JlYWRfcmVzcG9uc2Vfc2hhMjU2IjogIjAyMDFiODgzMzc3MjI4ZDhmMTgwNGQxYTE0NTQ4ZTIyMjM0ZWQ0MThjOGNmNzgxNWY1NmY3M2VkNzEyODE3OWMiLA0KICAiZmlsZXMiOiBbDQogICAgew0KICAgICAgInBhdGgiOiAic3VwYWJhc2UvZnVuY3Rpb25zL2FpLWNvYWNoL2luZGV4LnRzIiwNCiAgICAgICJzaGEyNTYiOiAiNmE5YjNiMmY4Yzg1ZGQ5NjRhNTY1NjdjOGU2ZmU0ZjhkMTgzN2NjNTY1OTAwNTY5MzNmNDY3ZDZjNjFjZTMzNSIsDQogICAgICAiYnl0ZXMiOiA4Mw0KICAgIH0sDQogICAgew0KICAgICAgInBhdGgiOiAic3VwYWJhc2UvZnVuY3Rpb25zL2FpLWNvYWNoL3NlcnZlci50cyIsDQogICAgICAic2hhMjU2IjogIjgxY2ExZGI5NzM0YzkwMWE0MWQ0YjEyY2IwNjlkY2EwMzIzMjZiY2VmM2UyYzc2YmI4Zjk4M2M3MTcxMTQwOGIiLA0KICAgICAgImJ5dGVzIjogNzEzMTkNCiAgICB9LA0KICAgIHsNCiAgICAgICJwYXRoIjogInN1cGFiYXNlL2Z1bmN0aW9ucy9fc2hhcmVkL2JjcDQ3LnRzIiwNCiAgICAgICJzaGEyNTYiOiAiM2Y2N2E0NjcxOTNmNmFjYmE4NjNlZGVmY2Q4ZmUwMGM2OTU0Nzk0NDc3ZWE0OWM1MDY2ZDk4ODc3NDljNjkzNyIsDQogICAgICAiYnl0ZXMiOiAxODM4DQogICAgfSwNCiAgICB7DQogICAgICAicGF0aCI6ICJzdXBhYmFzZS9mdW5jdGlvbnMvYWktY29hY2gvY29hY2hfcmVhc29uaW5nLnRzIiwNCiAgICAgICJzaGEyNTYiOiAiMGM0N2U1ZDU5ZWU5NjgyYWU3YTM1OGFlYTdmZWNjYzllNzU4ZmQ2Y2JjNDYwMWFkMzBjZDU1Mzg1MmUyOGEwMCIsDQogICAgICAiYnl0ZXMiOiAzMjIxDQogICAgfSwNCiAgICB7DQogICAgICAicGF0aCI6ICJzdXBhYmFzZS9mdW5jdGlvbnMvYWktY29hY2gvY29hY2hfY29udmVyc2F0aW9uX3Njb3BlLnRzIiwNCiAgICAgICJzaGEyNTYiOiAiN2UyYzM2MzQxN2ZmMzhkODhlMDNjNTQ5YjAyMmE4NGFmNmFiZWM0NTg3NmI3NzQ0ZjQ4Y2M1YzNlM2NkYmEzZSIsDQogICAgICAiYnl0ZXMiOiA1NjE0DQogICAgfSwNCiAgICB7DQogICAgICAicGF0aCI6ICJzdXBhYmFzZS9mdW5jdGlvbnMvYWktY29hY2gvY29hY2hfYW5zd2VyX3F1YWxpdHkudHMiLA0KICAgICAgInNoYTI1NiI6ICI5ZjAyMDZkMzgwNzlhNmZjNDNhYjc1MWY5MjYzODQ1ZDljYWE1ZGU2YzhjMDAxYzA3MzNlMmEyNWU5NzU4NWVmIiwNCiAgICAgICJieXRlcyI6IDg0ODMNCiAgICB9LA0KICAgIHsNCiAgICAgICJwYXRoIjogInN1cGFiYXNlL2Z1bmN0aW9ucy9haS1jb2FjaC9jb2FjaF9mb29kX3NhZmV0eS50cyIsDQogICAgICAic2hhMjU2IjogIjI3YTMyMGE1YjJmY2U5ZWM5OGZlZTk4NWRhMGY3ZTllZDc2ZWYwMmEyNzhkYjc4OTBmNTdlMzliZTg0MTcwNmIiLA0KICAgICAgImJ5dGVzIjogOTYyMg0KICAgIH0sDQogICAgew0KICAgICAgInBhdGgiOiAic3VwYWJhc2UvZnVuY3Rpb25zL2FpLWNvYWNoL2NvYWNoX2hlYWx0aF9zYWZldHkudHMiLA0KICAgICAgInNoYTI1NiI6ICI4MDQ4MjVjYmY3ZTcwNzFmMTNjZTg4NDYyMDQ4MTYzNGMyNzI4ZmQ3ZDZiYjdkMGVjNTNmZDAzYjY4OWI2YTBmIiwNCiAgICAgICJieXRlcyI6IDExMTc1DQogICAgfSwNCiAgICB7DQogICAgICAicGF0aCI6ICJzdXBhYmFzZS9mdW5jdGlvbnMvYWktY29hY2gvY29hY2hfdmVyaWZpZWRfd2VpZ2h0X3Byb3Bvc2FsLnRzIiwNCiAgICAgICJzaGEyNTYiOiAiMDcwZDI5M2Y2MmE0YmY5YTMxMDU3MzA4MTgzM2MzZDBiZTgzNGExOTNmYTQ3MTliOWE5MDg5MzEzNzM2ZGViZCIsDQogICAgICAiYnl0ZXMiOiAyMjg4DQogICAgfSwNCiAgICB7DQogICAgICAicGF0aCI6ICJzdXBhYmFzZS9mdW5jdGlvbnMvYWktY29hY2gvY29hY2hfd29ya291dF9yZXZpZXdfY29weS50cyIsDQogICAgICAic2hhMjU2IjogIjM5MjdiODkzYTk4MDBlN2ViZTY1MmM0MGIzMDMwNzY1Y2E4NDg0OTgzYTg1M2QzYWI2OGM0N2E5ZjVmMTBmOTQiLA0KICAgICAgImJ5dGVzIjogMjkwOA0KICAgIH0sDQogICAgew0KICAgICAgInBhdGgiOiAic3VwYWJhc2UvZnVuY3Rpb25zL2FpLWNvYWNoL2NvYWNoX3dlaWdodF90cnV0aC50cyIsDQogICAgICAic2hhMjU2IjogIjc1YzdkODI2MDhjMmU0MGVlNjk0MGQ0YjFiOGJkNjAyMDAzNzk1MzZlOWJlZjNmYzNjOTQ1NzJlYmQ3ZjI3YjQiLA0KICAgICAgImJ5dGVzIjogNTk3OQ0KICAgIH0sDQogICAgew0KICAgICAgInBhdGgiOiAic3VwYWJhc2UvZnVuY3Rpb25zL2FpLWNvYWNoL2NvYWNoX3JlY29yZF90cnV0aC50cyIsDQogICAgICAic2hhMjU2IjogIjRhNDJlYTIzMTQ0MjdlMDFlOTIwN2UwMmQ5OWI0MjA1OGMxYjg2YzY3ZWJhYTk3MDMwMjY0OWM2Y2M2NDkzZDIiLA0KICAgICAgImJ5dGVzIjogODI2OQ0KICAgIH0sDQogICAgew0KICAgICAgInBhdGgiOiAic3VwYWJhc2UvZnVuY3Rpb25zL2FpLWNvYWNoL2NvYWNoX3Rvb2xfYXJndW1lbnRzLnRzIiwNCiAgICAgICJzaGEyNTYiOiAiODFmMzYyOTE3NDM4MTg4MzRjNDFhY2VjNDY4MzJkNzkxMzE4ZTNhYWQyMjk1ZjIwODJmYjc2OTk0NjViMzYyZSIsDQogICAgICAiYnl0ZXMiOiAxNzA0DQogICAgfSwNCiAgICB7DQogICAgICAicGF0aCI6ICJzdXBhYmFzZS9mdW5jdGlvbnMvX3NoYXJlZC9haV9wcm92aWRlcl9yZWNpcGllbnQudHMiLA0KICAgICAgInNoYTI1NiI6ICJiMjNmYjY0YmI5ODk5MTkwZTQyOWVhZjJiOTM4MWQyMDYwNjE3OThhYjRkY2U5MWJiNGViZTA2ZjRjMmFjYWUwIiwNCiAgICAgICJieXRlcyI6IDExNDENCiAgICB9LA0KICAgIHsNCiAgICAgICJwYXRoIjogInN1cGFiYXNlL2Z1bmN0aW9ucy9fc2hhcmVkL21vYmlsZV9pbnRlZ3JpdHkudHMiLA0KICAgICAgInNoYTI1NiI6ICIwOTY1NmU4NmM3ZGNhNDIyMjlkYThlOWI1NTFhMmM1NGM2ZjliN2ZhZjBlYzlmZDQ0ODAzYTY1YjM3ZTVjNWE3IiwNCiAgICAgICJieXRlcyI6IDU2NjgNCiAgICB9DQogIF0sDQogICJkZXBsb3llZF9jb25maWd1cmF0aW9uIjogWw0KICAgIHsNCiAgICAgICJwYXRoIjogInN1cGFiYXNlL2Z1bmN0aW9ucy9haS1jb2FjaC9kZW5vLmpzb24iLA0KICAgICAgInNoYTI1NiI6ICI2NjI5OWU2NzgxMTk1YTZiOTM2N2Q4MmYzOTAwZjJjNDA1ZjJlMTg0MjIxMzlmYWYxZjg3NTc3MGY5OTkwMjEyIiwNCiAgICAgICJieXRlcyI6IDg4LA0KICAgICAgImNvbnRlbnRzIjogew0KICAgICAgICAiaW1wb3J0cyI6IHsNCiAgICAgICAgICAiQHN1cGFiYXNlL3N1cGFiYXNlLWpzIjogIm5wbTpAc3VwYWJhc2Uvc3VwYWJhc2UtanNAMi4xMTIuMyINCiAgICAgICAgfQ0KICAgICAgfQ0KICAgIH0NCiAgXSwNCiAgImFsbF9jYW5kaWRhdGVfYW5kX2Nsb3VkX3NvdXJjZV9ieXRlc19tYXRjaCI6IHRydWUsDQogICJyZWFkX29ubHkiOiB0cnVlLA0KICAibmV3X21vZGVsX3JlcXVlc3RzIjogMCwNCiAgImNsb3VkX3dyaXRlcyI6IDAsDQogICJyZW1vdGVfaGFzaF9zZWxmX3Rlc3RzIjogIlRocmVlIHN0YW5kYXJkIFNIQTI1NiB2ZWN0b3JzIFBBU1M7IGxvY2FsIHNvdXJjZSBoYXNoZXMgY29tcGFyZWQgaW5kZXBlbmRlbnRseSB3aXRoIFB5dGhvbiBoYXNobGliIG5leHQuIiwNCiAgImxpbWl0YXRpb25zIjogWw0KICAgICJTb3VyY2UgcGFyaXR5IG9ubHksIG5vdCBsaXZlIEdlbWluaS9EQi9kZXZpY2UgaGVhbHRoLiBSYXcgc291cmNlIGNvbnRlbnQgcmV0YWluZWQgaW4gb3JpZ2luYWwgdG9vbCByZXNwb25zZTsgdGhpcyBmaWxlIGNvbnRhaW5zIGRpZ2VzdHMgb25seS4iDQogIF0sDQogICJjaGVja2VkX2FwcGxpY2F0aW9uX2dpdF9oZWFkIjogImU5MGUwNDg5MGQ1YzMyMmNmZDhiMzU1NGZmMWYwM2ZiMzE2NTQxNGMiDQp9DQo=", validate=True))
+          PY_BIL_CLOUD_PARITY_BYTES
+          python3 "$RUNNER_TEMP/bil_e90_shared_pre_signing_gate.py" --platform android \
+            --config "$RUNNER_TEMP/bil_e90_pinned_full10_runs.json" \
+            --cloud-receipt "$RUNNER_TEMP/bil_e90_current_cloud_parity.json"
+
+      - name: Preflight actual Ubuntu apksigner API on authenticated historical build33 debug APK; no app build
+        id: apk_signer_preflight
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          APKSIGNER="$(find "${ANDROID_HOME:?}/build-tools" -maxdepth 2 -name apksigner -type f | sort -V | tail -n 1)"
+          test -n "$APKSIGNER" && test -x "$APKSIGNER"
+          APKSIGNER_JAR="$(dirname "$APKSIGNER")/lib/apksigner.jar"
+          test -s "$APKSIGNER_JAR"
+          mkdir "$RUNNER_TEMP/bil-apk-der-classes"
+          cat > "$RUNNER_TEMP/VerifyApkCertificate.java" <<'JAVA_DER'
+          import com.android.apksig.ApkVerifier;
+          import java.io.File;
+          import java.nio.charset.StandardCharsets;
+          import java.nio.file.Files;
+          import java.nio.file.Path;
+          import java.security.MessageDigest;
+          import java.security.cert.X509Certificate;
+          import java.util.HexFormat;
+          import java.util.LinkedHashSet;
+          import java.util.Set;
+          
+          /** Verifies APK signatures and DER identities; CLI presentation is not a trust input. */
+          public final class VerifyApkCertificate {
+              private static String digest(X509Certificate certificate) throws Exception {
+                  return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                          .digest(certificate.getEncoded()));
+              }
+          
+              private static void require(boolean condition, String code) {
+                  if (!condition) throw new IllegalStateException(code);
+              }
+          
+              public static void main(String[] args) {
+                  try {
+                      require(args.length == 3, "ARGUMENTS");
+                      String expected = System.getenv("EXPECTED_UPLOAD_CERT_SHA256");
+                      require(expected != null, "EXPECTED_CERT_MISSING");
+                      boolean discoverDebugOnly = args[2].equals("debug-preflight")
+                              && expected.equals("DISCOVER_VERIFIED_DEBUG_IDENTITY_ONLY");
+                      expected = expected.replaceAll("[:\\s]", "").toLowerCase(java.util.Locale.ROOT);
+                      require(discoverDebugOnly || expected.matches("[0-9a-f]{64}"), "EXPECTED_CERT_FORMAT");
+                      File apk = new File(args[0]);
+                      Path output = Path.of(args[1]);
+                      require(apk.isFile() && apk.length() > 0 && !Files.exists(output), "INPUT_OUTPUT");
+                      require(args[2].equals("release") || args[2].equals("debug-preflight"), "SCOPE");
+                      ApkVerifier.Result result = new ApkVerifier.Builder(apk).build().verify();
+                      require(result.isVerified() && !result.containsErrors(), "APK_SIGNATURE_INVALID");
+                      require(result.getSignerCertificates().size() == 1, "APK_SIGNER_COUNT");
+                      if (discoverDebugOnly) expected = digest(result.getSignerCertificates().get(0));
+                      Set<String> identities = new LinkedHashSet<>();
+                      identities.add(digest(result.getSignerCertificates().get(0)));
+                      for (var signer : result.getV1SchemeSigners()) {
+                          require(!signer.containsErrors(), "V1_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV2SchemeSigners()) {
+                          require(!signer.containsErrors(), "V2_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV3SchemeSigners()) {
+                          require(!signer.containsErrors(), "V3_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV31SchemeSigners()) {
+                          require(!signer.containsErrors(), "V31_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV4SchemeSigners()) {
+                          require(!signer.containsErrors(), "V4_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      require(identities.size() == 1 && identities.contains(expected), "APK_CERTIFICATE_MISMATCH");
+                      String json = "{\n"
+                              + "  \"status\": \"VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY\",\n"
+                              + "  \"scope\": \"" + args[2] + "\",\n"
+                              + "  \"apk_signature_verified\": true,\n"
+                              + "  \"current_signer_count\": 1,\n"
+                              + "  \"distinct_verified_scheme_leaf_certificates\": 1,\n"
+                              + "  \"certificate_sha256\": \"" + expected + "\",\n"
+                              + "  \"verified_v1\": " + result.isVerifiedUsingV1Scheme() + ",\n"
+                              + "  \"verified_v2\": " + result.isVerifiedUsingV2Scheme() + ",\n"
+                              + "  \"verified_v3\": " + result.isVerifiedUsingV3Scheme() + ",\n"
+                              + "  \"verified_v31\": " + result.isVerifiedUsingV31Scheme() + ",\n"
+                              + "  \"verified_v4\": " + result.isVerifiedUsingV4Scheme() + ",\n"
+                              + "  \"play_delivery_proven\": false\n}\n";
+                      Files.writeString(output, json, StandardCharsets.UTF_8,
+                              java.nio.file.StandardOpenOption.CREATE_NEW);
+                      System.out.println("APK_SIGNATURE_AND_DER_CERTIFICATE=PASS");
+                  } catch (Exception exception) {
+                      // Neither tool exceptions nor environment values belong in diagnostic artifacts.
+                      System.err.println("APK_SIGNATURE_AND_DER_CERTIFICATE=FAIL");
+                      System.exit(1);
+                  }
+              }
+          }
+          JAVA_DER
+          javac --release 17 -cp "$APKSIGNER_JAR" -d "$RUNNER_TEMP/bil-apk-der-classes" "$RUNNER_TEMP/VerifyApkCertificate.java"
+          {
+            echo "BIL_APKSIGNER=$APKSIGNER"
+            echo "BIL_APKSIGNER_JAR=$APKSIGNER_JAR"
+            echo "BIL_DER_VERIFIER_CLASSES=$RUNNER_TEMP/bil-apk-der-classes"
+          } >> "$GITHUB_ENV"
+          "$APKSIGNER" version > BIL-apksigner-tool-version.txt
+          sha256sum "$APKSIGNER_JAR" > BIL-apksigner-tool-jar.sha256
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/artifacts/13470321068 > "$RUNNER_TEMP/debug-artifact-metadata.json"
+          python3 - <<'PY_DEBUG_META'
+          import json,pathlib,os
+          meta=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'debug-artifact-metadata.json').read_text())
+          assert meta['id']==13470321068 and meta['expired'] is False
+          assert meta['name']=='bil-android-codeql-apk-4c23f40391362b73ae7f6fe850bbdb7f70037130-1'
+          assert meta['digest']=='sha256:2c5b7f393edd90da87d2cfab68ebbcd8bf0f83cfd9b8862a3e33e6f0a1611075'
+          assert meta['workflow_run']['id']==42144515551 and meta['workflow_run']['head_sha']=='4c23f40391362b73ae7f6fe850bbdb7f70037130'
+          assert meta['workflow_run']['head_branch']=='codex/bil41-android33-release-20261106'
+          pathlib.Path('BIL-apksigner-preflight-artifact.json').write_text(json.dumps({'artifact_id':meta['id'],'name':meta['name'],'zip_digest':meta['digest'],'run_id':42144515551,'source_sha':'4c23f40391362b73ae7f6fe850bbdb7f70037130','scope':'DEBUG_APK_TOOL_PREFLIGHT_ONLY_NOT_UPLOAD_CERTIFICATE_PROOF'},indent=2)+'\n')
+          PY_DEBUG_META
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/artifacts/13470321068/zip > "$RUNNER_TEMP/bil-s3-debug-apk.zip"
+          echo "2c5b7f393edd90da87d2cfab68ebbcd8bf0f83cfd9b8862a3e33e6f0a1611075  $RUNNER_TEMP/bil-s3-debug-apk.zip" | sha256sum --check -
+          python3 - <<'PY_DEBUG_ZIP'
+          import hashlib,os,pathlib,zipfile
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          with zipfile.ZipFile(root/'bil-s3-debug-apk.zip') as archive:
+              candidates=[i for i in archive.infolist() if not i.is_dir() and pathlib.PurePosixPath(i.filename).suffix.lower()=='.apk']
+              assert len(candidates)==1 and candidates[0].filename=='offline-debug-build33.apk'
+              assert candidates[0].file_size==315355803
+              with archive.open(candidates[0]) as source,(root/'bil-s3-debug.apk').open('xb') as target:
+                  import shutil
+                  shutil.copyfileobj(source,target)
+          with (root/'bil-s3-debug.apk').open('rb') as source:
+              actual=hashlib.file_digest(source,'sha256').hexdigest()
+          assert actual=='309e3ce10be369fc5f85d8e9396b81d5df80fef36628db0201f30cb2b8c0c65b'
+          proof=pathlib.Path('BIL-apksigner-preflight-artifact.json')
+          data=__import__('json').loads(proof.read_text())
+          data.update({'apk_member':'offline-debug-build33.apk','apk_member_bytes':315355803,'apk_sha256':actual,'apk_member_count':1})
+          proof.write_text(__import__('json').dumps(data,indent=2)+'\n')
+          PY_DEBUG_ZIP
+          "$APKSIGNER" verify --verbose --print-certs "$RUNNER_TEMP/bil-s3-debug.apk" > BIL-apksigner-preflight-cli.txt
+          EXPECTED_UPLOAD_CERT_SHA256=DISCOVER_VERIFIED_DEBUG_IDENTITY_ONLY \
+            java -cp "$RUNNER_TEMP/bil-apk-der-classes:$APKSIGNER_JAR" VerifyApkCertificate \
+            "$RUNNER_TEMP/bil-s3-debug.apk" BIL-apksigner-preflight-der.json debug-preflight
+          if EXPECTED_UPLOAD_CERT_SHA256=0000000000000000000000000000000000000000000000000000000000000000 \
+            java -cp "$RUNNER_TEMP/bil-apk-der-classes:$APKSIGNER_JAR" VerifyApkCertificate \
+            "$RUNNER_TEMP/bil-s3-debug.apk" "$RUNNER_TEMP/debug-negative-must-not-exist.json" debug-preflight >/dev/null 2>&1; then
+            echo 'APK_DER_NEGATIVE_IDENTITY_FIXTURE=FAIL' >&2
+            exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/debug-negative-must-not-exist.json"
+          python3 - <<'PY_DEBUG_RESULT'
+          import json,pathlib,re
+          result=json.loads(pathlib.Path('BIL-apksigner-preflight-der.json').read_text())
+          assert result['status']=='VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY' and result['scope']=='debug-preflight'
+          assert result['apk_signature_verified'] is True and result['current_signer_count']==1
+          text=pathlib.Path('BIL-apksigner-preflight-cli.txt').read_text()
+          result['legacy_signer_number_regex_matches']=len(re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F:]+)$',text,re.M))
+          result['sdk_scoped_cli_records']=len(re.findall(r'^Signer \(minSdkVersion=.*certificate SHA-256 digest:',text,re.M))
+          result['negative_expected_identity_rejected']=True
+          pathlib.Path('BIL-apksigner-preflight-der.json').write_text(json.dumps(result,indent=2)+'\n')
+          PY_DEBUG_RESULT
+          rm -f "$RUNNER_TEMP/bil-s3-debug-apk.zip" "$RUNNER_TEMP/bil-s3-debug.apk"
+          echo 'APK_DER_TOOL_PREFLIGHT=PASS;DEBUG_CERTIFICATE_IS_NOT_RELEASE_IDENTITY_PROOF'
+
+      - name: Preserve public signer-tool preflight evidence before application compilation
+        if: ${{ always() && steps.apk_signer_preflight.outcome != 'skipped' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android34-tool-preflight-e90e04890d5c322cfd8b3554ff1f03fb3165414c-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Validate release build number
+        shell: bash
+        env:
+          BUILD_NUMBER: '34'
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
+            echo 'build_number must be a positive integer.' >&2
+            exit 1
+          }
+          (( BUILD_NUMBER == 34 )) || {
+            echo 'build_number must be exactly 34 for the Android release candidate; build 33 and earlier must never be promoted.' >&2
+            exit 1
+          }
+
+      - name: Require release signing secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+        run: |
+          set -euo pipefail
+          test -n "${KEYSTORE_BASE64:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_BASE64'; exit 1; }
+          test -n "${STORE_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_PASSWORD'; exit 1; }
+          test -n "${KEY_ALIAS:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_ALIAS'; exit 1; }
+          test -n "${KEY_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_PASSWORD'; exit 1; }
+          test -n "${EXPECTED_UPLOAD_CERT_SHA256:-}" || { echo 'Missing GitHub secret: ANDROID_UPLOAD_CERTIFICATE_SHA256'; exit 1; }
+          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
+          [[ "${PLAY_INTEGRITY_PROJECT_NUMBER:-}" =~ ^[1-9][0-9]+$ ]] || { echo 'OWNER_INPUT_REQUIRED: numeric BIL_PLAY_INTEGRITY_PROJECT_NUMBER repository variable from the Play-linked Cloud project'; exit 1; }
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo 'storeFile=app/upload-keystore.jks'
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Resolve dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Prepare pinned Android policy library repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+
+      - name: Analyze release source
+        run: flutter analyze --no-pub
+
+      - name: Validate frozen production configuration
+        shell: bash
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: android
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: true
+          BIL_AD_PROVIDER_READY: true
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+          BIL_PUSH_ENABLED: true
+          BIL_PUSH_PROVIDER_READY: true
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_SOURCE_COMMIT: e90e04890d5c322cfd8b3554ff1f03fb3165414c
+          BIL_AUDITED_SOURCE_COMMIT: e90e04890d5c322cfd8b3554ff1f03fb3165414c
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: e90e04890d5c322cfd8b3554ff1f03fb3165414c
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: '34'
+        run: dart run tool/release/validate_release_configuration.dart
+
+      - name: Verify focused payment and subscription regressions only
+        # The broader owner suite is running independently; no repeat of the completed comprehensive host suite.
+        run: |
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
+
+      - name: Run explicit system-crypto source gate
+        run: >-
+          flutter test --no-pub
+          test/launch_readiness/system_crypto_export_compliance_contract_test.dart
+          --timeout 2m
+
+      - name: Bind the completed exact-source native AES-GCM CI evidence
+        id: native_crypto_runtime_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib
+          receipt=json.loads(pathlib.Path('BIL34-pre-signing-ci.json').read_text())
+          assert receipt['status']=='INTERNAL_BUILD_PREREQUISITES_PASS'
+          assert receipt['source_sha']==os.environ['BIL_TESTED_SOURCE_SHA']
+          assert receipt['source_sha']==__import__('subprocess').check_output(['git','rev-parse','HEAD'],text=True).strip()
+          controller=json.loads(pathlib.Path('BIL-android34-controller-provenance.json').read_text())
+          assert controller['workflow_sha']==os.environ['GITHUB_SHA']==os.environ['BIL_SIGNING_ORCHESTRATION_SHA']
+          assert controller['source_sha']==receipt['source_sha']
+          assert receipt['platform']=='android' and receipt['build']==34
+          native=[item for item in receipt['ci'] if item['workflow']=='bil_codeql_security_extended.yml']
+          assert len(native)==1 and native[0]['status']=='PASS'
+          assert 'Android API 33 native integration without CodeQL tracing' in native[0]['required_jobs']
+          pathlib.Path('BIL-android-native-crypto-gate.txt').write_text(
+              'NATIVE_CRYPTO_RUNTIME_GATE=PASS\n'
+              'NATIVE_CRYPTO_RUNTIME_SCOPE=COMPLETED_EXACT_SHA_FINAL_CI_ANDROID_API33\n'
+              'SOURCE_SHA='+receipt['source_sha']+'\n'
+              'NATIVE_CI_URL='+native[0]['url']+'\n')
+          PY
+
+      - name: Exclude dev-only native plugins from Android release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
+      - name: Validate production AdMob configuration
+        shell: bash
+        env:
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+        run: |
+          set -euo pipefail
+          python3 tool/release/test_validate_admob_production_configuration.py
+          python3 tool/release/validate_admob_production_configuration.py \
+            | tee BIL-android-production-admob-source.txt
+
+      - name: Build signed Android App Bundle
+        id: android_aab_build
+        env:
+          BUILD_NUMBER: '34'
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+        run: >-
+          flutter build appbundle --release --no-pub
+          --build-number "$BUILD_NUMBER"
+          --dart-define=BIL_ENVIRONMENT=production
+          --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true
+          --dart-define=BIL_PLAY_INTEGRITY_PROJECT_NUMBER="$PLAY_INTEGRITY_PROJECT_NUMBER"
+          --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true
+          --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms
+          --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy
+          --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal
+          --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json
+          --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_READY=true
+          --dart-define=BIL_PUSH_ENABLED=true
+          --dart-define=BIL_PUSH_PROVIDER_READY=true
+          --dart-define=BIL_ADS_ENABLED=true
+          --dart-define=BIL_AD_PROVIDER_READY=true
+          --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509
+          --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410
+          --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211
+          --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347
+          --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944
+          --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Verify final AAB SDK, optional hardware, 16 KB packaging, and ELF alignment
+        id: android_16k_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          BUNDLETOOL_VERSION=1.18.3
+          BUNDLETOOL_SHA256=a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+          BUNDLETOOL_URL="https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          EVIDENCE_DIR=BIL-android-16k-evidence
+          mkdir -p "$EVIDENCE_DIR"
+          {
+            echo "BUNDLETOOL_VERSION=$BUNDLETOOL_VERSION"
+            echo "BUNDLETOOL_URL=$BUNDLETOOL_URL"
+            echo "EXPECTED_BUNDLETOOL_SHA256=$BUNDLETOOL_SHA256"
+            echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=NOT_COMPLETED'
+          } > "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test -s "$AAB" || {
+            echo 'The final release AAB is missing or empty.' >&2
+            exit 1
+          }
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$BUNDLETOOL_JAR" "$BUNDLETOOL_URL"
+          ACTUAL_BUNDLETOOL_SHA256="$(sha256sum "$BUNDLETOOL_JAR" | cut -d ' ' -f 1)"
+          echo "ACTUAL_BUNDLETOOL_SHA256=$ACTUAL_BUNDLETOOL_SHA256" \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test "$ACTUAL_BUNDLETOOL_SHA256" = "$BUNDLETOOL_SHA256" || {
+            echo 'Pinned official bundletool checksum mismatch.' >&2
+            exit 1
+          }
+          echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=PASS' \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          java -jar "$BUNDLETOOL_JAR" dump manifest \
+            --bundle="$AAB" \
+            --module=base \
+            > "$EVIDENCE_DIR/BIL-android-base-manifest.xml"
+          BIL_ADMOB_PRODUCTION_READY=true \
+          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+          python3 tool/release/validate_admob_production_configuration.py \
+            --android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            | tee "$EVIDENCE_DIR/BIL-android-production-admob.txt"
+          python3 tool/release/verify_android_target_sdk.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.json"
+          python3 tool/release/verify_android_optional_device_features.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.json"
+          python3 tool/release/verify_android_16k_alignment.py \
+            --aab "$AAB" \
+            --bundletool "$BUNDLETOOL_JAR" \
+            --bundletool-version "$BUNDLETOOL_VERSION" \
+            --readelf readelf \
+            --evidence-dir "$EVIDENCE_DIR"
+
+      - name: Upload final AAB platform evidence
+        if: ${{ always() && steps.android_aab_build.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android-16k-e90e04890d5c322cfd8b3554ff1f03fb3165414c-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-android-16k-evidence/BIL-android-bundletool-install.txt
+            BIL-android-16k-evidence/BIL-android-base-manifest.xml
+            BIL-android-16k-evidence/BIL-android-production-admob.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.json
+            BIL-android-16k-evidence/BIL-android-optional-hardware.txt
+            BIL-android-16k-evidence/BIL-android-optional-hardware.json
+            BIL-android-16k-evidence/BIL-android-16k-bundletool.txt
+            BIL-android-16k-evidence/BIL-android-16k-elf.txt
+            BIL-android-16k-evidence/BIL-android-16k-summary.json
+
+      - name: Capture release evidence
+        shell: bash
+        env:
+          BUILD_NUMBER: '34'
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify -verbose -certs "$AAB" > BIL-android-signature.txt
+          ACTUAL_UPLOAD_CERT_SHA256="$(keytool -printcert -rfc -jarfile "$AAB" \
+            | openssl x509 -noout -fingerprint -sha256 \
+            | cut -d '=' -f 2 \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          EXPECTED_NORMALIZED="$(printf '%s' "$EXPECTED_UPLOAD_CERT_SHA256" \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          test -n "$ACTUAL_UPLOAD_CERT_SHA256"
+          test "$ACTUAL_UPLOAD_CERT_SHA256" = "$EXPECTED_NORMALIZED" || {
+            echo 'Signed AAB certificate does not match the expected Play upload certificate.' >&2
+            exit 1
+          }
+          printf '%s\n' 'ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH' \
+            > BIL-android-upload-certificate.txt
+          python3 -m unittest discover -s tool/release \
+            -p test_verify_final_artifact_identity.py -v
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build "$BUILD_NUMBER" \
+            --output BIL-android-final-artifact-identity.json
+          sha256sum "$AAB" | tee BIL-android-aab.sha256
+          stat --printf='%s\n' "$AAB" | tee BIL-android-aab.size
+          git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
+
+      - name: Reject forbidden bundled crypto implementations in signed AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          SCAN_DIR="$RUNNER_TEMP/bil-android-crypto-scan"
+          rm -rf "$SCAN_DIR"
+          mkdir -p "$SCAN_DIR"
+          unzip -qq "$AAB" -d "$SCAN_DIR"
+          if find "$SCAN_DIR" -type f -name '*.so' \
+            -exec strings {} + 2>/dev/null \
+            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
+            echo 'Forbidden non-OS crypto implementation marker found in signed AAB.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'SIGNED_AAB_FORBIDDEN_CRYPTO_MARKERS=0' \
+            | tee BIL-android-crypto-scan.txt
+
+      - name: Derive a signed recording APK from the verified final AAB
+        shell: bash
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-1.18.3.jar"
+          echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $BUNDLETOOL_JAR" | sha256sum --check -
+          SECRET_DIR="$(mktemp -d "$RUNNER_TEMP/bil-apk-secret.XXXXXX")"
+          trap 'rm -f "$SECRET_DIR/store.pass" "$SECRET_DIR/key.pass"; rmdir "$SECRET_DIR"' EXIT
+          printf '%s' "$STORE_PASSWORD" > "$SECRET_DIR/store.pass"
+          printf '%s' "$KEY_PASSWORD" > "$SECRET_DIR/key.pass"
+          mkdir -p build/app/outputs/recording-apk
+          java -jar "$BUNDLETOOL_JAR" build-apks \
+            --bundle=build/app/outputs/bundle/release/app-release.aab \
+            --output="$RUNNER_TEMP/bil-android34-recording.apks" --mode=universal \
+            --ks=android/app/upload-keystore.jks --ks-key-alias="$KEY_ALIAS" \
+            --ks-pass="file:$SECRET_DIR/store.pass" --key-pass="file:$SECRET_DIR/key.pass"
+          APK=build/app/outputs/recording-apk/BIL-Android34-derived-universal.apk
+          unzip -p "$RUNNER_TEMP/bil-android34-recording.apks" universal.apk > "$APK"
+          APKSIGNER="${BIL_APKSIGNER:?}"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > BIL-android-recording-apk-signature.txt
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/apkanalyzer" manifest print "$APK" > BIL-android-recording-apk-manifest.xml
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-recording-apk-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog --version 1.0.0 --build 34 \
+            --output BIL-android-recording-apk-identity.json
+          java -cp "$BIL_DER_VERIFIER_CLASSES:$BIL_APKSIGNER_JAR" VerifyApkCertificate \
+            "$APK" BIL-android-recording-apk-der-certificate.json release
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,re,subprocess
+          def digest(path):
+              with pathlib.Path(path).open('rb') as stream:
+                  return hashlib.file_digest(stream,'sha256').hexdigest()
+          identity=json.loads(pathlib.Path('BIL-android-recording-apk-der-certificate.json').read_text())
+          expected=re.sub(r'[:\s]','',os.environ['EXPECTED_UPLOAD_CERT_SHA256']).lower()
+          assert re.fullmatch('[0-9a-f]{64}',expected)
+          assert identity['status']=='VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY' and identity['scope']=='release'
+          assert identity['apk_signature_verified'] is True and identity['current_signer_count']==1
+          assert identity['distinct_verified_scheme_leaf_certificates']==1 and identity['certificate_sha256']==expected
+          aab=digest('build/app/outputs/bundle/release/app-release.aab')
+          assert pathlib.Path('BIL-android-aab.sha256').read_text().split()[0]==aab
+          source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          assert source==os.environ['BIL_TESTED_SOURCE_SHA'] and re.fullmatch('[0-9a-f]{40}',source)
+          controller=json.loads(pathlib.Path('BIL-android34-controller-provenance.json').read_text())
+          assert controller['workflow_sha']==os.environ['GITHUB_SHA']==os.environ['BIL_SIGNING_ORCHESTRATION_SHA']
+          assert controller['source_sha']==source
+          receipt={'status':'VERIFIED_DERIVED_SIGNED_QA_APK','source_sha':source,'signing_orchestration_sha':os.environ['GITHUB_SHA'],'run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'build':34,'package':'com.bilhealth.bodyintelligencelog','aab_sha256':aab,'apk_sha256':digest('build/app/outputs/recording-apk/BIL-Android34-derived-universal.apk'),'certificate_sha256':expected,'installation_source':'not_installed','scope':'Universal APK derived from the verified final AAB and signed with the upload certificate. Not Play-delivered, not proof of Play App Signing, billing or Integrity recognition.','app_recompiled':False,'play_upload_performed':False}
+          pathlib.Path('BIL-android-recording-apk-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print('DERIVED_SIGNED_ANDROID34_QA_APK_IDENTITY=PASS;PLAY_DELIVERY=NOT_PROVEN')
+          PY
+
+      - name: Record code and physical-device gate boundary
+        shell: bash
+        env:
+          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
+        run: |
+          test "$NATIVE_CRYPTO_OUTCOME" = success
+          NATIVE_CRYPTO_GATE_STATUS='PASS'
+          printf '%s\n' \
+            'CODE_GATE=PASS' \
+            "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            'FACEBOOK_LOGIN_COMPILED_GATE=SUPABASE_BROWSER_OAUTH_SOURCE_PRESENT' \
+            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
+            'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=PASS' \
+            'ADMOB_ANDROID_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED' \
+            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
+            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
+            'BLUETOOTH_ANDROID34=DISABLED_NO_RUNTIME_PERMISSIONS' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=Google Credential Manager sign-in and Facebook OAuth browser flow with Supabase token exchange,Play Integrity JIT token/request binding/replay denial,Health Connect,Wear OS via Health Connect,Play billing,AdMob consent and served ad review' \
+            > BIL-android-gate-status.txt
+          printf '%s\n' "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify the exact Android34 Google review permission scope in both artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tool/release -p test_verify_android33_review_scope.py -v
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --output BIL-android34-final-aab-permission-scope.json
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-recording-apk-manifest.xml \
+            --output BIL-android34-final-apk-permission-scope.json
+
+      - name: Upload signed release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android34-signed-e90e04890d5c322cfd8b3554ff1f03fb3165414c-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/recording-apk/BIL-Android34-derived-universal.apk
+            BIL-android-recording-apk-receipt.json
+            BIL-android34-final-aab-permission-scope.json
+            BIL-android34-final-apk-permission-scope.json
+            BIL34-pre-signing-ci.json
+            BIL-android34-controller-provenance.json
+            BIL-android34-internal-acceptance.md
+            BIL-android-recording-apk-der-certificate.json
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+            BIL-android-native-crypto-gate.txt
+            BIL-android-recording-apk-identity.json
+            BIL-android-recording-apk-signature.txt
+            BIL-android-recording-apk-manifest.xml
+            BIL-android-signature.txt
+            BIL-android-aab.sha256
+            BIL-android-aab.size
+            BIL-android-crypto-scan.txt
+            BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
+            BIL-android-production-admob-source.txt
+            BIL-android-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-android-16k-evidence/
+
+      - name: Preserve public AAB and available derivation diagnostics on failure
+        if: ${{ failure() && steps.android_aab_build.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android34-INCOMPLETE-diagnostics-e90e04890d5c322cfd8b3554ff1f03fb3165414c-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/recording-apk/BIL-Android34-derived-universal.apk
+            BIL34-pre-signing-ci.json
+            BIL-android34-controller-provenance.json
+            BIL-android34-internal-acceptance.md
+            BIL-android-recording-apk-der-certificate.json
+            BIL-android-recording-apk-receipt.json
+            BIL-android-recording-apk-signature.txt
+            BIL-android-recording-apk-manifest.xml
+            BIL-android-recording-apk-identity.json
+            BIL-android34-final-aab-permission-scope.json
+            BIL-android34-final-apk-permission-scope.json
+            BIL-android-signature.txt
+            BIL-android-aab.sha256
+            BIL-android-aab.size
+            BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
+            BIL-android-native-crypto-gate.txt
+            BIL-android-crypto-scan.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+            BIL-android-16k-evidence/
+
+      - name: Remove signing material
+        if: always()
+        shell: bash
+        run: rm -f android/app/upload-keystore.jks android/key.properties
