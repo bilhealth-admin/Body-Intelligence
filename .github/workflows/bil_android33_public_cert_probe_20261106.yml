@@ -1,0 +1,141 @@
+name: BIL Android33 one-shot public certificate configuration probe
+on:
+  push:
+    branches: [audit/bil33-public-cert-probe-20261106]
+permissions:
+  contents: read
+concurrency:
+  group: bil33-public-cert-probe-20261106
+  cancel-in-progress: false
+env:
+  BIL_APPLICATION_SOURCE_SHA: 4c23f40391362b73ae7f6fe850bbdb7f70037130
+  BIL_PROBE_CONTROLLER_PATH: .github/workflows/bil_android33_public_cert_probe_20261106.yml
+jobs:
+  public-certificate-configuration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout the isolated controller only
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Require one-shot audit branch and unchanged S3 application parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_EVENT_NAME" = push
+          test "$GITHUB_REF" = refs/heads/audit/bil33-public-cert-probe-20261106
+          test "$GITHUB_RUN_ATTEMPT" = 1
+          test "$(git rev-parse HEAD^)" = "$BIL_APPLICATION_SOURCE_SHA"
+          test "$(git diff-tree --no-commit-id --name-status -r HEAD)" = "$(printf 'A\t%s' "$BIL_PROBE_CONTROLLER_PATH")"
+      - name: Compare the current keystore leaf and public fingerprint formatting
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_UPLOAD_CERTIFICATE_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python3 - <<'PY'
+          import base64, hashlib, json, os, pathlib, re, stat, subprocess
+
+          def validate_identity(raw, leaf_digest):
+              canonical = re.sub(r'[:\s]+', '', raw).lower()
+              if not re.fullmatch(r'[0-9a-f]{64}', canonical):
+                  raise ValueError('PUBLIC_FINGERPRINT_FORMAT_INVALID')
+              if canonical != leaf_digest:
+                  raise ValueError('PUBLIC_CERTIFICATE_IDENTITY_MISMATCH')
+              return canonical
+
+          def leaf_digest_from_pem(pem):
+              certificates = re.findall(r'-----BEGIN CERTIFICATE-----\s*(.*?)\s*-----END CERTIFICATE-----', pem, re.S)
+              if len(certificates) != 1:
+                  raise ValueError('PUBLIC_CERTIFICATE_EXPORT_COUNT_INVALID')
+              der = base64.b64decode(re.sub(r'\s+', '', certificates[0]), validate=True)
+              return hashlib.sha256(der).hexdigest()
+
+          output = pathlib.Path('public-certificate-probe')
+          output.mkdir()
+          temporary = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bil33-public-cert-probe-keys'
+          keystore = temporary / 'upload.keystore'
+          raw = os.environ.get('ANDROID_UPLOAD_CERTIFICATE_SHA256', '')
+          report = {
+              'schema': 'BIL33_PUBLIC_UPLOAD_CERT_CONFIG_V1', 'status': 'PENDING',
+              'application_source_sha': os.environ['BIL_APPLICATION_SOURCE_SHA'],
+              'controller_sha': os.environ['GITHUB_SHA'], 'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'raw_fingerprint_length': len(raw),
+              'raw_fingerprint_whitespace_count': sum(c.isspace() for c in raw),
+              'raw_fingerprint_colon_count': raw.count(':'),
+              'raw_derive_regex64_pass': bool(re.fullmatch(r'[0-9a-f]{64}', raw.replace(':', '').lower())),
+              'current_keystore_leaf_matches_canonical_expected': False,
+              'private_material_in_artifact': False, 'app_build_performed': False,
+              'secret_update_performed': False,
+          }
+          exit_code = 1
+          try:
+              for name in ('ANDROID_KEYSTORE_BASE64', 'ANDROID_KEYSTORE_PASSWORD', 'ANDROID_KEY_ALIAS', 'ANDROID_UPLOAD_CERTIFICATE_SHA256'):
+                  if not os.environ.get(name):
+                      raise ValueError('REQUIRED_CONFIGURATION_MISSING')
+              temporary.mkdir(mode=0o700)
+              data = base64.b64decode(re.sub(r'\s+', '', os.environ['ANDROID_KEYSTORE_BASE64']), validate=True)
+              with os.fdopen(os.open(keystore, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'wb') as stream:
+                  stream.write(data)
+              del data
+              if stat.S_IMODE(keystore.stat().st_mode) != 0o600:
+                  raise ValueError('PRIVATE_KEYSTORE_MODE_INVALID')
+              environment = dict(os.environ)
+              for name in ('JAVA_TOOL_OPTIONS', '_JAVA_OPTIONS', 'JDK_JAVA_OPTIONS',
+                           'ANDROID_KEYSTORE_BASE64', 'ANDROID_KEY_ALIAS', 'ANDROID_UPLOAD_CERTIFICATE_SHA256'):
+                  environment.pop(name, None)
+              result = subprocess.run([
+                  'keytool', '-exportcert', '-rfc', '-keystore', str(keystore),
+                  '-alias', os.environ['ANDROID_KEY_ALIAS'],
+                  '-storepass:env', 'ANDROID_KEYSTORE_PASSWORD',
+              ], env=environment, capture_output=True, text=True, timeout=30, check=False)
+              if result.returncode != 0:
+                  raise ValueError('PUBLIC_CERTIFICATE_EXPORT_FAILED')
+              leaf = leaf_digest_from_pem(result.stdout)
+              canonical = validate_identity(raw, leaf)
+              report.update(status='PUBLIC_CERTIFICATE_IDENTITY_MATCH',
+                            canonical_public_certificate_sha256=canonical,
+                            current_keystore_leaf_matches_canonical_expected=True)
+              exit_code = 0
+          except ValueError as error:
+              # Only our constant failure codes are published, never tool stderr.
+              permitted = {'PUBLIC_FINGERPRINT_FORMAT_INVALID', 'PUBLIC_CERTIFICATE_IDENTITY_MISMATCH',
+                           'PUBLIC_CERTIFICATE_EXPORT_COUNT_INVALID', 'REQUIRED_CONFIGURATION_MISSING',
+                           'PRIVATE_KEYSTORE_MODE_INVALID', 'PUBLIC_CERTIFICATE_EXPORT_FAILED'}
+              report['status'] = str(error) if str(error) in permitted else 'CONFIGURATION_PROBE_FAILED'
+          except Exception:
+              report['status'] = 'CONFIGURATION_PROBE_FAILED'
+          finally:
+              keystore.unlink(missing_ok=True)
+              if temporary.exists():
+                  temporary.rmdir()
+              (output / 'public-certificate-config.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print('BIL33_PUBLIC_CERT_CONFIG_MATCH' if exit_code == 0 else 'BIL33_PUBLIC_CERT_CONFIG_FAILED')
+          raise SystemExit(exit_code)
+          PY
+      - name: Remove only this probe's temporary keystore even after interruption
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os, pathlib
+          directory = pathlib.Path(os.environ['RUNNER_TEMP']) / 'bil33-public-cert-probe-keys'
+          (directory / 'upload.keystore').unlink(missing_ok=True)
+          if directory.exists():
+              directory.rmdir()
+          PY
+      - name: Preserve public configuration proof only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil33-public-cert-config-${{ github.sha }}
+          path: public-certificate-probe/public-certificate-config.json
+          if-no-files-found: error
+          retention-days: 2
