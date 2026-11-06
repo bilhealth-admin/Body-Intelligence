@@ -1,5 +1,6 @@
 import '../../intelligence_center/domain/bil_tool_registry.dart';
 import '../../intelligence_center/domain/intelligence_action.dart';
+import '../../intelligence_center/domain/coach_question_purpose.dart';
 import '../../intelligence_center/services/coach_request_intent.dart';
 import '../domain/bil_smart_plan.dart';
 
@@ -34,6 +35,13 @@ BilSmartPlanIntent smartPlanIntent(String input) {
       RegExp(
         r'\b(finished|completed|done)\b|خلصت|انهيت|اكملت',
       ).hasMatch(normalizeCoachMeaning(input))) {
+    return BilSmartPlanIntent.none;
+  }
+  // An informational comparison/definition must not be reinterpreted as an
+  // observed completion by the legacy phrase fallback below. Positive create
+  // and completion requests already returned through their existing paths.
+  if (semantic.kind == CoachRequestKind.information &&
+      coachRequestsReasonedOrFormattedAnswer(input)) {
     return BilSmartPlanIntent.none;
   }
   final text = normalizeCoachMeaning(coachActionRequestText(input));

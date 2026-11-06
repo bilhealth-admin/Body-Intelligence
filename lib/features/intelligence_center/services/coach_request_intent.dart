@@ -1,3 +1,5 @@
+import '../domain/coach_question_purpose.dart';
+
 /// Semantic routing only. No intent is permission to change saved data.
 enum CoachRequestKind {
   information,
@@ -236,10 +238,28 @@ CoachRequestIntent classifyCoachRequest(String input) {
   final nutrition = has(
     r'\b(nutrition|diet|food|meals?)\b|غذاء|غذائي|تغذي[ةه]|وجبات|اكل',
   );
+  final completedTraining =
+      training && has(r'\b(finished|completed|done)\b|خلصت|انهيت|اكملت');
+  // A comparison/definition can mention "completed workout" without asserting
+  // that one happened. A real completion or logging command can still request
+  // a table; that presentation preference must not cancel its existing review.
+  final explanatoryCompletion =
+      completedTraining &&
+      coachRequestsReasonedOrFormattedAnswer(input) &&
+      !has(
+        r"^(?:please[,\s]+)?(?:(?:today|yesterday)[,\s]+)?"
+        r"(?:(?:log|record|mark|save)\b|"
+        r"i(?: have|'ve)?\s+(?:just\s+)?(?:finished|completed|done)\b|"
+        r'(?:just\s+)?(?:finished|completed|done)\s+(?:my|the)\b)|'
+        r'^(?:(?:اليوم|امس|مبارح)[،,\s]+)?'
+        r'(?:انا\s+)?(?:خلصت|انهيت|اكملت)(?:\s|[.!?،؛؟]|$)|'
+        r'^(?:(?:من فضلك|لو سمحت|ارجوك)\s+)?'
+        r'(?:سجل|دون|احفظ|علم)(?:\s|[.!?،؛؟]|$)',
+      );
   // A question about completion reads the diary; punctuation must never turn
   // a status question into the user's assertion that an activity happened.
-  if (training &&
-      has(r'\b(finished|completed|done)\b|خلصت|انهيت|اكملت') &&
+  if (completedTraining &&
+      !explanatoryCompletion &&
       (has(r'\b(have i|did i|was my|is my|has my)\b|^هل\b') ||
           text.endsWith('?') ||
           text.endsWith('؟'))) {
@@ -251,7 +271,10 @@ CoachRequestIntent classifyCoachRequest(String input) {
   if (missed && !has(r'\b(change|adjust|revise)\b|غير|عدل|بدل')) {
     return const CoachRequestIntent(CoachRequestKind.reviewProgress);
   }
-  if (training && has(r'\b(finished|completed|done)\b|خلصت|انهيت|اكملت')) {
+  if (explanatoryCompletion) {
+    return const CoachRequestIntent(CoachRequestKind.information);
+  }
+  if (completedTraining) {
     return const CoachRequestIntent(CoachRequestKind.completeWorkout);
   }
   if ((plan || training) &&

@@ -83,7 +83,9 @@ class BilDynamicStoreOffers extends StatefulWidget {
   /// no access until the server verifies the receipt.
   final String? purchaseStatusMessage;
   final bool purchaseStatusIsError;
-  final CommercePlan currentPlan;
+
+  /// Null means that account access is still unverified, never verified Free.
+  final CommercePlan? currentPlan;
   final String? initialFocus;
 
   @override
@@ -185,6 +187,21 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
         widget.blockedPurchaseKinds.contains(selectedOffer.kind);
     final controlsLocked =
         widget.loading || widget.purchaseInProgress || widget.restoreInProgress;
+    final selectedIsSubscription =
+        selectedOffer != null &&
+        selectedOffer.kind != BilStoreProductKind.aiBoostConsumable;
+    final selectedIsCurrent =
+        selectedOffer != null && _isCurrent(selectedOffer.kind);
+    final subscriptionPurchaseAllowed =
+        !selectedIsSubscription ||
+        (widget.currentPlan != null && !selectedIsCurrent);
+    // An existing account grant is access without another store purchase.
+    // Pending store operations keep their feedback, but cannot start checkout.
+    final showPurchaseBar =
+        subscriptionPurchaseAllowed ||
+        controlsLocked ||
+        selectedOwnershipBlocked ||
+        widget.purchaseStatusMessage != null;
     return Stack(
       children: [
         Positioned.fill(
@@ -362,7 +379,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
             ),
           ),
         ),
-        if (selectedOffer != null)
+        if (selectedOffer != null && showPurchaseBar)
           PositionedDirectional(
             start: 0,
             end: 0,
@@ -374,7 +391,8 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
               enabled:
                   (widget.purchaseAllowedForKind?.call(selectedOffer.kind) ??
                       widget.purchaseEnabled) &&
-                  !selectedOwnershipBlocked,
+                  !selectedOwnershipBlocked &&
+                  subscriptionPurchaseAllowed,
               statusMessage: selectedOwnershipBlocked
                   ? widget.blockedPurchaseMessage
                   : widget.purchaseStatusMessage ??

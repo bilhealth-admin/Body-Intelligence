@@ -426,9 +426,23 @@ extension _CommunityMemberProfileActions on _CommunityMemberProfilePageState {
             await repository.deletePost(post.id);
             visit.check();
             if (visit.isCurrent()) {
+              final loadGeneration = _loadGeneration;
+              final projectionRevision = ++_postProjectionRevision;
               _setProfileState(
                 () => _posts.removeWhere((item) => item.id == post.id),
               );
+              // A confirmed deletion invalidates the earlier profile snapshot.
+              // Read the permitted aggregate instead of guessing count - 1.
+              // Keep the header and successful local removal if this read fails.
+              final refreshed = await repository.loadProfileOverview(
+                visit.targetId,
+              );
+              visit.check();
+              if (loadGeneration != _loadGeneration ||
+                  projectionRevision != _postProjectionRevision) {
+                return;
+              }
+              _setProfileState(() => _profile = refreshed);
             }
           } else if (action == 'block') {
             await repository.blockMember(post.authorId);

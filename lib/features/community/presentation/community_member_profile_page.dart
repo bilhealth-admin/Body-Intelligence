@@ -68,6 +68,7 @@ class _CommunityMemberProfilePageState
   bool _loadingMore = false;
   bool _loadingMoreReviews = false;
   int _loadGeneration = 0;
+  int _postProjectionRevision = 0;
   bool _refreshing = false;
   bool _gridMode = false;
   bool _relationshipBusy = false;
@@ -117,6 +118,7 @@ class _CommunityMemberProfilePageState
     final repository = visit.repository;
     repository.invalidateCommunityModeratorStatus();
     final generation = ++_loadGeneration;
+    final postProjectionRevision = _postProjectionRevision;
     _refreshing = true;
     _loadingMore = false;
     _loadingMoreReviews = false;
@@ -264,7 +266,10 @@ class _CommunityMemberProfilePageState
           }
         }
         visit.check();
-        if (generation != _loadGeneration) return;
+        if (generation != _loadGeneration ||
+            postProjectionRevision != _postProjectionRevision) {
+          return;
+        }
         _coverUrl = coverUrl;
         _profile = profile;
         _creator = creator;
@@ -330,6 +335,7 @@ class _CommunityMemberProfilePageState
       return;
     }
     final generation = _loadGeneration;
+    final postProjectionRevision = _postProjectionRevision;
     setState(() => _loadingMore = true);
     try {
       await visit!.run(() async {
@@ -340,7 +346,10 @@ class _CommunityMemberProfilePageState
           limit: _pageSize,
         );
         visit.check();
-        if (generation != _loadGeneration) return;
+        if (generation != _loadGeneration ||
+            postProjectionRevision != _postProjectionRevision) {
+          return;
+        }
         final known = _posts.map((post) => post.id).toSet();
         final incoming = batch.posts
             .where((post) => known.add(post.id))
@@ -361,7 +370,10 @@ class _CommunityMemberProfilePageState
         }
 
         visit.check();
-        if (generation != _loadGeneration) return;
+        if (generation != _loadGeneration ||
+            postProjectionRevision != _postProjectionRevision) {
+          return;
+        }
         setState(() {
           _posts.addAll(incoming);
           _viewCounts.addAll(counts);
@@ -376,7 +388,9 @@ class _CommunityMemberProfilePageState
     } on CommunityOwnerOperationCancelled {
       // Invalidated profile pagination never applies to a later visit.
     } catch (_) {
-      if (visit?.isCurrent() == true && generation == _loadGeneration) {
+      if (visit?.isCurrent() == true &&
+          generation == _loadGeneration &&
+          postProjectionRevision == _postProjectionRevision) {
         _showFailure();
       }
     } finally {

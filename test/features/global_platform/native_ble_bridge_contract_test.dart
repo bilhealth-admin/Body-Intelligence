@@ -40,7 +40,7 @@ void main() {
       File(
         'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
       ).readAsStringSync(),
-      contains('BILFitnessBleBridge'),
+      isNot(contains('BILFitnessBleBridge')),
     );
     expect(File('ios/Runner/BILMedicalBleBridge.swift').existsSync(), isFalse);
     expect(

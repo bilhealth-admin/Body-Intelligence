@@ -22,6 +22,7 @@ import '../commerce/domain/commerce_plan.dart';
 import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../global_platform/fitness_devices/ble_fitness_device_platform.dart';
+import '../global_platform/fitness_devices/fitness_ble_release_policy.dart';
 import 'connected_health_model.dart';
 import 'connected_health_copy.dart';
 import 'device_compatibility.dart';
@@ -353,43 +354,44 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                               onOpenSettings: _openSystemSettings,
                             ),
                             const SizedBox(height: PremiumDesignTokens.spaceMd),
-                            _FitnessDeviceSection(
-                              accessGranted: fitnessDevicesUnlocked,
-                              checking: subscription.isLoading,
-                              verifiedDenied: confirmedFree,
-                              onRequestAccess: () {
-                                if (confirmedFree) {
-                                  showOptionalAccessOffer(
-                                    context,
-                                    ref,
-                                    verifiedDenied: true,
-                                  );
-                                  return;
-                                }
-                                // A pending or unverified owner entitlement
-                                // remains locked, but is never an upsell signal.
-                                if (!subscription.isLoading) {
-                                  ref.invalidate(
-                                    verifiedSubscriptionStateProvider,
-                                  );
-                                }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      subscription.isLoading
-                                          ? tr(
-                                              'Checking subscription',
-                                              'جارٍ التحقق من الاشتراك',
-                                            )
-                                          : tr(
-                                              'Subscription check unavailable',
-                                              'تعذر التحقق من الاشتراك',
-                                            ),
+                            if (fitnessBleAvailableOnCurrentPlatform)
+                              _FitnessDeviceSection(
+                                accessGranted: fitnessDevicesUnlocked,
+                                checking: subscription.isLoading,
+                                verifiedDenied: confirmedFree,
+                                onRequestAccess: () {
+                                  if (confirmedFree) {
+                                    showOptionalAccessOffer(
+                                      context,
+                                      ref,
+                                      verifiedDenied: true,
+                                    );
+                                    return;
+                                  }
+                                  // A pending or unverified owner entitlement
+                                  // remains locked, but is never an upsell signal.
+                                  if (!subscription.isLoading) {
+                                    ref.invalidate(
+                                      verifiedSubscriptionStateProvider,
+                                    );
+                                  }
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        subscription.isLoading
+                                            ? tr(
+                                                'Checking subscription',
+                                                'جارٍ التحقق من الاشتراك',
+                                              )
+                                            : tr(
+                                                'Subscription check unavailable',
+                                                'تعذر التحقق من الاشتراك',
+                                              ),
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
+                                  );
+                                },
+                              ),
                             if (!kIsWeb &&
                                 defaultTargetPlatform ==
                                     TargetPlatform.android) ...[

@@ -35,16 +35,16 @@ void main() {
     expect(source, isNot(contains('"Medical device"')));
   });
 
-  test('Android Bluetooth and internet permissions are declared', () {
+  test('Android keeps internet without withheld Bluetooth permissions', () {
     final manifest = File(
       'android/app/src/main/AndroidManifest.xml',
     ).readAsStringSync();
+    expect(manifest, contains('android.permission.INTERNET'));
     for (final permission in <String>[
-      'android.permission.INTERNET',
       'android.permission.BLUETOOTH_SCAN',
       'android.permission.BLUETOOTH_CONNECT',
     ]) {
-      expect(manifest, contains(permission));
+      expect(manifest, isNot(contains(permission)));
     }
   });
 

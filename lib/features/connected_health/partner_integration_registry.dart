@@ -88,14 +88,14 @@ abstract final class PartnerIntegrationRegistry {
       ]);
 
   /// The consumer capabilities page lists only connections that can actually
-  /// operate on the current device: its native health store plus BLE.
+  /// operate on the current device. Android BLE is withheld for this release.
   static List<PartnerIntegrationCapability> forTargetPlatform(
     TargetPlatform platform, {
     bool isWeb = false,
   }) {
     if (isWeb) return const <PartnerIntegrationCapability>[];
     final ids = switch (platform) {
-      TargetPlatform.android => const {'health-connect', 'fitness-ble'},
+      TargetPlatform.android => const {'health-connect'},
       TargetPlatform.iOS => const {'healthkit', 'fitness-ble'},
       _ => const <String>{},
     };

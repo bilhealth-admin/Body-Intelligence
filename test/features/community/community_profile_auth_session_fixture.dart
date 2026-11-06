@@ -97,32 +97,34 @@ class _ProfileAuthFixture {
   }
 }
 
-CommunityProfileOverview _profile(String userId, {String prefix = ''}) =>
-    CommunityProfileOverview(
-      userId: userId,
-      displayName:
-          '$prefix${userId == _ownerA ? 'Private A' : 'Public member'}',
-      isSelf: userId == _ownerA,
-      relationship: CommunityRelationshipStatus.none,
-      allowFriendRequests: true,
-      allowFollows: true,
-      showFollowers: true,
-      showFollowing: true,
-      showFriends: true,
-      showPosts: true,
-      showMembershipTier: false,
-      handle: userId == _ownerA ? 'owner_a' : 'public_member',
-      followerCount: 12,
-      followingCount: 6,
-      friendCount: 4,
-      postCount: 1,
-      communityXp: 900,
-      communityLevel: 4,
-      communityLevelCopyKey: 'community_level_4',
-      currentLevelMinXp: 700,
-      viewerFollows: false,
-      followsViewer: false,
-    );
+CommunityProfileOverview _profile(
+  String userId, {
+  String prefix = '',
+  int postCount = 1,
+}) => CommunityProfileOverview(
+  userId: userId,
+  displayName: '$prefix${userId == _ownerA ? 'Private A' : 'Public member'}',
+  isSelf: userId == _ownerA,
+  relationship: CommunityRelationshipStatus.none,
+  allowFriendRequests: true,
+  allowFollows: true,
+  showFollowers: true,
+  showFollowing: true,
+  showFriends: true,
+  showPosts: true,
+  showMembershipTier: false,
+  handle: userId == _ownerA ? 'owner_a' : 'public_member',
+  followerCount: 12,
+  followingCount: 6,
+  friendCount: 4,
+  postCount: postCount,
+  communityXp: 900,
+  communityLevel: 4,
+  communityLevelCopyKey: 'community_level_4',
+  currentLevelMinXp: 700,
+  viewerFollows: false,
+  followsViewer: false,
+);
 
 CommunityCreatorProfile _creator(String userId) => CommunityCreatorProfile(
   userId: userId,

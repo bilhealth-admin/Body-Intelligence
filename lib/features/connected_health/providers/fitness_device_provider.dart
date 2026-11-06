@@ -1,10 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../global_platform/fitness_devices/ble_fitness_device_platform.dart';
 import '../../global_platform/fitness_devices/native_ble_fitness_bridge.dart';
+import '../../global_platform/fitness_devices/fitness_ble_release_policy.dart';
 import '../../global_platform/core/global_platform_core.dart';
 import '../../global_platform/product/global_product_access.dart';
 
@@ -67,10 +67,7 @@ final class FitnessDeviceController
   FitnessDeviceController(this._bridge, {this._store})
     : super(
         FitnessDeviceSnapshot(
-          status:
-              !kIsWeb &&
-                  (defaultTargetPlatform == TargetPlatform.android ||
-                      defaultTargetPlatform == TargetPlatform.iOS)
+          status: fitnessBleAvailableOnCurrentPlatform
               ? FitnessDeviceConnectionStatus.idle
               : FitnessDeviceConnectionStatus.unavailable,
         ),
@@ -167,6 +164,7 @@ final class FitnessDeviceController
   }
 
   Future<void> connect(BlePeripheral peripheral) async {
+    if (!state.supported) return;
     final profiles = peripheral.profiles.intersection(bleFitnessProfiles);
     if (profiles.isEmpty) {
       state = FitnessDeviceSnapshot(
@@ -246,6 +244,7 @@ final class FitnessDeviceController
   }
 
   Future<void> refreshMeasurements([BlePeripheral? peripheral]) async {
+    if (!state.supported) return;
     final id = state.connectedDeviceId;
     var device = peripheral;
     if (device == null) {
@@ -348,6 +347,7 @@ final class FitnessDeviceController
   }
 
   Future<void> disconnect() async {
+    if (!state.supported) return;
     final id = state.connectedDeviceId;
     if (id != null) await _bridge.disconnect(id);
     if (id != null) {
@@ -363,6 +363,7 @@ final class FitnessDeviceController
   }
 
   Future<void> removeDevice(String peripheralId) async {
+    if (!state.supported) return;
     await _bridge.disconnect(peripheralId);
     final bridge = _bridge;
     final managedBridge = bridge is ManagedBleFitnessBridge ? bridge : null;

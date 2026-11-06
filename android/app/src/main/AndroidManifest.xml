@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <!-- Camera, microphone, and Bluetooth features are optional journeys.
+    <!-- Camera and microphone features are optional journeys.
          Declaring every permission-implied feature as optional prevents
          Google Play from filtering tablets/Chromebooks that can still use
          the rest of BIL (or an external/front camera) perfectly well. -->
@@ -19,19 +19,15 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
-    <!-- Location is requested only as the legacy Android <= 11 prerequisite
-         for nearby BLE discovery; it is not a device requirement. -->
+    <!-- Optional hardware metadata preserves tablet/Chromebook compatibility;
+         these declarations grant no location or Bluetooth access. -->
     <uses-feature android:name="android.hardware.location" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-feature android:name="android.hardware.location.network" android:required="false" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
-    <uses-permission
-        android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation"/>
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+    <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+    <!-- Optional BLE is not offered in this Android release. Its Bluetooth
+         and legacy scan-location permissions are deliberately absent. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <!-- Image selection is occasional and uses the Android system picker.
@@ -63,9 +59,6 @@
     <uses-permission
         android:name="android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE"
         tools:node="remove" />
-
-    <uses-feature android:name="android.hardware.bluetooth" android:required="false"/>
-    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false"/>
 
     <uses-permission android:name="android.permission.health.READ_STEPS"/>
     <uses-permission android:name="android.permission.health.READ_DISTANCE"/>

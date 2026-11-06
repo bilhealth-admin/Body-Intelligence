@@ -28,7 +28,7 @@ void main() {
     }
   });
 
-  test('capabilities expose only this platform native source and BLE', () {
+  test('Android exposes Health Connect; iOS retains native health and BLE', () {
     expect(
       PartnerIntegrationRegistry.forTargetPlatform(
         TargetPlatform.iOS,
@@ -39,7 +39,7 @@ void main() {
       PartnerIntegrationRegistry.forTargetPlatform(
         TargetPlatform.android,
       ).map((entry) => entry.id),
-      ['health-connect', 'fitness-ble'],
+      ['health-connect'],
     );
     expect(
       PartnerIntegrationRegistry.forTargetPlatform(

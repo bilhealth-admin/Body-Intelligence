@@ -381,9 +381,9 @@ void main() {
   );
 
   test(
-    'BLE rejects stale and unknown-unit data, deduplicates, and forgets',
+    'iOS BLE rejects stale and unknown-unit data, deduplicates, and forgets',
     () async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final bridge = _ManagedBridge();
       final store = InMemoryGlobalStore();
       final controller = FitnessDeviceController(bridge, store: store);
@@ -417,8 +417,8 @@ void main() {
     },
   );
 
-  test('BLE never reports connected when native status is false', () async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+  test('iOS BLE never reports connected when native status is false', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final bridge = _ManagedBridge()..connected = false;
     final store = InMemoryGlobalStore();
     final controller = FitnessDeviceController(bridge, store: store);
@@ -483,10 +483,7 @@ void main() {
         'apple-healthkit',
         'bluetooth-sig-health-profiles',
       ]);
-      expect(android.map((entry) => entry.id), [
-        'android-health-connect',
-        'bluetooth-sig-health-profiles',
-      ]);
+      expect(android.map((entry) => entry.id), ['android-health-connect']);
       expect(ios.first.dataTypes, BilHealthScope.appleHealthReadTypeNames);
       expect(
         android.first.dataTypes,

@@ -49,7 +49,7 @@ void main() {
       expect(kotlin, isNot(contains('emptyList<Map<String, Any>>()')));
       expect(activity, contains('BILGlobalHealthBridge('));
       expect(activity, contains('healthBridge?.dispose()'));
-      expect(activity, contains('fitnessBleBridge?.dispose()'));
+      expect(activity, isNot(contains('fitnessBleBridge')));
       expect(kotlin, contains('scope.cancel()'));
       expect(androidFitness, contains('activeScans'));
       expect(androidFitness, contains('channel.setMethodCallHandler(null)'));

@@ -172,11 +172,11 @@ class NativeSplitTest(unittest.TestCase):
             job_name = f'{title} native tests from exact BIL39 simulator bundles'
             self.assertEqual(gate.WORKFLOWS[workflow], {job_name})
             source = (ROOT / '.github/workflows' / workflow).read_text(encoding='utf-8')
-            # The owner-authorized Build40 reuses the same independent lanes.
-            # Keep39 covered and require40 explicitly; neither device may fall
+            # The owner-authorized Build40/41 reuse the independent lanes.
+            # Keep39/40 covered and require41; neither device may fall
             # back to the slow combined job or an unrelated branch.
             self.assertIn(
-                'branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028]',
+                'branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028, codex/bil41-android33-release-20261106]',
                 source,
             )
             self.assertIn('runs-on: macos-26', source)
@@ -210,6 +210,7 @@ class NativeSplitTest(unittest.TestCase):
             'ios_native_only', 'ios_only', 'android_only', 'supabase_only'], False))
         for branch, expected in [('bil39/integration-20261025', False),
                                  ('codex/bil40-device-fixes-20261028', False),
+                                 ('codex/bil41-android33-release-20261106', False),
                                  ('main', True)]:
             github = SimpleNamespace(event_name='push', ref='refs/heads/' + branch)
             self.assertEqual(eval(compile(tree, '<actual condition>', 'eval'),

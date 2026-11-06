@@ -230,6 +230,7 @@ void main() {
       final scope = ProviderContainer(
         overrides: [
           verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-a'),
+          verifiedEntitlementLoaderProvider.overrideWithValue(_verifiedFree),
         ],
       );
       addTearDown(() {
@@ -256,6 +257,7 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
       scope.updateOverrides([
         verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-b'),
+        verifiedEntitlementLoaderProvider.overrideWithValue(_verifiedFree),
       ]);
       await tester.pumpWidget(page(nextStore));
       await tester.pump();
@@ -582,7 +584,12 @@ void main() {
   testWidgets(
     'ownership conflict survives plans route recreation and blocks repurchase',
     (tester) async {
-      final container = ProviderContainer();
+      final container = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerIdProvider.overrideWithValue('fixture-owner'),
+          verifiedEntitlementLoaderProvider.overrideWithValue(_verifiedFree),
+        ],
+      );
       addTearDown(container.dispose);
       final rejectedStore = _CancellationReadyStore();
       final rejectedCatalog = _RestoreVerificationFailureCatalog(
@@ -942,6 +949,14 @@ const _monthlyOffer = BilStoreOfferMetadata(
   currencyCode: 'EGP',
   priceMicros: 129990000,
   billingPeriodIso8601: 'P1M',
+);
+
+Future<SubscriptionState> _verifiedFree() async => SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: false,
+  canRestorePurchases: false,
 );
 
 const _annualOffer = BilStoreOfferMetadata(

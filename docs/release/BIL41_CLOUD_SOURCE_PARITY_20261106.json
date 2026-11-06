@@ -1,0 +1,108 @@
+{
+  "schema": "BIL_DEPLOYED_EDGE_SOURCE_PARITY_V1",
+  "source_commit": "53924198e960edae0a06c8234cb0d216a7f89437",
+  "project_ref": "tgmanzhqulksykhslrzb",
+  "function_slug": "ai-coach",
+  "version": 134,
+  "status": "ACTIVE",
+  "verified_at_utc": "2026-11-06T00:21:11.487590+00:00",
+  "deployed_archive_sha256": "af651e0728181314945d133d5c76bf1dc32726bd582cf1065a1e9d1631df3160",
+  "remote_read_response_sha256": "0def11c16fb16b5db26feb321efcc125b43d8a98c9837f6d89d32ae34003eeb9",
+  "files": [
+    {
+      "path": "supabase/functions/ai-coach/index.ts",
+      "sha256": "6a9b3b2f8c85dd964a56567c8e6fe4f8d1837cc56590056933f467d6c61ce335",
+      "bytes": 83
+    },
+    {
+      "path": "supabase/functions/ai-coach/server.ts",
+      "sha256": "81ca1db9734c901a41d4b12cb069dca032326bcef3e2c76bb8f983c71711408b",
+      "bytes": 71319
+    },
+    {
+      "path": "supabase/functions/_shared/bcp47.ts",
+      "sha256": "3f67a467193f6acba863edefcd8fe00c6954794477ea49c5066d9887749c6937",
+      "bytes": 1838
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_reasoning.ts",
+      "sha256": "0c47e5d59ee9682ae7a358aea7feccc9e758fd6cbc4601ad30cd553852e28a00",
+      "bytes": 3221
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_conversation_scope.ts",
+      "sha256": "7e2c363417ff38d88e03c549b022a84af6abec45876b7744f48cc5c3e3cdba3e",
+      "bytes": 5614
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_answer_quality.ts",
+      "sha256": "9f0206d38079a6fc43ab751f9263845d9caa5de6c8c001c0733e2a25e97585ef",
+      "bytes": 8483
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_food_safety.ts",
+      "sha256": "27a320a5b2fce9ec98fee985da0f7e9ed76ef02a278db7890f57e39be841706b",
+      "bytes": 9622
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_health_safety.ts",
+      "sha256": "804825cbf7e7071f13ce884620481634c2728fd7d6bb7d0ec53fd03b689b6a0f",
+      "bytes": 11175
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_verified_weight_proposal.ts",
+      "sha256": "070d293f62a4bf9a310573081833c3d0be834a193fa4719b9a9089313736debd",
+      "bytes": 2288
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_workout_review_copy.ts",
+      "sha256": "3927b893a9800e7ebe652c40b3030765ca8484983a853d3ab68c47a9f5f10f94",
+      "bytes": 2908
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_weight_truth.ts",
+      "sha256": "75c7d82608c2e40ee6940d4b1b8bd60200379536e9bef3fc3c94572ebd7f27b4",
+      "bytes": 5979
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_record_truth.ts",
+      "sha256": "4a42ea2314427e01e9207e02d99b42058c1b86c67ebaa970302649c6cc6493d2",
+      "bytes": 8269
+    },
+    {
+      "path": "supabase/functions/ai-coach/coach_tool_arguments.ts",
+      "sha256": "81f36291743818834c41acec46832d791318e3aad2295f2082fb7699465b362e",
+      "bytes": 1704
+    },
+    {
+      "path": "supabase/functions/_shared/ai_provider_recipient.ts",
+      "sha256": "b23fb64bb9899190e429eaf2b9381d206061798ab4dce91bb4ebe06f4c2acae0",
+      "bytes": 1141
+    },
+    {
+      "path": "supabase/functions/_shared/mobile_integrity.ts",
+      "sha256": "09656e86c7dca42229da8e9b551a2c54c6f9b7faf0ec9fd44803a65b37e5c5a7",
+      "bytes": 5668
+    }
+  ],
+  "deployed_configuration": [
+    {
+      "path": "supabase/functions/ai-coach/deno.json",
+      "sha256": "66299e6781195a6b9367d82f3900f2c405f2e18422139faf1f875770f9990212",
+      "contents": {
+        "imports": {
+          "@supabase/supabase-js": "npm:@supabase/supabase-js@2.112.3"
+        }
+      },
+      "scope": "DEPLOYED_IMPORT_CONFIGURATION"
+    }
+  ],
+  "all_candidate_and_cloud_source_bytes_match": true,
+  "read_only": true,
+  "new_model_requests": 0,
+  "cloud_writes": 0,
+  "limitations": [
+    "Source parity is not a new Gemini response, availability, database synchronization, or physical-device test.",
+    "This receipt identifies the deployed cloud source separately from the future app commit."
+  ]
+}

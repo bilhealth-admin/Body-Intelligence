@@ -20,7 +20,6 @@ class MainActivity : FlutterFragmentActivity() {
     private var textToSpeechBridge: BILTextToSpeechBridge? = null
     private var micSoundBridge: BILMicSoundBridge? = null
     private var healthBridge: BILGlobalHealthBridge? = null
-    private var fitnessBleBridge: BILFitnessBleBridge? = null
     private var playIntegrityBridge: BILPlayIntegrityBridge? = null
     private var pushChannel: MethodChannel? = null
     private var pushPermissionResult: MethodChannel.Result? = null
@@ -46,17 +45,6 @@ class MainActivity : FlutterFragmentActivity() {
         registerForActivityResult(BILGlobalHealthBridge.permissionContract(this)) { granted ->
             healthBridge?.onPermissionsResult(granted)
         }
-    private val blePermissionLauncher: ActivityResultLauncher<Array<String>> =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
-            val result = pendingBlePermissionResult
-            pendingBlePermissionResult = null
-            if (grants.values.all { it }) {
-                result?.success(null)
-            } else {
-                result?.error("bluetooth_permission_denied", null, null)
-            }
-        }
-    private var pendingBlePermissionResult: io.flutter.plugin.common.MethodChannel.Result? = null
     private var pendingContactResult: io.flutter.plugin.common.MethodChannel.Result? = null
     private val contactPickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { response ->
@@ -186,15 +174,8 @@ class MainActivity : FlutterFragmentActivity() {
                 else -> result.notImplemented()
             }
         }
-        fitnessBleBridge = BILFitnessBleBridge(this, flutterEngine.dartExecutor.binaryMessenger) { result ->
-            if (pendingBlePermissionResult != null) {
-                result.error("permission_request_in_progress", null, null)
-            } else {
-                pendingBlePermissionResult = result
-                val permissions = if (Build.VERSION.SDK_INT >= 31) arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT) else arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
-                blePermissionLauncher.launch(permissions)
-            }
-        }
+        // Optional Android BLE is withheld until physical-device validation.
+        // Do not register a channel that could request removed permissions.
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -271,12 +252,8 @@ class MainActivity : FlutterFragmentActivity() {
         textToSpeechBridge = null
         micSoundBridge?.dispose()
         micSoundBridge = null
-        pendingBlePermissionResult?.error("activity_disposed", null, null)
-        pendingBlePermissionResult = null
         pendingContactResult?.error("activity_disposed", null, null)
         pendingContactResult = null
-        fitnessBleBridge?.dispose()
-        fitnessBleBridge = null
         healthBridge?.dispose()
         healthBridge = null
         playIntegrityBridge?.dispose()

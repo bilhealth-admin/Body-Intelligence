@@ -1,6 +1,7 @@
 import '../../wellness/domain/wellness_content_pack.dart';
 import '../../wellness/services/wellness_content_pack_manager.dart';
 import '../domain/intelligence_message.dart';
+import '../domain/coach_question_purpose.dart';
 import 'recipe_coach_lookup.dart';
 
 typedef CoachWorkoutCatalogLoader =
@@ -43,6 +44,10 @@ final class CoachCatalogGrounding {
     required String question,
     required String locale,
   }) async {
+    // Topic words are not lookup intent. A local list of titles/videos cannot
+    // answer a comparison, definition or requested text/table layout. Let the
+    // existing Coach path handle it with its normal consent and credit gates.
+    if (coachRequestsReasonedOrFormattedAnswer(question)) return null;
     final recipe = await _recipes.answer(question: question, locale: locale);
     if (recipe != null) {
       return CoachCatalogGroundingResult(

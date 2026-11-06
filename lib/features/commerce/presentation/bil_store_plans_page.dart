@@ -4,7 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/localization/app_localizations.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../domain/commerce_plan.dart';
+import '../domain/subscription_state.dart';
 import '../domain/market_offer_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
@@ -399,16 +402,29 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     final catalog = _catalog;
     final store = widget.store ?? _ownedStore;
     var ownershipBlocked = false;
+    var subscriptionBlocked = false;
     try {
       ownershipBlocked = ref
           .read(purchaseOwnershipConflictStoreProvider)
           .blockedFor(offer.kind);
+      if (offer.kind != BilStoreProductKind.aiBoostConsumable) {
+        final plan = _verifiedPlan(
+          ref.read(verifiedSubscriptionAccessProvider),
+        );
+        subscriptionBlocked =
+            plan == null ||
+            plan ==
+                (offer.kind == BilStoreProductKind.premiumSubscription
+                    ? CommercePlan.premium
+                    : CommercePlan.premiumAiCoach);
+      }
     } on StateError {
       // Production is always mounted below ProviderScope. Preview-only pages
       // have no authenticated owner state to retain.
     }
     if (catalog == null ||
         ownershipBlocked ||
+        subscriptionBlocked ||
         _purchaseRequestInFlight ||
         store?.busy == true) {
       return;
@@ -442,6 +458,75 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         });
       }
     }
+  }
+
+  CommercePlan? _verifiedPlan(AsyncValue<SubscriptionState> snapshot) {
+    final state = snapshot.asData?.value;
+    return state?.authority == EntitlementAuthority.verifiedServer
+        ? state!.plan
+        : null;
+  }
+
+  void _leavePlans() =>
+      context.canPop() ? context.pop() : context.go('/dashboard');
+
+  Widget _accountAccessStatus({
+    required String locale,
+    required AsyncValue<SubscriptionState> access,
+    required CommercePlan? plan,
+  }) {
+    final copy = AppLocalizations(Localizations.localeOf(context));
+    final active = plan != null && plan != CommercePlan.free;
+    final checking = access.isLoading;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (active) ...[
+            Text(
+              '${BilStoreCopy.text(locale, 'current_plan')}: '
+              '${BilStoreCopy.text(locale, plan == CommercePlan.premiumAiCoach ? 'premium_ai_coach' : 'premium')}',
+              key: const Key('store-current-plan-status'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Text(copy.text('Active')),
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              key: const Key('store-current-plan-continue'),
+              onPressed: _leavePlans,
+              icon: const Icon(Icons.check_circle_outline_rounded),
+              label: Text(BilStoreCopy.text(locale, 'continue')),
+            ),
+          ] else if (plan == null) ...[
+            Text(
+              copy.text(
+                checking
+                    ? 'Checking subscription'
+                    : 'Subscription check unavailable',
+              ),
+              key: const Key('store-account-access-status'),
+            ),
+            if (checking)
+              const SizedBox(
+                height: 24,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: BilFeatureWelcomeStatus(),
+                ),
+              )
+            else
+              TextButton.icon(
+                key: const Key('store-account-access-retry'),
+                onPressed: () =>
+                    ref.invalidate(verifiedSubscriptionStateProvider),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text(copy.text('Try again')),
+              ),
+          ],
+        ],
+      ),
+    );
   }
 
   Future<void> _openLegalLink(String value) async {
@@ -485,14 +570,16 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     final pageForeground = scheme.brightness == Brightness.dark
         ? scheme.onSurface
         : const Color(0xFF171717);
-    // Production is mounted below ProviderScope. Keeping this preview-safe
-    // fallback also lets isolated visual and localization tests render it.
-    var currentPlan = CommercePlan.free;
+    // Only a completed server decision may name a current plan. Catalog
+    // readiness says nothing about the signed-in account's existing access.
+    AsyncValue<SubscriptionState>? accountAccess;
+    CommercePlan? currentPlan;
     try {
-      currentPlan =
-          ref.watch(verifiedSubscriptionAccessProvider).value?.plan ??
-          CommercePlan.free;
+      final access = ref.watch(verifiedSubscriptionAccessProvider);
+      accountAccess = access;
+      currentPlan = _verifiedPlan(access);
     } on StateError {
+      // Standalone previews have no account authority or native checkout.
       currentPlan = CommercePlan.free;
     }
     final store = widget.store ?? _ownedStore;
@@ -517,8 +604,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         scrolledUnderElevation: 0,
         leading: IconButton(
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/dashboard'),
+          onPressed: _leavePlans,
           icon: const Icon(Icons.close_rounded),
         ),
         centerTitle: true,
@@ -530,67 +616,80 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
           ),
         ),
       ),
-      body: BilDynamicStoreOffers(
-        locale: locale,
-        offers: _offers,
-        loading: _loading,
-        purchaseInProgress: _purchaseInProgress,
-        restoreInProgress: _restoring,
-        purchaseEnabled: store?.canStartPurchase ?? true,
-        purchaseAllowedForKind: (kind) =>
-            kind == BilStoreProductKind.aiBoostConsumable &&
-                _sharedBoost != null
-            ? _sharedBoost!.canPurchase
-            : (store?.canStartPurchase ?? true),
-        onContinueVerification:
-            (_sharedBoost?.canRetry == true ||
-                (store != null &&
-                    !store.busy &&
-                    (store.hasPendingVerifiedFinish ||
-                        const {
-                          'purchase_status_unknown',
-                          'store_finish_pending',
-                        }.contains(store.messageCode))))
-            ? () async {
-                if (_sharedBoost?.canRetry == true) {
-                  await _sharedBoost!.retryPendingTransaction();
-                } else {
-                  await store!.continueVerification();
-                }
-              }
-            : null,
-        continueVerificationLabel: BilStoreCopy.text(
-          locale,
-          'continue_verification',
-        ),
-        blockedPurchaseKinds: blockedPurchaseKinds,
-        blockedPurchaseMessage: BilStoreCopy.text(
-          locale,
-          'purchase_owned_by_another_account',
-        ),
-        purchaseStatusMessage: purchaseFeedbackKey == null
-            ? null
-            : BilStoreCopy.text(locale, purchaseFeedbackKey),
-        purchaseStatusIsError:
-            blockedPurchaseKinds.isNotEmpty || _purchaseFeedbackIsError,
-        currentPlan: currentPlan,
-        initialFocus: widget.initialFocus,
-        onPurchaseRequested: _requestPurchase,
-        onOfferSelected: _onOfferSelected,
-        onRestore: _catalog == null ? null : _restorePurchases,
-        onManage: _catalog == null
-            ? null
-            : () => _catalog.openManageSubscriptions(),
-        onRetry: _catalog == null || _loading ? null : _load,
-        onTerms: StoreCatalogConfiguration.legalLinksConfigured
-            ? () =>
-                  unawaited(_openLegalLink(StoreCatalogConfiguration.termsUrl))
-            : null,
-        onPrivacy: StoreCatalogConfiguration.legalLinksConfigured
-            ? () => unawaited(
-                _openLegalLink(StoreCatalogConfiguration.privacyUrl),
-              )
-            : null,
+      body: Column(
+        children: [
+          if (accountAccess != null && currentPlan != CommercePlan.free)
+            _accountAccessStatus(
+              locale: locale,
+              access: accountAccess,
+              plan: currentPlan,
+            ),
+          Expanded(
+            child: BilDynamicStoreOffers(
+              locale: locale,
+              offers: _offers,
+              loading: _loading,
+              purchaseInProgress: _purchaseInProgress,
+              restoreInProgress: _restoring,
+              purchaseEnabled: store?.canStartPurchase ?? true,
+              purchaseAllowedForKind: (kind) =>
+                  kind == BilStoreProductKind.aiBoostConsumable &&
+                      _sharedBoost != null
+                  ? _sharedBoost!.canPurchase
+                  : (store?.canStartPurchase ?? true),
+              onContinueVerification:
+                  (_sharedBoost?.canRetry == true ||
+                      (store != null &&
+                          !store.busy &&
+                          (store.hasPendingVerifiedFinish ||
+                              const {
+                                'purchase_status_unknown',
+                                'store_finish_pending',
+                              }.contains(store.messageCode))))
+                  ? () async {
+                      if (_sharedBoost?.canRetry == true) {
+                        await _sharedBoost!.retryPendingTransaction();
+                      } else {
+                        await store!.continueVerification();
+                      }
+                    }
+                  : null,
+              continueVerificationLabel: BilStoreCopy.text(
+                locale,
+                'continue_verification',
+              ),
+              blockedPurchaseKinds: blockedPurchaseKinds,
+              blockedPurchaseMessage: BilStoreCopy.text(
+                locale,
+                'purchase_owned_by_another_account',
+              ),
+              purchaseStatusMessage: purchaseFeedbackKey == null
+                  ? null
+                  : BilStoreCopy.text(locale, purchaseFeedbackKey),
+              purchaseStatusIsError:
+                  blockedPurchaseKinds.isNotEmpty || _purchaseFeedbackIsError,
+              currentPlan: currentPlan,
+              initialFocus: widget.initialFocus,
+              onPurchaseRequested: _requestPurchase,
+              onOfferSelected: _onOfferSelected,
+              onRestore: _catalog == null ? null : _restorePurchases,
+              onManage: _catalog == null
+                  ? null
+                  : () => _catalog.openManageSubscriptions(),
+              onRetry: _catalog == null || _loading ? null : _load,
+              onTerms: StoreCatalogConfiguration.legalLinksConfigured
+                  ? () => unawaited(
+                      _openLegalLink(StoreCatalogConfiguration.termsUrl),
+                    )
+                  : null,
+              onPrivacy: StoreCatalogConfiguration.legalLinksConfigured
+                  ? () => unawaited(
+                      _openLegalLink(StoreCatalogConfiguration.privacyUrl),
+                    )
+                  : null,
+            ),
+          ),
+        ],
       ),
     );
   }

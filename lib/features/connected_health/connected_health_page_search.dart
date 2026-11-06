@@ -37,23 +37,24 @@ extension on _ConnectedHealthPageState {
                 ),
                 title: Text(nativeSource),
               ),
-              ListTile(
-                leading: BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.devices,
-                  iconOverride: Icons.bluetooth_rounded,
-                  appleIconOverride: CupertinoIcons.bluetooth,
-                  size: 38,
-                  iconSize: 21,
-                  shape: BoxShape.rectangle,
-                ),
-                title: Text(
-                  connectedHealthText(
-                    context,
-                    'Bluetooth fitness devices',
-                    'أجهزة اللياقة عبر البلوتوث',
+              if (fitnessBleAvailableOnCurrentPlatform)
+                ListTile(
+                  leading: BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.devices,
+                    iconOverride: Icons.bluetooth_rounded,
+                    appleIconOverride: CupertinoIcons.bluetooth,
+                    size: 38,
+                    iconSize: 21,
+                    shape: BoxShape.rectangle,
+                  ),
+                  title: Text(
+                    connectedHealthText(
+                      context,
+                      'Bluetooth fitness devices',
+                      'أجهزة اللياقة عبر البلوتوث',
+                    ),
                   ),
                 ),
-              ),
               ListTile(
                 key: const Key('available-connections-capabilities-link'),
                 leading: BilSemanticIconBadge(

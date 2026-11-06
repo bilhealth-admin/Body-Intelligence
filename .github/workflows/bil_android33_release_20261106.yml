@@ -1,0 +1,474 @@
+name: BIL Android33 paired iOS41 signed artifact
+run-name: "BIL Android33 same-source signed AAB and APK; no Play submission"
+on:
+  push:
+    branches: [codex/bil41-internal-testflight-20261106]
+permissions:
+  contents: read
+  actions: read
+  security-events: read
+concurrency:
+  group: bil41-android33-artifact-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  BIL_TESTED_SOURCE_SHA: ${{ github.sha }}
+  BIL_RELEASE_BRANCH: codex/bil41-android33-release-20261106
+  BIL_RELEASE_CONFIGURATION_PATH: docs/release/BIL_ANDROID33_CONFIGURATION_20261106.md
+  BIL_ORIGINAL_SHA: 0c94cf2a75c01ebb7cbea74704a18a8109831194
+jobs:
+  signed-android-aab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout the exact dispatched and tested candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require paired exact-source CI and verified deployed Coach source before credentials
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 tools/qa/bil41_internal_build_ci.py \
+            --sha "$BIL_TESTED_SOURCE_SHA" --branch "$BIL_RELEASE_BRANCH" \
+            --platform android --output BIL33-pre-signing-ci.json
+          python3 tools/qa/bil41_internal_signing_manifest.py \
+            --receipt BIL33-pre-signing-ci.json --platform android \
+            --output "$RUNNER_TEMP/BIL-android33-internal-acceptance.md"
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Validate release build number
+        shell: bash
+        env:
+          BUILD_NUMBER: '33'
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
+            echo 'build_number must be a positive integer.' >&2
+            exit 1
+          }
+          (( BUILD_NUMBER == 33 )) || {
+            echo 'build_number must be exactly 33 for the Android release candidate; build 32 and earlier must never be promoted.' >&2
+            exit 1
+          }
+
+      - name: Require release signing secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+        run: |
+          set -euo pipefail
+          test -n "${KEYSTORE_BASE64:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_BASE64'; exit 1; }
+          test -n "${STORE_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_PASSWORD'; exit 1; }
+          test -n "${KEY_ALIAS:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_ALIAS'; exit 1; }
+          test -n "${KEY_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_PASSWORD'; exit 1; }
+          test -n "${EXPECTED_UPLOAD_CERT_SHA256:-}" || { echo 'Missing GitHub secret: ANDROID_UPLOAD_CERTIFICATE_SHA256'; exit 1; }
+          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
+          [[ "${PLAY_INTEGRITY_PROJECT_NUMBER:-}" =~ ^[1-9][0-9]+$ ]] || { echo 'OWNER_INPUT_REQUIRED: numeric BIL_PLAY_INTEGRITY_PROJECT_NUMBER repository variable from the Play-linked Cloud project'; exit 1; }
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo 'storeFile=app/upload-keystore.jks'
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Resolve dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Prepare pinned Android policy library repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+
+      - name: Analyze release source
+        run: flutter analyze --no-pub
+
+      - name: Validate frozen production configuration
+        shell: bash
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: android
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: true
+          BIL_AD_PROVIDER_READY: true
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+          BIL_PUSH_ENABLED: true
+          BIL_PUSH_PROVIDER_READY: true
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_SOURCE_COMMIT: ${{ github.sha }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: '33'
+        run: dart run tool/release/validate_release_configuration.dart
+
+      - name: Verify focused payment and subscription regressions only
+        # The broader owner suite is running independently; no repeat of 9k tests.
+        run: |
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
+
+      - name: Run explicit system-crypto source gate
+        run: >-
+          flutter test --no-pub
+          test/launch_readiness/system_crypto_export_compliance_contract_test.dart
+          --timeout 2m
+
+      - name: Bind the completed exact-source native AES-GCM CI evidence
+        id: native_crypto_runtime_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib
+          receipt=json.loads(pathlib.Path('BIL33-pre-signing-ci.json').read_text())
+          assert receipt['status']=='INTERNAL_BUILD_PREREQUISITES_PASS'
+          assert receipt['source_sha']==os.environ['GITHUB_SHA']==os.environ['BIL_TESTED_SOURCE_SHA']
+          assert receipt['platform']=='android' and receipt['build']==33
+          native=[item for item in receipt['ci'] if item['workflow']=='bil_codeql_security_extended.yml']
+          assert len(native)==1 and native[0]['status']=='PASS'
+          assert 'Android API 33 native integration without CodeQL tracing' in native[0]['required_jobs']
+          pathlib.Path('BIL-android-native-crypto-gate.txt').write_text(
+              'NATIVE_CRYPTO_RUNTIME_GATE=PASS\n'
+              'NATIVE_CRYPTO_RUNTIME_SCOPE=COMPLETED_EXACT_SHA_FINAL_CI_ANDROID_API33\n'
+              'SOURCE_SHA='+receipt['source_sha']+'\n'
+              'NATIVE_CI_URL='+native[0]['url']+'\n')
+          PY
+
+      - name: Exclude dev-only native plugins from Android release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
+      - name: Validate production AdMob configuration
+        shell: bash
+        env:
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+        run: |
+          set -euo pipefail
+          python3 tool/release/test_validate_admob_production_configuration.py
+          python3 tool/release/validate_admob_production_configuration.py \
+            | tee BIL-android-production-admob-source.txt
+
+      - name: Build signed Android App Bundle
+        id: android_aab_build
+        env:
+          BUILD_NUMBER: '33'
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+        run: >-
+          flutter build appbundle --release --no-pub
+          --build-number "$BUILD_NUMBER"
+          --dart-define=BIL_ENVIRONMENT=production
+          --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true
+          --dart-define=BIL_PLAY_INTEGRITY_PROJECT_NUMBER="$PLAY_INTEGRITY_PROJECT_NUMBER"
+          --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true
+          --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms
+          --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy
+          --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal
+          --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json
+          --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_READY=true
+          --dart-define=BIL_PUSH_ENABLED=true
+          --dart-define=BIL_PUSH_PROVIDER_READY=true
+          --dart-define=BIL_ADS_ENABLED=true
+          --dart-define=BIL_AD_PROVIDER_READY=true
+          --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509
+          --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410
+          --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211
+          --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347
+          --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944
+          --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Verify final AAB SDK, optional hardware, 16 KB packaging, and ELF alignment
+        id: android_16k_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          BUNDLETOOL_VERSION=1.18.3
+          BUNDLETOOL_SHA256=a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+          BUNDLETOOL_URL="https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          EVIDENCE_DIR=BIL-android-16k-evidence
+          mkdir -p "$EVIDENCE_DIR"
+          {
+            echo "BUNDLETOOL_VERSION=$BUNDLETOOL_VERSION"
+            echo "BUNDLETOOL_URL=$BUNDLETOOL_URL"
+            echo "EXPECTED_BUNDLETOOL_SHA256=$BUNDLETOOL_SHA256"
+            echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=NOT_COMPLETED'
+          } > "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test -s "$AAB" || {
+            echo 'The final release AAB is missing or empty.' >&2
+            exit 1
+          }
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$BUNDLETOOL_JAR" "$BUNDLETOOL_URL"
+          ACTUAL_BUNDLETOOL_SHA256="$(sha256sum "$BUNDLETOOL_JAR" | cut -d ' ' -f 1)"
+          echo "ACTUAL_BUNDLETOOL_SHA256=$ACTUAL_BUNDLETOOL_SHA256" \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test "$ACTUAL_BUNDLETOOL_SHA256" = "$BUNDLETOOL_SHA256" || {
+            echo 'Pinned official bundletool checksum mismatch.' >&2
+            exit 1
+          }
+          echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=PASS' \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          java -jar "$BUNDLETOOL_JAR" dump manifest \
+            --bundle="$AAB" \
+            --module=base \
+            > "$EVIDENCE_DIR/BIL-android-base-manifest.xml"
+          BIL_ADMOB_PRODUCTION_READY=true \
+          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+          python3 tool/release/validate_admob_production_configuration.py \
+            --android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            | tee "$EVIDENCE_DIR/BIL-android-production-admob.txt"
+          python3 tool/release/verify_android_target_sdk.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.json"
+          python3 tool/release/verify_android_optional_device_features.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.json"
+          python3 tool/release/verify_android_16k_alignment.py \
+            --aab "$AAB" \
+            --bundletool "$BUNDLETOOL_JAR" \
+            --bundletool-version "$BUNDLETOOL_VERSION" \
+            --readelf readelf \
+            --evidence-dir "$EVIDENCE_DIR"
+
+      - name: Upload final AAB platform evidence
+        if: ${{ always() && steps.android_aab_build.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android-16k-evidence-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-android-16k-evidence/BIL-android-bundletool-install.txt
+            BIL-android-16k-evidence/BIL-android-base-manifest.xml
+            BIL-android-16k-evidence/BIL-android-production-admob.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.json
+            BIL-android-16k-evidence/BIL-android-optional-hardware.txt
+            BIL-android-16k-evidence/BIL-android-optional-hardware.json
+            BIL-android-16k-evidence/BIL-android-16k-bundletool.txt
+            BIL-android-16k-evidence/BIL-android-16k-elf.txt
+            BIL-android-16k-evidence/BIL-android-16k-summary.json
+
+      - name: Capture release evidence
+        shell: bash
+        env:
+          BUILD_NUMBER: '33'
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify -verbose -certs "$AAB" > BIL-android-signature.txt
+          ACTUAL_UPLOAD_CERT_SHA256="$(keytool -printcert -rfc -jarfile "$AAB" \
+            | openssl x509 -noout -fingerprint -sha256 \
+            | cut -d '=' -f 2 \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          EXPECTED_NORMALIZED="$(printf '%s' "$EXPECTED_UPLOAD_CERT_SHA256" \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          test -n "$ACTUAL_UPLOAD_CERT_SHA256"
+          test "$ACTUAL_UPLOAD_CERT_SHA256" = "$EXPECTED_NORMALIZED" || {
+            echo 'Signed AAB certificate does not match the expected Play upload certificate.' >&2
+            exit 1
+          }
+          printf '%s\n' 'ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH' \
+            > BIL-android-upload-certificate.txt
+          python3 -m unittest discover -s tool/release \
+            -p test_verify_final_artifact_identity.py -v
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build "$BUILD_NUMBER" \
+            --output BIL-android-final-artifact-identity.json
+          sha256sum "$AAB" | tee BIL-android-aab.sha256
+          stat --printf='%s\n' "$AAB" | tee BIL-android-aab.size
+          git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
+
+      - name: Reject forbidden bundled crypto implementations in signed AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          SCAN_DIR="$RUNNER_TEMP/bil-android-crypto-scan"
+          rm -rf "$SCAN_DIR"
+          mkdir -p "$SCAN_DIR"
+          unzip -qq "$AAB" -d "$SCAN_DIR"
+          if find "$SCAN_DIR" -type f -name '*.so' \
+            -exec strings {} + 2>/dev/null \
+            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
+            echo 'Forbidden non-OS crypto implementation marker found in signed AAB.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'SIGNED_AAB_FORBIDDEN_CRYPTO_MARKERS=0' \
+            | tee BIL-android-crypto-scan.txt
+
+      - name: Derive a signed recording APK from the verified final AAB
+        shell: bash
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-1.18.3.jar"
+          echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $BUNDLETOOL_JAR" | sha256sum --check -
+          SECRET_DIR="$(mktemp -d "$RUNNER_TEMP/bil-apk-secret.XXXXXX")"
+          trap 'rm -f "$SECRET_DIR/store.pass" "$SECRET_DIR/key.pass"; rmdir "$SECRET_DIR"' EXIT
+          printf '%s' "$STORE_PASSWORD" > "$SECRET_DIR/store.pass"
+          printf '%s' "$KEY_PASSWORD" > "$SECRET_DIR/key.pass"
+          mkdir -p build/app/outputs/recording-apk
+          java -jar "$BUNDLETOOL_JAR" build-apks \
+            --bundle=build/app/outputs/bundle/release/app-release.aab \
+            --output="$RUNNER_TEMP/bil-android33-recording.apks" --mode=universal \
+            --ks=android/app/upload-keystore.jks --ks-key-alias="$KEY_ALIAS" \
+            --ks-pass="file:$SECRET_DIR/store.pass" --key-pass="file:$SECRET_DIR/key.pass"
+          APK=build/app/outputs/recording-apk/BIL-Android33-derived-universal.apk
+          unzip -p "$RUNNER_TEMP/bil-android33-recording.apks" universal.apk > "$APK"
+          APKSIGNER="$(find "${ANDROID_HOME:?}/build-tools" -maxdepth 2 -name apksigner -type f | sort -V | tail -n 1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > BIL-android-recording-apk-signature.txt
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/apkanalyzer" manifest print "$APK" > BIL-android-recording-apk-manifest.xml
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-recording-apk-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog --version 1.0.0 --build 33 \
+            --output BIL-android-recording-apk-identity.json
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,re
+          def digest(path):
+              with pathlib.Path(path).open('rb') as stream:
+                  return hashlib.file_digest(stream,'sha256').hexdigest()
+          signature=pathlib.Path('BIL-android-recording-apk-signature.txt').read_text()
+          certificates=re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F:]+)$',signature,re.M)
+          expected=os.environ['EXPECTED_UPLOAD_CERT_SHA256'].replace(':','').lower()
+          assert re.fullmatch('[0-9a-f]{64}',expected) and len(certificates)==1
+          assert certificates[0].replace(':','').lower()==expected
+          aab=digest('build/app/outputs/bundle/release/app-release.aab')
+          assert pathlib.Path('BIL-android-aab.sha256').read_text().split()[0]==aab
+          source=os.environ['GITHUB_SHA']
+          assert source==os.environ['BIL_TESTED_SOURCE_SHA'] and re.fullmatch('[0-9a-f]{40}',source)
+          receipt={'status':'VERIFIED_DERIVED_SIGNED_QA_APK','source_sha':source,'build':33,'package':'com.bilhealth.bodyintelligencelog','aab_sha256':aab,'apk_sha256':digest('build/app/outputs/recording-apk/BIL-Android33-derived-universal.apk'),'certificate_sha256':expected,'installation_source':'not_installed','scope':'Universal APK derived from the verified final AAB and signed with the upload certificate. Not Play-delivered, not proof of Play App Signing, billing or Integrity recognition.','app_recompiled':False,'play_upload_performed':False}
+          pathlib.Path('BIL-android-recording-apk-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print('DERIVED_SIGNED_ANDROID33_QA_APK_IDENTITY=PASS;PLAY_DELIVERY=NOT_PROVEN')
+          PY
+
+      - name: Record code and physical-device gate boundary
+        shell: bash
+        env:
+          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
+        run: |
+          test "$NATIVE_CRYPTO_OUTCOME" = success
+          NATIVE_CRYPTO_GATE_STATUS='PASS'
+          printf '%s\n' \
+            'CODE_GATE=PASS' \
+            "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            'FACEBOOK_LOGIN_COMPILED_GATE=SUPABASE_BROWSER_OAUTH_SOURCE_PRESENT' \
+            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
+            'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=PASS' \
+            'ADMOB_ANDROID_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED' \
+            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
+            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
+            'BLUETOOTH_ANDROID33=DISABLED_NO_RUNTIME_PERMISSIONS' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=Google Credential Manager sign-in and Facebook OAuth browser flow with Supabase token exchange,Play Integrity JIT token/request binding/replay denial,Health Connect,Wear OS via Health Connect,Play billing,AdMob consent and served ad review' \
+            > BIL-android-gate-status.txt
+          printf '%s\n' "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify the exact Android33 Google review permission scope in both artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tool/release -p test_verify_android33_review_scope.py -v
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --output BIL-android33-final-aab-permission-scope.json
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-recording-apk-manifest.xml \
+            --output BIL-android33-final-apk-permission-scope.json
+
+      - name: Upload signed release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android-signed-aab-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/recording-apk/BIL-Android33-derived-universal.apk
+            BIL-android-recording-apk-receipt.json
+            BIL-android33-final-aab-permission-scope.json
+            BIL-android33-final-apk-permission-scope.json
+            BIL33-pre-signing-ci.json
+            BIL-android33-signing-manifest-proof.json
+            BIL-android-native-crypto-gate.txt
+            BIL-android-recording-apk-identity.json
+            BIL-android-recording-apk-signature.txt
+            BIL-android-recording-apk-manifest.xml
+            BIL-android-signature.txt
+            BIL-android-aab.sha256
+            BIL-android-aab.size
+            BIL-android-crypto-scan.txt
+            BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
+            BIL-android-production-admob-source.txt
+            BIL-android-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-android-16k-evidence/
+
+      - name: Remove signing material
+        if: always()
+        shell: bash
+        run: rm -f android/app/upload-keystore.jks android/key.properties

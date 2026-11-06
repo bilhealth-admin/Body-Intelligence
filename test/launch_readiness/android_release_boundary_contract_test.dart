@@ -59,8 +59,6 @@ void main() {
     ).readAsStringSync();
 
     for (final permission in <String>[
-      'android.permission.BLUETOOTH_SCAN',
-      'android.permission.BLUETOOTH_CONNECT',
       'android.permission.health.READ_STEPS',
       'android.permission.health.READ_DISTANCE',
       'android.permission.health.READ_ACTIVE_CALORIES_BURNED',
@@ -69,6 +67,9 @@ void main() {
     }
 
     for (final excludedPermission in <String>[
+      'android.permission.BLUETOOTH',
+      'android.permission.ACCESS_FINE_LOCATION',
+      'android.permission.ACCESS_COARSE_LOCATION',
       'READ_OXYGEN_SATURATION',
       'READ_BLOOD_GLUCOSE',
       'READ_BLOOD_PRESSURE',
@@ -116,8 +117,27 @@ void main() {
 
     expect(manifest, contains('android:allowBackup="false"'));
     expect(manifest, contains('android:usesCleartextTraffic="false"'));
-    expect(manifest, contains('android:maxSdkVersion="30"'));
-    expect(manifest, contains('android.hardware.bluetooth_le'));
+    expect(manifest, isNot(contains('android.permission.BLUETOOTH')));
+    expect(
+      manifest,
+      isNot(contains('android.permission.ACCESS_FINE_LOCATION')),
+    );
+    expect(
+      manifest,
+      isNot(contains('android.permission.ACCESS_COARSE_LOCATION')),
+    );
+    for (final optionalHardware in [
+      'android.hardware.bluetooth',
+      'android.hardware.bluetooth_le',
+      'android.hardware.location',
+      'android.hardware.location.gps',
+      'android.hardware.location.network',
+    ]) {
+      expect(
+        manifest,
+        contains('android:name="$optionalHardware" android:required="false"'),
+      );
+    }
     expect(manifest, contains('android:required="false"'));
     expect(
       manifest,

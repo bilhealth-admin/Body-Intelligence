@@ -50,11 +50,11 @@ abstract final class BilDeviceCompatibilityMatrix {
     ),
     HealthDeviceCompatibility(
       id: 'bluetooth-sig-health-profiles',
-      platforms: {'Android', 'iOS'},
+      platforms: {'iOS'},
       protocol: 'BLE GATT SIG 181D/181B/180D',
       dataTypes: {'weight', 'bodyComposition', 'heartRate'},
       verification: DeviceVerificationLevel.implementationReadyDeviceRequired,
-      minimumVersion: 'Android 8+ / iOS 15+',
+      minimumVersion: 'iOS 15+',
     ),
   ]);
 

@@ -121,7 +121,7 @@ class _GoldActionButton extends StatelessWidget {
 
   final String label;
   final bool loading;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) => FilledButton(

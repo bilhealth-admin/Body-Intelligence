@@ -186,14 +186,84 @@ class _AiCoachAccessCheckingSurface extends StatelessWidget {
   );
 }
 
-class _PremiumRouteGateContents extends ConsumerWidget {
+class _PremiumRouteGateContents extends ConsumerStatefulWidget {
   const _PremiumRouteGateContents({required this.feature, required this.child});
 
   final PremiumGateFeature feature;
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PremiumRouteGateContents> createState() =>
+      _PremiumRouteGateContentsState();
+}
+
+class _PremiumRouteGateContentsState
+    extends ConsumerState<_PremiumRouteGateContents> {
+  ProviderSubscription<AsyncValue<String?>>? _ownerSubscription;
+  String? _observedOwner;
+  int _ownerVisit = 0;
+  int? _verifiedFreeVisit;
+  Future<SubscriptionState>? _sourceReadWitness;
+  final _retiredSourceReads = Expando<bool>();
+
+  void _retireFreePresentationRead() {
+    final previousRead = _sourceReadWitness;
+    if (previousRead != null) _retiredSourceReads[previousRead] = true;
+    // Retire an in-flight read even if no frame has observed it yet. A pending
+    // Future may be forwarded across invalidations: a retired handle may never
+    // seed display continuity again. This is deliberately conservative; fresh
+    // authority still controls the real gate/child in the original code below.
+    if (widget.feature != PremiumGateFeature.aiCoach) {
+      final currentRead = ref.read(verifiedSubscriptionStateProvider.future);
+      // Observe only identity here. The AsyncValue below still owns and shows
+      // its error; do not leave this extra Future projection unhandled.
+      currentRead.ignore();
+      _retiredSourceReads[currentRead] = true;
+    }
+    _ownerVisit++;
+    _verifiedFreeVisit = null;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _observedOwner = ref.read(verifiedEntitlementOwnerIdProvider);
+    // Observe raw owner transitions, including A -> B -> A between frames.
+    // A scalar owner key alone can miss that visit boundary. This retains only
+    // public Free gate presentation, never an entitlement or account data.
+    _ownerSubscription = ref.listenManual(verifiedEntitlementOwnerProvider, (
+      previous,
+      next,
+    ) {
+      if (next.hasError) {
+        setState(() {
+          _retireFreePresentationRead();
+        });
+      } else if (next.hasValue && next.value != _observedOwner) {
+        setState(() {
+          _observedOwner = next.value;
+          _retireFreePresentationRead();
+        });
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _PremiumRouteGateContents oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.feature != widget.feature) _verifiedFreeVisit = null;
+  }
+
+  @override
+  void dispose() {
+    _ownerSubscription?.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final feature = widget.feature;
+    final child = widget.child;
     final isAiCoach = feature == PremiumGateFeature.aiCoach;
     // Boost belongs to the account, not its membership tier. A subscription
     // lookup (including its loading/error state) must not block verified credit.
@@ -204,13 +274,64 @@ class _PremiumRouteGateContents extends ConsumerWidget {
         ? null
         : ref.watch(storefrontTargetPlanProvider).value;
     final state = subscription.asData?.value;
+    final owner = isAiCoach
+        ? null
+        : ref.watch(verifiedEntitlementOwnerIdProvider);
+    final ownerSnapshot = isAiCoach
+        ? const AsyncValue<String?>.data(null)
+        : ref.watch(verifiedEntitlementOwnerProvider);
+    if (!isAiCoach && owner != _observedOwner) {
+      _observedOwner = owner;
+      _retireFreePresentationRead();
+    }
+    final source = isAiCoach
+        ? const AsyncValue<SubscriptionState>.loading()
+        : ref.watch(verifiedSubscriptionStateProvider);
+    final sourceRead = isAiCoach
+        ? null
+        : ref.read(verifiedSubscriptionStateProvider.future);
+    sourceRead?.ignore();
+    _sourceReadWitness = sourceRead;
+    if (!isAiCoach && !subscription.isLoading) {
+      _verifiedFreeVisit =
+          !subscription.hasError &&
+              !ownerSnapshot.hasError &&
+              !source.isLoading &&
+              !source.hasError &&
+              sourceRead != null &&
+              _retiredSourceReads[sourceRead] != true &&
+              owner != null &&
+              state?.authority == EntitlementAuthority.verifiedServer &&
+              state?.plan == CommercePlan.free
+          ? _ownerVisit
+          : null;
+    }
+    // A timer/resume refresh must not replace a settled Free card with a
+    // full-page spinner. Keep only its public presentation during an explicit
+    // same-owner source refresh. Initial loads, owner/dependency reloads,
+    // errors and completed paid/denied results use the original authority path.
+    // The source is never overridden and the Plans action stays disabled until
+    // verification completes; this cannot grant access to the protected child.
+    final retainingFreeGate =
+        !isAiCoach &&
+        subscription.isLoading &&
+        !subscription.hasError &&
+        !ownerSnapshot.hasError &&
+        owner != null &&
+        sourceRead != null &&
+        _retiredSourceReads[sourceRead] != true &&
+        _verifiedFreeVisit == _ownerVisit &&
+        source.isRefreshing &&
+        !source.hasError &&
+        source.value?.authority == EntitlementAuthority.verifiedServer &&
+        source.value?.plan == CommercePlan.free;
     final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
     final creditSnapshot = isAiCoach
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
     final creditAccess = creditSnapshot.asData?.value ?? false;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    if (subscription.isLoading) {
+    if (subscription.isLoading && !retainingFreeGate) {
       return _PremiumRouteAccessChecking(
         title: _featureName(context, feature),
         isDark: isDark,
@@ -223,6 +344,7 @@ class _PremiumRouteGateContents extends ConsumerWidget {
     final verificationUnavailable =
         subscription.hasError ||
         (!isAiCoach &&
+            !retainingFreeGate &&
             (state == null ||
                 state.authority != EntitlementAuthority.verifiedServer)) ||
         (isAiCoach && creditSnapshot.hasError);
@@ -291,9 +413,13 @@ class _PremiumRouteGateContents extends ConsumerWidget {
               compact: constraints.maxHeight < 700,
               isDark: isDark,
               showCoach: isAiCoach,
-              onPressed: () => context.push(
-                isAiCoach ? '/plans?focus=boost' : '/plans?focus=subscription',
-              ),
+              onPressed: retainingFreeGate
+                  ? null
+                  : () => context.push(
+                      isAiCoach
+                          ? '/plans?focus=boost'
+                          : '/plans?focus=subscription',
+                    ),
               onSecondaryPressed: null,
             ),
           ),
@@ -493,7 +619,7 @@ class _PremiumGateCard extends StatelessWidget {
   final bool compact;
   final bool isDark;
   final bool showCoach;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final VoidCallback? onSecondaryPressed;
 
   @override

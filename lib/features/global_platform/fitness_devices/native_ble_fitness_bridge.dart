@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 
 import 'ble_fitness_device_platform.dart';
+import 'fitness_ble_release_policy.dart';
 
 final class MethodChannelBleFitnessBridge implements ManagedBleFitnessBridge {
   MethodChannelBleFitnessBridge({
@@ -14,12 +15,21 @@ final class MethodChannelBleFitnessBridge implements ManagedBleFitnessBridge {
   final MethodChannel _channel;
   final BleGattMeasurementParser _parser;
 
+  void _requireAvailable() {
+    if (!fitnessBleAvailableOnCurrentPlatform) {
+      throw PlatformException(code: 'fitness_ble_unavailable');
+    }
+  }
+
   @override
-  Future<void> requestPermissions() =>
-      _channel.invokeMethod<void>('requestPermissions');
+  Future<void> requestPermissions() async {
+    _requireAvailable();
+    await _channel.invokeMethod<void>('requestPermissions');
+  }
 
   @override
   Future<List<BlePeripheral>> discover(Duration timeout) async {
+    _requireAvailable();
     final rows =
         await _channel.invokeListMethod<Map<Object?, Object?>>(
           'discover',
@@ -50,38 +60,47 @@ final class MethodChannelBleFitnessBridge implements ManagedBleFitnessBridge {
   }
 
   @override
-  Future<void> pair(String peripheralId) => _channel.invokeMethod<void>(
-    'pair',
-    <String, Object?>{'peripheralId': peripheralId},
-  );
+  Future<void> pair(String peripheralId) async {
+    _requireAvailable();
+    await _channel.invokeMethod<void>('pair', <String, Object?>{
+      'peripheralId': peripheralId,
+    });
+  }
 
   @override
-  Future<void> disconnect(String peripheralId) => _channel.invokeMethod<void>(
-    'disconnect',
-    <String, Object?>{'peripheralId': peripheralId},
-  );
+  Future<void> disconnect(String peripheralId) async {
+    _requireAvailable();
+    await _channel.invokeMethod<void>('disconnect', <String, Object?>{
+      'peripheralId': peripheralId,
+    });
+  }
 
   @override
-  Future<Map<String, Object?>> deviceStatus(String peripheralId) async =>
-      Map<String, Object?>.from(
-        await _channel.invokeMapMethod<String, Object?>(
-              'deviceStatus',
-              <String, Object?>{'peripheralId': peripheralId},
-            ) ??
-            const <String, Object?>{},
-      );
+  Future<Map<String, Object?>> deviceStatus(String peripheralId) async {
+    _requireAvailable();
+    return Map<String, Object?>.from(
+      await _channel.invokeMapMethod<String, Object?>(
+            'deviceStatus',
+            <String, Object?>{'peripheralId': peripheralId},
+          ) ??
+          const <String, Object?>{},
+    );
+  }
 
   @override
-  Future<void> forget(String peripheralId) => _channel.invokeMethod<void>(
-    'forget',
-    <String, Object?>{'peripheralId': peripheralId},
-  );
+  Future<void> forget(String peripheralId) async {
+    _requireAvailable();
+    await _channel.invokeMethod<void>('forget', <String, Object?>{
+      'peripheralId': peripheralId,
+    });
+  }
 
   @override
   Future<List<Map<String, Object?>>> readMeasurements({
     required BlePeripheral peripheral,
     required DateTime asOf,
   }) async {
+    _requireAvailable();
     final profiles = peripheral.profiles.intersection(bleFitnessProfiles);
     if (profiles.isEmpty) return const <Map<String, Object?>>[];
     final rows =

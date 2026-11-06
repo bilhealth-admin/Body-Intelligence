@@ -13,6 +13,7 @@ import '../health_data/apple_health_platform.dart';
 import '../fitness_devices/ble_fitness_device_platform.dart';
 import '../fitness_devices/fitness_device_platform.dart';
 import '../fitness_devices/native_ble_fitness_bridge.dart';
+import '../fitness_devices/fitness_ble_release_policy.dart';
 import '../persistence/global_platform_sqlite_store.dart';
 import '../plugins/plugin_platform.dart';
 import '../product/global_product_coordinators.dart';
@@ -100,7 +101,7 @@ final class GlobalNativeIntegrationHost {
     final isIos = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     final isAndroid =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-    final isMobileNative = isIos || isAndroid;
+    final hasFitnessBle = fitnessBleAvailableOnCurrentPlatform;
     appleHealth = AppleHealthRuntime.methodChannel(store: store, audit: audit);
     healthConnect = HealthConnectRuntime.methodChannel(
       store: store,
@@ -228,7 +229,7 @@ final class GlobalNativeIntegrationHost {
         audit: audit,
       ),
       fitness: FitnessDeviceRuntime(
-        providers: <FitnessDeviceProvider>[fitnessProvider],
+        providers: <FitnessDeviceProvider>[if (hasFitnessBle) fitnessProvider],
         store: store,
         audit: audit,
       ),
@@ -258,11 +259,13 @@ final class GlobalNativeIntegrationHost {
               : 'android_platform_required',
         ),
         'fitness': GlobalProductCapabilityState(
-          status: isMobileNative
+          status: hasFitnessBle
               ? GlobalProductCapabilityStatus.available
               : GlobalProductCapabilityStatus.unavailable,
-          code: isMobileNative
+          code: hasFitnessBle
               ? 'native_ble_available'
+              : isAndroid
+              ? 'android_ble_withheld_pending_device_validation'
               : 'mobile_bluetooth_platform_required',
         ),
         'reports': const GlobalProductCapabilityState(
