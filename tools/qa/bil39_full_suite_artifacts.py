@@ -14,7 +14,8 @@ from bil39_internal_build_ci import BRANCH, REPOSITORY
 from bil40_internal_build_ci import BRANCH as BIL40_BRANCH
 from bil41_internal_build_ci import BRANCH as BIL41_BRANCH
 
-SOURCE_BRANCHES = frozenset((BRANCH, BIL40_BRANCH, BIL41_BRANCH))
+FULL_FIX_BRANCH = 'codex/bil-full-fix-batch-20261106'
+SOURCE_BRANCHES = frozenset((BRANCH, BIL40_BRANCH, BIL41_BRANCH, FULL_FIX_BRANCH))
 MAX_ZIP = 32 * 1024 * 1024
 MAX_EXPANDED = 128 * 1024 * 1024
 MEMBERS = {'events.jsonl', 'receipt.json', 'plan.json'}
