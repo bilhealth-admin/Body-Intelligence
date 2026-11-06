@@ -234,6 +234,24 @@ final verifiedEntitlementClockProvider = Provider<DateTime Function()>(
       () => DateTime.now().toUtc(),
 );
 
+/// One immediate read per observed period boundary, scoped to the auth owner.
+/// Remembering the boundary across provider generations prevents an unchanged
+/// expired server row (or an offline read) from creating a refresh loop.
+final class VerifiedSubscriptionBoundaryRefresh {
+  final Set<DateTime> _requested = {};
+  bool claim(DateTime boundary) {
+    if (!_requested.add(boundary.toUtc())) return false;
+    if (_requested.length > 16) _requested.remove(_requested.first);
+    return true;
+  }
+}
+
+final verifiedSubscriptionBoundaryRefreshProvider =
+    Provider<VerifiedSubscriptionBoundaryRefresh>((ref) {
+      ref.watch(verifiedEntitlementOwnerIdProvider);
+      return VerifiedSubscriptionBoundaryRefresh();
+    });
+
 /// Presentation view of the server snapshot with an exact local access cutoff.
 /// The upstream repository still owns verification and its bounded continuity
 /// cache. A slow refresh must not keep a cached paid plan alive past its period.
@@ -258,19 +276,38 @@ final verifiedSubscriptionAccessProvider =
         return const AsyncValue.loading();
       }
       if (snapshot.hasError) return snapshot;
-      final state = snapshot.value;
+      final rawState = snapshot.value;
+      final state = rawState == null
+          ? null
+          : verifiedSubscriptionPeriodAt(rawState, now);
       if (state == null || state.plan == CommercePlan.free) return snapshot;
-      final boundary = switch (state.lifecycle) {
-        SubscriptionLifecycle.trial => state.trialEndsAt,
-        SubscriptionLifecycle.active ||
-        SubscriptionLifecycle.cancelled => state.currentPeriodEndsAt,
-        SubscriptionLifecycle.gracePeriod => state.gracePeriodEndsAt,
-        _ => null,
-      };
+      final boundary = verifiedSubscriptionBoundary(state)?.toUtc();
+      final boundaryRefresh = ref.watch(
+        verifiedSubscriptionBoundaryRefreshProvider,
+      );
+      void reloadAtBoundary(DateTime transition) {
+        if (boundaryRefresh.claim(transition) &&
+            !ref.read(verifiedSubscriptionStateProvider).isLoading) {
+          ref.invalidate(verifiedSubscriptionStateProvider);
+        }
+        ref.invalidateSelf();
+      }
+
       if (state.authority != EntitlementAuthority.verifiedServer ||
           boundary == null ||
           !boundary.toUtc().isAfter(now) ||
           (state.startedAt?.toUtc().isAfter(now) ?? false)) {
+        if (state.authority == EntitlementAuthority.verifiedServer &&
+            boundary != null &&
+            !boundary.isAfter(now) &&
+            boundaryRefresh.claim(boundary)) {
+          final refresh = Timer(Duration.zero, () {
+            if (!ref.read(verifiedSubscriptionStateProvider).isLoading) {
+              ref.invalidate(verifiedSubscriptionStateProvider);
+            }
+          });
+          ref.onDispose(refresh.cancel);
+        }
         return AsyncValue.data(
           SubscriptionState(
             plan: CommercePlan.free,
@@ -283,9 +320,16 @@ final verifiedSubscriptionAccessProvider =
           ),
         );
       }
+      final nextStart = state.verifiedNextPeriod?.startedAt?.toUtc();
+      final transition =
+          nextStart != null &&
+              nextStart.isAfter(now) &&
+              !nextStart.isAfter(boundary)
+          ? nextStart
+          : boundary;
       final expiry = Timer(
-        boundary.toUtc().difference(now),
-        ref.invalidateSelf,
+        transition.difference(now),
+        () => reloadAtBoundary(transition),
       );
       ref.onDispose(expiry.cancel);
       return AsyncValue.data(state);

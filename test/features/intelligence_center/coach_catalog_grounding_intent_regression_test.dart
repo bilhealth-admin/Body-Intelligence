@@ -78,6 +78,8 @@ void main() {
   }
 
   final lookups = <String, String>{
+    'en-video-translation':
+        'Show me a renegade row exercise video with an Arabic translation.',
     'ar-explanatory-video': 'اعرض فيديو شرح تمرين السحب بالدمبل',
     'en-no-comparison':
         'Show me a renegade row exercise video, no comparison needed.',

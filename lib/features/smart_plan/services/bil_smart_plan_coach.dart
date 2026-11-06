@@ -15,11 +15,12 @@ BilSmartPlanIntent smartPlanIntent(String input) {
   }
   final semantic = classifyCoachRequest(input);
   if (semantic.createsPlan) return BilSmartPlanIntent.open;
-  if (semantic.kind == CoachRequestKind.completeWorkout) {
-    return BilSmartPlanIntent.completedWorkout;
-  }
   if (semantic.kind == CoachRequestKind.revisePlan) {
     return BilSmartPlanIntent.revise;
+  }
+  if (isCoachFutureWorkoutCompletion(input)) return BilSmartPlanIntent.none;
+  if (semantic.kind == CoachRequestKind.completeWorkout) {
+    return BilSmartPlanIntent.completedWorkout;
   }
   if (semantic.kind == CoachRequestKind.todayPlan) {
     return BilSmartPlanIntent.today;

@@ -163,6 +163,77 @@ const profileRuntimeCopyCatalogA = <String, Map<String, String>>{
     'nl': 'Calorie- en macronutriëntdoelen',
     'uk': 'Цілі за калоріями та макронутрієнтами',
   },
+  'Review the recommendation, then adjust only what fits your plan.': {
+    'ar': 'راجع التوصية، ثم عدّل فقط ما يناسب خطتك.',
+    'en': 'Review the recommendation, then adjust only what fits your plan.',
+    'fr':
+        'Examinez la recommandation, puis ajustez uniquement ce qui convient à votre plan.',
+    'es': 'Revisa la recomendación y ajusta solo lo que encaje con tu plan.',
+    'tr':
+        'Öneriyi gözden geçirin, ardından yalnızca planınıza uygun olanları ayarlayın.',
+    'de':
+        'Prüfe die Empfehlung und passe dann nur das an, was zu deinem Plan passt.',
+    'it':
+        'Rivedi il consiglio, poi modifica solo ciò che si adatta al tuo piano.',
+    'pt-BR':
+        'Revise a recomendação e ajuste apenas o que se encaixa no seu plano.',
+    'pt-PT':
+        'Reveja a recomendação e ajuste apenas o que se adequa ao seu plano.',
+    'ur':
+        'تجویز کا جائزہ لیں، پھر صرف وہی تبدیلی کریں جو آپ کے منصوبے کے مطابق ہو۔',
+    'fa':
+        'توصیه را مرور کنید، سپس فقط موارد متناسب با برنامه‌تان را تغییر دهید.',
+    'hi':
+        'सुझाव की समीक्षा करें, फिर केवल वही बदलाव करें जो आपकी योजना के अनुकूल हों।',
+    'id':
+        'Tinjau rekomendasi, lalu sesuaikan hanya yang cocok dengan rencana Anda.',
+    'ms':
+        'Semak cadangan, kemudian laraskan hanya perkara yang sesuai dengan pelan anda.',
+    'ja': '推奨内容を確認し、プランに合うものだけを調整してください。',
+    'ko': '권장 사항을 검토한 다음 계획에 맞는 부분만 조정하세요.',
+    'zh-Hans': '查看建议，然后只调整适合你计划的部分。',
+    'zh-Hant': '查看建議，然後只調整適合你計畫的部分。',
+    'ru':
+        'Ознакомьтесь с рекомендацией, затем измените только то, что подходит вашему плану.',
+    'bn':
+        'সুপারিশটি পর্যালোচনা করুন, তারপর শুধু আপনার পরিকল্পনার সঙ্গে মানানসই বিষয়গুলো সমন্বয় করুন।',
+    'vi':
+        'Xem lại đề xuất, rồi chỉ điều chỉnh những gì phù hợp với kế hoạch của bạn.',
+    'th': 'ตรวจสอบคำแนะนำ แล้วปรับเฉพาะส่วนที่เหมาะกับแผนของคุณ',
+    'pl':
+        'Przejrzyj zalecenie, a następnie dostosuj tylko to, co pasuje do Twojego planu.',
+    'nl':
+        'Bekijk de aanbeveling en pas daarna alleen aan wat bij je plan past.',
+    'uk':
+        'Перегляньте рекомендацію, а потім змініть лише те, що відповідає вашому плану.',
+  },
+  'References for these recommended targets': {
+    'ar': 'مراجع هذه الأهداف الموصى بها',
+    'en': 'References for these recommended targets',
+    'fr': 'Références pour ces objectifs recommandés',
+    'es': 'Referencias para estos objetivos recomendados',
+    'tr': 'Önerilen bu hedefler için kaynaklar',
+    'de': 'Quellen für diese empfohlenen Zielwerte',
+    'it': 'Fonti per questi obiettivi consigliati',
+    'pt-BR': 'Referências para estas metas recomendadas',
+    'pt-PT': 'Referências para estes objetivos recomendados',
+    'ur': 'ان تجویز کردہ اہداف کے حوالے',
+    'fa': 'منابع این اهداف توصیه‌شده',
+    'hi': 'इन सुझाए गए लक्ष्यों के संदर्भ',
+    'id': 'Referensi untuk target yang direkomendasikan ini',
+    'ms': 'Rujukan untuk sasaran yang disyorkan ini',
+    'ja': 'これらの推奨目標の参考資料',
+    'ko': '이 권장 목표의 참고 자료',
+    'zh-Hans': '这些推荐目标的参考资料',
+    'zh-Hant': '這些建議目標的參考資料',
+    'ru': 'Источники для этих рекомендуемых целей',
+    'bn': 'এই প্রস্তাবিত লক্ষ্যগুলোর তথ্যসূত্র',
+    'vi': 'Tài liệu tham khảo cho các mục tiêu được đề xuất này',
+    'th': 'แหล่งอ้างอิงสำหรับเป้าหมายที่แนะนำเหล่านี้',
+    'pl': 'Źródła dla tych zalecanych celów',
+    'nl': 'Bronnen voor deze aanbevolen doelen',
+    'uk': 'Джерела для цих рекомендованих цілей',
+  },
   'Default goal': {
     'ar': 'الهدف الافتراضي',
     'en': 'Default goal',

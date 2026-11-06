@@ -199,6 +199,34 @@ bool isCoachPlanNegated(String input) {
   ).hasMatch(text);
 }
 
+/// A future/conditional completion describes a plan, never an observed event.
+/// Shared with the legacy plan fallback so that it cannot re-admit the phrase.
+bool isCoachFutureWorkoutCompletion(String input) {
+  final text = normalizeCoachMeaning(input);
+  final future = RegExp(
+    r'\b(?:will|would|going to|plan to|intend to|want to|aim to|if|when|once)\b'
+    r'[^.!?;]*\b(?:finish|complete|finished|completed|done)\b|'
+    r'(?:راح|رح|سوف|بكره|بكرة|غدا|اذا|عندما|لما)[^.!?؛؟]*(?:خلصت|انهيت|اكملت|اخلص|انهي|اكمل|يكتمل)',
+  );
+  if (!future.hasMatch(text)) return false;
+  // Preserve a separate explicit observation in a mixed turn. A future clause
+  // cannot erase "I completed my workout" or turn its review into information.
+  final observed = RegExp(
+    r"^(?:(?:today|yesterday)\s+)?(?:i(?: have|'ve)?\s+(?:just\s+)?(?:finished|completed|done)\b|"
+    r'(?:just\s+)?(?:finished|completed|done)\s+(?:my|the)\b)|'
+    r'^(?:(?:اليوم|امس|مبارح)\s+)?(?:انا\s+)?(?:خلصت|انهيت|اكملت)(?:\s|$)',
+  );
+  final clauses = text.split(
+    RegExp(
+      r'[.!?;؛؟]+|\s+(?:and|but|then)\s+|'
+      r'\s+و(?=(?:راح|رح|سوف|بكره|بكرة|غدا))',
+    ),
+  );
+  return !clauses.any(
+    (clause) => observed.hasMatch(clause.trim()) && !future.hasMatch(clause),
+  );
+}
+
 /// Model-suggested Smart Plan actions are only presentable when the member
 /// explicitly requested a plan operation. Review/analysis questions cannot
 /// create or launch a plan as an unsolicited side effect.
@@ -240,6 +268,16 @@ CoachRequestIntent classifyCoachRequest(String input) {
   );
   final completedTraining =
       training && has(r'\b(finished|completed|done)\b|خلصت|انهيت|اكملت');
+  if (completedTraining && isCoachFutureWorkoutCompletion(input)) {
+    return const CoachRequestIntent(CoachRequestKind.information);
+  }
+  if (completedTraining &&
+      has(
+        r"\b(?:not|never|isn.t|wasn.t|hasn.t|haven.t)\s+(?:yet\s+)?(?:finished|completed|done)\b|"
+        r'(?:ما|لم|مش|مو)\s*(?:خلصت|انهيت|اكملت)',
+      )) {
+    return const CoachRequestIntent(CoachRequestKind.reviewProgress);
+  }
   // A comparison/definition can mention "completed workout" without asserting
   // that one happened. A real completion or logging command can still request
   // a table; that presentation preference must not cancel its existing review.

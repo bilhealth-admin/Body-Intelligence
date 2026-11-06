@@ -21,6 +21,19 @@ class _ShareStudioData {
   final String goal;
 }
 
+typedef ShareStudioImageCapture =
+    Future<ui.Image> Function(RenderRepaintBoundary boundary);
+
+// Default adapters retain the existing raster/native share behavior. Tests can
+// control these boundaries without opening an OS share sheet or sending data.
+final shareStudioImageCaptureProvider = Provider<ShareStudioImageCapture>(
+  (_) =>
+      (boundary) => boundary.toImage(pixelRatio: 3),
+);
+final shareStudioShareClientProvider = Provider<SharePlus>(
+  (_) => SharePlus.instance,
+);
+
 final shareStudioDataProvider = FutureProvider<_ShareStudioData>((ref) async {
   final database = ref.watch(databaseProvider);
   final plan = await database.select(database.planSettings).getSingleOrNull();
@@ -40,7 +53,9 @@ final shareStudioDataProvider = FutureProvider<_ShareStudioData>((ref) async {
   final weights = await (database.select(
     database.weightEntries,
   )..where((row) => row.deletedAt.isNull())).get();
-  final water = await database.select(database.waterEntries).get();
+  final water = await (database.select(
+    database.waterEntries,
+  )..where((row) => row.deletedAt.isNull())).get();
   String key(DateTime value) =>
       '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}';
   final evidence = <ShareDayEvidence>[];
@@ -79,6 +94,7 @@ class ShareStudioPage extends ConsumerStatefulWidget {
 
 class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
   final boundaryKey = GlobalKey();
+  final shareButtonKey = GlobalKey();
   bool consistency = true;
   bool protein = true;
   bool hydration = true;
@@ -87,30 +103,59 @@ class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
   bool branding = true;
   bool sharing = false;
 
+  Rect _shareOrigin() {
+    final viewport = Offset.zero & MediaQuery.sizeOf(context);
+    final button = shareButtonKey.currentContext?.findRenderObject();
+    final anchor = button is RenderBox && button.attached && button.hasSize
+        ? button.localToGlobal(Offset.zero) & button.size
+        : viewport;
+    final visible = anchor.intersect(viewport);
+    if (visible.isFinite && !visible.isEmpty) return visible;
+    return Rect.fromCenter(center: viewport.center, width: 1, height: 1);
+  }
+
   Future<void> _share() async {
+    if (sharing || !mounted) return;
     final boundary = boundaryKey.currentContext?.findRenderObject();
     if (boundary is! RenderRepaintBoundary) return;
+    // The image card can be above the viewport after scrolling to Share.
+    // Snapshot the visible button anchor before any asynchronous raster work.
+    final origin = _shareOrigin();
+    ui.Image? image;
     setState(() => sharing = true);
     try {
-      final image = await boundary.toImage(pixelRatio: 3);
+      final capture = ref.read(shareStudioImageCaptureProvider);
+      final shareClient = ref.read(shareStudioShareClientProvider);
+      image = await capture(boundary);
+      if (!mounted) return;
       final data = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (data == null) return;
-      await SharePlus.instance.share(
+      if (!mounted) return;
+      if (data == null) throw StateError('Share image encoding unavailable');
+      await shareClient.share(
         ShareParams(
           files: [
-            XFile.fromData(
-              data.buffer.asUint8List(),
-              mimeType: 'image/png',
-              name: 'bil-progress.png',
-            ),
+            XFile.fromData(data.buffer.asUint8List(), mimeType: 'image/png'),
           ],
+          fileNameOverrides: const ['bil-progress.png'],
           text: 'BIL progress card',
           subject: 'My BIL progress',
-          sharePositionOrigin:
-              boundary.localToGlobal(Offset.zero) & boundary.size,
+          sharePositionOrigin: origin,
         ),
       );
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.strings.text(
+                'Could not prepare sharing data. Try again.',
+              ),
+            ),
+          ),
+        );
+      }
     } finally {
+      image?.dispose();
       if (mounted) setState(() => sharing = false);
     }
   }
@@ -172,6 +217,7 @@ class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
             ),
             const SizedBox(height: 12),
             FilledButton.icon(
+              key: shareButtonKey,
               onPressed: sharing ? null : _share,
               icon: const Icon(Icons.ios_share),
               label: Text(sharing ? t('Preparing…') : t('Share image')),

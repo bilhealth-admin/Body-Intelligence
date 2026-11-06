@@ -203,9 +203,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final AsyncValue<Map<String, double>> mealCalorieState = premiumMealFeatures
         ? ref.watch(mealCalorieGoalsProvider)
         : const AsyncData(<String, double>{});
-    final AsyncValue<MealMacroDisplay?> mealMacroState = premiumMealFeatures
-        ? ref.watch(mealMacroDisplayProvider)
-        : const AsyncData<MealMacroDisplay?>(null);
+    // Display preferences own layout, independently of commercial access.
+    // PremiumNutritionFieldsGroup still protects the values and actions.
+    final mealMacroState = ref.watch(mealMacroDisplayProvider);
     final mealCalorieGoals = mealCalorieState.value ?? const <String, double>{};
     final mealMacroDisplay = mealMacroState.value;
     final showFoodInsights =

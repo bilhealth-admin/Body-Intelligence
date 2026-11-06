@@ -109,6 +109,12 @@ void main() {
       await pumpDiaryEvidence(
         tester,
         DailyMealDetailSummary(
+          // This component scene exercises visible macro dials explicitly.
+          // Unset/disabled preference behavior is covered by the page suite.
+          macroDisplay: const MealMacroDisplay(
+            enabled: true,
+            mode: MealMacroDisplayMode.grams,
+          ),
           meal: diaryMeal([calorieOnlyDiaryItem()]),
           calorieGoal: 2000,
           carbsGoal: 250,

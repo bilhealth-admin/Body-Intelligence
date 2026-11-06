@@ -151,7 +151,7 @@ class DailyMealDetailSummary extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
                 children: [
-                  if (macroDisplay?.enabled ?? true) ...[
+                  if (macroDisplay?.enabled ?? false) ...[
                     macroDials,
                     const SizedBox(height: 14),
                   ],

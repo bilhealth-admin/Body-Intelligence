@@ -196,7 +196,9 @@ class BilMobilePageIntro extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
-    color: BilFlagshipTokens.surfaceLight,
+    color: Theme.of(context).brightness == Brightness.dark
+        ? BilFlagshipTokens.surfaceDark
+        : BilFlagshipTokens.surfaceLight,
     padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

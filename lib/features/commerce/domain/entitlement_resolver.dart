@@ -33,6 +33,8 @@ final class EntitlementResolver {
       trialEndsAt: record.trialEndsAt,
       gracePeriodEndsAt: record.gracePeriodEndsAt,
       verifiedAt: record.verifiedAt,
+      serverRevision: record.serverRevision,
+      storeOriginalTransactionId: record.storeOriginalTransactionId,
       isPurchasable: false,
       canRestorePurchases: record.authorityVerified && record.provider != null,
     );

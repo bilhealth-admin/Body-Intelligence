@@ -52,7 +52,9 @@ final challengeProgressProvider =
         final weights = await (database.select(
           database.weightEntries,
         )..where((row) => row.deletedAt.isNull())).get();
-        final water = await database.select(database.waterEntries).get();
+        final water = await (database.select(
+          database.waterEntries,
+        )..where((row) => row.deletedAt.isNull())).get();
         final plan = await database
             .select(database.planSettings)
             .getSingleOrNull();
@@ -119,7 +121,7 @@ final challengeProgressProvider =
       }
     });
 
-class ChallengesPage extends ConsumerWidget {
+class ChallengesPage extends ConsumerStatefulWidget {
   const ChallengesPage({super.key});
 
   static const presets = <(String, String, int)>[
@@ -132,13 +134,22 @@ class ChallengesPage extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ChallengesPage> createState() => _ChallengesPageState();
+}
+
+class _ChallengesPageState extends ConsumerState<ChallengesPage> {
+  bool _choosing = false;
+  bool _starting = false;
+  final Set<int> _deleting = {};
+
+  @override
+  Widget build(BuildContext context) {
     final rows = ref.watch(challengesProvider);
     final t = context.strings.text;
     return Scaffold(
       appBar: SecondaryPageAppBar(title: Text(t('Challenges'))),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _choose(context, ref),
+        onPressed: _choosing || _starting ? null : () => _choose(context, ref),
         icon: const Icon(Icons.add),
         label: Text(t('Start challenge')),
       ),
@@ -198,7 +209,13 @@ class ChallengesPage extends ConsumerWidget {
                   ),
                 ),
               ),
-            for (final challenge in items) _ChallengeTile(challenge: challenge),
+            for (final challenge in items)
+              _ChallengeTile(
+                key: ValueKey(challenge.uuid),
+                challenge: challenge,
+                deleting: _deleting.contains(challenge.id),
+                onDelete: () => _delete(context, challenge.id),
+              ),
             const SizedBox(height: 16),
             _SharedChallengesUnavailableCard(
               title: t('Shared challenges'),
@@ -257,30 +274,86 @@ class ChallengesPage extends ConsumerWidget {
   };
 
   Future<void> _choose(BuildContext context, WidgetRef ref) async {
+    if (_choosing || _starting || !mounted) {
+      return;
+    }
     final t = context.strings.text;
-    final selected = await showBilPearlBottomSheet<(String, String, int)>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => ListView(
-        shrinkWrap: true,
-        children: [
-          ListTile(title: Text(t('Choose a private challenge'))),
-          for (final preset in presets)
-            ListTile(
-              leading: BilSemanticIconBadge(kind: _challengeKind(preset.$1)),
-              title: Text(t(preset.$2)),
-              subtitle: Text(
-                '${preset.$3} ${t('days · private on this device')}',
+    final repository = ref.read(challengeRepositoryProvider);
+    setState(() => _choosing = true);
+    try {
+      final selected = await showBilPearlBottomSheet<(String, String, int)>(
+        context: context,
+        showDragHandle: true,
+        builder: (context) => ListView(
+          shrinkWrap: true,
+          children: [
+            ListTile(title: Text(t('Choose a private challenge'))),
+            for (final preset in ChallengesPage.presets)
+              ListTile(
+                leading: BilSemanticIconBadge(kind: _challengeKind(preset.$1)),
+                title: Text(t(preset.$2)),
+                subtitle: Text(
+                  '${preset.$3} ${t('days · private on this device')}',
+                ),
+                onTap: () => Navigator.pop(context, preset),
               ),
-              onTap: () => Navigator.pop(context, preset),
-            ),
-        ],
-      ),
-    );
-    if (selected == null) return;
-    await ref
-        .read(challengeRepositoryProvider)
-        .start(type: selected.$1, title: selected.$2, targetDays: selected.$3);
+          ],
+        ),
+      );
+      if (selected == null ||
+          !mounted ||
+          !identical(ref.read(challengeRepositoryProvider), repository)) {
+        return;
+      }
+      setState(() {
+        _choosing = false;
+        _starting = true;
+      });
+      await repository.start(
+        type: selected.$1,
+        title: selected.$2,
+        targetDays: selected.$3,
+      );
+    } on Object {
+      if (mounted && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(t('Your saved data was not changed. Try again.')),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _choosing = false;
+          _starting = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _delete(BuildContext context, int id) async {
+    if (!mounted || _deleting.contains(id)) {
+      return;
+    }
+    final repository = ref.read(challengeRepositoryProvider);
+    final t = context.strings.text;
+    setState(() => _deleting.add(id));
+    try {
+      await repository.delete(id);
+    } on Object {
+      if (mounted && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(t('Your saved data was not changed. Try again.')),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _deleting.remove(id));
+      }
+    }
   }
 
   static BilSemanticIconKind _challengeKind(String type) => switch (type) {
@@ -369,12 +442,67 @@ class _SharedChallengesUnavailableCard extends StatelessWidget {
   }
 }
 
-class _ChallengeTile extends ConsumerWidget {
-  const _ChallengeTile({required this.challenge});
+class _ChallengeTile extends ConsumerStatefulWidget {
+  const _ChallengeTile({
+    super.key,
+    required this.challenge,
+    required this.onDelete,
+    required this.deleting,
+  });
   final Challenge challenge;
+  final VoidCallback onDelete;
+  final bool deleting;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ChallengeTile> createState() => _ChallengeTileState();
+}
+
+class _ChallengeTileState extends ConsumerState<_ChallengeTile> {
+  bool _completionPending = false;
+  bool _completionSucceeded = false;
+  ChallengeProgress? _lastCompletionEvidence;
+  ChallengeRepository? _completionRepository;
+
+  void _completeWhenEligible(ChallengeProgress progress) {
+    if (!progress.complete ||
+        widget.challenge.status == 'completed' ||
+        _completionPending) {
+      return;
+    }
+    final repository = ref.read(challengeRepositoryProvider);
+    if (identical(_completionRepository, repository) &&
+        (_completionSucceeded ||
+            identical(_lastCompletionEvidence, progress))) {
+      return;
+    }
+    final challengeId = widget.challenge.id;
+    _completionPending = true;
+    _completionSucceeded = false;
+    _completionRepository = repository;
+    _lastCompletionEvidence = progress;
+    Future.microtask(() async {
+      try {
+        // Do not let a queued completion write into another account.
+        if (!mounted ||
+            !identical(ref.read(challengeRepositoryProvider), repository)) {
+          return;
+        }
+        await repository.markComplete(challengeId);
+        _completionSucceeded = true;
+      } on Object {
+        // A transient badge-write failure never changes diary evidence.
+        // Retry on fresh progress evidence, not an unrelated widget rebuild.
+      } finally {
+        if (mounted) {
+          setState(() => _completionPending = false);
+        }
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final challenge = widget.challenge;
     final progress = ref.watch(challengeProgressProvider(challenge));
     final t = context.strings.text;
     return BilPearlMaterialCard(
@@ -385,24 +513,7 @@ class _ChallengeTile extends ConsumerWidget {
           error: (error, _) =>
               Text(t('Could not calculate challenge progress.')),
           data: (value) {
-            if (value.complete && challenge.status != 'completed') {
-              final repository = ref.read(challengeRepositoryProvider);
-              Future.microtask(() async {
-                // Do not let a queued completion write into another account.
-                if (!context.mounted ||
-                    !identical(
-                      ref.read(challengeRepositoryProvider),
-                      repository,
-                    )) {
-                  return;
-                }
-                try {
-                  await repository.markComplete(challenge.id);
-                } on Object {
-                  // A transient badge-write failure never changes diary evidence.
-                }
-              });
-            }
+            _completeWhenEligible(value);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -417,9 +528,7 @@ class _ChallengeTile extends ConsumerWidget {
                   ),
                   trailing: IconButton(
                     tooltip: t('Delete'),
-                    onPressed: () => ref
-                        .read(challengeRepositoryProvider)
-                        .delete(challenge.id),
+                    onPressed: widget.deleting ? null : widget.onDelete,
                     icon: const Icon(Icons.delete_outline),
                   ),
                 ),

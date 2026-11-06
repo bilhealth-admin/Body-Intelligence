@@ -14,6 +14,8 @@ final class SubscriptionRecord {
     this.trialEndsAt,
     this.gracePeriodEndsAt,
     this.verifiedAt,
+    this.serverRevision,
+    this.storeOriginalTransactionId,
   }) {
     if (plan == CommercePlan.free && provider != null) {
       throw ArgumentError(
@@ -48,4 +50,6 @@ final class SubscriptionRecord {
   final DateTime? trialEndsAt;
   final DateTime? gracePeriodEndsAt;
   final DateTime? verifiedAt;
+  final int? serverRevision;
+  final String? storeOriginalTransactionId;
 }

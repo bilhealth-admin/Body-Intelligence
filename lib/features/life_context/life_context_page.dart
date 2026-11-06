@@ -10,114 +10,225 @@ import '../../data/repositories/life_context_repository.dart';
 import '../../shared/widgets/secondary_page_app_bar.dart';
 import 'providers/life_context_provider.dart';
 
-class LifeContextPage extends ConsumerWidget {
+class LifeContextPage extends ConsumerStatefulWidget {
   const LifeContextPage({super.key});
+
+  @override
+  ConsumerState<LifeContextPage> createState() => _LifeContextPageState();
+}
+
+class _LifeContextPageState extends ConsumerState<LifeContextPage> {
+  bool _adding = false;
+  bool _writing = false;
 
   String tr(BuildContext context, String en, String ar) =>
       context.strings.text(en);
 
-  Future<void> addContext(BuildContext context, WidgetRef ref) async {
-    final type = await showBilPearlBottomSheet<String>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          children: LifeContextRepository.allowedTypes
-              .map(
-                (value) => ListTile(
-                  leading: BilSemanticIconBadge(
-                    kind: _kind(value),
-                    iconOverride: _icon(value),
-                    appleIconOverride: _icon(value),
-                  ),
-                  title: Text(_label(context, value)),
-                  onTap: () => Navigator.pop(context, value),
-                ),
-              )
-              .toList(),
-        ),
-      ),
-    );
-    if (type == null || !context.mounted) return;
-    final details = TextEditingController();
-    var consent = true;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => BilPearlMaterialAlertDialog(
-          title: Text(_label(context, type)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: details,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: tr(
-                    context,
-                    'Optional context — avoid sensitive detail you do not want stored',
-                    'سياق اختياري — تجنب التفاصيل الحساسة التي لا تريد حفظها',
-                  ),
-                ),
-              ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: consent,
-                onChanged: (value) => setState(() => consent = value),
-                title: Text(
-                  tr(
-                    context,
-                    'Allow BIL to use this item as interpretation evidence',
-                    'السماح لـ BIL باستخدام هذا العنصر كدليل في التفسير',
-                  ),
-                ),
-                subtitle: Text(
-                  tr(
-                    context,
-                    'Correlation is not treated as causation.',
-                    'لا يتم اعتبار الارتباط سببًا مؤكدًا.',
-                  ),
-                ),
-              ),
-            ],
+  Future<bool> _write(
+    Future<void> Function() action, {
+    bool reportFailure = true,
+  }) async {
+    if (!mounted || _writing) return false;
+    setState(() => _writing = true);
+    try {
+      await action();
+      return true;
+    } on Object {
+      if (mounted && reportFailure) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.strings.text('Could not save changes.')),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(tr(context, 'Cancel', 'إلغاء')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(tr(context, 'Save', 'حفظ')),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (confirmed == true) {
-      await ref
-          .read(lifeContextRepositoryProvider)
-          .add(
-            occurredAt: DateTime.now(),
-            type: type,
-            details: details.text,
-            useInInsights: consent,
-          );
+        );
+      }
+      return false;
+    } finally {
+      if (mounted) setState(() => _writing = false);
     }
-    details.dispose();
+  }
+
+  Future<void> addContext(BuildContext context, WidgetRef ref) async {
+    if (!mounted || _adding || _writing) return;
+    setState(() => _adding = true);
+    try {
+      final repository = ref.read(lifeContextRepositoryProvider);
+      final type = await showBilPearlBottomSheet<String>(
+        context: context,
+        showDragHandle: true,
+        builder: (context) => SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            children: LifeContextRepository.allowedTypes
+                .map(
+                  (value) => ListTile(
+                    key: Key('life-context-type-$value'),
+                    leading: BilSemanticIconBadge(
+                      kind: _kind(value),
+                      iconOverride: _icon(value),
+                      appleIconOverride: _icon(value),
+                    ),
+                    title: Text(_label(context, value)),
+                    onTap: () => Navigator.pop(context, value),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      );
+      if (type == null || !mounted || !context.mounted) {
+        return;
+      }
+      final details = TextEditingController();
+      var consent = true;
+      var saving = false;
+      String? error;
+      ModalRoute<dynamic>? dialogRoute;
+      try {
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) {
+            dialogRoute = ModalRoute.of(dialogContext);
+            return StatefulBuilder(
+              builder: (context, setDialogState) => PopScope(
+                canPop: !saving,
+                child: BilPearlMaterialAlertDialog(
+                  title: Text(_label(context, type)),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        key: const Key('life-context-details'),
+                        controller: details,
+                        enabled: !saving,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          labelText: tr(
+                            context,
+                            'Optional context — avoid sensitive detail you do not want stored',
+                            'سياق اختياري — تجنب التفاصيل الحساسة التي لا تريد حفظها',
+                          ),
+                        ),
+                      ),
+                      SwitchListTile(
+                        key: const Key('life-context-consent'),
+                        contentPadding: EdgeInsets.zero,
+                        value: consent,
+                        onChanged: saving
+                            ? null
+                            : (value) => setDialogState(() => consent = value),
+                        title: Text(
+                          tr(
+                            context,
+                            'Allow BIL to use this item as interpretation evidence',
+                            'السماح لـ BIL باستخدام هذا العنصر كدليل في التفسير',
+                          ),
+                        ),
+                        subtitle: Text(
+                          tr(
+                            context,
+                            'Correlation is not treated as causation.',
+                            'لا يتم اعتبار الارتباط سببًا مؤكدًا.',
+                          ),
+                        ),
+                      ),
+                      if (error != null)
+                        Text(
+                          error!,
+                          key: const Key('life-context-write-error'),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      key: const Key('life-context-cancel'),
+                      onPressed: saving
+                          ? null
+                          : () => Navigator.pop(dialogContext),
+                      child: Text(tr(context, 'Cancel', 'إلغاء')),
+                    ),
+                    FilledButton(
+                      key: const Key('life-context-save'),
+                      onPressed: saving
+                          ? null
+                          : () async {
+                              if (saving || _writing) return;
+                              setDialogState(() {
+                                saving = true;
+                                error = null;
+                              });
+                              final saved = await _write(() async {
+                                if (!identical(
+                                  ref.read(lifeContextRepositoryProvider),
+                                  repository,
+                                )) {
+                                  throw StateError(
+                                    'Life context source changed',
+                                  );
+                                }
+                                await repository.add(
+                                  occurredAt: DateTime.now(),
+                                  type: type,
+                                  details: details.text,
+                                  useInInsights: consent,
+                                );
+                              }, reportFailure: false);
+                              final route = dialogRoute;
+                              final navigator = route?.navigator;
+                              if (!dialogContext.mounted ||
+                                  route == null ||
+                                  !route.isActive ||
+                                  navigator == null) {
+                                return;
+                              }
+                              if (saved) {
+                                if (route.isCurrent) {
+                                  navigator.pop();
+                                } else {
+                                  navigator.removeRoute(route);
+                                }
+                              } else {
+                                setDialogState(() {
+                                  saving = false;
+                                  error = context.strings.text(
+                                    'Could not save changes.',
+                                  );
+                                });
+                              }
+                            },
+                      child: Text(
+                        context.strings.text(saving ? 'Saving…' : 'Save'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      } finally {
+        // Dialog result precedes its reverse transition and field unmount.
+        await dialogRoute?.completed;
+        details.dispose();
+      }
+    } finally {
+      if (mounted) setState(() => _adding = false);
+    }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final entries = ref.watch(todayLifeContextProvider);
     return Scaffold(
       appBar: SecondaryPageAppBar(
         title: Text(tr(context, 'Life context', 'سياق الحياة')),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => addContext(context, ref),
+        key: const Key('life-context-add'),
+        onPressed: _adding || _writing ? null : () => addContext(context, ref),
         icon: const Icon(Icons.add),
         label: Text(tr(context, 'Add context', 'إضافة سياق')),
       ),
@@ -176,18 +287,22 @@ class LifeContextPage extends ConsumerWidget {
                         ].join('\n'),
                       ),
                       trailing: bilPearlPopupMenuButton<String>(
+                        key: Key('life-context-actions-${row.id}'),
+                        enabled: !_writing && !_adding,
                         onSelected: (value) async {
                           final repository = ref.read(
                             lifeContextRepositoryProvider,
                           );
-                          if (value == 'toggle') {
-                            await repository.setInsightConsent(
-                              row.id,
-                              !row.useInInsights,
-                            );
-                          } else if (value == 'delete') {
-                            await repository.delete(row.id);
-                          }
+                          await _write(() async {
+                            if (value == 'toggle') {
+                              await repository.setInsightConsent(
+                                row.id,
+                                !row.useInInsights,
+                              );
+                            } else if (value == 'delete') {
+                              await repository.delete(row.id);
+                            }
+                          });
                         },
                         itemBuilder: (context) => [
                           PopupMenuItem(

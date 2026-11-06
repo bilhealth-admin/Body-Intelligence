@@ -26,7 +26,7 @@ final class VerifiedEntitlementContinuityStore {
     required SubscriptionState state,
     required DateTime now,
   }) async {
-    final boundary = _boundaryFor(state);
+    final boundary = verifiedSubscriptionPriorBoundary(state);
     if (state.authority != EntitlementAuthority.verifiedServer ||
         state.plan == CommercePlan.free ||
         !state.lifecycle.mayGrantPaidAccess ||
@@ -46,6 +46,9 @@ final class VerifiedEntitlementContinuityStore {
         'cached_at': now.toUtc().toIso8601String(),
         'started_at': state.startedAt?.toUtc().toIso8601String(),
         'access_until': boundary.toUtc().toIso8601String(),
+        'original_transaction_id': state.storeOriginalTransactionId,
+        'verified_at': state.verifiedAt?.toUtc().toIso8601String(),
+        'server_revision': state.serverRevision,
       }),
     );
   }
@@ -105,6 +108,13 @@ final class VerifiedEntitlementContinuityStore {
         lifecycle: lifecycle,
         provider: provider,
         startedAt: startedAt,
+        storeOriginalTransactionId: value['original_transaction_id'] is String
+            ? value['original_transaction_id'] as String
+            : null,
+        verifiedAt: DateTime.tryParse('${value['verified_at']}')?.toUtc(),
+        serverRevision: value['server_revision'] is int
+            ? value['server_revision'] as int
+            : null,
         currentPeriodEndsAt: switch (lifecycle) {
           SubscriptionLifecycle.active ||
           SubscriptionLifecycle.cancelled => accessUntil,
@@ -126,14 +136,6 @@ final class VerifiedEntitlementContinuityStore {
   }
 
   Future<void> clear(String ownerId) => _secureStore.delete('$_prefix$ownerId');
-
-  DateTime? _boundaryFor(SubscriptionState state) => switch (state.lifecycle) {
-    SubscriptionLifecycle.trial => state.trialEndsAt,
-    SubscriptionLifecycle.gracePeriod => state.gracePeriodEndsAt,
-    SubscriptionLifecycle.active ||
-    SubscriptionLifecycle.cancelled => state.currentPeriodEndsAt,
-    _ => null,
-  };
 
   String _lifecycleId(SubscriptionLifecycle lifecycle) => switch (lifecycle) {
     SubscriptionLifecycle.trial => 'trial',

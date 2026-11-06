@@ -127,21 +127,15 @@ class _SourceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      context.strings.text(
-                        arabic
-                            ? source.arabicShortDescription ??
-                                  source.shortDescription
-                            : source.shortDescription,
-                      ),
+                      arabic && source.arabicShortDescription != null
+                          ? source.arabicShortDescription!
+                          : context.strings.text(source.shortDescription),
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      context.strings.text(
-                        arabic
-                            ? source.arabicMethodologyNote ??
-                                  source.methodologyNote
-                            : source.methodologyNote,
-                      ),
+                      arabic && source.arabicMethodologyNote != null
+                          ? source.arabicMethodologyNote!
+                          : context.strings.text(source.methodologyNote),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),

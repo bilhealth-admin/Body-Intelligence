@@ -18,6 +18,82 @@ import 'package:timezone/timezone.dart' as tz;
 void main() {
   group('BIL-01 native Food host + Drift', () {
     test(
+      'food purpose answer clauses yield without a draft or diary write',
+      () async {
+        final f = _Fixture();
+        addTearDown(f.close);
+        for (final input in const [
+          'Explain fact versus opinion using a short Markdown heading, two bullets, bold text, and a two-row table. Add a brief Arabic translation. Do not use personal data.',
+          'Add a brief Arabic translation.',
+          'Explain how to log rice and add a translation.',
+          'Record a definition of a fact versus an opinion.',
+          'أضف ترجمة عربية مختصرة.',
+          'اشرح كلمة سجل وضيف ترجمة صغيرة.',
+          'Only answer: I ate 100g rice.',
+          'Add a workout scheduled for tomorrow',
+        ]) {
+          final result = await f.host.prepare(
+            input: input,
+            referenceLocal: DateTime(2026, 11, 6, 13),
+            localeTag: 'en',
+            ownerScope: f.foodScope(),
+          );
+          expect(result, isA<CoachFoodHostIgnored>(), reason: input);
+          expect(await f.activeItems(), isEmpty, reason: input);
+          expect(await f.db.select(f.db.meals).get(), isEmpty, reason: input);
+        }
+      },
+    );
+
+    test(
+      'food purpose real food requests keep frozen review without writes',
+      () async {
+        final f = _Fixture();
+        addTearDown(f.close);
+        await f.seedModern(
+          'Rice',
+          calories: 130,
+          protein: 2.5,
+          carbs: 28,
+          fat: .3,
+        );
+        for (final input in const [
+          'I ate 100g Rice',
+          'Log 100g Rice',
+          'Add 100g Rice',
+          'اكلت ١٠٠غ Rice',
+          'سجل ١٠٠غ Rice',
+          'أضف ١٠٠غ Rice',
+          'Log 100g Rice and explain the nutrition in a table.',
+        ]) {
+          final result = await f.host.prepare(
+            input: input,
+            referenceLocal: DateTime(2026, 11, 6, 13),
+            localeTag: 'en',
+            ownerScope: f.foodScope(),
+          );
+          expect(result, isA<CoachFoodActionDraft>(), reason: input);
+          final draft = result as CoachFoodActionDraft;
+          expect(draft.review.items, hasLength(1), reason: input);
+          expect(draft.review.items.single.quantity.grams, 100, reason: input);
+          expect(await f.activeItems(), isEmpty, reason: input);
+        }
+        final unknown = await f.host.prepare(
+          input: 'Add homemade nebula stew',
+          referenceLocal: DateTime(2026, 11, 6, 13),
+          localeTag: 'en',
+          ownerScope: f.foodScope(),
+        );
+        expect(unknown, isA<CoachFoodHostClarification>());
+        expect(
+          (unknown as CoachFoodHostClarification).code,
+          'quantity_missing',
+        );
+        expect(await f.activeItems(), isEmpty);
+      },
+    );
+
+    test(
       'multi-food freezes review and retry replays without duplicates',
       () async {
         final f = _Fixture();

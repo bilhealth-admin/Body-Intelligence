@@ -134,17 +134,27 @@ class CoachReferenceWorkspace extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    key: const Key('coach-workspace-back-to-chat'),
-                    tooltip: t('Back', 'رجوع'),
-                    onPressed: onExit ?? onChat,
-                    icon: BilNavigationFeedback(
-                      child: Icon(
-                        ar
-                            ? Icons.chevron_right_rounded
-                            : Icons.chevron_left_rounded,
-                        color: muted,
+                  // The crystal paints a 48px surface around the glyph. Own
+                  // that space and a directional gutter in this header, so
+                  // wrapped greetings and access labels never sit under it.
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 12),
+                    child: SizedBox.square(
+                      dimension: 48,
+                      child: IconButton(
+                        key: const Key('coach-workspace-back-to-chat'),
+                        tooltip: t('Back', 'رجوع'),
+                        onPressed: onExit ?? onChat,
+                        icon: BilNavigationFeedback(
+                          child: Icon(
+                            ar
+                                ? Icons.chevron_right_rounded
+                                : Icons.chevron_left_rounded,
+                            color: muted,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -677,17 +687,5 @@ class CoachReferenceWorkspace extends ConsumerWidget {
       }
     }
     return result ?? const <String, Object?>{};
-  }
-
-  String _water(Map<String, Object?> row) {
-    final amount = row['amountMl'];
-    return amount is num && amount.isFinite && amount >= 0 ? '$amount ml' : '—';
-  }
-
-  String _steps(Map<String, Object?> row, BuildContext context) {
-    final amount = row['steps'];
-    return amount is num && amount.isFinite && amount >= 0
-        ? '$amount ${intelligenceText(context, 'steps', 'خطوات')}'
-        : '—';
   }
 }

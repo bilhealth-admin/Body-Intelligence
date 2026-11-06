@@ -43,6 +43,8 @@ import 'runtime_copy_sleep_schedule.dart';
 import 'runtime_copy_coach_review.dart';
 import 'runtime_copy_health_devices_review.dart';
 import 'runtime_copy_health_device_status.dart';
+import 'runtime_copy_health_evidence.dart';
+import 'runtime_copy_experiments.dart';
 import 'runtime_copy_community_review.dart';
 import 'runtime_copy_recipe_editor.dart';
 import 'runtime_copy_apple_ai_privacy.dart';
@@ -79,9 +81,23 @@ abstract final class RuntimeCopy {
     ...RuntimeCopyCuisines.values,
     ...DietRuntimeCopy.values,
     ...CorePagesRuntimeCopy.values,
+    'Could not save changes.': {
+      'ar': 'تعذر حفظ التغييرات.',
+      'en': 'Could not save changes.',
+      'fr': 'Impossible d\'enregistrer les modifications.',
+      'es': 'No se pudieron guardar los cambios.',
+      'tr': 'Değişiklikler kaydedilemedi.',
+    },
   };
 
   static String? resolve(String english, String localeTag) {
+    final experiments = ExperimentsRuntimeCopy.resolve(english, localeTag);
+    if (experiments != null) return experiments;
+    final healthEvidence = HealthEvidenceRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (healthEvidence != null) return healthEvidence;
     final recovery = SmartPlanRecoveryRuntimeCopy.resolve(english, localeTag);
     if (recovery != null) return recovery;
     final planVisual = SmartPlanVisualRuntimeCopy.resolve(english, localeTag);
@@ -289,6 +305,8 @@ abstract final class RuntimeCopy {
         MealVoiceRuntimeCopy.balanced &&
         CoachReviewRuntimeCopy.balanced &&
         HealthDevicesReviewCopy.balanced &&
+        HealthEvidenceRuntimeCopy.balanced &&
+        ExperimentsRuntimeCopy.balanced &&
         ClosureAccessRuntimeCopy.balanced &&
         ClosureCoachRuntimeCopy.balanced &&
         ClosureFoodRuntimeCopy.balanced &&

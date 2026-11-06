@@ -1,4 +1,6 @@
+import '../domain/coach_question_purpose.dart';
 import '../services/coach_date_resolver.dart';
+import '../services/coach_request_intent.dart';
 import 'coach_food_catalog_adapter.dart';
 
 enum CoachFoodTurnKind {
@@ -75,7 +77,11 @@ final class CoachFoodTurnParser {
 
   CoachFoodParsedTurn parse(String input, {required DateTime referenceLocal}) {
     final normalized = _normalize(input);
-    if (normalized.isEmpty || _looksLikeBodyWeight(normalized)) {
+    final commandText = _foodCommandText(input);
+    if (normalized.isEmpty ||
+        commandText == null ||
+        coachExplicitlyForbidsActions(input) ||
+        _looksLikeBodyWeight(normalized)) {
       return CoachFoodParsedTurn(
         kind: CoachFoodTurnKind.none,
         normalized: normalized,
@@ -85,9 +91,9 @@ final class CoachFoodTurnParser {
     final hasExplicit = dateResolver.hasExplicitDate(input);
     final date = dateResolver.resolve(input, referenceLocal: referenceLocal);
     final invalidExplicit = hasExplicit && date == null;
-    final mealType = _mealType(normalized);
+    final mealType = _mealType(commandText);
 
-    final recipeApproval = _recipeApproval(normalized);
+    final recipeApproval = _recipeApproval(commandText);
     if (recipeApproval != null) {
       return CoachFoodParsedTurn(
         kind: CoachFoodTurnKind.approveRecipe,
@@ -99,7 +105,7 @@ final class CoachFoodTurnParser {
       );
     }
 
-    final fixed = _fixedApproval(normalized);
+    final fixed = _fixedApproval(commandText);
     if (fixed != null) {
       return CoachFoodParsedTurn(
         kind: CoachFoodTurnKind.approveFixed,
@@ -111,7 +117,7 @@ final class CoachFoodTurnParser {
       );
     }
 
-    if (_hasAny(normalized, const [
+    if (_hasAny(commandText, const [
       'مثل امس',
       'نفس امس',
       'زي امس',
@@ -129,9 +135,9 @@ final class CoachFoodTurnParser {
       );
     }
 
-    final correction = _correctionKind(normalized);
+    final correction = _correctionKind(commandText);
     if (correction != null) {
-      final correctionBody = _stripCorrectionWords(normalized);
+      final correctionBody = _stripCorrectionWords(commandText);
       final amountOnly = RegExp(
         r'^(\d+(?:[\.,]\d+)?)\s*(g|غ|جرام|غرام|ml|مل|ملي|item|items|piece|pieces|حبه|حبة|حبات|scoop|scoops|سكوب|serving|servings|حصة|حصه)$',
         caseSensitive: false,
@@ -146,7 +152,7 @@ final class CoachFoodTurnParser {
                 unit: normalizeFoodUnit(amountOnly.group(2)!),
               ),
             ];
-      final target = _correctionTarget(normalized, parsed);
+      final target = _correctionTarget(commandText, parsed);
       return CoachFoodParsedTurn(
         kind: CoachFoodTurnKind.correction,
         normalized: normalized,
@@ -159,13 +165,13 @@ final class CoachFoodTurnParser {
       );
     }
 
-    if (!_loggingIntent(normalized)) {
+    if (!_loggingIntent(commandText)) {
       return CoachFoodParsedTurn(
         kind: CoachFoodTurnKind.none,
         normalized: normalized,
       );
     }
-    final body = _stripIntentAndContext(normalized);
+    final body = commandText.split('|').map(_stripIntentAndContext).join(' | ');
     final parsed = _items(body);
     if (parsed.isEmpty) {
       return CoachFoodParsedTurn(
@@ -183,10 +189,123 @@ final class CoachFoodTurnParser {
     );
   }
 
-  // Word boundaries are Unicode-aware: a *noun* such as "المسجلة" must
-  // never be mistaken for an imperative to log food. No writes happen here.
+  // An affirmative consumption/diary clause owns a Food turn. Answer requests
+  // can contain the same verbs as literal examples or presentation commands;
+  // they must reach normal Coach routing instead of becoming food concepts.
+  static String? _foodCommandText(String input) {
+    final sentences = input
+        .replaceAllMapped(
+          RegExp(
+            r'(^|[.!?;؛؟\n])(\s*(?:actually|i meant|correction|لا\s*[,،]?\s*قصدي|قصدي|تصحيح|صحح))\s*[,،:\n]\s*',
+            caseSensitive: false,
+          ),
+          (match) => '${match[1]}${match[2]} ',
+        )
+        .replaceAll(RegExp(r'لا\s*[,،]\s*قصدي'), 'لا قصدي')
+        // Split answer/directive boundaries before catalog normalization, but
+        // keep punctuation inside identities such as "Dr. Oetker pudding".
+        .split(
+          RegExp(
+            r'[!?;؛؟\n]+|(?<![\d٠-٩۰-۹])[,،]\s*(?=[\d٠-٩۰-۹])|[,،]\s+(?=[\d٠-٩۰-۹])|\.\s*(?=(?:please|can you|could you|would you|'
+            r'explain|define|compare|translate|summari[sz]e|rewrite|paraphrase|show|give|provide|write|format|present|'
+            r'add|log|record|i ate|i had|actually|i meant|correction|do not|only answer|'
+            r'اشرح|وضح|قارن|ترجم|لخص|اعرض|اكتب|قدم|اضف|أضف|ضيف|سجل|سجّل|اكلت|أكلت|تناولت|قصدي|لا|اعتمد|ثبت))',
+            caseSensitive: false,
+            unicode: true,
+          ),
+        );
+    final conjunction = RegExp(
+      r'\s+(?:and|then)\s+(?=(?:please\s+)?(?:explain|define|compare|translate|summari[sz]e|rewrite|paraphrase|show|give|provide|write|format|present|add|log|record|i ate|i had)\b)|'
+      r'\s+و\s*(?=(?:اشرح|وضح|قارن|ترجم|لخص|اعرض|اكتب|قدم|اضف|أضف|ضيف|سجل|سجّل|اكلت|أكلت|تناولت))',
+      caseSensitive: false,
+      unicode: true,
+    );
+    final clauses = sentences.expand((sentence) {
+      final parts = sentence.split(conjunction);
+      // In an answer-owned sentence the verb list itself may be literal:
+      // "Translate the words add, log, and record" declares no food facts.
+      if (coachRequestsReasonedOrFormattedAnswer(
+        _commandClauseMeaning(parts.first),
+      )) {
+        return [sentence];
+      }
+      return parts;
+    });
+    final commands = <String>[];
+    for (final clause in clauses) {
+      var value = _commandClauseMeaning(clause);
+      // A presentation preference belongs to the reply, never the identity
+      // of a declared food. A separate explanation clause is handled above.
+      value = value.replaceFirst(
+        RegExp(
+          r'\s+(?:(?:in|as|using)\s+(?:(?:a|an|the|short|brief)\s+)*'
+          r'(?:markdown|table|bullets|bullet points)|في جدول|بجدول|كجدول|بنقاط|في نقاط).*$',
+        ),
+        '',
+      );
+      if (coachRequestsReasonedOrFormattedAnswer(value) ||
+          _declaresAnotherDomain(value)) {
+        continue;
+      }
+      if (_loggingIntent(value)) {
+        commands.add(value);
+      } else if (commands.isNotEmpty && RegExp(r'^\d').hasMatch(value)) {
+        // Comma-separated portions remain part of the preceding food command.
+        commands.add('log $value');
+      } else if (RegExp(
+        r'^(?:لا قصدي|قصدي|actually|i meant|correction|تصحيح|صحح|'
+        r'نصها|نصفها|نصه|نصفه|half it|halve it|ضعفها|ضعفه|دبلها|دبله|double it|'
+        r'بدل|استبدل|replace|اعتمد|ثبت|خليها ثابته|remember as fixed|save as fixed|use as fixed|approve|'
+        r'مثل امس|نفس امس|زي امس|كرر امس|same as yesterday|like yesterday|repeat yesterday)(?=\s|$)',
+      ).hasMatch(value)) {
+        // Corrections and personal rules already have their own bounded
+        // validation and target/confirmation contracts below.
+        return value;
+      }
+    }
+    return commands.isEmpty ? null : commands.join(' | ');
+  }
+
+  static String _commandClauseMeaning(
+    String clause,
+  ) => _normalizeCommandClause(clause)
+      .replaceFirst(
+        RegExp(
+          r'^(?:(?:please|can you|could you|would you|من فضلك|لو سمحت|ممكن|رجاء|ارجوك)\s+)+',
+        ),
+        '',
+      )
+      .replaceFirst(RegExp(r'^(?:today|yesterday|اليوم|امس|مبارح)\s+'), '');
+
+  // Catalog identity normalization drops punctuation. Keep declared decimal
+  // amounts intact while normalizing the surrounding command and food words.
+  static String _normalizeCommandClause(String clause) => clause
+      .splitMapJoin(
+        RegExp(r'[\d٠-٩۰-۹]+[.,٫][\d٠-٩۰-۹]+'),
+        onMatch: (match) {
+          final parts = match[0]!.split(RegExp(r'[.,٫]'));
+          return ' ${_normalize(parts[0])}.${_normalize(parts[1])} ';
+        },
+        onNonMatch: (part) => ' ${_normalize(part)} ',
+      )
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+
+  // Explicit observation targets in other native domains cannot be food
+  // identities. A missing/invalid workout or sleep payload still belongs to
+  // that domain's clarification rather than a request for food grams.
+  static bool _declaresAnotherDomain(String value) => RegExp(
+    r'^(?:log|record|add)\s+(?:(?:a|an|my|the)\s+)?'
+    r'(?:workout|exercise|sleep|body weight|weight|goal|target)(?:\s|$)|'
+    r'^(?:سجل|سجلي|سجللي|ضيف|اضف)\s+(?:لي\s+)?'
+    r'(?:تمرين|تمارين|نوم|النوم|وزني|الوزن|هدفي|الهدف)(?:\s|$)',
+    unicode: true,
+  ).hasMatch(value);
+
+  // Unicode boundaries also keep nouns such as "المسجلة" out of this route.
+  // Unknown declared foods remain valid and may ask for their missing amount.
   static bool _loggingIntent(String value) => RegExp(
-    r'(?<![\p{L}\p{N}])(?:اكلت|سجل|سجلي|سجللي|سجلت|ضيف|اضف|فطرت|اتغديت|تعشيت|i ate|i had|log|add|record)(?![\p{L}\p{N}])',
+    r'^(?:اكلت|تناولت|سجل|سجلي|سجللي|سجلت|ضيف|اضف|فطرت|اتغديت|تغديت|تعشيت|i ate|i had|log|add|record)(?![\p{L}\p{N}])',
     caseSensitive: false,
     unicode: true,
   ).hasMatch(value);
@@ -390,16 +509,21 @@ final class CoachFoodTurnParser {
   }
 
   static String _stripIntentAndContext(String value) {
-    var result = value;
+    var result = value.trim();
     for (final token in const [
       'اكلت',
+      'تناولت',
       'سجل',
       'سجّل',
+      'سجلي',
+      'سجللي',
+      'سجلت',
       'ضيف',
       'اضف',
       'أضف',
       'فطرت',
       'اتغديت',
+      'تغديت',
       'تعشيت',
       'i ate',
       'i had',
@@ -408,7 +532,10 @@ final class CoachFoodTurnParser {
       'record',
     ]) {
       result = result.replaceFirst(
-        RegExp('^${RegExp.escape(_normalize(token))}\\s*', unicode: true),
+        RegExp(
+          '^${RegExp.escape(_normalize(token))}(?![\\p{L}\\p{N}])\\s*',
+          unicode: true,
+        ),
         '',
       );
     }

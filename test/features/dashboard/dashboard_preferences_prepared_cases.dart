@@ -173,6 +173,10 @@ void _registerPreparedFixtureCases() {
       final childProject = Directory.systemTemp.createTempSync(
         'bil-preferences-probe-',
       );
+      // Nested Flutter gets a fixture-owned temp root instead of inheriting
+      // a shared location whose lifetime it cannot control.
+      final childTemporaryRoot = Directory('${childProject.path}/tool_temp')
+        ..createSync();
       var childValidated = false;
       addTearDown(() {
         if (childValidated) {
@@ -245,6 +249,9 @@ void _registerPreparedFixtureCases() {
       ).writeAsStringSync(jsonEncode(graph));
       final childEnvironment = <String, String>{
         'FLUTTER_SUPPRESS_ANALYTICS': 'true',
+        'TMPDIR': childTemporaryRoot.absolute.path,
+        'TEMP': childTemporaryRoot.absolute.path,
+        'TMP': childTemporaryRoot.absolute.path,
       };
       if (Platform.isWindows) {
         // sqlite3's documented hook source=system loads this same already-built
@@ -310,6 +317,12 @@ void _registerPreparedFixtureCases() {
       final stderr = await errors.timeout(const Duration(seconds: 5));
       File('${childProject.path}/probe-events.jsonl').writeAsStringSync(stdout);
       File('${childProject.path}/probe-stderr.log').writeAsStringSync(stderr);
+      expect(
+        childTemporaryRoot.existsSync(),
+        isTrue,
+        reason:
+            'The child-owned temp root must survive until process and streams finish.',
+      );
 
       expect(timedOut, isFalse, reason: stderr);
       expect(
@@ -331,6 +344,18 @@ void _registerPreparedFixtureCases() {
       expect(
         errorEvents.single['error'],
         contains('Test timed out after 2 seconds'),
+      );
+      final deadlineProbe = events.singleWhere(
+        (event) =>
+            event['type'] == 'testStart' &&
+            (event['test'] as Map)['name'] ==
+                'deadline probe pending native task',
+      );
+      expect(
+        errorEvents.single['testID'],
+        (deadlineProbe['test'] as Map)['id'],
+        reason:
+            'The expected failure must come from the real two-second widget deadline.',
       );
       expect(stdout, isNot(contains('Reentrant call to runAsync')));
       expect(stdout, isNot(contains('PathAccessException')));

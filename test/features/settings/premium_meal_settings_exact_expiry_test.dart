@@ -1,6 +1,7 @@
 // Actual settings gate, real default server entitlement repository and SQLite.
 // Auth/HTTP/secure storage are host fixtures; only the existing entitlement
 // clock seam is overridden. No fabricated paid/access provider or fake page.
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -43,6 +44,8 @@ void main() {
         var clock = start;
         var authorityReads = 0;
         var authorityFinished = false;
+        var authorityCompletions = 0;
+        final boundaryRead = Completer<void>();
         final requestPaths = <String>[];
         Object? fixtureFailure;
         final secureValues = <String, String>{};
@@ -84,6 +87,11 @@ void main() {
                   'eq.$owner',
                 );
                 authorityReads++;
+                if (authorityReads > 1) {
+                  // The exact-cutoff refresh is real but deliberately remains
+                  // unanswered until cleanup. Local access must lock first.
+                  await boundaryRead.future;
+                }
                 response = <Object?>[];
               case '/rest/v1/bil_subscriptions':
                 expectSync(
@@ -105,6 +113,7 @@ void main() {
                 ];
               case '/rest/v1/rpc/bil_get_my_admin_subscription':
                 response = null;
+                authorityCompletions++;
                 authorityFinished = true;
               default:
                 throw StateError(
@@ -265,7 +274,8 @@ void main() {
             );
             await tester.enterText(find.byType(TextField), '900');
           }
-          // Fire the actual exact-boundary timer, before the raw 30s refresh.
+          // Fire the exact boundary. Its one new background authority read
+          // is deliberately held; local lock cannot wait for that response.
           // No paid state, entitlement loader or access provider is overridden.
           clock = boundary;
           await tester.pump(const Duration(seconds: 20));
@@ -278,13 +288,19 @@ void main() {
           expect(
             container.read(verifiedSubscriptionStateProvider).requireValue.plan,
             CommercePlan.premium,
-            reason: 'Raw successful server snapshot has not refreshed yet',
-          );
-          expect(
-            authorityReads,
-            1,
             reason:
-                'Exact local cutoff must not wait for the next network refresh',
+                'The old paid snapshot is retained while the boundary read is pending',
+          );
+          await _waitUntil(
+            tester,
+            () => authorityReads == 2,
+            'one real boundary refresh is pending after immediate local lock',
+          );
+          expect(authorityCompletions, 1);
+          expect(boundaryRead.isCompleted, isFalse);
+          expect(
+            container.read(verifiedSubscriptionStateProvider).isLoading,
+            isTrue,
           );
 
           // Try the actual local gesture only if the production route still
@@ -325,8 +341,58 @@ void main() {
             findsNothing,
             reason: 'Expired settings controls must become inaccessible',
           );
+          await _waitUntil(
+            tester,
+            () => authorityReads == 2,
+            'one real boundary refresh begins while local access is already locked',
+          );
+          expect(boundaryRead.isCompleted, isFalse);
+          expect(
+            authorityCompletions,
+            1,
+            reason: 'the new authority response has not completed',
+          );
+          expect(
+            container.read(verifiedSubscriptionStateProvider).isLoading,
+            isTrue,
+          );
+          for (var generation = 0; generation < 3; generation++) {
+            container.invalidate(verifiedSubscriptionAccessProvider);
+            final stillExpired = container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue;
+            expect(stillExpired.plan, CommercePlan.free);
+            expect(stillExpired.lifecycle, SubscriptionLifecycle.expired);
+            await tester.pump(Duration.zero);
+          }
+          await tester.pump(const Duration(seconds: 2));
+          expect(
+            authorityReads,
+            2,
+            reason:
+                'initial verification plus exactly one boundary refresh; no reload loop',
+          );
+          expect(authorityCompletions, 1);
+          expect(boundaryRead.isCompleted, isFalse);
+          expect(
+            container.read(verifiedSubscriptionStateProvider).isLoading,
+            isTrue,
+          );
+          expect(
+            container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue
+                .plan,
+            CommercePlan.free,
+          );
           expect(tester.takeException(), isNull);
         } finally {
+          if (!boundaryRead.isCompleted) boundaryRead.complete();
+          if (authorityReads > 1) {
+            await _finishHost(tester, () async {
+              await container.read(verifiedSubscriptionStateProvider.future);
+            });
+          }
           await tester.pumpWidget(const SizedBox.shrink());
           cutoffObserver.close();
           container.dispose();

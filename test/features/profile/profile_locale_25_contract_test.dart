@@ -14,6 +14,8 @@ void main() {
     'Calories & macro plan',
     'Plan details & recommendations',
     'Calorie & macro goals',
+    'Review the recommendation, then adjust only what fits your plan.',
+    'References for these recommended targets',
     'Default goal',
     'Custom daily goals',
     'Activity factor',

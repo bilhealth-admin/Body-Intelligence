@@ -28,6 +28,7 @@ import 'package:body_intelligence_log/features/nutrition_plans/presentation/nutr
 import 'package:body_intelligence_log/features/onboarding/onboarding_page.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
 import 'package:body_intelligence_log/features/settings/settings_page.dart';
+import 'package:body_intelligence_log/features/settings/premium_meal_features_page.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_library_page.dart';
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
@@ -243,6 +244,15 @@ void main() {
   }) async {
     SharedPreferences.setMockInitialValues({});
     final db = await seededDatabase(trends: trends);
+    if (page is DailyLogPage) {
+      // These existing store references intentionally display the macro row.
+      // The actual preference is opt-in; absence correctly means disabled.
+      await tester.runAsync(
+        () => PreferencesRepository(db)
+            .set(mealMacroDisplayEnabledKey, 'true')
+            .timeout(const Duration(seconds: 5)),
+      );
+    }
     // Store screenshots show a returning user. First-use onboarding has its
     // own explicit widget tests, so it must not obscure Home references.
     if (page is DashboardPage) {
@@ -321,6 +331,28 @@ void main() {
         ),
       ),
     );
+    // MaterialApp installs its home route on the next frame.
+    await tester.pumpAndSettle();
+    if (page is DailyLogPage) {
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(DailyLogPage)),
+      );
+      for (
+        var attempt = 0;
+        attempt < 100 && !container.read(mealMacroDisplayProvider).hasValue;
+        attempt++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+      expect(
+        container.read(mealMacroDisplayProvider).requireValue.enabled,
+        isTrue,
+        reason: 'The store scene must load its persisted macro-row opt-in.',
+      );
+    }
     await tester.pumpAndSettle();
     await settleVisualAssetImages(tester);
     await tester.pumpAndSettle();

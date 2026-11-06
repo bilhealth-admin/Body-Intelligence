@@ -1,6 +1,7 @@
 // Actual Customize Today page, default ServerEntitlementRepository and SQLite.
 // Auth/HTTP/secure storage are host fixtures. Only the existing entitlement
 // clock seam is overridden; no paid/access state, loader or callback is faked.
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
@@ -47,6 +48,8 @@ void main() {
         var clock = start;
         var authorityReads = 0;
         var authorityFinished = false;
+        var authorityCompletions = 0;
+        final boundaryRead = Completer<void>();
         Object? fixtureFailure;
         final secureValues = <String, String>{};
         SharedPreferences.setMockInitialValues({});
@@ -84,6 +87,11 @@ void main() {
                   'eq.$owner',
                 );
                 authorityReads++;
+                if (authorityReads > 1) {
+                  // The exact-cutoff refresh is real but deliberately remains
+                  // unanswered until cleanup. Local access must lock first.
+                  await boundaryRead.future;
+                }
                 response = <Object?>[];
               case '/rest/v1/bil_subscriptions':
                 expectSync(
@@ -105,6 +113,7 @@ void main() {
                 ];
               case '/rest/v1/rpc/bil_get_my_admin_subscription':
                 response = null;
+                authorityCompletions++;
                 authorityFinished = true;
               default:
                 throw StateError('Unexpected fixture HTTP path');
@@ -321,10 +330,59 @@ void main() {
               findsOneWidget,
             );
           }
-          expect(authorityReads, 1);
+          await _waitUntil(
+            tester,
+            () => authorityReads == 2,
+            'one real boundary refresh begins while local access is already locked',
+          );
+          expect(boundaryRead.isCompleted, isFalse);
+          expect(
+            authorityCompletions,
+            1,
+            reason: 'the new authority response has not completed',
+          );
+          expect(
+            container.read(verifiedSubscriptionStateProvider).isLoading,
+            isTrue,
+          );
+          for (var generation = 0; generation < 3; generation++) {
+            container.invalidate(verifiedSubscriptionAccessProvider);
+            final stillExpired = container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue;
+            expect(stillExpired.plan, CommercePlan.free);
+            expect(stillExpired.lifecycle, SubscriptionLifecycle.expired);
+            await tester.pump(Duration.zero);
+          }
+          await tester.pump(const Duration(seconds: 2));
+          expect(
+            authorityReads,
+            2,
+            reason:
+                'initial verification plus exactly one boundary refresh; no reload loop',
+          );
+          expect(authorityCompletions, 1);
+          expect(boundaryRead.isCompleted, isFalse);
+          expect(
+            container.read(verifiedSubscriptionStateProvider).isLoading,
+            isTrue,
+          );
+          expect(
+            container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue
+                .plan,
+            CommercePlan.free,
+          );
           expect(fixtureFailure, isNull);
           expect(tester.takeException(), isNull);
         } finally {
+          if (!boundaryRead.isCompleted) boundaryRead.complete();
+          if (authorityReads > 1) {
+            await _finishHost(tester, () async {
+              await container.read(verifiedSubscriptionStateProvider.future);
+            });
+          }
           await tester.pumpWidget(const SizedBox.shrink());
           cutoffObserver.close();
           container.dispose();

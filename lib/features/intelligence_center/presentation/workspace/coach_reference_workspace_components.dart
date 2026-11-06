@@ -1,5 +1,17 @@
 part of 'coach_reference_workspace.dart';
 
+String _water(Map<String, Object?> row) {
+  final amount = row['amountMl'];
+  return amount is num && amount.isFinite && amount >= 0 ? '$amount ml' : '—';
+}
+
+String _steps(Map<String, Object?> row, BuildContext context) {
+  final amount = row['steps'];
+  return amount is num && amount.isFinite && amount >= 0
+      ? '$amount ${intelligenceText(context, 'steps', 'خطوات')}'
+      : '—';
+}
+
 /// Reserve the translated, scaled badge height even before verification.
 /// A missing/expired badge has no hidden label or semantics, but cannot move
 /// the tabs and diary cards while its authority is refreshing.

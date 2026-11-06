@@ -4,6 +4,7 @@ import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_summary_widgets.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/features/settings/premium_meal_features_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,12 @@ void main() {
               await pumpDiaryEvidence(
                 tester,
                 DailyMealDetailSummary(
+                  // These component layout cases explicitly show macro dials;
+                  // they do not read page-level persisted display preferences.
+                  macroDisplay: const MealMacroDisplay(
+                    enabled: true,
+                    mode: MealMacroDisplayMode.grams,
+                  ),
                   calorieGoal: 2000,
                   meal: null,
                   mealGoal: initialGoal,

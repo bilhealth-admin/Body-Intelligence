@@ -35,23 +35,25 @@ class ExperimentRepository {
     if (durationDays < 3 || durationDays > 90) {
       throw ArgumentError('Duration must be between 3 and 90 days');
     }
-    if (await active() != null) {
-      throw StateError(
-        'Complete the active experiment before starting another',
-      );
-    }
-    return database
-        .into(database.personalExperiments)
-        .insert(
-          PersonalExperimentsCompanion.insert(
-            hypothesis: hypothesis.trim(),
-            changedVariable: changedVariable.trim(),
-            controlledFactors: Value(controlledFactors.trim()),
-            requiredData: Value(requiredData.trim()),
-            startedAt: startedAt,
-            endsAt: startedAt.add(Duration(days: durationDays - 1)),
-          ),
+    return database.transaction(() async {
+      if (await active() != null) {
+        throw StateError(
+          'Complete the active experiment before starting another',
         );
+      }
+      return database
+          .into(database.personalExperiments)
+          .insert(
+            PersonalExperimentsCompanion.insert(
+              hypothesis: hypothesis.trim(),
+              changedVariable: changedVariable.trim(),
+              controlledFactors: Value(controlledFactors.trim()),
+              requiredData: Value(requiredData.trim()),
+              startedAt: startedAt,
+              endsAt: startedAt.add(Duration(days: durationDays - 1)),
+            ),
+          );
+    });
   }
 
   Future<void> complete({

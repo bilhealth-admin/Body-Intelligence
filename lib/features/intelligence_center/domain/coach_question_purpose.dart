@@ -14,6 +14,10 @@ bool coachRequestsReasonedOrFormattedAnswer(String question) {
   }
   final layout = RegExp(
     r'\bmarkdown\b|'
+    r'\b(?:add|show|give|write|create|format|use)\s+'
+    r'(?:(?:me|a|an|the|one|two|three|four|\d+|short|brief|bold)\s+){0,5}'
+    r'(?:headings?|bullets?|bullet points?|bold text)\b|'
+    r'(?:اضف|اعرض|اكتب|استخدم)\s+(?:لي\s+)?(?:عنوان|عناوين|نقطتين|نقاط|نصا? عريضا?)|'
     r'\b(?:in|into|as)\s+(?:an?\s+)?table\b|'
     r'\b(?:show|make|create|write|format|present|display)\s+'
     r'(?:me\s+)?(?:(?:a|an|the)\s+)?'
@@ -33,6 +37,14 @@ bool coachRequestsReasonedOrFormattedAnswer(String question) {
     r'\b(?:video|videos|demonstration|demo|tutorial)\b|فيديو|فديو|مقطع',
   ).hasMatch(text)) {
     return false;
+  }
+  // Translation is an answer operation, even when phrased as "Add a brief
+  // Arabic translation". A translated video lookup keeps its catalog owner.
+  if (RegExp(
+    r'\b(?:translate|translation|translations|summari[sz]e|summary|rewrite|paraphrase)\b|'
+    r'ترجم|ترجمه|لخص|تلخيص|اعد صياغه',
+  ).hasMatch(text)) {
+    return true;
   }
   return RegExp(
     r'\b(?:explain|define|definition)\b|\bwhat\b[^.!?]{0,120}\bmean\b|'
