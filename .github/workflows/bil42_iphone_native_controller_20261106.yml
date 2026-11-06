@@ -1,0 +1,106 @@
+name: BIL42 iPhone pinned-source native QA (harness39)
+
+on:
+  push:
+    branches: [codex/bil42-native-controller-20261106]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil39-iphone-native-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native:
+    name: iPhone native tests from exact BIL39 simulator bundles
+    runs-on: macos-26
+    timeout-minutes: 100
+    steps:
+      - name: Check out exact integration source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: e90e04890d5c322cfd8b3554ff1f03fb3165414c
+          persist-credentials: false
+      - name: Assert pinned application source and record controller provenance
+        shell: bash
+        env:
+          BIL_PINNED_APP_SOURCE: e90e04890d5c322cfd8b3554ff1f03fb3165414c
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_PINNED_APP_SOURCE"
+          python3 - <<'PY_CONTROLLER_PROVENANCE'
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+
+          expected = os.environ['BIL_PINNED_APP_SOURCE']
+          actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          controller = os.environ['GITHUB_SHA']
+          if actual != expected or not re.fullmatch('[a-f0-9]{40}', controller):
+              raise ValueError('Pinned application source or controller identity differs')
+          output = Path('artifacts/qa/bil39-native-iphone/controller-provenance.json')
+          output.parent.mkdir(parents=True, exist_ok=True)
+          provenance = {
+              'schema': 'bil42.pinned-source-native-controller.v1',
+              'application_source_sha': actual,
+              'application_source_tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'controller_sha': controller,
+              'controller_ref': os.environ['GITHUB_REF'],
+              'controller_workflow_ref': os.environ.get('GITHUB_WORKFLOW_REF'),
+              'run_id': os.environ['GITHUB_RUN_ID'],
+              'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'device': 'iphone',
+              'qa_harness_build': 39,
+              'scope': 'Exact application source on native Simulator using unchanged QA harness39',
+              'signed_ios42_device_acceptance': False,
+              'physical_device_acceptance': False,
+          }
+          output.write_text(json.dumps(provenance, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({'application_source_sha': actual, 'controller_sha': controller,
+                            'device': 'iphone', 'qa_harness_build': 39,
+                            'signed_ios42_device_acceptance': False}))
+          PY_CONTROLLER_PROVENANCE
+      - name: Verify native preparation and independent device orchestration
+        run: |
+          python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
+          python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
+          python3 -m unittest discover -s tools/qa -p test_bil39_native_split.py -v
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Select exact CocoaPods in an isolated job gem home
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
+          python3 .github/scripts/install_isolated_cocoapods.py \
+            --output artifacts/qa/bil39-native-iphone/cocoapods-installation.json
+      - name: Resolve existing dependencies and native pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          pod install --project-directory=ios
+      - name: Verify Flutter UIKit composition and IME behavior before native build
+        run: >
+          flutter test --no-pub
+          test/features/intelligence_center/coach_native_chat_presentation_test.dart
+          test/features/intelligence_center/coach_reply_arrival_test.dart
+      - name: Drive all native scopes on dedicated iPhone
+        env:
+          BIL_NATIVE_DEVICE: iphone
+        run: bash .github/scripts/bil39_ios_native_integration.sh
+      - name: Upload exact iPhone native evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil42-iphone-native-app-e90e04890d5c322cfd8b3554ff1f03fb3165414c-harness39
+          path: artifacts/qa/bil39-native-iphone
+          if-no-files-found: error
+          retention-days: 14
