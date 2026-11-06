@@ -2,6 +2,16 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+int _numericContract(String source, String pattern, String name) {
+  final matches = RegExp(pattern).allMatches(source).toList();
+  expect(
+    matches,
+    hasLength(1),
+    reason: 'One live $name must define the budget.',
+  );
+  return int.parse(matches.single.group(1)!.replaceAll('_', ''));
+}
+
 void main() {
   test('AI Coach text route is server metered and confirmation gated', () {
     final source = File(
@@ -21,7 +31,6 @@ void main() {
     );
     expect(source, contains('BIL_GEMINI_COST_RATES_JSON'));
     expect(source, contains('attempt <= 1'));
-    expect(source, contains('geminiAttemptTimeoutMs = 10_000'));
     expect(
       source,
       matches(
@@ -66,6 +75,91 @@ void main() {
     expect(source, contains('encoded.length > 20_000'));
     expect(source, isNot(contains('AIza')));
     expect(source, isNot(contains('service_role_key=')));
+  });
+
+  test('AI Coach live provider caps fit the shared window and client deadline', () {
+    final source = File(
+      'supabase/functions/ai-coach/server.ts',
+    ).readAsStringSync();
+    final gateway = File(
+      'lib/features/intelligence_center/services/local_model_gateway_io.dart',
+    ).readAsStringSync();
+    final primary = _numericContract(
+      source,
+      r'export\s+const\s+geminiAttemptTimeoutMs\s*=\s*([0-9_]+)\s*;',
+      'primary provider cap',
+    );
+    final later = _numericContract(
+      source,
+      r'export\s+const\s+geminiLaterAttemptTimeoutMs\s*=\s*([0-9_]+)\s*;',
+      'later provider cap',
+    );
+    final window = _numericContract(
+      source,
+      r'const\s+remaining\s*=\s*([0-9_]+)\s*-\s*\(attemptStarted\s*-\s*started\)',
+      'absolute request window',
+    );
+    final repairWindow = _numericContract(
+      source,
+      r'const\s+budget\s*=\s*Math\.min\(geminiAttemptTimeoutMs,\s*([0-9_]+)\s*-\s*\(now\(\)\s*-\s*started\)\)',
+      'citation repair window',
+    );
+    final clientSeconds = _numericContract(
+      gateway,
+      r'\.invokeCoach\(<String,\s*Object\?>\{[\s\S]*?\.timeout\(\s*const\s+Duration\(seconds:\s*([0-9_]+)\)\s*\)',
+      'remote client timeout',
+    );
+    final maximumCalls = _numericContract(
+      source,
+      r'providerAttempts\s*>=\s*([0-9_]+)',
+      'provider call maximum',
+    );
+    expect(later, greaterThan(0));
+    expect(primary, greaterThan(later));
+    expect(primary + later, lessThanOrEqualTo(window));
+    expect(repairWindow, window);
+    expect(window, lessThan(clientSeconds * 1000));
+    expect(
+      maximumCalls,
+      3,
+      reason: 'Primary, independent fallback and repair.',
+    );
+    expect(
+      source,
+      matches(
+        RegExp(
+          r'const\s+cap\s*=\s*providerAttempts\s*===\s*0\s*\?\s*geminiAttemptTimeoutMs\s*:\s*geminiLaterAttemptTimeoutMs',
+        ),
+      ),
+    );
+    expect(
+      source,
+      matches(
+        RegExp(
+          r'const\s+budget\s*=\s*Math\.min\(args\[8\]\s*\?\?\s*cap,\s*cap,\s*remaining\)',
+        ),
+      ),
+    );
+    // These source/caller invariants supplement the executed Deno boundaries,
+    // not a replacement for them. The required exact-SHA cloud-source CI runs
+    // provider_deadline_test.ts (real logical transport, late-answer rejection,
+    // independent fallback and one refund) plus coach_reasoning_test.ts
+    // (read LOW, analysis MEDIUM, short planning HIGH and alias independence).
+    // The final release gate requires that workflow on the same source SHA.
+    final reasoning = File(
+      'supabase/functions/ai-coach/coach_reasoning.ts',
+    ).readAsStringSync();
+    expect(source, contains('coachReasoningFor(messages)'));
+    expect(source, contains('reasoning.level'));
+    expect(source, contains('independentGeminiFallback('));
+    expect(
+      reasoning,
+      contains('canonicalGeminiModel(candidate) !== canonical'),
+    );
+    expect(
+      source,
+      contains('thinkingLevel === "HIGH" ? "MEDIUM" : thinkingLevel'),
+    );
   });
 
   test('AI Coach voice capture is not locked to the app locale', () {

@@ -187,7 +187,7 @@ if [[ "$frame_ready" != true ]]; then
 fi
 
 stage='capture-launch-evidence'
-adb logcat -d -t 5000 > "$evidence/startup-logcat.txt" 2>&1 || true
+adb logcat -v threadtime -d -t 5000 > "$evidence/startup-logcat.txt" 2>&1 || true
 adb shell dumpsys activity activities > "$evidence/activity-state.txt" 2>&1 || true
 adb shell dumpsys window windows > "$evidence/window-state.txt" 2>&1 || true
 adb shell uiautomator dump /sdcard/bil-startup-window.xml \
@@ -196,11 +196,12 @@ adb pull /sdcard/bil-startup-window.xml "$evidence/startup-window.xml" \
   >/dev/null 2>&1 || true
 
 stage='verify-first-frame-content'
-if grep -Eqi \
-  "ANR in |Application Not Responding|isn't responding|is not responding|لا يستجيب" \
-  "$evidence/startup-logcat.txt" "$evidence/uiautomator.txt" \
-  "$evidence/startup-window.xml"; then
-  echo 'Android reported an ANR dialog or unresponsive process during startup.' >&2
+if ! python3 tool/release/classify_android_startup_anr.py \
+  --logcat "$evidence/startup-logcat.txt" \
+  --ui "$evidence/startup-window.xml" \
+  --evidence "$evidence/startup-anr-classification.json" \
+  > "$evidence/startup-anr-check.txt"; then
+  echo 'Android startup ANR evidence check failed.' >&2
   exit 1
 fi
 

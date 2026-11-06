@@ -68,9 +68,39 @@ void main() {
     final entitlements = read('ios/Runner/Runner.entitlements');
     final debugEntitlements = read('ios/Runner/RunnerDebug.entitlements');
     final coverage = read('docs/release/BIL_EPIC14_RELEASE_COVERAGE.md');
+    final permissions = RegExp(
+      r'<uses-permission\b[^>]*android:name="([^"]+)"',
+    ).allMatches(manifest).map((match) => match.group(1)!).toSet();
+    for (final excludedPermission in const [
+      'android.permission.BLUETOOTH',
+      'android.permission.BLUETOOTH_ADMIN',
+      'android.permission.BLUETOOTH_SCAN',
+      'android.permission.BLUETOOTH_CONNECT',
+      'android.permission.BLUETOOTH_ADVERTISE',
+      'android.permission.ACCESS_COARSE_LOCATION',
+      'android.permission.ACCESS_FINE_LOCATION',
+      'android.permission.ACCESS_BACKGROUND_LOCATION',
+    ]) {
+      expect(permissions, isNot(contains(excludedPermission)));
+    }
     expect(
-      manifest,
-      contains('android:usesPermissionFlags="neverForLocation"'),
+      permissions.where(
+        (name) => name.startsWith('android.permission.health.'),
+      ),
+      unorderedEquals(const [
+        'android.permission.health.READ_STEPS',
+        'android.permission.health.READ_DISTANCE',
+        'android.permission.health.READ_ACTIVE_CALORIES_BURNED',
+      ]),
+    );
+    // Android BLE is withheld; iOS retains its independently declared bridge.
+    expect(
+      read('ios/Runner/Info.plist'),
+      contains('NSBluetoothAlwaysUsageDescription'),
+    );
+    expect(
+      read('ios/Runner/AppDelegate.swift'),
+      contains('BILFitnessBleBridge.register'),
     );
     expect(entitlements, contains('<key>aps-environment</key>'));
     expect(entitlements, contains('<key>com.apple.developer.healthkit</key>'));

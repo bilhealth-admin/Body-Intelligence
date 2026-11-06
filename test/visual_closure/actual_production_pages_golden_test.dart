@@ -53,6 +53,7 @@ import 'package:body_intelligence_log/data/repositories/daily_log_repository.dar
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -452,12 +453,18 @@ void main() {
     required String name,
     Locale locale = const Locale('en'),
     Brightness brightness = Brightness.light,
+    TargetPlatform? platform,
     Widget Function(Widget child)? wrapper,
     Future<void> Function(WidgetTester tester)? interact,
     Future<void> Function(AppDatabase database)? seed,
     SubscriptionState? verifiedSubscriptionFixture,
     bool captureOverlay = false,
   }) async {
+    final previousPlatform = debugDefaultTargetPlatformOverride;
+    if (platform != null) {
+      debugDefaultTargetPlatformOverride = platform;
+      addTearDown(() => debugDefaultTargetPlatformOverride = previousPlatform);
+    }
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(db.close);
     if (seed != null) await seed(db);
@@ -553,9 +560,17 @@ void main() {
     } finally {
       // Dispose the real page and its expiry timers even when an assertion
       // fails; cleanup must not depend on a successful golden comparison.
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump();
+      try {
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 1));
+        await tester.pump();
+      } finally {
+        // The binding checks debug globals before addTearDown callbacks.
+        // Restore this fixture's platform before returning to testWidgets.
+        if (platform != null) {
+          debugDefaultTargetPlatformOverride = previousPlatform;
+        }
+      }
     }
   }
 
@@ -564,6 +579,7 @@ void main() {
       tester,
       page: const BilStorePlansPage(connectToDeviceStore: false),
       name: 'store_plans_phone',
+      verifiedSubscriptionFixture: _recipeGoldenVerifiedFree,
     );
   });
 
@@ -577,6 +593,7 @@ void main() {
         catalog: catalog,
         productIds: const {'bil.visual.monthly', 'bil.visual.annual'},
       ),
+      verifiedSubscriptionFixture: _recipeGoldenVerifiedFree,
       // Keep the approved configured reference. The default source checkout
       // has no compiled legal URLs; it needs its own exact visual contract.
       name: StoreCatalogConfiguration.legalLinksConfigured
@@ -984,6 +1001,7 @@ void main() {
       tester,
       page: const ConnectedHealthPage(),
       name: 'connected_health_permission_phone',
+      platform: TargetPlatform.android,
       wrapper: (child) => ProviderScope(
         overrides: [
           connectedHealthGatewayProvider.overrideWithValue(
@@ -1011,6 +1029,7 @@ void main() {
       tester,
       page: const ConnectedHealthPage(),
       name: 'connected_health_compatibility_phone',
+      platform: TargetPlatform.android,
       wrapper: (child) => ProviderScope(
         overrides: [
           connectedHealthGatewayProvider.overrideWithValue(
@@ -1061,6 +1080,7 @@ void main() {
         tester,
         page: const ConnectedHealthPage(),
         name: 'connected_health_${state.$1}_phone',
+        platform: TargetPlatform.android,
         wrapper: (child) => ProviderScope(
           overrides: [
             connectedHealthGatewayProvider.overrideWithValue(

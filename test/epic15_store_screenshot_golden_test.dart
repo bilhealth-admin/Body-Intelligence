@@ -40,7 +40,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
 
-// Protected Food, More, and Progress store captures share a single
+// Protected Food, More, Progress, and Plans store captures share a single
 // server-verified Free member. Without that evidence, the UI correctly
 // fails closed to Retry rather than showing the reviewed Premium preview.
 // This affects only the screenshot fixture, never production entitlements.
@@ -289,7 +289,8 @@ void main() {
               page is DailyLogPage ||
               page is FoodPage ||
               page is SettingsPage ||
-              page is AnalyticsPage) ...[
+              page is AnalyticsPage ||
+              page is BilStorePlansPage) ...[
             verifiedEntitlementClockProvider.overrideWithValue(
               () => DateTime.utc(2026, 8, 30, 9, 41, 12),
             ),

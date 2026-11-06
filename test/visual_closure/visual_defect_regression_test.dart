@@ -33,7 +33,9 @@ import 'package:body_intelligence_log/features/profile/profile_summary_page.dart
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/settings/premium_meal_features_page.dart';
 import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
+import 'package:body_intelligence_log/shared/widgets/premium_surface.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -439,71 +441,158 @@ void main() {
     },
   );
 
-  testWidgets(
-    'connected health route renders one glass group without repeated Premium',
-    (tester) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    testWidgets(
+      '${platform.name} connected health route renders one glass group without repeated Premium',
+      (tester) async {
+        debugDefaultTargetPlatformOverride = platform;
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
 
-      final database = AppDatabase.forTesting(NativeDatabase.memory());
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            databaseProvider.overrideWithValue(database),
-            connectedHealthGatewayProvider.overrideWithValue(
-              const _PremiumOnceHealthGateway(),
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        final nativeSource = platform == TargetPlatform.android
+            ? 'Health Connect'
+            : 'Apple Health';
+        try {
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                databaseProvider.overrideWithValue(database),
+                connectedHealthGatewayProvider.overrideWithValue(
+                  _PremiumOnceHealthGateway(platformSource: nativeSource),
+                ),
+                verifiedSubscriptionStateProvider.overrideWithValue(
+                  AsyncData(_verifiedFreeState()),
+                ),
+              ],
+              child: const MaterialApp(
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                home: ConnectedHealthPage(),
+              ),
             ),
-            verifiedSubscriptionStateProvider.overrideWithValue(
-              AsyncData(_verifiedFreeState()),
+          );
+          // The route owns a live clock/pulse. Resolve its immediate providers
+          // without pumpAndSettle, which is intentionally impossible here.
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
+          await tester.pump(const Duration(milliseconds: 400));
+          final sourceCard = find.byKey(
+            const Key('connected-health-source-card'),
+          );
+          expect(sourceCard, findsOneWidget);
+          expect(
+            tester.widget<PremiumSurface>(sourceCard).dashboardGlass,
+            isTrue,
+          );
+          expect(find.text(nativeSource), findsWidgets);
+          expect(
+            find.byKey(const Key('connected-health-sync-now')),
+            findsOneWidget,
+          );
+          _expectAtMostOneVisiblePremium(tester);
+          expect(
+            find.descendant(
+              of: sourceCard,
+              matching: find.byKey(const Key('dashboard-premium-label')),
             ),
-          ],
-          child: const MaterialApp(
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            home: ConnectedHealthPage(),
-          ),
-        ),
-      );
-      // The route owns a live clock/pulse. Resolve its immediate providers
-      // without pumpAndSettle, which is intentionally impossible here.
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('fitness-bluetooth-section')),
-        360,
-      );
-      _expectAtMostOneVisiblePremium(tester);
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('fitness-bluetooth-section')),
-          matching: find.byKey(const Key('dashboard-premium-label')),
-        ),
-        findsNothing,
-        reason:
-            'The BLE status and action must not sit under a floating badge.',
-      );
-      expect(
-        find.byKey(const Key('fitness-devices-premium-gate')),
-        findsNothing,
-      );
-      expect(
-        find.byKey(const Key('scan-fitness-devices-button')),
-        findsOneWidget,
-      );
+            findsNothing,
+            reason: 'Native health status and actions stay public.',
+          );
 
-      await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pump(const Duration(milliseconds: 1));
-      await database.close();
-    },
-    timeout: const Timeout(Duration(seconds: 20)),
-  );
+          if (platform == TargetPlatform.android) {
+            expect(
+              find.byKey(const Key('fitness-bluetooth-section')),
+              findsNothing,
+            );
+            expect(
+              find.byKey(const Key('scan-fitness-devices-button')),
+              findsNothing,
+            );
+          } else {
+            // This is an independent positive iOS case, not a replacement of the
+            // Android scene. Retain the original BLE badge/action assertions.
+            await tester.scrollUntilVisible(
+              find.byKey(const Key('fitness-bluetooth-section')),
+              360,
+            );
+            _expectAtMostOneVisiblePremium(tester);
+            expect(
+              find.descendant(
+                of: find.byKey(const Key('fitness-bluetooth-section')),
+                matching: find.byKey(const Key('dashboard-premium-label')),
+              ),
+              findsNothing,
+              reason:
+                  'The BLE status and action must not sit under a floating badge.',
+            );
+            expect(
+              find.byKey(const Key('scan-fitness-devices-button')),
+              findsOneWidget,
+            );
+          }
+          expect(
+            find.byKey(const Key('fitness-devices-premium-gate')),
+            findsNothing,
+          );
+
+          await tester.scrollUntilVisible(
+            find.text('Privacy and data flow'),
+            300,
+            scrollable: find.byType(Scrollable).first,
+          );
+          // ensureVisible can jump after its last layout; render that position
+          // before checking the disclosure's actual visibility.
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 100));
+          expect(
+            find.text('Privacy and data flow').hitTestable(),
+            findsOneWidget,
+          );
+          expect(
+            find.text(
+              'Only approved health categories are read. Sync stays local and keeps the original source of every value.',
+            ),
+            findsOneWidget,
+          );
+          final privacyGroup = find.ancestor(
+            of: find.text('Privacy and data flow'),
+            matching: find.byType(PremiumSurface),
+          );
+          expect(privacyGroup, findsOneWidget);
+          expect(
+            tester.widget<PremiumSurface>(privacyGroup).dashboardGlass,
+            isTrue,
+          );
+          expect(
+            find.byKey(const Key('health-device-compatibility')),
+            findsOneWidget,
+          );
+          _expectAtMostOneVisiblePremium(tester);
+          if (platform == TargetPlatform.android) {
+            expect(find.text('Bluetooth fitness devices'), findsNothing);
+            expect(
+              find.byKey(const Key('scan-fitness-devices-button')),
+              findsNothing,
+            );
+          }
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump(const Duration(milliseconds: 1));
+          await database.close();
+          debugDefaultTargetPlatformOverride = null;
+        }
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
+    );
+  }
 
   testWidgets('quick add, profile, pathways, meal settings and route glass '
       'each render at most one visible Premium word', (tester) async {
@@ -907,12 +996,13 @@ void _expectAtMostOneVisiblePremium(WidgetTester tester) {
 }
 
 final class _PremiumOnceHealthGateway implements ConnectedHealthGateway {
-  const _PremiumOnceHealthGateway();
+  const _PremiumOnceHealthGateway({this.platformSource = 'Health Connect'});
+  final String platformSource;
 
-  ConnectedHealthSnapshot get _snapshot => const ConnectedHealthSnapshot(
+  ConnectedHealthSnapshot get _snapshot => ConnectedHealthSnapshot(
     status: ConnectedHealthStatus.synchronized,
-    platformSource: 'Health Connect',
-    availableSources: ['Health Connect'],
+    platformSource: platformSource,
+    availableSources: [platformSource],
     signals: [],
     importedCount: 0,
     lastSyncAt: null,

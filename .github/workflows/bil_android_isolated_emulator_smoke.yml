@@ -87,6 +87,7 @@ jobs:
           python3 -m unittest discover -s tool/release -p 'test_configure_android_emulator_display.py'
           python3 -m unittest discover -s tool/release -p 'test_android_startup_workflow.py'
           python3 -m unittest discover -s tool/release -p 'test_verify_android_startup_frame.py'
+          python3 -m unittest discover -s tool/release -p 'test_classify_android_startup_anr.py'
           python3 -m unittest discover -s tool/release -p 'test_prepare_android_emulator_action.py'
           python3 -m unittest discover -s tool/release -p 'test_android_emulator_unlock.py'
           python3 tool/release/android_emulator_launch_options.py --api-level "$BIL_ANDROID_API" >> "$GITHUB_OUTPUT"

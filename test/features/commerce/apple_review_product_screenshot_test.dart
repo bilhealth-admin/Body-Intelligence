@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +18,18 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../visual_closure/visual_evidence_font.dart';
 
 const _captureKey = ValueKey('app-store-review-capture');
+
+final _reviewNow = DateTime.utc(2026, 8, 14, 9, 41, 12);
+
+// The original purchase screenshots represent a server-verified Free member.
+// Unknown access remains fail-closed in the dedicated member-access tests.
+final _reviewVerifiedFree = SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
 
 const _premiumMonthly = BilStoreOfferMetadata(
   productId: 'bil_premium',
@@ -209,6 +225,14 @@ void main() {
       }
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => _reviewNow,
+            ),
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(_reviewVerifiedFree),
+            ),
+          ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             locale: const Locale('en', 'US'),
