@@ -112,8 +112,9 @@ class RunnerTests: XCTestCase {
     phase: Double, reduced: Bool, scheme: ColorScheme = .light,
     direction: LayoutDirection = .leftToRight, contrast: ColorSchemeContrast = .standard
   ) throws -> CGImage {
-    // colorSchemeContrast is read-only in SwiftUI. Exercise its actual UIKit
-    // trait bridge rather than injecting a replacement production environment.
+    // Snapshot the actual SwiftUI view through UIKit's real trait bridge.
+    // A non-key fixture uses layer rendering, with a completed appearance
+    // lifecycle, rather than drawHierarchy before SwiftUI has painted.
     let bounds = CGRect(x: 0, y: 0, width: 24, height: 7)
     let requestedContrast: UIAccessibilityContrast = contrast == .increased ? .high : .normal
     let requestedStyle: UIUserInterfaceStyle = scheme == .dark ? .dark : .light
@@ -123,6 +124,7 @@ class RunnerTests: XCTestCase {
         .environment(\.layoutDirection, direction)
         .ignoresSafeArea()
     )
+    if #available(iOS 16.4, *) { hosting.safeAreaRegions = [] }
     let container = UIViewController()
     container.view.backgroundColor = .clear
     container.view.frame = bounds
@@ -145,28 +147,37 @@ class RunnerTests: XCTestCase {
       ]), forChild: hosting)
     }
 
-    // A visible, non-key test window lets SwiftUI inherit genuine view traits.
-    // It does not replace the application's key window or persist any setting.
-    let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
-    let currentScene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
-    let window: UIWindow
-    if let currentScene = currentScene {
-      window = UIWindow(windowScene: currentScene)
-      window.frame = bounds
-    } else {
-      // Legacy test hosts may not participate in the UIScene lifecycle.
-      window = UIWindow(frame: bounds)
-    }
+    // This isolated non-key window never replaces the application's root/key
+    // window, and is disposed only after both appearance transitions finish.
+    let window = UIWindow(frame: bounds)
     window.backgroundColor = .clear
-    window.rootViewController = container
     window.isHidden = false
+    window.rootViewController = container
+    container.beginAppearanceTransition(true, animated: false)
+    container.endAppearanceTransition()
     defer {
-      window.isHidden = true
+      container.beginAppearanceTransition(false, animated: false)
+      hosting.willMove(toParent: nil)
+      hosting.view.removeFromSuperview()
+      hosting.removeFromParent()
+      container.endAppearanceTransition()
       window.rootViewController = nil
+      window.isHidden = true
     }
     if #available(iOS 17.0, *) { hosting.updateTraitsIfNeeded() }
+    container.view.setNeedsLayout()
+    container.view.layoutIfNeeded()
+    hosting.view.setNeedsLayout()
+    hosting.view.layoutIfNeeded()
+
+    // Yield the main run loop so UIKit/SwiftUI can commit their first frame.
+    // This is test-only readiness; no application timeout or state changes.
+    let ready = expectation(description: "Native capsule initial display transaction")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { ready.fulfill() }
+    wait(for: [ready], timeout: 2)
     container.view.layoutIfNeeded()
     hosting.view.layoutIfNeeded()
+    hosting.view.layer.displayIfNeeded()
     XCTAssertEqual(hosting.traitCollection.accessibilityContrast, requestedContrast)
     XCTAssertEqual(hosting.view.traitCollection.accessibilityContrast, requestedContrast)
     XCTAssertEqual(hosting.view.bounds.size, bounds.size)
@@ -175,12 +186,13 @@ class RunnerTests: XCTestCase {
     format.scale = 1
     format.opaque = false
     format.preferredRange = .standard
-    var snapshotComplete = false
-    let rendered = UIGraphicsImageRenderer(size: bounds.size, format: format).image { _ in
-      snapshotComplete = hosting.view.drawHierarchy(in: bounds, afterScreenUpdates: true)
+    let rendered = UIGraphicsImageRenderer(size: bounds.size, format: format).image { context in
+      hosting.view.layer.render(in: context.cgContext)
     }
-    XCTAssertTrue(snapshotComplete, "Native capsule snapshot must include the complete hosted view")
     let image = try XCTUnwrap(rendered.cgImage, "Native capsule must rasterize a real image")
+    let pixels = try capsulePixels(image)
+    XCTAssertTrue(stride(from: 3, to: pixels.count, by: 4).contains { pixels[$0] > 0 },
+      "Native capsule snapshot must contain actual painted pixels")
     let attachment = XCTAttachment(image: UIImage(cgImage: image))
     attachment.name = "capsule-phase\(phase)-reduced\(reduced)-\(scheme)-\(direction)-\(contrast)"
     attachment.lifetime = .keepAlways
