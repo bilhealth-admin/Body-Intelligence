@@ -114,6 +114,7 @@ class CommunityCommentText extends StatelessWidget {
                 onPressed: onToggle,
                 icon: BilCrystalArrow(
                   extent: 36,
+                  reserveSpace: true,
                   child: Icon(
                     expanded
                         ? Icons.expand_less_rounded

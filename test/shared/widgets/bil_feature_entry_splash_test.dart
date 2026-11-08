@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:body_intelligence_log/shared/widgets/bil_feature_entry_splash.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -177,11 +177,14 @@ void main() {
               final luminance = title.style!.color!.computeLuminance();
               expect(luminance, dark ? greaterThan(.7) : lessThan(.05));
               expect(find.bySemanticsLabel(title.data!), findsOneWidget);
-              final indicator = tester.widget<CupertinoActivityIndicator>(
-                find.byType(CupertinoActivityIndicator),
+              final indicator = tester.widget<BilSplashCapsuleProgress>(
+                find.byType(BilSplashCapsuleProgress),
               );
-              expect(indicator.animating, isFalse);
-              expect(indicator.radius, 12);
+              expect(indicator.reducedMotion, isTrue);
+              expect(
+                tester.getSize(find.byType(BilSplashCapsuleProgress)).height,
+                7,
+              );
               expect(find.byType(CircularProgressIndicator), findsNothing);
               expect(find.byType(LinearProgressIndicator), findsNothing);
               expect(
@@ -202,7 +205,7 @@ void main() {
                 findsOneWidget,
               );
               // A real finger gesture reaches the readable status at large text.
-              // The Cupertino glyph itself is decorative, not a touch target.
+              // The capsule itself is decorative, not a touch target.
               await tester.drag(
                 find.byKey(const Key('bil-feature-welcome-scroll')),
                 const Offset(0, -300),
@@ -226,7 +229,7 @@ void main() {
     }
   }
   testWidgets(
-    'internal feature status uses the same iOS spinner on Android and iOS',
+    'internal feature status uses the same startup capsule on Android and iOS',
     (tester) async {
       for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
         await tester.pumpWidget(
@@ -242,11 +245,11 @@ void main() {
         );
         expect(
           tester
-              .widget<CupertinoActivityIndicator>(
-                find.byType(CupertinoActivityIndicator),
+              .widget<BilSplashCapsuleProgress>(
+                find.byType(BilSplashCapsuleProgress),
               )
-              .animating,
-          isTrue,
+              .reducedMotion,
+          isFalse,
         );
         expect(find.byType(CircularProgressIndicator), findsNothing);
         await tester.pumpWidget(const SizedBox.shrink());
@@ -274,11 +277,11 @@ void main() {
       await tester.pump();
       expect(
         tester
-            .widget<CupertinoActivityIndicator>(
-              find.byType(CupertinoActivityIndicator),
+            .widget<BilSplashCapsuleProgress>(
+              find.byType(BilSplashCapsuleProgress),
             )
-            .animating,
-        isTrue,
+            .reducedMotion,
+        isFalse,
       );
       await tester.pump(const Duration(milliseconds: 300));
       tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
@@ -286,11 +289,11 @@ void main() {
       await tester.pump();
       expect(
         tester
-            .widget<CupertinoActivityIndicator>(
-              find.byType(CupertinoActivityIndicator),
+            .widget<BilSplashCapsuleProgress>(
+              find.byType(BilSplashCapsuleProgress),
             )
-            .animating,
-        isFalse,
+            .reducedMotion,
+        isTrue,
       );
       await tester.pump(const Duration(milliseconds: 1899));
       expect(
@@ -419,50 +422,57 @@ void main() {
     });
     await tester.pumpWidget(const SizedBox.shrink());
   });
-  testWidgets(
-    'feathered artwork has no external card border or clipping frame',
-    (tester) async {
-      await tester.pumpWidget(
-        featureSplashApp(
-          language: 'en',
-          dark: false,
-          reduceMotion: true,
-          child: const BilPearlFeatureWelcome(
-            title: 'Measured feature',
-            subtitle: 'Context',
-            statusLabel: 'Preparing',
-            artwork: ColoredBox(color: Color(0xFFFF0000)),
-          ),
+  testWidgets('feathered artwork has no external card border or clipping frame', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      featureSplashApp(
+        language: 'en',
+        dark: false,
+        reduceMotion: true,
+        child: const BilPearlFeatureWelcome(
+          title: 'Measured feature',
+          subtitle: 'Context',
+          statusLabel: 'Preparing',
+          artwork: ColoredBox(color: Color(0xFFFF0000)),
         ),
-      );
-      // AppLocalizations.delegate.load is async: its first frame deliberately
-      // omits the route subtree. Pump the localized content frame before finding
-      // the production decoration, just as the pixel test above does.
-      await tester.pump();
-      expect(find.byType(BilPearlFeatureWelcome), findsOneWidget);
-      expect(
+      ),
+    );
+    // AppLocalizations.delegate.load is async: its first frame deliberately
+    // omits the route subtree. Pump the localized content frame before finding
+    // the production decoration, just as the pixel test above does.
+    await tester.pump();
+    expect(find.byType(BilPearlFeatureWelcome), findsOneWidget);
+    expect(
+      tester
+          .widget<BilPearlFeatureWelcome>(find.byType(BilPearlFeatureWelcome))
+          .featherArtwork,
+      isTrue,
+    );
+    expect(find.byType(ShaderMask), findsOneWidget);
+    final shader = tester.widget<ShaderMask>(find.byType(ShaderMask));
+    expect(shader.blendMode, BlendMode.dstIn);
+    expect(find.byType(ClipOval), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(ShaderMask),
+        matching: find.byType(ClipRRect),
+      ),
+      findsNothing,
+      reason:
+          'The artwork stays frameless; the independent loading capsule is clipped.',
+    );
+    final decoration =
         tester
-            .widget<BilPearlFeatureWelcome>(find.byType(BilPearlFeatureWelcome))
-            .featherArtwork,
-        isTrue,
-      );
-      expect(find.byType(ShaderMask), findsOneWidget);
-      final shader = tester.widget<ShaderMask>(find.byType(ShaderMask));
-      expect(shader.blendMode, BlendMode.dstIn);
-      expect(find.byType(ClipOval), findsNothing);
-      expect(find.byType(ClipRRect), findsNothing);
-      final decoration =
-          tester
-                  .widget<DecoratedBox>(
-                    find.byKey(const Key('bil-pearl-feature-canvas')),
-                  )
-                  .decoration
-              as BoxDecoration;
-      expect(decoration.border, isNull);
-      expect(decoration.borderRadius, isNull);
-      expect(decoration.boxShadow, isNull);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-  );
+                .widget<DecoratedBox>(
+                  find.byKey(const Key('bil-pearl-feature-canvas')),
+                )
+                .decoration
+            as BoxDecoration;
+    expect(decoration.border, isNull);
+    expect(decoration.borderRadius, isNull);
+    expect(decoration.boxShadow, isNull);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 }

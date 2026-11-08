@@ -4,7 +4,7 @@ import 'package:body_intelligence_log/features/dashboard/widgets/premium_dashboa
 import 'package:body_intelligence_log/shared/widgets/bil_feature_entry_splash.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:crypto/crypto.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -104,7 +104,12 @@ void main() {
           );
           final dashboardAsset = _underlyingAsset(dashboardPhoto.image);
           expect(dashboardAsset.assetName, asset);
-          expect(dashboardPhoto.fit, BoxFit.contain);
+          expect(
+            dashboardPhoto.fit,
+            BoxFit.cover,
+            reason:
+                'Dashboard preview backgrounds now fill their cards; the welcome below still preserves the full original photo',
+          );
           final dashboardBytes = await tester.runAsync(
             () => rootBundle.load(dashboardAsset.assetName),
           );
@@ -183,7 +188,7 @@ void main() {
           );
           expect(welcome.featherArtwork, isTrue);
           expect(find.byType(ShaderMask), findsOneWidget);
-          expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+          expect(find.byType(BilSplashCapsuleProgress), findsOneWidget);
           expect(find.byType(CircularProgressIndicator), findsNothing);
           expect(
             find.byKey(ValueKey('feature-entry-splash-${kind.name}')),
@@ -288,7 +293,7 @@ void main() {
         }
         expect(fallback, findsOneWidget);
         expect(find.text('BIL Recipes'), findsOneWidget);
-        expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+        expect(find.byType(BilSplashCapsuleProgress), findsOneWidget);
         await tester.pump(const Duration(milliseconds: 2199));
         expect(
           find.byKey(const ValueKey('feature-entry-splash-recipes')),

@@ -1,3 +1,4 @@
+import 'runtime_copy_next_batch_closure.dart';
 import 'runtime_copy_integration_gap.dart';
 import 'runtime_copy_closure_access.dart';
 import 'runtime_copy_closure_coach.dart';
@@ -91,6 +92,8 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final nextBatch = NextBatchClosureRuntimeCopy.resolve(english, localeTag);
+    if (nextBatch != null) return nextBatch;
     final experiments = ExperimentsRuntimeCopy.resolve(english, localeTag);
     if (experiments != null) return experiments;
     final healthEvidence = HealthEvidenceRuntimeCopy.resolve(

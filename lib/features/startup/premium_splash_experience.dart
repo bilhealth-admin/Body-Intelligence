@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import '../../shared/widgets/bil_splash_capsule_progress.dart';
 
 const _bilSplashIdentityAsset = 'assets/branding/bil_splash_identity.png';
 const bilSplashMotionAsset = 'assets/branding/bil_splash_motion.mp4';
@@ -333,67 +334,11 @@ class _PremiumSplashProgress extends StatelessWidget {
               key: const ValueKey('premium-splash-progress'),
               child: AnimatedBuilder(
                 animation: controller,
-                builder: (context, child) {
-                  final timelineValue = reducedMotion
-                      ? 0.72
-                      : controller.value.clamp(0.0, 1.0);
-                  final eased = Curves.easeInOutCubicEmphasized.transform(
-                    timelineValue,
-                  );
-                  final fill = 0.12 + (0.88 * eased);
-                  final highlightX = ((width + 38) * eased) - 38;
-                  return SizedBox(
-                    width: width,
-                    height: 7,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(99),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          const ColoredBox(color: Color(0x38FFFFFF)),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: FractionallySizedBox(
-                              widthFactor: fill,
-                              heightFactor: 1,
-                              child: const DecoratedBox(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color(0xA8FFFFFF),
-                                      Color(0xD6FFFFFF),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (!reducedMotion)
-                            Transform.translate(
-                              offset: Offset(highlightX, 0),
-                              child: const Align(
-                                alignment: Alignment.centerLeft,
-                                child: SizedBox(
-                                  width: 38,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Color(0x00FFFFFF),
-                                          Color(0xB8FFFFFF),
-                                          Color(0x00FFFFFF),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                builder: (context, child) => BilSplashCapsuleProgress(
+                  width: width,
+                  progress: controller.value,
+                  reducedMotion: reducedMotion,
+                ),
               ),
             ),
           );

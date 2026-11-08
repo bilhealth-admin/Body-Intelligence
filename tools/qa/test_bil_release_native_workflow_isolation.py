@@ -53,9 +53,10 @@ class NativeWorkflowIsolationTest(unittest.TestCase):
         for inputs in ({'android_only': True}, {'ios_only': True},
                        {'android_only': True, 'ios_only': True},
                        {'source_audit_only': True}, {'mobsf_only': True},
-                       {'supabase_only': True}, {'ios_native_only': True}):
+                       {'supabase_only': True}):
             with self.subTest(inputs=inputs):
                 self.assertFalse(native_selected(**inputs))
+        self.assertNotIn('      ios_native_only:', WORKFLOW.read_text(encoding='utf-8'))
         traced = job('analyze')
         self.assertIn('github/codeql-action/analyze', traced)
         self.assertIn('Build Android plugin sources for CodeQL', traced)

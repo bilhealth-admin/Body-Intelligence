@@ -116,7 +116,13 @@ void main() {
     expect(entry, contains('fontWeight: FontWeight.w600'));
     expect(entry, contains('Color(0xFF8B6429)'));
     expect(entry, contains('Color(0xFFE2C78E)'));
-    expect(entry, contains('isChecking'));
+    // A public Plans destination must retain its chevron and callback while
+    // authority refreshes. The separate behavioral matrix exercises loading,
+    // verified Free/Paid; the paid destination still owns access.
+    expect(entry, contains('onTap: onTap'));
+    expect(entry, contains('Icons.chevron_left_rounded'));
+    expect(entry, contains('Icons.chevron_right_rounded'));
+    expect(entry, isNot(contains('BilFeatureWelcomeStatus')));
     expect(entry, contains('isRetry'));
     for (final forbidden in const [
       'PremiumCrownEmblem(',

@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'dart:ui' as ui;
 
 import 'package:body_intelligence_log/shared/widgets/bil_striped_progress.dart';
@@ -146,7 +147,7 @@ void main() {
     },
   );
 
-  testWidgets('loading retains the native indicator without a data texture', (
+  testWidgets('loading uses the startup capsule without a data texture', (
     tester,
   ) async {
     const loading = CircularProgressIndicator(key: Key('native-loading'));
@@ -159,7 +160,7 @@ void main() {
     expect((state as StatelessElement).widget, isA<BilStripedProgress>());
     expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.byType(ClipRRect), findsNothing);
+    expect(find.byType(BilSplashCapsuleProgress), findsOneWidget);
     final semantics = tester.ensureSemantics();
     expect(
       tester

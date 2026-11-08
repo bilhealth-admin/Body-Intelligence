@@ -22,15 +22,17 @@ void main() {
   setUpAll(loadVisualEvidenceFont);
   late AppDatabase db;
   late PreferencesRepository repository;
-  var closed = false;
+  var widgetOwnsCleanup = false;
   setUp(() async {
-    closed = false;
+    widgetOwnsCleanup = false;
     db = AppDatabase.forTesting(NativeDatabase.memory());
     repository = PreferencesRepository(db);
     await repository.get('goal.calories');
   });
   tearDown(() async {
-    if (!closed) await db.close();
+    // Before widget resources exist there are no fake-zone stream listeners.
+    // Once owned below, cleanup runs exactly once with both clocks pumping.
+    if (!widgetOwnsCleanup) await db.close();
   });
   for (final language in ['ar', 'en']) {
     for (final state in ['default', 'custom', 'legacy', 'grams']) {
@@ -82,289 +84,157 @@ void main() {
             tester.view.physicalSize = Size(narrow ? 320 : 390, 844);
             tester.view.devicePixelRatio = 1;
             addTearDown(tester.view.reset);
-            await tester.pumpWidget(
-              UncontrolledProviderScope(
-                container: container,
-                child: MaterialApp(
-                  locale: Locale(language),
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  localizationsDelegates: [
-                    AppLocalizations.delegate,
-                    ...GlobalMaterialLocalizations.delegates,
-                  ],
-                  theme: visualEvidenceTheme(
-                    BilFlagshipTheme.light(isArabic: language == 'ar'),
-                    fontFamily: language == 'ar'
-                        ? 'NotoArabicEvidence'
-                        : 'RobotoEvidence',
-                  ),
-                  builder: (context, child) => RepaintBoundary(
-                    key: const Key('goal-current-capture'),
-                    child: MediaQuery(
-                      data: MediaQuery.of(
-                        context,
-                      ).copyWith(textScaler: TextScaler.linear(narrow ? 2 : 1)),
-                      child: child!,
+            widgetOwnsCleanup = true;
+            final failures =
+                <({String stage, Object error, StackTrace stack})>[];
+            try {
+              await tester.pumpWidget(
+                UncontrolledProviderScope(
+                  container: container,
+                  child: MaterialApp(
+                    locale: Locale(language),
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    localizationsDelegates: [
+                      AppLocalizations.delegate,
+                      ...GlobalMaterialLocalizations.delegates,
+                    ],
+                    theme: visualEvidenceTheme(
+                      BilFlagshipTheme.light(isArabic: language == 'ar'),
+                      fontFamily: language == 'ar'
+                          ? 'NotoArabicEvidence'
+                          : 'RobotoEvidence',
                     ),
+                    builder: (context, child) => RepaintBoundary(
+                      key: const Key('goal-current-capture'),
+                      child: MediaQuery(
+                        data: MediaQuery.of(context).copyWith(
+                          textScaler: TextScaler.linear(narrow ? 2 : 1),
+                        ),
+                        child: child!,
+                      ),
+                    ),
+                    home: const ReferenceNutritionGoalsPage(),
                   ),
-                  home: const ReferenceNutritionGoalsPage(),
                 ),
-              ),
-            );
-            debugPrint('goal fixture phase: UI pumped');
-            await settle(tester);
-            await waitFor(
-              tester,
-              () async =>
-                  container.read(nutritionGoalSnapshotProvider).hasValue,
-            );
-            expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
-            expect(
-              find.text(language == 'ar' ? 'تحتاج مراجعة' : 'Review needed'),
-              findsNothing,
-            );
-            expect(
-              find.text(
-                language == 'ar'
-                    ? 'مرجع عام للملصق'
-                    : 'General label reference',
-              ),
-              findsNothing,
-            );
-            expect(
-              find.textContaining(
-                language == 'ar' ? 'ثبّت هدفك' : 'Lock your target',
-              ),
-              findsNothing,
-            );
-            debugPrint('goal fixture phase: snapshot ready');
-            final snapshot = container
-                .read(nutritionGoalSnapshotProvider)
-                .value!;
-            final read = container
-                .read(dashboardNutrientGoalProvider('goal.calories'))
-                .value;
-            expect(read, snapshot.goals['goal.calories']!.value);
-            expect(
-              container.read(defaultNutritionGoalTargetProvider)?.calories,
-              read,
-            );
-            expect(
-              container
-                  .read(dashboardPercentageNutritionGoalsProvider)
-                  ?.calories,
-              read,
-            );
-            if (state == 'legacy') {
-              expect(read, isNull);
-              expect(
-                await tester.runAsync<String?>(
-                  () => repository.get('goal.calories'),
-                ),
-                'NaN',
               );
-              expect(
-                await tester.runAsync<String?>(
-                  () => repository.get('goal.vitaminA'),
-                ),
-                '10',
-              );
-            }
-            if (state == 'custom') {
-              await tester.scrollUntilVisible(
-                find.byKey(const ValueKey('nutrition-goal-goal.fiber')),
-                350,
-                scrollable: find.byType(Scrollable).first,
-              );
+              debugPrint('goal fixture phase: UI pumped');
               await settle(tester);
-              expect(find.text('979 g'), findsNothing);
+              await waitFor(
+                tester,
+                () async =>
+                    container.read(nutritionGoalSnapshotProvider).hasValue,
+              );
+              expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
               expect(
                 find.text(language == 'ar' ? 'تحتاج مراجعة' : 'Review needed'),
                 findsNothing,
               );
-              expect(snapshot.goals['goal.fiber']!.value, isNull);
               expect(
-                await tester.runAsync<String?>(
-                  () => repository.get('goal.fiber'),
+                find.text(
+                  language == 'ar'
+                      ? 'مرجع عام للملصق'
+                      : 'General label reference',
                 ),
-                '979',
-              );
-              expect(snapshot.goals['goal.fiber']!.source, 'reviewRequired');
-              if (narrow) {
-                tester.view.viewInsets = const FakeViewPadding(bottom: 240);
-              }
-              await tester.tap(
-                find.byKey(const ValueKey('nutrition-goal-goal.fiber')),
-              );
-              await tester.pumpAndSettle();
-              expect(
-                find.byKey(const Key('nutrition-goal-editor-notice')),
-                findsOneWidget,
-              );
-              expect(
-                tester
-                    .widget<TextField>(find.byType(TextField))
-                    .controller!
-                    .text,
-                '979',
-              );
-              await captureClosureSurface(
-                tester,
-                find.byKey(const Key('goal-current-capture')),
-                'goals-provenance-$language-custom-editor',
-              );
-              await tester.tap(
-                find.byKey(const Key('nutrition-goal-editor-book')),
-              );
-              await tester.pumpAndSettle();
-              expect(find.textContaining('FDA Daily Value:'), findsOneWidget);
-              expect(find.textContaining('القيمة الأصلية'), findsNothing);
-              expect(find.textContaining('الأصل محفوظ'), findsNothing);
-              expect(find.textContaining('original preserved'), findsNothing);
-              expect(find.textContaining('Original value'), findsNothing);
-              await captureClosureSurface(
-                tester,
-                find.byKey(const Key('goal-current-capture')),
-                'goals-provenance-$language-fiber-book',
-              );
-              await tester.tap(
-                find.widgetWithText(
-                  TextButton,
-                  language == 'ar' ? 'إغلاق' : 'Close',
-                ),
-              );
-              await tester.pumpAndSettle();
-              await tester.tap(
-                find.widgetWithText(
-                  TextButton,
-                  language == 'ar' ? 'إلغاء' : 'Cancel',
-                ),
-              );
-              await settle(tester);
-              if (narrow) tester.view.resetViewInsets();
-              expect(
-                find.byKey(const Key('nutrition-goal-editor-notice')),
                 findsNothing,
               );
-              expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
-            }
-            if (state == 'grams') {
-              final row = find.byKey(
-                const ValueKey('nutrition-goal-goal.proteinGrams'),
-              );
-              debugPrint('goal fixture phase: scroll to grams');
-              await tester.scrollUntilVisible(
-                row,
-                250,
-                scrollable: find.byType(Scrollable).first,
-              );
-              await settle(tester);
-              debugPrint('goal fixture phase: editor tap');
-              await tester.tap(row);
-              await tester.pumpAndSettle();
-              debugPrint('goal fixture phase: entry');
-              await tester.enterText(
-                find.byType(TextField),
-                language == 'ar' ? '٦٠' : '60',
-              );
-              await tester.tap(
-                find.widgetWithText(
-                  FilledButton,
-                  language == 'ar' ? 'حفظ' : 'Save',
+              expect(
+                find.textContaining(
+                  language == 'ar' ? 'ثبّت هدفك' : 'Lock your target',
                 ),
+                findsNothing,
               );
-              debugPrint('goal fixture phase: save waiting');
-              await waitFor(
-                tester,
-                () => repository
-                    .get('goal.proteinGrams')
-                    .then((v) => v == '60.0'),
+              debugPrint('goal fixture phase: snapshot ready');
+              final snapshot = container
+                  .read(nutritionGoalSnapshotProvider)
+                  .value!;
+              final read = container
+                  .read(dashboardNutrientGoalProvider('goal.calories'))
+                  .value;
+              expect(read, snapshot.goals['goal.calories']!.value);
+              expect(
+                container.read(defaultNutritionGoalTargetProvider)?.calories,
+                read,
               );
               expect(
-                await tester.runAsync(
-                  () => repository.get('goal.proteinPercent'),
-                ),
-                '24.0',
+                container
+                    .read(dashboardPercentageNutritionGoalsProvider)
+                    ?.calories,
+                read,
               );
-              expect(
-                await tester.runAsync<String?>(
-                  () => repository.get('goal.carbsPercent'),
-                ),
-                '45.0',
-              );
-              expect(
-                double.parse(
-                  (await tester.runAsync<String?>(
-                    () => repository.get('goal.fatGrams'),
-                  ))!,
-                ),
-                closeTo(1000 * .31 / 9, 1e-10),
-              );
-              await settle(tester);
-              await tester.tap(row);
-              await tester.pumpAndSettle();
-              expect(
-                tester
-                    .widget<TextField>(find.byType(TextField))
-                    .controller!
-                    .text,
-                '60.0',
-              );
-            }
-            debugPrint('goal fixture phase: capture');
-            await captureClosureSurface(
-              tester,
-              find.byKey(const Key('goal-current-capture')),
-              'goals-provenance-$language-$state${narrow ? '-320-2x' : ''}',
-            );
-            if (state != 'grams') {
-              final book = find.byKey(const Key('nutrition-goals-source-book'));
-              await tester.ensureVisible(book);
-              await settle(tester);
-              await tester.tap(book);
-              await tester.pumpAndSettle();
-              expect(find.bySubtype<AlertDialog>(), findsOneWidget);
-              expect(
-                find.textContaining(language == 'ar' ? 'الماكروز' : 'Macros:'),
-                findsWidgets,
-              );
-              await captureClosureSurface(
-                tester,
-                find.byKey(const Key('goal-current-capture')),
-                'goals-provenance-$language-$state-book${narrow ? '-320-2x' : ''}',
-              );
-              if (state == 'custom') {
-                await tester.tap(
-                  find.byKey(const Key('restore-all-nutrition-goals')),
-                );
-                await tester.pump(const Duration(milliseconds: 400));
+              if (state == 'legacy') {
+                expect(read, isNull);
                 expect(
-                  find.byKey(const Key('confirm-all-goal-restore')),
-                  findsOneWidget,
+                  await tester.runAsync<String?>(
+                    () => repository.get('goal.calories'),
+                  ),
+                  'NaN',
                 );
-                await tester.tap(
-                  find.byKey(const Key('confirm-all-goal-restore')),
+                expect(
+                  await tester.runAsync<String?>(
+                    () => repository.get('goal.vitaminA'),
+                  ),
+                  '10',
                 );
-                await waitFor(
-                  tester,
-                  () => repository
-                      .get('goal.fiber')
-                      .then((value) => value == null),
+              }
+              if (state == 'custom') {
+                await tester.scrollUntilVisible(
+                  find.byKey(const ValueKey('nutrition-goal-goal.fiber')),
+                  350,
+                  scrollable: find.byType(Scrollable).first,
                 );
                 await settle(tester);
-                final restored = container.read(
-                  nutritionGoalCurrentSnapshotProvider,
-                )!;
-                expect(restored.goals['goal.fiber']!.value, 28);
-                expect(restored.goals['goal.sugar']!.value, isNull);
-                final savedBackups = await tester.runAsync(
-                  () async => (await db.select(db.preferences).get())
-                      .where((row) => row.key.startsWith('goal.backup.v1.'))
-                      .map((row) => row.value)
-                      .toList(),
+                expect(find.text('979 g'), findsNothing);
+                expect(
+                  find.text(
+                    language == 'ar' ? 'تحتاج مراجعة' : 'Review needed',
+                  ),
+                  findsNothing,
                 );
-                expect(savedBackups!.single, contains('979'));
-                expect(savedBackups.single, contains('765'));
+                expect(snapshot.goals['goal.fiber']!.value, isNull);
+                expect(
+                  await tester.runAsync<String?>(
+                    () => repository.get('goal.fiber'),
+                  ),
+                  '979',
+                );
+                expect(snapshot.goals['goal.fiber']!.source, 'reviewRequired');
+                if (narrow) {
+                  tester.view.viewInsets = const FakeViewPadding(bottom: 240);
+                }
+                await tester.tap(
+                  find.byKey(const ValueKey('nutrition-goal-goal.fiber')),
+                );
+                await tester.pumpAndSettle();
+                expect(
+                  find.byKey(const Key('nutrition-goal-editor-notice')),
+                  findsOneWidget,
+                );
+                expect(
+                  tester
+                      .widget<TextField>(find.byType(TextField))
+                      .controller!
+                      .text,
+                  '979',
+                );
+                await captureClosureSurface(
+                  tester,
+                  find.byKey(const Key('goal-current-capture')),
+                  'goals-provenance-$language-custom-editor',
+                );
+                await tester.tap(
+                  find.byKey(const Key('nutrition-goal-editor-book')),
+                );
+                await tester.pumpAndSettle();
+                expect(find.textContaining('FDA Daily Value:'), findsOneWidget);
+                expect(find.textContaining('القيمة الأصلية'), findsNothing);
+                expect(find.textContaining('الأصل محفوظ'), findsNothing);
+                expect(find.textContaining('original preserved'), findsNothing);
+                expect(find.textContaining('Original value'), findsNothing);
+                await captureClosureSurface(
+                  tester,
+                  find.byKey(const Key('goal-current-capture')),
+                  'goals-provenance-$language-fiber-book',
+                );
                 await tester.tap(
                   find.widgetWithText(
                     TextButton,
@@ -372,33 +242,266 @@ void main() {
                   ),
                 );
                 await tester.pumpAndSettle();
+                await tester.tap(
+                  find.widgetWithText(
+                    TextButton,
+                    language == 'ar' ? 'إلغاء' : 'Cancel',
+                  ),
+                );
+                await settle(tester);
+                if (narrow) tester.view.resetViewInsets();
+                expect(
+                  find.byKey(const Key('nutrition-goal-editor-notice')),
+                  findsNothing,
+                );
+                expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
+              }
+              if (state == 'grams') {
+                final row = find.byKey(
+                  const ValueKey('nutrition-goal-goal.proteinGrams'),
+                );
+                debugPrint('goal fixture phase: scroll to grams');
+                await tester.scrollUntilVisible(
+                  row,
+                  250,
+                  scrollable: find.byType(Scrollable).first,
+                );
+                await settle(tester);
+                debugPrint('goal fixture phase: editor tap');
+                await tester.tap(row);
+                await tester.pumpAndSettle();
+                debugPrint('goal fixture phase: entry');
+                await tester.enterText(
+                  find.byType(TextField),
+                  language == 'ar' ? '٦٠' : '60',
+                );
+                await tester.tap(
+                  find.widgetWithText(
+                    FilledButton,
+                    language == 'ar' ? 'حفظ' : 'Save',
+                  ),
+                );
+                debugPrint('goal fixture phase: save waiting');
+                await waitFor(
+                  tester,
+                  () => repository
+                      .get('goal.proteinGrams')
+                      .then((v) => v == '60.0'),
+                );
+                expect(
+                  await tester.runAsync(
+                    () => repository.get('goal.proteinPercent'),
+                  ),
+                  '24.0',
+                );
+                expect(
+                  await tester.runAsync<String?>(
+                    () => repository.get('goal.carbsPercent'),
+                  ),
+                  '45.0',
+                );
+                expect(
+                  double.parse(
+                    (await tester.runAsync<String?>(
+                      () => repository.get('goal.fatGrams'),
+                    ))!,
+                  ),
+                  closeTo(1000 * .31 / 9, 1e-10),
+                );
+                await settle(tester);
+                await tester.tap(row);
+                await tester.pumpAndSettle();
+                expect(
+                  tester
+                      .widget<TextField>(find.byType(TextField))
+                      .controller!
+                      .text,
+                  '60',
+                  reason:
+                      'The editor shows whole grams; the saved value and '
+                      'the coupled macro calculations above retain precision.',
+                );
+              }
+              debugPrint('goal fixture phase: capture');
+              await captureClosureSurface(
+                tester,
+                find.byKey(const Key('goal-current-capture')),
+                'goals-provenance-$language-$state${narrow ? '-320-2x' : ''}',
+              );
+              if (state != 'grams') {
+                final book = find.byKey(
+                  const Key('nutrition-goals-source-book'),
+                );
+                await tester.ensureVisible(book);
+                await settle(tester);
+                await tester.tap(book);
+                await tester.pumpAndSettle();
+                expect(find.bySubtype<AlertDialog>(), findsOneWidget);
+                expect(
+                  find.textContaining(
+                    language == 'ar' ? 'الماكروز' : 'Macros:',
+                  ),
+                  findsWidgets,
+                );
                 await captureClosureSurface(
                   tester,
                   find.byKey(const Key('goal-current-capture')),
-                  'goals-provenance-$language-restored-reference',
+                  'goals-provenance-$language-$state-book${narrow ? '-320-2x' : ''}',
                 );
+                if (state == 'custom') {
+                  await tester.tap(
+                    find.byKey(const Key('restore-all-nutrition-goals')),
+                  );
+                  await tester.pump(const Duration(milliseconds: 400));
+                  expect(
+                    find.byKey(const Key('confirm-all-goal-restore')),
+                    findsOneWidget,
+                  );
+                  await tester.tap(
+                    find.byKey(const Key('confirm-all-goal-restore')),
+                  );
+                  await waitFor(
+                    tester,
+                    () => repository
+                        .get('goal.fiber')
+                        .then((value) => value == null),
+                  );
+                  await settle(tester);
+                  final restored = container.read(
+                    nutritionGoalCurrentSnapshotProvider,
+                  )!;
+                  expect(restored.goals['goal.fiber']!.value, 28);
+                  expect(restored.goals['goal.sugar']!.value, isNull);
+                  final savedBackups = await tester.runAsync(
+                    () async => (await db.select(db.preferences).get())
+                        .where((row) => row.key.startsWith('goal.backup.v1.'))
+                        .map((row) => row.value)
+                        .toList(),
+                  );
+                  expect(savedBackups!.single, contains('979'));
+                  expect(savedBackups.single, contains('765'));
+                  await tester.tap(
+                    find.widgetWithText(
+                      TextButton,
+                      language == 'ar' ? 'إغلاق' : 'Close',
+                    ),
+                  );
+                  await tester.pumpAndSettle();
+                  await captureClosureSurface(
+                    tester,
+                    find.byKey(const Key('goal-current-capture')),
+                    'goals-provenance-$language-restored-reference',
+                  );
+                }
               }
+              expect(tester.takeException(), isNull);
+            } catch (error, stack) {
+              failures.add((stage: 'original', error: error, stack: stack));
+            } finally {
+              await _attemptGoalCleanup(failures, 'unmount', () async {
+                await tester.pumpWidget(const SizedBox.shrink());
+                await tester.pump(const Duration(milliseconds: 400));
+              });
+              await _attemptGoalCleanup(
+                failures,
+                'calorie subscription',
+                () async {
+                  calorieSubscription.close();
+                },
+              );
+              await _attemptGoalCleanup(
+                failures,
+                'provider container',
+                () async {
+                  container.dispose();
+                },
+              );
+              await _attemptGoalCleanup(
+                failures,
+                'stream cancellation drain',
+                () async {
+                  // Disposing the external container schedules Drift's stream
+                  // cancellation timers. Drain them before starting DB.close.
+                  await tester.pump();
+                  await tester.runAsync(
+                    () => Future<void>.delayed(const Duration(milliseconds: 4)),
+                  );
+                  await tester.pump();
+                },
+              );
+              await _attemptGoalCleanup(failures, 'database close', () async {
+                await _closeGoalDatabase(tester, db);
+              });
             }
-            expect(tester.takeException(), isNull);
-            await tester.pumpWidget(const SizedBox.shrink());
-            await tester.pump(const Duration(milliseconds: 400));
-            calorieSubscription.close();
-            debugPrint('goal fixture phase: finished');
-            container.dispose();
-            var closeFinished = false;
-            final closing = db.close().whenComplete(() => closeFinished = true);
-            await waitFor(tester, () async => closeFinished);
-            await closing;
-            closed = true;
-            await tester.pump();
-            await tester.runAsync(
-              () => Future<void>.delayed(const Duration(milliseconds: 4)),
-            );
+            _throwGoalCleanupFailures(failures);
           },
         );
       }
     }
   }
+}
+
+// These are the same ordered disposal/error-preservation and host/fake-clock
+// handshake patterns already used by dashboard_preferences_release_matrix_test.
+// The helpers there are private to that test library; importing its main would
+// register an unrelated matrix, so this fixture keeps a small local version.
+Future<void> _attemptGoalCleanup(
+  List<({String stage, Object error, StackTrace stack})> failures,
+  String stage,
+  Future<void> Function() cleanup,
+) async {
+  debugPrint('goal fixture cleanup phase: $stage');
+  try {
+    await cleanup();
+  } catch (error, stack) {
+    failures.add((stage: stage, error: error, stack: stack));
+  }
+}
+
+Future<void> _closeGoalDatabase(
+  WidgetTester tester,
+  AppDatabase database,
+) async {
+  var finished = false;
+  Object? failure;
+  StackTrace? failureStack;
+  // Start close without awaiting its fake-zone cancellation timers. The
+  // existing bounded waitFor pumps fake time and real SQLite events together.
+  Future<void>.sync(database.close).then<void>(
+    (_) => finished = true,
+    onError: (Object error, StackTrace stack) {
+      failure = error;
+      failureStack = stack;
+      finished = true;
+    },
+  );
+  await waitFor(tester, () async => finished);
+  if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
+  debugPrint('goal fixture cleanup phase: database closed');
+}
+
+void _throwGoalCleanupFailures(
+  List<({String stage, Object error, StackTrace stack})> failures,
+) {
+  if (failures.length == 1) {
+    Error.throwWithStackTrace(failures.single.error, failures.single.stack);
+  }
+  if (failures.isNotEmpty) {
+    Error.throwWithStackTrace(
+      _GoalCleanupFailures(failures),
+      failures.first.stack,
+    );
+  }
+}
+
+class _GoalCleanupFailures implements Exception {
+  _GoalCleanupFailures(this.failures);
+  final List<({String stage, Object error, StackTrace stack})> failures;
+
+  @override
+  String toString() => failures
+      .map((failure) => '${failure.stage}: ${failure.error}\n${failure.stack}')
+      .join('\n');
 }
 
 Future<void> settle(WidgetTester tester) async {

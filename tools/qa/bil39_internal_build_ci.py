@@ -28,8 +28,8 @@ WORKFLOWS = {
         'Local Supabase migrations, SQL, Auth and RLS',
         'Isolated Semgrep source audit',
         'Android API 33 native integration without CodeQL tracing'},
-    'bil39_iphone_native.yml': {'iPhone native tests from exact BIL39 simulator bundles'},
-    'bil39_ipad_native.yml': {'iPad native tests from exact BIL39 simulator bundles'},
+    'bil39_iphone_native.yml': {'native / Native iOS source QA (iphone)'},
+    'bil39_ipad_native.yml': {'native / Native iOS source QA (ipad)'},
     'bil_android_isolated_emulator_smoke.yml': {
         f'Android {api} offline-config startup' for api in (26, 29, 33, 34, 35, 36)},
     'bil39_cloud_source_qa.yml': {'isolated-coach-handler'},

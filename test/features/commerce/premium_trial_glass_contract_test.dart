@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../dashboard/dashboard_discover_stability_test.dart'
+    show verifyAndroidDiscoverBackNavigation;
+
 void main() {
   test('trial and locked-card copy is complete in all 25 locales', () {
     const keys = <String>[
@@ -127,15 +130,8 @@ void main() {
     },
   );
 
-  test('discover destinations preserve Android back navigation', () {
-    final source = File(
-      'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
-    ).readAsStringSync();
-
-    expect(
-      source,
-      contains('onTap: checking ? null : () => context.push(route)'),
-    );
-    expect(source, isNot(contains('onTap: () => context.go(route)')));
-  });
+  testWidgets(
+    'discover destinations preserve Android back navigation',
+    verifyAndroidDiscoverBackNavigation,
+  );
 }

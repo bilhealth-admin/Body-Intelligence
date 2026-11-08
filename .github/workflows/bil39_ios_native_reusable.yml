@@ -1,0 +1,121 @@
+name: BIL reusable single-device native source QA
+
+on:
+  workflow_call:
+    inputs:
+      device:
+        required: true
+        type: string
+    outputs:
+      artifact_id:
+        value: ${{ jobs.native.outputs.artifact_id }}
+      artifact_digest:
+        value: ${{ jobs.native.outputs.artifact_digest }}
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: Native iOS source QA (${{ inputs.device }})
+    runs-on: macos-26
+    timeout-minutes: 100
+    outputs:
+      artifact_id: ${{ steps.native_evidence.outputs['artifact-id'] }}
+      artifact_digest: ${{ steps.native_evidence.outputs['artifact-digest'] }}
+    steps:
+      - name: Validate exactly one native device before checkout
+        id: device_guard
+        shell: bash
+        env:
+          BIL_NATIVE_DEVICE: ${{ inputs.device }}
+        run: |
+          set -euo pipefail
+          case "$BIL_NATIVE_DEVICE" in
+            iphone|ipad) ;;
+            *) echo 'Exactly one approved native device is required' >&2; exit 2 ;;
+          esac
+      - name: Check out exact integration source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Bind actual native source, caller, target and reusable workflow
+        shell: bash
+        env:
+          BIL_NATIVE_DEVICE: ${{ inputs.device }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_NATIVE_SOURCE_PROVENANCE'
+          import hashlib, json, os, re, subprocess
+          from pathlib import Path
+          target = os.environ['BIL_NATIVE_DEVICE']
+          if target not in ('iphone', 'ipad'):
+              raise ValueError('Unknown native source target')
+          source = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          tree = subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip()
+          if source != os.environ['GITHUB_SHA'] or not re.fullmatch('[a-f0-9]{40}', source):
+              raise ValueError('Actual checkout is not the caller commit')
+          reusable = '.github/workflows/bil39_ios_native_reusable.yml'
+          caller = '.github/workflows/bil39_' + target + '_native.yml'
+          paths = [reusable, caller, '.github/scripts/bil39_ios_native_integration.sh',
+              '.github/scripts/bil39_native_receipts.py',
+              '.github/scripts/bil39_simulator_vm_attach.py', '.github/scripts/bil_ios_runner_tests.py',
+              'integration_test/system_crypto_bridge_integration_test.dart',
+              'integration_test/native_settings_polish_test.dart', 'integration_test/native_feature_splashes_test.dart',
+              'test_driver/native_settings_capture_driver.dart', 'test_driver/native_feature_splashes_driver.dart',
+              'ios/RunnerTests/RunnerTests.swift']
+          output = Path('artifacts/qa/bil39-native-' + target) / 'controller-provenance.json'
+          output.parent.mkdir(parents=True, exist_ok=True)
+          receipt = {'schema':'bil.native-source-reusable.v1', 'application_source_sha':source,
+              'application_source_tree':tree, 'repository':os.environ['GITHUB_REPOSITORY'],
+              'caller_workflow':caller, 'caller_workflow_ref':os.environ['GITHUB_WORKFLOW_REF'],
+              'caller_ref':os.environ['GITHUB_REF'], 'reusable_workflow':reusable,
+              'run_id':os.environ['GITHUB_RUN_ID'], 'run_attempt':os.environ['GITHUB_RUN_ATTEMPT'],
+              'device':target, 'qa_harness_build':39, 'signed_artifact_acceptance':False,
+              'physical_device_acceptance':False,
+              'source_scope_hashes':{path:hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in paths}}
+          output.write_text(json.dumps(receipt, indent=2)+'\n', encoding='utf-8')
+          PY_NATIVE_SOURCE_PROVENANCE
+      - name: Verify native preparation and independent device orchestration
+        run: |
+          python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
+          python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
+          python3 -m unittest discover -s tools/qa -p test_bil39_native_split.py -v
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Select exact CocoaPods in an isolated job gem home
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
+          python3 .github/scripts/install_isolated_cocoapods.py \
+            --output artifacts/qa/bil39-native-${{ inputs.device }}/cocoapods-installation.json
+      - name: Resolve existing dependencies and native pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          pod install --project-directory=ios
+      - name: Verify Flutter UIKit composition and IME behavior before native build
+        run: >
+          flutter test --no-pub
+          test/features/intelligence_center/coach_native_chat_presentation_test.dart
+          test/features/intelligence_center/coach_reply_arrival_test.dart
+      - name: Drive all native scopes on dedicated iOS
+        env:
+          BIL_NATIVE_DEVICE: ${{ inputs.device }}
+        run: bash .github/scripts/bil39_ios_native_integration.sh
+      - name: Upload exact iOS native evidence
+        id: native_evidence
+        if: always() && steps.device_guard.outcome == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil-native-${{ inputs.device }}-${{ github.sha }}-r${{ github.run_id }}-a${{ github.run_attempt }}
+          path: artifacts/qa/bil39-native-${{ inputs.device }}
+          if-no-files-found: error
+          retention-days: 14

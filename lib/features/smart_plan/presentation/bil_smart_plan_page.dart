@@ -42,8 +42,8 @@ import '../domain/bil_smart_plan_review.dart';
 import '../services/bil_smart_plan_catalog.dart';
 import '../services/bil_smart_plan_prescriptions.dart';
 import 'bil_smart_plan_panel.dart';
+import 'bil_smart_plan_sources.dart';
 import 'bil_smart_plan_load_failure.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../services/bil_smart_plan_phase_copy.dart';
 import '../../wellness/domain/wellness_content_pack.dart';
 import '../../wellness/services/wellness_content_pack_manager.dart';
@@ -421,6 +421,16 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
       appBar: AppBar(
         title: Text(_t('My Plan', 'خطتي')),
         actions: [
+          BilSmartPlanBookButton(
+            key: const ValueKey('bil-smart-plan-sources'),
+            label: _t('Plan sources', 'مصادر الخطة'),
+            onPressed: () => showBilSmartPlanSources(
+              context,
+              home: plan?.setup?.environment == BilPlanEnvironment.home,
+              training: plan?.focus != BilPlanFocus.nutrition,
+              nutrition: plan?.focus != BilPlanFocus.training,
+            ),
+          ),
           PopupMenuButton<String>(
             key: const ValueKey('bil-smart-plan-options'),
             enabled: !_busy,

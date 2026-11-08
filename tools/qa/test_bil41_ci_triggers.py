@@ -6,10 +6,12 @@ from types import SimpleNamespace
 import unittest
 
 from bil40_internal_build_ci import WORKFLOWS
+from bil_native_source_evidence import validate_native_workflow_contract
 
 ROOT = Path(__file__).resolve().parents[2]
 RELEASE_BRANCH = 'codex/bil41-android33-release-20261106'
 PROMOTION_BRANCH = 'codex/bil41-internal-testflight-20261106'
+NEW_SOURCE_BRANCH = 'codex/bil43-android35-verified-20261108'
 
 
 def push_branches(source):
@@ -34,8 +36,11 @@ def push_branches(source):
 
 
 def selected_job(source, job, *, branch, event='push', **options):
-    block = re.search(r'^  ' + re.escape(job) + r':\n(.*?)(?=^  [\w-]+:\n|\Z)',
-                      source.split('\njobs:\n', 1)[1], re.M | re.S).group(1)
+    match = re.search(r'^  ' + re.escape(job) + r':\n(.*?)(?=^  [\w-]+:\n|\Z)',
+                      source.split('\njobs:\n', 1)[1], re.M | re.S)
+    if match is None:
+        return False
+    block = match.group(1)
     condition = re.search(r'^    if:\s*(.*?)^    name:', block, re.M | re.S).group(1)
     expression = condition.replace('>-', '').replace('${{', '').replace('}}', '')
     expression = expression.replace('&&', ' and ').replace('||', ' or ').replace('!=', '<>')
@@ -70,6 +75,7 @@ class Release41CiTriggersTest(unittest.TestCase):
             with self.subTest(workflow=name):
                 branches = push_branches(source)
                 self.assertIn(RELEASE_BRANCH, branches)
+                self.assertIn(NEW_SOURCE_BRANCH, branches)
                 self.assertIn('bil39/integration-20261025', branches)
                 self.assertIn('codex/bil40-device-fixes-20261028', branches)
 
@@ -83,24 +89,24 @@ class Release41CiTriggersTest(unittest.TestCase):
                                      branch=RELEASE_BRANCH))
         self.assertFalse(selected_job(self.security, 'isolated-source-audit',
                                       branch=PROMOTION_BRANCH))
+        self.assertTrue(selected_job(self.security,'isolated-source-audit',branch=NEW_SOURCE_BRANCH))
 
     def test_release_keeps_iphone_and_ipad_in_independent_runs(self):
-        self.assertFalse(selected_job(self.security, 'ios-native-integration',
-                                      branch=RELEASE_BRANCH))
-        for device in ('iphone', 'ipad'):
-            source = self.sources[f'bil39_{device}_native.yml']
-            jobs = source.split('\njobs:\n', 1)[1]
-            self.assertEqual(re.findall(r'^  ([\w-]+):$', jobs, re.M), ['native'])
-            self.assertNotRegex(jobs, r'(?m)^    if:')
-            self.assertNotIn('matrix:', jobs)
-            self.assertIn(f'BIL_NATIVE_DEVICE: {device}', jobs)
+        for branch in (RELEASE_BRANCH,NEW_SOURCE_BRANCH):
+            self.assertFalse(selected_job(self.security,'ios-native-integration',branch=branch))
+            for device in ('iphone','ipad'):
+                proof=validate_native_workflow_contract(ROOT,device,branch)
+                self.assertEqual(proof['device'],device)
+                self.assertGreaterEqual(len(proof['runner_test_names']),8)
 
     def test_existing_native_scopes_and_manual_audit_keep_their_selection(self):
         for branch in ('bil39/integration-20261025', 'codex/bil40-device-fixes-20261028'):
             with self.subTest(branch=branch):
                 self.assertTrue(selected_job(self.security, 'isolated-source-audit', branch=branch))
                 self.assertFalse(selected_job(self.security, 'ios-native-integration', branch=branch))
-        self.assertTrue(selected_job(self.security, 'ios-native-integration', branch='main'))
+        self.assertFalse(selected_job(self.security, 'ios-native-integration', branch='main'))
+        for device in ('iphone','ipad'):
+            self.assertEqual(validate_native_workflow_contract(ROOT,device,'main')['device'],device)
         self.assertTrue(selected_job(self.security, 'isolated-source-audit',
                                      branch='audit-fixture', event='workflow_dispatch',
                                      source_audit_only=True))

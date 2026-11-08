@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/app/localization/runtime_copy_next_batch_closure.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_integration_gap.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_closure_access.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_closure_coach.dart';
@@ -133,6 +134,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     File('lib/features/auth/auth_five_locale_copy.dart').readAsString(),
   ])).join('\n');
   final catalogKeys = <String>{
+    ...NextBatchClosureRuntimeCopy.sources,
     ...SmartPlanVisualRuntimeCopy.sources,
     ...ClosureAccessRuntimeCopy.sources,
     ...ClosureCoachRuntimeCopy.sources,

@@ -335,6 +335,81 @@ void main() {
     },
   );
 
+  for (final language in ['en', 'ar']) {
+    for (final width in [320.0, 390.0]) {
+      testWidgets(
+        'saved birth date includes its year in $language at ${width.toInt()}px with large text',
+        (tester) async {
+          final owner = 'profile-dob-$language-${width.toInt()}';
+          final database = await _seedDatabase(localOwnerId: owner);
+          addTearDown(database.close);
+          final preferences = PreferencesRepository(database);
+          final birthDate = DateTime(1991, 10, 25);
+          final storedBirthDate = birthDate.toIso8601String();
+          await preferences.set('profileDateOfBirth', storedBirthDate);
+          final semantics = tester.ensureSemantics();
+          try {
+            await _pumpProfile(
+              tester,
+              database,
+              identity: ProfileAuthIdentity(ownerId: owner, email: null),
+              locale: Locale(language),
+              textScaler: const TextScaler.linear(1.6),
+              surfaceSize: Size(width, 844),
+            );
+            final row = find.byKey(const Key('profile-date-of-birth-row'));
+            await tester.scrollUntilVisible(
+              row,
+              240,
+              scrollable: find.byType(Scrollable).first,
+            );
+            await tester.pumpAndSettle();
+
+            final context = tester.element(row);
+            final localizations = MaterialLocalizations.of(context);
+            final localizedYear = localizations.formatYear(birthDate);
+            final label = language == 'ar' ? 'تاريخ الميلاد' : 'Date of birth';
+            final valueFinder = find.descendant(
+              of: row,
+              matching: find.byWidgetPredicate(
+                (widget) => widget is Text && widget.data != label,
+              ),
+            );
+            final value = tester.widget<Text>(valueFinder);
+            expect(value.data, contains(localizedYear));
+            expect(value.data, localizations.formatShortDate(birthDate));
+            if (language == 'en') expect(value.data, 'Oct 25, 1991');
+            expect(value.semanticsLabel, value.data);
+            expect(
+              tester.getSemantics(valueFinder).label,
+              contains(localizedYear),
+            );
+            expect(
+              find.descendant(
+                of: row,
+                matching: find.byTooltip('$label: ${value.data}'),
+              ),
+              findsOneWidget,
+            );
+            expect(
+              Directionality.of(context),
+              language == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+            );
+            expect(tester.takeException(), isNull);
+            expect(
+              await preferences.get('profileDateOfBirth'),
+              storedBirthDate,
+            );
+          } finally {
+            semantics.dispose();
+            await tester.pumpWidget(const SizedBox.shrink());
+            await tester.pumpAndSettle();
+          }
+        },
+      );
+    }
+  }
+
   testWidgets('sex chooser is centered, arrow-free, and persists selection', (
     tester,
   ) async {

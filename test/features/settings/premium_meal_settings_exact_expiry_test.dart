@@ -33,381 +33,478 @@ const _secureStorage = MethodChannel(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   var ownerSequence = 0;
-  for (final openBeforeExpiry in [false, true]) {
-    testWidgets(
-      'actual meal settings rejects ${openBeforeExpiry ? 'already-open' : 'new'} edit at exact expiry',
-      (tester) async {
-        final owner =
-            '00000000-0000-4000-8002-${(++ownerSequence).toString().padLeft(12, '0')}';
-        final start = DateTime.now().toUtc();
-        final boundary = start.add(const Duration(seconds: 20));
-        var clock = start;
-        var authorityReads = 0;
-        var authorityFinished = false;
-        var authorityCompletions = 0;
-        final boundaryRead = Completer<void>();
-        final requestPaths = <String>[];
-        Object? fixtureFailure;
-        final secureValues = <String, String>{};
-        SharedPreferences.setMockInitialValues({});
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          _secureStorage,
-          (call) async {
-            final args = Map<String, Object?>.from(call.arguments as Map);
-            final key = args['key'] as String?;
-            switch (call.method) {
-              case 'read':
-                return secureValues[key];
-              case 'write':
-                secureValues[key!] = args['value']! as String;
-                return null;
-              case 'delete':
-                secureValues.remove(key);
-                return null;
-              default:
-                throw StateError('Unexpected secure storage operation');
-            }
-          },
-        );
-        final transport = MockClient((request) async {
-          requestPaths.add(request.url.path);
-          try {
-            // This callback was registered before pumpWidget. expectSync keeps
-            // the strict HTTP assertions without a conflicting widget guard.
-            expectSync(request.url.host, 'meal-expiry-fixture.invalid');
-            expectSync(
-              request.headers['authorization'],
-              'Bearer meal-expiry-fixture-token',
-            );
-            Object? response;
-            switch (request.url.path) {
-              case '/rest/v1/bil_ai_closed_test_grants':
-                expectSync(
-                  request.url.queryParameters['owner_id'],
-                  'eq.$owner',
-                );
-                authorityReads++;
-                if (authorityReads > 1) {
-                  // The exact-cutoff refresh is real but deliberately remains
-                  // unanswered until cleanup. Local access must lock first.
-                  await boundaryRead.future;
-                }
-                response = <Object?>[];
-              case '/rest/v1/bil_subscriptions':
-                expectSync(
-                  request.url.queryParameters['owner_id'],
-                  'eq.$owner',
-                );
-                response = [
-                  {
-                    'owner_id': owner,
-                    'provider': 'google',
-                    'plan_id': 'premium',
-                    'lifecycle': 'active',
-                    'started_at': start
-                        .subtract(const Duration(days: 1))
-                        .toIso8601String(),
-                    'expires_at': boundary.toIso8601String(),
-                    'verified_at': start.toIso8601String(),
-                  },
-                ];
-              case '/rest/v1/rpc/bil_get_my_admin_subscription':
-                response = null;
-                authorityCompletions++;
-                authorityFinished = true;
-              default:
-                throw StateError(
-                  'Unexpected fixture HTTP path: ${request.url.path}',
-                );
-            }
-            return http.Response(
-              jsonEncode(response),
-              200,
-              headers: {'content-type': 'application/json'},
-              request: request,
-            );
-          } on Object catch (error) {
-            fixtureFailure = error;
-            rethrow;
-          }
-        });
-        await tester.runAsync(() async {
-          await Supabase.initialize(
-            url: 'https://meal-expiry-fixture.invalid',
-            publishableKey: 'meal-expiry-fixture-publishable-key',
-            debug: false,
-            authOptions: const FlutterAuthClientOptions(
-              autoRefreshToken: false,
-              detectSessionInUri: false,
-              localStorage: EmptyLocalStorage(),
-            ),
-            httpClient: transport,
-          );
-          await Supabase.instance.client.auth.setInitialSession(
-            jsonEncode({
-              'access_token': 'meal-expiry-fixture-token',
-              'token_type': 'bearer',
-              'user': {
-                'id': owner,
-                'app_metadata': {},
-                'user_metadata': {},
-                'aud': 'authenticated',
-                'created_at': '2026-01-01T00:00:00Z',
-              },
-            }),
-          );
-        });
-        final database = AppDatabase.forTesting(
-          NativeDatabase.memory(),
-          localOwnerId: owner,
-        );
-        final preferences = PreferencesRepository(database);
-        final container = ProviderContainer(
-          overrides: [
-            databaseProvider.overrideWithValue(database),
-            verifiedEntitlementClockProvider.overrideWithValue(() => clock),
-          ],
-        );
-        // Observe the genuine exact-cutoff view without replacing its behavior,
-        // independently of whichever snapshot the actual settings UI consumes.
-        final cutoffObserver = container.listen(
-          verifiedSubscriptionAccessProvider,
-          (_, _) {},
-          fireImmediately: true,
-        );
-        final router = GoRouter(
-          initialLocation: '/settings/nutrition-meal-calorie-goals',
-          routes: [
-            GoRoute(
-              path: '/settings/nutrition-meal-calorie-goals',
-              builder: (_, _) => const MealCalorieGoalsPage(),
-            ),
-            GoRoute(
-              path: '/plans',
-              builder: (_, _) =>
-                  const BilStorePlansPage(connectToDeviceStore: false),
-            ),
-          ],
-        );
-        try {
-          await tester.pumpWidget(
-            UncontrolledProviderScope(
-              container: container,
-              child: MaterialApp.router(
-                routerConfig: router,
-                locale: const Locale('en'),
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
-              ),
-            ),
-          );
-          await _waitUntil(
-            tester,
-            () =>
-                authorityFinished &&
-                find.text('Breakfast').hitTestable().evaluate().isNotEmpty,
-            'genuine active paid snapshot and actual unlocked meal settings',
-            diagnostics: () {
-              final state = container.read(verifiedSubscriptionStateProvider);
-              final goals = container.read(mealCalorieGoalsProvider);
-              return 'reads=$authorityReads; finished=$authorityFinished; '
-                  'subscription=$state; mealGoals=$goals; '
-                  'requests=$requestPaths; '
-                  'fixtureFailure=$fixtureFailure; '
-                  'plan=${state.value?.plan}; '
-                  'auth=${Supabase.instance.client.auth.currentUser?.id}; '
-                  'owner=${container.read(verifiedEntitlementOwnerIdProvider)}; '
-                  'breakfast=${find.text('Breakfast').evaluate().length}; '
-                  'hit=${find.text('Breakfast').hitTestable().evaluate().length}';
-            },
-          );
-          final verified = container
-              .read(verifiedSubscriptionStateProvider)
-              .requireValue;
-          expect(fixtureFailure, isNull);
-          expect(verified.authority, EntitlementAuthority.verifiedServer);
-          expect(verified.plan, CommercePlan.premium);
-          expect(verified.currentPeriodEndsAt, boundary);
-          expect(
-            container
-                .read(verifiedSubscriptionAccessProvider)
-                .requireValue
-                .plan,
-            CommercePlan.premium,
-          );
-          expect(authorityReads, 1);
-
-          // Prove that the same production widget/callback really saves locally
-          // while its authoritative paid period is valid, not just a UI shell.
-          await tester.tap(find.text('Breakfast'));
-          await _waitUntil(
-            tester,
-            () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
-            'initial actual meal edit dialog',
-          );
-          await tester.enterText(find.byType(TextField), '620');
-          await tester.tap(find.widgetWithText(FilledButton, 'Save'));
-          await _waitUntil(
-            tester,
-            () =>
-                find.bySubtype<AlertDialog>().evaluate().isEmpty &&
-                find.text('620 kcal').evaluate().isNotEmpty,
-            'initial SQLite write/readback',
-          );
-          String? initial;
-          await _finishHost(tester, () async {
-            initial = await preferences.get(mealCalorieGoalKey('breakfast'));
-          });
-          expect(initial, '620.0');
-
-          if (openBeforeExpiry) {
-            await tester.tap(find.text('Breakfast'));
-            await _waitUntil(
-              tester,
-              () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
-              'real dialog remains open while paid access expires',
-            );
-            await tester.enterText(find.byType(TextField), '900');
-          }
-          // Fire the exact boundary. Its one new background authority read
-          // is deliberately held; local lock cannot wait for that response.
-          // No paid state, entitlement loader or access provider is overridden.
-          clock = boundary;
-          await tester.pump(const Duration(seconds: 20));
-          await tester.pump();
-          final expired = container
-              .read(verifiedSubscriptionAccessProvider)
-              .requireValue;
-          expect(expired.plan, CommercePlan.free);
-          expect(expired.lifecycle, SubscriptionLifecycle.expired);
-          expect(
-            container.read(verifiedSubscriptionStateProvider).requireValue.plan,
-            CommercePlan.premium,
-            reason:
-                'The old paid snapshot is retained while the boundary read is pending',
-          );
-          await _waitUntil(
-            tester,
-            () => authorityReads == 2,
-            'one real boundary refresh is pending after immediate local lock',
-          );
-          expect(authorityCompletions, 1);
-          expect(boundaryRead.isCompleted, isFalse);
-          expect(
-            container.read(verifiedSubscriptionStateProvider).isLoading,
-            isTrue,
-          );
-
-          // Try the actual local gesture only if the production route still
-          // exposes it. Correct lock/removal also passes the invariant below.
-          if (!openBeforeExpiry &&
-              find.text('Breakfast').hitTestable().evaluate().isNotEmpty) {
-            await tester.tap(find.text('Breakfast'));
-            await _waitUntil(
-              tester,
-              () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
-              'post-expiry stale real editor',
-            );
-            await tester.enterText(find.byType(TextField), '900');
-          }
-          final staleSave = find
-              .widgetWithText(FilledButton, 'Save')
-              .hitTestable();
-          if (staleSave.evaluate().isNotEmpty) {
-            await tester.tap(staleSave);
-          }
-          await _waitUntil(
-            tester,
-            () => find.bySubtype<AlertDialog>().evaluate().isEmpty,
-            'stale real editor is closed without a new SQLite write',
-          );
-          String? persisted;
-          await _finishHost(tester, () async {
-            persisted = await preferences.get(mealCalorieGoalKey('breakfast'));
-          });
-          expect(
-            persisted,
-            '620.0',
-            reason:
-                'An expired paid callback must not persist a new local meal goal',
-          );
-          expect(
-            find.text('Breakfast').hitTestable(),
-            findsNothing,
-            reason: 'Expired settings controls must become inaccessible',
-          );
-          await _waitUntil(
-            tester,
-            () => authorityReads == 2,
-            'one real boundary refresh begins while local access is already locked',
-          );
-          expect(boundaryRead.isCompleted, isFalse);
-          expect(
-            authorityCompletions,
-            1,
-            reason: 'the new authority response has not completed',
-          );
-          expect(
-            container.read(verifiedSubscriptionStateProvider).isLoading,
-            isTrue,
-          );
-          for (var generation = 0; generation < 3; generation++) {
-            container.invalidate(verifiedSubscriptionAccessProvider);
-            final stillExpired = container
-                .read(verifiedSubscriptionAccessProvider)
-                .requireValue;
-            expect(stillExpired.plan, CommercePlan.free);
-            expect(stillExpired.lifecycle, SubscriptionLifecycle.expired);
-            await tester.pump(Duration.zero);
-          }
-          await tester.pump(const Duration(seconds: 2));
-          expect(
-            authorityReads,
-            2,
-            reason:
-                'initial verification plus exactly one boundary refresh; no reload loop',
-          );
-          expect(authorityCompletions, 1);
-          expect(boundaryRead.isCompleted, isFalse);
-          expect(
-            container.read(verifiedSubscriptionStateProvider).isLoading,
-            isTrue,
-          );
-          expect(
-            container
-                .read(verifiedSubscriptionAccessProvider)
-                .requireValue
-                .plan,
-            CommercePlan.free,
-          );
-          expect(tester.takeException(), isNull);
-        } finally {
-          if (!boundaryRead.isCompleted) boundaryRead.complete();
-          if (authorityReads > 1) {
-            await _finishHost(tester, () async {
-              await container.read(verifiedSubscriptionStateProvider.future);
-            });
-          }
-          await tester.pumpWidget(const SizedBox.shrink());
-          cutoffObserver.close();
-          container.dispose();
-          router.dispose();
-          await _finishHost(tester, database.close);
-          await _finishHost(tester, Supabase.instance.dispose);
-          transport.close();
+  for (final holdInitialPaidResponse in [false, true]) {
+    for (final openBeforeExpiry in [false, true]) {
+      testWidgets(
+        'actual meal settings rejects ${openBeforeExpiry ? 'already-open' : 'new'} edit at exact expiry${holdInitialPaidResponse ? ' after held initial HTTP' : ''}',
+        (tester) async {
+          final owner =
+              '00000000-0000-4000-8002-${(++ownerSequence).toString().padLeft(12, '0')}';
+          final fixtureElapsed = Stopwatch()..start();
+          final fixtureFakeStart = tester.binding.clock.now();
+          int? authorityFinishedAtMs;
+          final initialAccessEvents = <String>[];
+          final start = DateTime.now().toUtc();
+          final boundary = start.add(const Duration(seconds: 20));
+          var clock = start;
+          var authorityReads = 0;
+          var authorityFinished = false;
+          var authorityCompletions = 0;
+          final boundaryRead = Completer<void>();
+          final initialPaidResponse = Completer<void>();
+          var storeReads = 0;
+          var initialPaidResponseHeld = false;
+          final requestPaths = <String>[];
+          Object? fixtureFailure;
+          final secureValues = <String, String>{};
+          SharedPreferences.setMockInitialValues({});
           tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
             _secureStorage,
-            null,
+            (call) async {
+              final args = Map<String, Object?>.from(call.arguments as Map);
+              final key = args['key'] as String?;
+              switch (call.method) {
+                case 'read':
+                  return secureValues[key];
+                case 'write':
+                  secureValues[key!] = args['value']! as String;
+                  return null;
+                case 'delete':
+                  secureValues.remove(key);
+                  return null;
+                default:
+                  throw StateError('Unexpected secure storage operation');
+              }
+            },
           );
-          await tester.pump();
-        }
-      },
-    );
+          final transport = MockClient((request) async {
+            requestPaths.add(request.url.path);
+            try {
+              // This callback was registered before pumpWidget. expectSync keeps
+              // the strict HTTP assertions without a conflicting widget guard.
+              expectSync(request.url.host, 'meal-expiry-fixture.invalid');
+              expectSync(
+                request.headers['authorization'],
+                'Bearer meal-expiry-fixture-token',
+              );
+              Object? response;
+              switch (request.url.path) {
+                case '/rest/v1/bil_ai_closed_test_grants':
+                  expectSync(
+                    request.url.queryParameters['owner_id'],
+                    'eq.$owner',
+                  );
+                  authorityReads++;
+                  if (authorityReads > 1) {
+                    // The exact-cutoff refresh is real but deliberately remains
+                    // unanswered until cleanup. Local access must lock first.
+                    await boundaryRead.future;
+                  }
+                  response = <Object?>[];
+                case '/rest/v1/bil_subscriptions':
+                  expectSync(
+                    request.url.queryParameters['owner_id'],
+                    'eq.$owner',
+                  );
+                  storeReads++;
+                  if (holdInitialPaidResponse && storeReads == 1) {
+                    initialPaidResponseHeld = true;
+                    await initialPaidResponse.future;
+                  }
+                  response = [
+                    {
+                      'owner_id': owner,
+                      'provider': 'google',
+                      'plan_id': 'premium',
+                      'lifecycle': 'active',
+                      'started_at': start
+                          .subtract(const Duration(days: 1))
+                          .toIso8601String(),
+                      'expires_at': boundary.toIso8601String(),
+                      'verified_at': start.toIso8601String(),
+                    },
+                  ];
+                case '/rest/v1/rpc/bil_get_my_admin_subscription':
+                  response = null;
+                  authorityCompletions++;
+                  authorityFinished = true;
+                  authorityFinishedAtMs = fixtureElapsed.elapsedMilliseconds;
+                default:
+                  throw StateError(
+                    'Unexpected fixture HTTP path: ${request.url.path}',
+                  );
+              }
+              return http.Response(
+                jsonEncode(response),
+                200,
+                headers: {'content-type': 'application/json'},
+                request: request,
+              );
+            } on Object catch (error) {
+              fixtureFailure = error;
+              rethrow;
+            }
+          });
+          await tester.runAsync(() async {
+            await Supabase.initialize(
+              url: 'https://meal-expiry-fixture.invalid',
+              publishableKey: 'meal-expiry-fixture-publishable-key',
+              debug: false,
+              authOptions: const FlutterAuthClientOptions(
+                autoRefreshToken: false,
+                detectSessionInUri: false,
+                localStorage: EmptyLocalStorage(),
+              ),
+              httpClient: transport,
+            );
+            await Supabase.instance.client.auth.setInitialSession(
+              jsonEncode({
+                'access_token': 'meal-expiry-fixture-token',
+                'token_type': 'bearer',
+                'user': {
+                  'id': owner,
+                  'app_metadata': {},
+                  'user_metadata': {},
+                  'aud': 'authenticated',
+                  'created_at': '2026-01-01T00:00:00Z',
+                },
+              }),
+            );
+          });
+          final database = AppDatabase.forTesting(
+            NativeDatabase.memory(),
+            localOwnerId: owner,
+          );
+          final preferences = PreferencesRepository(database);
+          final container = ProviderContainer(
+            overrides: [
+              databaseProvider.overrideWithValue(database),
+              verifiedEntitlementClockProvider.overrideWithValue(() => clock),
+            ],
+          );
+          // Observe the genuine exact-cutoff view without replacing its behavior,
+          // independently of whichever snapshot the actual settings UI consumes.
+          final cutoffObserver = container.listen(
+            verifiedSubscriptionAccessProvider,
+            (_, next) {
+              initialAccessEvents.add(
+                'wall_ms=${fixtureElapsed.elapsedMilliseconds}; '
+                'fake_ms=${tester.binding.clock.now().difference(fixtureFakeStart).inMilliseconds}; '
+                'loading=${next.isLoading}; error=${next.hasError}; '
+                'plan=${next.value?.plan}; authority=${next.value?.authority}; '
+                'rights=${next.value?.entitlements.map((right) => right.name).toList()}',
+              );
+            },
+            fireImmediately: true,
+          );
+          final router = GoRouter(
+            initialLocation: '/settings/nutrition-meal-calorie-goals',
+            routes: [
+              GoRoute(
+                path: '/settings/nutrition-meal-calorie-goals',
+                builder: (_, _) => const MealCalorieGoalsPage(),
+              ),
+              GoRoute(
+                path: '/plans',
+                builder: (_, _) =>
+                    const BilStorePlansPage(connectToDeviceStore: false),
+              ),
+            ],
+          );
+          try {
+            await tester.pumpWidget(
+              UncontrolledProviderScope(
+                container: container,
+                child: MaterialApp.router(
+                  routerConfig: router,
+                  locale: const Locale('en'),
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                ),
+              ),
+            );
+            if (holdInitialPaidResponse) {
+              await _waitUntil(
+                tester,
+                () => initialPaidResponseHeld,
+                'first genuine paid HTTP response is held after mount',
+              );
+              // Prove a real mounted pending frame before the genuine server
+              // response is released. This never primes/fabricates paid access.
+              await tester.pump(const Duration(milliseconds: 16));
+              await tester.pump(const Duration(milliseconds: 16));
+              expect(find.byType(MealCalorieGoalsPage), findsOneWidget);
+              expect(find.byType(VerifiedPremiumFeatureGate), findsOneWidget);
+              expect(
+                container.read(verifiedSubscriptionStateProvider).isLoading,
+                isTrue,
+              );
+              expect(
+                container.read(verifiedSubscriptionAccessProvider).isLoading,
+                isTrue,
+              );
+              expect(Supabase.instance.client.auth.currentUser?.id, owner);
+              expect(container.read(verifiedEntitlementOwnerIdProvider), owner);
+              expect(find.text('Breakfast'), findsNothing);
+              expect(
+                find.byKey(const Key('meal-calorie-goal-breakfast')),
+                findsNothing,
+              );
+              expect(authorityReads, 1);
+              expect(storeReads, 1);
+              expect(authorityFinished, isFalse);
+              expect(fixtureFailure, isNull);
+              expect(clock, start);
+              expect(boundaryRead.isCompleted, isFalse);
+              debugPrint(
+                'MEAL_HELD_PENDING wall_ms=${fixtureElapsed.elapsedMilliseconds}; '
+                'fake_ms=${tester.binding.clock.now().difference(fixtureFakeStart).inMilliseconds}; '
+                'mounted=true; frames=2; raw_loading=true; access_loading=true; '
+                'owner_matches=true; breakfast=0; reads=$authorityReads; store_reads=$storeReads',
+              );
+              initialPaidResponse.complete();
+              debugPrint(
+                'MEAL_HELD_RELEASE wall_ms=${fixtureElapsed.elapsedMilliseconds}; '
+                'fake_ms=${tester.binding.clock.now().difference(fixtureFakeStart).inMilliseconds}',
+              );
+            }
+            await _waitUntil(
+              tester,
+              () =>
+                  authorityFinished &&
+                  find.text('Breakfast').hitTestable().evaluate().isNotEmpty,
+              'genuine active paid snapshot and actual unlocked meal settings',
+              diagnostics: () {
+                final state = container.read(verifiedSubscriptionStateProvider);
+                final goals = container.read(mealCalorieGoalsProvider);
+                final access = container.read(
+                  verifiedSubscriptionAccessProvider,
+                );
+                return 'wall_ms=${fixtureElapsed.elapsedMilliseconds}; '
+                    'fake_ms=${tester.binding.clock.now().difference(fixtureFakeStart).inMilliseconds}; '
+                    'authority_finished_at_ms=$authorityFinishedAtMs; '
+                    'access_loading=${access.isLoading}; access_error=${access.hasError}; '
+                    'access_plan=${access.value?.plan}; access_authority=${access.value?.authority}; '
+                    'access_rights=${access.value?.entitlements.map((right) => right.name).toList()}; '
+                    'access_events=$initialAccessEvents; '
+                    'page=${find.byType(MealCalorieGoalsPage).evaluate().length}; '
+                    'gate=${find.byType(VerifiedPremiumFeatureGate).evaluate().length}; '
+                    'breakfast_key=${find.byKey(const Key('meal-calorie-goal-breakfast')).evaluate().length}; '
+                    'retry=${find.byKey(const Key('premium-feature-entitlement-retry')).evaluate().length}; '
+                    'plans=${find.text('View Premium plans').evaluate().length}; '
+                    'scheduled=${tester.binding.hasScheduledFrame}; '
+                    'reads=$authorityReads; finished=$authorityFinished; '
+                    'subscription=$state; mealGoals=$goals; '
+                    'requests=$requestPaths; '
+                    'fixtureFailure=$fixtureFailure; '
+                    'plan=${state.value?.plan}; '
+                    'auth=${Supabase.instance.client.auth.currentUser?.id}; '
+                    'owner=${container.read(verifiedEntitlementOwnerIdProvider)}; '
+                    'breakfast=${find.text('Breakfast').evaluate().length}; '
+                    'hit=${find.text('Breakfast').hitTestable().evaluate().length}';
+              },
+            );
+            final verified = container
+                .read(verifiedSubscriptionStateProvider)
+                .requireValue;
+            expect(fixtureFailure, isNull);
+            expect(verified.authority, EntitlementAuthority.verifiedServer);
+            expect(verified.plan, CommercePlan.premium);
+            expect(verified.currentPeriodEndsAt, boundary);
+            expect(
+              container
+                  .read(verifiedSubscriptionAccessProvider)
+                  .requireValue
+                  .plan,
+              CommercePlan.premium,
+            );
+            expect(authorityReads, 1);
+
+            // Prove that the same production widget/callback really saves locally
+            // while its authoritative paid period is valid, not just a UI shell.
+            await tester.tap(find.text('Breakfast'));
+            await _waitUntil(
+              tester,
+              () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
+              'initial actual meal edit dialog',
+            );
+            await tester.enterText(find.byType(TextField), '620');
+            await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+            await _waitUntil(
+              tester,
+              () =>
+                  find.bySubtype<AlertDialog>().evaluate().isEmpty &&
+                  find.text('620 kcal').evaluate().isNotEmpty,
+              'initial SQLite write/readback',
+            );
+            String? initial;
+            await _finishHost(tester, () async {
+              initial = await preferences.get(mealCalorieGoalKey('breakfast'));
+            });
+            expect(initial, '620.0');
+
+            if (openBeforeExpiry) {
+              await tester.tap(find.text('Breakfast'));
+              await _waitUntil(
+                tester,
+                () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
+                'real dialog remains open while paid access expires',
+              );
+              await tester.enterText(find.byType(TextField), '900');
+            }
+            // Fire the exact boundary. Its one new background authority read
+            // is deliberately held; local lock cannot wait for that response.
+            // No paid state, entitlement loader or access provider is overridden.
+            clock = boundary;
+            await tester.pump(const Duration(seconds: 20));
+            await tester.pump();
+            final expired = container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue;
+            expect(expired.plan, CommercePlan.free);
+            expect(expired.lifecycle, SubscriptionLifecycle.expired);
+            expect(
+              container
+                  .read(verifiedSubscriptionStateProvider)
+                  .requireValue
+                  .plan,
+              CommercePlan.premium,
+              reason:
+                  'The old paid snapshot is retained while the boundary read is pending',
+            );
+            await _waitUntil(
+              tester,
+              () => authorityReads == 2,
+              'one real boundary refresh is pending after immediate local lock',
+            );
+            expect(authorityCompletions, 1);
+            expect(boundaryRead.isCompleted, isFalse);
+            expect(
+              container.read(verifiedSubscriptionStateProvider).isLoading,
+              isTrue,
+            );
+
+            // Try the actual local gesture only if the production route still
+            // exposes it. Correct lock/removal also passes the invariant below.
+            if (!openBeforeExpiry &&
+                find.text('Breakfast').hitTestable().evaluate().isNotEmpty) {
+              await tester.tap(find.text('Breakfast'));
+              await _waitUntil(
+                tester,
+                () => find.bySubtype<AlertDialog>().evaluate().isNotEmpty,
+                'post-expiry stale real editor',
+              );
+              await tester.enterText(find.byType(TextField), '900');
+            }
+            final staleSave = find
+                .widgetWithText(FilledButton, 'Save')
+                .hitTestable();
+            if (staleSave.evaluate().isNotEmpty) {
+              await tester.tap(staleSave);
+            }
+            await _waitUntil(
+              tester,
+              () => find.bySubtype<AlertDialog>().evaluate().isEmpty,
+              'stale real editor is closed without a new SQLite write',
+            );
+            String? persisted;
+            await _finishHost(tester, () async {
+              persisted = await preferences.get(
+                mealCalorieGoalKey('breakfast'),
+              );
+            });
+            expect(
+              persisted,
+              '620.0',
+              reason:
+                  'An expired paid callback must not persist a new local meal goal',
+            );
+            expect(
+              find.text('Breakfast').hitTestable(),
+              findsNothing,
+              reason: 'Expired settings controls must become inaccessible',
+            );
+            await _waitUntil(
+              tester,
+              () => authorityReads == 2,
+              'one real boundary refresh begins while local access is already locked',
+            );
+            expect(boundaryRead.isCompleted, isFalse);
+            expect(
+              authorityCompletions,
+              1,
+              reason: 'the new authority response has not completed',
+            );
+            expect(
+              container.read(verifiedSubscriptionStateProvider).isLoading,
+              isTrue,
+            );
+            for (var generation = 0; generation < 3; generation++) {
+              container.invalidate(verifiedSubscriptionAccessProvider);
+              final stillExpired = container
+                  .read(verifiedSubscriptionAccessProvider)
+                  .requireValue;
+              expect(stillExpired.plan, CommercePlan.free);
+              expect(stillExpired.lifecycle, SubscriptionLifecycle.expired);
+              await tester.pump(Duration.zero);
+            }
+            await tester.pump(const Duration(seconds: 2));
+            expect(
+              authorityReads,
+              2,
+              reason:
+                  'initial verification plus exactly one boundary refresh; no reload loop',
+            );
+            expect(authorityCompletions, 1);
+            expect(boundaryRead.isCompleted, isFalse);
+            expect(
+              container.read(verifiedSubscriptionStateProvider).isLoading,
+              isTrue,
+            );
+            expect(
+              container
+                  .read(verifiedSubscriptionAccessProvider)
+                  .requireValue
+                  .plan,
+              CommercePlan.free,
+            );
+            expect(tester.takeException(), isNull);
+          } finally {
+            if (!initialPaidResponse.isCompleted) {
+              initialPaidResponse.complete();
+            }
+            if (initialPaidResponseHeld && !authorityFinished) {
+              await _finishHost(tester, () async {
+                await container.read(verifiedSubscriptionStateProvider.future);
+              });
+            }
+            if (!boundaryRead.isCompleted) boundaryRead.complete();
+            if (authorityReads > 1) {
+              await _finishHost(tester, () async {
+                await container.read(verifiedSubscriptionStateProvider.future);
+              });
+            }
+            await tester.pumpWidget(const SizedBox.shrink());
+            cutoffObserver.close();
+            container.dispose();
+            router.dispose();
+            await _finishHost(tester, database.close);
+            await _finishHost(tester, Supabase.instance.dispose);
+            transport.close();
+            tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+              _secureStorage,
+              null,
+            );
+            await tester.pump();
+          }
+        },
+      );
+    }
   }
 }
 
@@ -418,12 +515,20 @@ Future<void> _waitUntil(
   String Function()? diagnostics,
 }) async {
   final elapsed = Stopwatch()..start();
+  final fakeStart = tester.binding.clock.now();
+  var pumps = 0;
   while (!ready() && elapsed.elapsedMilliseconds < 5000) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 5)),
     );
     await tester.pump(const Duration(milliseconds: 16));
+    pumps++;
   }
+  debugPrint(
+    'MEAL_WAIT stage=$stage; wall_ms=${elapsed.elapsedMilliseconds}; '
+    'fake_ms=${tester.binding.clock.now().difference(fakeStart).inMilliseconds}; '
+    'pumps=$pumps; ready=${ready()}; ${diagnostics?.call() ?? ''}',
+  );
   expect(
     ready(),
     isTrue,

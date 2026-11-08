@@ -53,7 +53,9 @@ void main() {
     expect(discover, contains('dashboard-discover-balanced-final-tile'));
     expect(discover, contains('pairedItemCount'));
     expect(discover, contains('dashboard-discover-complete-'));
-    expect(discover, contains('fit: BoxFit.contain'));
+    // Dashboard previews fill the cards under the updated artwork contract.
+    // Body Twin and feature welcome images retain their complete-image rules.
+    expect(discover, contains('fit: BoxFit.cover'));
 
     expect(cards, contains('bil_dashboard_body_twin_hero_v1.png'));
     final bodyTwinIndex = cards.indexOf('bil_dashboard_body_twin_hero_v1.png');

@@ -1,14 +1,8 @@
 part of 'premium_dashboard_benchmark.dart';
 
 class _ReferenceDiscoverGrid extends StatelessWidget {
-  const _ReferenceDiscoverGrid({
-    required this.arabic,
-    required this.premiumUnlocked,
-    required this.premiumAccessResolved,
-  });
+  const _ReferenceDiscoverGrid({required this.arabic});
   final bool arabic;
-  final bool premiumUnlocked;
-  final bool premiumAccessResolved;
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +106,6 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
                 label: item.$3,
                 subtitle: item.$4,
                 route: item.$5,
-                premium: item.$6 && premiumAccessResolved && !premiumUnlocked,
-                checking: item.$6 && !premiumAccessResolved,
               );
             },
           ),
@@ -131,9 +123,6 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
                 label: items.last.$3,
                 subtitle: items.last.$4,
                 route: items.last.$5,
-                premium:
-                    items.last.$6 && premiumAccessResolved && !premiumUnlocked,
-                checking: items.last.$6 && !premiumAccessResolved,
               ),
             ),
           ],
@@ -150,8 +139,6 @@ class _DiscoverTile extends StatelessWidget {
     required this.label,
     required this.subtitle,
     required this.route,
-    required this.premium,
-    required this.checking,
     super.key,
   });
 
@@ -160,8 +147,6 @@ class _DiscoverTile extends StatelessWidget {
   final String label;
   final String subtitle;
   final String route;
-  final bool premium;
-  final bool checking;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -172,17 +157,27 @@ class _DiscoverTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: checking ? null : () => context.push(route),
+        key: ValueKey('dashboard-discover-tile-$route'),
+        // This is a navigation affordance, not an entitlement operation.
+        // Periodic commerce checks must not replace its arrow or disable the
+        // entry. The destination keeps its existing verified access gates.
+        onTap: () => context.push(route),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // A single full artwork: never cover-crop a face or person's
-            // limbs, and never double the image with a blurred inset.
+            // Dashboard previews fill the tile without dark letterboxing.
+            // Use a per-photo focal crop on wide tiles; feature welcome
+            // screens continue to show the complete original photo.
             Image.asset(
               imageAsset,
               key: Key('dashboard-discover-complete-$imageAsset'),
-              fit: BoxFit.contain,
-              alignment: Alignment.topCenter,
+              fit: BoxFit.cover,
+              alignment: switch (route) {
+                '/wellness/workouts/routines' => const Alignment(0, -.6),
+                '/community' => const Alignment(0, -.6),
+                _ => Alignment.center,
+              },
+              gaplessPlayback: true,
               errorBuilder: (_, _, _) => Center(
                 child: BilNavigationFeedback(
                   child: Icon(
@@ -244,31 +239,19 @@ class _DiscoverTile extends StatelessWidget {
                 end: 8,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: premium
-                        ? const Color(0xD99A6500)
-                        : const Color(0xB3071928),
+                    color: const Color(0xB3071928),
                     borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: premium
-                          ? const Color(0x99FFE7A0)
-                          : const Color(0x33FFFFFF),
-                    ),
+                    border: Border.all(color: const Color(0x33FFFFFF)),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(5),
-                    child: checking
-                        ? const SizedBox.square(
-                            key: Key('dashboard-discover-access-checking'),
-                            dimension: 15,
-                            child: BilFeatureWelcomeStatus(color: Colors.white),
-                          )
-                        : const BilNavigationFeedback(
-                            child: Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 15,
-                              color: Colors.white,
-                            ),
-                          ),
+                    child: const BilNavigationFeedback(
+                      child: Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 15,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),

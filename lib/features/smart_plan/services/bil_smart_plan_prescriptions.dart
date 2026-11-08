@@ -49,6 +49,21 @@ final class BilSmartPlanPrescriptions {
   static Future<Map<String, dynamic>>? _homeCached;
   static Map<String, dynamic>? _homeData;
 
+  /// Display-only provenance from the same hash-checked document that owns
+  /// Home prescriptions. This never creates or changes a training dose.
+  Future<List<({String publisher, String title, Uri url})>>
+  homeSources() async {
+    final data = await _loadHome();
+    return List.unmodifiable([
+      for (final row in data['sources'] as List)
+        (
+          publisher: row['publisher'] as String,
+          title: row['title'] as String,
+          url: Uri.parse(row['url'] as String),
+        ),
+    ]);
+  }
+
   /// Called only after catalog validation has loaded the pinned projection.
   /// Missing translations fall back to the existing released catalog label.
   String? exerciseTitle(String id, {required String locale}) {

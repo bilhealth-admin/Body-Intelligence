@@ -31,6 +31,7 @@ import 'data/diary_sharing_support_repository.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'reference_preferences_controls.dart';
+part 'reference_preferences_number_field.dart';
 part 'reference_preferences_numeric.dart';
 part 'reference_preferences_macros.dart';
 part 'reference_preferences_goal_legacy.dart';

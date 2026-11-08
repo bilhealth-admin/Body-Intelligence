@@ -357,6 +357,7 @@ abstract final class RecipeEditorRuntimeCopy {
 
   static String? resolve(String english, String locale) {
     const basic = <String, Map<String, String>>{
+      'Carbs': {'ar': 'الكربوهيدرات'},
       'Name': {'ar': 'الاسم', 'fr': 'Nom', 'es': 'Nombre', 'tr': 'Ad'},
       'Servings': {
         'ar': 'الحصص',

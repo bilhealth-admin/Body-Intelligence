@@ -84,6 +84,19 @@ class _FeedTabState extends State<_FeedTab>
   Future<void> _refreshSelectedFeed() => _selectedTopic == null
       ? _refresh()
       : (_topicFeedKey.currentState?.refresh() ?? Future<void>.value());
+
+  Future<void> _refreshAfterPeopleReturn() async {
+    final topicFeed = _selectedTopic == null
+        ? null
+        : _topicFeedKey.currentState;
+    // Relationship changes affect both the surrounding stories and the
+    // selected category. Each existing refresh retires its own older reads.
+    await Future.wait([
+      _refresh(supersedeCachedRefresh: true),
+      if (topicFeed != null) topicFeed.refresh(),
+    ]);
+  }
+
   @override
   final Map<String, CommunityPostReferenceMetadata> _referenceByPost =
       <String, CommunityPostReferenceMetadata>{};
@@ -488,11 +501,10 @@ class _FeedTabState extends State<_FeedTab>
     }
   }
 
-  Future<void> _refresh() async {
+  Future<void> _refresh({bool supersedeCachedRefresh = false}) async {
     if (_openingComposer ||
         _managingPost ||
-        _feedRefreshing ||
-        _cacheRefreshing) {
+        (!supersedeCachedRefresh && (_feedRefreshing || _cacheRefreshing))) {
       return;
     }
     final visit = _captureFeedVisit();

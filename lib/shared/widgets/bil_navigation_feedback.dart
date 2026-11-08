@@ -25,13 +25,14 @@ class BilNavigationFeedback extends StatelessWidget {
       final standalone =
           context.findAncestorWidgetOfExactType<IconButton>() != null;
       final size = original.size ?? IconTheme.of(context).size ?? 24;
-      // Inline labels normally have an eight-pixel icon gap. Keep the crystal
-      // within that gap while the existing button/row retains its full target.
+      // Reserve the whole inline crystal before the parent icon/label gap,
+      // while the existing button/row continues to own its full touch target.
       // Even logical-pixel diameters keep the resting edge aligned at 1x/2x.
       final inlineExtent = (((size + 12) / 2).ceil() * 2).toDouble();
       final extent = standalone ? 48.0 : inlineExtent.clamp(28.0, 48.0);
       return BilCrystalArrow(
         extent: extent,
+        reserveSpace: !standalone,
         child: BilArrowGlyph.modern(original),
       );
     }

@@ -98,6 +98,13 @@ void main() {
       final repository = File(
         'lib/features/commerce/repositories/server_entitlement_repository.dart',
       ).readAsStringSync();
+      final continuity = File(
+        'lib/features/commerce/repositories/server_entitlement_grant_continuity.dart',
+      ).readAsStringSync();
+      expect(
+        repository,
+        contains("part 'server_entitlement_grant_continuity.dart';"),
+      );
       final closedTestBranch = repository.indexOf('if (closedTestActive) {');
       final subscriptionQuery = repository.indexOf(
         ".from('bil_subscriptions')",
@@ -112,8 +119,19 @@ void main() {
         closedTestBranch,
         subscriptionQuery,
       );
-      expect(closedTestBody, contains('return await _remember('));
-      expect(closedTestBody, contains('_closedTestState('));
+      // Awaiting secure continuity must not bypass a newer revocation or the
+      // real grant expiry. The exact local variable name is irrelevant.
+      expect(
+        closedTestBody,
+        contains(
+          RegExp(
+            r'final\s+(\w+)\s*=\s*await\s+_remember\('
+            r'[\s\S]*?_closedTestState\([\s\S]*?\);\s*'
+            r'return\s+_revalidateClosedTestObservation\(\s*'
+            r'user\.id,\s*\1,\s*closedTestReadGeneration,?\s*\);',
+          ),
+        ),
+      );
       expect(
         repository,
         contains(
@@ -122,20 +140,76 @@ void main() {
           ),
         ),
       );
+      final constructorStart = continuity.indexOf(
+        'SubscriptionState _verifiedFree(',
+      );
+      final constructorEnd = continuity.indexOf(
+        'SubscriptionState _closedTestState(',
+      );
+      expect(constructorStart, greaterThanOrEqualTo(0));
+      expect(constructorEnd, greaterThan(constructorStart));
+      final verifiedFreeConstructor = continuity.substring(
+        constructorStart,
+        constructorEnd,
+      );
+      expect(verifiedFreeConstructor, contains('plan: CommercePlan.free'));
       expect(
-        repository,
+        verifiedFreeConstructor,
+        contains('entitlements: FreePlan.entitlements'),
+      );
+      expect(
+        verifiedFreeConstructor,
         contains('authority: EntitlementAuthority.verifiedServer'),
       );
-      expect(
-        repository,
-        contains('final inMemory = _sessionCache.fallbackFor('),
+      final fallbackStart = continuity.indexOf(
+        'Future<SubscriptionState> _transientFallback(',
       );
-      expect(repository, contains('if (inMemory != null) return inMemory;'));
+      final fallbackEnd = continuity.indexOf(
+        'SubscriptionState _withClosedTestContinuity(',
+      );
+      expect(fallbackStart, greaterThanOrEqualTo(0));
+      expect(fallbackEnd, greaterThan(fallbackStart));
+      final fallbackBody = continuity.substring(fallbackStart, fallbackEnd);
+      expect(fallbackBody, contains('CommunityOwnerOperation.checkCurrent();'));
+      expect(fallbackBody, contains(RegExp(r'_sessionCache\.fallbackFor\(')));
       expect(
-        repository,
+        fallbackBody,
+        contains(RegExp(r'inMemory != null && inMemory\.provider != null')),
+      );
+      expect(
+        fallbackBody,
         contains('final persisted = await _subscriptionStore.read('),
       );
-      expect(repository, contains('return FreePlan.createState();'));
+      expect(
+        fallbackBody,
+        contains(RegExp(r'persisted != null && persisted\.provider != null')),
+      );
+      expect(fallbackBody, isNot(contains('_verifiedFree(')));
+      expect(
+        fallbackBody,
+        contains(
+          RegExp(
+            r'return\s+_withClosedTestContinuity\(\s*ownerId,\s*'
+            r'FreePlan\.createState\(\)\s*\);',
+          ),
+        ),
+      );
+      final revalidationStart = continuity.indexOf(
+        'SubscriptionState _revalidateClosedTestObservation(',
+      );
+      expect(revalidationStart, greaterThanOrEqualTo(0));
+      expect(constructorStart, greaterThan(revalidationStart));
+      final revalidationBody = continuity.substring(
+        revalidationStart,
+        constructorStart,
+      );
+      expect(
+        revalidationBody,
+        contains('CommunityOwnerOperation.checkCurrent();'),
+      );
+      expect(revalidationBody, contains('_settledClosedTestReadGeneration'));
+      expect(revalidationBody, contains('boundary.isAfter(_now())'));
+      expect(revalidationBody, isNot(contains('_verifiedFree(')));
     });
   });
 

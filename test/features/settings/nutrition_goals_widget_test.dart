@@ -12,6 +12,126 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      '$language macro editors show whole numbers and untouched save preserves precision',
+      (tester) async {
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        final repository = PreferencesRepository(database);
+        const saved = {
+          'goal.calories': '1000',
+          'goal.carbsPercent': '20',
+          'goal.proteinPercent': '48.55',
+          'goal.fatPercent': '31.45',
+          'goal.carbsGrams': '50',
+          'goal.proteinGrams': '121.375',
+          'goal.fatGrams': '34.94444444444444',
+        };
+        await repository.setMany(saved);
+        await _pumpGoals(
+          tester,
+          database,
+          repository,
+          locale: Locale(language),
+        );
+        for (final (key, initial) in [
+          ('goal.proteinPercent', '49'),
+          ('goal.proteinGrams', '121'),
+          ('goal.fatGrams', '35'),
+        ]) {
+          final tile = find.byKey(ValueKey('nutrition-goal-$key'));
+          await tester.ensureVisible(tile);
+          await tester.tap(tile);
+          await tester.pump(const Duration(milliseconds: 400));
+          expect(
+            tester.widget<TextField>(find.byType(TextField)).controller!.text,
+            initial,
+          );
+          await tester.tap(
+            find.widgetWithText(
+              FilledButton,
+              language == 'ar' ? 'حفظ' : 'Save',
+            ),
+          );
+          await _waitFor(
+            tester,
+            () async => find.bySubtype<AlertDialog>().evaluate().isEmpty,
+          );
+          for (final entry in saved.entries) {
+            expect(await repository.get(entry.key), entry.value);
+          }
+          await tester.pump(const Duration(milliseconds: 300));
+        }
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 300));
+        await database.close();
+      },
+    );
+    testWidgets(
+      '$language editing a rounded macro still saves the coherent allocation',
+      (tester) async {
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        final repository = PreferencesRepository(database);
+        await repository.setMany(const {
+          'goal.calories': '1000',
+          'goal.carbsPercent': '20',
+          'goal.proteinPercent': '48.55',
+          'goal.fatPercent': '31.45',
+          'goal.carbsGrams': '50',
+          'goal.proteinGrams': '121.375',
+          'goal.fatGrams': '34.94444444444444',
+        });
+        await _pumpGoals(
+          tester,
+          database,
+          repository,
+          locale: Locale(language),
+        );
+        final tile = find.byKey(
+          const ValueKey('nutrition-goal-goal.proteinPercent'),
+        );
+        await tester.ensureVisible(tile);
+        await tester.tap(tile);
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.enterText(
+          find.byType(TextField),
+          language == 'ar' ? '٥٠' : '50',
+        );
+        await tester.tap(
+          find.widgetWithText(FilledButton, language == 'ar' ? 'حفظ' : 'Save'),
+        );
+        await _waitFor(
+          tester,
+          () async =>
+              find.bySubtype<AlertDialog>().evaluate().isEmpty &&
+              await repository.get('goal.proteinPercent') == '50.0',
+        );
+        final carbs = double.parse(
+          (await repository.get('goal.carbsPercent'))!,
+        );
+        final protein = double.parse(
+          (await repository.get('goal.proteinPercent'))!,
+        );
+        final fat = double.parse((await repository.get('goal.fatPercent'))!);
+        expect(carbs + protein + fat, closeTo(100, 0.000001));
+        expect(
+          double.parse((await repository.get('goal.proteinGrams'))!),
+          closeTo(125, 0.000001),
+        );
+        expect(
+          double.parse((await repository.get('goal.carbsGrams'))!),
+          closeTo(1000 * carbs / 100 / 4, 0.000001),
+        );
+        expect(
+          double.parse((await repository.get('goal.fatGrams'))!),
+          closeTo(1000 * fat / 100 / 9, 0.000001),
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump(const Duration(milliseconds: 300));
+        await database.close();
+      },
+    );
+  }
   testWidgets(
     'macro targets round their display without changing saved precision',
     (tester) async {
@@ -190,6 +310,7 @@ Future<void> _pumpGoals(
   AppDatabase database,
   PreferencesRepository repository, {
   bool withPlan = true,
+  Locale locale = const Locale('en'),
 }) async {
   // Keep setup deterministic: the page owns several independent preference
   // reads, so advance exactly one frame and one async completion window.
@@ -206,14 +327,14 @@ Future<void> _pumpGoals(
             'goal.fatPercent': 25,
           }),
       ],
-      child: const MaterialApp(
-        locale: Locale('en'),
+      child: MaterialApp(
+        locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: [
+        localizationsDelegates: const [
           AppLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        home: ReferenceNutritionGoalsPage(),
+        home: const ReferenceNutritionGoalsPage(),
       ),
     ),
   );

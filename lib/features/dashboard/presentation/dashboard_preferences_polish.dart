@@ -15,7 +15,7 @@ class _DashboardResponsiveActionTile extends StatelessWidget {
   final Widget title;
   final Widget subtitle;
   final Widget trailing;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(

@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -6,7 +7,7 @@ import 'package:body_intelligence_log/features/community/data/community_reposito
 import 'package:body_intelligence_log/features/community/domain/community_attention.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_attention_scope.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_surface.dart';
@@ -206,17 +207,20 @@ void main() {
           expect(find.byType(BackButton), findsOneWidget);
           expect(tester.takeException(), isNull);
           expect(find.byType(SingleChildScrollView), findsOneWidget);
-          expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
-          final progress = tester.widget<CupertinoActivityIndicator>(
-            find.byType(CupertinoActivityIndicator),
+          expect(find.byType(BilSplashCapsuleProgress), findsOneWidget);
+          final progress = tester.widget<BilSplashCapsuleProgress>(
+            find.byType(BilSplashCapsuleProgress),
           );
           expect(
-            progress.animating,
-            isFalse,
+            progress.reducedMotion,
+            isTrue,
             reason:
-                'reduced motion shows a static segmented status, not a made-up percentage',
+                'reduced motion shows a static startup capsule, not a made-up percentage',
           );
-          expect(progress.radius, 12);
+          expect(
+            tester.getSize(find.byType(BilSplashCapsuleProgress)).height,
+            7,
+          );
           expect(find.byType(LinearProgressIndicator), findsNothing);
           await tester.pumpWidget(const SizedBox.shrink());
         },

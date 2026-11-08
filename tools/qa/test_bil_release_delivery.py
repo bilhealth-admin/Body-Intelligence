@@ -44,9 +44,10 @@ class DeliveryTest(unittest.TestCase):
             return deepcopy(run)
         return request
 
-    def test_complete_exact_ci_prerequisite_passes(self):
+    def test_ci_job_success_without_both_native_artifacts_is_not_release_authority(self):
         manifest, run = fixture()
-        self.assertEqual(len(delivery.validate_prerequisites(manifest, {'synthetic': 12}, HEAD, self.api(run))), 1)
+        with self.assertRaisesRegex(ValueError, 'Both independent native'):
+            delivery.validate_prerequisites(manifest, {'synthetic': 12}, HEAD, self.api(run))
 
     def test_wrong_source_workflow_branch_event_and_all_non_successes_rejected(self):
         manifest, run = fixture()
@@ -143,6 +144,63 @@ class DeliveryTest(unittest.TestCase):
         self.assertGreaterEqual(len(planner.e2e_inventory(delivery.ROOT, manifest)), 23)
         lanes = planner.validate_ci_manifest(manifest, required_workflow_ids=manifest['required_workflow_ids'])
         self.assertTrue(any(lane.get('depends_on') for lane in lanes))
+
+
+class NativeDeliveryProofTest(unittest.TestCase):
+    def setUp(self):
+        from test_bil_native_source_evidence import Fixture, BRANCH, TREE
+        self.branch, self.tree = BRANCH, TREE
+        self.temp = tempfile.TemporaryDirectory(prefix='bil-native-delivery-')
+        self.addCleanup(self.temp.cleanup)
+        self.fixtures = {device: Fixture(self.temp.name, device) for device in ('iphone', 'ipad')}
+        self.manifest = {'required_workflow_ids': [1, 2], 'workflows': [],
+            'manual_physical': [{'name': 'new signed device', 'status': 'PENDING'}]}
+        for index, (device, item) in enumerate(self.fixtures.items(), 1):
+            item.run.update(workflow_id=index, created_at='2026-11-08T00:00:00Z')
+            item.write()
+            self.manifest['workflows'].append({'workflow': f'bil39_{device}_native.yml',
+                'workflow_id': index, 'lane_id': device + '_native', 'native_device': device,
+                'required_jobs': [delivery.native.native_job_name(device)], 'inputs': {},
+                'reason': 'Synthetic exact source native artifact fixture'})
+        self.downloads = []
+
+    def api(self, endpoint):
+        for item in self.fixtures.values():
+            base = 'actions/runs/' + str(item.run['id'])
+            if endpoint == base: return deepcopy(item.run)
+            if endpoint == base + '/attempts/1': return deepcopy(item.attempt)
+            if endpoint.startswith(base + '/attempts/1/jobs?'):
+                return {'jobs': deepcopy(item.jobs), 'total_count': len(item.jobs)}
+            if endpoint.startswith(base + '/artifacts?'):
+                return {'artifacts': [deepcopy(item.meta)], 'total_count': 1}
+        raise AssertionError('Unexpected synthetic native API route')
+
+    def download(self, meta, target):
+        item = next(item for item in self.fixtures.values() if item.meta['id'] == meta['id'])
+        self.downloads.append(item.device)
+        Path(target).write_bytes(item.path.read_bytes())
+
+    def invoke(self, **overrides):
+        run_ids = {device + '_native': item.run['id'] for device, item in self.fixtures.items()}
+        with patch.object(delivery, 'git_source_identity', return_value=(HEAD, self.tree)):
+            return delivery.validate_prerequisites(self.manifest, run_ids, HEAD, self.api,
+                expected_branch=self.branch, artifact_download=self.download, **overrides)
+
+    def test_both_original_zip_artifacts_are_verified_before_returning_release_prerequisites(self):
+        proofs = self.invoke()
+        self.assertEqual(self.downloads, ['iphone', 'ipad'])
+        self.assertEqual({row['native_source_evidence']['device'] for row in proofs}, {'iphone', 'ipad'})
+        self.assertTrue(all(row['native_source_evidence']['xctest']['passedTests'] == 8 for row in proofs))
+
+    def test_green_job_with_wrong_zip_or_stale_attempt_cannot_complete_release(self):
+        self.fixtures['ipad'].files['crypto-driver.dart'] = b'Unverified driver'
+        self.fixtures['ipad'].write()
+        with self.assertRaises(ValueError): self.invoke()
+
+    def test_missing_native_lane_cannot_be_substituted_by_other_successful_jobs(self):
+        self.manifest['workflows'] = self.manifest['workflows'][:1]
+        self.manifest['required_workflow_ids'] = [1]
+        with self.assertRaises(ValueError): self.invoke()
 
 
 if __name__ == '__main__':

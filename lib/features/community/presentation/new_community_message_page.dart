@@ -468,6 +468,7 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                           ),
                           icon: const BilCrystalArrow(
                             extent: 36,
+                            reserveSpace: true,
                             child: Icon(Icons.arrow_upward_rounded, size: 20),
                           ),
                           label: Text(copy.send),

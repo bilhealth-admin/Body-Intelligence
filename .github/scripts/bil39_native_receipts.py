@@ -6,10 +6,12 @@ from pathlib import Path
 import re
 import subprocess
 
+from bil_ios_runner_tests import expected_tests, verified_summary
+
 KINDS = ('system-crypto', 'native-settings', 'feature-splashes')
 
 
-def verify(root, *, label, sha):
+def verify(root, *, label, sha, source_root=None):
     root = Path(root).resolve()
     if label not in ('iphone', 'ipad') or not re.fullmatch('[a-f0-9]{40}', sha):
         raise ValueError('One exact-source native device is required')
@@ -33,15 +35,25 @@ def verify(root, *, label, sha):
             raise ValueError('Missing, incomplete or failed actual native execution: ' + kind)
         rows.append({'kind': kind, 'result_sha256': hashlib.sha256(path.read_bytes()).hexdigest(),
                      'log_sha256': value['output_sha256'], 'summary': value['native_summary']})
+    source_root = (Path(source_root) if source_root else Path(__file__).resolve().parents[2]).resolve()
+    source = source_root / 'ios/RunnerTests/RunnerTests.swift'
+    if (source.is_symlink() or not source.is_file() or not source.resolve().is_relative_to(source_root)):
+        raise ValueError('Actual regular RunnerTests source is required')
+    names = expected_tests(source.read_text(encoding='utf-8'))
     xctest = root / 'runner-tests/runner-tests-result.json'
-    if xctest.is_symlink():
-        raise ValueError('XCTest evidence cannot be symlinked')
+    summary = root / 'runner-tests/runner-tests-summary.json'
+    execution_log = root / 'runner-tests/runner-tests.log'
+    if any(path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(root)
+           for path in (xctest, summary, execution_log)):
+        raise ValueError('Actual regular XCTest result, summary and named execution log are required')
     value = json.loads(xctest.read_text(encoding='utf-8'))
+    actual = verified_summary(summary.read_text(encoding='utf-8'), execution_log.read_text(encoding='utf-8'), names)
     if (value.get('status') != 'PASS' or value.get('build_number') != '39' or
-            value.get('summary', {}).get('passedTests') != 5 or
-            value.get('summary', {}).get('failedTests') != 0 or
-            value.get('summary', {}).get('skippedTests') != 0):
-        raise ValueError('All five actual RunnerTests are required')
+            value.get('source_test_sha256') != hashlib.sha256(source.read_bytes()).hexdigest() or
+            any(type(value.get('summary', {}).get(key)) is not int for key in
+                ('totalTestCount', 'passedTests', 'failedTests', 'skippedTests')) or
+            value.get('summary') != actual):
+        raise ValueError('Every original and newly declared actual named RunnerTest must pass on this source')
     return {'schema': 'bil39.single-device-native.v1', 'source_sha': sha, 'device': label,
             'status': 'PASS', 'scopes': rows, 'xctest': value['summary'],
             'scope': 'Actual simulator tests; signed IPA and physical-device acceptance remain separate'}

@@ -50,9 +50,23 @@ extension _BilSmartPlanMeals on _BilSmartPlanPageState {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      catalog.recipeTitle(meal.recipeId, locale: locale),
-                      style: Theme.of(sheet).textTheme.headlineSmall,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            catalog.recipeTitle(meal.recipeId, locale: locale),
+                            style: Theme.of(sheet).textTheme.headlineSmall,
+                          ),
+                        ),
+                        if (detail != null)
+                          BilSmartPlanBookButton(
+                            key: const ValueKey('bil-smart-plan-meal-sources'),
+                            label: _t('Recipe and sources', 'الوصفة والمصادر'),
+                            onPressed: () =>
+                                Navigator.pop(sheet, '__open_recipe__'),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Text('${day.date} · ${_mealSlot(meal.slot)}'),
@@ -100,20 +114,6 @@ extension _BilSmartPlanMeals on _BilSmartPlanPageState {
                           'لا تتوفر قيم غذائية موثقة لهذا الاقتراح.',
                         ),
                       ),
-                    if (detail != null) ...[
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: _smartPlanActionInk(context),
-                        ),
-                        onPressed: () =>
-                            Navigator.pop(sheet, '__open_recipe__'),
-                        icon: const Icon(Icons.menu_book_outlined),
-                        label: Text(
-                          _t('Recipe and sources', 'الوصفة والمصادر'),
-                        ),
-                      ),
-                    ],
                     if (current.status == BilPlanStatus.active &&
                         day.date.compareTo(
                               BilPlanDate.iso(

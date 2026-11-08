@@ -235,6 +235,7 @@ class _CommunityInlineTopicFeedState extends State<_CommunityInlineTopicFeed> {
                             )
                           : const BilCrystalArrow(
                               extent: 36,
+                              reserveSpace: true,
                               child: Icon(Icons.expand_more_rounded),
                             ),
                       label: Text(

@@ -104,7 +104,9 @@ class SettingsPage extends ConsumerWidget {
             subscription.when(
               loading: () => _PremiumMembershipLink(
                 label: copy('Checking subscription'),
-                isChecking: true,
+                // Plans owns account verification. A background membership
+                // recheck must not turn this public destination into a loader.
+                onTap: () => context.push('/plans'),
               ),
               error: (_, _) => _PremiumMembershipLink(
                 label: copy('Retry subscription check'),
@@ -257,13 +259,11 @@ class _PremiumMembershipLink extends StatelessWidget {
   const _PremiumMembershipLink({
     required this.label,
     this.onTap,
-    this.isChecking = false,
     this.isRetry = false,
   });
 
   final String label;
   final VoidCallback? onTap;
-  final bool isChecking;
   final bool isRetry;
 
   @override
@@ -315,19 +315,13 @@ class _PremiumMembershipLink extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                if (isChecking)
-                  SizedBox.square(
-                    dimension: 18,
-                    child: BilFeatureWelcomeStatus(color: gold),
-                  )
-                else
-                  BilNavigationFeedback(
-                    child: Icon(
-                      isRetry ? Icons.refresh_rounded : directionalIcon,
-                      size: 18,
-                      color: gold,
-                    ),
+                BilNavigationFeedback(
+                  child: Icon(
+                    isRetry ? Icons.refresh_rounded : directionalIcon,
+                    size: 18,
+                    color: gold,
                   ),
+                ),
               ],
             ),
           ),

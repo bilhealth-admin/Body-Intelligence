@@ -82,7 +82,7 @@ bool coachExplicitlyForbidsActions(String input) {
       RegExp(
         r"\b(?:do not|don't|dont|never)\s+" +
             _coachEnglishActionVerbs +
-            r'\b[^.!?;]*\b(?:anything|any data|any records?|any changes?)\b',
+            r'\b[^.!?;]*\b(?:anything|(?:any|my|our|the) (?:data|records?)|any changes?)\b',
       ).hasMatch(text) ||
       RegExp(
         r'\b(?:only|just)\s+(?:answer|reply|respond|explain)\b|'
@@ -95,6 +95,7 @@ bool coachExplicitlyForbidsActions(String input) {
       ).hasMatch(text) ||
       RegExp(
         r'(?:بدون|دون)[^.!?؛؟]*اي\s*(?:شيء|شي|بيانات|سجلات)|'
+        r'(?:بدون|دون)\s+(?:تعديل|تغيير|تسجيل)\s+(?:بياناتي|سجلاتي)|'
         r'(?:للقراءة|قراءة)\s+فقط|'
         r'(?:اشرح|اجب|جاوب)[^.!?؛؟]*\sفقط',
       ).hasMatch(text);
@@ -134,10 +135,55 @@ String coachActionRequestText(String input) {
       .trim();
 }
 
+// A formatting request cannot turn an explicit check-in/goal update into a
+// history read. The existing command parser still validates its quantity/date
+// and owns confirmation; this predicate never admits a write itself.
+bool _isCoachWeightMutationRequest(String text) => RegExp(
+  r'^(?:please[,\s]+)?(?:log|record|save|add)\s+'
+  r'(?:(?:my|the|body|current|measured)\s+){0,4}weight\b|'
+  r'^(?:please[,\s]+)?(?:set|update|change|modify)\s+'
+  r'(?:(?:my|the|new|target|goal)\s+){0,4}(?:weight|goal|target)\b|'
+  r'^(?:(?:من فضلك|لو سمحت|ارجوك)\s+)?'
+  r'(?:سجل|ادخل|دخللي|حط|اكتب|دير|اضف|غير|عدل|حدث)\s+'
+  r'(?:لي\s+)?(?:وزني|الوزن|هدفي|الهدف)',
+).hasMatch(text);
+
+/// Definitions/comparisons about weight concepts belong to the normal answer
+/// path. "Explain my recorded weight trend in a table" remains a personal read;
+/// merely mentioning a table is not evidence that measurements were requested.
+bool isCoachWeightConceptQuestion(String input) {
+  final text = normalizeCoachMeaning(input);
+  if (!RegExp(r'\b(?:weights?|weigh|weighing)\b|وزن').hasMatch(text) ||
+      _isCoachWeightMutationRequest(text)) {
+    return false;
+  }
+  final personalHistory = RegExp(
+    r'\bmy\s+(?:(?:recorded|saved|logged|recent|past|last|current)\s+){0,3}'
+    r'(?:weight\s+)?(?:history|trend|chart|timeline|measurements?|records?|progress)\b|'
+    r'\b(?:history|trend|chart|timeline|progress)\s+(?:of\s+)?my\s+weight\b|'
+    r'\bmy\s+weight\b[^.!?]{0,60}\b(?:changes?|changed|last|past|over time)\b|'
+    r'\bchanges?\s+(?:in|of)\s+my\s+weight\b|'
+    r'\b(?:saved|recorded|logged)\s+(?:body\s+)?(?:weights?|measurements?)\b|'
+    r'(?:تغير|تطور|اتجاه|تقلب|سجل|تاريخ|نزول|تقدم)\s+(?:في\s+)?(?:وزني|اوزاني|الوزن)|'
+    r'(?:وزني|اوزاني)[^.!?؛؟]{0,50}(?:المسجل|المحفوظ|اخر|خلال)',
+  ).hasMatch(text);
+  if (personalHistory) return false;
+  return RegExp(
+    r'\b(?:explain|define|definition|meaning)\b|'
+    r'\bwhat\b[^.!?]{0,120}\b(?:difference|mean)\b|'
+    r'\bdifferences?\s+between\b|'
+    r'اشرح|وضح|تعريف|ما\s+معن|الفرق|الفروق',
+  ).hasMatch(text);
+}
+
 /// Read-only history/chart intent. A weight diary must never be inferred
 /// to be a Smart Plan just because the user said "جدول" or "شهر".
 bool isCoachWeightHistoryReadRequest(String input) {
   final text = normalizeCoachMeaning(input);
+  if (isCoachWeightConceptQuestion(input) ||
+      _isCoachWeightMutationRequest(text)) {
+    return false;
+  }
   final weight = RegExp(
     r'\b(?:weights?|weigh|weighing|measurements?)\b|وزن|وزني|اوزاني|اوزان|نزولي|قياسات الجسم',
   ).hasMatch(text);
@@ -251,6 +297,9 @@ CoachRequestIntent classifyCoachRequest(String input) {
   );
   bool has(String pattern) => RegExp(pattern).hasMatch(text);
   if (coachExplicitlyForbidsActions(input)) {
+    return const CoachRequestIntent(CoachRequestKind.information);
+  }
+  if (isCoachWeightConceptQuestion(input)) {
     return const CoachRequestIntent(CoachRequestKind.information);
   }
   if (isCoachWeightHistoryReadRequest(input)) {

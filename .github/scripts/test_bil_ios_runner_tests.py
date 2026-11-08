@@ -28,7 +28,7 @@ class ExistingRunnerTestsCoverage(unittest.TestCase):
         self.test_status = 0
         self.summary_status = 0
         self.create_bundle = True
-        self.summary = {"totalTestCount": 5, "passedTests": 5, "failedTests": 0,
+        self.summary = {"totalTestCount": len(self.names), "passedTests": len(self.names), "failedTests": 0,
                         "skippedTests": 0, "expectedFailures": 0}
         self.log = "\n".join(f"Test Case '-[RunnerTests.RunnerTests {name}]' passed (0.01 seconds)."
                              for name in sorted(self.names))
@@ -56,7 +56,7 @@ class ExistingRunnerTestsCoverage(unittest.TestCase):
         self.assertIn('FLUTTER_BUILD_NUMBER=39', self.calls[0][0])
         receipt = json.loads((self.output / 'runner-tests-result.json').read_text())
         self.assertEqual(receipt['build_number'], '39')
-        self.assertEqual(receipt['summary']['passedTests'], 5)
+        self.assertEqual(receipt['summary']['passedTests'], len(self.names))
 
     def test_unreviewed_build_number_fails_before_any_xcode_execution(self):
         with self.assertRaises(ValueError):
@@ -125,8 +125,9 @@ class ExistingRunnerTestsCoverage(unittest.TestCase):
     def test_missing_skipped_failed_or_wrong_counts_fail_closed(self):
         invalid = [
             {}, {**self.summary, "skippedTests": 1}, {**self.summary, "failedTests": 1},
-            {**self.summary, "passedTests": 4}, {**self.summary, "totalTestCount": 6},
-            {**self.summary, "expectedFailures": 1}, {**self.summary, "passedTests": True},
+            {**self.summary, "passedTests": len(self.names) - 1}, {**self.summary, "totalTestCount": len(self.names) + 1},
+            {**self.summary, "expectedFailures": 1}, {**self.summary, "expectedFailures": False},
+            {**self.summary, "passedTests": True},
         ]
         for summary in invalid:
             with self.subTest(summary=summary), self.assertRaises(ValueError):
@@ -156,16 +157,81 @@ class ExistingRunnerTestsCoverage(unittest.TestCase):
         self.assertEqual(self.calls, [])
 
     def test_actual_five_source_tests_and_native_script_wiring_are_retained(self):
-        self.assertEqual(len(self.names), 5)
+        self.assertTrue(runner.ORIGINAL_TEST_NAMES.issubset(self.names))
         script = (ROOT / ".github/scripts/bil_ios37_native_integration.sh").read_text(encoding="utf-8")
         self.assertLess(script.index("python3 .github/scripts/bil_ios_native_preflight.py"),
                         script.index("python3 .github/scripts/bil_ios_runner_tests.py"))
         self.assertLess(script.index("python3 .github/scripts/bil_ios_runner_tests.py"),
                         script.index('for KIND in "${KINDS[@]}"'))
         self.assertIn('--device "$IPHONE_UDID" "${DEFINES[@]}"', script)
+        # A fixture or top-level function is not a declared RunnerTests XCTest.
+        self.assertEqual(runner.expected_tests((ROOT / "ios/RunnerTests/RunnerTests.swift").read_text(encoding="utf-8") +
+            "\nfunc testUnrelatedTopLevel() {}\n"), self.names)
+
+
+class NamedSourceRegistryTests(unittest.TestCase):
+    @staticmethod
+    def source(extra=''):
+        return ('import XCTest\nclass RunnerTests: XCTestCase {\n' +
+            '\n'.join('  func ' + name + '() throws {}' for name in sorted(runner.ORIGINAL_TEST_NAMES)) +
+            '\n' + extra + '\n}\n')
+
+    @staticmethod
+    def summary(names):
+        return json.dumps({'totalTestCount':len(names),'passedTests':len(names),
+            'failedTests':0,'skippedTests':0,'expectedFailures':0})
+
+    @staticmethod
+    def log(names):
+        return '\n'.join("Test Case '-[RunnerTests.RunnerTests " + name + "]' passed (0.01 seconds)." for name in sorted(names))
+
+    def test_old_source_keeps_exact_five_and_new_source_requires_every_declared_test(self):
+        old = runner.expected_tests(self.source())
+        self.assertEqual(old, runner.ORIGINAL_TEST_NAMES)
+        new = runner.expected_tests(self.source('  @MainActor func testNewCapsulePixels() throws {}\n  func testNewCapsuleRTL() {}'))
+        self.assertEqual(len(new), 7)
+        self.assertEqual(set(runner.verified_summary(self.summary(new), self.log(new), new)['testNames']), new)
         with self.assertRaises(ValueError):
-            runner.expected_tests((ROOT / "ios/RunnerTests/RunnerTests.swift").read_text(encoding="utf-8") +
-                                  "\nfunc testUnreviewedSixth() {}\n")
+            runner.verified_summary(self.summary(old), self.log(old), new)
+
+    def test_comments_literals_nested_functions_and_foreign_classes_are_not_tests(self):
+        extra = '''// func testCommentFake() {}
+        /* nested /* func testNestedCommentFake() {} */ comment */
+        let fixture = "func testStringFake() {}"
+        let rawFixture = #"func testRawStringFake() {}"#
+        let multiline = """func testMultilineFake() {}"""
+        func helper() { func testNestedFunctionFake() {} }
+        '''
+        source = self.source(extra) + 'class OtherFixture { func testForeignClassFake() {} }'
+        self.assertEqual(runner.expected_tests(source), runner.ORIGINAL_TEST_NAMES)
+
+    def test_actual_runner_extension_is_included(self):
+        source = self.source() + 'extension RunnerTests { @MainActor func testExtensionCapsule() throws {} }'
+        self.assertEqual(runner.expected_tests(source), runner.ORIGINAL_TEST_NAMES | {'testExtensionCapsule'})
+
+    def test_missing_original_duplicate_or_non_xctest_source_fails_closed(self):
+        original = sorted(runner.ORIGINAL_TEST_NAMES)[0]
+        values = [self.source().replace('func ' + original, 'func renamedOriginal'),
+            self.source('func ' + original + '() {}'),
+            self.source().replace('class RunnerTests: XCTestCase', 'class Fixture: XCTestCase'),
+            'class Container { ' + self.source() + ' }',
+            self.source('func testInvalidParameter(value: Int) {}'),
+            self.source() + 'class RunnerTests: XCTestCase {}', self.source() + '/* unclosed']
+        for source in values:
+            with self.subTest(kind=len(source)), self.assertRaises(ValueError):
+                runner.expected_tests(source)
+
+    def test_foreign_class_duplicate_and_unknown_executions_cannot_supply_named_passes(self):
+        names = runner.expected_tests(self.source())
+        good = self.log(names)
+        values = [good.replace('RunnerTests.RunnerTests', 'OtherRunnerTests.RunnerTests'),
+            good.replace('RunnerTests.RunnerTests', 'RunnerTests.OtherClass'),
+            good + '\n' + good.splitlines()[0], good.replace(sorted(names)[0], 'testUnknownFromAnotherSource'),
+            good + "\nTest Case '-[OtherTests.OtherTests testForeign]' passed (0.01 seconds).",
+            'A fixture says ' + good.replace('\n', '\nA fixture says ')]
+        for log in values:
+            with self.subTest(kind=len(log)), self.assertRaises(ValueError):
+                runner.verified_summary(self.summary(names), log, names)
 
 
 if __name__ == "__main__":

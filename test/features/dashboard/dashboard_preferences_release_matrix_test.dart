@@ -41,6 +41,7 @@ void main() {
     _registerActualDeadlineProbe();
   } else {
     _registerPreferencesMatrix();
+    _registerNutritionGoalReachabilityCases();
     _registerPreparedFixtureCases();
   }
 }
@@ -353,6 +354,92 @@ void _registerPreferencesMatrix() {
     }
   }
   _registerFixtureLifecycleCases();
+}
+
+void _registerNutritionGoalReachabilityCases() {
+  for (final brightness in Brightness.values) {
+    testWidgets('nutrition goals full Arabic copy remains reachable at 200% '
+        '320x568 ${brightness.name}', (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final directory = Directory.systemTemp.createTempSync(
+        'bil-preferences-goals-layout-',
+      );
+      addTearDown(() => _deleteFixtureDirectory(directory));
+      final harness = await _PreferencesHarness.open(
+        tester,
+        databaseFile: File('${directory.path}/preferences.sqlite'),
+        language: 'ar',
+        brightness: brightness,
+        scale: 2,
+        subscription: FreePlan.createState(),
+      );
+      try {
+        final goals = find.byKey(const Key('dashboard-edit-nutrition-goals'));
+        final scrollable = _pageScrollable();
+        // Retain the same real, bounded pointer gestures as the release
+        // matrix. No ensureVisible, larger drag budget or callback invocation.
+        await _reach(tester, goals, scrollable);
+        _assertMeaning(tester, goals);
+        _assertTouchTarget(tester, goals);
+        final tile = tester.widget<ListTile>(goals);
+        final element = tester.element(goals);
+        final rect = tester.getRect(goals);
+        expect(
+          rect.height,
+          lessThanOrEqualTo(tester.getRect(scrollable).height),
+        );
+        expect(MediaQuery.textScalerOf(element).scale(16), 32);
+        expect(tile.leading, isNull);
+        expect(tile.trailing, isNull);
+        expect(tile.onTap, isNotNull);
+        final title = find.descendant(
+          of: goals,
+          matching: find.text('أهداف التغذية'),
+        );
+        final subtitle = find.descendant(
+          of: goals,
+          matching: find.text('تعديل الهدف'),
+        );
+        expect(title, findsOneWidget);
+        expect(subtitle, findsOneWidget);
+        final padding =
+            tile.contentPadding ?? ListTileTheme.of(element).contentPadding;
+        expect(padding, isNotNull);
+        final contentWidth =
+            rect.width -
+            padding!.resolve(Directionality.of(element)).horizontal;
+        expect(
+          tester.getRect(subtitle).width,
+          closeTo(contentWidth, .01),
+          reason: 'Header accessories must not reserve the subtitle width.',
+        );
+        expect(
+          find.descendant(
+            of: goals,
+            matching: find.byIcon(Icons.chevron_right_rounded),
+          ),
+          findsOneWidget,
+        );
+        // The existing guarded ListTile still owns the real route action.
+        await tester.tap(goals);
+        await _settle(tester, 'Arabic large-text goals route');
+        expect(harness.path, '/settings/nutrition-goals');
+        expect(
+          find.byKey(const Key('matrix-destination-goals')),
+          findsOneWidget,
+        );
+      } catch (error, stack) {
+        await _preserveFailureDuringCleanup(
+          error,
+          stack,
+          () => harness.close(tester),
+        );
+      }
+      await harness.close(tester);
+    }, timeout: const Timeout(Duration(seconds: 30)));
+  }
 }
 
 SubscriptionState _verifiedPremiumFixture() => SubscriptionState(

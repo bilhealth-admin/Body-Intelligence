@@ -1,8 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../../app/theme/bil_pearl_finish.dart';
+import '../../app/theme/bil_flagship_tokens.dart';
+import 'bil_splash_capsule_progress.dart';
 
 /// The visual hold shared by internal feature entry surfaces. It never waits
 /// for an asset, network request, authorization or first data page to finish.
@@ -204,7 +205,7 @@ class BilPearlFeatureWelcome extends StatelessWidget {
   }
 }
 
-/// Same segmented iOS activity glyph on every supported platform. The native
+/// The startup capsule on every supported platform. The native
 /// iOS reduceMotion flag is separate from MediaQuery.disableAnimations in the
 /// pinned Flutter SDK, so changes to either must produce the static variant.
 class BilFeatureWelcomeStatus extends StatefulWidget {
@@ -218,21 +219,52 @@ class BilFeatureWelcomeStatus extends StatefulWidget {
 }
 
 class _BilFeatureWelcomeStatusState extends State<BilFeatureWelcomeStatus>
-    with WidgetsBindingObserver {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  late final AnimationController _phase;
+
   @override
   void initState() {
     super.initState();
+    _phase = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2300),
+    );
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  bool get _reduced =>
+      MediaQuery.disableAnimationsOf(context) ||
+      View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
+
+  void _syncMotion() {
+    if (_reduced) {
+      _phase.stop(canceled: false);
+      _phase.value = 0.72;
+    } else if (!_phase.isAnimating) {
+      // This repeats only while the real pending widget is mounted. No
+      // percent, completion deadline or application state is inferred.
+      _phase.repeat();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncMotion();
   }
 
   @override
   void didChangeAccessibilityFeatures() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      _syncMotion();
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _phase.dispose();
     super.dispose();
   }
 
@@ -243,26 +275,51 @@ class _BilFeatureWelcomeStatusState extends State<BilFeatureWelcomeStatus>
         widget.color ??
         (MediaQuery.highContrastOf(context)
             ? (dark ? Colors.white : Colors.black)
-            : (dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178)));
-    final reduced =
-        MediaQuery.disableAnimationsOf(context) ||
-        View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
+            : (dark ? const Color(0xFF8CCFFF) : BilFlagshipTokens.navy800));
+    final reduced = _reduced;
     return Semantics(
       liveRegion: true,
       label: widget.label,
       role: ui.SemanticsRole.loadingSpinner,
       child: ExcludeSemantics(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: CupertinoActivityIndicator(
-            key: Key(
-              reduced
-                  ? 'bil-feature-welcome-static-status'
-                  : 'bil-feature-welcome-progress',
-            ),
-            radius: 12,
-            animating: !reduced,
-            color: color,
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Preserve the former24x24 natural footprint, so an existing
+              // adjacent waiting label keeps its exact position. Explicit
+              // parent constraints still select compact or wide presentation.
+              final width = constraints.constrainWidth(24);
+              final height = constraints.constrainHeight(24);
+              if (width <= 0 || height <= 0) return const SizedBox.shrink();
+              final capsuleWidth = width.clamp(0.0, 112.0).toDouble();
+              return SizedBox(
+                width: width,
+                height: height,
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: RepaintBoundary(
+                      child: AnimatedBuilder(
+                        animation: _phase,
+                        builder: (context, _) => BilSplashCapsuleProgress(
+                          key: Key(
+                            reduced
+                                ? 'bil-feature-welcome-static-status'
+                                : 'bil-feature-welcome-progress',
+                          ),
+                          width: capsuleWidth,
+                          progress: _phase.value,
+                          reducedMotion: reduced,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ),

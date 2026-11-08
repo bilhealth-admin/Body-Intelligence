@@ -78,6 +78,7 @@ class _CommunityPostBodyState extends State<CommunityPostBody> {
               ),
               icon: BilCrystalArrow(
                 extent: 36,
+                reserveSpace: true,
                 child: Icon(
                   _expanded
                       ? Icons.expand_less_rounded

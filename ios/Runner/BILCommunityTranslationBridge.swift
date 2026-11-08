@@ -142,6 +142,116 @@ private final class BILTranslationVisit: ObservableObject {
     return true
   }
 }
+
+/// Native paint parity with BilSplashCapsuleProgress. Phase is visual only;
+/// it never estimates translation/download completion or changes request state.
+@available(iOS 15.0, *)
+struct BILNativeSplashCapsulePaint: View {
+  let progress: Double
+  let reducedMotion: Bool
+  @Environment(\.colorScheme) private var colorScheme
+  @Environment(\.colorSchemeContrast) private var contrast
+
+  private var ink: Color {
+    if contrast == .increased { return colorScheme == .dark ? .white : .black }
+    return colorScheme == .dark
+      ? Color(red: 140.0 / 255, green: 207.0 / 255, blue: 1)
+      : Color(red: 16.0 / 255, green: 37.0 / 255, blue: 74.0 / 255)
+  }
+
+  var body: some View {
+    let phase = reducedMotion ? 0.72 : progress
+    let eased = Self.emphasized(phase)
+    Canvas { context, size in
+      let bounds = CGRect(origin: .zero, size: size)
+      context.clip(to: Path(roundedRect: bounds, cornerRadius: min(size.width, size.height) / 2))
+      context.fill(Path(bounds), with: .color(ink.opacity(56.0 / 255)))
+      let fillWidth = size.width * CGFloat(0.12 + 0.88 * eased)
+      context.fill(
+        Path(CGRect(x: 0, y: 0, width: fillWidth, height: size.height)),
+        with: .linearGradient(
+          Gradient(colors: [ink.opacity(168.0 / 255), ink.opacity(214.0 / 255)]),
+          startPoint: .zero, endPoint: CGPoint(x: fillWidth, y: 0)
+        )
+      )
+      if !reducedMotion {
+        let highlightX = (size.width + 38) * CGFloat(eased) - 38
+        context.fill(
+          Path(CGRect(x: highlightX, y: 0, width: 38, height: size.height)),
+          with: .linearGradient(
+            Gradient(colors: [ink.opacity(0), ink.opacity(184.0 / 255), ink.opacity(0)]),
+            startPoint: CGPoint(x: highlightX, y: 0),
+            endPoint: CGPoint(x: highlightX + 38, y: 0)
+          )
+        )
+      }
+    }
+    // Flutter uses physical centerLeft/left-to-right gradients even in RTL.
+    .frame(width: 24, height: 7)
+    .accessibilityHidden(true)
+  }
+
+  // The original Flutter ThreePointCubic control points and its 0.001 solver
+  // tolerance, rather than a different native easeInOut approximation.
+  static func emphasized(_ phase: Double) -> Double {
+    guard phase.isFinite else { return phase == .infinity ? 1 : 0 }
+    let t = min(1, max(0, phase))
+    if t == 0 || t == 1 { return t }
+    let first = t < 0.166666
+    let scaleX = first ? 0.166666 : 1 - 0.166666
+    let scaleY = first ? 0.4 : 0.6
+    let localT = (t - (first ? 0 : 0.166666)) / scaleX
+    let a = first ? 0.05 / scaleX : (0.208333 - 0.166666) / scaleX
+    let b = first ? 0 : (0.82 - 0.4) / scaleY
+    let c = first ? 0.133333 / scaleX : (0.25 - 0.166666) / scaleX
+    let d = first ? 0.06 / scaleY : 1.0
+    let value = cubic(localT, a: a, b: b, c: c, d: d)
+    return value * scaleY + (first ? 0 : 0.4)
+  }
+
+  private static func cubic(_ t: Double, a: Double, b: Double, c: Double, d: Double) -> Double {
+    guard t.isFinite else { return t == .infinity ? 1 : 0 }
+    if t == 0 || t == 1 { return t }
+    func evaluate(_ first: Double, _ second: Double, _ m: Double) -> Double {
+      3 * first * (1 - m) * (1 - m) * m + 3 * second * (1 - m) * m * m + m * m * m
+    }
+    var low = 0.0
+    var high = 1.0
+    for _ in 0..<64 {
+      let midpoint = (low + high) / 2
+      let estimate = evaluate(a, c, midpoint)
+      if abs(t - estimate) < 0.001 { return evaluate(b, d, midpoint) }
+      if estimate < t { low = midpoint } else { high = midpoint }
+    }
+    return evaluate(b, d, (low + high) / 2)
+  }
+}
+
+/// Only exists while BIL's real preparation surface is mounted. No timer or
+/// animation schedule remains active with Reduce Motion or outside foreground.
+@available(iOS 15.0, *)
+struct BILNativeSplashCapsuleProgress: View {
+  @Environment(\.accessibilityReduceMotion) private var reducedMotion
+  @Environment(\.scenePhase) private var scenePhase
+  @State private var origin = Date()
+
+  var body: some View {
+    Group {
+      if reducedMotion || scenePhase != .active {
+        BILNativeSplashCapsulePaint(progress: 0.72, reducedMotion: true)
+      } else {
+        TimelineView(.animation(minimumInterval: 1.0 / 60)) { timeline in
+          let elapsed = max(0, timeline.date.timeIntervalSince(origin))
+          let phase = elapsed.truncatingRemainder(dividingBy: 2.3) / 2.3
+          BILNativeSplashCapsulePaint(progress: phase, reducedMotion: false)
+        }
+      }
+    }
+    .frame(width: 24, height: 24)
+    .accessibilityHidden(true)
+  }
+}
+
 @available(iOS 18.0, *)
 private struct BILTranslationPreparation: View {
   @ObservedObject var model: BILTranslationVisit
@@ -152,7 +262,10 @@ private struct BILTranslationPreparation: View {
   let cancelled: () -> Void
   var body: some View {
     VStack(spacing: 20) {
-      ProgressView(status)
+      VStack(spacing: 8) {
+        BILNativeSplashCapsuleProgress()
+        Text(status)
+      }
       Button(cancel, action: cancelled)
     }.padding(24).translationTask(model.configuration) { session in
       let index = model.index

@@ -71,6 +71,9 @@ void main() {
       final flutterSource = File(
         'lib/features/startup/premium_splash_experience.dart',
       ).readAsStringSync();
+      final progressRenderer = File(
+        'lib/shared/widgets/bil_splash_capsule_progress.dart',
+      ).readAsStringSync();
       final startupSource = File(
         'lib/features/startup/startup_page.dart',
       ).readAsStringSync();
@@ -109,7 +112,8 @@ void main() {
       );
       expect(flutterSource, isNot(contains('VideoPlayerController.network')));
       expect(flutterSource, contains("ValueKey('premium-splash-progress')"));
-      expect(flutterSource, contains('Curves.easeInOutCubicEmphasized'));
+      expect(flutterSource, contains('BilSplashCapsuleProgress('));
+      expect(progressRenderer, contains('Curves.easeInOutCubicEmphasized'));
       expect(flutterSource, isNot(contains('CircularProgressIndicator(')));
       expect(flutterSource, isNot(contains('Download')));
       expect(

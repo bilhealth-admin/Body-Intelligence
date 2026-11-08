@@ -179,6 +179,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
     final date = ref.watch(selectedLogDateProvider);
     final meals = ref.watch(dailyMealsProvider);
     final waterEntries = ref.watch(dailyWaterProvider);
@@ -281,16 +283,21 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         context.go(widget.returnPath ?? '/dashboard');
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.dark.copyWith(
-          statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
-        ),
+        value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+            .copyWith(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: dark
+                  ? Brightness.light
+                  : Brightness.dark,
+              statusBarBrightness: dark ? Brightness.dark : Brightness.light,
+            ),
         child: Scaffold(
           // Keep focused meal/search pages on the established neutral canvas.
           // The Today-only reference treatment is painted by
           // DailyLogTodayBackground when that surface is active.
-          backgroundColor: const Color(0xFFF5F5F8),
+          backgroundColor: dark
+              ? theme.colorScheme.surfaceContainerLowest
+              : const Color(0xFFF5F5F8),
           body: DailyLogTodayBackground(
             enabled:
                 selectedFood == null &&

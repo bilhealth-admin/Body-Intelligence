@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -5,7 +6,7 @@ import 'package:body_intelligence_log/features/commerce/domain/store_offer_metad
 import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -88,14 +89,17 @@ void main() {
                 findsOneWidget,
               );
               expect(tester.widget<InkWell>(cta).onTap, isNull);
-              final nativeIndicator = tester.widget<CupertinoActivityIndicator>(
-                find.byType(CupertinoActivityIndicator),
+              final nativeIndicator = tester.widget<BilSplashCapsuleProgress>(
+                find.byType(BilSplashCapsuleProgress),
               );
-              expect(nativeIndicator.radius, 12);
-              expect(nativeIndicator.animating, !reduced);
+              expect(
+                tester.getSize(find.byType(BilSplashCapsuleProgress)).height,
+                7,
+              );
+              expect(nativeIndicator.reducedMotion, reduced);
               expect(
                 nativeIndicator.color,
-                dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
+                dark ? const Color(0xFF8CCFFF) : const Color(0xFF10254A),
               );
               await tester.tap(cta, warnIfMissed: false);
               await tester.pump(const Duration(milliseconds: 200));

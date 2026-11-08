@@ -2,37 +2,6 @@ part of 'bil_smart_plan_page.dart';
 
 /// Warmup and reference surfaces share the active session owner fence.
 extension _BilSessionWarmup on _BilSmartPlanSessionState {
-  Widget _sourceLink(String title, String url) => TextButton.icon(
-    style: TextButton.styleFrom(foregroundColor: _smartPlanActionInk(context)),
-    onPressed: () async {
-      if (!_allowed()) return;
-      var opened = false;
-      try {
-        opened = await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-        );
-      } on Object {
-        opened = false;
-      }
-      if (!opened && mounted && _allowed()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              _smartPlanText(
-                context,
-                'The reference could not be opened. Try again.',
-                'تعذّر فتح المرجع. حاول مجددًا.',
-              ),
-            ),
-          ),
-        );
-      }
-    },
-    icon: const Icon(Icons.open_in_new_rounded),
-    label: Text(title),
-  );
-
   Widget _warmupSurface(String locale) {
     String t(String en, String ar) => _smartPlanText(context, en, ar);
     final home = widget.day.workout!.templateId.startsWith('home-');
@@ -110,11 +79,6 @@ extension _BilSessionWarmup on _BilSmartPlanSessionState {
                       ),
                     ),
                 ],
-                if (home)
-                  _sourceLink(
-                    t('NHS warm-up reference', 'مرجع الإحماء من NHS'),
-                    'https://www.nhs.uk/live-well/exercise/how-to-warm-up-before-exercising/',
-                  ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
                   key: const ValueKey('bil-smart-plan-warmup-continue'),
@@ -125,6 +89,7 @@ extension _BilSessionWarmup on _BilSmartPlanSessionState {
                   },
                   icon: const BilCrystalArrow(
                     extent: 36,
+                    reserveSpace: true,
                     child: Icon(Icons.arrow_forward_rounded),
                   ),
                   label: Text(

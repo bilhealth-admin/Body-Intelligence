@@ -278,6 +278,7 @@ Future<void> showAiCoachAnswerReportSheet(
                                 duration: const Duration(milliseconds: 180),
                                 child: const BilCrystalArrow(
                                   extent: 36,
+                                  reserveSpace: true,
                                   child: Icon(
                                     Icons.keyboard_arrow_down_rounded,
                                     size: 20,

@@ -13,6 +13,7 @@ import unittest
 from types import SimpleNamespace
 
 import bil39_internal_build_ci as gate
+from bil_native_source_evidence import validate_native_workflow_contract, native_job_name
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / '.github/scripts/bil39_ios_native_integration.sh'
@@ -167,54 +168,32 @@ class NativeSplitTest(unittest.TestCase):
                     self.assertIn('--qa-simulator-only', args)
 
     def test_two_distinct_workflow_runs_are_required_and_each_missing_failed_or_skipped_job_blocks(self):
-        for label, title in [('iphone', 'iPhone'), ('ipad', 'iPad')]:
+        for label in ('iphone', 'ipad'):
             workflow = f'bil39_{label}_native.yml'
-            job_name = f'{title} native tests from exact BIL39 simulator bundles'
+            job_name = native_job_name(label)
+            proof = validate_native_workflow_contract(ROOT, label, 'codex/bil43-android35-verified-20261108')
+            self.assertEqual(proof['job_name'], job_name)
             self.assertEqual(gate.WORKFLOWS[workflow], {job_name})
-            source = (ROOT / '.github/workflows' / workflow).read_text(encoding='utf-8')
-            # The owner-authorized Build40/41 reuse the independent lanes.
-            # Keep39/40 covered and require41; neither device may fall
-            # back to the slow combined job or an unrelated branch.
-            self.assertIn(
-                'branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028, codex/bil41-android33-release-20261106]',
-                source,
-            )
-            self.assertIn('runs-on: macos-26', source)
-            self.assertIn(f'BIL_NATIVE_DEVICE: {label}', source)
-            self.assertIn(f'name: bil39-{label}-native-${{{{ github.sha }}}}', source)
-            self.assertNotIn('matrix:', source)
-            self.assertNotIn('continue-on-error', source)
-            run = {'id': 123, 'head_sha': SHA, 'head_branch': gate.BRANCH, 'event': 'push',
-                'status': 'completed', 'conclusion': 'success', 'path': '.github/workflows/' + workflow,
-                'html_url': f'https://github.com/{gate.REPOSITORY}/actions/runs/123'}
-            job = {'name': job_name, 'status': 'completed', 'conclusion': 'success', 'head_sha': SHA}
-            self.assertEqual(gate.validate_run(run, [job], sha=SHA, workflow=workflow)['status'], 'PASS')
-            for jobs in ([], [{**job, 'conclusion': 'skipped'}], [{**job, 'conclusion': 'failure'}],
-                         [{**job, 'head_sha': 'b' * 40}]):
-                with self.subTest(workflow=workflow, jobs=jobs):
-                    with self.assertRaises(ValueError):
-                        gate.validate_run(run, jobs, sha=SHA, workflow=workflow)
+            run = {'id':123, 'head_sha':SHA, 'head_branch':gate.BRANCH, 'event':'push',
+                'status':'completed', 'conclusion':'success', 'path':'.github/workflows/'+workflow,
+                'html_url':f'https://github.com/{gate.REPOSITORY}/actions/runs/123'}
+            job = {'name':job_name,'status':'completed','conclusion':'success','head_sha':SHA}
+            self.assertEqual(gate.validate_run(run,[job],sha=SHA,workflow=workflow)['status'],'PASS')
+            for jobs in ([],[{**job,'conclusion':'skipped'}],[{**job,'conclusion':'failure'}],
+                    [{**job,'head_sha':'b'*40}]):
+                with self.subTest(workflow=workflow,jobs=jobs),self.assertRaises(ValueError):
+                    gate.validate_run(run,jobs,sha=SHA,workflow=workflow)
 
     def test_combined_job_is_disabled_for_bil39_but_existing_main_scope_is_preserved(self):
-        source = (ROOT / '.github/workflows/bil_codeql_security_extended.yml').read_text(encoding='utf-8')
-        job = source.split('\n  ios-native-integration:\n', 1)[1].split('\n    name:', 1)[0]
-        expression = job.split('${{', 1)[1].rsplit('}}', 1)[0].strip()
-        expression = expression.replace('&&', ' and ').replace('||', ' or ').replace('!=', '<>')
-        expression = expression.replace('!', ' not ').replace('<>', '!=')
-        expression = expression.replace('true', 'True')
-        tree = ast.parse(' '.join(expression.split()), mode='eval')
-        allowed = (ast.Expression, ast.BoolOp, ast.UnaryOp, ast.Compare, ast.Name,
-            ast.Attribute, ast.Constant, ast.And, ast.Or, ast.Not, ast.Eq, ast.NotEq, ast.Load)
-        self.assertTrue(all(isinstance(node, allowed) for node in ast.walk(tree)))
-        flags = SimpleNamespace(**dict.fromkeys(['source_audit_only', 'mobsf_only', 'android_native_only',
-            'ios_native_only', 'ios_only', 'android_only', 'supabase_only'], False))
-        for branch, expected in [('bil39/integration-20261025', False),
-                                 ('codex/bil40-device-fixes-20261028', False),
-                                 ('codex/bil41-android33-release-20261106', False),
-                                 ('main', True)]:
-            github = SimpleNamespace(event_name='push', ref='refs/heads/' + branch)
-            self.assertEqual(eval(compile(tree, '<actual condition>', 'eval'),
-                {'__builtins__': {}}, {'inputs': flags, 'github': github}), expected)
+        security = (ROOT/'.github/workflows/bil_codeql_security_extended.yml').read_text()
+        self.assertNotIn('\n  ios-native-integration:\n', security)
+        for branch in ('bil39/integration-20261025','codex/bil40-device-fixes-20261028',
+                'codex/bil41-android33-release-20261106','codex/bil43-android35-verified-20261108','main'):
+            for device in ('iphone','ipad'):
+                self.assertEqual(validate_native_workflow_contract(ROOT,device,branch)['device'],device)
+        for device in ('iphone','ipad'):
+            caller=(ROOT/f'.github/workflows/bil39_{device}_native.yml').read_text()
+            self.assertIn('  pull_request:\n    branches: [main, integration/bil-qa-media-policy-20261011]',caller)
 
 
 if __name__ == '__main__':

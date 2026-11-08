@@ -1,31 +1,5 @@
 part of 'reference_preferences_pages.dart';
 
-class _StoredNumber extends ConsumerStatefulWidget {
-  const _StoredNumber(this.keyName, this.label, this.defaultValue, this.suffix);
-  final String keyName;
-  final String label;
-  final String? defaultValue;
-  final String suffix;
-  @override
-  ConsumerState<_StoredNumber> createState() => _StoredNumberState();
-}
-
-@visibleForTesting
-bool validStoredNutritionGoal(String key, String suffix, String input) {
-  final expectedUnit = NutritionGoalSnapshot.units[key];
-  if (expectedUnit == null ||
-      (key == 'goal.calories'
-          ? suffix != '' && suffix != 'kcal'
-          : key.endsWith('Percent')
-          ? suffix != '%'
-          : suffix != expectedUnit)) {
-    return false;
-  }
-  final number = NutritionGoalSnapshot.parse(input);
-  if (number == null || !number.isFinite || number < 0) return false;
-  return validDashboardNutrientGoal(key, number);
-}
-
 class _StoredNumberState extends ConsumerState<_StoredNumber> {
   String? value;
   String? retainedDraft;
@@ -254,8 +228,8 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
         ?.goals[widget.keyName];
     final displayed = resolved?.raw ?? resolved?.value?.toString();
     final displayNumber = resolved?.value;
-    // Round only the visible calorie/macro targets. Editors and persistence
-    // retain the exact values used by the nutrition calculations.
+    // Present calorie/macro targets as whole numbers. Opening or saving an
+    // untouched editor must retain the exact persisted calculation values.
     final wholeNumberDisplay =
         widget.keyName == 'goal.calories' ||
         widget.suffix == '%' ||
@@ -374,8 +348,14 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
                   preferencesRepositoryProvider,
                 );
                 final controller = TextEditingController(
-                  text: retainedDraft ?? displayed ?? '',
+                  text:
+                      retainedDraft ??
+                      (wholeNumberDisplay
+                          ? displayText ?? displayed
+                          : displayed) ??
+                      '',
                 );
+                var userEdited = retainedDraft != null;
                 String? next;
                 try {
                   next = await showDialog<String>(
@@ -410,6 +390,7 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
                                 children: [
                                   TextField(
                                     controller: controller,
+                                    onChanged: (_) => userEdited = true,
                                     style: Theme.of(dialogContext)
                                         .textTheme
                                         .bodyLarge
@@ -516,6 +497,23 @@ class _StoredNumberState extends ConsumerState<_StoredNumber> {
                                 onPressed: dialogSaving
                                     ? null
                                     : () async {
+                                        if (wholeNumberDisplay &&
+                                            !userEdited &&
+                                            resolved?.raw != null &&
+                                            displayed != null &&
+                                            NutritionGoalSnapshot.technicallyValid(
+                                              widget.keyName,
+                                              displayNumber,
+                                            ) &&
+                                            _editorIsCurrent(
+                                              editorRepository,
+                                            )) {
+                                          Navigator.pop(
+                                            dialogContext,
+                                            displayed,
+                                          );
+                                          return;
+                                        }
                                         if (!validStoredNutritionGoal(
                                           widget.keyName,
                                           widget.suffix,

@@ -111,6 +111,32 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
       key: const ValueKey('bil-smart-plan-session'),
       appBar: AppBar(
         title: Text(t('Your training session', 'جلستك التدريبية')),
+        actions: [
+          BilSmartPlanBookButton(
+            key: const ValueKey('bil-smart-plan-session-sources'),
+            label: t('Plan sources', 'مصادر الخطة'),
+            onPressed: !allowed
+                ? null
+                : () async {
+                    List<WellnessContentItem>? items;
+                    try {
+                      items = await _load;
+                    } on Object {
+                      // Public guidance remains available if the session's
+                      // existing error surface cannot load its exact media.
+                    }
+                    if (!context.mounted || !_allowed()) return;
+                    await showBilSmartPlanSources(
+                      context,
+                      home: widget.day.workout!.templateId.startsWith('home-'),
+                      nutrition: false,
+                      exercise: items != null && _step < items.length
+                          ? items[_step]
+                          : null,
+                    );
+                  },
+          ),
+        ],
       ),
       body: BilPearlBackdrop(
         child: SafeArea(
@@ -346,56 +372,13 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                                             'حافظ على التحكم. توقف عند الألم وزد الراحة عند الحاجة.',
                                           ),
                                         ),
-                                        ExpansionTile(
-                                          key: const ValueKey(
-                                            'bil-smart-plan-home-guidance',
-                                          ),
-                                          tilePadding: EdgeInsets.zero,
-                                          title: Text(
-                                            t(
-                                              'Guidance and sources',
-                                              'الإرشادات والمصادر',
-                                            ),
-                                          ),
-
-                                          trailing:
-                                              const BilCrystalExpansionIndicator(),
-                                          children: [
-                                            Text(
-                                              t(
-                                                'BIL adapts published NHS and CDC strength guidance for this general adult program. It is not injury rehabilitation. Sets and resistance never increase automatically; review and approve any change.',
-                                                'يطبّق BIL إرشادات القوة المنشورة لدى NHS وCDC في برنامج عام للبالغين وليس لتأهيل الإصابات. لا تزيد المجموعات أو المقاومة تلقائيًا؛ راجع أي تعديل ووافق عليه.',
-                                              ),
-                                            ),
-                                            Text(
-                                              t(
-                                                'Use a comfortable resistance. Allow more time rather than shortening rest or rushing technique.',
-                                                'استخدم مقاومة مريحة. أتح وقتًا أطول بدلًا من اختصار الراحة أو استعجال الأداء.',
-                                              ),
-                                            ),
-                                            _sourceLink(
-                                              t(
-                                                'NHS sets and repetitions',
-                                                'المجموعات والتكرارات من NHS',
-                                              ),
-                                              'https://www.nhs.uk/live-well/exercise/how-to-improve-strength-flexibility/',
-                                            ),
-                                            _sourceLink(
-                                              t(
-                                                'CDC rest guidance',
-                                                'إرشادات الراحة من CDC',
-                                              ),
-                                              'https://www.cdc.gov/pcd/issues/2014/13_0403.htm',
-                                            ),
-                                          ],
-                                        ),
-                                      ] else
                                         Text(
                                           t(
-                                            'Reference: BIL source-verified Gym plan. Adjust only through a reviewed plan change.',
-                                            'المرجع: خطة النادي الموثقة من مصدر BIL. لا تُعدّل إلا بعد مراجعة تغيير الخطة.',
+                                            'Use a comfortable resistance. Allow more time rather than shortening rest or rushing technique.',
+                                            'استخدم مقاومة مريحة. أتح وقتًا أطول بدلًا من اختصار الراحة أو استعجال الأداء.',
                                           ),
                                         ),
+                                      ],
                                     ],
                                     if (dose == null && item.segments.isEmpty)
                                       Padding(

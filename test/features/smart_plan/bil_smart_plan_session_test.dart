@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/features/smart_plan/presentation/bil_smart_plan_page.dart';
+import 'package:body_intelligence_log/features/smart_plan/presentation/bil_smart_plan_sources.dart';
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan.dart';
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan_engine.dart';
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_catalog.dart';
@@ -164,6 +165,83 @@ void main() {
       await tester.tap(proceed);
       await tester.pumpAndSettle();
     }
+  }
+
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      'warm-up continue glass leaves the full label gap in $language',
+      (tester) async {
+        await pump(
+          tester,
+          locale: language,
+          selectedPlan: homePlan,
+          showWarmup: true,
+        );
+        final button = find.byKey(
+          const ValueKey('bil-smart-plan-warmup-continue'),
+        );
+        await tester.ensureVisible(button);
+        await tester.pumpAndSettle();
+        final glass = find.descendant(
+          of: button,
+          matching: find.byKey(const Key('bil-crystal-arrow-bubble')),
+        );
+        final label = find.descendant(
+          of: button,
+          matching: find.text(
+            language == 'ar'
+                ? 'المتابعة إلى التمارين'
+                : 'Continue to exercises',
+          ),
+        );
+        final bubbleRect = tester.getRect(glass);
+        final textRect = tester.getRect(label);
+        expect(
+          language == 'ar'
+              ? bubbleRect.left - textRect.right
+              : textRect.left - bubbleRect.right,
+          greaterThanOrEqualTo(8),
+        );
+        expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+        expect(tester.takeException(), isNull);
+      },
+    );
+    testWidgets(
+      'session book $language opens verified references and returns without changing warm-up or completion',
+      (tester) async {
+        await pump(
+          tester,
+          locale: language,
+          selectedPlan: homePlan,
+          showWarmup: true,
+          width: 320,
+          scale: 2,
+        );
+        final original = homePlan.encode();
+        final button = find.byKey(
+          const ValueKey('bil-smart-plan-session-sources'),
+        );
+        expect(button.hitTestable(), findsOneWidget);
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        expect(find.byType(BilSmartPlanSourcesPanel), findsOneWidget);
+        expect(find.textContaining('NHS ·'), findsOneWidget);
+        await tester.tap(
+          find.byTooltip(
+            MaterialLocalizations.of(tester.element(button)).closeButtonTooltip,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(BilSmartPlanSourcesPanel), findsNothing);
+        expect(
+          find.byKey(const ValueKey('bil-smart-plan-warmup')),
+          findsOneWidget,
+        );
+        expect(homePlan.encode(), original);
+        expect(homePlan.days.first.workout!.completed, isFalse);
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets(

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - codex/bil43-android35-verified-20261108
       - integration/bil-qa-media-policy-20261011
       - bil39/integration-20261025
       - codex/bil40-device-fixes-20261028
@@ -27,7 +28,7 @@ on:
         type: boolean
         default: false
       ios_only:
-        description: Run only the Swift and iOS 37 simulator certification job
+        description: Run only the Swift compiler analysis; both native source lanes run independently
         required: false
         type: boolean
         default: false
@@ -41,13 +42,8 @@ on:
         required: false
         type: boolean
         default: false
-      ios_native_only:
-        description: Run existing iPhone and iPad tests from generic simulator bundles without CodeQL tracing
-        required: false
-        type: boolean
-        default: false
       native_target:
-        description: Scope native-only reruns to the affected existing entrypoint
+        description: Scope Android native-only reruns to the affected existing entrypoint
         required: false
         type: choice
         options:
@@ -84,7 +80,7 @@ permissions:
 
 jobs:
   analyze:
-    if: ${{ inputs.mobsf_only != true && inputs.android_native_only != true && inputs.ios_native_only != true && (inputs.source_audit_only == true || github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true) }}
+    if: ${{ inputs.mobsf_only != true && inputs.android_native_only != true && (inputs.source_audit_only == true || github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true) }}
     name: CodeQL (${{ matrix.language }})
     runs-on: ${{ matrix.runner }}
     timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
@@ -299,7 +295,7 @@ jobs:
           retention-days: 14
 
   local-supabase-integration:
-    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') && inputs.mobsf_only != true && inputs.android_native_only != true && inputs.ios_native_only != true && inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') && inputs.mobsf_only != true && inputs.android_native_only != true && inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
     name: Local Supabase migrations, SQL, Auth and RLS
     runs-on: ubuntu-24.04
     timeout-minutes: 180
@@ -638,7 +634,7 @@ jobs:
           deno test --allow-env --allow-read --allow-net supabase/functions
 
   isolated-source-audit:
-    if: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/bil39/integration-20261025' || github.ref == 'refs/heads/codex/bil40-device-fixes-20261028' || github.ref == 'refs/heads/codex/bil41-android33-release-20261106')) || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
+    if: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/bil39/integration-20261025' || github.ref == 'refs/heads/codex/bil40-device-fixes-20261028' || github.ref == 'refs/heads/codex/bil41-android33-release-20261106' || github.ref == 'refs/heads/codex/bil43-android35-verified-20261108')) || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
     name: Isolated Semgrep source audit
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -720,7 +716,7 @@ jobs:
 
   android-native-only:
     if: >-
-      ${{ inputs.ios_native_only != true && inputs.source_audit_only != true && inputs.mobsf_only != true &&
+      ${{ inputs.source_audit_only != true && inputs.mobsf_only != true &&
           (inputs.android_native_only == true ||
            (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true)) }}
     name: Android API 33 native integration without CodeQL tracing
@@ -780,67 +776,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  ios-native-integration:
-    if: >-
-      ${{ github.ref != 'refs/heads/bil39/integration-20261025' && github.ref != 'refs/heads/codex/bil40-device-fixes-20261028' && github.ref != 'refs/heads/codex/bil41-android33-release-20261106' && inputs.source_audit_only != true && inputs.mobsf_only != true && inputs.android_native_only != true &&
-          ((github.event_name == 'workflow_dispatch' && inputs.ios_native_only == true) ||
-           (inputs.ios_native_only != true &&
-            !(github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') &&
-            (github.event_name != 'workflow_dispatch' || inputs.ios_only == true ||
-             (inputs.android_only != true && inputs.supabase_only != true)))) }}
-    name: iPhone and iPad native tests from exact simulator bundles
-    runs-on: macos-26
-    timeout-minutes: 120
-    permissions:
-      contents: read
-    steps:
-      - name: Check out accepted source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Verify native preparation commands and workflow scopes offline
-        run: python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
-      - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-      - name: Select exact CocoaPods in an isolated job gem home
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
-          python3 .github/scripts/install_isolated_cocoapods.py \
-            --output artifacts/qa/text18/ios37-simulators/cocoapods-installation.json
-
-      - name: Upload isolated CocoaPods installation receipt
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: bil-cocoapods-native-ios-${{ github.sha }}
-          path: artifacts/qa/text18/ios37-simulators/cocoapods-installation.json
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Resolve existing dependencies and native pods
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter pub get
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
-          pod install --project-directory=ios
-      - name: Drive each actual test entrypoint on iPhone and iPad
-        env:
-          BIL_NATIVE_TARGET: ${{ inputs.native_target }}
-        run: bash .github/scripts/bil_ios37_native_integration.sh
-      - name: Upload exact native test evidence
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: bil-ios37-native-only-${{ github.sha }}
-          path: artifacts/qa/text18/ios37-simulators
-          if-no-files-found: warn
-          retention-days: 14
+  # Native iOS coverage is mandatory in bil39_iphone_native.yml and
+  # bil39_ipad_native.yml through the same-commit reusable workflow. Both
+  # exact-source artifacts are required by the release prerequisite gate;
+  # CodeQL does not repeat the retired combined Simulator orchestration.
 
   offline-mobile-static-audit:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.mobsf_only == true }}

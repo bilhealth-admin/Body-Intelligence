@@ -458,8 +458,8 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
               BilPearlMaterialCard(
                 child: Column(
                   children: [
-                    ListTile(
-                      key: const Key('dashboard-edit-nutrition-goals'),
+                    _DashboardResponsiveActionTile(
+                      tileKey: const Key('dashboard-edit-nutrition-goals'),
                       leading: const _DashboardLuxeIconBadge(
                         kind: BilSemanticIconKind.goals,
                       ),
@@ -612,12 +612,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                               child: Icon(Icons.refresh_rounded),
                             ),
                           )
-                        : !entitlementResolved
-                        ? const SizedBox.square(
-                            dimension: 22,
-                            child: BilFeatureWelcomeStatus(),
-                          )
-                        : !paid
+                        : entitlementResolved && !paid
                         ? const Icon(
                             Icons.workspace_premium_rounded,
                             color: Color(0xFFF2B632),

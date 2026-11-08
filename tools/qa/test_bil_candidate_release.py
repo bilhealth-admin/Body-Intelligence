@@ -46,8 +46,11 @@ class CandidateReleaseTest(unittest.TestCase):
             return {'jobs': [{'name': 'Actual E2E', 'status': 'completed', 'conclusion': 'success'}]} if '/jobs?' in endpoint else deepcopy(run)
         with self.assertRaises(ValueError):
             delivery.validate_prerequisites(manifest, {'synthetic': 12}, HEAD, api)
-        self.assertEqual(len(delivery.validate_prerequisites(manifest, {'synthetic': 12},
-            HEAD, api, expected_branch=candidate.BRANCH)), 1)
+        # The explicitly selected candidate branch is necessary but a green
+        # generic job cannot substitute for both actual native ZIP artifacts.
+        with self.assertRaisesRegex(ValueError, 'Both independent native'):
+            delivery.validate_prerequisites(manifest, {'synthetic': 12}, HEAD, api,
+                                            expected_branch=candidate.BRANCH)
         run['head_sha'] = 'b' * 40
         with self.assertRaises(ValueError):
             delivery.validate_prerequisites(manifest, {'synthetic': 12}, HEAD, api,

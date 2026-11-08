@@ -51,7 +51,6 @@
       "allowed_skipped_jobs": [
         "Local Supabase migrations, SQL, Auth and RLS",
         "Android API 33 native integration without CodeQL tracing",
-        "iPhone and iPad native tests from exact simulator bundles",
         "Offline MobSF static debug APK audit"
       ],
       "workflow_id": 384948928,
@@ -75,7 +74,6 @@
         "Isolated Semgrep source audit",
         "Bounded macro editor generated checks, mutants and VM coverage",
         "Android API 33 native integration without CodeQL tracing",
-        "iPhone and iPad native tests from exact simulator bundles",
         "Offline MobSF static debug APK audit"
       ],
       "workflow_id": 384948928,
@@ -98,7 +96,6 @@
         "Local Supabase migrations, SQL, Auth and RLS",
         "Isolated Semgrep source audit",
         "Bounded macro editor generated checks, mutants and VM coverage",
-        "iPhone and iPad native tests from exact simulator bundles",
         "Offline MobSF static debug APK audit"
       ],
       "workflow_id": 384948928,
@@ -107,27 +104,36 @@
       "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
     },
     {
-      "workflow": "bil_codeql_security_extended.yml",
-      "inputs": {
-        "ios_native_only": "true",
-        "native_target": "all"
-      },
-      "reason": "Current latest lane fails at simulator launch after XCTest5PASS; require repaired script and all entrypoints on both iPhone and iPad, not only build/XCTest.",
+      "workflow": "bil39_iphone_native.yml",
+      "inputs": {},
+      "reason": "One independent same-commit native target with all three actual drive scopes and every declared original/new XCTest; actual authenticated ZIP evidence is mandatory before signing.",
       "required_jobs": [
-        "iPhone and iPad native tests from exact simulator bundles"
+        "native / Native iOS source QA (iphone)"
       ],
-      "allowed_skipped_jobs": [
-        "CodeQL (${{ matrix.language }})",
-        "Local Supabase migrations, SQL, Auth and RLS",
-        "Isolated Semgrep source audit",
-        "Bounded macro editor generated checks, mutants and VM coverage",
-        "Android API 33 native integration without CodeQL tracing",
-        "Offline MobSF static debug APK audit"
+      "allowed_skipped_jobs": [],
+      "workflow_id": 397661038,
+      "registered_workflow_name": "BIL39 iPhone native QA",
+      "lane_id": "iphone_native",
+      "native_device": "iphone",
+      "reuse_push_run": true,
+      "expect_push_for_this_run": true,
+      "source_binding": "Mandatory exact-source push run from the approved branch; relative workflow_call resolves at caller SHA. Never dispatch a new default-branch workflow or reuse a previous source/artifact."
+    },
+    {
+      "workflow": "bil39_ipad_native.yml",
+      "inputs": {},
+      "reason": "One independent same-commit native target with all three actual drive scopes and every declared original/new XCTest; actual authenticated ZIP evidence is mandatory before signing.",
+      "required_jobs": [
+        "native / Native iOS source QA (ipad)"
       ],
-      "workflow_id": 384948928,
-      "registered_workflow_name": "BIL CodeQL security-extended",
-      "lane_id": "ios_native",
-      "source_binding": "Future final accepted commit; exact headSha and profile job scope required. Reuse a matching fresh push run for owner/source audit; do not dispatch a duplicate."
+      "allowed_skipped_jobs": [],
+      "workflow_id": 397661037,
+      "registered_workflow_name": "BIL39 iPad native QA",
+      "lane_id": "ipad_native",
+      "native_device": "ipad",
+      "reuse_push_run": true,
+      "expect_push_for_this_run": true,
+      "source_binding": "Mandatory exact-source push run from the approved branch; relative workflow_call resolves at caller SHA. Never dispatch a new default-branch workflow or reuse a previous source/artifact."
     },
     {
       "workflow": "bil_rc_mobile_test_build.yml",
@@ -387,14 +393,16 @@
     385995260,
     386117761,
     390900524,
-    390900526
+    390900526,
+    397661037,
+    397661038
   ],
   "manual_physical": [
     {
       "name": "ios_launch_repair_before_dispatch",
       "status": "PENDING",
       "reason": "Confirmed QA signing defect repaired: Xcode owns local signature and separate simulated capability section; the actual spawn162 causal closure still requires a successful exact-source native run.",
-      "evidence_required": "All three native entrypoints on both iPhone+iPad, six actual drive receipts with effective exit0 and expected test summaries, plus five actual XCTest passes. Signature helper PASS alone does not close the launch failure."
+      "evidence_required": "Both independent exact-source iPhone/iPad native artifacts, all six actual drive receipts and every declared original/new named XCTest pass; full ZIP digest/CRC/source/attempt verification. Signed artifact/physical acceptance remains separate."
     },
     {
       "name": "production_migration_publication",
@@ -479,7 +487,8 @@
     "integration_test/native_feature_splashes_test.dart": {
       "lanes": [
         "android_native",
-        "ios_native"
+        "iphone_native",
+        "ipad_native"
       ],
       "mode": "direct",
       "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
@@ -487,7 +496,8 @@
     "integration_test/native_settings_polish_test.dart": {
       "lanes": [
         "android_native",
-        "ios_native"
+        "iphone_native",
+        "ipad_native"
       ],
       "mode": "direct",
       "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
@@ -502,7 +512,8 @@
     "integration_test/system_crypto_bridge_integration_test.dart": {
       "lanes": [
         "android_native",
-        "ios_native"
+        "iphone_native",
+        "ipad_native"
       ],
       "mode": "direct",
       "reason": "Actual existing native/HTTP test entrypoint with enabled fixture inputs; missing prerequisites must fail, not skip."
@@ -635,5 +646,21 @@
     }
   },
   "expanded_e2e_scope": "All current runnable E2E entrypoints inventoried. Historical removed-fixture diagnostics and equivalent platform wrappers are explicitly mapped; physical store/OS/device journeys remain separately unproven.",
-  "candidate_branch": "codex/bil-release-ios38-android33-20261022"
+  "candidate_branch": "codex/bil-release-ios38-android33-20261022",
+  "native_source_evidence_contract": {
+    "verifier": "tools/qa/bil_native_source_evidence.py",
+    "targets": [
+      "iphone",
+      "ipad"
+    ],
+    "mandatory_before_signing": true,
+    "source_sha": "FINAL_ACCEPTED_SHA_REQUIRED",
+    "scopes": [
+      "system-crypto",
+      "native-settings",
+      "feature-splashes"
+    ],
+    "xctest": "All five original named tests plus every declared new RunnerTests XCTest at the same source; names/count/log/source hashes must match.",
+    "historical_combined_run_can_satisfy_gate": false
+  }
 }

@@ -294,8 +294,13 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         tooltip: communityText(context, 'Find people', 'البحث عن أشخاص'),
         onPressed: visit == null
             ? null
-            : () {
-                if (visit.isCurrent()) context.push('/community/people');
+            : () async {
+                if (!visit.isCurrent()) return;
+                await context.push('/community/people');
+                if (!mounted || !visit.isCurrent()) return;
+                // A confirmed block or relationship change in Find people
+                // changes which authors the server permits this visit to see.
+                await _feedKey.currentState?._refreshAfterPeopleReturn();
               },
         icon: const Icon(Icons.search_rounded, size: 32),
       ),

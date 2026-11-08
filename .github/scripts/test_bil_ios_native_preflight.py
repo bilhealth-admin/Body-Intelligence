@@ -146,78 +146,61 @@ class SimulatorPreflightTests(unittest.TestCase):
 class WorkflowNativeScopeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        text = WORKFLOW.read_text(encoding="utf-8")
-        cls.job = text.split("\n  ios-native-integration:\n", 1)[1].split("\n  offline-mobile-static-audit:", 1)[0]
-        condition = cls.job.split("    if: >-\n", 1)[1].split("\n    name:", 1)[0].strip()
-        expression = condition.removeprefix("${{").removesuffix("}}").strip()
-        expression = expression.replace("&&", " and ").replace("||", " or ")
-        expression = re.sub(r"!(?!=)", " not ", expression)
-        expression = re.sub(r"\btrue\b", "True", expression)
-        expression = " ".join(expression.split())
-        tree = ast.parse(expression, mode="eval")
-        allowed = (ast.Expression, ast.BoolOp, ast.UnaryOp, ast.Compare, ast.Name,
-                   ast.Attribute, ast.Constant, ast.And, ast.Or, ast.Not, ast.Eq,
-                   ast.NotEq, ast.Load)
-        if any(not isinstance(node, allowed) for node in ast.walk(tree)):
-            raise AssertionError("Unexpected syntax in the actual native job condition")
-        cls.condition = compile(tree, str(WORKFLOW), "eval")
-
-    def selected(self, event="workflow_dispatch", ref="refs/heads/integration/bil-qa-media-policy-20261011", **flags):
-        defaults = dict.fromkeys(["source_audit_only", "mobsf_only", "android_native_only",
-                                 "ios_native_only", "android_only", "ios_only", "supabase_only"], False)
-        defaults.update(flags)
-        return eval(self.condition, {"__builtins__": {}},
-                    {"inputs": SimpleNamespace(**defaults), "github": SimpleNamespace(event_name=event, ref=ref)})
+        cls.security = WORKFLOW.read_text(encoding="utf-8")
+        cls.reusable = (ROOT / ".github/workflows/bil39_ios_native_reusable.yml").read_text(encoding="utf-8")
+        cls.job = cls.reusable.split("\njobs:\n",1)[1]
 
     def test_dispatch_scope_combinations_use_the_actual_workflow_expression(self):
-        # Exercise every combination of the user-selectable native/audit scopes.
-        names = ["source_audit_only", "mobsf_only", "android_native_only", "ios_native_only",
-                 "android_only", "ios_only", "supabase_only"]
-        for values in itertools.product([False, True], repeat=len(names)):
-            flags = dict(zip(names, values))
-            native_scope = (flags["ios_native_only"] or flags["ios_only"] or
-                            not (flags["android_only"] or flags["supabase_only"]))
-            excluded = flags["source_audit_only"] or flags["mobsf_only"] or flags["android_native_only"]
-            with self.subTest(**flags):
-                self.assertEqual(bool(self.selected(**flags)), native_scope and not excluded)
+        # CodeQL no longer dispatches combined native work under any old flag.
+        # The mandatory native callers own both targets on their exact source.
+        self.assertNotIn("\n  ios-native-integration:\n", self.security)
+        for device in ("iphone", "ipad"):
+            caller=(ROOT/f".github/workflows/bil39_{device}_native.yml").read_text()
+            self.assertIn("uses: ./.github/workflows/bil39_ios_native_reusable.yml",caller)
+            self.assertIn(f"      device: {device}\n",caller)
+            self.assertNotIn("workflow_dispatch:",caller)
 
     def test_default_main_and_pull_request_keep_native_coverage(self):
-        self.assertTrue(self.selected(event="push", ref="refs/heads/main"))
-        self.assertTrue(self.selected(event="pull_request", ref="refs/pull/12/merge"))
-        self.assertTrue(self.selected())
-        self.assertTrue(self.selected(android_only=True, ios_only=True))
-        self.assertTrue(self.selected(ios_native_only=True))
+        for device in ("iphone", "ipad"):
+            caller=(ROOT/f".github/workflows/bil39_{device}_native.yml").read_text()
+            self.assertIn("branches: [main,",caller)
+            self.assertIn("  pull_request:\n    branches: [main,",caller)
+            self.assertNotIn("    if:",caller)
+            self.assertNotIn("continue-on-error",caller)
 
     def test_integration_push_and_source_only_stay_non_native(self):
-        self.assertFalse(self.selected(event="push"))
-        self.assertFalse(self.selected(source_audit_only=True))
-        self.assertFalse(self.selected(android_only=True))
-        self.assertFalse(self.selected(supabase_only=True))
+        self.assertNotIn("\n  ios-native-integration:\n",self.security)
+        self.assertIn("- name: Build iOS plugin sources for CodeQL",self.security)
+        self.assertIn("uses: github/codeql-action/analyze@",self.security)
+        self.assertIn("  workflow_call:\n",self.reusable)
+        self.assertIn("          ref: ${{ github.sha }}",self.reusable)
 
     def test_native_job_is_fresh_and_actual_journeys_remain_required(self):
-        self.assertIn("runs-on: macos-26\n", self.job)
-        self.assertIn("BIL_NATIVE_TARGET: ${{ inputs.native_target }}", self.job)
-        self.assertIn("run: bash .github/scripts/bil_ios37_native_integration.sh", self.job)
-        analyze = WORKFLOW.read_text(encoding="utf-8").split("\n  local-supabase-integration:", 1)[0]
-        self.assertNotIn("run: bash .github/scripts/bil_ios37_native_integration.sh", analyze)
-        self.assertIn("- name: Build iOS plugin sources for CodeQL", analyze)
-        self.assertIn("uses: github/codeql-action/analyze@", analyze)
+        self.assertIn("runs-on: macos-26\n",self.job)
+        self.assertIn("BIL_NATIVE_DEVICE: ${{ inputs.device }}",self.job)
+        self.assertIn("run: bash .github/scripts/bil39_ios_native_integration.sh",self.job)
+        self.assertNotIn("continue-on-error",self.job)
+        for case in ("coach_native_chat_presentation_test.dart","coach_reply_arrival_test.dart"):
+            self.assertIn(case,self.job)
+        source=(ROOT/".github/scripts/bil39_ios_native_integration.sh").read_text()
+        self.assertIn("KINDS=(system-crypto native-settings feature-splashes)",source)
 
     def test_direct_xctest_requires_flutter_native_configuration_first(self):
-        script = (ROOT / ".github/scripts/bil_ios37_native_integration.sh").read_text(encoding="utf-8")
-        warmup = script.index("python3 .github/scripts/bil_ios_native_preflight.py")
-        configuration = script.index('stage flutter-native-config 900 "$OUT/flutter-native-config.log"')
-        xctest = script.index("python3 .github/scripts/bil_ios_runner_tests.py")
-        self.assertLess(warmup, configuration)
-        self.assertLess(configuration, xctest)
-        command = script[configuration:xctest]
-        self.assertIn("flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub", command)
-        self.assertIn('--build-number 37 --target lib/main.dart "${DEFINES[@]}"', command)
-        self.assertNotIn("|| true", command)
-        dependencies = self.job.split("- name: Resolve existing dependencies and native pods", 1)[1].split("- name: Drive each actual", 1)[0]
-        sanitizer = "dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins"
-        self.assertLess(dependencies.index("flutter pub get"), dependencies.index(sanitizer))
-        self.assertLess(dependencies.index(sanitizer), dependencies.index("pod install"))
+        for script_name,build in (("bil_ios37_native_integration.sh",37),("bil39_ios_native_integration.sh",39)):
+            script=(ROOT/".github/scripts"/script_name).read_text()
+            warmup=script.index("python3 .github/scripts/bil_ios_native_preflight.py")
+            configuration=script.index('stage flutter-native-config 900 "$OUT/flutter-native-config.log"')
+            xctest=script.index("python3 .github/scripts/bil_ios_runner_tests.py")
+            self.assertLess(warmup,configuration)
+            self.assertLess(configuration,xctest)
+            command=script[configuration:xctest]
+            self.assertIn("flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub",command)
+            self.assertIn(f'--build-number {build} --target lib/main.dart "${{DEFINES[@]}}"',command)
+            self.assertNotIn("|| true",command)
+        dependencies=self.job.split("- name: Resolve existing dependencies and native pods",1)[1].split("- name: Drive all native scopes",1)[0]
+        sanitizer="dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins"
+        self.assertLess(dependencies.index("flutter pub get"),dependencies.index(sanitizer))
+        self.assertLess(dependencies.index(sanitizer),dependencies.index("pod install"))
 
 
 if __name__ == "__main__":

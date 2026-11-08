@@ -305,11 +305,14 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         return;
       }
       late final IntelligenceCenterReply reply;
-      if (immediateEngine.canAnswerWithoutPersonalContext(text)) {
+      final weightConceptQuestion = isCoachWeightConceptQuestion(text);
+      if (weightConceptQuestion ||
+          immediateEngine.canAnswerWithoutPersonalContext(text)) {
         final fastEngine =
-            immediateEngine.isGreetingQuestion(text) &&
-                !voiceGreeting &&
-                !isTransliteratedArabicGreeting(text.trim().toLowerCase())
+            weightConceptQuestion ||
+                (immediateEngine.isGreetingQuestion(text) &&
+                    !voiceGreeting &&
+                    !isTransliteratedArabicGreeting(text.trim().toLowerCase()))
             ? IntelligenceCenterEngine(
                 localApi: ModelBackedLocalCoachApi(
                   gateway: bindCoachCloudRequest(

@@ -50,7 +50,7 @@ const _reviewMetadata = <String, Map<String, Object?>>{
   },
   'bil_ai_boost': {
     'selectedTerm': 'ONE_TIME_CONSUMABLE',
-    'localizedPrice': r'$2.49',
+    'localizedPrice': r'$1.99',
     'currencyCode': 'USD',
     'storeCountryCode': 'USA',
     'discountBadge': null,

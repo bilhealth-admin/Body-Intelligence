@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,14 +33,17 @@ void main() {
                 ),
               );
               await tester.pump(const Duration(milliseconds: 80));
-              final indicator = tester.widget<CupertinoActivityIndicator>(
-                find.byType(CupertinoActivityIndicator),
+              final indicator = tester.widget<BilSplashCapsuleProgress>(
+                find.byType(BilSplashCapsuleProgress),
               );
-              expect(indicator.radius, 12);
-              expect(indicator.animating, !reduced);
+              expect(
+                tester.getSize(find.byType(BilSplashCapsuleProgress)).height,
+                7,
+              );
+              expect(indicator.reducedMotion, reduced);
               expect(
                 indicator.color,
-                dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
+                dark ? const Color(0xFF8CCFFF) : const Color(0xFF10254A),
               );
               final role = tester
                   .getSemantics(find.byKey(const Key('waiting')))
@@ -73,22 +76,22 @@ void main() {
     );
     expect(
       tester
-          .widget<CupertinoActivityIndicator>(
-            find.byType(CupertinoActivityIndicator),
+          .widget<BilSplashCapsuleProgress>(
+            find.byType(BilSplashCapsuleProgress),
           )
-          .animating,
-      isTrue,
+          .reducedMotion,
+      isFalse,
     );
     tester.binding.platformDispatcher.accessibilityFeaturesTestValue =
         const FakeAccessibilityFeatures(reduceMotion: true);
     await tester.pump();
     expect(
       tester
-          .widget<CupertinoActivityIndicator>(
-            find.byType(CupertinoActivityIndicator),
+          .widget<BilSplashCapsuleProgress>(
+            find.byType(BilSplashCapsuleProgress),
           )
-          .animating,
-      isFalse,
+          .reducedMotion,
+      isTrue,
     );
     await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.hasScheduledFrame, isFalse);

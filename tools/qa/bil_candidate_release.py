@@ -50,7 +50,9 @@ def verify_ci(platform, head, run_ids, api=delivery.gh):
     proofs = delivery.validate_prerequisites(plan, run_ids, head, api, expected_branch=BRANCH)
     security = delivery.verify_security(run_ids, head, api, expected_branch=BRANCH)
     return {'source_sha': head, 'branch': BRANCH, 'platform': platform,
-            'build': TARGETS[platform], 'ci_lanes': len(proofs), 'security': security}
+            'build': TARGETS[platform], 'ci_lanes': len(proofs), 'security': security,
+            'native_source_evidence': [proof['native_source_evidence'] for proof in proofs
+                                      if 'native_source_evidence' in proof]}
 
 
 def main():

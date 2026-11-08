@@ -1,8 +1,11 @@
-name: BIL39 iPad native QA
+name: BIL iPad native source QA
 
 on:
   push:
-    branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028, codex/bil41-android33-release-20261106]
+    branches: [main, integration/bil-qa-media-policy-20261011, bil39/integration-20261025, codex/bil40-device-fixes-20261028, codex/bil41-android33-release-20261106, codex/bil-full-fix-batch-20261106, codex/bil43-android35-verified-20261108, codex/bil-release-ios38-android33-20261022]
+  pull_request:
+    branches: [main, integration/bil-qa-media-policy-20261011]
+    paths-ignore: ['docs/**']
 
 permissions:
   contents: read
@@ -13,52 +16,6 @@ concurrency:
 
 jobs:
   native:
-    name: iPad native tests from exact BIL39 simulator bundles
-    runs-on: macos-26
-    timeout-minutes: 100
-    steps:
-      - name: Check out exact integration source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Verify native preparation and independent device orchestration
-        run: |
-          python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
-          python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
-          python3 -m unittest discover -s tools/qa -p test_bil39_native_split.py -v
-      - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-      - name: Select exact CocoaPods in an isolated job gem home
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
-          python3 .github/scripts/install_isolated_cocoapods.py \
-            --output artifacts/qa/bil39-native-ipad/cocoapods-installation.json
-      - name: Resolve existing dependencies and native pods
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter pub get
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
-          pod install --project-directory=ios
-      - name: Verify Flutter UIKit composition and IME behavior before native build
-        run: >
-          flutter test --no-pub
-          test/features/intelligence_center/coach_native_chat_presentation_test.dart
-          test/features/intelligence_center/coach_reply_arrival_test.dart
-      - name: Drive all native scopes on dedicated iPad
-        env:
-          BIL_NATIVE_DEVICE: ipad
-        run: bash .github/scripts/bil39_ios_native_integration.sh
-      - name: Upload exact iPad native evidence
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: bil39-ipad-native-${{ github.sha }}
-          path: artifacts/qa/bil39-native-ipad
-          if-no-files-found: error
-          retention-days: 14
+    uses: ./.github/workflows/bil39_ios_native_reusable.yml
+    with:
+      device: ipad

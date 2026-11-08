@@ -124,7 +124,10 @@ class _MemberCodeUnavailable extends StatelessWidget {
                     context.go('/community');
                   }
                 },
-                icon: const BilCrystalArrow(child: BackButtonIcon()),
+                icon: const BilCrystalArrow(
+                  reserveSpace: true,
+                  child: BackButtonIcon(),
+                ),
                 label: Text(
                   MaterialLocalizations.of(context).backButtonTooltip,
                 ),

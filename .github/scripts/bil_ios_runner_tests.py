@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Run the five existing RunnerTests and require an actual XCTest result.
+"""Run every declared RunnerTests XCTest and require named execution evidence.
 
-These tests exercise App Attest key-store logic with an in-memory backend.
+These tests include App Attest key-store logic with an in-memory backend
+and every declared native UI XCTest from the same checked-out source.
 They do not prove App Attest service support or hardware attestation.
 """
 
@@ -18,17 +19,91 @@ from bil_native_bounded_command import run_bounded
 
 TEST_TIMEOUT_SECONDS = 1800
 SUMMARY_TIMEOUT_SECONDS = 60
-EXPECTED_TEST_COUNT = 5
+ORIGINAL_TEST_NAMES = frozenset({
+    'testAppAttestKeyStoreKeepsAccountsIsolated',
+    'testAppAttestKeyStoreMigratesLegacyAccountsOneAtATime',
+    'testAppAttestLegacyEntrySurvivesFailedKeychainMigration',
+    'testAppAttestKeyStoreDeletesOnlyTheExpectedAccountKey',
+    'testAppAttestDiscardCannotResurrectAnOlderLegacyKey',
+})
+
+
+def _swift_code(source):
+    """Remove Swift comments/literals before inspecting actual declarations."""
+    output = list(source)
+    index, length = 0, len(source)
+    while index < length:
+        start = index
+        if source.startswith('//', index):
+            end = source.find('\n', index)
+            index = length if end < 0 else end
+        elif source.startswith('/*', index):
+            index += 2
+            nesting = 1
+            while index < length and nesting:
+                if source.startswith('/*', index):
+                    nesting += 1
+                    index += 2
+                elif source.startswith('*/', index):
+                    nesting -= 1
+                    index += 2
+                else:
+                    index += 1
+            if nesting:
+                raise ValueError('Unclosed Swift comment in XCTest source')
+        else:
+            opening = re.match(r'(#+)?("""|")', source[index:])
+            if opening is None:
+                index += 1
+                continue
+            hashes, quotes = opening.group(1) or '', opening.group(2)
+            closing = quotes + hashes
+            index += len(opening.group())
+            while index < length:
+                if source.startswith('\\' + hashes, index):
+                    index += len(hashes) + 2
+                elif source.startswith(closing, index):
+                    index += len(closing)
+                    break
+                else:
+                    index += 1
+            else:
+                raise ValueError('Unclosed Swift literal in XCTest source')
+        output[start:index] = ['\n' if value == '\n' else ' ' for value in source[start:index]]
+    return ''.join(output)
 
 
 def expected_tests(source):
-    names = re.findall(r"^\s*func (test[A-Za-z0-9_]+)\(", source, flags=re.MULTILINE)
-    if len(names) != EXPECTED_TEST_COUNT or len(set(names)) != EXPECTED_TEST_COUNT:
-        raise ValueError("The expected existing five RunnerTests must be reviewed if changed")
+    code = _swift_code(source)
+    classes = list(re.finditer(r'\bclass\s+RunnerTests\s*:\s*(?:XCTest\.)?XCTestCase\s*\{', code))
+    if len(classes) != 1 or code[:classes[0].start()].count('{') != code[:classes[0].start()].count('}'):
+        raise ValueError('Exactly one actual RunnerTests XCTestCase class is required')
+    scopes = classes + list(re.finditer(r'\bextension\s+RunnerTests\s*\{', code))
+    names = []
+    for scope in scopes:
+        depth = 1
+        for token in re.finditer(r'[{}]|\bfunc\s+(test[A-Za-z0-9_]+)\b', code[scope.end():]):
+            if token.group() == '{':
+                depth += 1
+            elif token.group() == '}':
+                depth -= 1
+                if depth == 0:
+                    break
+            elif depth == 1:
+                tail = code[scope.end() + token.end():]
+                if re.match(r'\s*\(\s*\)\s*(?:(?:async|throws|rethrows)\s*)*(?:->\s*Void\s*)?\{', tail) is None:
+                    raise ValueError('Unsupported XCTest declaration requires source review')
+                names.append(token.group(1))
+        if depth != 0:
+            raise ValueError('Unclosed actual RunnerTests source scope')
+    if not ORIGINAL_TEST_NAMES.issubset(names) or len(names) != len(set(names)):
+        raise ValueError('Every original named XCTest and unique declared new test is mandatory')
     return set(names)
 
 
 def verified_summary(raw_summary, execution_log, names):
+    if not ORIGINAL_TEST_NAMES.issubset(names) or any(not re.fullmatch(r'test[A-Za-z0-9_]+', name) for name in names):
+        raise ValueError('Actual complete named XCTest source registry required')
     summary = json.loads(raw_summary)
     if not isinstance(summary, dict):
         raise ValueError("Expected an actual xcresult test summary")
@@ -36,18 +111,22 @@ def verified_summary(raw_summary, execution_log, names):
         "totalTestCount", "passedTests", "failedTests", "skippedTests")}
     if any(type(value) is not int for value in counts.values()):
         raise ValueError("Missing or invalid XCTest summary counts")
-    if counts != {"totalTestCount": EXPECTED_TEST_COUNT, "passedTests": EXPECTED_TEST_COUNT,
+    if counts != {"totalTestCount": len(names), "passedTests": len(names),
                   "failedTests": 0, "skippedTests": 0}:
-        raise ValueError("RunnerTests must report five passes without failures or skips")
-    if summary.get("expectedFailures", 0) != 0:
+        raise ValueError("RunnerTests must report every declared test without failures or skips")
+    if type(summary.get("expectedFailures", 0)) is not int or summary.get("expectedFailures", 0) != 0:
         raise ValueError("Expected failures cannot stand in for successful tests")
-    passed = set()
+    passed = []
     for line in execution_log.splitlines():
-        if re.search(r"\bTest [Cc]ase\b", line) and re.search(r"\bpassed\b", line):
-            if "RunnerTests" in line:
-                passed.update(name for name in names if re.search(rf"\b{re.escape(name)}\b", line))
-    if passed != names:
-        raise ValueError("The execution log must identify each existing RunnerTests pass")
+        match = re.match(r"\s*Test Case '-\[(?:RunnerTests\.)?RunnerTests (test[A-Za-z0-9_]+)\]' passed\b", line)
+        if match is None:
+            match = re.match(r"\s*Test case 'RunnerTests\.(test[A-Za-z0-9_]+)\(\)' passed\b", line)
+        if match is not None:
+            passed.append(match.group(1))
+        elif re.match(r'\s*Test [Cc]ase .*\bpassed\b', line):
+            raise ValueError('An unexpected XCTest class cannot supply execution evidence')
+    if set(passed) != names or len(passed) != len(names):
+        raise ValueError("The execution log must identify each exact RunnerTests pass once")
     return {**counts, "testNames": sorted(passed)}
 
 
@@ -78,8 +157,8 @@ def run_tests(workspace, output, device, defines, *, run=run_bounded, host=sys.p
         raise ValueError("A previous XCTest bundle cannot serve as new execution evidence")
     receipt_path = output / "runner-tests-result.json"
     receipt = {
-        "status": "RUNNING", "stage": "xcodebuild-test", "expected_test_count": EXPECTED_TEST_COUNT,
-        "scope": "Existing in-memory App Attest key-store unit tests on an iOS Simulator, not real-device App Attest proof",
+        "status": "RUNNING", "stage": "xcodebuild-test", "expected_test_count": len(names),
+        "scope": "All declared source XCTests, including original in-memory App Attest and native UI rendering; iOS Simulator, not real-device App Attest proof",
         "real_device_attestation_proven": False, "build_number": build_number,
         "source_test_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "xcresult": str(bundle.relative_to(workspace)),
@@ -123,7 +202,7 @@ def run_tests(workspace, output, device, defines, *, run=run_bounded, host=sys.p
             receipt.update(status="FAIL", exit_code=code if code != 0 else summary_code)
             save()
             return receipt["exit_code"]
-        receipt["stage"] = "verify-five-executed-tests"
+        receipt["stage"] = "verify-all-declared-named-tests"
         receipt["summary"] = verified_summary(summary_path.read_text(encoding="utf-8"),
                                                log.read_text(encoding="utf-8"), names)
         receipt.update(status="PASS", exit_code=0)

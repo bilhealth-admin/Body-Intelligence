@@ -56,7 +56,7 @@ void main() {
     expect(page, contains('BilPearlFeatureWelcome('));
     expect(page, contains("'Welcome to AI Coach'"));
     expect(welcome, contains('BilFeatureWelcomeStatus('));
-    expect(welcome, contains('CupertinoActivityIndicator('));
-    expect(welcome, contains('animating: !reduced'));
+    expect(welcome, contains('BilSplashCapsuleProgress('));
+    expect(welcome, contains('reducedMotion: reduced'));
   });
 }

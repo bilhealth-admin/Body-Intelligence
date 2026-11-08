@@ -365,11 +365,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         ],
         if (visibleSections.contains(DashboardSectionIds.discover)) ...[
           const SizedBox(height: 12),
-          _ReferenceDiscoverGrid(
-            arabic: arabic,
-            premiumUnlocked: premiumUnlocked,
-            premiumAccessResolved: premiumAccessResolved,
-          ),
+          _ReferenceDiscoverGrid(arabic: arabic),
         ],
       ],
     );

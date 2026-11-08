@@ -1,5 +1,7 @@
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
+import 'package:flutter/material.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_coach_identity.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../qa_next/feature_splashes_test_support.dart';
@@ -48,11 +50,11 @@ void main() {
             );
             expect(
               tester
-                  .widget<CupertinoActivityIndicator>(
-                    find.byType(CupertinoActivityIndicator),
+                  .widget<BilSplashCapsuleProgress>(
+                    find.byType(BilSplashCapsuleProgress),
                   )
-                  .animating,
-              !reduced,
+                  .reducedMotion,
+              reduced,
             );
             expect(
               find.text(

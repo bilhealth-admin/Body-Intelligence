@@ -12,6 +12,101 @@ const _bubble = Key('bil-crystal-arrow-bubble');
 void main() {
   for (final direction in TextDirection.values) {
     for (final dark in [false, true]) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets(
+          'inline action crystals reserve the full surface before labels $direction dark=$dark scale=$scale',
+          (tester) async {
+            tester.view.physicalSize = const Size(320, 720);
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.resetPhysicalSize);
+            addTearDown(tester.view.resetDevicePixelRatio);
+            final rtl = direction == TextDirection.rtl;
+            var taps = 0;
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: ThemeData(
+                  brightness: dark ? Brightness.dark : Brightness.light,
+                ),
+                home: MediaQuery(
+                  data: MediaQueryData(
+                    size: const Size(320, 720),
+                    textScaler: TextScaler.linear(scale),
+                  ),
+                  child: Directionality(
+                    textDirection: direction,
+                    child: Scaffold(
+                      body: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (final (key, icon, label) in [
+                              (
+                                'play',
+                                Icons.play_arrow_rounded,
+                                rtl ? 'تشغيل الفيديو' : 'Play video',
+                              ),
+                              (
+                                'download',
+                                Icons.download_rounded,
+                                rtl ? 'تنزيل' : 'Download',
+                              ),
+                              (
+                                'export',
+                                Icons.file_download_outlined,
+                                rtl ? 'إنشاء تصدير CSV' : 'Create CSV export',
+                              ),
+                            ])
+                              FilledButton.icon(
+                                key: ValueKey('spacing-$key'),
+                                onPressed: () => taps++,
+                                icon: BilNavigationFeedback(child: Icon(icon)),
+                                label: Text(label, key: ValueKey('label-$key')),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+            for (final key in ['play', 'download', 'export']) {
+              final button = find.byKey(ValueKey('spacing-$key'));
+              final crystal = find.descendant(
+                of: button,
+                matching: find.byKey(_bubble),
+              );
+              final crystalRect = tester.getRect(crystal);
+              final labelRect = tester.getRect(
+                find.byKey(ValueKey('label-$key')),
+              );
+              final gap = rtl
+                  ? crystalRect.left - labelRect.right
+                  : labelRect.left - crystalRect.right;
+              // Material retains an8px gap at normal text and4px at200%.
+              // The crystal must occupy its own width before that native gap.
+              expect(
+                gap,
+                greaterThanOrEqualTo(scale == 1 ? 8 : 4),
+                reason: '$key decoration must not consume label spacing',
+              );
+              expect(
+                tester.getRect(button).contains(crystalRect.center),
+                isTrue,
+              );
+              await tester.tap(button);
+              await tester.pumpAndSettle();
+            }
+            expect(taps, 3);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+  }
+  for (final direction in TextDirection.values) {
+    for (final dark in [false, true]) {
       testWidgets(
         'navigation keeps one resting crystal, action and geometry $direction dark=$dark',
         (tester) async {

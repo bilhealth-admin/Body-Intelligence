@@ -3,6 +3,20 @@ import 'bil_locale_policy.dart';
 /// Nutrition and weight-planning source descriptions and limitations, in every
 /// canonical release locale. Scientific claims and English source stay intact.
 abstract final class HealthEvidenceRuntimeCopy {
+  // Arabic descriptions/limitations for the two existing movement and healthy
+  // eating entries reached by Plan sources. Other locales and source data are
+  // intentionally unchanged.
+  static const _arabicPlanReferences = <String, String>{
+    'Evidence-based adult movement and muscle-strengthening guidance.':
+        'إرشادات قائمة على الأدلة للحركة وتقوية العضلات لدى البالغين.',
+    'Activity guidance is general and must be adapted for symptoms, pregnancy, injury, or medical restrictions.':
+        'إرشادات النشاط عامة، ويجب تكييفها مع الأعراض أو الحمل أو الإصابات أو القيود الطبية.',
+    'General food-pattern guidance used across non-medical nutrition pathways.':
+        'إرشادات عامة للأنماط الغذائية تُستخدم في المسارات الغذائية غير الطبية.',
+    'Food-pattern guidance does not replace allergy, medication, or clinical diet advice.':
+        'لا تحل إرشادات الأنماط الغذائية محل المشورة المتعلقة بالحساسية أو الأدوية أو الأنظمة الغذائية العلاجية.',
+  };
+
   static const sources = <String>[
     'General label references, not personal RDA/AI.',
     'Editable references, not a supplement dose or treatment.',
@@ -409,9 +423,13 @@ abstract final class HealthEvidenceRuntimeCopy {
   };
 
   static String? resolve(String source, String localeTag) {
+    final canonical = BilLocalePolicy.canonicalSupportedTag(localeTag);
+    if (canonical == 'ar') {
+      final planReference = _arabicPlanReferences[source];
+      if (planReference != null) return planReference;
+    }
     final index = sources.indexOf(source);
     if (index < 0) return null;
-    final canonical = BilLocalePolicy.canonicalSupportedTag(localeTag);
     return canonical == null ? null : rows[canonical]?[index];
   }
 

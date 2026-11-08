@@ -15,6 +15,7 @@ import subprocess
 import tempfile
 
 import bil_release_revalidation_plan as planner
+import bil_native_source_evidence as native
 
 ROOT = Path(__file__).resolve().parents[2]
 REPO = 'bilhealth-admin/Body-Intelligence'
@@ -40,7 +41,27 @@ def pages(api, endpoint, field=None):
     raise ValueError('GitHub evidence exceeds bounded pagination; no partial acceptance')
 
 
-def validate_prerequisites(manifest, run_ids, head, api=gh, *, expected_branch=BRANCH):
+def git_source_identity(root):
+    def git(*args):
+        return subprocess.check_output(['git', '-C', str(root), *args], encoding='utf8').strip()
+    if git('status', '--porcelain=v1', '--untracked-files=all'):
+        raise ValueError('Native release evidence requires a clean immutable checkout')
+    return git('rev-parse', 'HEAD'), git('rev-parse', 'HEAD^{tree}')
+
+
+def download_native_artifact(meta, destination):
+    if (type(meta.get('id')) is not int or meta['id'] <= 0
+            or meta.get('expired') is not False
+            or type(meta.get('size_in_bytes')) is not int
+            or not 0 < meta['size_in_bytes'] <= native.MAX_ARCHIVE):
+        raise ValueError('Bounded authenticated native ZIP metadata required before download')
+    with Path(destination).open('xb') as output:
+        subprocess.run(['gh', 'api', f'repos/{REPO}/actions/artifacts/{meta["id"]}/zip'],
+                       stdout=output, check=True, timeout=600)
+
+
+def validate_prerequisites(manifest, run_ids, head, api=gh, *, expected_branch=BRANCH,
+                           source_root=ROOT, artifact_download=download_native_artifact):
     lanes = planner.validate_ci_manifest(manifest, required_workflow_ids=manifest['required_workflow_ids'])
     expected = {lane['lane_id'] for lane in lanes}
     if (not isinstance(run_ids, dict) or set(run_ids) != expected
@@ -48,15 +69,56 @@ def validate_prerequisites(manifest, run_ids, head, api=gh, *, expected_branch=B
             or len(set(run_ids.values())) != len(run_ids)):
         raise ValueError('Exact complete unique CI run inventory is required before signing')
     proofs = []
+    native_runs = {}
     for lane in lanes:
         run_id = run_ids[lane['lane_id']]
         run = api(f'actions/runs/{run_id}')
         if run.get('head_branch') != expected_branch or run.get('event') not in ('push', 'workflow_dispatch'):
             raise ValueError('CI prerequisite is from another branch/event')
-        run['jobs'] = pages(api, f'actions/runs/{run_id}/jobs', 'jobs')
+        device = next((target for target in native.DEVICES
+            if lane['workflow'] == f'bil39_{target}_native.yml'), None)
+        if device:
+            if device in native_runs:
+                raise ValueError('Each native source target must have exactly one required lane')
+            if lane.get('native_device') != device or run.get('event') != 'push':
+                raise ValueError('Native release targets require their mandatory exact-source push lane')
+            attempt_number = run.get('run_attempt')
+            if type(attempt_number) is not int or attempt_number <= 0:
+                raise ValueError('Exact native run attempt required')
+            run['jobs'] = pages(api, f'actions/runs/{run_id}/attempts/{attempt_number}/jobs', 'jobs')
+            native_runs[device] = (run, lane)
+        else:
+            run['jobs'] = pages(api, f'actions/runs/{run_id}/jobs', 'jobs')
         proofs.append(planner.validate_ci_run(run, expected_head=head,
             expected_workflow_id=lane['workflow_id'], after_run_id=run_id - 1,
             created_after=run['created_at'], required_job_names=lane['required_jobs']))
+    if set(native_runs) != set(native.DEVICES):
+        raise ValueError('Both independent native source targets are required before signing')
+    actual_head, tree = git_source_identity(source_root)
+    if actual_head != head:
+        raise ValueError('Native evidence source differs from the actual signing checkout')
+    verified_native = []
+    for device in native.DEVICES:
+        run, lane = native_runs[device]
+        run_id, attempt_number = run['id'], run['run_attempt']
+        contract = native.validate_native_workflow_contract(source_root, device, expected_branch)
+        attempt = api(f'actions/runs/{run_id}/attempts/{attempt_number}')
+        artifacts = pages(api, f'actions/runs/{run_id}/artifacts', 'artifacts')
+        expected_name = f'bil-native-{device}-{head}-r{run_id}-a{attempt_number}'
+        matches = [row for row in artifacts if row.get('name') == expected_name]
+        if len(matches) != 1:
+            raise ValueError('One exact current native artifact is mandatory for each target')
+        with tempfile.TemporaryDirectory(prefix='bil-native-source-proof-') as folder:
+            destination = Path(folder) / (device + '.zip')
+            artifact_download(matches[0], destination)
+            result = native.validate_native_artifact(run, run['jobs'], matches[0], destination,
+                device=device, source_sha=head, source_tree=tree, source_branch=expected_branch,
+                source_scope_hashes=contract['source_scope_hashes'],
+                expected_runner_names=contract['runner_test_names'], source_root=source_root, attempt=attempt)
+        verified_native.append(result)
+        proof = next(row for row in proofs if row['run_id'] == run_id)
+        proof['native_source_evidence'] = result
+    native.require_native_pair(verified_native, source_sha=head, source_tree=tree)
     return proofs
 
 

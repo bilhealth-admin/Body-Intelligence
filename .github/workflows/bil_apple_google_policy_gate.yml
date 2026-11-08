@@ -458,60 +458,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-          import json, os, re, subprocess, urllib.request
-          from pathlib import Path
-          def git(*args):
-              return subprocess.check_output(['git', *args], text=True).strip()
-          def api(path):
-              req = urllib.request.Request('https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY'] + path,
-                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
-              with urllib.request.urlopen(req, timeout=30) as response:
-                  return json.load(response)
-          def verify_run(role, record, source):
-              specs = {
-                  'policy': ('bil_apple_google_policy_gate.yml', 'push', {'Source and affected regressions; certification remains separate', 'Seven exact plan goldens on their Windows reference platform'}),
-                  'source_security': ('bil_codeql_security_extended.yml', 'push', {'CodeQL (actions)', 'CodeQL (javascript-typescript)', 'CodeQL (python)', 'Isolated Semgrep source audit'}),
-                  'android_startup': ('bil_android_isolated_emulator_smoke.yml', 'push', {f'Android {level} offline-config startup' for level in (26,29,33,34,35,36)}),
-                  'native_android_ios': ('bil_codeql_security_extended.yml', 'workflow_dispatch', {'Android API 33 native integration without CodeQL tracing', 'iPhone and iPad native tests from exact simulator bundles'}),
-              }
-              workflow, event, expected = specs[role]
-              run_id = str(record['run_id'])
-              assert run_id.isdecimal(), 'Invalid run ID'
-              run = api('/actions/runs/' + run_id)
-              assert run['head_sha'] == source and run['head_branch'] == 'integration/bil-qa-media-policy-20261011'
-              assert run['path'].split('@')[0] == '.github/workflows/' + workflow and run['event'] == event
-              assert run['status'] == 'completed' and run['conclusion'] == 'success', 'Required run did not pass'
-              jobs = api('/actions/runs/' + run_id + '/jobs?filter=latest&per_page=100')['jobs']
-              assert all(j['status'] == 'completed' and j['conclusion'] in ('success','skipped') for j in jobs)
-              successful = {j['name'] for j in jobs if j['conclusion'] == 'success'}
-              assert successful == expected, 'Required jobs were skipped, missing, failed, or different'
-              return {'role': role, 'run_id': int(run_id), 'url': run['html_url'], 'head_sha': run['head_sha'],
-                      'attempt': run['run_attempt'], 'verified_successful_jobs': sorted(successful)}
-          def main():
-              record = json.loads(Path('docs/qa_next/evidence/policy-gate-20261015/ci-closure.json').read_text())
-              source = record['tested_source_sha']
-              assert re.fullmatch('[0-9a-f]{40}', source)
-              head = git('rev-parse','HEAD')
-              assert head == os.environ['GITHUB_SHA'] and git('rev-parse','HEAD^') == source
-              changed = subprocess.check_output(['git','diff','--name-only','-z',source,head]).decode().split('\0')
-              changed = [p for p in changed if p]
-              assert changed and all(p.startswith('docs/qa_next/') for p in changed), 'Implementation changed after the tested source'
-              roles = ('policy','source_security','android_startup','native_android_ios')
-              runs = record['required_runs']
-              assert set(runs) == set(roles)
-              verified = [verify_run(role, runs[role], source) for role in roles]
-              result = {'status': 'PASS_SOURCE_EQUIVALENCE_AND_LIVE_CI', 'attested_commit_sha': head,
-                  'tested_source_sha': source, 'changed_paths': changed, 'verified_runs': verified,
-                  'implementation_changed': False, 'full_suite_repeated': False,
-                  'pre_submission_certification': 'BLOCKED', 'signed_build_or_store_acceptance_proven': False}
-              out = Path('build/qa/policy-gate-20261015/final-evidence-attestation.json')
-              out.parent.mkdir(parents=True, exist_ok=True)
-              out.write_text(json.dumps(result, indent=2) + '\n')
-              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as stream:
-                  stream.write(f'Final commit `{head}` has the same implementation as tested `{source}`. All four required live runs and 14 jobs verified. No tests repeated. Store certification remains BLOCKED.\n')
-          main()
-          PY
+          python3 -m unittest discover -s tools/qa -p test_bil_policy_evidence_attestation.py -v
+          python3 tools/qa/bil_policy_evidence_attestation.py
       - name: Preserve final SHA attestation
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:

@@ -1,0 +1,1418 @@
+{
+  "schema": "bil43.android35.source-closure.local.v1",
+  "generated_at_utc": "2026-11-08T02:26:28.597067+00:00",
+  "status": "LOCAL_AFFECTED_CLOSURE_PASS_IMMUTABLE_SHA_CI_NATIVE_SIGNING_PENDING",
+  "base_SHA": "e90e04890d5c322cfd8b3554ff1f03fb3165414c",
+  "candidate_branch": "codex/bil43-android35-verified-20261108",
+  "candidate_final_SHA": null,
+  "final_46_result_to_be_filled_by_Root": "ACTUAL_COMPLETED_RECEIPTS_RECORDED_686_PASS",
+  "source_binding_limit": "The 46-file run is bound to its recorded worktree fingerprint. Subsequent braces-only lint edits passed the two affected files again. Fresh CI must validate the final committed SHA.",
+  "canonical_traceability": {
+    "repo_path": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+    "sha256": "99a2684baaaffcea5ce934cb7eb4adf2bca61dc8dd9ad9203976b47fb7ebeb32",
+    "original_count": 68,
+    "canonical_rows": [
+      {
+        "id": "BIL-01",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-08"
+        ]
+      },
+      {
+        "id": "BIL-02",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-03",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-04",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-05",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-06",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-07",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-08",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-09",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-10",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-11",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-12",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-13",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-14",
+          "NB-18"
+        ]
+      },
+      {
+        "id": "BIL-14",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-15",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-16",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-17",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-18",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-19",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-20",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-21",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-01",
+          "NB-12"
+        ]
+      },
+      {
+        "id": "BIL-22",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-23",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-24",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-25",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "BIL-26",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-02",
+          "NB-06",
+          "NB-07"
+        ]
+      },
+      {
+        "id": "BIL-27",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-14",
+          "NB-15",
+          "NB-18"
+        ]
+      },
+      {
+        "id": "COACH-ADD-01",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-16"
+        ]
+      },
+      {
+        "id": "COACH-ADD-02",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-16"
+        ]
+      },
+      {
+        "id": "COACH-ADD-03",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "COACH-ADD-04",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "COACH-ADD-05",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "COACH-ADD-06",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "COACH-ADD-07",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "COACH-ADD-08",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-16"
+        ]
+      },
+      {
+        "id": "COACH-ADD-09",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "COACH-ADD-10",
+        "family": "original_37_cases",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-01",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-02",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-03",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-04",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-05",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-06",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-07",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-08",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-09",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-10",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-11",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-12",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-13",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-14",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": [
+          "NB-16"
+        ]
+      },
+      {
+        "id": "QA-COACH-15",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-16",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-17",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "QA-COACH-18",
+        "family": "additional_18_coach_scenarios",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-01",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-02",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-03",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-04",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-05",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-06",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-07",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-08",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-09",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CC-1009-10",
+        "family": "cloud_10_truth_gates",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "VIDEO-SOURCE-01",
+        "family": "supplemental_scopes",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CLOUD-COACH-01",
+        "family": "supplemental_scopes",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      },
+      {
+        "id": "CLOUD-COACH-02",
+        "family": "supplemental_scopes",
+        "canonical_reference": "docs/qa_next/BIL39_CENTRAL_TRACEABILITY_20261025.json",
+        "current_acceptance": "CARRIED_REQUIREMENT_HISTORY_DOES_NOT_PROVE_NEW_SOURCE_PASS",
+        "linked_batch_ids": []
+      }
+    ],
+    "original_external_registry": {
+      "basename": "BATCH_REQUIREMENT_EXECUTION_LEDGER.json",
+      "sha256": "ce1d1403b09df43f328666f994dc4cbaf5ef215b797b9e22511207136961a57a"
+    }
+  },
+  "batch_requirements_19": [
+    {
+      "id": "NB-01",
+      "requirement_ar": "ثبات أسهم وصور Dashboard وتعبئة الخلفيات",
+      "behavior": "Dashboard previews fill their cards and retain stable arrows during membership rechecks. Per-asset workout cropping is corrected independently; real paid destination guards remain active.",
+      "production_or_tool_files": [
+        "lib/features/dashboard/widgets/dashboard_reference_phone.dart",
+        "lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/dashboard/dashboard_discover_stability_test.dart",
+        "test/shared/widgets/bil_feature_entry_dashboard_photo_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-21"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "DASHBOARD_FIX_RESULT.json",
+          "sha256": "cdfb495e8699501ceb7af8509ae779cd9191f64e28a663e1c12c95ff96db6dfc"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-02",
+      "requirement_ar": "ثبات عرض العضوية وأسهم More وتفضيلات Dashboard مع حفظ بوابات الصلاحيات",
+      "behavior": "More retains the public Plans arrow and navigation callback while verification refreshes. Nutrient actions keep their authority checks. Existing eight UI cases cover pending, Free and paid states; they do not establish Retry behavior.",
+      "production_or_tool_files": [
+        "lib/features/settings/settings_page.dart",
+        "lib/features/dashboard/presentation/dashboard_preferences_body.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/settings/membership_navigation_stability_test.dart",
+        "test/features/settings/more_premium_polish_contract_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-26"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "MEMBERSHIP_SUPPLEMENT_RESULT.json",
+          "sha256": "9e80e0660392b007c76ba3c0f7e401fed10643eedf7733053565a3192ff81fc5"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-03",
+      "requirement_ar": "مؤشر انتظار السبلاش المشترك بكل انتظار BIL مع حفظ نصوص Coach وزر شراء بلا مؤشر داخلي",
+      "behavior": "BIL-owned waiting uses the approved Splash capsule. Coach status strings remain unchanged. Checkout does not add a second spinner. Determinate progress and Apple-owned dialogs are preserved.",
+      "production_or_tool_files": [
+        "lib/shared/widgets/bil_splash_capsule_progress.dart",
+        "lib/shared/widgets/bil_pearl_feature_welcome.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/shared/widgets/bil_splash_capsule_layout_test.dart",
+        "test/features/commerce/bil_store_activity_indicator_test.dart",
+        "test/features/intelligence_center/coach_thinking_status_test.dart"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "SHARED_SPLASH_CAPSULE_RESULT.json",
+          "sha256": "cbe0a024510dd888364219b304a099efe1c202a03ae35a878d5339219be072b6"
+        },
+        {
+          "basename": "PLAN_STRICT_REVIEWED_BASELINES_PROOF.json",
+          "sha256": "ffc5966b19c1a9aec7478f282256fa15864d6ab280ec1a70f54faf914bbe7fc8"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-04",
+      "requirement_ar": "مؤشر SwiftUI الخاص بتجهيز ترجمة المجتمع بنفس رسم السبلاش",
+      "behavior": "The native translation preparation view ports the capsule geometry, colors and timing, including Reduce Motion and background behavior. Translation callbacks and status/cancel semantics are unchanged. Native compilation and all eight XCTest executions remain pending.",
+      "production_or_tool_files": [
+        "ios/Runner/BILCommunityTranslationBridge.swift",
+        "ios/RunnerTests/RunnerTests.swift"
+      ],
+      "behavior_or_contract_tests": [
+        "testSplashCapsuleReducedMotionKeepsIdenticalPixels",
+        "testSplashCapsuleMotionChangesPaintWithoutChangingFootprint",
+        "testSplashCapsulePreservesPhysicalDirectionAndAccessibleColors"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "NATIVE_TRANSLATION_SPLASH_PORT_MANIFEST.json",
+          "sha256": "937b6c8abe7bf8d56766f5bf1f57c2f97b617dc15ad179b47788e37cc381d818"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-05",
+      "requirement_ar": "إظهار سنة الميلاد دون تغيير تاريخ الميلاد المحفوظ",
+      "behavior": "The profile birth-date display includes the year without changing the stored date.",
+      "production_or_tool_files": [
+        "lib/features/profile/premium_profile_page.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/profile/premium_profile_page_test.dart"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "PROFILE_DOB_YEAR_FIX.json",
+          "sha256": "d209e923cf941ebe884e68a4214da1ab501250a560fd943847c94756e9b2d1e5"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-06",
+      "requirement_ar": "فصل إثبات منحة الاختبار عن اشتراك المتجر وحفظ استمرارية محدودة آمنة",
+      "behavior": "Independent bounded test-grant proof remains separate from Apple purchase authority. A transient same-owner read failure does not discard still-valid independent proof or create new rights.",
+      "production_or_tool_files": [
+        "lib/features/commerce/repositories/server_entitlement_repository.dart",
+        "lib/features/commerce/repositories/server_entitlement_grant_continuity.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/commerce/closed_test_grant_continuity_regression_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-26"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "CLOSED_GRANT_CONTINUITY_FIX.json",
+          "sha256": "a05f9f01e3a591dd81ffc87ac4dcddd9ba5d58ebdebd8da858897a9973b6e4c9"
+        },
+        {
+          "basename": "APPLIED_FOCUSED_MANIFEST.json",
+          "sha256": "7f1ffa2af4dd496dc40b70676dc31a320167f19b46d531999f6f66b96a9f994c"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-07",
+      "requirement_ar": "منع استجابة منحة قديمة بعد await من إعادة صلاحية أُلغيت أو انتهت",
+      "behavior": "Post-await owner, generation and real-expiry checks prevent an older response from resurrecting revoked access. Unverified fallback Free cannot become eligible to request an ad.",
+      "production_or_tool_files": [
+        "lib/features/commerce/repositories/server_entitlement_grant_continuity.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/commerce/closed_test_grant_continuity_regression_test.dart",
+        "test/features/ads/safe_free_ad_inventory_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-26"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "CLOSED_GRANT_POST_AWAIT_FIX.json",
+          "sha256": "e2d1730cacafe459ffdffc05d1b0bba6618b0e4979aaf2e294134bfad47e9c01"
+        },
+        {
+          "basename": "APPLIED_FOCUSED_MANIFEST.json",
+          "sha256": "7f1ffa2af4dd496dc40b70676dc31a320167f19b46d531999f6f66b96a9f994c"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-08",
+      "requirement_ar": "تحديث قوائم المجتمع والملف بعد الحظر وحذف المنشور والعودة من الفئات",
+      "behavior": "Community feed and profile caches refresh after blocking, deleting an owned post and returning from categories. Server relationship and moderation authority remain unchanged.",
+      "production_or_tool_files": [
+        "lib/features/community/presentation/community_feed_tab.dart",
+        "lib/features/community/presentation/community_hub_page.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/community/community_blocked_member_return_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-01"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "COMMUNITY_RETURN_FIX.json",
+          "sha256": "279a15eef85f9279f6f7214d27dcc8c4459654e9ba42da7e73c7cbb8b1d7e915"
+        },
+        {
+          "basename": "independent-next-batch-qa-20261108-postfix-appendix.json",
+          "sha256": "c6f41f3167934e1b2a91ffd420acd2fbacac7c858acaaa383aad6d7c10126f80"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-09",
+      "requirement_ar": "تنسيق السعرات والماكروز في المحرر مع حفظ دقة القيم عند إغلاقها دون تعديل",
+      "behavior": "Whole-number presentation does not persist rounded values unless edited. Raw values such as979 that require review remain visible. Owned fixture cleanup preserves the original error and releases resources.",
+      "production_or_tool_files": [
+        "lib/features/settings/reference_preferences_numeric.dart",
+        "lib/features/settings/reference_preferences_number_field.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/settings/nutrition_goals_widget_test.dart",
+        "test/features/settings/nutrition_goal_provenance_ui_test.dart"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "MACRO_EDITOR_LOCAL_FIX_ROOT_PROOF.json",
+          "sha256": "5501cca1fbb6475d6b69fbbc289b74976fdbd1e44e63ed90c8a42623831d7a44"
+        },
+        {
+          "basename": "APPLIED_FOCUSED_MANIFEST.json",
+          "sha256": "7f1ffa2af4dd496dc40b70676dc31a320167f19b46d531999f6f66b96a9f994c"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-10",
+      "requirement_ar": "تسمية كربوهيدرات الوصفات بالعربية دون تغيير بيانات الغذاء",
+      "behavior": "The Arabic recipe carbohydrate label is corrected without changing nutrient data.",
+      "production_or_tool_files": [
+        "lib/app/localization/runtime_copy_recipe_editor.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/localization/recipe_carbs_arabic_test.dart"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "ARABIC_RECIPE_CARBS_SUPPLEMENT_RESULT.json",
+          "sha256": "9ff3323337fbe1a383d98f74175816c6923c2496020930f603df995042ae73aa"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-11",
+      "requirement_ar": "تباين صفحات الغذاء والماء في Dark مع بقاء Light ومسار الرجوع",
+      "behavior": "Dark food and water pages use a matching dark canvas and readable foregrounds while preserving Light presentation and navigation.",
+      "production_or_tool_files": [
+        "lib/features/daily_log/daily_log_page.dart",
+        "lib/features/daily_log/daily_water_page.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/daily_log/daily_entry_theme_contrast_test.dart"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "DETAILS_AND_DARK_FIXTURE_RESULT.json",
+          "sha256": "dfc52c4d79635938f003bba2a89f4c8910f847a65f515014d101164f3c23f71c"
+        },
+        {
+          "basename": "ROOT_LAYOUT_MACRO_DARK_READONLY_REVIEW.json",
+          "sha256": "39e14dfa988024caea4fe483d519ff76035e3bd73e7a024c13eb622fab5c3317"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-12",
+      "requirement_ar": "مساحة الأيقونة والنص في أزرار التصدير والتشغيل والمجتمع وفحص أمثلة الساعة",
+      "behavior": "Inline crystal decoration reserves layout space away from labels. At Arabic200% text scale, the nutrition goal tile reuses the full-width action layout without reducing fonts or weakening drag bounds.",
+      "production_or_tool_files": [
+        "lib/shared/widgets/bil_crystal_arrow.dart",
+        "lib/shared/widgets/bil_navigation_feedback.dart",
+        "lib/features/dashboard/presentation/dashboard_preferences_polish.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/bil_navigation_feedback_test.dart",
+        "test/features/dashboard/dashboard_preferences_release_matrix_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-21"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "ROOT_LAYOUT_MACRO_DARK_READONLY_REVIEW.json",
+          "sha256": "39e14dfa988024caea4fe483d519ff76035e3bd73e7a024c13eb622fab5c3317"
+        },
+        {
+          "basename": "DIRECT_ARROW_READONLY_INVENTORY.json",
+          "sha256": "557aa671cd7e115956767aa1c2a4712eb3438e1be03717658122b60f1d046aa4"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-13",
+      "requirement_ar": "مساحة سهم Details في نافذة بلاغ المدرب دون تغيير الخصوصية أو الإرسال",
+      "behavior": "The report Details arrow has reserved spacing. Report consent, confirmation and submission semantics remain unchanged.",
+      "production_or_tool_files": [
+        "lib/features/intelligence_center/presentation/ai_coach_report_confirmation_sheet.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/intelligence_center/ai_coach_report_confirmation_capture_test.dart"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "DETAILS_AND_DARK_FIXTURE_RESULT.json",
+          "sha256": "dfc52c4d79635938f003bba2a89f4c8910f847a65f515014d101164f3c23f71c"
+        },
+        {
+          "basename": "PLAN_STRICT_REVIEWED_BASELINES_PROOF.json",
+          "sha256": "ffc5966b19c1a9aec7478f282256fa15864d6ab280ec1a70f54faf914bbe7fc8"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-14",
+      "requirement_ar": "كتاب مصادر Smart Plan وروابط موثقة بدل تكديس المراجع",
+      "behavior": "Plan and meal books open the existing verified sources and exact recipe without recording food. Seven new labels and disclosures have explicit translations for all25locales, including the real community adapter and source-owner extraction.",
+      "production_or_tool_files": [
+        "lib/features/smart_plan/presentation/bil_smart_plan_sources.dart",
+        "lib/app/localization/runtime_copy_next_batch_closure.dart",
+        "tool/localization/smart_plan_copy_sources.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/smart_plan/bil_smart_plan_sources_test.dart",
+        "test/features/smart_plan/bil_smart_plan_page_test.dart",
+        "test/localization/next_batch_closure_25_locale_test.dart",
+        "test/localization/smart_plan_25_locale_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-13",
+        "BIL-27"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "SMART_PLAN_BOOK_SOURCES_RESULT.json",
+          "sha256": "8d56e066e00da62c86b0749ab2305665d8e71cd3c70fc9eb05235b1c79f3da56"
+        },
+        {
+          "basename": "SMART_PLAN_PRIMARY_REFERENCE_OPEN_PROOF.json",
+          "sha256": "21d365c18840eebebb55079572de24ab8c60084f7aa21acf311e098b7011acd5"
+        },
+        {
+          "basename": "PLAN_STRICT_REVIEWED_BASELINES_PROOF.json",
+          "sha256": "ffc5966b19c1a9aec7478f282256fa15864d6ab280ec1a70f54faf914bbe7fc8"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-15",
+      "requirement_ar": "تصحيح تداخل سهم إحماء الخطة مع النص وتحقق المساحة بالعربية والإنجليزية",
+      "behavior": "The warm-up source entry and Continue action keep clear labels while preserving the genuine workout session flow.",
+      "production_or_tool_files": [
+        "lib/features/smart_plan/presentation/bil_smart_plan_session.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/smart_plan/bil_smart_plan_session_test.dart",
+        "test/features/smart_plan/bil_smart_plan_page_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-27"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "SMART_PLAN_BOOK_SOURCES_RESULT.json",
+          "sha256": "8d56e066e00da62c86b0749ab2305665d8e71cd3c70fc9eb05235b1c79f3da56"
+        },
+        {
+          "basename": "PLAN_STRICT_REVIEWED_BASELINES_PROOF.json",
+          "sha256": "ffc5966b19c1a9aec7478f282256fa15864d6ab280ec1a70f54faf914bbe7fc8"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-16",
+      "requirement_ar": "التمييز بين شرح الوزن المستهدف/المقاس وطلب عرض القياسات الفعلية",
+      "behavior": "Conceptual target-versus-measured weight table requests remain informational questions. Recorded history requests still use owner-grounded data. Weight logging stays a proposed action requiring confirmation.",
+      "production_or_tool_files": [
+        "lib/features/intelligence_center/services/coach_request_intent.dart",
+        "lib/features/intelligence_center/services/local_coach_command_parser.dart",
+        "lib/features/intelligence_center/services/local_coach_command_quantity.dart",
+        "lib/features/intelligence_center/presentation/intelligence_query_flow.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/intelligence_center/coach_weight_concept_routing_test.dart",
+        "test/features/intelligence_center/coach_weight_concept_answer_flow_test.dart"
+      ],
+      "canonical68_links": [
+        "COACH-ADD-01",
+        "COACH-ADD-02",
+        "COACH-ADD-08",
+        "QA-COACH-14"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "D42_037_IMPLEMENTATION_MANIFEST.json",
+          "sha256": "09b792d35d4a4097faf96f7cd9f3bb56ed69fd275af2695c96d3de78f0165ca6"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-17",
+      "requirement_ar": "بوابات CI مستقلة iPhone/iPad وربط XCTest بالمصدر الفعلي ومنع قبول نتائج تاريخية",
+      "behavior": "Native evidence binds exact source identity, executed XCTest names, builder and attempt. iPhone/iPad gates and signed-artifact evidence remain separate pending actual CI.",
+      "production_or_tool_files": [
+        ".github/workflows/bil39_ios_native_reusable.yml",
+        ".github/scripts/bil_ios_runner_tests.py",
+        "tools/qa/bil_native_source_evidence.py"
+      ],
+      "behavior_or_contract_tests": [
+        "tools/qa/test_bil_native_source_evidence.py",
+        ".github/scripts/test_bil_ios_runner_tests.py"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "NATIVE_SOURCE_REPLACEMENT_PROPOSAL.json",
+          "sha256": "43d97ff5e1f13db1e5e81db7bdba3f37d3931b7d15cd5e0a1a447f52dad8c3bc"
+        },
+        {
+          "basename": "CI_GATE_MATRIX_PENDING.json",
+          "sha256": "a264781e5a7e1f4aac0ea40a6864b7cb5317d1b30dc35c587dbc46075e00681c"
+        },
+        {
+          "basename": "INDEPENDENT_SOURCE_V2_ASSEMBLER_CLOSURE_20261108.json",
+          "sha256": "4587286be4212c73889e678543222a2b428e67ad2f3f567c6e469829aa3ba2fd"
+        },
+        {
+          "basename": "PIPELINE_SOURCE_FREEZE_V2.json",
+          "sha256": "a8ca91a0e54bf4eb3b12ab658acd1ef5a9db8b17a53bcc7680ed889b430efd79"
+        },
+        {
+          "basename": "CONTROLLER_PREPARATION_FREEZE_V2.json",
+          "sha256": "a5a077c42eb10948cceadbd99f357c6734f2226e78862fb59465b958b1d01395"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-18",
+      "requirement_ar": "مراجعة صور Smart Plan المقصودة مع حفظ الأصل وعدم اعتبار مراجعة الصور نجاح اختبار",
+      "behavior": "Deliberate image changes have reviewed originals and byte-exact backups. AI Boost review metadata changes toUS$1.99 only in the test/packaging fixture; runtime prices and legacy AI products remain unchanged.",
+      "production_or_tool_files": [
+        "test/features/commerce/apple_review_product_screenshot_test.dart",
+        "tool/apple_store_connect/package_app_review_goldens.dart"
+      ],
+      "behavior_or_contract_tests": [
+        "test/features/smart_plan/bil_smart_plan_states_visual_test.dart",
+        "test/features/commerce/apple_review_product_screenshot_test.dart",
+        "test/features/commerce/apple_review_asset_package_contract_test.dart"
+      ],
+      "canonical68_links": [
+        "BIL-13",
+        "BIL-27"
+      ],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "INTENTIONAL_SMART_PLAN_REFERENCE_REVIEW.json",
+          "sha256": "d812aa978eeeb970866a485731e61ccec93162395a358969f740265badc0f6a7"
+        },
+        {
+          "basename": "STYLE_VISUAL_EVIDENCE_MANIFEST.json",
+          "sha256": "3d751cb9452eef68f71fbbf03e1f8405b626bedad5f64a7ac0b3f4dcf2eb420a"
+        },
+        {
+          "basename": "PLAN_STRICT_REVIEWED_BASELINES_PROOF.json",
+          "sha256": "ffc5966b19c1a9aec7478f282256fa15864d6ab280ec1a70f54faf914bbe7fc8"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING"
+    },
+    {
+      "id": "NB-19",
+      "requirement_ar": "إصلاح أدوات تصوير مراجع Google والتحقق من الدخول والميزات المدفوعة على البنية المحددة",
+      "behavior": "External reviewer capture and policy-evidence binding tools are prepared. A complete new Play-delivered reviewer journey remains pending. No appeal or Store submission is established by this closure.",
+      "production_or_tool_files": [],
+      "behavior_or_contract_tests": [
+        "tools/qa/test_bil_policy_evidence_attestation.py"
+      ],
+      "canonical68_links": [],
+      "validation_scope": "The46-file affected closure passed686tests on its unchanged local fingerprint. Immutable-SHA CI, finalglobalanalysis and new-artifact native/device acceptance remain pending.",
+      "evidence_basename_hash_refs": [
+        {
+          "basename": "CAPTURE_REPAIR_FINAL_HANDOFF.json",
+          "sha256": "16548abc0381089edf675f546553df0ed18aab4144a5ca5c65e33fa67f7efa3e"
+        },
+        {
+          "basename": "GOOGLE_CONDITIONAL_APPEAL_REQUIREMENTS_READBACK_20261108.json",
+          "sha256": "70e970b2f7b280fc6a3f7d4f06cfd662238d1e037150d23e84b758fbfc14eb81"
+        },
+        {
+          "basename": "GOOGLE_CONSOLE_READONLY_ROOT_PROOF_20261108.json",
+          "sha256": "919d602090663b662d315fa7a93c592726814449823880874f02fc20af8b2df3"
+        }
+      ],
+      "source_SHA": null,
+      "final_CI": "PENDING",
+      "native_or_device_new_artifact": "PENDING",
+      "external_prepared_tool_basenames": [
+        "reviewer_capture.py",
+        "reviewer_home_probe.py",
+        "reviewer_shell_contract.cjs"
+      ]
+    }
+  ],
+  "verified_scoped_results": {
+    "V3_full_failed": {
+      "result": "FAIL",
+      "counts": {
+        "success": 11707,
+        "failure": 5,
+        "error": 126,
+        "skip": 1
+      },
+      "loaded_files": 1519,
+      "missing_files": 0,
+      "source_unchanged": true,
+      "fingerprint": "82008a6475c0dc18af8b51f8cc5d27ca04771794e9898780b1fe42becb3334b4",
+      "cleanup_incomplete_and_expected_skip_retained": true,
+      "evidence": [
+        "v3_failed",
+        "v3_protocol",
+        "v3_cleanup"
+      ]
+    },
+    "tools403": {
+      "result": "PASS",
+      "tests": 403,
+      "process_exit": 0,
+      "same_V3_fingerprint": true,
+      "evidence": [
+        "qa_tools_403"
+      ],
+      "not_native_or_full_app": true
+    },
+    "strict_plan32": {
+      "result": "PASS_SCOPED_HOST",
+      "tests": 32,
+      "prior_failures_preserved": true,
+      "evidence": [
+        "plan32"
+      ]
+    },
+    "current_book_journeys": {
+      "passed_cases": [
+        "plan and meal books en open real references and exact recipe without logging food",
+        "plan and meal books ar open real references and exact recipe without logging food"
+      ],
+      "scope": "ActualAR/ENbooknavigation+exactrecipewithoutautomaticfoodlog,insideamixedfailedrun. NotwholefilePASS.",
+      "evidence": [
+        "book_provenance_earlier"
+      ]
+    },
+    "current_provenance": {
+      "passed_behavior_cases": 14,
+      "lifecycle_hook_events": 2,
+      "successful_protocol_events_including_hooks": 16,
+      "case_names": [
+        "actual goal provenance ar default with source and real editor taps",
+        "actual goal provenance ar default with source and real editor taps narrow 320 2x",
+        "actual goal provenance ar custom with source and real editor taps",
+        "actual goal provenance ar custom with source and real editor taps narrow 320 2x",
+        "actual goal provenance ar legacy with source and real editor taps",
+        "actual goal provenance ar grams with source and real editor taps",
+        "actual goal provenance ar grams with source and real editor taps narrow 320 2x",
+        "actual goal provenance en default with source and real editor taps",
+        "actual goal provenance en default with source and real editor taps narrow 320 2x",
+        "actual goal provenance en custom with source and real editor taps",
+        "actual goal provenance en custom with source and real editor taps narrow 320 2x",
+        "actual goal provenance en legacy with source and real editor taps",
+        "actual goal provenance en grams with source and real editor taps",
+        "actual goal provenance en grams with source and real editor taps narrow 320 2x"
+      ],
+      "whole_run_status": "FAIL_WITH_NINE_KNOWN_GOLDEN_DIFFERENCES",
+      "evidence": [
+        "provenance_current"
+      ],
+      "do_not_call_16_distinct_behavior_tests": true
+    },
+    "strict_price5": {
+      "result": "PASS",
+      "tests": 5,
+      "done_success": true,
+      "prices": {
+        "premium_monthly": "EGP129.99",
+        "premium_annual": "EGP999.99",
+        "legacy_AI_monthly": "USD5.99",
+        "legacy_AI_annual": "USD49.99",
+        "AI_Boost": "USD1.99"
+      },
+      "fixture_only_not_live_ASC_read": true,
+      "evidence": [
+        "price_review",
+        "price_strict5",
+        "price_adopt5",
+        "price_package5"
+      ]
+    },
+    "Android_Back": {
+      "result": "PASS_SCOPED_HOST_BEHAVIOR",
+      "cases": 1,
+      "authority_states": [
+        "pending",
+        "verifiedFree",
+        "freshVerifiedPaid"
+      ],
+      "actual_transition_ms": 450,
+      "old_fixture_assumption_ms": 400,
+      "system_Back_API": "tester.binding.handlePopRoute",
+      "fixture_fix": "Driveactualthemeddurationwith16msframesandboundedbudget; assertanimationterminal,overlaysremovedandDashboardhitTestable. Noapplicationdurationortesttimeoutchange.",
+      "evidence": [
+        "android_back"
+      ]
+    },
+    "affected46": {
+      "status": "PASS_SCOPED_LOCAL_AFFECTED_CLOSURE",
+      "counts": {
+        "success": 686,
+        "failure": 0,
+        "error": 0,
+        "skip": 0
+      },
+      "files_loaded": 46,
+      "missing_files": 0,
+      "source_unchanged": true,
+      "source_fingerprint": "15947fe4deee96fa49d3a460dacfab44cefb4dd46c610ce8c3dbafc6c79aa445",
+      "elapsed_seconds": 281.0,
+      "process_exit": 0,
+      "protocol_success": true,
+      "in_progress": [],
+      "not_fresh_full_suite_or_immutable_CI": true,
+      "result_counter_rule": "686fromauthoritativeprotocol;run.completed_tests768includeslifecyclehookeventsandisnotusedasbehaviorcount.",
+      "evidence": [
+        "affected46_run",
+        "affected46_protocol",
+        "affected46_events"
+      ]
+    }
+  },
+  "deliberate_golden_adoptions": {
+    "sets": [
+      {
+        "images": 108,
+        "backup_complete": true,
+        "evidence": "adopt108",
+        "strict_retest": "PASS_INCLUDED_AFFECTED46_686_SCOPE"
+      },
+      {
+        "images": 10,
+        "backup_complete": true,
+        "evidence": "adopt10",
+        "strict_retest": "PASS_INCLUDED_AFFECTED46_686_SCOPE"
+      },
+      {
+        "images": 5,
+        "backup_complete": true,
+        "evidence": "price_adopt5",
+        "strict_retest": "PASS_INCLUDED_AFFECTED46_686_SCOPE"
+      }
+    ],
+    "no_tolerance_relaxation": true,
+    "no_blind_update_to_hide_bugs": true,
+    "reviewed_crop_correction_distinct_from_reference_update": true,
+    "new_reference_adoption_is_not_new_device_test": true,
+    "new_reference_total": 123,
+    "earlier44_plan_references_not_added_to_new_total": true
+  },
+  "pending_gates": [
+    "Rootcompletedfinalglobalformatandanalysisreceipt",
+    "immutablecandidateSHAandactualCIonsameSHA",
+    "macOSiPhone/iPadnativecompilation/runtimeandall8RunnerXCTests",
+    "signediOS43andAndroid35artifactidentity",
+    "newartifactsdevice/reviewerjourney",
+    "internalTestFlight43uploadandreadback",
+    "GooglePlaynewartifactaccess/consentcaptureandsubmissionreadiness"
+  ],
+  "not_claimed": [
+    "published",
+    "AppStoreorGoogleapproval",
+    "bugfree",
+    "allfeatures/allscopespassed",
+    "successfulnewaccountpurchasefromQAgrant",
+    "productioncloudfunctionalityfrombyteparity",
+    "privateaccountorcredentialdisclosure"
+  ],
+  "evidence": {
+    "v3_failed": {
+      "basename": "FROZEN_LOCAL_FLUTTER_RUN_V3.json",
+      "sha256": "b1849a5fb55e67ed1cb8e86779a96f7d54d1d8f2d2a0911c9f9984900b2119f9",
+      "scope": "Frozen local full Flutter run; failed scope preserved."
+    },
+    "v3_protocol": {
+      "basename": "FROZEN_LOCAL_FLUTTER_PROTOCOL_RECEIPT_V3.json",
+      "sha256": "f8dfe885916ec5b189d806c24e0d69db061c6675cedfcba5f27515969d7adbd5",
+      "scope": "Actual final Flutter protocol counts, incomplete cleanup and explicit skip."
+    },
+    "v3_cleanup": {
+      "basename": "FROZEN_LOCAL_V3_STOP_FAILED_CLEANUP.json",
+      "sha256": "25840e8b65e47d7486af0ba2a5a948b2d0b44df522c56e3a5a1e46a2d6dcfdeb",
+      "scope": "Earlier cleanup-stop snapshot; not final counts."
+    },
+    "qa_tools_403": {
+      "basename": "result.json",
+      "sha256": "152a9743046229ffec0568bce75d2e96a61ca8c0edd2265f54669f2126f0441e",
+      "scope": "Actual local tools unittest0exit403PASS, not Flutter/native/CI."
+    },
+    "pipeline_v2": {
+      "basename": "PIPELINE_SOURCE_FREEZE_V2.json",
+      "sha256": "a8ca91a0e54bf4eb3b12ab658acd1ef5a9db8b17a53bcc7680ed889b430efd79",
+      "scope": "Native source/controller preparation and immutable-source evidence chain; actual CI pending."
+    },
+    "pipeline_independent": {
+      "basename": "INDEPENDENT_SOURCE_V2_ASSEMBLER_CLOSURE_20261108.json",
+      "sha256": "4587286be4212c73889e678543222a2b428e67ad2f3f567c6e469829aa3ba2fd",
+      "scope": "Independent136tooltests; overlaps403discovery, no sum."
+    },
+    "plan32": {
+      "basename": "PLAN_STRICT_REVIEWED_BASELINES_PROOF.json",
+      "sha256": "ffc5966b19c1a9aec7478f282256fa15864d6ab280ec1a70f54faf914bbe7fc8",
+      "scope": "32strict host tests after deliberate44planreference updates; not samefinalcommitCI."
+    },
+    "post_full_patches": {
+      "basename": "POST_FULL_REVIEWED_FIXES_APPLIED.json",
+      "sha256": "0dba17131064dda9d284f15a15c59524863d2d1f6aadd33e7e839b84d7b3f17e",
+      "scope": "Seven post-full patches applied with protected commerce/runtime pricing unchanged."
+    },
+    "book_provenance_earlier": {
+      "basename": "POST_FULL_PROVENANCE_BOOK_EVENTS.jsonl",
+      "sha256": "04be6c60e644a0611c670f051e9560a7ccfa268d3ba5be2f1441dbd2f15946e8",
+      "scope": "Mixedrun46success4error; specific book journeys succeeded, whole run remains failed."
+    },
+    "provenance_current": {
+      "basename": "POST_FULL_PRICE_FOCAL_PROVENANCE_EVENTS.jsonl",
+      "sha256": "fa0a909ed74d973193f5c62207d16a63f8e675c5f49e8e586d06e9fd68f14a5c",
+      "scope": "14provenancebehaviorcases succeeded plus lifecyclehooks; nine known visualdiff errors retained."
+    },
+    "price_review": {
+      "basename": "CURRENT_FIVE_PRODUCTS_VISUAL_REVIEW.json",
+      "sha256": "34422c3adaced32492dfeaa6a3a3c80cddb11e5fcea207b4e6e1262c38d1bea8",
+      "scope": "Five actual current1.99fixtureimages personally viewed."
+    },
+    "price_strict5": {
+      "basename": "REVIEWED_FIVE_PRODUCTS_STRICT_EVENTS.jsonl",
+      "sha256": "7d104dbfad360bd85537b9c00830f3d2b3d44e53f9c9d4aa3408b927a9d04c8c",
+      "scope": "Actualstrict5success, done.success=true."
+    },
+    "adopt108": {
+      "basename": "ADOPTION_BACKUP_AND_RESULT.json",
+      "sha256": "aa1ff8d853869543a01010864d36abafa8b18b38bfea5627b6393e382731387e",
+      "scope": "108explicitly approved references adopted with byteexactbeforebackups; retest separately."
+    },
+    "adopt10": {
+      "basename": "ADOPTION_BACKUP_AND_RESULT.json",
+      "sha256": "c9d895530a4026d69fd4b1172418356e69d2509ab2add34b9fce480263c575b2",
+      "scope": "10explicit currentfocal references adopted with byteexactbeforebackups; retest separately."
+    },
+    "price_adopt5": {
+      "basename": "ACTION_20261108T021351506632Z.json",
+      "sha256": "00909bdc978a7ee6e9d02c2b549795667f4d25a2913dcb8b1a78852a15188eaa",
+      "scope": "Five exactreviewed productreferences adopted with11filebackup."
+    },
+    "price_package5": {
+      "basename": "ACTION_20261108T021431411217Z.json",
+      "sha256": "3b09de3b3466894914aabaf3e0a95f006be3558fba7f638f74083a5dc894d3bc",
+      "scope": "Five actual opaqueRGBoutputs/manifesthashes/pixelidentity verified; contract not impliedbyreceiptalone."
+    },
+    "android_back": {
+      "basename": "ANDROID_BACK_ACTUAL_DURATION_FIX_READBACK.json",
+      "sha256": "1111e1de523589af8da1eb22e2b098caedb2de2db1f5a4d756c74cebe9cc01be",
+      "scope": "One realframeworksystemBackcase coverspending/Free/paid,450msdeclaredanimation and teardown."
+    },
+    "coach_intent": {
+      "basename": "D42_037_IMPLEMENTATION_MANIFEST.json",
+      "sha256": "09b792d35d4a4097faf96f7cd9f3bb56ed69fd275af2695c96d3de78f0165ca6",
+      "scope": "173regression/final20behavior scopedproof; no model/cloudinstructionchanges."
+    },
+    "native_capsule": {
+      "basename": "NATIVE_TRANSLATION_SPLASH_PORT_MANIFEST.json",
+      "sha256": "937b6c8abe7bf8d56766f5bf1f57c2f97b617dc15ad179b47788e37cc381d818",
+      "scope": "SwiftUIcapsule sourceport+8declaredXCTestnames; macOSexecutionpending."
+    },
+    "device42": {
+      "basename": "FINAL_DEVICE_QA_RESULTS.md",
+      "sha256": "bd3e1fcb3a82cd0acb94068b75cc4c84240149100834b7b2079aa21eb8e915af",
+      "scope": "39bounded realdevice42groups; not newartifactapproval."
+    },
+    "cloud_readonly": {
+      "basename": "CANDIDATE_CLOUD_READONLY_PRECOMMIT_CHECK.json",
+      "sha256": "bf2ca0d70159927c8403a4158703b59ef4c716e1fd3e1873fe236c242ba779a8",
+      "scope": "16sourcefilesbyteparityACTIVE134; nowrite/modelrequest; not livefunctionalcloudapproval."
+    },
+    "affected46_run": {
+      "basename": "AFFECTED_CLOSURE_RUN.json",
+      "sha256": "5cb50a1e8d2b5c4e4abf08f8f1210d179224d97aa65c9fdc0ddcb3d7b73b533b",
+      "scope": "Completed46-file localaffectedclosure;notfullfreshCI/native."
+    },
+    "affected46_protocol": {
+      "basename": "AFFECTED_CLOSURE_PROTOCOL_RECEIPT.json",
+      "sha256": "36694d972a643136d58ea4f178f3fbec730745050d60d0e6d9a593c2867c8b1c",
+      "scope": "686completedbehavior/contractprotocoltests;nohooksdoublecount."
+    },
+    "affected46_events": {
+      "basename": "AFFECTED_CLOSURE_MACHINE.jsonl",
+      "sha256": "bdcdf1b66b5ec62f4e9eea7892a784164c57c5416f8f2cf5ed388e9b2fe9c0cf",
+      "scope": "Actualeventstream;externalonlybasename/hashinpublichandoff."
+    },
+    "global_format": {
+      "basename": "FINAL_LOCAL_FORMAT.log",
+      "sha256": "b3fc1fd0f7f6d705eb6cc90c5727eb75c74b3d5cd387796979783b1894e80921",
+      "scope": "3400 Dart files; zero changes required."
+    },
+    "lint_only_regression": {
+      "basename": "FINAL_LINT_ONLY_AFFECTED_EVENTS.jsonl",
+      "sha256": "ad128ea5896eb1a79384903b7c6156941cfc5ccb62e0486e8e25a30bbb143746",
+      "scope": "Seven tests passed after two braces-only analyzer corrections; overlaps the 686 and is not added to it."
+    },
+    "global_analyzer": {
+      "basename": "FINAL_LOCAL_ANALYZE_LINT_CORRECTED.log",
+      "sha256": "b8930769a2609177d51ea86c9ae1959c3b79cb0c06d914c18767c071ab526712",
+      "scope": "Final complete local analyzer; no issues."
+    }
+  },
+  "privacy_scope": "Onlyrepositoryrelativepathsandexternalevidencebasenames+SHA256.Noprivateemail/account/secrets/rawlogs/localusernames/absolutepaths.",
+  "Root_finalization_slots": {
+    "affected46_result": {
+      "success": 686,
+      "failure": 0,
+      "error": 0,
+      "skip": 0,
+      "files_loaded": 46,
+      "missing_files": 0,
+      "source_unchanged": true
+    },
+    "affected46_actual_receipt_basename": "AFFECTED_CLOSURE_PROTOCOL_RECEIPT.json",
+    "affected46_actual_receipt_sha256": "36694d972a643136d58ea4f178f3fbec730745050d60d0e6d9a593c2867c8b1c",
+    "final_local_analyzer_result": "PASS_NO_ISSUES",
+    "final_candidate_SHA": null,
+    "CI_run_ids_same_SHA": null,
+    "native43_35_results": null,
+    "signed_artifacts": null,
+    "TestFlight_readback": null
+  },
+  "root_handoff_limit": "This source note records local results only. Final commit identity, actual CI/native execution, signing, TestFlight and new-artifact device acceptance remain separate required evidence."
+}

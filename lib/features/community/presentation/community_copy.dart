@@ -1,3 +1,4 @@
+import '../../../app/localization/runtime_copy_next_batch_closure.dart';
 import '../../../app/localization/runtime_copy_community_ai_reward.dart';
 import '../../../app/localization/runtime_copy_ai_safety_reports.dart';
 import '../../../app/localization/runtime_copy_closure_access.dart';
@@ -46,7 +47,8 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
     'Check again' => 'Retry',
     _ => en,
   };
-  return QualityFeedbackRuntimeCopy.resolve(catalogEnglish, canonical) ??
+  return NextBatchClosureRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      QualityFeedbackRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityReportReceiptCopy.resolve(catalogEnglish, canonical) ??
       CommunityAiRewardRuntimeCopy.resolve(catalogEnglish, canonical) ??
       CommunityChatGuardCopy.resolve(catalogEnglish, canonical) ??

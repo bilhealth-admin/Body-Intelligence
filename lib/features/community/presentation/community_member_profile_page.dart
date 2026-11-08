@@ -543,14 +543,48 @@ class _CommunityMemberProfilePageState
                 return const Center(child: BilFeatureWelcomeStatus());
               }
               if (snapshot.hasError || _profile == null) {
+                final error = snapshot.error;
+                final unavailable =
+                    error is PostgrestException &&
+                    const {
+                      'community_profile_unavailable',
+                      'community_profile_not_found',
+                    }.contains(error.message.trim().toLowerCase());
                 return Center(
-                  child: FilledButton.icon(
-                    onPressed: _refresh,
-                    icon: const BilNavigationFeedback(
-                      child: Icon(Icons.refresh_rounded),
-                    ),
-                    label: Text(
-                      communityText(context, 'Retry', 'إعادة المحاولة'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          unavailable
+                              ? communityText(
+                                  context,
+                                  'This profile is unavailable.',
+                                  'هذا الملف الشخصي غير متاح.',
+                                )
+                              : communityText(
+                                  context,
+                                  'Could not load this profile. Try again.',
+                                  'تعذر تحميل هذا الملف الشخصي. أعد المحاولة.',
+                                ),
+                          key: const Key(
+                            'community-profile-load-error-message',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          key: const Key('community-profile-load-retry'),
+                          onPressed: _refresh,
+                          icon: const BilNavigationFeedback(
+                            child: Icon(Icons.refresh_rounded),
+                          ),
+                          label: Text(
+                            communityText(context, 'Retry', 'إعادة المحاولة'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -590,15 +624,17 @@ class _CommunityMemberProfilePageState
                             draftCountIsLowerBound:
                                 _draftSummaries.length == 50,
                             statsAvailable: _creator != null,
-                            onPosts: () {
+                            onPosts: () async {
                               if (!visit.isCurrent()) return;
-                              pushCommunityPage<void>(
+                              await pushCommunityPage<void>(
                                 context,
                                 CommunityMyPostsPage(
                                   repository: visit.repository,
                                   showProfileHeader: false,
                                 ),
                               );
+                              if (!mounted || !visit.isCurrent()) return;
+                              await _refresh();
                             },
                             onDrafts: () {
                               if (visit.isCurrent()) {

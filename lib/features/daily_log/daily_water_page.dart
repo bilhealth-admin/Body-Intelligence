@@ -116,6 +116,10 @@ class _DailyWaterPageState extends ConsumerState<DailyWaterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final canvas = theme.brightness == Brightness.dark
+        ? theme.colorScheme.surfaceContainerLowest
+        : const Color(0xFFF5F5F8);
     final date = ref.watch(selectedLogDateProvider);
     final entries = ref.watch(dailyWaterProvider);
     final now = DateTime.now();
@@ -130,9 +134,9 @@ class _DailyWaterPageState extends ConsumerState<DailyWaterPage> {
       },
       child: Scaffold(
         key: const Key('daily-water-page'),
-        backgroundColor: const Color(0xFFF5F5F8),
+        backgroundColor: canvas,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFF5F5F8),
+          backgroundColor: canvas,
           surfaceTintColor: Colors.transparent,
           leading: BilCrystalArrow(
             child: BackButton(onPressed: saving ? null : leave),

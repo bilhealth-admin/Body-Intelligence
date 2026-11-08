@@ -74,7 +74,7 @@ void main() {
 
     final boost = products['bil_ai_boost']!;
     expect(boost['selectedTerm'], 'ONE_TIME_CONSUMABLE');
-    expect(boost['localizedPrice'], r'$2.49');
+    expect(boost['localizedPrice'], r'$1.99');
     expect(boost['discountBadge'], isNull);
   });
 

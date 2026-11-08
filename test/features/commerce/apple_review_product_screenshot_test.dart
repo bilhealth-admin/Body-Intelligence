@@ -79,9 +79,9 @@ const _aiBoost = BilStoreOfferMetadata(
   productId: 'bil_ai_boost',
   kind: BilStoreProductKind.aiBoostConsumable,
   localizedTitle: 'BIL AI Boost — 2,500 Tokens',
-  localizedPrice: r'$2.49',
+  localizedPrice: r'$1.99',
   currencyCode: 'USD',
-  priceMicros: 2490000,
+  priceMicros: 1990000,
   storeCountryCode: 'USA',
 );
 
@@ -185,7 +185,7 @@ void main() {
     ),
     _ReviewScenario(
       productId: 'bil_ai_boost',
-      localizedPrice: r'$2.49',
+      localizedPrice: r'$1.99',
       expectedCurrencyCode: 'USD',
       expectedStoreCountryCode: 'USA',
       focusBoost: true,

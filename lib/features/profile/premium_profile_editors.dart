@@ -202,7 +202,7 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
   String get birthDateLabel {
     final value = dateOfBirth;
     if (value == null) return tr('Not set', 'غير محدد');
-    return MaterialLocalizations.of(context).formatMediumDate(value);
+    return MaterialLocalizations.of(context).formatShortDate(value);
   }
 
   String get activityLabel => switch (activity) {

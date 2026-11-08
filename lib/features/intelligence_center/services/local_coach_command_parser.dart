@@ -23,7 +23,10 @@ class LocalCoachCommandParser {
     String? locale,
     DateTime? referenceLocal,
   }) {
-    if (coachExplicitlyForbidsActions(input)) return const [];
+    if (coachExplicitlyForbidsActions(input) ||
+        isCoachWeightConceptQuestion(input)) {
+      return const [];
+    }
     const admission = CoachActionAdmission();
     return [
       for (final action in _parse(

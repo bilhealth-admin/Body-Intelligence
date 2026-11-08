@@ -19,11 +19,15 @@ import 'package:body_intelligence_log/features/smart_plan/data/bil_smart_plan_re
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan_engine.dart';
 import 'package:body_intelligence_log/features/smart_plan/presentation/bil_smart_plan_page.dart';
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_clock.dart';
+import 'package:body_intelligence_log/features/smart_plan/presentation/bil_smart_plan_sources.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
+import 'package:body_intelligence_log/features/wellness/presentation/recipe_library_page.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../visual_closure/visual_evidence_font.dart';
 import 'dart:io';
@@ -525,6 +529,195 @@ void main() {
       expectedRevision: old.revision,
     );
     return repo;
+  }
+
+  for (final language in ['en', 'ar']) {
+    testWidgets(
+      'plan and meal books $language open real references and exact recipe without logging food',
+      (tester) async {
+        Future<void> routeFrames() async {
+          for (var frame = 0; frame < 12; frame++) {
+            await tester.pump(const Duration(milliseconds: 50));
+          }
+        }
+
+        final repo = (await tester.runAsync(activePlan))!;
+        final original = (await tester.runAsync(
+          () => repo.readFor('owner-123'),
+        ))!;
+        // The older generic fixture intentionally includes planner estimates
+        // without recipe provenance. This journey requires a real source-backed
+        // recipe, selected through the same released catalog used at creation.
+        final verifiedRecipes = (await tester.runAsync(
+          () => const BilSmartPlanCatalog().sourcedRecipes(
+            dietary: const DietaryPreferences(),
+          ),
+        ))!;
+        final sourceMeal = original.days.first.meals.first;
+        final recipe = verifiedRecipes.firstWhere(
+          (entry) => entry.slot == sourceMeal.slot,
+        );
+        final before = original.replaceMeal(
+          date: now,
+          slot: sourceMeal.slot,
+          recipeId: recipe.id,
+          now: now,
+        );
+        await tester.runAsync(
+          () => repo.save(before, expectedRevision: original.revision),
+        );
+        final meal = before.days.first.meals.first;
+        final detail = await tester.runAsync(
+          () => const BilSmartPlanCatalog().recipeDetail(
+            meal.recipeId,
+            const DietaryPreferences(),
+          ),
+        );
+        expect(detail, isNotNull);
+        final originalIngredients = detail!.record['ingredients'] as List;
+        final recordId = originalIngredients.first['recordId'];
+        final router = GoRouter(
+          routes: [
+            GoRoute(path: '/', builder: (_, _) => const BilSmartPlanPage()),
+            GoRoute(
+              path: '/wellness/recipes',
+              builder: (_, state) => RecipeLibraryPage(
+                initialRecipeId: state.uri.queryParameters['recipe'],
+                remoteImageDeliveryEnabled: false,
+              ),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              databaseProvider.overrideWithValue(db),
+              verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-123'),
+              verifiedSubscriptionAccessProvider.overrideWithValue(
+                AsyncData(
+                  SubscriptionState(
+                    plan: CommercePlan.premium,
+                    entitlements: PaidPlanCatalog.composedEntitlementsFor(
+                      CommercePlan.premium,
+                    ),
+                    authority: EntitlementAuthority.verifiedServer,
+                    isPurchasable: false,
+                    canRestorePurchases: false,
+                    currentPeriodEndsAt: DateTime(2026, 12, 1),
+                  ),
+                ),
+              ),
+              bilSmartPlanClockProvider.overrideWithValue(() => now),
+              // Native billing is outside this host recipe/source journey.
+              // This selects an offer only; the verified access fixture above
+              // still owns whether the real destination can expose recipes.
+              storefrontTargetPlanProvider.overrideWith(
+                (_) async => CommercePlan.premium,
+              ),
+            ],
+            child: MaterialApp.router(
+              routerConfig: router,
+              locale: Locale(language),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              theme: visualEvidenceTheme(
+                BilFlagshipTheme.light(isArabic: language == 'ar'),
+                fontFamily: language == 'ar'
+                    ? 'NotoArabicEvidence'
+                    : 'RobotoEvidence',
+              ),
+            ),
+          ),
+        );
+        await waitForSurface(
+          tester,
+          find.byKey(const ValueKey('bil-smart-plan-tabs')),
+        );
+        await tester.tap(find.byKey(const ValueKey('bil-smart-plan-sources')));
+        await tester.pumpAndSettle();
+        expect(find.byType(BilSmartPlanSourcesPanel), findsOneWidget);
+        await tester.tap(
+          find.byTooltip(
+            MaterialLocalizations.of(
+              tester.element(find.byType(BilSmartPlanSourcesPanel)),
+            ).closeButtonTooltip,
+          ),
+        );
+        await tester.pumpAndSettle();
+        final mealRow = find.byKey(
+          ValueKey('bil-smart-plan-meal-${meal.slot.name}'),
+        );
+        await tester.scrollUntilVisible(
+          mealRow,
+          250,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.ensureVisible(mealRow);
+        await tester.pumpAndSettle();
+        expect(mealRow.hitTestable(), findsOneWidget);
+        await tester.tap(mealRow);
+        final book = find.byKey(const ValueKey('bil-smart-plan-meal-sources'));
+        await waitForSurface(tester, book);
+        expect(
+          find.text(
+            language == 'ar'
+                ? 'وجبة مخططة فقط. لا يُسجّل الطعام كمأكول من هنا.'
+                : 'Planned meal only. Nothing here records food as eaten.',
+          ),
+          findsOneWidget,
+        );
+        await tester.tap(book);
+        final sources = find.byKey(const Key('recipe-source-disclosure'));
+        // The actual recipe page may still be loading native asset I/O when
+        // its route first mounts. Wait for the real disclosure, not global
+        // ticker settlement, which cannot advance host asset futures.
+        await tester.runAsync(() async {
+          final deadline = DateTime.now().add(const Duration(seconds: 15));
+          while (sources.evaluate().isEmpty &&
+              DateTime.now().isBefore(deadline)) {
+            await tester.pump(const Duration(milliseconds: 20));
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+          }
+        });
+        expect(sources, findsOneWidget);
+        await routeFrames();
+        expect(
+          tester
+              .widget<RecipeLibraryPage>(find.byType(RecipeLibraryPage))
+              .initialRecipeId,
+          meal.recipeId,
+        );
+        await tester.ensureVisible(sources);
+        await routeFrames();
+        await tester.tap(sources);
+        await routeFrames();
+        expect(find.textContaining('$recordId ·'), findsOneWidget);
+        expect(
+          (await tester.runAsync(() => repo.readFor('owner-123')))!.encode(),
+          before.encode(),
+        );
+        expect(await tester.runAsync(() => db.select(db.meals).get()), isEmpty);
+        expect(
+          await tester.runAsync(() => db.select(db.dailyLogs).get()),
+          isEmpty,
+        );
+        Navigator.of(tester.element(sources)).pop();
+        await routeFrames();
+        router.pop();
+        await routeFrames();
+        expect(find.byType(BilSmartPlanPage), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await routeFrames();
+      },
+    );
   }
 
   testWidgets(

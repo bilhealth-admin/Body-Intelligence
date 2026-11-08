@@ -134,6 +134,8 @@ extension _LocalCoachCommandQuantity on LocalCoachCommandParser {
     if (_hasQuantityUnit(value, 'g|grams?|غ|غرام|جرام|جم')) return false;
     return _contains(value, const [
           'my weight',
+          'my current weight',
+          'my measured weight',
           'body weight',
           'i weigh',
           'log weight',
@@ -159,6 +161,8 @@ extension _LocalCoachCommandQuantity on LocalCoachCommandParser {
     final text = _quantityText(value, const [
       'my',
       'body',
+      'current',
+      'measured',
       'weight',
       'i',
       'weigh',
@@ -173,6 +177,7 @@ extension _LocalCoachCommandQuantity on LocalCoachCommandParser {
       'target',
       'goal',
       'to',
+      'as',
       'is',
       'وزني',
       'وزنى',

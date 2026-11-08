@@ -14,6 +14,144 @@ import '../../visual_closure/visual_evidence_font.dart';
 void main() {
   setUpAll(loadVisualEvidenceFont);
 
+  for (final language in ['en', 'ar']) {
+    for (final dark in [false, true]) {
+      for (final scale in [1.0, 2.0]) {
+        testWidgets(
+          'real report Details keeps the glass outside its label and opens in $language dark=$dark scale=$scale',
+          (tester) async {
+            tester.view.devicePixelRatio = 1;
+            tester.view.physicalSize = const Size(320, 640);
+            addTearDown(tester.view.resetDevicePixelRatio);
+            addTearDown(tester.view.resetPhysicalSize);
+            final submitted = <AiCoachAnswerReportDraft>[];
+            await tester.pumpWidget(
+              MaterialApp(
+                debugShowCheckedModeBanner: false,
+                locale: Locale(language),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  ...GlobalMaterialLocalizations.delegates,
+                ],
+                theme: visualEvidenceTheme(
+                  dark
+                      ? BilFlagshipTheme.dark(isArabic: language == 'ar')
+                      : BilFlagshipTheme.light(isArabic: language == 'ar'),
+                  fontFamily: language == 'ar'
+                      ? 'NotoArabicEvidence'
+                      : 'RobotoEvidence',
+                ),
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(scale)),
+                  child: child!,
+                ),
+                home: Scaffold(
+                  body: Builder(
+                    builder: (context) => Center(
+                      child: FilledButton(
+                        key: const Key('open-report-details-layout'),
+                        onPressed: () => showAiCoachAnswerReportSheet(
+                          context,
+                          submitted.add,
+                        ),
+                        child: const Text('Open report sheet'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+            await tester.tap(
+              find.byKey(const Key('open-report-details-layout')),
+            );
+            await tester.pumpAndSettle();
+            final details = find.byKey(
+              const Key('ai-coach-report-privacy-details'),
+            );
+            await tester.ensureVisible(details);
+            await tester.pumpAndSettle();
+            final text = find.descendant(
+              of: details,
+              matching: find.byType(Text),
+            );
+            final bubble = find.descendant(
+              of: details,
+              matching: find.byKey(const Key('bil-crystal-arrow-bubble')),
+            );
+            final textRect = tester.getRect(text);
+            final bubbleRect = tester.getRect(bubble);
+            final rtl =
+                Directionality.of(tester.element(details)) == TextDirection.rtl;
+            final gap = rtl
+                ? textRect.left - bubbleRect.right
+                : bubbleRect.left - textRect.right;
+            expect(
+              gap,
+              greaterThanOrEqualTo(6),
+              reason: 'The36px crystal must not consume the existing6px gap.',
+            );
+            expect(
+              tester
+                  .widget<AnimatedCrossFade>(find.byType(AnimatedCrossFade))
+                  .crossFadeState,
+              CrossFadeState.showFirst,
+            );
+            await tester.tap(details);
+            await tester.pumpAndSettle();
+            expect(
+              tester
+                  .widget<AnimatedCrossFade>(find.byType(AnimatedCrossFade))
+                  .crossFadeState,
+              CrossFadeState.showSecond,
+            );
+            expect(
+              find.textContaining(
+                language == 'ar'
+                    ? 'لا يُرسل سؤالك'
+                    : 'Your question, other messages',
+              ),
+              findsOneWidget,
+            );
+            await tester.ensureVisible(details);
+            await tester.tap(details);
+            await tester.pumpAndSettle();
+            expect(
+              tester
+                  .widget<AnimatedCrossFade>(find.byType(AnimatedCrossFade))
+                  .crossFadeState,
+              CrossFadeState.showFirst,
+            );
+            expect(
+              tester
+                  .widget<FilledButton>(
+                    find.byKey(const Key('ai-coach-confirm-report')),
+                  )
+                  .onPressed,
+              isNull,
+              reason: 'Expanding details must not select consent or a reason.',
+            );
+            expect(submitted, isEmpty);
+            await tester.ensureVisible(
+              find.byKey(const Key('ai-coach-cancel-report')),
+            );
+            await tester.tap(find.byKey(const Key('ai-coach-cancel-report')));
+            await tester.pumpAndSettle();
+            expect(
+              find.byKey(const Key('ai-coach-confirm-report')),
+              findsNothing,
+            );
+            expect(submitted, isEmpty);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
+    }
+  }
+
   for (final language in ['ar', 'en']) {
     testWidgets('captures the real AI Coach report sheet in $language', (
       tester,
