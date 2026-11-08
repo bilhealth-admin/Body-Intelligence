@@ -14,6 +14,7 @@ import bil39_full_suite_artifacts as artifact
 SHA = 'a' * 40
 BIL40_BRANCH = 'codex/bil40-device-fixes-20261028'
 FULL_FIX_BRANCH = 'codex/bil-full-fix-batch-20261106'
+BIL43_BRANCH = 'codex/bil43-android35-verified-20261108'
 
 
 class LatestShardArtifactsTest(unittest.TestCase):
@@ -45,6 +46,40 @@ class LatestShardArtifactsTest(unittest.TestCase):
 
     def test_full_fix_branch_cli_downloads_and_verifies_all_eight_real_zip_fixtures(self):
         self.assert_exact_run_downloads_and_verifies_all_eight_real_zip_fixtures(FULL_FIX_BRANCH)
+
+    def test_bil43_exact_run_cli_downloads_and_verifies_all_eight_real_zip_fixtures(self):
+        self.assert_exact_run_downloads_and_verifies_all_eight_real_zip_fixtures(BIL43_BRANCH)
+
+    def test_bil43_each_artifact_must_match_the_exact_selected_branch(self):
+        self.assert_run_and_each_artifact_match_the_explicit_selected_branch(BIL43_BRANCH)
+
+    def test_bil43_run_metadata_mismatches_fail_before_download(self):
+        self.assert_run_metadata_mismatches_fail_before_download(BIL43_BRANCH)
+
+    def test_bil43_lookalike_cli_branches_fail_before_api_or_download(self):
+        for branch in [BIL43_BRANCH + '-extra', BIL43_BRANCH + '0', BIL43_BRANCH.replace('bil43', 'BIL43')]:
+            with self.subTest(branch=branch), patch('sys.argv', [
+                    'bil39_full_suite_artifacts.py', '--sha', SHA,
+                    '--run-id', '123', '--branch', branch, '--output', 'unused']), \
+                    patch('sys.stderr', new_callable=io.StringIO), \
+                    patch.object(artifact, 'api') as api, \
+                    patch.object(artifact.subprocess, 'run') as download:
+                with self.assertRaises(SystemExit) as raised:
+                    artifact.main()
+                self.assertEqual(raised.exception.code, 2)
+                api.assert_not_called()
+                download.assert_not_called()
+            with self.assertRaises(ValueError):
+                artifact.select([self.row(i) for i in range(8)],
+                                sha=SHA, run_id=123, total=8, branch=branch)
+
+    def test_bil43_artifact_metadata_lookalike_branch_is_not_accepted(self):
+        rows = [self.row(i) for i in range(8)]
+        for row in rows:
+            row['workflow_run']['head_branch'] = BIL43_BRANCH
+        rows[3]['workflow_run']['head_branch'] = BIL43_BRANCH + '-extra'
+        with self.assertRaisesRegex(ValueError, 'Artifact identity'):
+            artifact.select(rows, sha=SHA, run_id=123, total=8, branch=BIL43_BRANCH)
 
     def assert_exact_run_downloads_and_verifies_all_eight_real_zip_fixtures(self, branch):
         folder = tempfile.TemporaryDirectory(prefix='bil40-exact-run-')

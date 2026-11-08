@@ -300,14 +300,33 @@ void _registerNativeConversationsAndStoreActivity(
           );
           await _nativeSettle(tester);
           final cta = find.byKey(const ValueKey('store-purchase-cta'));
-          expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+          final capsule = find.byType(BilSplashCapsuleProgress);
+          expect(capsule, findsOneWidget);
+          expect(find.byType(CupertinoActivityIndicator), findsNothing);
+          expect(find.byType(CircularProgressIndicator), findsNothing);
+          expect(find.descendant(of: cta, matching: capsule), findsNothing);
           expect(
-            find.descendant(
-              of: cta,
-              matching: find.byType(CupertinoActivityIndicator),
-            ),
-            findsNothing,
+            _nativeRect(capsule).bottom,
+            lessThanOrEqualTo(_nativeRect(cta).top),
           );
+          expect(tester.widget<InkWell>(cta).onTap, isNull);
+          expect(find.text(status), findsWidgets);
+          expect(launches, 0);
+          final element = capsule.evaluate().single;
+          final reduced =
+              MediaQuery.disableAnimationsOf(element) ||
+              View.of(
+                element,
+              ).platformDispatcher.accessibilityFeatures.reduceMotion;
+          final capsulePaint = await _verifyNativeCapsulePaint(
+            tester,
+            capsule,
+            reduced: reduced,
+          );
+          // An actual tap while pending must not request a store transaction.
+          await tester.tap(cta);
+          await tester.pump();
+          expect(capsule, findsOneWidget);
           expect(tester.widget<InkWell>(cta).onTap, isNull);
           expect(find.text(status), findsWidgets);
           expect(launches, 0);
@@ -327,6 +346,8 @@ void _registerNativeConversationsAndStoreActivity(
             'source_head': _head,
             'source_fingerprint': _fingerprint,
             'one_indicator_above_cta': true,
+            'capsule_paint': capsulePaint,
+            'pending_cta_tap_requested_no_purchase': launches == 0,
             'purchase_requests': launches,
           });
           await tester.pumpWidget(const SizedBox.shrink());

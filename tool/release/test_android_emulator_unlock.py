@@ -93,6 +93,10 @@ def window(awake=True, locked=False, focus='com.google.android.apps.nexuslaunche
             '    KeyguardServiceDelegate\n'
             f'      showing={str(locked).lower()}\n'
             f'      inputRestricted={str(locked).lower()}\n'
+            '      KeyguardStateMonitor\n'
+            f'        mIsShowing={str(locked).lower()}\n'
+            f'        mInputRestricted={str(locked).lower()}\n'
+            '        mCurrentUserId=0\n'
             f'  mCurrentFocus=Window{{123 u0 {focus}}}\n')
 
 
@@ -425,6 +429,83 @@ class AndroidUnlockTest(unittest.TestCase):
     def test_lock_clearing_during_readonly_capture_does_not_trigger_input(self):
         fake = AdbControl([window(locked=True), window()])
         self.assertEqual(self.execute(fake)['exit_code'], 0)
+        self.assertEqual(fake.mutations, [])
+
+
+ACTUAL_API36_UNBOUND_WINDOW = 'WINDOW MANAGER POLICY STATE\n    mAwake=true\n    KeyguardServiceDelegate\n      showing=true\n      inputRestricted=false\n      occluded=false\n      secure=true\n      dreaming=false\n      systemIsReady=true\n      deviceHasKeyguard=true\n      enabled=true\n      offReason=0\n      currentUser=-10000\n      bootCompleted=true\n      screenState=SCREEN_STATE_ON\n      interactiveState=INTERACTIVE_STATE_AWAKE\n    Looper state:\n  mCurrentFocus=Window{8ead8e1 u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}\n'
+
+
+class ConnectedKeyguardReadinessTest(unittest.TestCase):
+    execute = AndroidUnlockTest.execute
+    def test_actual_api36_unbound_service_fails_without_a_lost_dismissal(self):
+        fake = AdbControl([ACTUAL_API36_UNBOUND_WINDOW]); fake.api = '36'
+        result = self.execute(fake, expected_api=36)
+        self.assertEqual(fake.mutations, [])
+        self.assertEqual(result['input_command_count'], 0)
+        self.assertEqual(result['failure_code'], 'KEYGUARD_SERVICE_UNAVAILABLE')
+        self.assertNotEqual(result['exit_code'], 0)
+        self.assertLessEqual(result['elapsed_seconds'], unlock.DEADLINE_SECONDS)
+        self.assertIn('did not connect', result['reason'])
+
+    def test_connection_must_precede_the_one_dismissal_and_real_readback(self):
+        fake = AdbControl([ACTUAL_API36_UNBOUND_WINDOW, window(locked=True),
+                           window(locked=True), window()]); fake.api = '36'
+        result = self.execute(fake, expected_api=36)
+        self.assertEqual(result['exit_code'], 0)
+        self.assertFalse(result['observations'][0]['keyguard_service_connected'])
+        self.assertTrue(result['observations'][1]['keyguard_service_connected'])
+        self.assertEqual(fake.mutations, [['shell', 'wm', 'dismiss-keyguard']])
+        self.assertFalse(result['final_state']['keyguard_locked'])
+
+    def test_unlocked_disabled_keyguard_needs_no_monitor_or_input(self):
+        no_monitor = window().split('      KeyguardStateMonitor')[0]
+        no_monitor += '  mCurrentFocus=Window{123 u0 com.google.android.apps.nexuslauncher/.Launcher}\n'
+        fake = AdbControl([no_monitor])
+        self.assertEqual(self.execute(fake)['exit_code'], 0)
+        self.assertEqual(fake.mutations, [])
+
+    def test_keyguard_clearing_while_waiting_needs_no_synthetic_input(self):
+        fake = AdbControl([ACTUAL_API36_UNBOUND_WINDOW, window()])
+        self.assertEqual(self.execute(fake)['exit_code'], 0)
+        self.assertEqual(fake.mutations, [])
+
+    def test_missing_or_nested_monitor_fields_cannot_authorize_input(self):
+        for suffix in ['      KeyguardStateMonitor\n',
+                       '      OtherBlock\n        KeyguardStateMonitor\n          mIsShowing=true\n          mInputRestricted=false\n          mCurrentUserId=0\n',
+                       '      KeyguardStateMonitor\n        Nested\n          mIsShowing=true\n          mInputRestricted=false\n          mCurrentUserId=0\n']:
+            state = ACTUAL_API36_UNBOUND_WINDOW.replace('  mCurrentFocus=', suffix + '  mCurrentFocus=')
+            fake = AdbControl([state])
+            result = self.execute(fake)
+            self.assertNotEqual(result['exit_code'], 0)
+            self.assertEqual(fake.mutations, [])
+
+    def test_invalid_or_duplicate_connected_state_fails_closed(self):
+        for state in [window(True, True).replace('mIsShowing=true', 'mIsShowing=unknown'),
+                      window(True, True).replace('mCurrentUserId=0', 'mCurrentUserId=-10000'),
+                      window(True, True).replace('mIsShowing=true', 'mIsShowing=true\n        mIsShowing=false')]:
+            fake = AdbControl([state])
+            self.assertNotEqual(self.execute(fake)['exit_code'], 0)
+            self.assertEqual(fake.mutations, [])
+
+    def test_still_locked_connected_service_is_not_passed_or_dismissed_twice(self):
+        fake = AdbControl([window(True, True)])
+        result = self.execute(fake)
+        self.assertNotEqual(result['exit_code'], 0)
+        self.assertEqual(fake.mutations, [['shell', 'wm', 'dismiss-keyguard']])
+        self.assertEqual(result['command_retries'], 0)
+        self.assertLessEqual(result['elapsed_seconds'], unlock.DEADLINE_SECONDS)
+
+    def test_no_full_dump_is_started_with_less_than_one_poll_interval_left(self):
+        class DeadlineProbe(AdbControl):
+            def run(self, argv, **kwargs):
+                if argv[-3:] == ['shell', 'dumpsys', 'window']:
+                    self_test.assertGreaterEqual(kwargs['timeout'], 0.25)
+                return super().run(argv, **kwargs)
+        self_test = self
+        fake = DeadlineProbe([ACTUAL_API36_UNBOUND_WINDOW])
+        result = self.execute(fake)
+        self.assertNotEqual(result['exit_code'], 0)
+        self.assertEqual(result['failure_code'], 'KEYGUARD_SERVICE_UNAVAILABLE')
         self.assertEqual(fake.mutations, [])
 
 

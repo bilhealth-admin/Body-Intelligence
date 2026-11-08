@@ -112,15 +112,75 @@ class RunnerTests: XCTestCase {
     phase: Double, reduced: Bool, scheme: ColorScheme = .light,
     direction: LayoutDirection = .leftToRight, contrast: ColorSchemeContrast = .standard
   ) throws -> CGImage {
-    let renderer = ImageRenderer(content:
+    // colorSchemeContrast is read-only in SwiftUI. Exercise its actual UIKit
+    // trait bridge rather than injecting a replacement production environment.
+    let bounds = CGRect(x: 0, y: 0, width: 24, height: 7)
+    let requestedContrast: UIAccessibilityContrast = contrast == .increased ? .high : .normal
+    let requestedStyle: UIUserInterfaceStyle = scheme == .dark ? .dark : .light
+    let hosting = UIHostingController(rootView:
       BILNativeSplashCapsulePaint(progress: phase, reducedMotion: reduced)
         .environment(\.colorScheme, scheme)
-        .environment(\.colorSchemeContrast, contrast)
         .environment(\.layoutDirection, direction)
+        .ignoresSafeArea()
     )
-    renderer.scale = 1
-    renderer.isOpaque = false
-    let image = try XCTUnwrap(renderer.cgImage, "Native capsule must rasterize a real image")
+    let container = UIViewController()
+    container.view.backgroundColor = .clear
+    container.view.frame = bounds
+    container.addChild(hosting)
+    container.view.addSubview(hosting.view)
+    hosting.didMove(toParent: container)
+    hosting.view.frame = bounds
+    hosting.view.backgroundColor = .clear
+    hosting.view.isOpaque = false
+
+    if #available(iOS 17.0, *) {
+      hosting.traitOverrides.accessibilityContrast = requestedContrast
+      hosting.traitOverrides.userInterfaceStyle = requestedStyle
+      hosting.traitOverrides.displayScale = 1
+    } else {
+      container.setOverrideTraitCollection(UITraitCollection(traitsFrom: [
+        UITraitCollection(accessibilityContrast: requestedContrast),
+        UITraitCollection(userInterfaceStyle: requestedStyle),
+        UITraitCollection(displayScale: 1)
+      ]), forChild: hosting)
+    }
+
+    // A visible, non-key test window lets SwiftUI inherit genuine view traits.
+    // It does not replace the application's key window or persist any setting.
+    let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+    let currentScene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+    let window: UIWindow
+    if let currentScene = currentScene {
+      window = UIWindow(windowScene: currentScene)
+      window.frame = bounds
+    } else {
+      // Legacy test hosts may not participate in the UIScene lifecycle.
+      window = UIWindow(frame: bounds)
+    }
+    window.backgroundColor = .clear
+    window.rootViewController = container
+    window.isHidden = false
+    defer {
+      window.isHidden = true
+      window.rootViewController = nil
+    }
+    if #available(iOS 17.0, *) { hosting.updateTraitsIfNeeded() }
+    container.view.layoutIfNeeded()
+    hosting.view.layoutIfNeeded()
+    XCTAssertEqual(hosting.traitCollection.accessibilityContrast, requestedContrast)
+    XCTAssertEqual(hosting.view.traitCollection.accessibilityContrast, requestedContrast)
+    XCTAssertEqual(hosting.view.bounds.size, bounds.size)
+
+    let format = UIGraphicsImageRendererFormat()
+    format.scale = 1
+    format.opaque = false
+    format.preferredRange = .standard
+    var snapshotComplete = false
+    let rendered = UIGraphicsImageRenderer(size: bounds.size, format: format).image { _ in
+      snapshotComplete = hosting.view.drawHierarchy(in: bounds, afterScreenUpdates: true)
+    }
+    XCTAssertTrue(snapshotComplete, "Native capsule snapshot must include the complete hosted view")
+    let image = try XCTUnwrap(rendered.cgImage, "Native capsule must rasterize a real image")
     let attachment = XCTAttachment(image: UIImage(cgImage: image))
     attachment.name = "capsule-phase\(phase)-reduced\(reduced)-\(scheme)-\(direction)-\(contrast)"
     attachment.lifetime = .keepAlways

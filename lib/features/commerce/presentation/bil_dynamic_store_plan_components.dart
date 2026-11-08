@@ -95,7 +95,9 @@ class _PlanBenefitListState extends State<_PlanBenefitList> {
                   context,
                 ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
-              icon: BilNavigationFeedback(
+              // Preserve the immutable checkout-page layout and translucent
+              // purchase-bar halo. Other navigation keeps reserved crystals.
+              icon: BilGlassPressFeedback(
                 child: Icon(
                   _expanded
                       ? Icons.keyboard_arrow_up_rounded

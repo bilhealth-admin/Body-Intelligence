@@ -403,3 +403,135 @@ class _NativeReplyFrameTrace {
     WidgetsBinding.instance.removeTimingsCallback(_timings);
   }
 }
+
+// Capture only the real production capsule's existing internal repaint layer.
+// These tiny RGBA reads run in the independent visual/pending visit, never in
+// NativeHoldObserver or the measured2.2s welcome interval. No frame/timer is
+// frozen, no production duration is extended, and no pixels are fabricated.
+class _NativeCapsulePaint {
+  const _NativeCapsulePaint({
+    required this.size,
+    required this.phase,
+    required this.reduced,
+    required this.rgba,
+  });
+  final Size size;
+  final double phase;
+  final bool reduced;
+  final List<int> rgba;
+}
+
+Future<_NativeCapsulePaint> _readNativeCapsulePaint(
+  WidgetTester tester,
+  Finder capsule,
+) async {
+  expect(capsule, findsOneWidget);
+  final element = capsule.evaluate().single;
+  final widget = element.widget as BilSplashCapsuleProgress;
+  final size = _nativeRect(capsule).size;
+  expect(size, Size(widget.width, 7));
+  expect(size.width, greaterThan(0));
+  expect(size.width, lessThanOrEqualTo(112));
+  final boundary = element
+      .findAncestorRenderObjectOfType<RenderRepaintBoundary>();
+  expect(boundary, isNotNull);
+  final snapshot = await tester.runAsync(() async {
+    final image = await boundary!.toImage(pixelRatio: 1);
+    try {
+      expect(image.width, size.width.ceil());
+      expect(image.height, 7);
+      final raw = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      expect(raw, isNotNull);
+      final bytes = raw!;
+      return _NativeCapsulePaint(
+        size: size,
+        phase: widget.progress,
+        reduced: widget.reducedMotion,
+        rgba: bytes.buffer
+            .asUint8List(bytes.offsetInBytes, bytes.lengthInBytes)
+            .toList(growable: false),
+      );
+    } finally {
+      image.dispose();
+    }
+  });
+  expect(snapshot, isNotNull);
+  return snapshot!;
+}
+
+Future<Map<String, Object?>> _verifyNativeCapsulePaint(
+  WidgetTester tester,
+  Finder capsule, {
+  required bool reduced,
+}) async {
+  final first = await _readNativeCapsulePaint(tester, capsule);
+  // This is a visual sampling interval within the existing separate visit,
+  // not a change to any welcome, operation or test timeout.
+  await tester.pump(const Duration(milliseconds: 320));
+  final second = await _readNativeCapsulePaint(tester, capsule);
+  expect(second.size, first.size);
+  expect(first.reduced, reduced);
+  expect(second.reduced, reduced);
+  expect(second.rgba.length, first.rgba.length);
+  var changedPixels = 0;
+  var paintedPixels = 0;
+  final colors = <int>{};
+  for (var i = 0; i < first.rgba.length; i += 4) {
+    if (first.rgba[i + 3] > 0) paintedPixels++;
+    colors.add(
+      (first.rgba[i] << 24) |
+          (first.rgba[i + 1] << 16) |
+          (first.rgba[i + 2] << 8) |
+          first.rgba[i + 3],
+    );
+    if (first.rgba[i] != second.rgba[i] ||
+        first.rgba[i + 1] != second.rgba[i + 1] ||
+        first.rgba[i + 2] != second.rgba[i + 2] ||
+        first.rgba[i + 3] != second.rgba[i + 3]) {
+      changedPixels++;
+    }
+  }
+  expect(paintedPixels, greaterThan(0), reason: 'The real capsule must paint.');
+  expect(
+    colors.length,
+    greaterThan(1),
+    reason: 'A blank/flat layer is not the capsule.',
+  );
+  if (reduced) {
+    expect(first.phase, closeTo(.72, 1e-9));
+    expect(second.phase, closeTo(.72, 1e-9));
+    expect(
+      changedPixels,
+      0,
+      reason: 'Reduced motion must keep identical actual RGBA paint.',
+    );
+  } else {
+    expect(second.phase, isNot(first.phase));
+    expect(
+      changedPixels,
+      greaterThan(0),
+      reason: 'Normal motion must change actual capsule pixels.',
+    );
+  }
+  return {
+    'indicator_kind': 'BIL_SPLASH_CAPSULE',
+    'render_width': first.size.width,
+    'render_height': first.size.height,
+    'reduced_motion': reduced,
+    'first_phase': first.phase,
+    'second_phase': second.phase,
+    'painted_pixel_count': paintedPixels,
+    'distinct_rgba_colors': colors.length,
+    'changed_rgba_pixel_count': changedPixels,
+    'sampling_scope':
+        'actual internal RepaintBoundary RGBA; separate visual visit, not hold timing',
+  };
+}
+
+// Host regressions exercise this exact device probe without registering the
+// native journey or installing its transports and platform binding.
+Future<Map<String, Object?>> verifyNativeSplashCapsuleProbe(
+  WidgetTester tester,
+  Finder capsule, {
+  required bool reduced,
+}) => _verifyNativeCapsulePaint(tester, capsule, reduced: reduced);

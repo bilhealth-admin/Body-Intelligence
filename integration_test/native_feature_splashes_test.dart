@@ -43,9 +43,11 @@ import 'package:body_intelligence_log/features/intelligence_center/services/loca
 import 'package:body_intelligence_log/features/nutrition_plans/presentation/nutrition_pathways_page.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_coach_identity.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_feature_entry_splash.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -245,16 +247,20 @@ Finder _welcome(String kind) => find.byKey(
       : ValueKey('feature-entry-splash-$kind'),
 );
 Map<String, Object?> _welcomeFrameDetails(String kind) {
-  final indicators = find
-      .descendant(
-        of: _welcome(kind),
-        matching: find.byType(CupertinoActivityIndicator),
-      )
-      .evaluate();
-  final indicator = indicators.single.widget as CupertinoActivityIndicator;
+  final capsule = find.descendant(
+    of: _welcome(kind),
+    matching: find.byType(BilSplashCapsuleProgress),
+  );
+  final element = capsule.evaluate().single;
+  final indicator = element.widget as BilSplashCapsuleProgress;
+  // Post-frame observers cannot call guarded WidgetController geometry APIs.
+  final render = element.findRenderObject()! as RenderBox;
   return {
-    'indicator_animating': indicator.animating,
-    'indicator_radius': indicator.radius,
+    'indicator_kind': 'BIL_SPLASH_CAPSULE',
+    'capsule_reduced_motion': indicator.reducedMotion,
+    'capsule_phase': indicator.progress,
+    'capsule_render_width': render.size.width,
+    'capsule_render_height': render.size.height,
   };
 }
 
@@ -615,10 +621,15 @@ void main() {
                   'The measured welcome must be present in its actual first frame.',
             );
             expect(
-              observer.firstVisibleFrame?['indicator_animating'],
-              !scene.reduced,
+              observer.firstVisibleFrame?['indicator_kind'],
+              'BIL_SPLASH_CAPSULE',
             );
-            expect(observer.firstVisibleFrame?['indicator_radius'], 12);
+            expect(
+              observer.firstVisibleFrame?['capsule_reduced_motion'],
+              scene.reduced,
+            );
+            expect(observer.firstVisibleFrame?['capsule_render_width'], 24);
+            expect(observer.firstVisibleFrame?['capsule_render_height'], 7);
             expect(mounted[kind], 1);
             if (kind == 'community') {
               while (destinationMounts[kind] == null &&
@@ -668,6 +679,14 @@ void main() {
             final captureObserver = holdObservers[kind]!;
             final captureWatch = captureObserver.watch;
             expect(_welcome(kind), findsOneWidget);
+            final capsulePaint = await _verifyNativeCapsulePaint(
+              tester,
+              find.descendant(
+                of: _welcome(kind),
+                matching: find.byType(BilSplashCapsuleProgress),
+              ),
+              reduced: scene.reduced,
+            );
             final captureAt = captureWatch.elapsedMilliseconds;
             expect(captureAt, lessThan(1900));
             await _capture(binding, '$kind-$name-welcome', output);
@@ -689,6 +708,7 @@ void main() {
               'capture_started_ms': captureAt,
               'capture_completed_ms': captureCompleteAt,
               'capture_separate_visit': true,
+              'capsule_paint_separate_visit': capsulePaint,
               ...observed,
               'requested_observation_interval_ms': 20,
               'qa_warmup_separate_visit': true,

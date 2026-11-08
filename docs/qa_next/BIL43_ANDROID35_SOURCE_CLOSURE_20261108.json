@@ -1414,5 +1414,92 @@
     "signed_artifacts": null,
     "TestFlight_readback": null
   },
-  "root_handoff_limit": "This source note records local results only. Final commit identity, actual CI/native execution, signing, TestFlight and new-artifact device acceptance remain separate required evidence."
+  "root_handoff_limit": "This source note records local results only. Final commit identity, actual CI/native execution, signing, TestFlight and new-artifact device acceptance remain separate required evidence.",
+  "post_first_CI_corrections": {
+    "status": "CORRECTIVE_LOCAL_VALIDATION_PASS_FRESH_IMMUTABLE_SOURCE_CI_REQUIRED",
+    "parent_source_sha": "3f48b1cd6c62994fbef338a7431d265706573ec1",
+    "first_source_CI": "Five successful workflows and six failed workflows retained. All29 host precursor jobs succeeded; aggregate rejected the new branch before artifact collection.",
+    "first_source_host_proof": {
+      "files": 1520,
+      "success": 11862,
+      "failure": 0,
+      "error": 0,
+      "explicit_live_opt_in_skip": 1,
+      "scope": "Original eight ZIPs, verified metadata/digests/CRC and exact coverage; GitHub aggregate remains FAILED."
+    },
+    "corrections": {
+      "checkout": "Restore one benefit-list caller to original legacy feedback; original12 complete frames, CTA, halos and geometry match immutable155 with zero pixel error. Protected checkout and legacy widget source unchanged.",
+      "Swift_test_helper": "Use real UIKit hosting traits and a scene-attached non-key test window instead of a read-only SwiftUI environment setter. Eight XCTest bodies preserved. Actual macOS compile/execution remains pending.",
+      "native_indicator_contract": "Measure real BIL capsule geometry and RGBA motion, not removed Cupertino indicators. All41 native case names, actual pending-click denial, messages and hold bounds preserved. Nine host probe regressions passed; native execution still required.",
+      "API36_unlock": "Require a connected keyguard monitor before input on a locked emulator; preserve a30-second shared deadline, single dismissal, actual readback and all physical-device/ANR guards. Forty-three unit tests passed; fresh emulator recovery is not proved locally.",
+      "coverage_collector": "Add only the exact new43 branch; preserve artifact identity/digest/CRC/path and unique-file requirements. Whole tools/qa suite408 passed."
+    },
+    "local_scope_counts": {
+      "reviewed_store_cases": 17,
+      "package_contract": 2,
+      "crystal_widgets": 91,
+      "native_probe": 9,
+      "tools_qa": 408,
+      "unlock_tool": 43,
+      "format_files": 3401,
+      "format_changes": 0,
+      "analyzer_issues": 0
+    },
+    "counting_limit": "These scopes overlap earlier results. They are not summed into a single full-suite pass for the corrective source.",
+    "evidence": {
+      "strict17": {
+        "basename": "CHECKOUT_COMPATIBLE_STRICT17_EVENTS.jsonl",
+        "sha256": "a56777dd0b63e615d0e11dd735189d3bd26bd894fe6a8650dd3dbb7874e0614e"
+      },
+      "package_contract2": {
+        "basename": "CHECKOUT_COMPATIBLE_PACKAGE_CONTRACT_EVENTS.jsonl",
+        "sha256": "9c170466e99031a2776a5cfdd179beb6830360b1069a5588e2466155cd5920e7"
+      },
+      "rgb5": {
+        "basename": "CHECKOUT_COMPATIBLE_RGB_VERIFIED.json",
+        "sha256": "7e136a706e81f27afea326e48c5c194a405db8ea10c577db86d249772cc65d1d"
+      },
+      "crystal_widgets91": {
+        "basename": "CHECKOUT_CORRECTION_CRYSTAL_WIDGET_EVENTS.jsonl",
+        "sha256": "678dd95351fd537ef88883bcc2cd15408044bd3d26f3910e7af3b4f5fcf8a5f1"
+      },
+      "native_probe9": {
+        "basename": "NATIVE_CAPSULE_ACTUAL_PROBE_HOST_EVENTS.jsonl",
+        "sha256": "5e3145a1d4e4017256f130be0f688aeabff08ae227c760a2861ec4d19f268044"
+      },
+      "native_probe_analyzer": {
+        "basename": "NATIVE_CAPSULE_CONTRACT_HOST_PROBE_ANALYZE.log",
+        "sha256": "3114ed16edac21350d323d694678a24b0fbdd5896d87c236d46bef0ab10b17cd"
+      },
+      "qa_tools408": {
+        "basename": "CORRECTIVE_QA_TOOLS_FULL.log",
+        "sha256": "6e014af3bf0c31b21296e0fa98cfeac95a2e5aca124234a47d7f64e4d6ef8eaf"
+      },
+      "unlock43": {
+        "basename": "API36_UNLOCK_READINESS_APPLIED_TESTS.log",
+        "sha256": "2aff7346734cde5b7773847886bf741b6477b765e0b5f10f250efb5e031a82fb"
+      },
+      "format3401": {
+        "basename": "CORRECTIVE_FULL_FORMAT.log",
+        "sha256": "8d6d4a14b05e0b0844fec216eca5973e9b9a4b3a1f0220c8ddf746f42fa99a3e"
+      },
+      "analyzer": {
+        "basename": "CORRECTIVE_FULL_ANALYZE.log",
+        "sha256": "55d7bcdd838e54b48b33ab3ea1cbbe3ed04ab1d3566d444edcba19164328dd8f"
+      },
+      "checkout_exact12": {
+        "basename": "LOCAL_AB_EXACT_BASELINE_CALLER_FIX_RESULT.json",
+        "sha256": "886ff52c4046e82b2dc3d0c18e989996e346df65b96dca77ff3bd548d8809730"
+      },
+      "host_source3f": {
+        "basename": "ORIGINAL_EIGHT_SHARDS_VERIFIED_EXTERNAL.json",
+        "sha256": "9c9c0723b8c93e6d532450c35b243d960d7ba7278df9c5da00d3515c8353cc97"
+      },
+      "independent_probe_review": {
+        "basename": "NATIVE_CAPSULE_AND_UIKIT_V2_INDEPENDENT_READONLY_REVIEW.json",
+        "sha256": "5a20f54f65c222675ba204ab957b6ab84d20c4798162ac4a3d767f5f7a7669b2"
+      }
+    },
+    "signing_and_upload": "NOT_STARTED_REQUIRES_ALL_FRESH_CI_AND_NATIVE_ON_CORRECTIVE_SHA"
+  }
 }

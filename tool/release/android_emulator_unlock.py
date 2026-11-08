@@ -93,6 +93,62 @@ def window_flags(text: str) -> tuple[bool, bool, bool]:
             known_boolean(restricted, 'keyguard input restriction'))
 
 
+
+def keyguard_service_connected(text: str) -> bool:
+    """AOSP only dumps this direct monitor when the keyguard service is bound.
+
+    Delegate booleans default to showing/secure before that connection. A
+    successful wm command is not a dismissal acknowledgement in that state.
+    """
+    history = re.search(r'^WINDOW MANAGER LAST ANR\b', text, re.MULTILINE)
+    if history:
+        live = re.search(r'^WINDOW MANAGER POLICY STATE\b', text[history.end():], re.MULTILINE)
+        text = text[history.end() + live.start():] if live else ''
+    delegate_fields(text)  # Retain the existing one-delegate, size and indentation guards.
+    lines = text.splitlines()
+    for index, line in enumerate(lines):
+        header = re.fullmatch(r'([ \t]*)KeyguardServiceDelegate[ \t]*', line)
+        if header is None:
+            continue
+        parent_indent = len(header.group(1).expandtabs(8))
+        block = []
+        for child in lines[index + 1:]:
+            indent = len(child) - len(child.lstrip(' \t'))
+            indent = len(child[:indent].expandtabs(8))
+            if child.strip() and indent <= parent_indent:
+                break
+            if child.strip():
+                block.append((indent, child.strip()))
+        if not block:
+            return False
+        direct_indent = block[0][0]
+        monitors = [i for i, (indent, value) in enumerate(block)
+                    if indent == direct_indent and value == 'KeyguardStateMonitor']
+        if len(monitors) > 1:
+            raise BootstrapFailure('Multiple keyguard service monitors cannot be combined')
+        if not monitors:
+            return False
+        fields = {'mIsShowing': [], 'mInputRestricted': [], 'mCurrentUserId': []}
+        member_indent = None
+        for indent, value in block[monitors[0] + 1:]:
+            if indent <= direct_indent:
+                break
+            member_indent = indent if member_indent is None else member_indent
+            if indent != member_indent:
+                continue
+            match = re.fullmatch(r'(mIsShowing|mInputRestricted|mCurrentUserId)=(\S+)', value)
+            if match:
+                fields[match.group(1)].append(match.group(2))
+        for key in ('mIsShowing', 'mInputRestricted'):
+            if fields[key]:
+                known_boolean(fields[key], 'connected keyguard ' + key)
+        users = fields['mCurrentUserId']
+        if users and (len(users) != 1 or re.fullmatch(r'[0-9]+', users[0]) is None):
+            raise BootstrapFailure('Unknown or conflicting connected keyguard user')
+        return all(fields.values())
+    return False
+
+
 def bootstrap(serial: str, evidence: Path, *, expected_api: int, run=subprocess.run,
               clock=time.monotonic, sleep=time.sleep) -> dict:
     result = {'source_sha': os.environ.get('GITHUB_SHA'), 'serial': serial, 'expected_api': expected_api,
@@ -178,9 +234,14 @@ def bootstrap(serial: str, evidence: Path, *, expected_api: int, run=subprocess.
                 raise
             row.update(policy_ready=False, initial_readiness=str(error))
             return row
+        connected = keyguard_service_connected(text)
         row.update(awake=awake, keyguard_showing=showing,
                    keyguard_input_restricted=restricted, keyguard_locked=showing or restricted,
-                   policy_ready=True)
+                   policy_ready=True, keyguard_service_connected=connected)
+        if row['keyguard_locked'] and not connected:
+            row['initial_readiness'] = 'Keyguard service is not connected'
+            if not initial_readiness:
+                raise BootstrapFailure('Keyguard service disconnected before unlock was confirmed')
         if focus['window_status'] == 'FOCUSED_WINDOW_UNAVAILABLE':
             if not initial_readiness:
                 raise BootstrapFailure('Unknown live focus after input; no repeated unlock')
@@ -189,6 +250,13 @@ def bootstrap(serial: str, evidence: Path, *, expected_api: int, run=subprocess.
 
     def wait_for(predicate, *, initial_readiness: bool = False) -> dict:
         while True:
+            # Do not launch a full dumpsys with less than one poll interval left.
+            # The shared 30-second deadline is unchanged, never extended.
+            if deadline - clock() <= 0.25:
+                last = result['observations'][-1] if result['observations'] else {}
+                if last.get('keyguard_locked') and last.get('keyguard_service_connected') is False:
+                    raise BootstrapFailure('Keyguard service did not connect within the shared unlock deadline')
+                raise BootstrapFailure('Emulator unlock observation deadline expired')
             state = observe(initial_readiness=initial_readiness)
             if initial_readiness:
                 capture_initial_logs()
@@ -220,13 +288,15 @@ def bootstrap(serial: str, evidence: Path, *, expected_api: int, run=subprocess.
             raise BootstrapFailure('The action must first confirm boot completion')
         identity_validated = True
         state = wait_for(lambda value: value.get('policy_ready') is True and
-                         value['window_status'] != 'FOCUSED_WINDOW_UNAVAILABLE',
+                         value['window_status'] != 'FOCUSED_WINDOW_UNAVAILABLE' and
+                         (not value['keyguard_locked'] or value['keyguard_service_connected']),
                          initial_readiness=True)
         if not state['awake'] or state['keyguard_locked']:
             # The read-only diagnostic may outlive the first sample. Re-observe before
             # considering any input, within the original shared deadline.
             state = wait_for(lambda value: value.get('policy_ready') is True and
-                             value['window_status'] != 'FOCUSED_WINDOW_UNAVAILABLE',
+                             value['window_status'] != 'FOCUSED_WINDOW_UNAVAILABLE' and
+                             (not value['keyguard_locked'] or value['keyguard_service_connected']),
                              initial_readiness=True)
         if not state['awake'] or state['keyguard_locked']:
             if not re.search(r'^Service input: found\b', command(['shell', 'service', 'check', 'input'])):
@@ -247,6 +317,10 @@ def bootstrap(serial: str, evidence: Path, *, expected_api: int, run=subprocess.
                       exit_code=error.code if isinstance(error, BootstrapFailure) else 2)
     finally:
         capture_initial_logs()
+        if result['status'] == 'FAIL' and result['observations']:
+            last = result['observations'][-1]
+            if last.get('keyguard_locked') and last.get('keyguard_service_connected') is False:
+                result['failure_code'] = 'KEYGUARD_SERVICE_UNAVAILABLE'
         result['elapsed_seconds'] = round(clock() - start, 3)
         receipt.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     return result
