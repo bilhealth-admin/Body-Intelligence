@@ -42,6 +42,7 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
   bool _pinQueued = false;
   bool _disposed = false;
   int _interactionGeneration = 0;
+  Size? _lastViewportSize;
 
   bool get _nearLatest {
     if (!widget.controller.hasClients) return true;
@@ -81,6 +82,7 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
       _followingLatest = true;
       _userScrollActive = false;
       _interactionGeneration++;
+      _lastViewportSize = null;
     }
     if (_followingLatest &&
         oldWidget.latestMessageId != widget.latestMessageId) {
@@ -141,6 +143,48 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
     return false;
   }
 
+  Widget _layoutHistory(BuildContext context, BoxConstraints constraints) {
+    final previous = _lastViewportSize;
+    final size = constraints.biggest;
+    _lastViewportSize = size.isFinite ? size : null;
+    final positions = widget.controller.positions;
+    if (previous == null ||
+        !size.isFinite ||
+        size.height <= 0 ||
+        (previous.width - size.width).abs() > .5 ||
+        (previous.height - size.height).abs() <= .01 ||
+        !_followingLatest ||
+        _userScrollActive ||
+        widget.latestTargetOffset == null ||
+        positions.length != 1) {
+      return widget.child;
+    }
+    final position = positions.single;
+    if (position.axisDirection != AxisDirection.up ||
+        !position.hasPixels ||
+        !position.hasContentDimensions ||
+        !position.hasViewportDimension ||
+        (position.viewportDimension - previous.height).abs() > .5 ||
+        position.isScrollingNotifier.value) {
+      return widget.child;
+    }
+    final target = _latestTarget(position);
+    // Only a measured long-reply reading start moves with the viewport's top.
+    // A short reply's ordinary newest end must keep the normal physics path.
+    if (target - position.minScrollExtent > .5 &&
+        (position.pixels - target).abs() <= .5) {
+      final corrected = (position.pixels + previous.height - size.height)
+          .clamp(position.minScrollExtent, double.infinity)
+          .toDouble();
+      // correctBy is Flutter's layout-only correction: it does not notify or
+      // cancel an activity. Apply it before the history child lays out/paints,
+      // rather than exposing one frame before the post-frame pin catches up.
+      // Grow-to-fit stops at min; shrink may legitimately exceed the old max.
+      position.correctBy(corrected - position.pixels);
+    }
+    return widget.child;
+  }
+
   @override
   void dispose() {
     _disposed = true;
@@ -161,7 +205,9 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
       child: Stack(
         fit: StackFit.expand,
         children: [
-          widget.child,
+          // Keep the jump-button sibling outside this layout build scope: its
+          // visibility must not read a new offset against the old child layout.
+          LayoutBuilder(builder: _layoutHistory),
           Positioned(
             bottom: 10,
             left: widget.centerJumpButton ? 0 : null,
