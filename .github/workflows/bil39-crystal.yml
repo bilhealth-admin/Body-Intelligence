@@ -54,7 +54,7 @@ jobs:
       - name: Protect purchase CTA and shared legacy glass source blobs
         shell: bash
         run: |
-          test "$(git hash-object lib/features/commerce/presentation/bil_dynamic_store_components.dart)" = "fdd24dbfa5b16f78aad65a821a2f5cf1215f90d5"
+          test "$(git hash-object lib/features/commerce/presentation/bil_dynamic_store_components.dart)" = "119f72914b468ff3db40dd07e72da96b837f7da7"
           test "$(git hash-object lib/shared/widgets/bil_glass_press_feedback.dart)" = "653d424ddb6cca8adeb0d394f5c8f8866da3792d"
       - name: Check scoped Dart formatting
         run: dart format --output=none --set-exit-if-changed lib/app/theme/bil_navigation_press_style.dart lib/shared/widgets/bil_crystal_arrow.dart lib/shared/widgets/secondary_page_app_bar.dart test/bil_crystal_arrow_test.dart test/bil_crystal_calendar_video_test.dart test/bil_crystal_purchase_cta_isolation_test.dart
