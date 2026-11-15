@@ -33,11 +33,11 @@ jobs:
           from pathlib import Path
           def git(*args):
               return subprocess.check_output(['git', *args], text=True).strip()
-          expected = {'lib/features/intelligence_center/presentation/coach_native_paint_gate.dart': '983bd9908f3f1fe576697b01df55e710ea23a9d434e6848711fe995c10d3437f', 'lib/features/intelligence_center/presentation/coach_native_markdown.dart': 'a210c1f303ba84ee08062341b285972806265ba543b737bb48106274a902b308', 'ios/Runner/BILCoachMarkdownBridge.swift': '77f263374c41ad869337aa0ba3881815159409334e7f22f2e06c22440918e13d', 'integration_test/native_feature_splashes_coach.dart': 'eb6a67b538c32d772d22c9077eb7522e375b29280d26e7dad5e4de295aad8d88'}
+          expected = {'lib/features/intelligence_center/presentation/coach_native_paint_gate.dart': '983bd9908f3f1fe576697b01df55e710ea23a9d434e6848711fe995c10d3437f', 'lib/features/intelligence_center/presentation/coach_native_markdown.dart': 'a210c1f303ba84ee08062341b285972806265ba543b737bb48106274a902b308', 'ios/Runner/BILCoachMarkdownBridge.swift': '73a745c7b0c0dc27316ec3648805f23cb23f48ea887d2a651df9709583172114', 'integration_test/native_feature_splashes_coach.dart': 'f149b2b4e3489017bf4d9f4630e380b616f3ce7dbe8723e584dfac6a270d91f2'}
           if os.environ['GITHUB_REF'] != 'refs/heads/codex/bil45-ipad-coach-cold-diagnostic-20261115' or os.environ['GITHUB_EVENT_NAME'] != 'push':
               raise ValueError('Only the exact reviewed iPad diagnostic branch push may run')
-          if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != 'a50ea86aa8d439510d2718108881e1b1acd1227e':
-              raise ValueError('Exact single-parent S3 diagnostic checkout required')
+          if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != '36cab30bc4a91a58b50ecc5e8182e60624edc50d':
+              raise ValueError('Exact reviewed single-parent diagnostic fast-forward checkout required')
           if set(git('diff', '--name-only', 'a50ea86aa8d439510d2718108881e1b1acd1227e', 'HEAD').splitlines()) != set(expected) | {'.github/workflows/bil45_ipad_coach_cold_diagnostic.yml'}:
               raise ValueError('Only four passive telemetry paths and this one workflow may change')
           if git('status', '--porcelain') or any(hashlib.sha256(Path(path).read_bytes()).hexdigest() != digest for path, digest in expected.items()):
@@ -121,14 +121,15 @@ jobs:
           sys.path.insert(0, str(WORKSPACE / '.github/scripts'))
           from bil_native_bounded_command import run_bounded
 
-          PARENT = 'a50ea86aa8d439510d2718108881e1b1acd1227e'
+          PARENT = '36cab30bc4a91a58b50ecc5e8182e60624edc50d'
+          APPLICATION_BASELINE = 'a50ea86aa8d439510d2718108881e1b1acd1227e'
           BRANCH = 'refs/heads/codex/bil45-ipad-coach-cold-diagnostic-20261115'
           WORKFLOW = '.github/workflows/bil45_ipad_coach_cold_diagnostic.yml'
           EXPECTED_FILES = {
               'lib/features/intelligence_center/presentation/coach_native_paint_gate.dart': '983bd9908f3f1fe576697b01df55e710ea23a9d434e6848711fe995c10d3437f',
               'lib/features/intelligence_center/presentation/coach_native_markdown.dart': 'a210c1f303ba84ee08062341b285972806265ba543b737bb48106274a902b308',
-              'ios/Runner/BILCoachMarkdownBridge.swift': '77f263374c41ad869337aa0ba3881815159409334e7f22f2e06c22440918e13d',
-              'integration_test/native_feature_splashes_coach.dart': 'eb6a67b538c32d772d22c9077eb7522e375b29280d26e7dad5e4de295aad8d88',
+              'ios/Runner/BILCoachMarkdownBridge.swift': '73a745c7b0c0dc27316ec3648805f23cb23f48ea887d2a651df9709583172114',
+              'integration_test/native_feature_splashes_coach.dart': 'f149b2b4e3489017bf4d9f4630e380b616f3ce7dbe8723e584dfac6a270d91f2',
           }
           TARGET = 'integration_test/native_feature_splashes_test.dart'
           DRIVER = 'test_driver/native_feature_splashes_driver.dart'
@@ -144,7 +145,8 @@ jobs:
           controller_started = time.monotonic()
           controller_deadline = controller_started + CONTROLLER_BUDGET_SECONDS
           receipt = {'schema': 'bil.ipad-coach-cold-diagnostic.v1', 'status': 'RUNNING',
-              'source_parent': PARENT, 'diagnostic_source': os.environ['GITHUB_SHA'],
+              'source_parent': PARENT, 'application_source_baseline': APPLICATION_BASELINE,
+              'diagnostic_source': os.environ['GITHUB_SHA'],
               'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
               'planned_cold_processes': 3,
               'probes': [{'index': index, 'status': 'NOT_STARTED', 'process_exit': None,
@@ -271,8 +273,8 @@ jobs:
               if sys.platform != 'darwin' or os.environ['GITHUB_EVENT_NAME'] != 'push' or os.environ['GITHUB_REF'] != BRANCH:
                   raise ValueError('Exact reviewed macOS diagnostic branch push required')
               if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != PARENT:
-                  raise ValueError('Single-parent S3 diagnostic source required')
-              if set(git('diff', '--name-only', PARENT, 'HEAD').splitlines()) != set(EXPECTED_FILES) | {WORKFLOW}:
+                  raise ValueError('Single-parent reviewed diagnostic fast-forward source required')
+              if set(git('diff', '--name-only', APPLICATION_BASELINE, 'HEAD').splitlines()) != set(EXPECTED_FILES) | {WORKFLOW}:
                   raise ValueError('Only four passive telemetry paths and one workflow may differ')
               if any(sha(WORKSPACE / name) != digest for name, digest in EXPECTED_FILES.items()):
                   raise ValueError('Actual telemetry source bytes differ from independent review')

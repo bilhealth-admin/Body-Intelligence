@@ -30,7 +30,7 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
   private var qaPreparation = false
 
   private func qaMark(_ stage: String, _ values: [String: Any] = [:]) {
-    #if DEBUG
+    #if targetEnvironment(simulator)
     guard qaTimingEnabled else { return }
     guard Self.qaTimingRows.count < 1024 else { Self.qaTimingDropped += 1; return }
     let origin = Self.qaTimingOrigin
@@ -54,7 +54,7 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
       blocks: [], rightToLeft: false, fontSize: 16, textColor: .primary,
       linkColor: .blue, fontName: nil, openLink: { _ in }, reportHeight: { _ in })))
     super.init()
-    #if DEBUG
+    #if targetEnvironment(simulator)
     qaTimingEnabled = arguments["qaStageTiming"] as? Bool == true
     qaPreparation = arguments["generation"] as? String == "bil-renderer-preparation"
     #endif
@@ -83,7 +83,7 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
         self.qaMark("set_visible_ack", ["visible": visible])
         result(true)
       case "qaReadStageTiming":
-        #if DEBUG
+        #if targetEnvironment(simulator)
         guard self.qaTimingEnabled, data["generation"] as? String == self.generation else { result(nil); return }
         result(["enabled": true, "clock_domain": "native_process_system_uptime_us",
           "capacity": 1024, "dropped": Self.qaTimingDropped, "rows": Self.qaTimingRows,
