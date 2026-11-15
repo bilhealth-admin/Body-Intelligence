@@ -1,0 +1,728 @@
+name: BIL Android36 immutable 1e9e070a release controller
+run-name: "Android36 app 1e9e070a; separate controller provenance; no Play submission"
+on:
+  push:
+    branches: [codex/bil-android36-controller-20261115]
+permissions:
+  contents: read
+  actions: read
+  security-events: read
+concurrency:
+  group: bil-android36-recovery-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  BIL_TESTED_SOURCE_SHA: 1e9e070a77c3f6ce114892404e1724d06f340c89
+  BIL_SIGNING_ORCHESTRATION_SHA: ${{ github.sha }}
+  BIL_RELEASE_BRANCH: codex/bil44-android36-verified-20261115
+  BIL_ORIGINAL_SHA: 0c94cf2a75c01ebb7cbea74704a18a8109831194
+jobs:
+  signed-android-aab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Checkout immutable verified application source 1e9e070a
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require strict exact-source full-ten-lane prerequisites and separate controller before credentials
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_BIL_EXACT_TRANSPORT'
+          import base64, hashlib, json, os, zlib
+          from pathlib import Path
+          BIL_TRANSPORT_B64 = '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'
+          BIL_TRANSPORT_SHA256 = '4fd3d592c3a94779cdd5e23b13caed37789e0cd3b2828fabb41094d432968bfa'
+          BIL_TRANSPORT_RAW_SHA256 = '815df4a0883151cf1081c773e614abfd76976252b3d9be00fbae60ece18e2bb5'
+          BIL_TRANSPORT_RAW_BYTES = 37867
+          compressed = base64.b64decode(BIL_TRANSPORT_B64, validate=True)
+          assert hashlib.sha256(compressed).hexdigest() == BIL_TRANSPORT_SHA256
+          assert 0 < BIL_TRANSPORT_RAW_BYTES <= 2 * 1024 * 1024
+          decoder = zlib.decompressobj()
+          raw = decoder.decompress(compressed, BIL_TRANSPORT_RAW_BYTES + 1)
+          assert decoder.eof and not decoder.unused_data and not decoder.unconsumed_tail
+          assert len(raw) == BIL_TRANSPORT_RAW_BYTES
+          assert hashlib.sha256(raw).hexdigest() == BIL_TRANSPORT_RAW_SHA256
+          header_bytes = int.from_bytes(raw[:4], 'big')
+          assert 0 < header_bytes <= len(raw) - 4
+          bundle = json.loads(raw[4:4 + header_bytes])
+          assert set(bundle) == {'schema', 'files'} and bundle['schema'] == 'bil.exact-gate-transport.v1'
+          names = {'bil44_fresh_source_gate.py', 'bil44_fresh_source_pins.json', 'bil44_current_cloud_parity.json'}
+          descriptors = bundle['files']
+          assert isinstance(descriptors, list) and len(descriptors) == 3
+          assert {entry['name'] for entry in descriptors} == names
+          root = Path(os.environ['RUNNER_TEMP']).resolve(strict=True)
+          assert root.is_dir()
+          prepared = []
+          offset = 4 + header_bytes
+          for descriptor in descriptors:
+              assert set(descriptor) == {'name', 'sha256', 'bytes'}
+              name = descriptor['name']
+              assert type(descriptor['bytes']) is int and descriptor['bytes'] >= 0
+              content = raw[offset:offset + descriptor['bytes']]
+              assert len(content) == descriptor['bytes']
+              assert hashlib.sha256(content).hexdigest() == descriptor['sha256']
+              offset += descriptor['bytes']
+              path = root / name
+              assert not path.exists() and not path.is_symlink()
+              prepared.append((path, content))
+          assert offset == len(raw)
+          for path, content in prepared:
+              with path.open('xb') as output:
+                  output.write(content)
+          PY_BIL_EXACT_TRANSPORT
+          python3 "$RUNNER_TEMP/bil44_fresh_source_gate.py" --platform android \
+            --config "$RUNNER_TEMP/bil44_fresh_source_pins.json" \
+            --cloud-receipt "$RUNNER_TEMP/bil44_current_cloud_parity.json"
+
+      - name: Preflight actual Ubuntu apksigner API on authenticated historical build33 debug APK; no app build
+        id: apk_signer_preflight
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          APKSIGNER="$(find "${ANDROID_HOME:?}/build-tools" -maxdepth 2 -name apksigner -type f | sort -V | tail -n 1)"
+          test -n "$APKSIGNER" && test -x "$APKSIGNER"
+          APKSIGNER_JAR="$(dirname "$APKSIGNER")/lib/apksigner.jar"
+          test -s "$APKSIGNER_JAR"
+          mkdir "$RUNNER_TEMP/bil-apk-der-classes"
+          cat > "$RUNNER_TEMP/VerifyApkCertificate.java" <<'JAVA_DER'
+          import com.android.apksig.ApkVerifier;
+          import java.io.File;
+          import java.nio.charset.StandardCharsets;
+          import java.nio.file.Files;
+          import java.nio.file.Path;
+          import java.security.MessageDigest;
+          import java.security.cert.X509Certificate;
+          import java.util.HexFormat;
+          import java.util.LinkedHashSet;
+          import java.util.Set;
+          
+          /** Verifies APK signatures and DER identities; CLI presentation is not a trust input. */
+          public final class VerifyApkCertificate {
+              private static String digest(X509Certificate certificate) throws Exception {
+                  return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                          .digest(certificate.getEncoded()));
+              }
+          
+              private static void require(boolean condition, String code) {
+                  if (!condition) throw new IllegalStateException(code);
+              }
+          
+              public static void main(String[] args) {
+                  try {
+                      require(args.length == 3, "ARGUMENTS");
+                      String expected = System.getenv("EXPECTED_UPLOAD_CERT_SHA256");
+                      require(expected != null, "EXPECTED_CERT_MISSING");
+                      boolean discoverDebugOnly = args[2].equals("debug-preflight")
+                              && expected.equals("DISCOVER_VERIFIED_DEBUG_IDENTITY_ONLY");
+                      expected = expected.replaceAll("[:\\s]", "").toLowerCase(java.util.Locale.ROOT);
+                      require(discoverDebugOnly || expected.matches("[0-9a-f]{64}"), "EXPECTED_CERT_FORMAT");
+                      File apk = new File(args[0]);
+                      Path output = Path.of(args[1]);
+                      require(apk.isFile() && apk.length() > 0 && !Files.exists(output), "INPUT_OUTPUT");
+                      require(args[2].equals("release") || args[2].equals("debug-preflight"), "SCOPE");
+                      ApkVerifier.Result result = new ApkVerifier.Builder(apk).build().verify();
+                      require(result.isVerified() && !result.containsErrors(), "APK_SIGNATURE_INVALID");
+                      require(result.getSignerCertificates().size() == 1, "APK_SIGNER_COUNT");
+                      if (discoverDebugOnly) expected = digest(result.getSignerCertificates().get(0));
+                      Set<String> identities = new LinkedHashSet<>();
+                      identities.add(digest(result.getSignerCertificates().get(0)));
+                      for (var signer : result.getV1SchemeSigners()) {
+                          require(!signer.containsErrors(), "V1_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV2SchemeSigners()) {
+                          require(!signer.containsErrors(), "V2_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV3SchemeSigners()) {
+                          require(!signer.containsErrors(), "V3_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV31SchemeSigners()) {
+                          require(!signer.containsErrors(), "V31_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      for (var signer : result.getV4SchemeSigners()) {
+                          require(!signer.containsErrors(), "V4_SIGNER_ERROR");
+                          identities.add(digest(signer.getCertificate()));
+                      }
+                      require(identities.size() == 1 && identities.contains(expected), "APK_CERTIFICATE_MISMATCH");
+                      String json = "{\n"
+                              + "  \"status\": \"VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY\",\n"
+                              + "  \"scope\": \"" + args[2] + "\",\n"
+                              + "  \"apk_signature_verified\": true,\n"
+                              + "  \"current_signer_count\": 1,\n"
+                              + "  \"distinct_verified_scheme_leaf_certificates\": 1,\n"
+                              + "  \"certificate_sha256\": \"" + expected + "\",\n"
+                              + "  \"verified_v1\": " + result.isVerifiedUsingV1Scheme() + ",\n"
+                              + "  \"verified_v2\": " + result.isVerifiedUsingV2Scheme() + ",\n"
+                              + "  \"verified_v3\": " + result.isVerifiedUsingV3Scheme() + ",\n"
+                              + "  \"verified_v31\": " + result.isVerifiedUsingV31Scheme() + ",\n"
+                              + "  \"verified_v4\": " + result.isVerifiedUsingV4Scheme() + ",\n"
+                              + "  \"play_delivery_proven\": false\n}\n";
+                      Files.writeString(output, json, StandardCharsets.UTF_8,
+                              java.nio.file.StandardOpenOption.CREATE_NEW);
+                      System.out.println("APK_SIGNATURE_AND_DER_CERTIFICATE=PASS");
+                  } catch (Exception exception) {
+                      // Neither tool exceptions nor environment values belong in diagnostic artifacts.
+                      System.err.println("APK_SIGNATURE_AND_DER_CERTIFICATE=FAIL");
+                      System.exit(1);
+                  }
+              }
+          }
+          JAVA_DER
+          javac --release 17 -cp "$APKSIGNER_JAR" -d "$RUNNER_TEMP/bil-apk-der-classes" "$RUNNER_TEMP/VerifyApkCertificate.java"
+          {
+            echo "BIL_APKSIGNER=$APKSIGNER"
+            echo "BIL_APKSIGNER_JAR=$APKSIGNER_JAR"
+            echo "BIL_DER_VERIFIER_CLASSES=$RUNNER_TEMP/bil-apk-der-classes"
+          } >> "$GITHUB_ENV"
+          "$APKSIGNER" version > BIL-apksigner-tool-version.txt
+          sha256sum "$APKSIGNER_JAR" > BIL-apksigner-tool-jar.sha256
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/artifacts/13470321068 > "$RUNNER_TEMP/debug-artifact-metadata.json"
+          python3 - <<'PY_DEBUG_META'
+          import json,pathlib,os
+          meta=json.loads((pathlib.Path(os.environ['RUNNER_TEMP'])/'debug-artifact-metadata.json').read_text())
+          assert meta['id']==13470321068 and meta['expired'] is False
+          assert meta['name']=='bil-android-codeql-apk-4c23f40391362b73ae7f6fe850bbdb7f70037130-1'
+          assert meta['digest']=='sha256:2c5b7f393edd90da87d2cfab68ebbcd8bf0f83cfd9b8862a3e33e6f0a1611075'
+          assert meta['workflow_run']['id']==42144515551 and meta['workflow_run']['head_sha']=='4c23f40391362b73ae7f6fe850bbdb7f70037130'
+          assert meta['workflow_run']['head_branch']=='codex/bil41-android33-release-20261106'
+          pathlib.Path('BIL-apksigner-preflight-artifact.json').write_text(json.dumps({'artifact_id':meta['id'],'name':meta['name'],'zip_digest':meta['digest'],'run_id':42144515551,'source_sha':'4c23f40391362b73ae7f6fe850bbdb7f70037130','scope':'DEBUG_APK_TOOL_PREFLIGHT_ONLY_NOT_UPLOAD_CERTIFICATE_PROOF'},indent=2)+'\n')
+          PY_DEBUG_META
+          gh api repos/bilhealth-admin/Body-Intelligence/actions/artifacts/13470321068/zip > "$RUNNER_TEMP/bil-s3-debug-apk.zip"
+          echo "2c5b7f393edd90da87d2cfab68ebbcd8bf0f83cfd9b8862a3e33e6f0a1611075  $RUNNER_TEMP/bil-s3-debug-apk.zip" | sha256sum --check -
+          python3 - <<'PY_DEBUG_ZIP'
+          import hashlib,os,pathlib,zipfile
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          with zipfile.ZipFile(root/'bil-s3-debug-apk.zip') as archive:
+              candidates=[i for i in archive.infolist() if not i.is_dir() and pathlib.PurePosixPath(i.filename).suffix.lower()=='.apk']
+              assert len(candidates)==1 and candidates[0].filename=='offline-debug-build33.apk'
+              assert candidates[0].file_size==315355803
+              with archive.open(candidates[0]) as source,(root/'bil-s3-debug.apk').open('xb') as target:
+                  import shutil
+                  shutil.copyfileobj(source,target)
+          with (root/'bil-s3-debug.apk').open('rb') as source:
+              actual=hashlib.file_digest(source,'sha256').hexdigest()
+          assert actual=='309e3ce10be369fc5f85d8e9396b81d5df80fef36628db0201f30cb2b8c0c65b'
+          proof=pathlib.Path('BIL-apksigner-preflight-artifact.json')
+          data=__import__('json').loads(proof.read_text())
+          data.update({'apk_member':'offline-debug-build33.apk','apk_member_bytes':315355803,'apk_sha256':actual,'apk_member_count':1})
+          proof.write_text(__import__('json').dumps(data,indent=2)+'\n')
+          PY_DEBUG_ZIP
+          "$APKSIGNER" verify --verbose --print-certs "$RUNNER_TEMP/bil-s3-debug.apk" > BIL-apksigner-preflight-cli.txt
+          EXPECTED_UPLOAD_CERT_SHA256=DISCOVER_VERIFIED_DEBUG_IDENTITY_ONLY \
+            java -cp "$RUNNER_TEMP/bil-apk-der-classes:$APKSIGNER_JAR" VerifyApkCertificate \
+            "$RUNNER_TEMP/bil-s3-debug.apk" BIL-apksigner-preflight-der.json debug-preflight
+          if EXPECTED_UPLOAD_CERT_SHA256=0000000000000000000000000000000000000000000000000000000000000000 \
+            java -cp "$RUNNER_TEMP/bil-apk-der-classes:$APKSIGNER_JAR" VerifyApkCertificate \
+            "$RUNNER_TEMP/bil-s3-debug.apk" "$RUNNER_TEMP/debug-negative-must-not-exist.json" debug-preflight >/dev/null 2>&1; then
+            echo 'APK_DER_NEGATIVE_IDENTITY_FIXTURE=FAIL' >&2
+            exit 1
+          fi
+          test ! -e "$RUNNER_TEMP/debug-negative-must-not-exist.json"
+          python3 - <<'PY_DEBUG_RESULT'
+          import json,pathlib,re
+          result=json.loads(pathlib.Path('BIL-apksigner-preflight-der.json').read_text())
+          assert result['status']=='VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY' and result['scope']=='debug-preflight'
+          assert result['apk_signature_verified'] is True and result['current_signer_count']==1
+          text=pathlib.Path('BIL-apksigner-preflight-cli.txt').read_text()
+          result['legacy_signer_number_regex_matches']=len(re.findall(r'^Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F:]+)$',text,re.M))
+          result['sdk_scoped_cli_records']=len(re.findall(r'^Signer \(minSdkVersion=.*certificate SHA-256 digest:',text,re.M))
+          result['negative_expected_identity_rejected']=True
+          pathlib.Path('BIL-apksigner-preflight-der.json').write_text(json.dumps(result,indent=2)+'\n')
+          PY_DEBUG_RESULT
+          rm -f "$RUNNER_TEMP/bil-s3-debug-apk.zip" "$RUNNER_TEMP/bil-s3-debug.apk"
+          echo 'APK_DER_TOOL_PREFLIGHT=PASS;DEBUG_CERTIFICATE_IS_NOT_RELEASE_IDENTITY_PROOF'
+
+      - name: Preserve public signer-tool preflight evidence before application compilation
+        if: ${{ always() && steps.apk_signer_preflight.outcome != 'skipped' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android36-tool-preflight-1e9e070a77c3f6ce114892404e1724d06f340c89-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Validate release build number
+        shell: bash
+        env:
+          BUILD_NUMBER: '36'
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
+            echo 'build_number must be a positive integer.' >&2
+            exit 1
+          }
+          (( BUILD_NUMBER == 36 )) || {
+            echo 'build_number must be exactly 36 for the Android release candidate; build 33 and earlier must never be promoted.' >&2
+            exit 1
+          }
+
+      - name: Require release signing secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+        run: |
+          set -euo pipefail
+          test -n "${KEYSTORE_BASE64:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_BASE64'; exit 1; }
+          test -n "${STORE_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEYSTORE_PASSWORD'; exit 1; }
+          test -n "${KEY_ALIAS:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_ALIAS'; exit 1; }
+          test -n "${KEY_PASSWORD:-}" || { echo 'Missing GitHub secret: ANDROID_KEY_PASSWORD'; exit 1; }
+          test -n "${EXPECTED_UPLOAD_CERT_SHA256:-}" || { echo 'Missing GitHub secret: ANDROID_UPLOAD_CERTIFICATE_SHA256'; exit 1; }
+          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
+          [[ "${PLAY_INTEGRITY_PROJECT_NUMBER:-}" =~ ^[1-9][0-9]+$ ]] || { echo 'OWNER_INPUT_REQUIRED: numeric BIL_PLAY_INTEGRITY_PROJECT_NUMBER repository variable from the Play-linked Cloud project'; exit 1; }
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          {
+            echo 'storeFile=app/upload-keystore.jks'
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - name: Resolve dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Prepare pinned Android policy library repairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_android_policy_plugin_overrides.py
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
+
+      - name: Analyze release source
+        run: flutter analyze --no-pub
+
+      - name: Validate frozen production configuration
+        shell: bash
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: android
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: true
+          BIL_AD_PROVIDER_READY: true
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+          BIL_PUSH_ENABLED: true
+          BIL_PUSH_PROVIDER_READY: true
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_SOURCE_COMMIT: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          BIL_AUDITED_SOURCE_COMMIT: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: '36'
+        run: dart run tool/release/validate_release_configuration.dart
+
+      - name: Verify focused payment and subscription regressions only
+        # The broader owner suite is running independently; no repeat of the completed comprehensive host suite.
+        run: |
+          flutter test --no-pub --concurrency 1 --timeout 30s \
+            --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
+            test/features/commerce/app_purchase_confirmation_test.dart \
+            test/features/commerce/app_subscription_confirmation_test.dart
+
+      - name: Run explicit system-crypto source gate
+        run: >-
+          flutter test --no-pub
+          test/launch_readiness/system_crypto_export_compliance_contract_test.dart
+          --timeout 2m
+
+      - name: Bind the completed exact-source native AES-GCM CI evidence
+        id: native_crypto_runtime_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$RUNNER_TEMP/bil44_fresh_source_gate.py" --platform android \
+            --config "$RUNNER_TEMP/bil44_fresh_source_pins.json" \
+            --cloud-receipt "$RUNNER_TEMP/bil44_current_cloud_parity.json" --consume-android-crypto
+
+      - name: Exclude dev-only native plugins from Android release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
+      - name: Validate production AdMob configuration
+        shell: bash
+        env:
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+        run: |
+          set -euo pipefail
+          python3 tool/release/test_validate_admob_production_configuration.py
+          python3 tool/release/validate_admob_production_configuration.py \
+            | tee BIL-android-production-admob-source.txt
+
+      - name: Build signed Android App Bundle
+        id: android_aab_build
+        env:
+          BUILD_NUMBER: '36'
+          PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+        run: >-
+          flutter build appbundle --release --no-pub
+          --build-number "$BUILD_NUMBER"
+          --dart-define=BIL_ENVIRONMENT=production
+          --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true
+          --dart-define=BIL_PLAY_INTEGRITY_PROJECT_NUMBER="$PLAY_INTEGRITY_PROJECT_NUMBER"
+          --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true
+          --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms
+          --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy
+          --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal
+          --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json
+          --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true
+          --dart-define=BIL_FACEBOOK_LOGIN_READY=true
+          --dart-define=BIL_PUSH_ENABLED=true
+          --dart-define=BIL_PUSH_PROVIDER_READY=true
+          --dart-define=BIL_ADS_ENABLED=true
+          --dart-define=BIL_AD_PROVIDER_READY=true
+          --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509
+          --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410
+          --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211
+          --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347
+          --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944
+          --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Verify final AAB SDK, optional hardware, 16 KB packaging, and ELF alignment
+        id: android_16k_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          BUNDLETOOL_VERSION=1.18.3
+          BUNDLETOOL_SHA256=a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29
+          BUNDLETOOL_URL="https://github.com/google/bundletool/releases/download/${BUNDLETOOL_VERSION}/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-${BUNDLETOOL_VERSION}.jar"
+          EVIDENCE_DIR=BIL-android-16k-evidence
+          mkdir -p "$EVIDENCE_DIR"
+          {
+            echo "BUNDLETOOL_VERSION=$BUNDLETOOL_VERSION"
+            echo "BUNDLETOOL_URL=$BUNDLETOOL_URL"
+            echo "EXPECTED_BUNDLETOOL_SHA256=$BUNDLETOOL_SHA256"
+            echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=NOT_COMPLETED'
+          } > "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test -s "$AAB" || {
+            echo 'The final release AAB is missing or empty.' >&2
+            exit 1
+          }
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            --output "$BUNDLETOOL_JAR" "$BUNDLETOOL_URL"
+          ACTUAL_BUNDLETOOL_SHA256="$(sha256sum "$BUNDLETOOL_JAR" | cut -d ' ' -f 1)"
+          echo "ACTUAL_BUNDLETOOL_SHA256=$ACTUAL_BUNDLETOOL_SHA256" \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          test "$ACTUAL_BUNDLETOOL_SHA256" = "$BUNDLETOOL_SHA256" || {
+            echo 'Pinned official bundletool checksum mismatch.' >&2
+            exit 1
+          }
+          echo 'BUNDLETOOL_DOWNLOAD_CHECKSUM_GATE=PASS' \
+            >> "$EVIDENCE_DIR/BIL-android-bundletool-install.txt"
+          java -jar "$BUNDLETOOL_JAR" dump manifest \
+            --bundle="$AAB" \
+            --module=base \
+            > "$EVIDENCE_DIR/BIL-android-base-manifest.xml"
+          BIL_ADMOB_PRODUCTION_READY=true \
+          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+          python3 tool/release/validate_admob_production_configuration.py \
+            --android-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            | tee "$EVIDENCE_DIR/BIL-android-production-admob.txt"
+          python3 tool/release/verify_android_target_sdk.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.json"
+          python3 tool/release/verify_android_optional_device_features.py \
+            --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            --text-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.txt" \
+            --json-evidence "$EVIDENCE_DIR/BIL-android-optional-hardware.json"
+          python3 tool/release/verify_android_16k_alignment.py \
+            --aab "$AAB" \
+            --bundletool "$BUNDLETOOL_JAR" \
+            --bundletool-version "$BUNDLETOOL_VERSION" \
+            --readelf readelf \
+            --evidence-dir "$EVIDENCE_DIR"
+
+      - name: Upload final AAB platform evidence
+        if: ${{ always() && steps.android_aab_build.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android-16k-1e9e070a77c3f6ce114892404e1724d06f340c89-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-android-16k-evidence/BIL-android-bundletool-install.txt
+            BIL-android-16k-evidence/BIL-android-base-manifest.xml
+            BIL-android-16k-evidence/BIL-android-production-admob.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.txt
+            BIL-android-16k-evidence/BIL-android-target-sdk.json
+            BIL-android-16k-evidence/BIL-android-optional-hardware.txt
+            BIL-android-16k-evidence/BIL-android-optional-hardware.json
+            BIL-android-16k-evidence/BIL-android-16k-bundletool.txt
+            BIL-android-16k-evidence/BIL-android-16k-elf.txt
+            BIL-android-16k-evidence/BIL-android-16k-summary.json
+
+      - name: Capture release evidence
+        shell: bash
+        env:
+          BUILD_NUMBER: '36'
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          test -s "$AAB"
+          jarsigner -verify -verbose -certs "$AAB" > BIL-android-signature.txt
+          ACTUAL_UPLOAD_CERT_SHA256="$(keytool -printcert -rfc -jarfile "$AAB" \
+            | openssl x509 -noout -fingerprint -sha256 \
+            | cut -d '=' -f 2 \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          EXPECTED_NORMALIZED="$(printf '%s' "$EXPECTED_UPLOAD_CERT_SHA256" \
+            | tr -d ':[:space:]' | tr '[:lower:]' '[:upper:]')"
+          test -n "$ACTUAL_UPLOAD_CERT_SHA256"
+          test "$ACTUAL_UPLOAD_CERT_SHA256" = "$EXPECTED_NORMALIZED" || {
+            echo 'Signed AAB certificate does not match the expected Play upload certificate.' >&2
+            exit 1
+          }
+          printf '%s\n' 'ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH' \
+            > BIL-android-upload-certificate.txt
+          python3 -m unittest discover -s tool/release \
+            -p test_verify_final_artifact_identity.py -v
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build "$BUILD_NUMBER" \
+            --output BIL-android-final-artifact-identity.json
+          sha256sum "$AAB" | tee BIL-android-aab.sha256
+          stat --printf='%s\n' "$AAB" | tee BIL-android-aab.size
+          git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
+
+      - name: Reject forbidden bundled crypto implementations in signed AAB
+        shell: bash
+        run: |
+          set -euo pipefail
+          AAB=build/app/outputs/bundle/release/app-release.aab
+          SCAN_DIR="$RUNNER_TEMP/bil-android-crypto-scan"
+          rm -rf "$SCAN_DIR"
+          mkdir -p "$SCAN_DIR"
+          unzip -qq "$AAB" -d "$SCAN_DIR"
+          if find "$SCAN_DIR" -type f -name '*.so' \
+            -exec strings {} + 2>/dev/null \
+            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
+            echo 'Forbidden non-OS crypto implementation marker found in signed AAB.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'SIGNED_AAB_FORBIDDEN_CRYPTO_MARKERS=0' \
+            | tee BIL-android-crypto-scan.txt
+
+      - name: Derive a signed recording APK from the verified final AAB
+        shell: bash
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ secrets.ANDROID_UPLOAD_CERTIFICATE_SHA256 }}
+        run: |
+          set -euo pipefail
+          umask 077
+          BUNDLETOOL_JAR="$RUNNER_TEMP/bundletool-all-1.18.3.jar"
+          echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $BUNDLETOOL_JAR" | sha256sum --check -
+          SECRET_DIR="$(mktemp -d "$RUNNER_TEMP/bil-apk-secret.XXXXXX")"
+          trap 'rm -f "$SECRET_DIR/store.pass" "$SECRET_DIR/key.pass"; rmdir "$SECRET_DIR"' EXIT
+          printf '%s' "$STORE_PASSWORD" > "$SECRET_DIR/store.pass"
+          printf '%s' "$KEY_PASSWORD" > "$SECRET_DIR/key.pass"
+          mkdir -p build/app/outputs/recording-apk
+          java -jar "$BUNDLETOOL_JAR" build-apks \
+            --bundle=build/app/outputs/bundle/release/app-release.aab \
+            --output="$RUNNER_TEMP/bil-android36-recording.apks" --mode=universal \
+            --ks=android/app/upload-keystore.jks --ks-key-alias="$KEY_ALIAS" \
+            --ks-pass="file:$SECRET_DIR/store.pass" --key-pass="file:$SECRET_DIR/key.pass"
+          APK=build/app/outputs/recording-apk/BIL-Android36-derived-universal.apk
+          unzip -p "$RUNNER_TEMP/bil-android36-recording.apks" universal.apk > "$APK"
+          APKSIGNER="${BIL_APKSIGNER:?}"
+          test -x "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$APK" > BIL-android-recording-apk-signature.txt
+          "${ANDROID_HOME}/cmdline-tools/latest/bin/apkanalyzer" manifest print "$APK" > BIL-android-recording-apk-manifest.xml
+          python3 tool/release/verify_final_artifact_identity.py \
+            --android-manifest BIL-android-recording-apk-manifest.xml \
+            --package com.bilhealth.bodyintelligencelog --version 1.0.0 --build 36 \
+            --output BIL-android-recording-apk-identity.json
+          java -cp "$BIL_DER_VERIFIER_CLASSES:$BIL_APKSIGNER_JAR" VerifyApkCertificate \
+            "$APK" BIL-android-recording-apk-der-certificate.json release
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,re,subprocess
+          def digest(path):
+              with pathlib.Path(path).open('rb') as stream:
+                  return hashlib.file_digest(stream,'sha256').hexdigest()
+          identity=json.loads(pathlib.Path('BIL-android-recording-apk-der-certificate.json').read_text())
+          expected=re.sub(r'[:\s]','',os.environ['EXPECTED_UPLOAD_CERT_SHA256']).lower()
+          assert re.fullmatch('[0-9a-f]{64}',expected)
+          assert identity['status']=='VERIFIED_APK_SIGNATURE_AND_DER_IDENTITY' and identity['scope']=='release'
+          assert identity['apk_signature_verified'] is True and identity['current_signer_count']==1
+          assert identity['distinct_verified_scheme_leaf_certificates']==1 and identity['certificate_sha256']==expected
+          aab=digest('build/app/outputs/bundle/release/app-release.aab')
+          assert pathlib.Path('BIL-android-aab.sha256').read_text().split()[0]==aab
+          source=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          assert source==os.environ['BIL_TESTED_SOURCE_SHA'] and re.fullmatch('[0-9a-f]{40}',source)
+          controller=json.loads(pathlib.Path('BIL-android36-controller-provenance.json').read_text())
+          assert controller['workflow_sha']==os.environ['GITHUB_SHA']==os.environ['BIL_SIGNING_ORCHESTRATION_SHA']
+          assert controller['source_sha']==source
+          receipt={'status':'VERIFIED_DERIVED_SIGNED_QA_APK','source_sha':source,'signing_orchestration_sha':os.environ['GITHUB_SHA'],'run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'build':36,'package':'com.bilhealth.bodyintelligencelog','aab_sha256':aab,'apk_sha256':digest('build/app/outputs/recording-apk/BIL-Android36-derived-universal.apk'),'certificate_sha256':expected,'installation_source':'not_installed','scope':'Universal APK derived from the verified final AAB and signed with the upload certificate. Not Play-delivered, not proof of Play App Signing, billing or Integrity recognition.','app_recompiled':False,'play_upload_performed':False}
+          pathlib.Path('BIL-android-recording-apk-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print('DERIVED_SIGNED_ANDROID36_QA_APK_IDENTITY=PASS;PLAY_DELIVERY=NOT_PROVEN')
+          PY
+
+      - name: Record code and physical-device gate boundary
+        shell: bash
+        env:
+          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
+        run: |
+          test "$NATIVE_CRYPTO_OUTCOME" = success
+          NATIVE_CRYPTO_GATE_STATUS='PASS'
+          printf '%s\n' \
+            'CODE_GATE=PASS' \
+            "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            'FACEBOOK_LOGIN_COMPILED_GATE=SUPABASE_BROWSER_OAUTH_SOURCE_PRESENT' \
+            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
+            'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=PASS' \
+            'ADMOB_ANDROID_UMP_AND_NATIVE_CONFIGURATION_GATE=REQUIRED_AND_CONFIGURED' \
+            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
+            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
+            'BLUETOOTH_ANDROID36=DISABLED_NO_RUNTIME_PERMISSIONS' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=Google Credential Manager sign-in and Facebook OAuth browser flow with Supabase token exchange,Play Integrity JIT token/request binding/replay denial,Health Connect,Wear OS via Health Connect,Play billing,AdMob consent and served ad review' \
+            > BIL-android-gate-status.txt
+          printf '%s\n' "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify the exact Android36 Google review permission scope in both artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tool/release -p test_verify_android33_review_scope.py -v
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-16k-evidence/BIL-android-base-manifest.xml \
+            --output BIL-android36-final-aab-permission-scope.json
+          python3 tool/release/verify_android33_review_scope.py \
+            --manifest BIL-android-recording-apk-manifest.xml \
+            --output BIL-android36-final-apk-permission-scope.json
+
+      - name: Upload signed release candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android36-signed-1e9e070a77c3f6ce114892404e1724d06f340c89-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/recording-apk/BIL-Android36-derived-universal.apk
+            BIL-android-recording-apk-receipt.json
+            BIL-android36-final-aab-permission-scope.json
+            BIL-android36-final-apk-permission-scope.json
+            BIL36-pre-signing-ci.json
+            BIL-android36-controller-provenance.json
+            BIL-android36-internal-acceptance.md
+            BIL-android-recording-apk-der-certificate.json
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+            BIL-android-native-crypto-gate.txt
+            BIL-android-recording-apk-identity.json
+            BIL-android-recording-apk-signature.txt
+            BIL-android-recording-apk-manifest.xml
+            BIL-android-signature.txt
+            BIL-android-aab.sha256
+            BIL-android-aab.size
+            BIL-android-crypto-scan.txt
+            BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
+            BIL-android-production-admob-source.txt
+            BIL-android-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-android-16k-evidence/
+
+      - name: Preserve public AAB and available derivation diagnostics on failure
+        if: ${{ failure() && steps.android_aab_build.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-android36-INCOMPLETE-diagnostics-1e9e070a77c3f6ce114892404e1724d06f340c89-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/recording-apk/BIL-Android36-derived-universal.apk
+            BIL36-pre-signing-ci.json
+            BIL-android36-controller-provenance.json
+            BIL-android36-internal-acceptance.md
+            BIL-android-recording-apk-der-certificate.json
+            BIL-android-recording-apk-receipt.json
+            BIL-android-recording-apk-signature.txt
+            BIL-android-recording-apk-manifest.xml
+            BIL-android-recording-apk-identity.json
+            BIL-android36-final-aab-permission-scope.json
+            BIL-android36-final-apk-permission-scope.json
+            BIL-android-signature.txt
+            BIL-android-aab.sha256
+            BIL-android-aab.size
+            BIL-android-upload-certificate.txt
+            BIL-android-final-artifact-identity.json
+            BIL-android-native-crypto-gate.txt
+            BIL-android-crypto-scan.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-apksigner-preflight-artifact.json
+            BIL-apksigner-preflight-der.json
+            BIL-apksigner-preflight-cli.txt
+            BIL-apksigner-tool-version.txt
+            BIL-apksigner-tool-jar.sha256
+            BIL-android-16k-evidence/
+
+      - name: Remove signing material
+        if: always()
+        shell: bash
+        run: rm -f android/app/upload-keystore.jks android/key.properties
