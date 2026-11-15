@@ -28,7 +28,7 @@ import zipfile
 from bil_native_bounded_command import run_bounded
 
 PACKAGE = 'com.bilhealth.bodyintelligencelog'
-PARENT = 'e2e2c999a248eea4461cca857d4bf0cb48e60263'
+PARENT = 'a4c3bf85339d9fd65f85a3f5ffa98616934c673e'
 BRANCH = 'refs/heads/codex/bil45-android-api33-direct-vm-diagnostic-20261115'
 WORKFLOW = '.github/workflows/bil45_android_api33_direct_vm_diagnostic.yml'
 SELF = '.github/scripts/bil_android_direct_vm_attach.py'
@@ -144,7 +144,7 @@ def emit(text, private=()):
 def launch_command(adb, serial):
     # Exact debug-drive defaults from pinned Flutter3.44.6 run.dart169 and
     # android_device.dart: profiling, checked mode, entry verification, paused.
-    return [str(adb), '-s', serial, 'shell', 'am', 'start', '-W', '-a', 'android.intent.action.MAIN',
+    return [str(adb), '-s', serial, 'shell', 'am', 'start', '-a', 'android.intent.action.MAIN',
             '-c', 'android.intent.category.LAUNCHER', '-f', '0x20000000',
             '--ez', 'enable-dart-profiling', 'true', '--ez', 'enable-checked-mode', 'true',
             '--ez', 'verify-entry-points', 'true', '--ez', 'start-paused', 'true', PACKAGE + '/.MainActivity']
@@ -305,8 +305,8 @@ def worker(args):
         need(allow or result.returncode == 0, 'COMMAND_FAILED_' + label.upper().replace('-', '_'))
         return result.returncode, raw
 
-    def current_pid(*, cleanup=False):
-        _, raw = capture('current-pid', [str(adb), '-s', args.device, 'shell', 'pidof', PACKAGE], allow=True, cleanup=cleanup)
+    def current_pid(*, cleanup=False, cap=30):
+        _, raw = capture('current-pid', [str(adb), '-s', args.device, 'shell', 'pidof', PACKAGE], allow=True, cleanup=cleanup, cap=cap)
         need(not raw.strip() or re.fullmatch(r'[1-9][0-9]*', raw.strip()), 'ONE_EXACT_PACKAGE_PID_REQUIRED')
         return int(raw.strip()) if raw.strip() else None
 
@@ -390,16 +390,26 @@ def worker(args):
         capture('install-exact-apk', [str(adb), '-s', args.device, 'install', '-r', '-t', str(apk)], cap=120)
         need(current_pid() is None, 'NO_APP_PID_BEFORE_FRESH_CAPTURE')
         collector, native = fresh_log_capture(adb, args.device, args.deadline, receipt)
-        _, launched = capture('one-owned-launch', launch_command(adb, args.device))
-        need('Error:' not in launched and 'Status: ok' in launched and 'not started' not in launched, 'ONE_LAUNCH_NOT_CONFIRMED')
-        owned_pid = current_pid()
-        need(owned_pid is not None, 'NEW_OWNED_LAUNCH_PID_REQUIRED')
-        receipt['pid'] = owned_pid
+        launch_exit, launched = capture('one-owned-launch', launch_command(adb, args.device), allow=True)
         end = time.monotonic() + remaining(90)
+        # Like the SDK, am start is nonwaiting. The one existing90s window
+        # covers both process creation and its actual VM announcement.
+        seconds = end - time.monotonic()
+        need(seconds > 0, 'CURRENT_PID_VM_DISCOVERY_FAILED')
+        owned_pid = current_pid(cap=min(3, seconds))
+        need(launch_exit == 0 and 'Error: ' not in launched, 'ONE_LAUNCH_NOT_CONFIRMED')
+        while owned_pid is None:
+            seconds = end - time.monotonic()
+            need(seconds > 0 and collector.poll() is None and not native.done.is_set(), 'NEW_OWNED_LAUNCH_PID_REQUIRED')
+            owned_pid = current_pid(cap=min(3, seconds))
+        need(time.monotonic() < end, 'CURRENT_PID_VM_DISCOVERY_FAILED')
+        receipt['pid'] = owned_pid
         uri = None
         while uri is None:
-            need(time.monotonic() < end and collector.poll() is None and not native.done.is_set(), 'CURRENT_PID_VM_DISCOVERY_FAILED')
-            row = native.take()
+            seconds = end - time.monotonic()
+            need(seconds > 0 and collector.poll() is None and not native.done.is_set(), 'CURRENT_PID_VM_DISCOVERY_FAILED')
+            row = native.take(timeout=min(.02, seconds))
+            need(time.monotonic() < end, 'CURRENT_PID_VM_DISCOVERY_FAILED')
             if row is not None:
                 uri = vm_from_line(row, owned_pid)
         parsed = vm_authority(uri)

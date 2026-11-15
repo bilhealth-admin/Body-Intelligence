@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 3
+          fetch-depth: 4
           persist-credentials: false
       - name: Require the exact two added diagnostic paths and unchanged S4 application
         shell: bash
@@ -31,7 +31,7 @@ jobs:
           from pathlib import Path
           def git(*args):
               return subprocess.check_output(['git', *args], text=True).strip()
-          parent = 'e2e2c999a248eea4461cca857d4bf0cb48e60263'
+          parent = 'a4c3bf85339d9fd65f85a3f5ffa98616934c673e'
           baseline = 'fd106fd3ba6073f0474640a10062af6d7d55dadb'
           helper = '.github/scripts/bil_android_direct_vm_attach.py'
           workflow = '.github/workflows/bil45_android_api33_direct_vm_diagnostic.yml'
@@ -43,7 +43,7 @@ jobs:
               raise ValueError('Only two new diagnostic files may differ; application and all original tests must be unchanged')
           if set(git('diff', '--name-status', baseline, 'HEAD').splitlines()) != {'A\t' + helper, 'A\t' + workflow}:
               raise ValueError('Cumulative difference from S4 must still be exactly two diagnostic files')
-          if hashlib.sha256(Path(helper).read_bytes()).hexdigest() != '23f39fd9058fbedb14a2c1b7ca1c640ef11f19dc0e606bb4db895486c6946888':
+          if hashlib.sha256(Path(helper).read_bytes()).hexdigest() != 'f8dd691ad1856e91e6df5b2cee81c161971bdc9483236220e307c0fd66a83f4c':
               raise ValueError('Exact independently reviewed direct VM helper required')
           PY_SCOPE
       - name: Install the identical pinned Flutter
@@ -93,7 +93,7 @@ jobs:
           complete = preflight.get('status') == 'LOG_BARRIER_PREFLIGHT_PASS_NO_APP_CASES' and all(r['result'].get('direct_vm_final_exit') == 0 and r['result'].get('direct_vm_actual_case_summary_required') is True for r in rows)
           receipt = {'status': 'BOTH_ORIGINAL_AFFECTED_SCOPES_PASS_DIAGNOSTIC_ONLY' if complete and sys.argv[1] == '0' else 'FAIL_OR_INCOMPLETE_DIAGNOSTIC',
               'source': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'], 'attempt': os.environ['GITHUB_RUN_ATTEMPT'],
-              'source_parent': 'e2e2c999a248eea4461cca857d4bf0cb48e60263', 'scopes': rows, 'log_barrier_preflight': preflight,
+              'source_parent': 'a4c3bf85339d9fd65f85a3f5ffa98616934c673e', 'scopes': rows, 'log_barrier_preflight': preflight,
               'crypto_this_run': 'NOT_EXECUTED', 'separate_prior_crypto_pass_run': 43760383178,
               'all3_native_scopes_this_run': False, 'future_full_source_still_requires_all3_native_scopes': True,
               'renderer_runtime_permissions_or_original_assertions_changed': False, 'release_acceptance': False,
