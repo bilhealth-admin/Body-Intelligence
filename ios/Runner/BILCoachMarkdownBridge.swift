@@ -23,15 +23,42 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
   private var firstBlock: CGRect?
   private var appliedInput: NSDictionary?
   private static var registeredFonts: [String: String] = [:]
+  private static let qaTimingOrigin = ProcessInfo.processInfo.systemUptime
+  private static var qaTimingRows = [[String: Any]]()
+  private static var qaTimingDropped = 0
+  private var qaTimingEnabled = false
+  private var qaPreparation = false
+
+  private func qaMark(_ stage: String, _ values: [String: Any] = [:]) {
+    #if DEBUG
+    guard qaTimingEnabled else { return }
+    guard Self.qaTimingRows.count < 1024 else { Self.qaTimingDropped += 1; return }
+    let origin = Self.qaTimingOrigin
+    var row: [String: Any] = ["stage": stage, "preparation": qaPreparation,
+      "native_elapsed_us": Int((ProcessInfo.processInfo.systemUptime - origin) * 1_000_000)]
+    for (key, value) in values {
+      if value is Bool || value is Int { row[key] = value }
+      else if let number = value as? Double, number.isFinite { row[key] = number }
+    }
+    Self.qaTimingRows.append(row)
+    #endif
+  }
+
 
   init(frame: CGRect, id: Int64, arguments: [String: Any],
        registrar: FlutterPluginRegistrar) {
+    let qaInitStarted = ProcessInfo.processInfo.systemUptime
     channel = FlutterMethodChannel(name: "bil/coach_markdown/\(id)",
                                    binaryMessenger: registrar.messenger())
     host = UIHostingController(rootView: AnyView(BILCoachMarkdownView(
       blocks: [], rightToLeft: false, fontSize: 16, textColor: .primary,
       linkColor: .blue, fontName: nil, openLink: { _ in }, reportHeight: { _ in })))
     super.init()
+    #if DEBUG
+    qaTimingEnabled = arguments["qaStageTiming"] as? Bool == true
+    qaPreparation = arguments["generation"] as? String == "bil-renderer-preparation"
+    #endif
+    qaMark("platform_create", ["native_init_pre_record_us": Int((ProcessInfo.processInfo.systemUptime - qaInitStarted) * 1_000_000)])
     host.view.frame = frame
     host.view.backgroundColor = .clear
     host.view.isOpaque = false
@@ -46,21 +73,37 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
         self.update(data, registrar: registrar)
         result(nil)
       case "setVisible":
+        self.qaMark("set_visible_request")
         guard data["generation"] as? String == self.generation,
               let visible = data["visible"] as? Bool,
               !visible || (self.lastHeight > 0 && self.firstBlock != nil) else {
           result(false); return
         }
         self.setVisible(visible)
+        self.qaMark("set_visible_ack", ["visible": visible])
         result(true)
+      case "qaReadStageTiming":
+        #if DEBUG
+        guard self.qaTimingEnabled, data["generation"] as? String == self.generation else { result(nil); return }
+        result(["enabled": true, "clock_domain": "native_process_system_uptime_us",
+          "capacity": 1024, "dropped": Self.qaTimingDropped, "rows": Self.qaTimingRows,
+          "processor_count": ProcessInfo.processInfo.processorCount,
+          "active_processor_count": ProcessInfo.processInfo.activeProcessorCount,
+          "thermal_state": ProcessInfo.processInfo.thermalState.rawValue,
+          "context_collected_after_observation": true])
+        #else
+        result(nil)
+        #endif
       default:
         result(FlutterMethodNotImplemented)
       }
     }
     update(arguments, registrar: registrar)
+    qaMark("platform_create_complete")
   }
 
   private func update(_ data: [String: Any], registrar: FlutterPluginRegistrar) {
+    qaMark("update_begin")
     guard let text = data["text"] as? String,
           let token = data["generation"] as? String,
           let size = data["fontSize"] as? Double, size.isFinite, size >= 8, size <= 120,
@@ -71,6 +114,7 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
     // time. Replay measured geometry instead; a new generation/width/content
     // still takes the complete layout path below.
     if appliedInput?.isEqual(to: data) == true {
+      qaMark("duplicate_update_replay")
       replayGeometry(token: token)
       return
     }
@@ -83,21 +127,28 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
     }
     let rtl = data["rtl"] as? Bool ?? false
     let asset = rtl ? "assets/fonts/NotoNaskhArabic-Regular.ttf" : nil
+    qaMark("font_lookup_begin", ["cache_hit": asset.map { Self.registeredFonts[$0] != nil } ?? false])
     let name = asset.flatMap { Self.fontName($0, registrar: registrar) }
+    qaMark("font_lookup_end")
+    qaMark("parse_begin")
+    let parsedBlocks = BILCoachMarkdownDocument.blocks(text)
+    qaMark("parse_end", ["blocks": parsedBlocks.count])
     host.rootView = AnyView(BILCoachMarkdownView(
-      blocks: BILCoachMarkdownDocument.blocks(text), rightToLeft: rtl,
+      blocks: parsedBlocks, rightToLeft: rtl,
       fontSize: size, textColor: Self.color(foreground), linkColor: Self.color(accent),
       fontName: name,
       openLink: { [weak self] url in
         self?.channel.invokeMethod("openLink", arguments: ["generation": token, "url": url.absoluteString])
       },
       reportHeight: { [weak self] height in
+        self?.qaMark("height_preference", ["height": Double(height)])
         guard let self, self.generation == token, height.isFinite, height > 0,
               abs(height - self.lastHeight) > 0.5 else { return }
         self.lastHeight = height
         self.channel.invokeMethod("height", arguments: ["generation": token, "height": Double(height)])
       },
       reportFirstBlock: { [weak self] rect in
+        self?.qaMark("first_block_preference", ["width": Double(rect.width), "height": Double(rect.height)])
         guard let self, self.generation == token, !rect.isEmpty,
               rect.origin.x.isFinite, rect.origin.y.isFinite,
               rect.width.isFinite, rect.height.isFinite else { return }
@@ -106,19 +157,23 @@ private final class BILCoachMarkdownPlatformView: NSObject, FlutterPlatformView 
           "x": Double(rect.minX), "y": Double(rect.minY),
           "width": Double(rect.width), "height": Double(rect.height)])
       }).id(token))
+    qaMark("prepare_size_begin", ["has_width": data["width"] as? Double != nil])
     if let width = data["width"] as? Double,
        let height = BILCoachMarkdownSizing.prepare(host, width: CGFloat(width)),
        abs(height - lastHeight) > 0.5 {
       lastHeight = height
     }
+    qaMark("prepare_size_end", ["height": Double(lastHeight)])
     host.view.setNeedsLayout()
     // The first measurement can precede Flutter's channel handler. Replaying
     // cached current-generation geometry also makes initial attachment safe.
     replayGeometry(token: token)
+    qaMark("update_end")
   }
 
   private func replayGeometry(token: String) {
     guard generation == token else { return }
+    qaMark("geometry_replay", ["height": Double(lastHeight), "has_first_block": firstBlock != nil])
     if lastHeight > 0 {
       channel.invokeMethod("height", arguments: ["generation": token, "height": Double(lastHeight)])
     }

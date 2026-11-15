@@ -493,6 +493,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
               'capture_windows': <Object?>[],
               'completed': false,
             };
+            CoachNativeMarkdownState.beginStageDiagnosticFixture();
             GoRouter? router;
             _NativeReplyFrameTrace? trace;
             try {
@@ -547,6 +548,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
               }
               final replyReleasedAt = trace.watch.elapsedMilliseconds;
               metadata['held_reply_released_at_ms'] = replyReleasedAt;
+              CoachNativeMarkdownState.markStageDiagnosticReplyRelease();
               gateway.finish(reply);
               if (history) {
                 for (var i = 0; i < 25; i++) {
@@ -751,6 +753,22 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
               metadata['completed'] = true;
             } finally {
               trace?.stop();
+              // The original observation/assertions have already ended. This
+              // read never schedules a measured frame or changes a verdict.
+              final diagnosticStates = _replyRow(reply).evaluate()
+                  .where((element) => element.widget is CoachNativeMarkdown)
+                  .cast<StatefulElement>()
+                  .map((element) => element.state as CoachNativeMarkdownState)
+                  .toList();
+              if (CoachNativeMarkdownState.stageDiagnosticSnapshot()['enabled'] == true) {
+                metadata['qa_stage_timings'] = {
+                  'native': [for (final state in diagnosticStates)
+                    await state.collectNativeStageDiagnostic()],
+                  'dart': CoachNativeMarkdownState.stageDiagnosticSnapshot(),
+                  'clock_comparison': 'Separate monotonic domains; compare durations within a domain only. Dart send/receive brackets surround native RPC.',
+                  'collection_after_original_observation': true,
+                };
+              }
               gateway.cancelPending();
               metadata['geometry_native_frames'] =
                   trace?.samples ?? <Object?>[];

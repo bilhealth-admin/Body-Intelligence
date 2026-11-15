@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -67,6 +68,7 @@ class CoachNativeRendererPreparation extends StatelessWidget {
       creationParamsCodec: StandardMessageCodec(),
       creationParams: <String, Object>{
         'generation': 'bil-renderer-preparation',
+        if (CoachNativeStageDiagnostics.enabled) 'qaStageTiming': true,
         'text': 'BIL المدرب',
         'rtl': true,
         'fontSize': 32.0,
@@ -104,6 +106,36 @@ class CoachNativeMarkdown extends StatefulWidget {
 }
 
 class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
+  @override
+  void initState() {
+    super.initState();
+    CoachNativeStageDiagnostics.mark('markdown_init');
+  }
+
+  static void beginStageDiagnosticFixture() => CoachNativeStageDiagnostics.beginFixture();
+  static void markStageDiagnosticReplyRelease() => CoachNativeStageDiagnostics.mark('reply_release');
+  static Map<String, Object?> stageDiagnosticSnapshot() => CoachNativeStageDiagnostics.snapshot();
+
+  /// Called only by the offline fixture after its original observation stops.
+  Future<Map<String, Object?>> collectNativeStageDiagnostic() async {
+    if (!CoachNativeStageDiagnostics.enabled || _channel == null) return {'enabled': false};
+    CoachNativeStageDiagnostics.mark('diagnostic_read_send');
+    try {
+      final value = await _channel!.invokeMapMethod<String, Object?>(
+        'qaReadStageTiming', {'generation': _generation},
+      ).timeout(const Duration(seconds: 1));
+      return value ?? {'enabled': true, 'available': false};
+    } on PlatformException {
+      return {'enabled': true, 'available': false, 'reason': 'platform_unavailable'};
+    } on MissingPluginException {
+      return {'enabled': true, 'available': false, 'reason': 'plugin_unavailable'};
+    } on TimeoutException {
+      return {'enabled': true, 'available': false, 'reason': 'diagnostic_read_timeout'};
+    } finally {
+      CoachNativeStageDiagnostics.mark('diagnostic_read_complete');
+    }
+  }
+
   MethodChannel? _channel;
   String _generation = UniqueKey().toString();
   double _height = 60;
@@ -160,6 +192,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
 
   Map<String, Object> _payload(BuildContext context) => {
     'generation': _generation,
+    if (CoachNativeStageDiagnostics.enabled) 'qaStageTiming': true,
     'width': _width ?? 0,
     'text': widget.visitIsCurrent() ? widget.text : '',
     'rtl': widget.direction == TextDirection.rtl,
@@ -191,7 +224,9 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
       onFailure: () => setState(() => _failed = true),
     );
     try {
+      CoachNativeStageDiagnostics.mark('update_send');
       await _channel?.invokeMethod<void>('update', payload);
+      CoachNativeStageDiagnostics.mark('update_complete');
     } on PlatformException {
       if (mounted && widget.visitIsCurrent() && _generation == generation) {
         setState(() => _failed = true);
@@ -249,6 +284,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
     if (args['generation'] != _generation) return null;
     switch (call.method) {
       case 'height':
+        CoachNativeStageDiagnostics.mark('height_received', {'height': args['height']});
         final height = args['height'];
         if (height is num &&
             height.isFinite &&
@@ -261,6 +297,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
           });
         }
       case 'contentBounds':
+        CoachNativeStageDiagnostics.mark('content_bounds_received', {'width': args['width'], 'height': args['height']});
         final coordinates = [
           args['x'],
           args['y'],
@@ -306,11 +343,13 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
 
   @override
   Widget build(BuildContext context) {
+    CoachNativeStageDiagnostics.mark('markdown_build', {'height_ready': _heightReady, 'paint_ready': _paintReady});
     _reportReadinessAfterPaint();
     if (!widget.visitIsCurrent()) return const SizedBox.shrink();
     if (_failed || !coachUsesNativeMarkdown) return widget.fallback;
     return LayoutBuilder(
       builder: (context, constraints) {
+        CoachNativeStageDiagnostics.mark('layout_builder', {'width': constraints.maxWidth, 'height': _height});
         if (_width != constraints.maxWidth) {
           _width = constraints.maxWidth;
           _generation = UniqueKey().toString();
@@ -345,6 +384,7 @@ class CoachNativeMarkdownState extends State<CoachNativeMarkdown> {
             creationParamsCodec: const StandardMessageCodec(),
             gestureRecognizers: coachNativeMarkdownGestures(),
             onPlatformViewCreated: (id) {
+              CoachNativeStageDiagnostics.mark('platform_created');
               _channel = MethodChannel('bil/coach_markdown/$id')
                 ..setMethodCallHandler(_receive);
               _update(_payload(context));

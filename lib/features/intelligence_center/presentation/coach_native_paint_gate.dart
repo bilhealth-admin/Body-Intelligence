@@ -1,7 +1,55 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
+
+/// Passive, bounded counters for the explicit offline Simulator diagnostic.
+/// No text, message/account/generation identifiers or raw error data is stored.
+class CoachNativeStageDiagnostics {
+  static const enabled = kDebugMode &&
+      bool.fromEnvironment('BIL_QA_NATIVE_COACH_STAGE_TIMING');
+  static final _watch = Stopwatch();
+  static final _rows = <Map<String, Object?>>[];
+  static var _dropped = 0;
+  static const _allowedStages = {
+    'fixture_begin', 'reply_release', 'markdown_init', 'markdown_build', 'layout_builder',
+    'platform_created', 'update_send', 'update_complete', 'height_received',
+    'content_bounds_received', 'gate_schedule', 'gate_post_frame',
+    'gate_size_wait', 'gate_set_visible_send', 'gate_set_visible_ack',
+    'gate_ready', 'diagnostic_read_send', 'diagnostic_read_complete',
+  };
+
+  static void beginFixture() {
+    if (!enabled) return;
+    _rows.clear();
+    _dropped = 0;
+    _watch..reset()..start();
+    mark('fixture_begin');
+  }
+
+  static void mark(String stage, [Map<String, Object?> values = const {}]) {
+    if (!enabled) return;
+    if (!_allowedStages.contains(stage) || _rows.length >= 512) {
+      _dropped++;
+      return;
+    }
+    _rows.add({
+      'stage': stage, 'dart_elapsed_us': _watch.elapsedMicroseconds,
+      for (final entry in values.entries)
+        if (entry.value is bool || entry.value is int ||
+            entry.value is double && (entry.value as double).isFinite)
+          entry.key: entry.value,
+    });
+  }
+
+  static Map<String, Object?> snapshot() => {
+    'enabled': enabled, 'clock_domain': 'dart_fixture_stopwatch_us',
+    'capacity': 512, 'dropped': _dropped,
+    'rows': _rows.map((row) => Map<String, Object?>.of(row)).toList(),
+  };
+}
 
 /// Opens the native surface after Flutter has reserved its measured body.
 ///
@@ -54,6 +102,7 @@ class CoachNativePaintGate {
     if (_scheduled || _disposed) return;
     _scheduled = true;
     _stage = 'layout_wait';
+    CoachNativeStageDiagnostics.mark('gate_schedule');
 
     bool active() => !_disposed && isCurrent();
 
@@ -80,12 +129,14 @@ class CoachNativePaintGate {
 
     void queue() {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
+        CoachNativeStageDiagnostics.mark('gate_post_frame');
         if (!active()) {
           if (_stage != 'failed') _stage = 'retired';
           finish();
           return;
         }
         if (!hasReservedBody()) {
+          CoachNativeStageDiagnostics.mark('gate_size_wait');
           _stage = 'layout_wait';
           queue();
           return;
@@ -93,7 +144,9 @@ class CoachNativePaintGate {
         var waitForLayout = false;
         try {
           _stage = 'native_ack';
+          CoachNativeStageDiagnostics.mark('gate_set_visible_send');
           final acknowledged = await setVisible(true);
+          CoachNativeStageDiagnostics.mark('gate_set_visible_ack', {'accepted': acknowledged == true});
           if (!active()) {
             await setVisible(false);
             if (_stage != 'failed') _stage = 'retired';
@@ -114,6 +167,7 @@ class CoachNativePaintGate {
             }
             _layoutTimer?.cancel();
             _stage = 'ready';
+            CoachNativeStageDiagnostics.mark('gate_ready');
             onReady();
           } else {
             _stage = 'rejected';
