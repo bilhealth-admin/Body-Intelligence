@@ -1,0 +1,306 @@
+name: BIL one-GET read-only Auth redirect configuration
+on:
+  push:
+    branches:
+      - codex/bil45-auth-config-readonly-20261115
+permissions:
+  contents: read
+concurrency:
+  group: bil45-auth-config-readonly-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  auth-redirect-config-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out the one-file diagnostic controller
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Validate exact source parent and first-attempt one-file controller before cloud credential
+        shell: python
+        run: |
+          """Prove one added-only readonly controller on its first push attempt; no cloud credential."""
+          import os
+          import re
+          import subprocess
+
+          SOURCE = '530844f9eb66ad58176e4aa035bbdd6e1564ae53'
+          REPO = 'bilhealth-admin/Body-Intelligence'
+          BRANCH = 'codex/bil45-auth-config-readonly-20261115'
+          WORKFLOW = '.github/workflows/bil45_auth_config_readonly_20261115.yml'
+
+          def prove(env, git):
+              sha = env.get('GITHUB_SHA', '')
+              assert re.fullmatch('[a-f0-9]{40}', sha) and sha != SOURCE
+              assert env.get('GITHUB_REPOSITORY') == REPO
+              assert env.get('GITHUB_EVENT_NAME') == 'push'
+              assert env.get('GITHUB_REF') == 'refs/heads/' + BRANCH
+              assert env.get('GITHUB_REF_NAME') == BRANCH
+              assert env.get('GITHUB_WORKFLOW_SHA') == sha
+              assert env.get('GITHUB_WORKFLOW_REF') == REPO + '/' + WORKFLOW + '@refs/heads/' + BRANCH
+              assert env.get('GITHUB_RUN_ATTEMPT') == '1'
+              assert re.fullmatch('[1-9][0-9]{0,14}', env.get('GITHUB_RUN_ID', ''))
+              assert git('rev-parse', 'HEAD') == sha
+              assert git('show', '-s', '--format=%P', 'HEAD') == SOURCE
+              assert git('diff-tree', '--no-commit-id', '--name-status', '--no-renames', '-r', SOURCE, 'HEAD') == 'A	' + WORKFLOW
+              tree = git('ls-tree', 'HEAD', '--', WORKFLOW)
+              assert re.fullmatch('100644 blob [a-f0-9]{40}\t' + re.escape(WORKFLOW), tree)
+              assert git('status', '--porcelain=v1', '--untracked-files=all') == ''
+
+          def main():
+              try:
+                  def git(*args):
+                      return subprocess.check_output(['git', *args], text=True, stderr=subprocess.DEVNULL, timeout=20).strip()
+                  prove(dict(os.environ), git)
+                  print('READONLY_AUTH_CONFIG_CONTROLLER_GUARD=PASS')
+                  return 0
+              except Exception:
+                  print('READONLY_AUTH_CONFIG_CONTROLLER_GUARD=FAIL')
+                  return 2
+
+          if __name__ == '__main__':
+              raise SystemExit(main())
+      - name: Read exactly one bounded AuthConfig response and retain safe redirect evidence only
+        id: config_probe
+        shell: python
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          """One bounded Management AuthConfig GET; only public BIL redirect evidence leaves memory."""
+          from datetime import datetime, timezone
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import ssl
+          import urllib.error
+          import urllib.request
+
+          PROJECT = 'tgmanzhqulksykhslrzb'
+          SOURCE_PARENT = '530844f9eb66ad58176e4aa035bbdd6e1564ae53'
+          BRANCH = 'codex/bil45-auth-config-readonly-20261115'
+          WORKFLOW = '.github/workflows/bil45_auth_config_readonly_20261115.yml'
+          URL = 'https://api.supabase.com/v1/projects/' + PROJECT + '/config/auth'
+          CANONICAL = 'https://www.bilhealth.com/auth/callback'
+          LEGACY = 'bil://auth/callback'
+          MAX_RESPONSE = 1024 * 1024
+          MAX_ALLOWLIST = 65536
+          MAX_ENTRIES = 512
+          OUTPUT_NAME = 'bil-auth-config-readonly-safe.json'
+          ERRORS = frozenset({'CREDENTIAL_UNAVAILABLE', 'HTTP_ERROR', 'REDIRECT_REFUSED',
+              'NETWORK_ERROR', 'NETWORK_TIMEOUT', 'RESPONSE_TOO_LARGE', 'INVALID_RESPONSE',
+              'UNEXPECTED_ERROR'})
+
+          class SafeFailure(Exception):
+              def __init__(self, code):
+                  self.code = code
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, request, fp, code, message, headers, newurl):
+                  return None
+
+          def safe_bil_pattern(value):
+              if not isinstance(value, str) or not 1 <= len(value) <= 256:
+                  return False
+              # No arbitrary paths, query/fragment/userinfo, escapes, classes or alternation
+              # can be exported. Recognize only a documented */** subset on public BIL URIs.
+              if not value.isascii() or any(c in value for c in '?#!@=\\[]{}\r\n\t') or '***' in value:
+                  return False
+              scheme, separator, rest = value.partition('://')
+              if not separator:
+                  return False
+              authority, slash, tail = rest.partition('/')
+              if scheme == 'https':
+                  if authority not in {'bilhealth.com', 'www.bilhealth.com', '*.bilhealth.com', '**.bilhealth.com'}:
+                      return False
+              elif scheme == 'bil':
+                  if authority not in {'auth', 'login-callback', 'auth-callback', 'login', 'callback', '*', '**'}:
+                      return False
+              else:
+                  return False
+              if not slash:
+                  return True
+              if '//' in tail:
+                  return False
+              segments = tail.split('/')
+              if segments and segments[-1] == '':
+                  segments.pop()
+              return all(part in {'auth', 'callback', 'login', 'login-callback', 'auth-callback', '*', '**', 'auth*', 'auth**', 'callback*', 'callback**', 'login*', 'login**'} for part in segments)
+
+          def documented_star_glob_matches(pattern, target):
+              if not safe_bil_pattern(pattern):
+                  return False
+              # Supabase documents '.' and '/' as separators. DP avoids regex backtracking.
+              tokens = []
+              i = 0
+              while i < len(pattern):
+                  if pattern[i:i+2] == '**':
+                      tokens.append(('many', None)); i += 2
+                  elif pattern[i] == '*':
+                      tokens.append(('segment', None)); i += 1
+                  else:
+                      tokens.append(('literal', pattern[i])); i += 1
+              row = [True] + [False] * len(target)
+              for kind, char in tokens:
+                  nxt = [False] * (len(target) + 1)
+                  if kind != 'literal':
+                      nxt[0] = row[0]
+                  for j in range(1, len(target) + 1):
+                      if kind == 'literal':
+                          nxt[j] = row[j-1] and target[j-1] == char
+                      else:
+                          nxt[j] = row[j] or (nxt[j-1] and (kind == 'many' or target[j-1] not in './'))
+                  row = nxt
+              return row[-1]
+
+          def evidence(config):
+              if not isinstance(config, dict) or 'uri_allow_list' not in config or 'site_url' not in config:
+                  raise SafeFailure('INVALID_RESPONSE')
+              raw, site = config['uri_allow_list'], config['site_url']
+              if raw is not None and not isinstance(raw, str):
+                  raise SafeFailure('INVALID_RESPONSE')
+              if site is not None and not isinstance(site, str):
+                  raise SafeFailure('INVALID_RESPONSE')
+              raw = raw or ''
+              site = site or ''
+              if len(raw) > MAX_ALLOWLIST or len(site) > 4096:
+                  raise SafeFailure('INVALID_RESPONSE')
+              entries = [item.strip() for item in raw.split(',') if item.strip()]
+              if len(entries) > MAX_ENTRIES:
+                  raise SafeFailure('INVALID_RESPONSE')
+              recognized = sorted({item for item in entries if safe_bil_pattern(item)})
+              relevant_unknown = any(not safe_bil_pattern(item) and
+                  ('bilhealth.com' in item.lower() or item.lower().startswith('bil:')) for item in entries)
+              canonical_matches = [item for item in recognized if documented_star_glob_matches(item, CANONICAL)]
+              legacy_matches = [item for item in recognized if documented_star_glob_matches(item, LEGACY)]
+              return {
+                  'canonical_exact_entry': CANONICAL in entries,
+                  'legacy_exact_entry': LEGACY in entries,
+                  'canonical_documented_star_glob_match': any('*' in item for item in canonical_matches),
+                  'legacy_documented_star_glob_match': any('*' in item for item in legacy_matches),
+                  'canonical_positive_allowlist_proof': bool(canonical_matches),
+                  'legacy_positive_allowlist_proof': bool(legacy_matches),
+                  'canonical_matching_sanitized_bil_patterns': canonical_matches,
+                  'legacy_matching_sanitized_bil_patterns': legacy_matches,
+                  'sanitized_existing_bil_scheme_redirect_patterns': [item for item in recognized if item.startswith('bil://')],
+                  'sanitized_existing_bil_https_redirect_patterns': [item for item in recognized if item.startswith('https://')],
+                  'sanitized_existing_bil_scheme_site_url': site if site.startswith('bil://') and safe_bil_pattern(site) and '*' not in site else None,
+                  'historical_login_callback_exact_entry': 'bil://login-callback' in entries,
+                  'historical_auth_callback_exact_entry': 'bil://auth-callback' in entries,
+                  'canonical_is_exact_site_url': site == CANONICAL,
+                  'legacy_is_exact_site_url': site == LEGACY,
+                  'site_url_is_www_bil_https_origin': site in {'https://www.bilhealth.com', 'https://www.bilhealth.com/'},
+                  'site_url_is_nonwww_bil_https_origin': site in {'https://bilhealth.com', 'https://bilhealth.com/'},
+                  'unsupported_relevant_bil_rules_present': relevant_unknown,
+                  'positive_proof_only_unsupported_rules_not_denied': True,
+              }
+
+          def strict_json_pairs(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result:
+                      raise SafeFailure('INVALID_RESPONSE')
+                  result[key] = value
+              return result
+
+          def probe_once(token, context, opener=None):
+              result = {
+                  'schema': 'bil.auth-config.readonly.safe.v1',
+                  'status': 'READ_FAILED', 'error_class': None, 'http_status': None,
+                  'project_ref': PROJECT, 'source_parent_sha': SOURCE_PARENT,
+                  'controller_sha': context['controller_sha'], 'run_id': context['run_id'],
+                  'run_attempt': 1, 'observed_at_utc': datetime.now(timezone.utc).isoformat(),
+                  'request_count': 0, 'read_only': True, 'cloud_writes': False,
+                  'raw_config_saved': False, 'redirect_evidence': None,
+              }
+              try:
+                  if not isinstance(token, str) or not 10 <= len(token) <= 8192 or '\r' in token or '\n' in token:
+                      raise SafeFailure('CREDENTIAL_UNAVAILABLE')
+                  if opener is None:
+                      opener = urllib.request.build_opener(urllib.request.ProxyHandler({}),
+                          urllib.request.HTTPSHandler(context=ssl.create_default_context()), NoRedirect())
+                  request = urllib.request.Request(URL, method='GET',
+                      headers={'Authorization': 'Bearer ' + token, 'Accept': 'application/json',
+                               'User-Agent': 'BIL-AuthConfig-ReadOnly-One-GET'})
+                  result['request_count'] = 1
+                  with opener.open(request, timeout=30) as response:
+                      status = response.getcode()
+                      if type(status) is not int or status != 200:
+                          result['http_status'] = status if type(status) is int and 100 <= status <= 599 else None
+                          raise SafeFailure('HTTP_ERROR')
+                      result['http_status'] = status
+                      length = response.headers.get('Content-Length')
+                      if length is not None and (not length.isascii() or not length.isdigit() or len(length) > 10 or int(length) > MAX_RESPONSE):
+                          raise SafeFailure('RESPONSE_TOO_LARGE')
+                      raw = response.read(MAX_RESPONSE + 1)
+                      if not isinstance(raw, bytes) or len(raw) > MAX_RESPONSE:
+                          raise SafeFailure('RESPONSE_TOO_LARGE')
+                      config = json.loads(raw.decode('utf-8'), object_pairs_hook=strict_json_pairs)
+                      result['redirect_evidence'] = evidence(config)
+                      result['status'] = 'READ_COMPLETE'
+              except SafeFailure as error:
+                  result['error_class'] = error.code if error.code in ERRORS else 'UNEXPECTED_ERROR'
+              except urllib.error.HTTPError as error:
+                  result['http_status'] = error.code if type(error.code) is int and 100 <= error.code <= 599 else None
+                  result['error_class'] = 'REDIRECT_REFUSED' if result['http_status'] in {301,302,303,307,308} else 'HTTP_ERROR'
+                  error.close()  # Never read, print or persist provider/API error bodies.
+              except (TimeoutError,):
+                  result['error_class'] = 'NETWORK_TIMEOUT'
+              except urllib.error.URLError:
+                  result['error_class'] = 'NETWORK_ERROR'
+              except (ValueError, UnicodeError, RecursionError):
+                  result['error_class'] = 'INVALID_RESPONSE'
+              except Exception:
+                  result['error_class'] = 'UNEXPECTED_ERROR'
+              return result
+
+          def context_from_env():
+              sha = os.environ.get('GITHUB_SHA', '')
+              run = os.environ.get('GITHUB_RUN_ID', '')
+              if not (re.fullmatch('[a-f0-9]{40}', sha) and re.fullmatch('[1-9][0-9]{0,14}', run)
+                      and os.environ.get('GITHUB_REPOSITORY') == 'bilhealth-admin/Body-Intelligence'
+                      and os.environ.get('GITHUB_EVENT_NAME') == 'push'
+                      and os.environ.get('GITHUB_REF') == 'refs/heads/' + BRANCH
+                      and os.environ.get('GITHUB_RUN_ATTEMPT') == '1'):
+                  raise SafeFailure('UNEXPECTED_ERROR')
+              return {'controller_sha': sha, 'run_id': int(run)}
+
+          def main():
+              # No actual credential read occurs when this module is imported by fixtures.
+              try:
+                  context = context_from_env()
+                  folder = Path(os.environ['RUNNER_TEMP']).resolve(strict=True)
+                  destination = folder / OUTPUT_NAME
+                  if not folder.is_dir() or destination.exists() or destination.is_symlink():
+                      raise SafeFailure('UNEXPECTED_ERROR')
+                  token = os.environ.pop('SUPABASE_ACCESS_TOKEN', None)
+                  report = probe_once(token, context)
+                  token = None
+                  # report is constructed from literal keys/booleans and sanitized public
+                  # patterns; raw config, response hashes, exceptions and credentials never
+                  # enter file/log output. Use an exclusive private safe-report file only.
+                  raw = (json.dumps(report, sort_keys=True, indent=2) + '\n').encode('utf-8')
+                  if len(raw) > 8192:
+                      raise SafeFailure('UNEXPECTED_ERROR')
+                  fd = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                  with os.fdopen(fd, 'wb') as output:
+                      output.write(raw)
+                  print('AUTH_CONFIG_READONLY_SAFE_RESULT=' + report['status'])
+                  return 0 if report['status'] == 'READ_COMPLETE' else 2
+              except Exception:
+                  print('AUTH_CONFIG_READONLY_SAFE_RESULT=SAFE_SETUP_OR_OUTPUT_ERROR')
+                  return 2
+
+          if __name__ == '__main__':
+              raise SystemExit(main())
+      - name: Preserve only the sanitized redirect evidence
+        if: ${{ always() && steps.config_probe.outcome != 'skipped' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil45-auth-config-readonly-safe-r${{ github.run_id }}-a${{ github.run_attempt }}
+          path: ${{ runner.temp }}/bil-auth-config-readonly-safe.json
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 3
