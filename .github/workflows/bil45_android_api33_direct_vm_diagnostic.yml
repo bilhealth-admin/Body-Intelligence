@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  original-three-native-scopes:
+  affected-two-native-scopes-after-log-preflight:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
+          fetch-depth: 3
           persist-credentials: false
       - name: Require the exact two added diagnostic paths and unchanged S4 application
         shell: bash
@@ -31,16 +31,19 @@ jobs:
           from pathlib import Path
           def git(*args):
               return subprocess.check_output(['git', *args], text=True).strip()
-          parent = 'fd106fd3ba6073f0474640a10062af6d7d55dadb'
+          parent = 'e2e2c999a248eea4461cca857d4bf0cb48e60263'
+          baseline = 'fd106fd3ba6073f0474640a10062af6d7d55dadb'
           helper = '.github/scripts/bil_android_direct_vm_attach.py'
           workflow = '.github/workflows/bil45_android_api33_direct_vm_diagnostic.yml'
           if os.environ['GITHUB_EVENT_NAME'] != 'push' or os.environ['GITHUB_REF'] != 'refs/heads/codex/bil45-android-api33-direct-vm-diagnostic-20261115':
               raise ValueError('Exact diagnostic branch push required')
           if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != parent:
               raise ValueError('Exact single-parent S4 diagnostic commit required')
-          if set(git('diff', '--name-status', parent, 'HEAD').splitlines()) != {'A\t' + helper, 'A\t' + workflow} or git('status', '--porcelain'):
+          if set(git('diff', '--name-status', parent, 'HEAD').splitlines()) != {'M\t' + helper, 'M\t' + workflow} or git('status', '--porcelain'):
               raise ValueError('Only two new diagnostic files may differ; application and all original tests must be unchanged')
-          if hashlib.sha256(Path(helper).read_bytes()).hexdigest() != '696c4acff6d4a98eb15529f1a83e6034e1244fb32216c02ef300c96e91b406b2':
+          if set(git('diff', '--name-status', baseline, 'HEAD').splitlines()) != {'A\t' + helper, 'A\t' + workflow}:
+              raise ValueError('Cumulative difference from S4 must still be exactly two diagnostic files')
+          if hashlib.sha256(Path(helper).read_bytes()).hexdigest() != '23f39fd9058fbedb14a2c1b7ca1c640ef11f19dc0e606bb4db895486c6946888':
               raise ValueError('Exact independently reviewed direct VM helper required')
           PY_SCOPE
       - name: Install the identical pinned Flutter
@@ -52,7 +55,7 @@ jobs:
         run: flutter pub get
       - name: Require the same disposable-runner hardware acceleration
         run: bash .github/scripts/bil_prepare_android_kvm.sh
-      - name: Prepare the scoped three-native-case orchestration
+      - name: Prepare cheap log preflight and the two affected original native scopes
         shell: bash
         run: |
           set -euo pipefail
@@ -82,13 +85,17 @@ jobs:
           from pathlib import Path
           root = Path('artifacts/qa/text18/android-api33-direct-vm')
           rows = []
-          for scope in ['system-crypto', 'native-settings', 'native-feature-splashes']:
+          for scope in ['native-settings', 'native-feature-splashes']:
               file = root / (scope + '-result.json')
               rows.append({'scope': scope, 'result': json.loads(file.read_text()) if file.is_file() else {'status': 'NOT_EXECUTED'}})
-          complete = all(r['result'].get('direct_vm_final_exit') == 0 and r['result'].get('direct_vm_actual_case_summary_required') is True for r in rows)
-          receipt = {'status': 'ALL3_ORIGINAL_NATIVE_SCOPES_PASS_DIAGNOSTIC_ONLY' if complete and sys.argv[1] == '0' else 'FAIL_OR_INCOMPLETE_DIAGNOSTIC',
+          preflight_file = root / 'barrier-preflight.json'
+          preflight = json.loads(preflight_file.read_text()) if preflight_file.is_file() else {'status': 'NOT_EXECUTED'}
+          complete = preflight.get('status') == 'LOG_BARRIER_PREFLIGHT_PASS_NO_APP_CASES' and all(r['result'].get('direct_vm_final_exit') == 0 and r['result'].get('direct_vm_actual_case_summary_required') is True for r in rows)
+          receipt = {'status': 'BOTH_ORIGINAL_AFFECTED_SCOPES_PASS_DIAGNOSTIC_ONLY' if complete and sys.argv[1] == '0' else 'FAIL_OR_INCOMPLETE_DIAGNOSTIC',
               'source': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'], 'attempt': os.environ['GITHUB_RUN_ATTEMPT'],
-              'source_parent': 'fd106fd3ba6073f0474640a10062af6d7d55dadb', 'scopes': rows,
+              'source_parent': 'e2e2c999a248eea4461cca857d4bf0cb48e60263', 'scopes': rows, 'log_barrier_preflight': preflight,
+              'crypto_this_run': 'NOT_EXECUTED', 'separate_prior_crypto_pass_run': 43760383178,
+              'all3_native_scopes_this_run': False, 'future_full_source_still_requires_all3_native_scopes': True,
               'renderer_runtime_permissions_or_original_assertions_changed': False, 'release_acceptance': False,
               'private_vm_uri_saved': False, 'original_shell_exit': int(sys.argv[1])}
           (root / 'diagnostic-result.json').write_text(json.dumps(receipt, indent=2) + '\n')
@@ -102,13 +109,14 @@ jobs:
           collect_command airplane-enable adb -s "$DEVICE" shell cmd connectivity airplane-mode enable
           collect_command airplane-status adb -s "$DEVICE" shell cmd connectivity airplane-mode
           test "$(tr -d '\r\n' < "$OUT/airplane-status.log")" = enabled
-          python3 .github/scripts/bil_android_direct_vm_attach.py --scope system-crypto --device "$DEVICE" --output "$OUT/system-crypto-transport" --log "$OUT/system-crypto.log" --receipt "$OUT/system-crypto-result.json"
+          collect_command fresh-log-preflight python3 .github/scripts/bil_android_direct_vm_attach.py \
+            --barrier-preflight --device "$DEVICE" --receipt "$OUT/barrier-preflight.json"
           BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/native-settings" \
             python3 .github/scripts/bil_android_direct_vm_attach.py --scope native-settings --device "$DEVICE" --output "$OUT/native-settings-transport" --log "$OUT/native-settings.log" --receipt "$OUT/native-settings-result.json"
           BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/feature-splashes" \
             python3 .github/scripts/bil_android_direct_vm_attach.py --scope native-feature-splashes --device "$DEVICE" --output "$OUT/native-feature-splashes-transport" --log "$OUT/native-feature-splashes.log" --receipt "$OUT/native-feature-splashes-result.json"
           SH_DIRECT_VM
-      - name: Run all three unchanged native scopes through the bounded transport
+      - name: Verify the live log channel then run original settings and feature scopes
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: 33

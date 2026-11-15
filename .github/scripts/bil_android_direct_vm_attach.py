@@ -28,7 +28,7 @@ import zipfile
 from bil_native_bounded_command import run_bounded
 
 PACKAGE = 'com.bilhealth.bodyintelligencelog'
-PARENT = 'fd106fd3ba6073f0474640a10062af6d7d55dadb'
+PARENT = 'e2e2c999a248eea4461cca857d4bf0cb48e60263'
 BRANCH = 'refs/heads/codex/bil45-android-api33-direct-vm-diagnostic-20261115'
 WORKFLOW = '.github/workflows/bil45_android_api33_direct_vm_diagnostic.yml'
 SELF = '.github/scripts/bil_android_direct_vm_attach.py'
@@ -150,6 +150,129 @@ def launch_command(adb, serial):
             '--ez', 'verify-entry-points', 'true', '--ez', 'start-paused', 'true', PACKAGE + '/.MainActivity']
 
 
+def fresh_log_capture(adb, serial, deadline, receipt):
+    """One subscription handshake; all waits/write/echo share the same20s."""
+    started = time.monotonic()
+    end = min(deadline, started + 20)
+    need(end > started, 'ORIGINAL_BOOTSTRAP_DEADLINE_EXPIRED')
+    state = {'status': 'WAITING_FIRST_VALID_ENTRY', 'rows': 0, 'valid_rows': 0,
+             'first_valid_tag': None, 'first_valid_after_seconds': None,
+             'marker_writes': 0, 'marker_exit': None}
+    receipt['fresh_log_handshake'] = state
+    collector = subprocess.Popen([str(adb), '-s', serial, 'shell', '-x', 'logcat',
+                                  '-v', 'threadtime', '-T', '1'],
+                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    native = Lines(collector)
+
+    def remaining():
+        seconds = end - time.monotonic()
+        need(seconds > 0, 'FRESH_LOG_HANDSHAKE_DEADLINE_EXPIRED')
+        need(collector.poll() is None and not native.done.is_set(), 'FRESH_LOG_READER_ENDED')
+        return seconds
+
+    def read():
+        row = native.take(timeout=min(.02, remaining()))
+        remaining()  # A blocking read cannot turn a late record into PASS.
+        if row is None:
+            return None
+        state['rows'] += 1
+        match = LINE.fullmatch(row)
+        if match:
+            state['valid_rows'] += 1
+        return match
+
+    try:
+        first = None
+        while first is None:
+            first = read()
+        tag = first[2].strip()
+        state['first_valid_tag'] = tag if tag in ('flutter', 'BIL_DIRECT_VM', 'ActivityManager', 'logd') else 'OTHER'
+        state['first_valid_after_seconds'] = round(time.monotonic() - started, 3)
+        state['status'] = 'WRITING_ONE_MARKER'
+        marker = uuid.uuid4().hex
+        timeout = remaining()
+        state['marker_writes'] = 1
+        result = subprocess.run([str(adb), '-s', serial, 'shell', 'log', '-p', 'i', '-t', 'BIL_DIRECT_VM', marker],
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
+        state['marker_exit'] = result.returncode
+        remaining()
+        need(result.returncode == 0, 'FRESH_LOG_MARKER_COMMAND_FAILED')
+        state['status'] = 'WAITING_EXACT_MARKER'
+        while True:
+            match = read()
+            if match and match[2].strip() == 'BIL_DIRECT_VM' and match[3] == marker:
+                break
+        state['status'] = 'EXACT_FRESH_MARKER_OBSERVED'
+        receipt['fresh_log_barrier_observed'] = True
+        return collector, native
+    except Exception as error:
+        state['failed_stage'] = state['status']
+        state['status'] = 'FAILED'
+        state.update(collector_exit_at_failure=collector.poll(), reader_eof_at_failure=native.done.is_set() and not native.failed,
+                     reader_failed_at_failure=native.failed, failure_error_type=type(error).__name__,
+                     failure_code=str(error) if re.fullmatch(r'[A-Z0-9_]+', str(error)) else 'NO_RAW_EXCEPTION_RECORDED')
+        try:
+            if collector.poll() is None:
+                collector.terminate()
+                try:
+                    collector.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    collector.kill()
+                    collector.wait(timeout=1)
+            state['owned_reader_cleanup_completed'] = True
+        except Exception as cleanup_error:
+            state.update(owned_reader_cleanup_completed=False, cleanup_error_type=type(cleanup_error).__name__)
+        raise
+    finally:
+        state.update(elapsed_seconds=round(time.monotonic() - started, 3),
+                     collector_exit=collector.poll(), reader_eof=native.done.is_set() and not native.failed, reader_failed=native.failed)
+
+
+def barrier_preflight(args):
+    # The existing outer30s collector bounds property/PID reads, the shared20s
+    # handshake and owned-reader teardown. This is not an application test.
+    receipt = {'status': 'LOG_BARRIER_PREFLIGHT_FAILED', 'application_test_cases': 0,
+               'release_acceptance': False, 'private_body_or_nonce_saved': False}
+    collector = None
+    output = Path(args.receipt).resolve()
+    need(output == Path.cwd().resolve() / 'artifacts/qa/text18/android-api33-direct-vm/barrier-preflight.json', 'EXACT_PREFLIGHT_RECEIPT_REQUIRED')
+    deadline = time.monotonic() + 25
+    adb = Path(os.environ['ANDROID_HOME']).resolve() / 'platform-tools/adb'
+    need(adb.is_file(), 'EXISTING_ADB_REQUIRED')
+    try:
+        for prop, expected in [('ro.kernel.qemu', '1'), ('ro.build.version.sdk', '33'), ('ro.product.cpu.abi', 'x86_64')]:
+            result = subprocess.run([str(adb), '-s', args.device, 'shell', 'getprop', prop], stdout=subprocess.PIPE,
+                                    stderr=subprocess.STDOUT, timeout=max(.001, min(3, deadline - time.monotonic())))
+            need(result.returncode == 0 and result.stdout.decode().strip() == expected, 'EXACT_API33_X64_OWNED_EMULATOR_REQUIRED')
+        result = subprocess.run([str(adb), '-s', args.device, 'shell', 'pidof', PACKAGE], stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT, timeout=max(.001, min(3, deadline - time.monotonic())))
+        need(result.returncode == 1 and not result.stdout.strip(), 'PREFLIGHT_REQUIRES_NO_APP_PID')
+        collector, _ = fresh_log_capture(adb, args.device, deadline, receipt)
+        receipt['status'] = 'LOG_BARRIER_PREFLIGHT_PASS_NO_APP_CASES'
+        return 0
+    except Exception as error:
+        receipt.update(error_type=type(error).__name__, error_code=str(error) if re.fullmatch(r'[A-Z0-9_]+', str(error)) else 'NO_RAW_EXCEPTION_RECORDED')
+        return 1
+    finally:
+        cleanup_error = None
+        if collector is not None and collector.poll() is None:
+            try:
+                collector.terminate()
+                try:
+                    collector.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    collector.kill()
+                    collector.wait(timeout=1)
+            except Exception as error:
+                cleanup_error = type(error).__name__
+                receipt.update(status='LOG_BARRIER_PREFLIGHT_FAILED', cleanup_error_type=cleanup_error)
+        receipt['owned_cleanup_completed'] = cleanup_error is None and receipt.get('fresh_log_handshake', {}).get('owned_reader_cleanup_completed', True)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(receipt, indent=2) + '\n')
+        if not receipt['owned_cleanup_completed']:
+            raise RuntimeError('PREFLIGHT_OWNED_CLEANUP_FAILED')
+
+
 def worker(args):
     root = Path.cwd().resolve()
     output = Path(args.output).resolve()
@@ -266,18 +389,7 @@ def worker(args):
         need(current_pid() is None, 'OLD_APP_PID_MUST_BE_GONE')
         capture('install-exact-apk', [str(adb), '-s', args.device, 'install', '-r', '-t', str(apk)], cap=120)
         need(current_pid() is None, 'NO_APP_PID_BEFORE_FRESH_CAPTURE')
-        collector = subprocess.Popen([str(adb), '-s', args.device, 'shell', '-x', 'logcat', '-v', 'threadtime', '-T', '0'],
-                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        native = Lines(collector)
-        marker = uuid.uuid4().hex
-        capture('live-log-barrier', [str(adb), '-s', args.device, 'shell', 'log', '-p', 'i', '-t', 'BIL_DIRECT_VM', marker])
-        end = time.monotonic() + remaining(20)
-        while True:
-            need(time.monotonic() < end and collector.poll() is None and not native.done.is_set(), 'FRESH_LOG_BARRIER_NOT_OBSERVED')
-            row = native.take()
-            if row and 'BIL_DIRECT_VM' in row and row.endswith(marker):
-                break
-        receipt['fresh_log_barrier_observed'] = True
+        collector, native = fresh_log_capture(adb, args.device, args.deadline, receipt)
         _, launched = capture('one-owned-launch', launch_command(adb, args.device))
         need('Error:' not in launched and 'Status: ok' in launched and 'not started' not in launched, 'ONE_LAUNCH_NOT_CONFIRMED')
         owned_pid = current_pid()
@@ -354,7 +466,7 @@ def worker(args):
             receipt['evidence_save_failed'] = True
         try:
             cleanup()
-            receipt['owned_cleanup_completed'] = True
+            receipt['owned_cleanup_completed'] = receipt.get('fresh_log_handshake', {}).get('owned_reader_cleanup_completed', True)
         except Exception as error:
             receipt['owned_cleanup_completed'] = False
             receipt['cleanup_error_type'] = type(error).__name__
@@ -369,15 +481,22 @@ def worker(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--scope', choices=sorted(SCOPES), required=True)
+    parser.add_argument('--scope', choices=sorted(SCOPES))
     parser.add_argument('--device', required=True)
-    parser.add_argument('--output', required=True)
-    parser.add_argument('--log', required=True)
+    parser.add_argument('--output')
+    parser.add_argument('--log')
     parser.add_argument('--receipt', required=True)
+    parser.add_argument('--barrier-preflight', action='store_true')
     parser.add_argument('--worker', action='store_true')
     parser.add_argument('--deadline', type=float)
     args = parser.parse_args()
     need(sys.platform == 'linux' and re.fullmatch(r'emulator-[0-9]+', args.device), 'LINUX_OWNED_EMULATOR_ONLY')
+    if args.barrier_preflight:
+        need(not args.worker and args.scope is None and args.output is None and args.log is None and args.deadline is None,
+             'EXACT_PREFLIGHT_ARGUMENTS_REQUIRED')
+        need(os.environ.get('GITHUB_EVENT_NAME') == 'push' and os.environ.get('GITHUB_REF') == BRANCH, 'EXACT_DIAGNOSTIC_PUSH_ONLY')
+        return barrier_preflight(args)
+    need(args.scope is not None and args.output and args.log, 'EXACT_NATIVE_SCOPE_ARGUMENTS_REQUIRED')
     base = Path.cwd().resolve() / 'artifacts/qa/text18/android-api33-direct-vm'
     need(Path(args.output).resolve() == base / (args.scope + '-transport')
          and Path(args.log).resolve() == base / (args.scope + '.log')
