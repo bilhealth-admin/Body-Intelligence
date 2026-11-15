@@ -48,7 +48,10 @@ collect_before_exit() {
       "$OUT/device-platform-polish"
   fi
   if [ "$original_status" -ne 0 ]; then
-    collect_command failure-logcat adb -s "$DEVICE" logcat -d -t 1000
+    # The helper reads only this owned AVD's fixed logcat tail into memory and
+    # removes private VM URIs/auth paths before this public collector sees bytes.
+    collect_command failure-logcat python3 .github/scripts/bil_android_direct_vm_attach.py \
+      --redact-logcat --device "$DEVICE"
     collect_command failure-memory adb -s "$DEVICE" shell dumpsys meminfo \
       com.bilhealth.bodyintelligencelog
     if collect_command failure-screen-device adb -s "$DEVICE" shell screencap \
@@ -75,6 +78,11 @@ collect_command airplane-enable adb -s "$DEVICE" shell cmd connectivity airplane
 collect_command airplane-status adb -s "$DEVICE" shell cmd connectivity airplane-mode
 test "$(tr -d '\r\n' < "$OUT/airplane-status.log")" = 'enabled'
 
+# The same live-reader handshake fails cheaply before any application build.
+# All three original native scopes remain mandatory on the full-source run.
+collect_command log-transport-preflight python3 .github/scripts/bil_android_direct_vm_attach.py \
+  --barrier-preflight --device "$DEVICE" --receipt "$OUT/barrier-preflight.json"
+
 if [ "${BIL_NATIVE_TARGET:-all}" != feature-splashes ]; then
   native_command system-crypto flutter test integration_test/system_crypto_bridge_integration_test.dart \
     --no-pub --device-id "$DEVICE" --reporter expanded \
@@ -88,22 +96,12 @@ if [ "${BIL_NATIVE_TARGET:-all}" != feature-splashes ]; then
   fi
 
   BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/native-settings" \
-    native_command native-settings flutter drive --timeout 1200 --device-id "$DEVICE" \
-      --driver=test_driver/native_settings_capture_driver.dart \
-      --target=integration_test/native_settings_polish_test.dart \
-      --dart-define=BIL_ENVIRONMENT=testing \
-      --dart-define=BIL_USE_SUPABASE=false \
-      --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
-      --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE"
+    python3 .github/scripts/bil_android_direct_vm_attach.py \
+      --scope native-settings --device "$DEVICE" --output "$OUT/native-settings-transport" \
+      --log "$OUT/native-settings.log" --receipt "$OUT/native-settings-result.json"
 fi
 
 BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/feature-splashes" \
-  native_command native-feature-splashes flutter drive --timeout 1200 --device-id "$DEVICE" \
-    --driver=test_driver/native_feature_splashes_driver.dart \
-    --target=integration_test/native_feature_splashes_test.dart \
-    --dart-define=BIL_ENVIRONMENT=testing \
-    --dart-define=BIL_USE_SUPABASE=false \
-    --dart-define=BIL_QA_ANDROID_EMULATOR=true \
-    --dart-define=BIL_QA_DEVICE_NAME=github-api33-pixel6 \
-    --dart-define=BIL_QA_SOURCE_HEAD="$SOURCE_HEAD" \
-    --dart-define=BIL_QA_SOURCE_FINGERPRINT="$SOURCE_TREE"
+  python3 .github/scripts/bil_android_direct_vm_attach.py \
+    --scope native-feature-splashes --device "$DEVICE" --output "$OUT/native-feature-splashes-transport" \
+    --log "$OUT/native-feature-splashes.log" --receipt "$OUT/native-feature-splashes-result.json"
