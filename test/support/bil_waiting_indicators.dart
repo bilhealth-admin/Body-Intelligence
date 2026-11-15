@@ -1,4 +1,6 @@
+import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,6 +13,8 @@ export 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.d
 Finder bilWaitingIndicators() => find.byWidgetPredicate(
   (widget) =>
       widget is BilFeatureWelcomeStatus ||
+      widget is BilCompactActivityIndicator ||
+      widget is CupertinoActivityIndicator ||
       (widget is CircularProgressIndicator && widget.value == null) ||
       (widget is LinearProgressIndicator && widget.value == null),
   description: 'BIL or legacy indeterminate waiting indicator',

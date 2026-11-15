@@ -128,7 +128,7 @@ class _DashboardNutrientGoalCards extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ),
-                          BilStripedProgress(
+                          BilStripedProgress.dashboard(
                             child: LinearProgressIndicator(
                               value: progress ?? 0,
                               minHeight: 8,

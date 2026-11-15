@@ -53,7 +53,7 @@ void main() {
                                     for (final size in [16.0, 18.0, 22.0, 24.0])
                                       SizedBox.square(
                                         dimension: size,
-                                        child: BilFeatureWelcomeStatus(
+                                        child: BilFeatureWelcomeStatus.splash(
                                           key: ValueKey('compact-$size'),
                                           label: label,
                                         ),
@@ -64,7 +64,7 @@ void main() {
                                 const SizedBox(
                                   width: 180,
                                   height: 24,
-                                  child: BilFeatureWelcomeStatus(
+                                  child: BilFeatureWelcomeStatus.splash(
                                     key: Key('wide'),
                                     label: 'Working on your question…',
                                   ),
@@ -73,7 +73,7 @@ void main() {
                                 IntrinsicWidth(
                                   child: Row(
                                     children: [
-                                      BilFeatureWelcomeStatus(
+                                      BilFeatureWelcomeStatus.splash(
                                         key: const Key('natural'),
                                         label: label,
                                       ),
@@ -90,7 +90,7 @@ void main() {
                                   content: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      BilFeatureWelcomeStatus(
+                                      BilFeatureWelcomeStatus.splash(
                                         color: Colors.red,
                                       ),
                                       SizedBox(width: 8),

@@ -382,7 +382,7 @@ class _WindowsCameraCaptureState extends State<_WindowsCameraCapture> {
         child: error != null
             ? Center(child: Text(error!, textAlign: TextAlign.center))
             : active == null || !active.value.isInitialized
-            ? const Center(child: BilFeatureWelcomeStatus())
+            ? const Center(child: BilFeatureWelcomeStatus.splash())
             : ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: CameraPreview(active),
@@ -400,7 +400,7 @@ class _WindowsCameraCaptureState extends State<_WindowsCameraCapture> {
           icon: capturing
               ? const SizedBox.square(
                   dimension: 18,
-                  child: BilFeatureWelcomeStatus(),
+                  child: BilFeatureWelcomeStatus.splash(),
                 )
               : const Icon(Icons.camera_alt_rounded),
           label: Text(_dashboardText(widget.locale, 'capture')),

@@ -1,8 +1,52 @@
 // QA-only protocol shared by the native paint probe and host evidence driver.
 // It describes observed production pixels, never a fabricated progress value.
 const nativeCompactActivityEvidenceSchema = 'bil.native-compact-activity.v1';
+const nativeCompactActivityIndicatorKind = 'BIL_COMPACT_SEGMENTED_WAIT';
+const nativeCompactActivityNeutralArgb = {0xFF697178, 0xFFBBC4CD, 0xFFE5E7EB};
 const nativeCompactActivitySamplingScope =
     'actual ancestor RepaintBoundary RGBA crop; separate pending visit';
+
+/// Cupertino ticks use alpha 47..147, so observe their actual composited color.
+/// An unchanged background or a transparent/blank pixel cannot count as paint.
+bool isNativeSegmentedActivityForegroundPixel(
+  List<int> pixel,
+  List<int> background, {
+  List<int> foregroundRgb = const [0x69, 0x71, 0x78],
+}) {
+  if (pixel.length != 4 ||
+      background.length != 4 ||
+      foregroundRgb.length != 3 ||
+      pixel.any((channel) => channel < 0 || channel > 255) ||
+      background.any((channel) => channel < 0 || channel > 255) ||
+      foregroundRgb.any((channel) => channel < 0 || channel > 255) ||
+      pixel[3] != 255 ||
+      background[3] != 255 ||
+      List.generate(
+        3,
+        (channel) => (pixel[channel] - background[channel]).abs(),
+      ).every((difference) => difference < 10)) {
+    return false;
+  }
+  final foregroundArgb =
+      0xFF000000 |
+      (foregroundRgb[0] << 16) |
+      (foregroundRgb[1] << 8) |
+      foregroundRgb[2];
+  if (!nativeCompactActivityNeutralArgb.contains(foregroundArgb)) return false;
+  for (final alpha in [47, 72, 97, 122, 147]) {
+    var matches = true;
+    for (var channel = 0; channel < 3; channel++) {
+      final expected =
+          (foregroundRgb[channel] * alpha +
+              background[channel] * (255 - alpha) +
+              127) ~/
+          255;
+      if ((pixel[channel] - expected).abs() > 6) matches = false;
+    }
+    if (matches) return true;
+  }
+  return false;
+}
 
 bool isNativeCompactActivityPaintEvidence(Object? value) {
   if (value is! Map) return false;
@@ -25,7 +69,7 @@ bool isNativeCompactActivityPaintEvidence(Object? value) {
   if (value.length != keys.length ||
       !keys.every(value.containsKey) ||
       value['schema'] != nativeCompactActivityEvidenceSchema ||
-      value['indicator_kind'] != 'BIL_COMPACT_CIRCULAR_WAIT' ||
+      value['indicator_kind'] != nativeCompactActivityIndicatorKind ||
       value['sampling_scope'] != nativeCompactActivitySamplingScope ||
       value['sample_interval_ms'] != 320 ||
       value['indeterminate_without_percentage'] != true ||

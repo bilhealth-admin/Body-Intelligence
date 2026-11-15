@@ -12,6 +12,7 @@ import 'package:body_intelligence_log/features/commerce/domain/subscription_stat
 import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -89,7 +90,13 @@ void main() {
     expect(find.text('Checking subscription'), findsOneWidget);
     expect(find.byType(BilCompactActivityIndicator), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsNothing);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    final activity = find.byType(CupertinoActivityIndicator);
+    expect(activity, findsOneWidget);
+    final indicator = tester.widget<CupertinoActivityIndicator>(activity);
+    expect(indicator.radius, 12);
+    expect(indicator.color, const Color(0xFF697178));
+    expect(indicator.animating, isTrue);
     expect(find.text('Current plan'), findsNothing);
     expect(find.byKey(const Key('store-current-plan-status')), findsNothing);
     expect(find.byKey(const Key('store-purchase-cta')), findsNothing);

@@ -38,7 +38,7 @@ class _DailyGoalStrip extends StatelessWidget {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(99),
-                  child: BilStripedProgress(
+                  child: BilStripedProgress.dashboard(
                     child: LinearProgressIndicator(
                       minHeight: 8,
                       value: progress,
@@ -289,7 +289,7 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                     children: [
                       ExcludeSemantics(
                         excluding: consumed == null,
-                        child: BilStripedProgress(
+                        child: BilStripedProgress.dashboard(
                           tone: BilProgressTone.calories,
                           child: LinearProgressIndicator(
                             key: const Key(
@@ -611,7 +611,7 @@ class _ReferenceMacroColumn extends StatelessWidget {
             borderRadius: BorderRadius.circular(99),
             child: ExcludeSemantics(
               excluding: value == null,
-              child: BilStripedProgress(
+              child: BilStripedProgress.dashboard(
                 nutritionColors: true,
                 child: LinearProgressIndicator(
                   minHeight: 7,

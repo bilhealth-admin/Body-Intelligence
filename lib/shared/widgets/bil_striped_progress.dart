@@ -53,16 +53,31 @@ class BilStripedProgress extends StatelessWidget {
     required this.child,
     this.tone,
     this.nutritionColors = false,
-  });
+  }) : _preserveDashboardWaiting = false;
+
+  const BilStripedProgress.dashboard({
+    super.key,
+    required this.child,
+    this.tone,
+    this.nutritionColors = false,
+  }) : _preserveDashboardWaiting = true;
 
   final ProgressIndicator child;
   final BilProgressTone? tone;
   final bool nutritionColors;
+  final bool _preserveDashboardWaiting;
 
   @override
   Widget build(BuildContext context) {
     final value = child.value;
     if (value == null) {
+      if (_preserveDashboardWaiting) {
+        return BilFeatureWelcomeStatus.splash(
+          key: child.key,
+          color: child.valueColor?.value ?? child.color,
+          label: child.semanticsLabel,
+        );
+      }
       return BilFeatureWelcomeStatus(
         key: child.key,
         color: child.valueColor?.value ?? child.color,

@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,7 +9,7 @@ import '../../../tools/qa/flutter/native_compact_activity_evidence.dart';
 // These are protocol-only fixtures, not substitutes for actual pixel reads.
 Map<String, Object?> _evidence({bool reduced = false}) => {
   'schema': nativeCompactActivityEvidenceSchema,
-  'indicator_kind': 'BIL_COMPACT_CIRCULAR_WAIT',
+  'indicator_kind': nativeCompactActivityIndicatorKind,
   'render_width': 24.0,
   'render_height': 24.0,
   'crop_width': 24,
@@ -35,7 +36,95 @@ Widget _frame({required bool reduced, required Widget child}) => MaterialApp(
   ),
 );
 
+void _expectSegmentedIndicator(WidgetTester tester, {required bool reduced}) {
+  expect(find.byType(CircularProgressIndicator), findsNothing);
+  final activity = find.byType(CupertinoActivityIndicator);
+  expect(activity, findsOneWidget);
+  final indicator = tester.widget<CupertinoActivityIndicator>(activity);
+  expect(indicator.radius, 12);
+  expect(indicator.color, const Color(0xFF697178));
+  expect(indicator.animating, !reduced);
+}
+
 void main() {
+  test(
+    'segmented pixel classifier accepts actual alpha blends on light and dark',
+    () {
+      expect(
+        isNativeSegmentedActivityForegroundPixel(
+          [169, 173, 177, 255],
+          [255, 255, 255, 255],
+        ),
+        isTrue,
+      );
+      expect(
+        isNativeSegmentedActivityForegroundPixel(
+          [108, 113, 118, 255],
+          [0, 0, 0, 255],
+          foregroundRgb: [0xBB, 0xC4, 0xCD],
+        ),
+        isTrue,
+      );
+      expect(
+        isNativeSegmentedActivityForegroundPixel(
+          [139, 149, 167, 255],
+          [0x10, 0x25, 0x4A, 255],
+          foregroundRgb: [0xE5, 0xE7, 0xEB],
+        ),
+        isTrue,
+      );
+      expect(
+        isNativeSegmentedActivityForegroundPixel(
+          [240, 241, 243, 255],
+          [255, 255, 255, 255],
+          foregroundRgb: [0xE5, 0xE7, 0xEB],
+        ),
+        isTrue,
+      );
+      expect(
+        isNativeSegmentedActivityForegroundPixel(
+          [19, 21, 22, 255],
+          [0, 0, 0, 255],
+        ),
+        isTrue,
+      );
+    },
+  );
+
+  test('segmented pixel classifier refuses unapproved foreground families', () {
+    for (final color in [
+      [0, 80, 255],
+      [0xBB, 0xC4],
+      [0xBB, 0xC4, 256],
+    ]) {
+      expect(
+        isNativeSegmentedActivityForegroundPixel(
+          [139, 149, 167, 255],
+          [0x10, 0x25, 0x4A, 255],
+          foregroundRgb: color,
+        ),
+        isFalse,
+      );
+    }
+  });
+
+  test(
+    'segmented pixel classifier refuses blank, transparent and wrong-color paint',
+    () {
+      for (final pixel in [
+        [255, 255, 255, 255],
+        [169, 173, 177, 0],
+        [0, 80, 255, 255],
+        [105, 113, 120, 255],
+      ]) {
+        expect(
+          isNativeSegmentedActivityForegroundPixel(pixel, [255, 255, 255, 255]),
+          isFalse,
+        );
+      }
+    },
+  );
+
   test('strict native compact paint contract accepts both observed modes', () {
     expect(isNativeCompactActivityPaintEvidence(_evidence()), isTrue);
     expect(
@@ -63,6 +152,7 @@ void main() {
     for (final mutant in [
       {..._evidence(), 'schema': 'bil.legacy-capsule.v1'},
       {..._evidence(), 'indicator_kind': 'BIL_SPLASH_CAPSULE'},
+      {..._evidence(), 'indicator_kind': 'BIL_COMPACT_CIRCULAR_WAIT'},
       {..._evidence(), 'indeterminate_without_percentage': false},
       {..._evidence(), 'sample_interval_ms': 0},
     ]) {
@@ -110,6 +200,7 @@ void main() {
         ),
       );
       await tester.pump();
+      _expectSegmentedIndicator(tester, reduced: true);
       await expectLater(
         native.verifyNativeCompactActivityProbe(
           tester,
@@ -139,6 +230,7 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 160));
+      _expectSegmentedIndicator(tester, reduced: false);
       await expectLater(
         native.verifyNativeCompactActivityProbe(
           tester,

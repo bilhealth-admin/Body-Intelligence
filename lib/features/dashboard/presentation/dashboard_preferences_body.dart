@@ -38,7 +38,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
               SizedBox(
                 height: _savingLayout ? 24 : 12,
                 child: _savingLayout
-                    ? const BilFeatureWelcomeStatus()
+                    ? const BilFeatureWelcomeStatus.splash()
                     : const SizedBox.shrink(),
               ),
               _DashboardPreferencesHero(
@@ -100,7 +100,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                         'Loading saved view',
                         'جارٍ تحميل العرض المحفوظ',
                       ),
-                      child: const BilFeatureWelcomeStatus(),
+                      child: const BilFeatureWelcomeStatus.splash(),
                     );
                   }
                   final pendingPreset = _pendingPresetId;
@@ -181,7 +181,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                     : preset.premium && !entitlementResolved
                                     ? const SizedBox.square(
                                         dimension: 22,
-                                        child: BilFeatureWelcomeStatus(),
+                                        child: BilFeatureWelcomeStatus.splash(),
                                       )
                                     : preset.premium && !paid
                                     ? const Icon(
@@ -372,7 +372,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                     child: const Center(
                                       child: SizedBox.square(
                                         dimension: 24,
-                                        child: BilFeatureWelcomeStatus(),
+                                        child: BilFeatureWelcomeStatus.splash(),
                                       ),
                                     ),
                                   );
@@ -522,7 +522,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                         if (state.isLoading) {
                           return const SizedBox.square(
                             dimension: 22,
-                            child: BilFeatureWelcomeStatus(),
+                            child: BilFeatureWelcomeStatus.splash(),
                           );
                         }
                         if (state.hasError) {

@@ -25,7 +25,7 @@ void main() {
                         body: Center(
                           child: SizedBox.square(
                             dimension: width,
-                            child: const BilFeatureWelcomeStatus(),
+                            child: const BilFeatureWelcomeStatus.splash(),
                           ),
                         ),
                       ),

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:body_intelligence_log/shared/widgets/bil_striped_progress.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -147,7 +148,7 @@ void main() {
     },
   );
 
-  testWidgets('loading uses the startup capsule without a data texture', (
+  testWidgets('loading uses grey segmented waiting without a data texture', (
     tester,
   ) async {
     const loading = CircularProgressIndicator(key: Key('native-loading'));
@@ -160,7 +161,12 @@ void main() {
     expect((state as StatelessElement).widget, isA<BilStripedProgress>());
     expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.byType(BilSplashCapsuleProgress), findsOneWidget);
+    expect(find.byType(BilSplashCapsuleProgress), findsNothing);
+    final indicator = tester.widget<CupertinoActivityIndicator>(
+      find.byType(CupertinoActivityIndicator),
+    );
+    expect(indicator.color, const Color(0xFF697178));
+    expect(indicator.radius, 12);
     final semantics = tester.ensureSemantics();
     expect(
       tester
@@ -170,6 +176,27 @@ void main() {
       ui.SemanticsRole.loadingSpinner,
     );
     semantics.dispose();
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('Dashboard missing progress retains its capsule presentation', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: BilStripedProgress.dashboard(
+            child: CircularProgressIndicator(color: Colors.green),
+          ),
+        ),
+      ),
+    );
+    final capsule = tester.widget<BilSplashCapsuleProgress>(
+      find.byType(BilSplashCapsuleProgress),
+    );
+    expect(capsule.color, Colors.green);
+    expect(find.byType(CupertinoActivityIndicator), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

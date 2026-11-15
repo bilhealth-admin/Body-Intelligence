@@ -1,5 +1,6 @@
 import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_thinking_status.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -41,7 +42,13 @@ void main() {
         final rect = tester.getRect(find.byKey(const Key('anchor')));
         final spinner = find.byType(BilCompactActivityIndicator);
         expect(spinner, findsOneWidget);
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        final activity = find.byType(CupertinoActivityIndicator);
+        expect(activity, findsOneWidget);
+        final indicator = tester.widget<CupertinoActivityIndicator>(activity);
+        expect(indicator.radius, 12);
+        expect(indicator.color, const Color(0xFF697178));
+        expect(indicator.animating, isTrue);
         expect(tester.getSize(spinner), const Size.square(24));
         void expectIndicatorOnPhysicalLeft(String label) {
           expect(
@@ -92,13 +99,12 @@ void main() {
       expect(find.text('Please wait…'), findsNothing);
       expect(find.byType(ShaderMask), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(
-        find.descendant(
-          of: find.byType(BilCompactActivityIndicator),
-          matching: find.byType(CustomPaint),
-        ),
-        findsOneWidget,
-      );
+      final activity = find.byType(CupertinoActivityIndicator);
+      expect(activity, findsOneWidget);
+      final indicator = tester.widget<CupertinoActivityIndicator>(activity);
+      expect(indicator.radius, 12);
+      expect(indicator.color, const Color(0xFF697178));
+      expect(indicator.animating, isFalse);
       expect(
         tester
             .getSemantics(find.byType(BilCompactActivityIndicator))

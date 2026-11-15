@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/features/commerce/domain/store_offer_metad
 import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,14 +80,15 @@ void main() {
                 final spinner = find.byType(BilCompactActivityIndicator);
                 expect(spinner, findsOneWidget);
                 expect(find.byType(BilSplashCapsuleProgress), findsNothing);
-                final circle = find.byType(CircularProgressIndicator);
-                expect(circle, reduced ? findsNothing : findsOneWidget);
+                final activity = find.byType(CupertinoActivityIndicator);
+                expect(activity, findsOneWidget);
+                expect(find.byType(CircularProgressIndicator), findsNothing);
                 expect(
                   find.descendant(of: cta, matching: spinner),
                   findsNothing,
                 );
                 expect(
-                  find.descendant(of: cta, matching: circle),
+                  find.descendant(of: cta, matching: activity),
                   findsNothing,
                 );
                 expect(
@@ -103,20 +105,14 @@ void main() {
                 );
                 expect(tester.widget<InkWell>(cta).onTap, isNull);
                 expect(tester.getSize(spinner), const Size.square(24));
-                if (!reduced) {
-                  final nativeIndicator = tester
-                      .widget<CircularProgressIndicator>(circle);
-                  expect(nativeIndicator.strokeWidth, 2);
-                  expect(nativeIndicator.value, isNull);
-                } else {
-                  expect(
-                    find.descendant(
-                      of: spinner,
-                      matching: find.byType(CustomPaint),
-                    ),
-                    findsOneWidget,
-                  );
-                }
+                final nativeIndicator = tester
+                    .widget<CupertinoActivityIndicator>(activity);
+                expect(nativeIndicator.radius, 12);
+                expect(
+                  nativeIndicator.color,
+                  dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
+                );
+                expect(nativeIndicator.animating, !reduced);
                 final paint = await native.verifyNativeCompactActivityProbe(
                   tester,
                   spinner,
@@ -129,7 +125,13 @@ void main() {
                 expect(restores, 0);
                 if (reduced) expect(tester.binding.hasScheduledFrame, isFalse);
                 expect(tester.takeException(), isNull);
-                if (reduced && restoring && scale == 2) {
+                final captureDir =
+                    Platform.environment['BIL_PREMIUM_CAPTURE_DIR'];
+                if (captureDir != null &&
+                    captureDir.isNotEmpty &&
+                    reduced &&
+                    restoring &&
+                    scale == 2) {
                   final boundary = tester.renderObject<RenderRepaintBoundary>(
                     find.byKey(const Key('qa-store-loading-frame')),
                   );
@@ -144,7 +146,7 @@ void main() {
                     }
                   });
                   final file = File(
-                    'build/bil44_compact_loading_review/store-${rtl ? 'ar' : 'en'}-${dark ? 'dark' : 'light'}-2x.png',
+                    '$captureDir/store-${rtl ? 'ar' : 'en'}-${dark ? 'dark' : 'light'}-2x.png',
                   );
                   file.parent.createSync(recursive: true);
                   file.writeAsBytesSync(bytes!.buffer.asUint8List());

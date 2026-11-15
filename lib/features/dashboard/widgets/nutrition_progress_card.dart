@@ -69,7 +69,7 @@ class NutritionProgressCard extends StatelessWidget {
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              BilStripedProgress(
+              BilStripedProgress.dashboard(
                 child: LinearProgressIndicator(
                   value: progress,
                   color: color,

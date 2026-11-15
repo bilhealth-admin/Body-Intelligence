@@ -45,7 +45,7 @@ class ConfidenceRing extends StatelessWidget {
           children: [
             SizedBox.square(
               dimension: size,
-              child: BilStripedProgress(
+              child: BilStripedProgress.dashboard(
                 child: CircularProgressIndicator(
                   value: score.clamp(0, 100) / 100,
                   strokeWidth: 5,

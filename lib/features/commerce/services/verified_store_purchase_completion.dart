@@ -33,6 +33,20 @@ extension _VerifiedNativeStoreCompletion on VerifiedStorePurchaseService {
       if (current()) {
         _pendingVerifiedFinishes.remove(key);
         trace?.mark(StorePurchaseStage.finishCompleted);
+        // A verified inactive subscription can finish before its first prices.
+        // Recover only that settled owner/generation once a catalog is present.
+        if (!boost &&
+            !active &&
+            currentPresentation() &&
+            state == VerifiedStoreState.unavailable &&
+            messageCode == 'no_restorable_purchases') {
+          _settledInactiveCatalogRecovery = (
+            visit: visit,
+            generation: generation,
+            benefitRevision: benefitRevision,
+          );
+          if (_restoreCatalogAfterSettledInactiveReceipt()) notifyListeners();
+        }
       }
     } on Object {
       if (!current()) return;

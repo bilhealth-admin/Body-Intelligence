@@ -96,7 +96,8 @@ class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard> {
             ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
             : PremiumDesignTokens.cardPaddingLarge,
         child: state.when(
-          loading: () => const Center(child: BilCompactActivityIndicator()),
+          loading: () =>
+              const Center(child: BilCompactActivityIndicator.dashboard()),
           error: (_, _) => ConnectedHealthErrorContent(
             languageCode: Localizations.localeOf(context).toLanguageTag(),
             onRetry: () => ref.read(connectedHealthProvider.notifier).refresh(),
@@ -663,7 +664,7 @@ class _DashboardSyncReading extends StatelessWidget {
     icon: syncing
         ? const SizedBox.square(
             dimension: 17,
-            child: BilCompactActivityIndicator(),
+            child: BilCompactActivityIndicator.dashboard(),
           )
         : BilNavigationFeedback(
             child: Icon(Icons.sync_rounded, size: compact ? 14 : 17),

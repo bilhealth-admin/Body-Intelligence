@@ -106,7 +106,7 @@ class DashboardTargetRow extends StatelessWidget {
                 if (evidence.state == NutrientEvidenceState.partial)
                   NutrientEvidenceStatusText(state: evidence.state),
                 const SizedBox(height: 4),
-                BilStripedProgress(
+                BilStripedProgress.dashboard(
                   child: LinearProgressIndicator(value: ratio),
                 ),
                 Text(

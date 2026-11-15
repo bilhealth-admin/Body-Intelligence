@@ -50,7 +50,7 @@ class _MacroProgress extends StatelessWidget {
               children: [
                 SizedBox.square(
                   dimension: 56,
-                  child: BilStripedProgress(
+                  child: BilStripedProgress.dashboard(
                     nutritionColors: true,
                     child: CircularProgressIndicator(
                       value: progress,

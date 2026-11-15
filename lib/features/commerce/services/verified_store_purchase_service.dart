@@ -107,6 +107,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   String? _purchaseInitiatedProductId;
   Timer? _purchaseWatchdog;
   bool _storeStartupFaultBeforeCatalog = false;
+  ({StoreAccountSnapshot visit, int generation, int benefitRevision})?
+  _settledInactiveCatalogRecovery;
   bool _appleDuplicateRetryInFlight = false;
   Completer<void>? _restoreEventObserved;
   String? _entitlementOwnerId;
@@ -157,6 +159,24 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         productAvailable: products.isNotEmpty,
         messageCode: messageCode,
       );
+
+  bool _restoreCatalogAfterSettledInactiveReceipt() {
+    final settled = _settledInactiveCatalogRecovery;
+    if (settled == null ||
+        _disposed ||
+        products.isEmpty ||
+        state != VerifiedStoreState.unavailable ||
+        messageCode != 'no_restorable_purchases' ||
+        hasPendingVerifiedFinish ||
+        settled.generation != _purchaseEventGeneration ||
+        settled.benefitRevision != verifiedBenefitRevision ||
+        !_storeVisit.isCurrent(settled.visit)) {
+      return false;
+    }
+    _settledInactiveCatalogRecovery = null;
+    state = VerifiedStoreState.ready;
+    return true;
+  }
 
   Future<void> initialize() {
     if (_disposed || busy) return Future<void>.value();
@@ -278,6 +298,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         messageCode = null;
         _storeStartupFaultBeforeCatalog = false;
       }
+      _restoreCatalogAfterSettledInactiveReceipt();
       notifyListeners();
       await _queryCompletedAndroidPurchases();
     } on Object {

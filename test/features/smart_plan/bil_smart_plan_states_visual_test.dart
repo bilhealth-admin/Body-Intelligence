@@ -1,4 +1,4 @@
-import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
+import 'package:flutter/cupertino.dart';
 import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:io';
@@ -162,19 +162,16 @@ void main() {
               }
               expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
               expect(find.byIcon(Icons.calendar_month_rounded), findsOneWidget);
-              final indicator = tester.widget<BilSplashCapsuleProgress>(
+              final indicator = tester.widget<CupertinoActivityIndicator>(
                 find.descendant(
                   of: find.byType(BilFeatureWelcomeStatus),
-                  matching: find.byType(BilSplashCapsuleProgress),
+                  matching: find.byType(CupertinoActivityIndicator),
                 ),
               );
-              expect(
-                tester.getSize(find.byType(BilSplashCapsuleProgress)).height,
-                7,
-              );
+              expect(indicator.radius, 12);
               expect(
                 indicator.color,
-                dark ? const Color(0xFF8CCFFF) : const Color(0xFF10254A),
+                dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
               );
               expect(
                 find.byKey(const ValueKey('bil-smart-plan-create')),

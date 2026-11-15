@@ -303,15 +303,11 @@ void _registerNativeConversationsAndStoreActivity(
           final indicator = find.byType(BilCompactActivityIndicator);
           expect(indicator, findsOneWidget);
           expect(find.byType(BilSplashCapsuleProgress), findsNothing);
-          expect(find.byType(CupertinoActivityIndicator), findsNothing);
+          final activity = find.byType(CupertinoActivityIndicator);
+          expect(activity, findsOneWidget);
+          expect(find.byType(CircularProgressIndicator), findsNothing);
           expect(find.descendant(of: cta, matching: indicator), findsNothing);
-          expect(
-            find.descendant(
-              of: cta,
-              matching: find.byType(CircularProgressIndicator),
-            ),
-            findsNothing,
-          );
+          expect(find.descendant(of: cta, matching: activity), findsNothing);
           expect(
             _nativeRect(indicator).bottom,
             lessThanOrEqualTo(_nativeRect(cta).top),
@@ -325,10 +321,13 @@ void _registerNativeConversationsAndStoreActivity(
               View.of(
                 element,
               ).platformDispatcher.accessibilityFeatures.reduceMotion;
+          final segmented = tester.widget<CupertinoActivityIndicator>(activity);
+          expect(segmented.radius, 12);
           expect(
-            find.byType(CircularProgressIndicator),
-            reduced ? findsNothing : findsOneWidget,
+            segmented.color,
+            dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
           );
+          expect(segmented.animating, !reduced);
           final compactPaint = await verifyNativeCompactActivityProbe(
             tester,
             indicator,

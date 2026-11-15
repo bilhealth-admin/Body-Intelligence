@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/bil_pearl_finish.dart';
 import '../../app/theme/bil_flagship_tokens.dart';
+import 'bil_compact_activity_indicator.dart';
 import 'bil_splash_capsule_progress.dart';
 
 /// The visual hold shared by internal feature entry surfaces. It never waits
@@ -165,7 +166,7 @@ class BilPearlFeatureWelcome extends StatelessWidget {
                                   ),
                             ),
                             const SizedBox(height: 26),
-                            BilFeatureWelcomeStatus(
+                            BilFeatureWelcomeStatus.splash(
                               color: highContrast
                                   ? ink
                                   : (dark
@@ -205,13 +206,23 @@ class BilPearlFeatureWelcome extends StatelessWidget {
   }
 }
 
-/// The startup capsule on every supported platform. The native
+/// Pending operations use the shared grey segmented wait. Splash and
+/// Dashboard compositions explicitly retain their established capsule.
+/// The native
 /// iOS reduceMotion flag is separate from MediaQuery.disableAnimations in the
 /// pinned Flutter SDK, so changes to either must produce the static variant.
 class BilFeatureWelcomeStatus extends StatefulWidget {
-  const BilFeatureWelcomeStatus({super.key, this.color, this.label});
+  const BilFeatureWelcomeStatus({super.key, this.color, this.label})
+    : _preserveSplashStyle = false;
+
+  const BilFeatureWelcomeStatus.splash({super.key, this.color, this.label})
+    : _preserveSplashStyle = true;
+
+  // Operation colors resolve to neutral grey, keeping light neutral requests
+  // visible on filled surfaces. The splash variant retains its exact color.
   final Color? color;
   final String? label;
+  final bool _preserveSplashStyle;
 
   @override
   State<BilFeatureWelcomeStatus> createState() =>
@@ -237,6 +248,10 @@ class _BilFeatureWelcomeStatusState extends State<BilFeatureWelcomeStatus>
       View.of(context).platformDispatcher.accessibilityFeatures.reduceMotion;
 
   void _syncMotion() {
+    if (!widget._preserveSplashStyle) {
+      _phase.stop(canceled: false);
+      return;
+    }
     if (_reduced) {
       _phase.stop(canceled: false);
       _phase.value = 0.72;
@@ -251,6 +266,14 @@ class _BilFeatureWelcomeStatusState extends State<BilFeatureWelcomeStatus>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _syncMotion();
+  }
+
+  @override
+  void didUpdateWidget(BilFeatureWelcomeStatus oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget._preserveSplashStyle != oldWidget._preserveSplashStyle) {
+      _syncMotion();
+    }
   }
 
   @override
@@ -270,6 +293,15 @@ class _BilFeatureWelcomeStatusState extends State<BilFeatureWelcomeStatus>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget._preserveSplashStyle) {
+      return Semantics(
+        liveRegion: true,
+        child: BilCompactActivityIndicator(
+          label: widget.label,
+          color: widget.color,
+        ),
+      );
+    }
     final dark = Theme.of(context).brightness == Brightness.dark;
     final color =
         widget.color ??

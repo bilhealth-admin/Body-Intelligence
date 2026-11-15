@@ -389,7 +389,7 @@ class _Loading extends StatelessWidget {
           weight: FontWeight.w700,
         ),
         const SizedBox(height: 18),
-        const BilFeatureWelcomeStatus(color: Color(0xFFE5ECF2)),
+        const BilFeatureWelcomeStatus.splash(color: Color(0xFFE5ECF2)),
       ],
     );
   }
