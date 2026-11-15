@@ -1,0 +1,134 @@
+name: BIL Google36 reviewer secret identity binding only
+run-name: Google36 secret identity configuration; no login or app execution
+on:
+  push:
+    branches: [codex/bil-google36-reviewer-binding-20261115]
+permissions:
+  contents: read
+concurrency:
+  group: bil-google36-reviewer-binding-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  classify-configured-identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Classify only the configured identity without authentication
+        shell: bash
+        env:
+          BIL_GOOGLE_REVIEWER_EMAIL: ${{ secrets.BIL_GOOGLE_REVIEWER_EMAIL }}
+          BIL_GOOGLE_REVIEWER_PASSWORD: ${{ secrets.BIL_GOOGLE_REVIEWER_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_BINDING_ONLY'
+          """Hash-only configuration classification. Never authenticate or expose a secret."""
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import hashlib
+          import json
+          import os
+          import re
+
+          CANONICAL = '0953e0ce72671ea8330c96c41d0aa70e9b8578990532383c51edec2fb4002217'
+          LEGACY = 'f88bf2e393d3da25ac0ede12c1b128ae4fd4b6193f30dacd332abafa17ad510f'
+          APP_SOURCE = '1e9e070a77c3f6ce114892404e1724d06f340c89'
+          BRANCH = 'codex/bil-google36-reviewer-binding-20261115'
+
+
+          def normalized_email_digest(email):
+              normalized = email.strip().lower()
+              return hashlib.sha256(normalized.encode('utf-8')).hexdigest() if normalized else None
+
+
+          def classify_digest(digest, password_configured):
+              if type(password_configured) is not bool:
+                  raise ValueError('BINDING_CLASSIFICATION_INPUT_INVALID')
+              if digest is None:
+                  state = 'MISSING'
+              elif digest == CANONICAL:
+                  state = 'CANONICAL_CONFIGURED'
+              elif digest == LEGACY:
+                  state = 'LEGACY_UNGRANTED'
+              elif re.fullmatch('[0-9a-f]{64}', digest or ''):
+                  state = 'UNKNOWN'
+              else:
+                  raise ValueError('BINDING_CLASSIFICATION_INPUT_INVALID')
+              return {
+                  'emailBindingStatus': state,
+                  'passwordConfigured': password_configured,
+                  'identityConfigurationPreconditionMet': state == 'CANONICAL_CONFIGURED' and password_configured,
+                  'passwordValidityProven': False,
+                  'nativeAccessProven': False,
+                  'consoleConfigurationProven': False,
+              }
+
+
+          def main():
+              try:
+                  if os.environ.get('GITHUB_REPOSITORY') != 'bilhealth-admin/Body-Intelligence':
+                      raise ValueError('BINDING_CONTEXT_INVALID')
+                  if os.environ.get('GITHUB_REF') != 'refs/heads/' + BRANCH:
+                      raise ValueError('BINDING_CONTEXT_INVALID')
+                  commit = os.environ.get('GITHUB_SHA', '')
+                  run = os.environ.get('GITHUB_RUN_ID', '')
+                  attempt = os.environ.get('GITHUB_RUN_ATTEMPT', '')
+                  if not re.fullmatch('[0-9a-f]{40}', commit) or not re.fullmatch('[1-9][0-9]*', run) or not re.fullmatch('[1-9][0-9]*', attempt):
+                      raise ValueError('BINDING_CONTEXT_INVALID')
+                  # Pop both values from this process's environment. The password is used
+                  # solely for this Boolean; its contents and hash are never retained.
+                  password_configured = bool(os.environ.pop('BIL_GOOGLE_REVIEWER_PASSWORD', ''))
+                  digest = normalized_email_digest(os.environ.pop('BIL_GOOGLE_REVIEWER_EMAIL', ''))
+                  result = classify_digest(digest, password_configured)
+                  del digest
+                  result.update(
+                      schema='bil.google36.reviewer-secret-identity-binding.v1',
+                      observedUtc=datetime.now(timezone.utc).isoformat(),
+                      runId=int(run), runAttempt=int(attempt), controllerSha=commit,
+                      controllerBranch=BRANCH, applicationSourceSha=APP_SOURCE, intendedBuild=36,
+                      sourceBindingKind='ROOT_VERIFIED_SINGLE_PARENT_DECLARATION_NOT_BINARY_PROOF',
+                      scope='GITHUB_SECRET_CONFIGURATION_IDENTITY_ONLY',
+                      binary36Proven=False, authLoginAttempted=False, appNetworkRequestMade=False,
+                      rawEmailPasswordHashOrLengthWritten=False, passwordHashComputed=False,
+                      accountGrantProfileOrDataChanged=False,
+                      jobSuccessMeansClassificationRecordedOnly=True,
+                  )
+                  allowed = {
+                      'emailBindingStatus', 'passwordConfigured', 'identityConfigurationPreconditionMet',
+                      'passwordValidityProven', 'nativeAccessProven', 'consoleConfigurationProven',
+                      'schema', 'observedUtc', 'runId', 'runAttempt', 'controllerSha', 'controllerBranch',
+                      'applicationSourceSha', 'intendedBuild', 'sourceBindingKind', 'scope',
+                      'binary36Proven', 'authLoginAttempted', 'appNetworkRequestMade',
+                      'rawEmailPasswordHashOrLengthWritten', 'passwordHashComputed',
+                      'accountGrantProfileOrDataChanged', 'jobSuccessMeansClassificationRecordedOnly',
+                  }
+                  if set(result) != allowed or result['emailBindingStatus'] not in {
+                      'CANONICAL_CONFIGURED', 'LEGACY_UNGRANTED', 'UNKNOWN', 'MISSING'
+                  }:
+                      raise ValueError('BINDING_SAFE_OUTPUT_SCHEMA_INVALID')
+                  temp = Path(os.environ['RUNNER_TEMP']).resolve(strict=True)
+                  if not temp.is_dir():
+                      raise ValueError('BINDING_CONTEXT_INVALID')
+                  output = temp / 'BIL_GOOGLE36_SECRET_BINDING'
+                  output.mkdir()
+                  with (output / 'BINDING_RESULT.json').open('x', encoding='utf-8') as stream:
+                      json.dump(result, stream, indent=2)
+                      stream.write('\n')
+                  print(json.dumps(result, sort_keys=True))
+                  return 0
+              except Exception:
+                  # Do not echo exceptions, environment, process arguments or secret data.
+                  print('BINDING_PREFLIGHT_FAILED_SAFE')
+                  return 1
+
+
+          if __name__ == '__main__':
+              raise SystemExit(main())
+          PY_BINDING_ONLY
+      - name: Preserve the tiny safe identity-classification receipt
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-google36-reviewer-secret-binding-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/BIL_GOOGLE36_SECRET_BINDING/BINDING_RESULT.json
+          if-no-files-found: error
+          retention-days: 3
+          include-hidden-files: false
