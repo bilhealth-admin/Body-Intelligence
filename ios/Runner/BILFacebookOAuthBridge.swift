@@ -5,6 +5,8 @@ import UIKit
 /// Owns one OS authentication session. No callback URL enters a log or website
 /// bridge; legacy scheme callbacks are accepted only by this session completion.
 final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationContextProviding {
+  // ASWebAuthenticationSession owns this callback; no HTTPS association is needed.
+  static let callbackMode = "legacy"
   private let channel: FlutterMethodChannel
   private var session: ASWebAuthenticationSession?
   private var activeAttempt: String?
@@ -21,7 +23,7 @@ final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationCon
       }
       switch call.method {
       case "callbackMode":
-        if #available(iOS 17.4, *) { result("https") } else { result("legacy") }
+        result(Self.callbackMode)
       case "authenticate":
         self.authenticate(call.arguments, result: result)
       case "cancel":
@@ -70,7 +72,7 @@ final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationCon
     let authSession: ASWebAuthenticationSession
     if #available(iOS 17.4, *) {
       authSession = ASWebAuthenticationSession(
-        url: url, callback: .https(host: "www.bilhealth.com", path: "/auth/callback"),
+        url: url, callback: .customScheme("bil"),
         completionHandler: completion)
     } else {
       authSession = ASWebAuthenticationSession(
@@ -114,17 +116,12 @@ final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationCon
     return presentationWindow ?? ASPresentationAnchor()
   }
 
-  private var usesHTTPSCallback: Bool {
-    if #available(iOS 17.4, *) { return true }
-    return false
-  }
-
   private func isAllowedAuthorizationURL(_ url: URL) -> Bool {
-    Self.isAllowedAuthorizationURL(url, usesHTTPS: usesHTTPSCallback)
+    Self.isAllowedAuthorizationURL(url, usesHTTPS: Self.callbackMode == "https")
   }
 
   private func isAllowedCallbackURL(_ url: URL) -> Bool {
-    Self.isAllowedCallbackURL(url, usesHTTPS: usesHTTPSCallback)
+    Self.isAllowedCallbackURL(url, usesHTTPS: Self.callbackMode == "https")
   }
 
   private static func expectedCallback(usesHTTPS: Bool) -> String {

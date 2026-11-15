@@ -318,6 +318,7 @@ class RunnerTests: XCTestCase {
   }
 
   func testModernCallbackRequiresExactAssociatedHTTPSOrigin() {
+    XCTAssertEqual(BILFacebookOAuthBridge.callbackMode, "legacy")
     XCTAssertTrue(callback("https://www.bilhealth.com/auth/callback?code=synthetic", https: true))
     for raw in [
       "https://www.bilhealth.com.evil.example/auth/callback?code=synthetic",
@@ -330,6 +331,7 @@ class RunnerTests: XCTestCase {
   }
 
   func testLegacyCallbackIsExactAndCannotUseGenericRoutes() {
+    XCTAssertEqual(BILFacebookOAuthBridge.callbackMode, "legacy")
     XCTAssertTrue(callback("bil://auth-callback?code=synthetic", https: false))
     for raw in [
       "bil://auth/callback?code=synthetic", "bil://plans?code=synthetic",
