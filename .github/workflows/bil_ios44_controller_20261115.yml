@@ -1,0 +1,887 @@
+name: BIL iOS44 pinned-source internal TestFlight
+run-name: iOS44 app 1e9e070a; separate controller; no App Store submission
+on:
+  push:
+    branches: [codex/bil-ios44-controller-20261115]
+permissions:
+  contents: read
+  actions: read
+  security-events: read
+concurrency:
+  group: bil-ios44-internal-testflight-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  BIL_VALIDATION_MODE: exact_source_ci_separate_controller
+  BIL_TESTED_SOURCE_SHA: 1e9e070a77c3f6ce114892404e1724d06f340c89
+  BIL_TESTED_SOURCE: 1e9e070a77c3f6ce114892404e1724d06f340c89
+  BIL_SIGNING_ORCHESTRATION_SHA: ${{ github.sha }}
+  BIL_ORIGINAL_SHA: 155b079696430919f8272df934371f033fb11be2
+jobs:
+  signed-ios-release:
+    runs-on: macos-26
+    timeout-minutes: 240
+    steps:
+      - name: Checkout the immutable candidate accepted by final CI
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require strict exact-source full-ten-lane prerequisites and separate controller before credentials
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_BIL_EXACT_TRANSPORT'
+          import base64, hashlib, json, os, zlib
+          from pathlib import Path
+          BIL_TRANSPORT_B64 = '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'
+          BIL_TRANSPORT_SHA256 = '4fd3d592c3a94779cdd5e23b13caed37789e0cd3b2828fabb41094d432968bfa'
+          BIL_TRANSPORT_RAW_SHA256 = '815df4a0883151cf1081c773e614abfd76976252b3d9be00fbae60ece18e2bb5'
+          BIL_TRANSPORT_RAW_BYTES = 37867
+          compressed = base64.b64decode(BIL_TRANSPORT_B64, validate=True)
+          assert hashlib.sha256(compressed).hexdigest() == BIL_TRANSPORT_SHA256
+          assert 0 < BIL_TRANSPORT_RAW_BYTES <= 2 * 1024 * 1024
+          decoder = zlib.decompressobj()
+          raw = decoder.decompress(compressed, BIL_TRANSPORT_RAW_BYTES + 1)
+          assert decoder.eof and not decoder.unused_data and not decoder.unconsumed_tail
+          assert len(raw) == BIL_TRANSPORT_RAW_BYTES
+          assert hashlib.sha256(raw).hexdigest() == BIL_TRANSPORT_RAW_SHA256
+          header_bytes = int.from_bytes(raw[:4], 'big')
+          assert 0 < header_bytes <= len(raw) - 4
+          bundle = json.loads(raw[4:4 + header_bytes])
+          assert set(bundle) == {'schema', 'files'} and bundle['schema'] == 'bil.exact-gate-transport.v1'
+          names = {'bil44_fresh_source_gate.py', 'bil44_fresh_source_pins.json', 'bil44_current_cloud_parity.json'}
+          descriptors = bundle['files']
+          assert isinstance(descriptors, list) and len(descriptors) == 3
+          assert {entry['name'] for entry in descriptors} == names
+          root = Path(os.environ['RUNNER_TEMP']).resolve(strict=True)
+          assert root.is_dir()
+          prepared = []
+          offset = 4 + header_bytes
+          for descriptor in descriptors:
+              assert set(descriptor) == {'name', 'sha256', 'bytes'}
+              name = descriptor['name']
+              assert type(descriptor['bytes']) is int and descriptor['bytes'] >= 0
+              content = raw[offset:offset + descriptor['bytes']]
+              assert len(content) == descriptor['bytes']
+              assert hashlib.sha256(content).hexdigest() == descriptor['sha256']
+              offset += descriptor['bytes']
+              path = root / name
+              assert not path.exists() and not path.is_symlink()
+              prepared.append((path, content))
+          assert offset == len(raw)
+          for path, content in prepared:
+              with path.open('xb') as output:
+                  output.write(content)
+          PY_BIL_EXACT_TRANSPORT
+          python3 "$RUNNER_TEMP/bil44_fresh_source_gate.py" --platform ios \
+            --config "$RUNNER_TEMP/bil44_fresh_source_pins.json" \
+            --cloud-receipt "$RUNNER_TEMP/bil44_current_cloud_parity.json"
+
+      - name: Verify selected Xcode 26+ and iOS SDK 26+
+        id: apple_toolchain_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Do not guess or switch Xcode installations. The runner-selected
+          # toolchain itself must satisfy the store gate.
+          python3 tool/release/verify_apple_release_toolchain.py \
+            --text-evidence BIL-apple-release-toolchain.txt \
+            --json-evidence BIL-apple-release-toolchain.json
+
+      - name: Upload Apple toolchain version evidence
+        if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-ios44-preview-toolchain-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-apple-release-toolchain.txt
+            BIL-apple-release-toolchain.json
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+
+      - name: Validate release build number and Apple team
+        shell: bash
+        env:
+          BUILD_NUMBER: '44'
+          UPLOAD_TO_TESTFLIGHT: 'false'
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
+            echo 'build_number must be a positive integer.' >&2
+            exit 1
+          }
+          (( BUILD_NUMBER == 44 )) || {
+            echo 'build_number must be exactly 44 for the iOS release candidate; build 36 and earlier must never be selected.' >&2
+            exit 1
+          }
+          [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
+            echo 'upload_to_testflight must be a boolean.' >&2
+            exit 1
+          }
+          test -n "${APPLE_TEAM_ID:-}" || {
+            echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID' >&2
+            exit 1
+          }
+          grep -Eq "DEVELOPMENT_TEAM = \"?${APPLE_TEAM_ID}\"?;" \
+            ios/Runner.xcodeproj/project.pbxproj || {
+              echo 'Xcode DEVELOPMENT_TEAM does not match APPLE_TEAM_ID.' >&2
+              exit 1
+            }
+
+      - name: Require Apple signing inputs
+        shell: bash
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CERTIFICATE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_BASE64'; exit 1; }
+          test -n "${CERTIFICATE_PASSWORD:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD'; exit 1; }
+          test -n "${PROVISIONING_PROFILE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_PROVISIONING_PROFILE_BASE64'; exit 1; }
+          test -n "${APPLE_TEAM_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID'; exit 1; }
+          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
+
+      - name: Import distribution certificate
+        uses: apple-actions/import-codesign-certs@77ba2a2a8f5cfc8c405ebf3159f767c323e238f9
+        with:
+          p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+
+      - name: Install provisioning profile
+        shell: bash
+        env:
+          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          PROFILE="$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
+          python3 - "$PROFILE" <<'PY'
+          import base64
+          import binascii
+          import os
+          import pathlib
+          import sys
+
+          try:
+              decoded = base64.b64decode(os.environ['PROFILE_BASE64'], validate=True)
+          except (KeyError, ValueError, binascii.Error) as error:
+              raise SystemExit(f'Invalid provisioning-profile Base64: {error}')
+          pathlib.Path(sys.argv[1]).write_bytes(decoded)
+          PY
+          security cms -D -i "$PROFILE" > "$RUNNER_TEMP/BIL-profile.plist"
+          python3 - "$RUNNER_TEMP/BIL-profile.plist" "$APPLE_TEAM_ID" <<'PY'
+          import datetime as dt
+          import plistlib
+          import sys
+
+          profile_path, team_id = sys.argv[1:]
+          with open(profile_path, 'rb') as handle:
+              profile = plistlib.load(handle)
+          entitlements = profile.get('Entitlements', {})
+          expected_app_id = f'{team_id}.com.bilhealth.bodyintelligencelog'
+          if entitlements.get('application-identifier') != expected_app_id:
+              raise SystemExit('Provisioning profile has the wrong application identifier.')
+          if entitlements.get('com.apple.developer.healthkit') is not True:
+              raise SystemExit('Provisioning profile does not authorize HealthKit.')
+          if 'Default' not in entitlements.get('com.apple.developer.applesignin', []):
+              raise SystemExit('Provisioning profile does not authorize Sign in with Apple.')
+          associated_domains = entitlements.get(
+              'com.apple.developer.associated-domains',
+              [],
+          )
+          if isinstance(associated_domains, str):
+              associated_domain_values = {associated_domains}
+          elif isinstance(associated_domains, list):
+              associated_domain_values = {
+                  value for value in associated_domains if isinstance(value, str)
+              }
+          else:
+              associated_domain_values = set()
+          if not (
+              '*' in associated_domain_values
+              or 'applinks:www.bilhealth.com' in associated_domain_values
+          ):
+              raise SystemExit(
+                  'Provisioning profile does not authorize '
+                  'applinks:www.bilhealth.com.'
+              )
+          if entitlements.get('aps-environment') != 'production':
+              raise SystemExit('Provisioning profile does not authorize production push.')
+          app_attest = entitlements.get(
+              'com.apple.developer.devicecheck.appattest-environment'
+          )
+          if isinstance(app_attest, str):
+              app_attest_environments = {app_attest}
+          elif isinstance(app_attest, list):
+              app_attest_environments = {
+                  value for value in app_attest if isinstance(value, str)
+              }
+          else:
+              app_attest_environments = set()
+          if 'production' not in app_attest_environments:
+              raise SystemExit(
+                  'Provisioning profile does not authorize production App Attest.'
+              )
+          if entitlements.get('get-task-allow', False) is not False:
+              raise SystemExit('Provisioning profile unexpectedly enables get-task-allow.')
+          expiry = profile.get('ExpirationDate')
+          now = dt.datetime.now(dt.timezone.utc)
+          if expiry is None or expiry.replace(tzinfo=dt.timezone.utc) <= now:
+              raise SystemExit('Provisioning profile is expired.')
+          print('APPLE_PROVISIONING_PROFILE_GATE=PASS')
+          PY
+
+      - name: Resolve and validate source
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: ios
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: true
+          BIL_AD_PROVIDER_READY: true
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+          BIL_PUSH_ENABLED: true
+          BIL_PUSH_PROVIDER_READY: true
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_SOURCE_COMMIT: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          BIL_AUDITED_SOURCE_COMMIT: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: 1e9e070a77c3f6ce114892404e1724d06f340c89
+          BIL_RELEASE_EXPECTED_BUILD_NUMBER: '44'
+        run: |
+          flutter pub get --enforce-lockfile
+          dart run tool/release/validate_release_configuration.dart
+
+          flutter test --no-pub \
+            test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
+            --timeout 2m
+          plutil -lint ios/Runner/Info.plist
+          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
+          plutil -lint ios/Runner/Runner.entitlements
+          plutil -lint ios/Runner/RunnerDebug.entitlements
+
+      - name: Select exact CocoaPods in an isolated job gem home
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
+          python3 .github/scripts/install_isolated_cocoapods.py \
+            --output BIL-ios-cocoapods-installation.json
+
+      - name: Upload isolated CocoaPods installation receipt
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-ios44-preview-pods-${{ github.run_id }}
+          path: BIL-ios-cocoapods-installation.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Record exact-source native QA cryptography independently from signed44 identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s BIL44-pre-signing-ci.json
+          printf '%s\n' 'NATIVE_CRYPTO_RUNTIME_GATE=PASS' \
+            'NATIVE_CRYPTO_RUNTIME_SCOPE=EXACT_SOURCE_NATIVE_QA_IPHONE_IPAD_ANDROID; IOS_SIMULATOR_HARNESS_BUILD39; SIGNED44_IDENTITY_SEPARATE' \
+            > BIL-ios-native-crypto-gate.txt
+
+      - name: Preserve production AdMob plugin and validate configuration
+        shell: bash
+        env:
+          BIL_ADMOB_PRODUCTION_READY: true
+          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
+          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
+          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
+        run: |
+          set -euo pipefail
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
+          python3 tool/release/test_validate_admob_production_configuration.py
+          python3 tool/release/validate_admob_production_configuration.py \
+            | tee BIL-ios-production-admob-source.txt
+          printf '%s\n' \
+            'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347' \
+            > ios/Flutter/ReleaseAdMob.xcconfig
+          grep -Fqx $'\t<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
+          grep -Fqx $'\t<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
+          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
+          # GeneratedPluginRegistrant.m is checked after flutter build ipa,
+          # where Flutter/Xcode must actually regenerate it.
+
+      - name: Configure manual App Store distribution signing
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          PROFILE_PLIST="$RUNNER_TEMP/BIL-profile.plist"
+          EXPORT_OPTIONS="$RUNNER_TEMP/BIL-export-options.plist"
+          test -s "$PROFILE_PLIST" || {
+            echo 'Decoded provisioning-profile metadata is missing.' >&2
+            exit 1
+          }
+          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PROFILE_PLIST")"
+          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PROFILE_PLIST")"
+          test -n "$PROFILE_NAME" || {
+            echo 'Provisioning profile name is missing.' >&2
+            exit 1
+          }
+          test -n "$PROFILE_UUID" || {
+            echo 'Provisioning profile UUID is missing.' >&2
+            exit 1
+          }
+
+          {
+            printf '\n// CI App Store distribution signing\n'
+            printf 'CODE_SIGN_STYLE = Manual\n'
+            printf 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution\n'
+            printf 'DEVELOPMENT_TEAM = %s\n' "$APPLE_TEAM_ID"
+            printf 'PROVISIONING_PROFILE_SPECIFIER = %s\n' "$PROFILE_NAME"
+            printf 'PROVISIONING_PROFILE = %s\n' "$PROFILE_UUID"
+          } >> ios/Flutter/Release.xcconfig
+
+          python3 - "$EXPORT_OPTIONS" "$APPLE_TEAM_ID" "$PROFILE_UUID" <<'PY'
+          import pathlib
+          import plistlib
+          import sys
+
+          output_path, team_id, profile_uuid = sys.argv[1:]
+          options = {
+              'method': 'app-store-connect',
+              'signingStyle': 'manual',
+              'teamID': team_id,
+              'signingCertificate': 'Apple Distribution',
+              'provisioningProfiles': {
+                  'com.bilhealth.bodyintelligencelog': profile_uuid,
+              },
+              'manageAppVersionAndBuildNumber': False,
+              'uploadSymbols': True,
+              'stripSwiftSymbols': True,
+          }
+          with pathlib.Path(output_path).open('wb') as handle:
+              plistlib.dump(options, handle, sort_keys=True)
+          PY
+          plutil -lint "$EXPORT_OPTIONS"
+
+          # Do not invoke `xcodebuild -showBuildSettings` here. Immediately
+          # before this step the deferred-plugin graph is intentionally
+          # sanitized; Xcode 26 aborts while resolving that transient graph.
+          # `flutter build ipa` regenerates the graph in the next step and is
+          # the authoritative resolved-settings and signing gate.
+          grep -Fqx 'CODE_SIGN_STYLE = Manual' ios/Flutter/Release.xcconfig
+          grep -Fqx 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution' ios/Flutter/Release.xcconfig
+          grep -Fqx "DEVELOPMENT_TEAM = $APPLE_TEAM_ID" ios/Flutter/Release.xcconfig
+          grep -Fqx "PROVISIONING_PROFILE_SPECIFIER = $PROFILE_NAME" ios/Flutter/Release.xcconfig
+          grep -Fqx "PROVISIONING_PROFILE = $PROFILE_UUID" ios/Flutter/Release.xcconfig
+          test "$(/usr/libexec/PlistBuddy -c 'Print :signingStyle' "$EXPORT_OPTIONS")" = 'manual'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :teamID' "$EXPORT_OPTIONS")" = "$APPLE_TEAM_ID"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :provisioningProfiles:com.bilhealth.bodyintelligencelog' "$EXPORT_OPTIONS")" = "$PROFILE_UUID"
+          printf '%s\n' 'IOS_MANUAL_DISTRIBUTION_SIGNING_GATE=PASS'
+
+      - name: Build signed archive
+        env:
+          BUILD_NUMBER: '44'
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ipa --release --no-pub \
+            --target lib/main.dart \
+            --export-options-plist "$RUNNER_TEMP/BIL-export-options.plist" \
+            --build-number "$BUILD_NUMBER" \
+            --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
+            --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
+            --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
+            --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
+            --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
+            --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json \
+            --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
+            --dart-define=BIL_PUSH_ENABLED=true \
+            --dart-define=BIL_PUSH_PROVIDER_READY=true \
+            --dart-define=BIL_ADS_ENABLED=true \
+            --dart-define=BIL_AD_PROVIDER_READY=true \
+            --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+            --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+            --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+            --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+            --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
+
+      - name: Verify regenerated iOS production AdMob plugin graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
+          grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
+          printf '%s\n' 'ADMOB_IOS_NATIVE_SDK_GRAPH_GATE=PASS' \
+            | tee BIL-ios-production-admob-plugin-graph.txt
+
+      - name: Capture signed IPA evidence
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BUILD_NUMBER: '44'
+        run: |
+          set -euo pipefail
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          test -s "$IPA"
+
+          SIGNED_IPA_DIR="$(mktemp -d "$RUNNER_TEMP/bil-final-signed-ipa.XXXXXX")"
+          unzip -qq "$IPA" -d "$SIGNED_IPA_DIR"
+          SIGNED_APP_COUNT="$(find "$SIGNED_IPA_DIR/Payload" \
+            -mindepth 1 -maxdepth 1 -type d -name '*.app' | wc -l | tr -d '[:space:]')"
+          test "$SIGNED_APP_COUNT" = 1 || {
+            echo "Expected exactly one application in final IPA Payload; found $SIGNED_APP_COUNT." >&2
+            exit 1
+          }
+          SIGNED_APP="$(find "$SIGNED_IPA_DIR/Payload" \
+            -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
+          test -d "$SIGNED_APP"
+
+          BIL_ADMOB_PRODUCTION_READY=true \
+          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
+          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
+          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
+          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
+          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
+          python3 tool/release/validate_admob_production_configuration.py \
+            --ios-info-plist "$SIGNED_APP/Info.plist" \
+            | tee BIL-ios-production-admob.txt
+
+          codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
+            2>&1 | tee BIL-ios-codesign-verify.txt
+          printf '%s\n' 'SIGNED_IPA_CODESIGN_GATE=PASS' \
+            | tee -a BIL-ios-codesign-verify.txt
+          codesign -dv --verbose=4 "$SIGNED_APP" 2> BIL-ios-codesign.txt
+          codesign --display --entitlements - --xml \
+            "$SIGNED_APP" \
+            | plutil -convert xml1 -o BIL-ios-entitlements.plist -
+          test -s BIL-ios-entitlements.plist
+
+          EMBEDDED_PROFILE="$SIGNED_APP/embedded.mobileprovision"
+          test -s "$EMBEDDED_PROFILE" || {
+            echo 'Final IPA app has no embedded provisioning profile.' >&2
+            exit 1
+          }
+          security cms -D -i "$EMBEDDED_PROFILE" \
+            > BIL-ios-embedded-profile.plist
+          plutil -lint BIL-ios-embedded-profile.plist
+          python3 tool/release/verify_signed_ios_entitlements.py \
+            --entitlements BIL-ios-entitlements.plist \
+            --embedded-profile BIL-ios-embedded-profile.plist \
+            --team-id "$APPLE_TEAM_ID" \
+            --bundle-id com.bilhealth.bodyintelligencelog
+          python3 -m unittest discover -s tool/release \
+            -p test_verify_final_artifact_identity.py -v
+          python3 tool/release/verify_final_artifact_identity.py \
+            --ipa "$IPA" \
+            --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build "$BUILD_NUMBER" \
+            --output BIL-ios-final-artifact-inventory.json
+          python3 tool/release/verify_ios_app_icon.py --ipa "$IPA" --output BIL-ios-final-icon-inventory.json
+          shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
+          stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
+          git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
+
+      - name: Reject forbidden bundled crypto implementations in signed IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          SCAN_DIR="$RUNNER_TEMP/bil-ios-crypto-scan"
+          rm -rf "$SCAN_DIR"
+          mkdir -p "$SCAN_DIR"
+          unzip -qq "$IPA" -d "$SCAN_DIR"
+          if find "$SCAN_DIR/Payload" -type f -perm -0111 \
+            -exec strings {} + 2>/dev/null \
+            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
+            echo 'Forbidden non-OS crypto implementation marker found in signed IPA.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' \
+            | tee BIL-ios-crypto-scan.txt
+
+      - name: Record code and physical-device gate boundary
+        shell: bash
+        run: |
+          printf '%s\n' \
+            'CODE_GATE=SIGNED_IPA_ARTIFACT_ONLY' \
+            'FACEBOOK_LOGIN_COMPILED_GATE=SUPABASE_BROWSER_OAUTH_SOURCE_PRESENT' \
+            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
+            'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=PASS' \
+            'ADMOB_IOS_UMP_CONFIGURATION_GATE=SOURCE_CONFIG_VALIDATED' \
+            'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=NOT_VERIFIED_IN_IPA_BY_THIS_JOB' \
+            'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_OWNER_INSTALL_OR_UPLOAD' \
+            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
+            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=Facebook OAuth browser flow and Supabase token exchange,App Attest JIT registration/assertion/replay denial,HealthKit,Apple Watch via HealthKit,StoreKit sandbox,AdMob consent and served ad review' \
+            'TESTFLIGHT=NOT_RUN' \
+            > BIL-ios-gate-status.txt
+
+      - name: Generate signed IPA-only receipt after codesign and entitlements PASS
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BIL_TESTED_SOURCE_SHA"
+          grep -Fq 'SIGNED_IPA_CODESIGN_GATE=PASS' BIL-ios-codesign-verify.txt
+          grep -Fq 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' BIL-ios-crypto-scan.txt
+          test -s BIL-ios-final-artifact-inventory.json
+          test -s BIL-ios-entitlements.plist
+          test -s BIL-ios-embedded-profile.plist
+          test -s BIL-ios-ipa.sha256
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib,subprocess
+          files=list(pathlib.Path('build/ios/ipa').glob('*.ipa'))
+          if len(files)!=1 or not files[0].is_file() or files[0].stat().st_size<=0:
+              raise SystemExit('Exactly one signed IPA required')
+          digest=hashlib.sha256(files[0].read_bytes()).hexdigest()
+          if pathlib.Path('BIL-ios-ipa.sha256').read_text().split()[0]!=digest:
+              raise SystemExit('IPA hash readback mismatch')
+          githead=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          if githead!=os.environ['BIL_TESTED_SOURCE_SHA']:
+              raise SystemExit('Built source differs from audited candidate')
+          native_status='PASS'
+          if ('NATIVE_CRYPTO_RUNTIME_GATE='+native_status) not in pathlib.Path('BIL-ios-native-crypto-gate.txt').read_text():
+              raise SystemExit('Native runtime evidence scope mismatch')
+          pathlib.Path('BIL-ios-build-only-receipt.json').write_text(json.dumps({
+              'status':'SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED','source_sha':githead,
+              'workflow_sha':os.environ['GITHUB_SHA'],'build':44,
+              'validation_mode':os.environ['BIL_VALIDATION_MODE'],'public_release_approved':False,
+              'native_crypto_runtime_status':native_status,
+              'ipa_sha256':digest,'ipa_bytes':files[0].stat().st_size,
+              'testflight_upload':'NOT_RUN','app_store_connect':'NOT_RUN',
+              'production_deploy':'NOT_RUN','physical_device':'NOT_RUN',
+              'release_certification':'NOT_CLAIMED'
+          },indent=2)+'\n')
+          print('SIGNED_IPA_BUILD_ONLY_PASS; NO_TESTFLIGHT_UPLOAD')
+          PY
+
+      - name: Upload signed IPA and validation evidence
+        id: signed_artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-ios44-signed-only-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/ios/ipa/*.ipa
+            BIL-ios-codesign.txt
+            BIL-ios-codesign-verify.txt
+            BIL-ios-entitlements.plist
+            BIL-ios-final-artifact-inventory.json
+            BIL-ios-final-icon-inventory.json
+            BIL-ios-embedded-profile.plist
+            BIL-ios-ipa.sha256
+            BIL-ios-ipa.size
+            BIL-ios-crypto-scan.txt
+            BIL-ios-native-crypto-gate.txt
+            BIL-ios-production-admob-source.txt
+            BIL-ios-production-admob.txt
+            BIL-ios-production-admob-plugin-graph.txt
+            BIL-ios-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+            BIL-ios-build-only-receipt.json
+            BIL44-pre-signing-ci.json
+            BIL44-internal-acceptance.md
+            BIL44-signing-manifest-proof.json
+            BIL-apple-release-toolchain.txt
+            BIL-apple-release-toolchain.json
+
+      - name: Remove temporary Apple distribution profile and export options
+        if: always()
+        shell: bash
+        run: |
+          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
+          rm -f "$RUNNER_TEMP/BIL-profile.plist" "$RUNNER_TEMP/BIL-export-options.plist"
+
+      - name: Bind promotion to this exact signed IPA
+        shell: bash
+        env:
+          BIL_SIGNED_RUN: ${{ github.run_id }}
+          BIL_SIGNED_ARTIFACT: ${{ steps.signed_artifact.outputs.artifact-id }}
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python3 - <<'PY'
+          import json,os,pathlib
+          r=json.loads(pathlib.Path('BIL-ios-build-only-receipt.json').read_text())
+          assert r['build']==44 and r['source_sha']==os.environ['BIL_TESTED_SOURCE_SHA']
+          with open(os.environ['GITHUB_ENV'],'a') as stream:
+              stream.write('BIL_IPA_SHA256='+r['ipa_sha256']+'\n')
+              stream.write('BIL_SIGNED_RUN='+os.environ['BIL_SIGNED_RUN']+'\n')
+              stream.write('BIL_SIGNED_ARTIFACT='+os.environ['BIL_SIGNED_ARTIFACT']+'\n')
+          PY
+      - name: Verify exact bytes, IPA identity and original signing receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, plistlib, zipfile
+          root=pathlib.Path('.')
+          def unique(name):
+              matches=list(root.rglob(name))
+              assert len(matches)==1, 'Missing or ambiguous evidence: '+name
+              return matches[0]
+          ipa=unique('*.ipa')
+          digest=hashlib.sha256(ipa.read_bytes()).hexdigest()
+          assert digest==os.environ['BIL_IPA_SHA256'], 'IPA bytes differ from signed run'
+          receipt=json.loads(unique('BIL-ios-build-only-receipt.json').read_text())
+          assert receipt['status']=='SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED'
+          assert receipt['source_sha']==os.environ['BIL_TESTED_SOURCE'] and receipt['build']==44
+          assert receipt['workflow_sha']==os.environ['GITHUB_SHA']==os.environ['BIL_SIGNING_ORCHESTRATION_SHA']
+          assert receipt.get('validation_mode','all_exact_source_ci')==os.environ['BIL_VALIDATION_MODE']
+          native_status='PASS'
+          assert receipt['native_crypto_runtime_status']==native_status
+          assert ('NATIVE_CRYPTO_RUNTIME_GATE='+native_status) in unique('BIL-ios-native-crypto-gate.txt').read_text()
+          assert receipt['ipa_sha256']==digest and receipt['ipa_bytes']==ipa.stat().st_size
+          assert unique('BIL-source-head.txt').read_text().strip()==os.environ['BIL_TESTED_SOURCE']
+          assert 'SIGNED_IPA_CODESIGN_GATE=PASS' in unique('BIL-ios-codesign-verify.txt').read_text()
+          assert 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' in unique('BIL-ios-crypto-scan.txt').read_text()
+          inventory=json.loads(unique('BIL-ios-final-artifact-inventory.json').read_text())
+          assert inventory['status']=='FINAL_ARTIFACT_IDENTITY_PASS' and inventory['build']=='44'
+          assert inventory['package']=='com.bilhealth.bodyintelligencelog' and inventory['version']=='1.0.0'
+          with zipfile.ZipFile(ipa) as archive:
+              infos=[n for n in archive.namelist() if n.startswith('Payload/') and n.endswith('.app/Info.plist') and len(n.split('/'))==3]
+              assert len(infos)==1
+              info=plistlib.loads(archive.read(infos[0]))
+          assert info['CFBundleIdentifier']=='com.bilhealth.bodyintelligencelog'
+          assert info['CFBundleVersion']=='44' and info['CFBundleShortVersionString']=='1.0.0'
+          identity={'source_sha':os.environ['BIL_TESTED_SOURCE'],'build':44,'ipa_sha256':digest,
+                    'workflow_sha':os.environ['GITHUB_SHA'],'signed_run':int(os.environ['BIL_SIGNED_RUN']),
+                    'signed_artifact':int(os.environ['BIL_SIGNED_ARTIFACT']),
+                    'uses_non_exempt_encryption':info.get('ITSAppUsesNonExemptEncryption'),
+                    'physical_device_verified':False,'release_approved':False}
+          pathlib.Path('evidence/identity.json').write_text(json.dumps(identity,indent=2)+'\n')
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('BIL_IPA_PATH='+str(ipa.resolve())+'\n')
+          print('EXACT_SIGNED_IPA_44_BYTES_AND_SOURCE=PASS')
+          PY
+          BIL_IPA_PATH="$(find build/ios/ipa -maxdepth 1 -type f -name '*.ipa' -print -quit)"
+          python3 tool/release/verify_final_artifact_identity.py \
+            --ipa "$BIL_IPA_PATH" --package com.bilhealth.bodyintelligencelog \
+            --version 1.0.0 --build 44 --output evidence/final-artifact-inventory.json
+          python3 tool/release/verify_ios_app_icon.py --ipa "$BIL_IPA_PATH" --output evidence/final-icon-inventory.json
+      - name: Prepare ephemeral Apple API key and processing verifier
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, os, pathlib
+          assert all(os.environ.get(k) for k in ('ASC_KEY_ID','ASC_ISSUER_ID','ASC_PRIVATE_KEY_BASE64'))
+          folder=pathlib.Path.home()/'.appstoreconnect/private_keys'
+          folder.mkdir(parents=True,exist_ok=True)
+          key=folder/('AuthKey_'+os.environ['ASC_KEY_ID']+'.p8')
+          raw=base64.b64decode(os.environ['ASC_PRIVATE_KEY_BASE64'],validate=True)
+          assert b'-----BEGIN PRIVATE KEY-----' in raw
+          key.write_bytes(raw); key.chmod(0o600)
+          with open(os.environ['GITHUB_ENV'],'a') as env:
+              env.write('ASC_PRIVATE_KEY_PATH='+str(key)+'\n')
+          PY
+          cat > evidence/asc-processing.mjs <<'JS'
+          import fs from 'node:fs';
+          import { clientFromEnvironment } from '../tool/apple_store_connect/asc_catalog_sync.mjs';
+          const client=clientFromEnvironment();
+          const APP='6805349703';
+          const mode=process.argv[2];
+          const write=(name,data)=>fs.writeFileSync(`evidence/${name}.json`,JSON.stringify(data,null,2)+'\n');
+          const matching=async version=>{
+            const response=await client.request('GET',`/v1/builds?filter[app]=${APP}&filter[version]=${version}&include=preReleaseVersion&limit=100`);
+            return response.data.filter(b=>response.included?.some(v=>v.id===b.relationships.preReleaseVersion.data?.id&&v.attributes.version==='1.0.0'&&v.attributes.platform==='IOS'));
+          };
+          const internalGroupsForBuild=async buildId=>{
+            const result=[];
+            for(const group of await client.all(`/v1/apps/${APP}/betaGroups?limit=200`)){
+              if(group.attributes.isInternalGroup!==true) continue;
+              const builds=await client.all(`/v1/betaGroups/${group.id}/builds?limit=200`);
+              if(builds.some(b=>b.id===buildId)) result.push(group);
+            }
+            return result;
+          };
+          if(mode==='preflight'){
+            const app=await client.request('GET',`/v1/apps/${APP}`);
+            if(app.data.attributes.bundleId!=='com.bilhealth.bodyintelligencelog') throw Error('ASC app identity mismatch');
+            if((await matching('44')).length) throw Error('Build 44 already exists: upload is blocked to prevent duplication; inspect its identity before proceeding');
+            const previous=await matching('41');
+            const internal=new Map();
+            for(const build of previous){
+              for(const group of await internalGroupsForBuild(build.id)){
+                if(group.attributes.isInternalGroup===true) internal.set(group.id,{id:group.id,name:group.attributes.name});
+              }
+            }
+            write('asc-preflight',{app_id:APP,build44_absent:true,previous_internal_groups:[...internal.values()]});
+            if(internal.size===0) throw Error('No existing internal testing group was verified; upload is blocked');
+            console.log(`ASC_PREFLIGHT=PASS; BUILD44_ABSENT; EXISTING_INTERNAL_GROUPS=${internal.size}`);
+          }else if(mode==='processing'){
+            const identity=JSON.parse(fs.readFileSync('evidence/identity.json'));
+            const preflight=JSON.parse(fs.readFileSync('evidence/asc-preflight.json'));
+            const expectedGroups=preflight.previous_internal_groups;
+            if(!Array.isArray(expectedGroups)||expectedGroups.length===0) throw Error('At least one verified internal group is required before promotion');
+            let build;
+            for(let attempt=0;attempt<31;attempt++){
+              const matches=await matching('44');
+              if(matches.length>1) throw Error('Ambiguous build 44 records');
+              build=matches[0];
+              const state=build?.attributes.processingState??'NOT_VISIBLE_YET';
+              write('apple-processing',{build_id:build?.id??null,processing_state:state,attempt,source_sha:identity.source_sha,ipa_sha256:identity.ipa_sha256});
+              console.log(`APPLE_PROCESSING=${state}; CHECK=${attempt+1}`);
+              if(['FAILED','INVALID'].includes(state)) throw Error('Apple rejected binary processing; preserve upload receipt and do not re-upload');
+              if(state==='VALID') break;
+              if(attempt<30) await new Promise(resolve=>setTimeout(resolve,30000));
+            }
+            if(build?.attributes.processingState!=='VALID'){
+              write('testflight-pending',{status:'APPLE_PROCESSING_PENDING',build_id:build?.id??null,
+                processing_state:build?.attributes.processingState??'NOT_VISIBLE_YET',
+                source_sha:identity.source_sha,ipa_sha256:identity.ipa_sha256,do_not_reupload:true});
+              throw Error('Upload accepted but Apple processing is pending; readiness was not verified. Do not re-upload');
+            }
+            if(build.attributes.usesNonExemptEncryption==null&&identity.uses_non_exempt_encryption===false){
+              await client.request('PATCH',`/v1/builds/${build.id}`,{data:{type:'builds',id:build.id,attributes:{usesNonExemptEncryption:false}}});
+            }
+            const current=await internalGroupsForBuild(build.id);
+            const known=new Set(current.map(g=>g.id));
+            for(const group of expectedGroups){
+              if(!known.has(group.id)) await client.request('POST',`/v1/betaGroups/${group.id}/relationships/builds`,{data:[{type:'builds',id:build.id}]});
+            }
+            // Apple InternalBetaState availability values; processing VALID alone
+            // does not establish internal testing or group association.
+            // https://developer.apple.com/documentation/appstoreconnectapi/internalbetastate
+            const availableStates=new Set(['READY_FOR_BETA_TESTING','IN_BETA_TESTING']);
+            let ready=false;
+            for(let attempt=0;attempt<13;attempt++){
+              const internal=await internalGroupsForBuild(build.id);
+              const detail=await client.request('GET',`/v1/builds/${build.id}/buildBetaDetail`);
+              const state=detail.data?.attributes.internalBuildState??'NOT_AVAILABLE_YET';
+              const associated=new Set(internal.map(g=>g.id));
+              const missing=expectedGroups.filter(g=>!associated.has(g.id)).map(g=>g.id);
+              ready=availableStates.has(state)&&missing.length===0;
+              const result={status:ready?'INTERNAL_TESTFLIGHT_READY':'INTERNAL_AVAILABILITY_PENDING',
+                build_id:build.id,version:'1.0.0',build:44,processing_state:'VALID',
+                internal_build_state:state,internal_groups:internal.map(g=>({id:g.id,name:g.attributes.name})),
+                expected_internal_groups:expectedGroups,missing_internal_group_ids:missing,attempt,
+                source_sha:identity.source_sha,ipa_sha256:identity.ipa_sha256,
+                physical_device_verified:false,release_approved:false,do_not_reupload:true};
+              write(ready?'testflight-ready':'testflight-pending',result);
+              console.log(`TESTFLIGHT_BUILD44_PROCESSING=VALID; INTERNAL_STATE=${state}; MISSING_INTERNAL_GROUPS=${missing.length}; READINESS_CHECK=${attempt+1}`);
+              if(ready){
+                console.log('TESTFLIGHT_BUILD44_INTERNAL_AVAILABILITY=VERIFIED; DEVICE_ACCEPTANCE=PENDING');
+                break;
+              }
+              if(['PROCESSING_EXCEPTION','EXPIRED'].includes(state)) throw Error('Apple internal testing is unavailable: '+state+'; do not re-upload');
+              if(attempt<12) await new Promise(resolve=>setTimeout(resolve,10000));
+            }
+            if(!ready) throw Error('Upload accepted but internal testing availability or group readback remains pending; do not re-upload');
+          }else throw Error('Unknown ASC operation');
+          JS
+          node --check evidence/asc-processing.mjs
+      - name: Verify Apple access and prevent an accidental duplicate upload
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: node evidence/asc-processing.mjs preflight
+      - name: Validate this exact IPA with Apple
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcrun altool --validate-app -f "$BIL_IPA_PATH" -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee evidence/apple-validation.log
+      - name: Upload the original signed IPA to TestFlight once
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = '1'
+          xcrun altool --upload-app -f "$BIL_IPA_PATH" -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" 2>&1 | tee evidence/apple-upload.log
+          python3 - <<'PY'
+          import datetime,json,pathlib,os
+          identity=json.loads(pathlib.Path('evidence/identity.json').read_text())
+          identity.update(status='UPLOAD_ACCEPTED',processing_verified=False,
+                          uploaded_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),signed_run=int(os.environ['BIL_SIGNED_RUN']),signed_artifact=int(os.environ['BIL_SIGNED_ARTIFACT']))
+          pathlib.Path('evidence/upload-receipt.json').write_text(json.dumps(identity,indent=2)+'\n')
+          print('EXACT_ORIGINAL_IPA44_UPLOAD=ACCEPTED')
+          PY
+      - name: Verify Apple processing and reuse existing internal testing groups
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        shell: bash
+        run: node evidence/asc-processing.mjs processing
+      - name: Record failure-safe signing stage evidence without credentials
+        if: always()
+        env:
+          BIL_SIGNING_JOB_STATUS: ${{ job.status }}
+        shell: bash
+        run: |
+          mkdir -p evidence
+          python3 - <<'PY2'
+          import json, os, pathlib, subprocess
+          record={'source_sha':os.environ['BIL_TESTED_SOURCE_SHA'],
+                  'workflow_sha':os.environ['GITHUB_SHA'], 'job_status':os.environ['BIL_SIGNING_JOB_STATUS'],
+                  'actual_checkout':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+                  'signed_receipt_exists':pathlib.Path('BIL-ios-build-only-receipt.json').is_file(),
+                  'upload_receipt_exists':pathlib.Path('evidence/upload-receipt.json').is_file(),
+                  'public_release_approved':False}
+          pathlib.Path('evidence/signing-stage-status.json').write_text(json.dumps(record,indent=2)+'\n')
+          PY2
+      - name: Preserve upload, processing and artifact identity evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil-ios44-testflight-promotion-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 21
+      - name: Remove ephemeral Apple private key
+        if: always()
+        shell: bash
+        run: |
+          if [[ -n "${ASC_PRIVATE_KEY_PATH:-}" && "$ASC_PRIVATE_KEY_PATH" == "$HOME/.appstoreconnect/private_keys/"* ]]; then
+            rm -f "$ASC_PRIVATE_KEY_PATH"
+          fi
