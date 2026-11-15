@@ -1,0 +1,128 @@
+name: BIL API33 direct VM transport diagnostic only
+
+on:
+  push:
+    branches: [codex/bil45-android-api33-direct-vm-diagnostic-20261115]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil45-api33-direct-vm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  original-three-native-scopes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out exact single-parent diagnostic source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Require the exact two added diagnostic paths and unchanged S4 application
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_SCOPE'
+          import hashlib, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          parent = 'fd106fd3ba6073f0474640a10062af6d7d55dadb'
+          helper = '.github/scripts/bil_android_direct_vm_attach.py'
+          workflow = '.github/workflows/bil45_android_api33_direct_vm_diagnostic.yml'
+          if os.environ['GITHUB_EVENT_NAME'] != 'push' or os.environ['GITHUB_REF'] != 'refs/heads/codex/bil45-android-api33-direct-vm-diagnostic-20261115':
+              raise ValueError('Exact diagnostic branch push required')
+          if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != parent:
+              raise ValueError('Exact single-parent S4 diagnostic commit required')
+          if set(git('diff', '--name-status', parent, 'HEAD').splitlines()) != {'A\t' + helper, 'A\t' + workflow} or git('status', '--porcelain'):
+              raise ValueError('Only two new diagnostic files may differ; application and all original tests must be unchanged')
+          if hashlib.sha256(Path(helper).read_bytes()).hexdigest() != '696c4acff6d4a98eb15529f1a83e6034e1244fb32216c02ef300c96e91b406b2':
+              raise ValueError('Exact independently reviewed direct VM helper required')
+          PY_SCOPE
+      - name: Install the identical pinned Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Resolve existing Flutter dependencies
+        run: flutter pub get
+      - name: Require the same disposable-runner hardware acceleration
+        run: bash .github/scripts/bil_prepare_android_kvm.sh
+      - name: Prepare the scoped three-native-case orchestration
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/bil45_api33_direct_vm.sh" <<'SH_DIRECT_VM'
+          set -euo pipefail
+          OUT=artifacts/qa/text18/android-api33-direct-vm
+          DEVICE="${BIL_NATIVE_CAPTURE_DEVICE_ID:-${ANDROID_SERIAL:-emulator-5554}}"
+          [[ "$DEVICE" =~ ^emulator-[0-9]+$ ]]
+          export BIL_NATIVE_CAPTURE_DEVICE_ID="$DEVICE"
+          mkdir -p "$OUT"
+          collect_command() {
+            local label="$1"
+            shift
+            python3 .github/scripts/bil_native_bounded_command.py --label "$label" \
+              --log "$OUT/$label.log" --receipt "$OUT/$label-result.json" \
+              --timeout-seconds 30 -- "$@"
+          }
+          finish() {
+            original_status=$?
+            trap - EXIT
+            set +e
+            collect_command device-settings-copy adb -s "$DEVICE" pull /sdcard/Android/data/com.bilhealth.bodyintelligencelog/files/platform-polish "$OUT/device-platform-polish"
+            collect_command device-features-copy adb -s "$DEVICE" pull /sdcard/Android/data/com.bilhealth.bodyintelligencelog/files/feature-splashes-native "$OUT/device-feature-splashes"
+            collect_command restore-connectivity adb -s "$DEVICE" shell cmd connectivity airplane-mode disable
+            python3 - "$original_status" <<'PY_END'
+          import json, os, sys
+          from pathlib import Path
+          root = Path('artifacts/qa/text18/android-api33-direct-vm')
+          rows = []
+          for scope in ['system-crypto', 'native-settings', 'native-feature-splashes']:
+              file = root / (scope + '-result.json')
+              rows.append({'scope': scope, 'result': json.loads(file.read_text()) if file.is_file() else {'status': 'NOT_EXECUTED'}})
+          complete = all(r['result'].get('direct_vm_final_exit') == 0 and r['result'].get('direct_vm_actual_case_summary_required') is True for r in rows)
+          receipt = {'status': 'ALL3_ORIGINAL_NATIVE_SCOPES_PASS_DIAGNOSTIC_ONLY' if complete and sys.argv[1] == '0' else 'FAIL_OR_INCOMPLETE_DIAGNOSTIC',
+              'source': os.environ['GITHUB_SHA'], 'run_id': os.environ['GITHUB_RUN_ID'], 'attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'source_parent': 'fd106fd3ba6073f0474640a10062af6d7d55dadb', 'scopes': rows,
+              'renderer_runtime_permissions_or_original_assertions_changed': False, 'release_acceptance': False,
+              'private_vm_uri_saved': False, 'original_shell_exit': int(sys.argv[1])}
+          (root / 'diagnostic-result.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY_END
+            exit "$original_status"
+          }
+          trap finish EXIT
+          python3 tool/release/prepare_android_policy_plugin_overrides.py > "$OUT/android-plugin-overlays.json"
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins > "$OUT/android-plugin-discovery.json"
+          collect_command acceleration-check "${ANDROID_HOME:?}/emulator/emulator" -accel-check
+          collect_command airplane-enable adb -s "$DEVICE" shell cmd connectivity airplane-mode enable
+          collect_command airplane-status adb -s "$DEVICE" shell cmd connectivity airplane-mode
+          test "$(tr -d '\r\n' < "$OUT/airplane-status.log")" = enabled
+          python3 .github/scripts/bil_android_direct_vm_attach.py --scope system-crypto --device "$DEVICE" --output "$OUT/system-crypto-transport" --log "$OUT/system-crypto.log" --receipt "$OUT/system-crypto-result.json"
+          BIL_NATIVE_SETTINGS_OUTPUT="$GITHUB_WORKSPACE/$OUT/native-settings" \
+            python3 .github/scripts/bil_android_direct_vm_attach.py --scope native-settings --device "$DEVICE" --output "$OUT/native-settings-transport" --log "$OUT/native-settings.log" --receipt "$OUT/native-settings-result.json"
+          BIL_FEATURE_NATIVE_OUTPUT="$GITHUB_WORKSPACE/$OUT/feature-splashes" \
+            python3 .github/scripts/bil_android_direct_vm_attach.py --scope native-feature-splashes --device "$DEVICE" --output "$OUT/native-feature-splashes-transport" --log "$OUT/native-feature-splashes.log" --receipt "$OUT/native-feature-splashes-result.json"
+          SH_DIRECT_VM
+      - name: Run all three unchanged native scopes through the bounded transport
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 1200
+          script: bash "$RUNNER_TEMP/bil45_api33_direct_vm.sh"
+      - name: Preserve public redacted logs and original native case evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil45-api33-direct-vm-${{ github.sha }}-r${{ github.run_id }}-a${{ github.run_attempt }}
+          path: artifacts/qa/text18/android-api33-direct-vm
+          if-no-files-found: error
+          retention-days: 14
