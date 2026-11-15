@@ -1,0 +1,315 @@
+name: BIL capsule UIKit XCTest diagnostic only
+
+on:
+  push:
+    branches: [codex/bil45-capsule-xctest-diagnostic-20261115]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bil45-capsule-xctest-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capsule-xctest-only:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+    steps:
+      - name: Check out exact single-parent diagnostic candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Guard exact branch, S3 parent and two changed paths before preparation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_DIAGNOSTIC_SCOPE'
+          import hashlib, os, subprocess
+          from pathlib import Path
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          parent = 'a50ea86aa8d439510d2718108881e1b1acd1227e'
+          assert os.environ['GITHUB_REF'] == 'refs/heads/codex/bil45-capsule-xctest-diagnostic-20261115'
+          assert os.environ['GITHUB_EVENT_NAME'] == 'push'
+          assert git('rev-parse', 'HEAD') == os.environ['GITHUB_SHA']
+          assert git('show', '-s', '--format=%P', 'HEAD') == parent
+          assert set(git('diff', '--name-only', parent, 'HEAD').splitlines()) == {
+              'ios/RunnerTests/RunnerTests.swift', '.github/workflows/bil45_capsule_xctest_diagnostic.yml'}
+          assert not git('status', '--porcelain')
+          assert hashlib.sha256(Path('ios/RunnerTests/RunnerTests.swift').read_bytes()).hexdigest() == '9081724e1ade7f41e6ac2d342b048663d3a7435480851e1875faddf14da4d131'
+          PY_DIAGNOSTIC_SCOPE
+      - name: Install the same pinned Flutter as original S3 native QA
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.44.6
+          cache: true
+      - name: Select the same isolated CocoaPods as original S3 native QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/install_isolated_cocoapods.py --output artifacts/qa/bil45-capsule-xctest-diagnostic/cocoapods-installation.json
+      - name: Resolve the existing pinned dependencies and native pods
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_LOCKS_BEFORE'
+          import hashlib, json
+          from pathlib import Path
+          folder = Path('artifacts/qa/bil45-capsule-xctest-diagnostic')
+          folder.mkdir(parents=True, exist_ok=True)
+          names = ['pubspec.lock', 'ios/Podfile.lock']
+          before = {name: hashlib.sha256(Path(name).read_bytes()).hexdigest() if Path(name).is_file() else None for name in names}
+          if before['pubspec.lock'] != 'bc3c559586313d4323233c0b5d66dde56441e0f03d7be45d00bae61efb4fa7ac' or before['ios/Podfile.lock'] is not None:
+              raise ValueError('Exact S3 pub lock and SOURCE_POD_LOCK_ABSENT required before resolution')
+          (folder / 'dependency-locks-before.json').write_text(json.dumps(before, indent=2), encoding='utf-8')
+          PY_LOCKS_BEFORE
+          flutter pub get --enforce-lockfile
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          # The pristine S3 baseline has no tracked Podfile.lock. Preserve the
+          # same original pod-install operation, record its actual generated
+          # lock, and never claim byte equivalence with a nonexistent source lock.
+          pod install --project-directory=ios
+          python3 - <<'PY_LOCKS_AFTER'
+          import hashlib, json, re, shutil
+          from pathlib import Path
+          folder = Path('artifacts/qa/bil45-capsule-xctest-diagnostic')
+          before = json.loads((folder / 'dependency-locks-before.json').read_text(encoding='utf-8'))
+          after = {name: hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in ['pubspec.lock', 'ios/Podfile.lock']}
+          if after['pubspec.lock'] != before['pubspec.lock']:
+              raise ValueError('pubspec.lock changed despite enforced resolution')
+          lock = Path('ios/Podfile.lock')
+          shutil.copyfile(lock, folder / 'GENERATED_Podfile.lock')
+          text = lock.read_text(encoding='utf-8')
+          pods_section = text.split('DEPENDENCIES:', 1)[0]
+          resolved_versions = re.findall(r'^  - (.+?)(?::)?$', pods_section, flags=re.M)
+          if not resolved_versions:
+              raise ValueError('Generated Pod lock must expose its actual resolved version list')
+          proof = {'source_pod_lock_state': 'SOURCE_POD_LOCK_ABSENT', 'before': before, 'after': after,
+              'source_pubspec_lock_preserved': True, 'pod_resolution': 'Same existing CocoaPods1.16.2 pod install baseline operation; no pod update or repo-update',
+              'historical_pod_lock_byte_equivalence_proven': False,
+              'historical_original_pod_lock_payload_available': False,
+              'generated_pod_lock_copy': 'GENERATED_Podfile.lock', 'actual_resolved_pod_versions': resolved_versions}
+          (folder / 'dependency-locks-resolution.json').write_text(json.dumps(proof, indent=2), encoding='utf-8')
+          PY_LOCKS_AFTER
+      - name: Run all fourteen actual XCTests and three planned capsule repetitions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_CAPSULE_DIAGNOSTIC'
+          """External proposal for one synthetic iPhone XCTest diagnostic job only.
+
+          This file is embedded verbatim in the proposed workflow, not a third Git path.
+          It has no network/auth/production API operation and must run on macOS CI only.
+          """
+          import base64
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          import sys
+
+          WORKSPACE = Path(os.environ['GITHUB_WORKSPACE']).resolve()
+          OUTPUT = WORKSPACE / 'artifacts/qa/bil45-capsule-xctest-diagnostic'
+          OUTPUT.mkdir(parents=True, exist_ok=True)
+          sys.path.insert(0, str(WORKSPACE / '.github/scripts'))
+          from bil_native_bounded_command import run_bounded
+          from bil_ios_runner_tests import expected_tests, run_tests
+
+          PARENT = 'a50ea86aa8d439510d2718108881e1b1acd1227e'
+          CANDIDATE = '9081724e1ade7f41e6ac2d342b048663d3a7435480851e1875faddf14da4d131'
+          BRANCH = 'refs/heads/codex/bil45-capsule-xctest-diagnostic-20261115'
+          WORKFLOW = '.github/workflows/bil45_capsule_xctest_diagnostic.yml'
+          CAPSULES = {
+              'testSplashCapsuleReducedMotionKeepsIdenticalPixels',
+              'testSplashCapsuleMotionChangesPaintWithoutChangingFootprint',
+              'testSplashCapsulePreservesPhysicalDirectionAndAccessibleColors',
+          }
+          DEFINES = [
+              'BIL_ENVIRONMENT=testing', 'BIL_USE_SUPABASE=false',
+              'BIL_PAYMENTS_ENABLED=false', 'BIL_ADS_ENABLED=false',
+              'BIL_QA_IOS_SIMULATOR=true', 'BIL_QA_DEVICE_NAME=github-bil45-capsule-diagnostic',
+              'BIL_QA_SOURCE_HEAD=' + os.environ['GITHUB_SHA'],
+          ]
+          device = None
+          receipt = {'schema': 'bil.capsule-xctest-diagnostic.v1', 'status': 'RUNNING',
+                     'application_parent_sha': PARENT, 'diagnostic_source_sha': os.environ['GITHUB_SHA'],
+                     'event': os.environ['GITHUB_EVENT_NAME'], 'ref': os.environ['GITHUB_REF'],
+                     'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+                     'native_scope': '14 declared RunnerTests plus three planned repetitions of the three capsule cases',
+                     'production_capsule_changed': False, 'signed_artifact_acceptance': False,
+                     'physical_device_acceptance': False, 'release_gate_acceptance': False,
+                     'planned_capsule_repeat_runs': 3, 'completed_capsule_repeat_runs': []}
+
+          def save():
+              (OUTPUT / 'diagnostic-result.json').write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
+
+          def git(*args):
+              return subprocess.check_output(['git', *args], cwd=WORKSPACE, text=True).strip()
+
+          def verify_dependency_locks(stage_name):
+              proof = json.loads((OUTPUT / 'dependency-locks-resolution.json').read_text(encoding='utf-8'))
+              if proof['source_pod_lock_state'] != 'SOURCE_POD_LOCK_ABSENT':
+                  raise ValueError('Source Pod lock state must remain honestly absent')
+              expected_pub = 'bc3c559586313d4323233c0b5d66dde56441e0f03d7be45d00bae61efb4fa7ac'
+              actual_pub = hashlib.sha256((WORKSPACE / 'pubspec.lock').read_bytes()).hexdigest()
+              actual_pod = hashlib.sha256((WORKSPACE / 'ios/Podfile.lock').read_bytes()).hexdigest()
+              if proof['before']['pubspec.lock'] != expected_pub or proof['before']['ios/Podfile.lock'] is not None:
+                  raise ValueError('Dependency preparation did not start from the exact S3 lock state')
+              if actual_pub != expected_pub or actual_pod != proof['after']['ios/Podfile.lock']:
+                  raise ValueError('Actual dependency locks drifted after reviewed initial resolution')
+              receipt['dependency_lock_proof'] = proof
+              receipt.setdefault('dependency_lock_checks', []).append({
+                  'stage': stage_name, 'pubspec_lock_sha256': actual_pub, 'generated_pod_lock_sha256': actual_pod})
+
+          def stage(label, command, timeout=120, output=None):
+              log = output or OUTPUT / (label + '.log')
+              code = run_bounded(command, label=label, log_path=log,
+                                 receipt_path=OUTPUT / (label + '-command-result.json'),
+                                 timeout_seconds=timeout)
+              if code != 0:
+                  raise RuntimeError('Diagnostic stage failed: ' + label)
+              return log
+
+          def export(bundle, folder):
+              stage(folder.name + '-export-attachments', [
+                  'xcrun', 'xcresulttool', 'export', 'attachments', '--path', str(bundle),
+                  '--output-path', str(folder / 'attachments')], timeout=120)
+
+          def verify_repeat(summary, log):
+              value = json.loads(summary.read_text(encoding='utf-8'))
+              counts = {key: value.get(key) for key in ('totalTestCount', 'passedTests', 'failedTests', 'skippedTests')}
+              if any(type(item) is not int for item in counts.values()) or counts != {'totalTestCount': 3, 'passedTests': 3, 'failedTests': 0, 'skippedTests': 0}:
+                  raise ValueError('Every planned capsule case must pass without failure or skip')
+              if type(value.get('expectedFailures', 0)) is not int or value.get('expectedFailures', 0) != 0:
+                  raise ValueError('Expected failures cannot satisfy the diagnostic')
+              passed = []
+              for line in log.read_text(encoding='utf-8', errors='replace').splitlines():
+                  match = re.match(r"\s*Test Case '-\[(?:RunnerTests\.)?RunnerTests (test[A-Za-z0-9_]+)\]' passed\b", line)
+                  if match is None:
+                      match = re.match(r"\s*Test case 'RunnerTests\.(test[A-Za-z0-9_]+)\(\)' passed\b", line)
+                  if match:
+                      passed.append(match.group(1))
+                  elif re.match(r'\s*Test [Cc]ase .*\bpassed\b', line):
+                      raise ValueError('Unexpected XCTest class in capsule repetition')
+              if set(passed) != CAPSULES or len(passed) != 3:
+                  raise ValueError('Exact three uniquely named capsule passes required for each repetition')
+              return {**counts, 'testNames': sorted(passed)}
+
+          try:
+              save()
+              if sys.platform != 'darwin' or os.environ['GITHUB_EVENT_NAME'] != 'push' or os.environ['GITHUB_REF'] != BRANCH:
+                  raise ValueError('Only the reviewed diagnostic branch push on macOS may run')
+              if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != PARENT:
+                  raise ValueError('One exact single-parent S3 diagnostic commit required')
+              if set(git('diff', '--name-only', PARENT, 'HEAD').splitlines()) != {WORKFLOW, 'ios/RunnerTests/RunnerTests.swift'}:
+                  raise ValueError('Only the fixture and dedicated diagnostic workflow may differ from S3')
+              test_source = WORKSPACE / 'ios/RunnerTests/RunnerTests.swift'
+              if hashlib.sha256(test_source.read_bytes()).hexdigest() != CANDIDATE:
+                  raise ValueError('RunnerTests is not the independently reviewed exact candidate')
+              names = expected_tests(test_source.read_text(encoding='utf-8'))
+              if len(names) != 14 or not CAPSULES.issubset(names):
+                  raise ValueError('All fourteen actual source tests must remain declared')
+              receipt['source_test_sha256'] = CANDIDATE
+              receipt['source_tree'] = git('rev-parse', 'HEAD^{tree}')
+              DEFINES.append('BIL_QA_SOURCE_FINGERPRINT=' + receipt['source_tree'])
+              receipt['source_scope_hashes'] = {path: hashlib.sha256((WORKSPACE / path).read_bytes()).hexdigest()
+                  for path in [WORKFLOW, 'ios/RunnerTests/RunnerTests.swift',
+                               'ios/Runner/BILCommunityTranslationBridge.swift', '.github/scripts/bil_ios_runner_tests.py',
+                               '.github/scripts/bil_ios_native_preflight.py', '.github/scripts/install_isolated_cocoapods.py',
+                               'pubspec.lock']}
+              verify_dependency_locks('before-native-preflight')
+              xcode = stage('xcode-version', ['xcodebuild', '-version']).read_text().strip()
+              sdk = stage('simulator-sdk', ['xcrun', '--sdk', 'iphonesimulator', '--show-sdk-version']).read_text().strip()
+              flutter = json.loads(stage('flutter-version', ['flutter', '--version', '--machine']).read_text())
+              pods = stage('cocoapods-version', ['pod', '--version']).read_text().strip()
+              if xcode != 'Xcode 26.6\nBuild version 17F113' or sdk != '26.5':
+                  raise ValueError('Exact original Xcode 26.6/17F113 and iOS Simulator SDK26.5 required')
+              if flutter.get('frameworkVersion') != '3.44.6' or pods != '1.16.2':
+                  raise ValueError('Exact original Flutter3.44.6 and isolated CocoaPods1.16.2 required')
+              runtimes = json.loads(stage('runtimes', ['xcrun', 'simctl', 'list', 'runtimes', 'available', '-j']).read_text())['runtimes']
+              runtime = [item for item in runtimes if item.get('identifier') == 'com.apple.CoreSimulator.SimRuntime.iOS-26-5'
+                         and item.get('buildversion') == '23F77' and item.get('isAvailable') is True]
+              if len(runtime) != 1:
+                  raise ValueError('Exact original iOS26.5/23F77 Simulator runtime required; no substitute')
+              receipt['toolchain'] = {'xcode': xcode, 'simulator_sdk': sdk,
+                  'flutter': flutter['frameworkVersion'], 'cocoapods': pods,
+                  'runtime': 'com.apple.CoreSimulator.SimRuntime.iOS-26-5', 'runtime_build': '23F77',
+                  'device_type': 'com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro'}
+              stage('native-preflight', ['python3', '.github/scripts/bil_ios_native_preflight.py',
+                    '--workspace', str(WORKSPACE), '--output', str(OUTPUT)], timeout=900)
+              stage('flutter-native-config', ['flutter', '--verbose', 'build', 'ios', '--config-only', '--simulator',
+                    '--debug', '--no-codesign', '--no-pub', '--build-number', '39', '--target', 'lib/main.dart',
+                    *['--dart-define=' + value for value in DEFINES]], timeout=900)
+              verify_dependency_locks('after-native-config')
+              device = stage('create-iphone', ['xcrun', 'simctl', 'create', 'BIL45-capsule-diagnostic-' + os.environ['GITHUB_RUN_ID'],
+                  'com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro', 'com.apple.CoreSimulator.SimRuntime.iOS-26-5']).read_text().strip()
+              if re.fullmatch(r'[0-9A-Fa-f-]{36}', device) is None:
+                  raise ValueError('Invalid newly created synthetic Simulator identity')
+              receipt['synthetic_simulator_udid'] = device
+              stage('boot-iphone', ['xcrun', 'simctl', 'boot', device])
+              stage('bootstatus-iphone', ['xcrun', 'simctl', 'bootstatus', device, '-b'], timeout=180)
+              save()
+              code = run_tests(WORKSPACE, OUTPUT / 'all14', device, DEFINES, build_number='39')
+              if (OUTPUT / 'all14/RunnerTests.xcresult').is_dir():
+                  export(OUTPUT / 'all14/RunnerTests.xcresult', OUTPUT / 'all14')
+              if code != 0:
+                  raise RuntimeError('Actual full fourteen-case XCTest failed; repetitions cannot turn it green')
+              verify_dependency_locks('after-all14')
+              encoded = ','.join(base64.b64encode(value.encode()).decode() for value in DEFINES)
+              for iteration in range(1, 4):
+                  folder = OUTPUT / ('capsules-repeat-' + str(iteration))
+                  folder.mkdir()
+                  bundle = folder / 'Capsules.xcresult'
+                  if bundle.exists():
+                      raise ValueError('Existing repetition bundle cannot supply new evidence')
+                  command = ['xcrun', 'xcodebuild', 'test-without-building',
+                      '-workspace', str(WORKSPACE / 'ios/Runner.xcworkspace'), '-scheme', 'Runner',
+                      '-configuration', 'Debug', '-sdk', 'iphonesimulator',
+                      '-destination', 'platform=iOS Simulator,id=' + device,
+                      '-clonedSourcePackagesDirPath', str(WORKSPACE / 'build/ios/SourcePackages'), '-skipPackageUpdates',
+                      '-parallel-testing-enabled', 'NO', '-resultBundlePath', str(bundle),
+                      *['-only-testing:RunnerTests/RunnerTests/' + name for name in sorted(CAPSULES)],
+                      'BUILD_DIR=' + str(WORKSPACE / 'build/ios'), 'CODE_SIGN_IDENTITY=-',
+                      'CODE_SIGNING_ALLOWED=YES', 'CODE_SIGNING_REQUIRED=YES', 'PROVISIONING_PROFILE_SPECIFIER=',
+                      'FLUTTER_TARGET=lib/main.dart', 'FLUTTER_BUILD_NUMBER=39', 'DART_DEFINES=' + encoded]
+                  log = folder / 'capsules.log'
+                  code = run_bounded(command, label='capsules-repeat-' + str(iteration), log_path=log,
+                      receipt_path=folder / 'command-result.json', timeout_seconds=300)
+                  if bundle.is_dir():
+                      stage('capsules-repeat-' + str(iteration) + '-summary', [
+                          'xcrun', 'xcresulttool', 'get', 'test-results', 'summary', '--path', str(bundle)],
+                          timeout=60, output=folder / 'summary.json')
+                      export(bundle, folder)
+                  if code != 0:
+                      raise RuntimeError('A planned capsule repetition failed; no rerun or acceptance')
+                  counts = verify_repeat(folder / 'summary.json', log)
+                  verify_dependency_locks('after-capsules-repeat-' + str(iteration))
+                  receipt['completed_capsule_repeat_runs'].append({'iteration': iteration, 'summary': counts})
+                  save()
+              receipt['status'] = 'PASS_DIAGNOSTIC_ONLY_NOT_RELEASE_ACCEPTANCE'
+          except Exception as error:
+              receipt.update(status='FAIL', failure_type=type(error).__name__, failure=str(error))
+              raise
+          finally:
+              save()
+              if device is not None and re.fullmatch(r'[0-9A-Fa-f-]{36}', device):
+                  for operation in ('shutdown', 'delete'):
+                      run_bounded(['xcrun', 'simctl', operation, device], label='cleanup-' + operation,
+                          log_path=OUTPUT / ('cleanup-' + operation + '.log'),
+                          receipt_path=OUTPUT / ('cleanup-' + operation + '-result.json'), timeout_seconds=30)
+          PY_CAPSULE_DIAGNOSTIC
+      - name: Preserve actual diagnostic originals even on failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil45-capsule-xctest-diagnostic-${{ github.sha }}-r${{ github.run_id }}-a${{ github.run_attempt }}
+          path: artifacts/qa/bil45-capsule-xctest-diagnostic
+          if-no-files-found: error
+          retention-days: 14
