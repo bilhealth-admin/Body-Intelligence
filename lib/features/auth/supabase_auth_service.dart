@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'apple_credential_lifecycle.dart';
 import 'native_google_sign_in.dart';
+import 'native_facebook_oauth.dart';
 
 enum BilAuthOutcome { signedIn, confirmationRequired }
 
@@ -69,9 +70,8 @@ class SupabaseAuthService {
   static const passwordResetRedirectUri =
       'https://www.bilhealth.com/auth/reset-password';
 
-  /// On iOS, browser OAuth stays inside BIL in SFSafariViewController, where
-  /// users can inspect the provider URL without leaving the app. Native Google
-  /// and Apple sign-in keep their own flows; callbacks still use verified HTTPS.
+  /// General browser OAuth stays in BIL on iOS. Facebook bypasses this launcher
+  /// for ASWebAuthenticationSession; native Google/Apple retain their own flows.
   static LaunchMode oauthLaunchModeFor(
     OAuthProvider provider, {
     required bool isWeb,
@@ -108,8 +108,8 @@ class SupabaseAuthService {
       usesNativeGoogleSignIn(provider, isWeb: isWeb, platform: platform) &&
       platform == TargetPlatform.android;
 
-  /// Browser OAuth providers, including Facebook, return through the same
-  /// verified HTTPS route. Native Google sign-in does not use this URL.
+  /// General browser callbacks use verified HTTPS. iOS Facebook selects this
+  /// canonical return or its session-owned legacy return in its native bridge.
   static String oauthRedirectUriFor(
     OAuthProvider provider, {
     required bool isWeb,
@@ -119,6 +119,13 @@ class SupabaseAuthService {
   }
 
   Future<bool> signInWithOAuth(OAuthProvider provider) async {
+    if (usesNativeFacebookOAuth(
+      provider,
+      isWeb: kIsWeb,
+      platform: defaultTargetPlatform,
+    )) {
+      return const BilNativeFacebookOAuth().authenticate(client);
+    }
     if (usesNativeGoogleSignIn(
       provider,
       isWeb: kIsWeb,
@@ -140,6 +147,15 @@ class SupabaseAuthService {
       ),
     );
   }
+
+  static bool usesNativeFacebookOAuth(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) =>
+      provider == OAuthProvider.facebook &&
+      !isWeb &&
+      platform == TargetPlatform.iOS;
 
   /// Signs in through Google's native mobile SDK, then swaps the short-lived Google
   /// identity proof for the same Supabase session used by every BIL surface.

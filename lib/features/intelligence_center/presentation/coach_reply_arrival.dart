@@ -41,10 +41,9 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   bool _awaitingFirstPaint = false;
   String? _lastMetricsSignature;
   String? _lastNonKeyboardMetricsSignature;
-  double? _lastKeyboardInset;
   Timer? _metricLayoutDebounce;
   String? _reportedVisibleFor;
-  bool _visibilityNoticeQueued = false;
+  ({String messageId, int generation})? _queuedVisibilityNotice;
 
   bool get _reduceMotion =>
       MediaQuery.disableAnimationsOf(context) ||
@@ -76,21 +75,32 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
 
   void _noticeVisibleAfterPaint() {
     if (widget.onPresentationReady == null ||
-        _visibilityNoticeQueued ||
-        _reportedVisibleFor == widget.messageId) {
+        _reportedVisibleFor == widget.messageId ||
+        _awaitingFirstPaint ||
+        _opacity.value < .99) {
       return;
     }
-    _visibilityNoticeQueued = true;
+    final notice = (messageId: widget.messageId, generation: _layoutGeneration);
+    if (_queuedVisibilityNotice == notice) return;
+    _queuedVisibilityNotice = notice;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _visibilityNoticeQueued = false;
-      if (!mounted || _awaitingFirstPaint || _opacity.value < .99) {
+      // A retired message must not clear or consume its replacement's notice.
+      if (_queuedVisibilityNotice != notice) return;
+      _queuedVisibilityNotice = null;
+      if (!mounted ||
+          widget.messageId != notice.messageId ||
+          _layoutGeneration != notice.generation ||
+          _awaitingFirstPaint ||
+          _opacity.value < .99) {
         return;
       }
-      if (_reportedVisibleFor != widget.messageId) {
-        _reportedVisibleFor = widget.messageId;
+      if (_reportedVisibleFor != notice.messageId) {
+        _reportedVisibleFor = notice.messageId;
         widget.onPresentationReady?.call();
       }
     });
+    // Reduced motion can finish without a ticker or another widget rebuild.
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   @override
@@ -100,7 +110,6 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
     _lastNonKeyboardMetricsSignature ??= _metricsSignature(
       includeKeyboardInset: false,
     );
-    _lastKeyboardInset ??= View.of(context).viewInsets.bottom;
     _syncMotionPreference();
   }
 
@@ -131,30 +140,24 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
     final previousSignature = _lastMetricsSignature;
     final nonKeyboardSignature = _metricsSignature(includeKeyboardInset: false);
     final previousNonKeyboardSignature = _lastNonKeyboardMetricsSignature;
-    final keyboardInset = View.of(context).viewInsets.bottom;
-    final previousKeyboardInset = _lastKeyboardInset;
     _lastMetricsSignature = signature;
     _lastNonKeyboardMetricsSignature = nonKeyboardSignature;
-    _lastKeyboardInset = keyboardInset;
     if (previousSignature == null ||
         previousSignature == signature ||
         !_awaitingFirstPaint) {
       return;
     }
 
-    // A retracting IME expands the existing reading viewport. Restarting the
-    // fade on every closing frame can keep a fully laid-out reply transparent,
-    // especially when native debug frames are slow. Keep the current entrance;
-    // genuine viewport contractions and other geometry changes still re-gate.
-    if (previousNonKeyboardSignature == nonKeyboardSignature &&
-        previousKeyboardInset != null &&
-        keyboardInset < previousKeyboardInset) {
+    // The viewport maintains the reading anchor while the IME opens or closes.
+    // Restarting opacity on those metrics can keep a complete reply hidden
+    // indefinitely, even though its text and first glyphs are already laid out.
+    // Only an actual screen or safe-area change needs a fresh reading layout.
+    if (previousNonKeyboardSignature == nonKeyboardSignature) {
       return;
     }
 
-    // Only real viewport changes restart the entrance. Duplicate native
-    // notifications are ignored; changing IME metrics are coalesced until the
-    // viewport has been quiet long enough to lay out the reading anchor.
+    // Coalesce actual screen and safe-area changes for the reading layout.
+    // Keyboard-only metrics above retain the existing entrance instead.
     _scheduleMetricLayoutGate();
   }
 
@@ -209,6 +212,9 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
         }
         _observeFirstPaint(generation);
       });
+      // A post-frame callback alone cannot wake an idle pipeline after the
+      // entrance was paused. Request the layout frame this gate waits for.
+      WidgetsBinding.instance.ensureVisualUpdate();
     });
   }
 
@@ -242,6 +248,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
       if (!mounted || generation != _layoutGeneration) return;
       if (_opacity.value > 0) {
         _awaitingFirstPaint = false;
+        _noticeVisibleAfterPaint();
       } else {
         _observeFirstPaint(generation);
       }
@@ -283,6 +290,7 @@ class _CoachReplyArrivalState extends State<CoachReplyArrival>
   @override
   void dispose() {
     _metricLayoutDebounce?.cancel();
+    _queuedVisibilityNotice = null;
     WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     super.dispose();

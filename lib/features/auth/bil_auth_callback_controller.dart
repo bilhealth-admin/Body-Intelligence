@@ -24,20 +24,28 @@ final class BilAuthCallbackController {
 
   Future<bool> handle(Uri uri) async {
     if (!isSupportedCallbackLocation(uri)) return false;
+    await completeNativeCallback(uri);
+    return true;
+  }
+
+  /// Uses the same deduplicated exchange as app links, returning its verified
+  /// outcome to the active native authentication session rather than whether
+  /// the link was consumed. The verified HTTPS allowlist is unchanged.
+  Future<bool> completeNativeCallback(Uri uri) async {
+    if (!isSupportedCallbackLocation(uri)) return false;
     _lastStarted = uri;
 
     // Android may expose the cold-start URI through more than one delivery
     // path. A successful PKCE authorization code is single-use, while a failed
     // exchange must remain available for an explicit user retry.
-    if (_handled.contains(uri) || _failed.contains(uri)) return true;
+    if (_handled.contains(uri)) return true;
+    if (_failed.contains(uri)) return false;
     final existing = _inFlight[uri];
     if (existing != null) {
-      await existing;
-      return true;
+      return existing;
     }
 
-    await _run(uri);
-    return true;
+    return _run(uri);
   }
 
   /// Waits for the current callback, or retries the most recent failed one.

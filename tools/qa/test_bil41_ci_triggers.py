@@ -13,6 +13,7 @@ RELEASE_BRANCH = 'codex/bil41-android33-release-20261106'
 PROMOTION_BRANCH = 'codex/bil41-internal-testflight-20261106'
 NEW_SOURCE_BRANCH = 'codex/bil43-android35-verified-20261108'
 BIL44_SOURCE_BRANCH = 'codex/bil44-android36-verified-20261115'
+BIL45_SOURCE_BRANCH = 'codex/bil45-android37-inactive-catalog-20261115'
 
 
 def push_branches(source):
@@ -78,6 +79,7 @@ class Release41CiTriggersTest(unittest.TestCase):
                 self.assertIn(RELEASE_BRANCH, branches)
                 self.assertIn(NEW_SOURCE_BRANCH, branches)
                 self.assertIn(BIL44_SOURCE_BRANCH, branches)
+                self.assertIn(BIL45_SOURCE_BRANCH, branches)
                 self.assertIn('bil39/integration-20261025', branches)
                 self.assertIn('codex/bil40-device-fixes-20261028', branches)
 
@@ -93,9 +95,10 @@ class Release41CiTriggersTest(unittest.TestCase):
                                       branch=PROMOTION_BRANCH))
         self.assertTrue(selected_job(self.security,'isolated-source-audit',branch=NEW_SOURCE_BRANCH))
         self.assertTrue(selected_job(self.security,'isolated-source-audit',branch=BIL44_SOURCE_BRANCH))
+        self.assertTrue(selected_job(self.security,'isolated-source-audit',branch=BIL45_SOURCE_BRANCH))
 
     def test_release_keeps_iphone_and_ipad_in_independent_runs(self):
-        for branch in (RELEASE_BRANCH,NEW_SOURCE_BRANCH,BIL44_SOURCE_BRANCH):
+        for branch in (RELEASE_BRANCH,NEW_SOURCE_BRANCH,BIL44_SOURCE_BRANCH,BIL45_SOURCE_BRANCH):
             self.assertFalse(selected_job(self.security,'ios-native-integration',branch=branch))
             for device in ('iphone','ipad'):
                 proof=validate_native_workflow_contract(ROOT,device,branch)

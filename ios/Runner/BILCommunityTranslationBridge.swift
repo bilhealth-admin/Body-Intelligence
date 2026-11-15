@@ -263,7 +263,11 @@ private struct BILTranslationPreparation: View {
   var body: some View {
     VStack(spacing: 20) {
       VStack(spacing: 8) {
-        BILNativeSplashCapsuleProgress()
+        ProgressView()
+          .progressViewStyle(.circular)
+          .tint(Color.gray)
+          .frame(width: 24, height: 24)
+          .accessibilityHidden(true)
         Text(status)
       }
       Button(cancel, action: cancelled)

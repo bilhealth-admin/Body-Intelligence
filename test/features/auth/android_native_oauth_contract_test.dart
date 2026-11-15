@@ -1,6 +1,9 @@
 import 'dart:io';
 
+import 'package:body_intelligence_log/features/auth/supabase_auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   test('Android uses native Google and external Supabase Facebook OAuth', () {
@@ -25,7 +28,16 @@ void main() {
     expect(service, contains('usesNativeGoogleSignIn('));
     expect(service, contains('client.auth.signInWithOAuth('));
     expect(service, isNot(contains('FacebookSignIn')));
-    expect(service, isNot(contains('BilNativeFacebook')));
+    // Facebook's iOS authentication session must never replace Android's
+    // existing browser flow. Its production selection predicate proves scope.
+    expect(
+      SupabaseAuthService.usesNativeFacebookOAuth(
+        OAuthProvider.facebook,
+        isWeb: false,
+        platform: TargetPlatform.android,
+      ),
+      isFalse,
+    );
     expect(service, isNot(contains('getOAuthSignInUrl')));
     expect(service, isNot(contains('BilGoogleOAuthLauncher')));
     expect(service, isNot(contains('BilFacebookOAuthLauncher')));

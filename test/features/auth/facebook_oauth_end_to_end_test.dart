@@ -14,7 +14,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+  // The iOS native session and its HTTPS/legacy return are covered by
+  // native_facebook_oauth_test.dart. Preserve this Android browser regression.
+  for (final platform in [TargetPlatform.android]) {
     for (final expectedOwnerId in [
       'a1b2c3d4-1234-4abc-8def-0123456789ab',
       'b2c3d4e5-2345-4bcd-9efa-123456789abc',

@@ -4,6 +4,32 @@ import 'package:body_intelligence_log/features/auth/bil_auth_callback_controller
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('native failure outcome differs from consumed app link', () async {
+    var calls = 0;
+    final controller = BilAuthCallbackController(
+      resolve: (_) async {
+        calls++;
+        throw StateError('synthetic failure');
+      },
+      navigate: (_) {},
+      onError: (_, _) {},
+    );
+    final callback = Uri.parse(
+      'https://www.bilhealth.com/auth/callback?code=synthetic',
+    );
+    expect(await controller.completeNativeCallback(callback), isFalse);
+    expect(await controller.handle(callback), isTrue);
+    expect(await controller.completeNativeCallback(callback), isFalse);
+    expect(calls, 1);
+    expect(
+      await controller.completeNativeCallback(
+        Uri.parse('bil://auth/callback?code=synthetic'),
+      ),
+      isFalse,
+    );
+    expect(calls, 1);
+  });
+
   test('exchanges an exact verified HTTPS OAuth callback once', () async {
     final resolved = <Uri>[];
     final routes = <String>[];

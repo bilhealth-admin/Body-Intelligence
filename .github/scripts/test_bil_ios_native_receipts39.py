@@ -76,15 +76,26 @@ class NativeReceiptTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.check()
 
-    def test_current_eight_named_source_tests_and_a_future_extra_declaration_are_not_hardcoded(self):
+    def test_all_source_declared_tests_and_a_future_extra_declaration_are_not_hardcoded(self):
+        from bil_ios_runner_tests import ORIGINAL_TEST_NAMES
+        original_eight = ORIGINAL_TEST_NAMES | {
+            'testSplashCapsuleReducedMotionKeepsIdenticalPixels',
+            'testSplashCapsuleMotionChangesPaintWithoutChangingFootprint',
+            'testSplashCapsulePreservesPhysicalDirectionAndAccessibleColors',
+        }
         names = expected_tests(self.source.read_text())
-        self.assertEqual(len(names), 8)
-        self.assertEqual(self.check()['xctest']['passedTests'], 8)
+        self.assertTrue(original_eight.issubset(names))
+        declared_count = len(names)
+        current = self.check()['xctest']
+        self.assertEqual(current['passedTests'], declared_count)
+        self.assertEqual(current['testNames'], sorted(names))
         names.add('testAdditionalSourceDeclaredReceiptRegression')
         self.source.write_text('import XCTest\nclass RunnerTests: XCTestCase {\n' + '\n'.join(
             '  func ' + name + '() {}' for name in sorted(names)) + '\n}\n')
         self.write_xctest()
-        self.assertEqual(self.check()['xctest']['passedTests'], 9)
+        extended = self.check()['xctest']
+        self.assertEqual(extended['passedTests'], declared_count + 1)
+        self.assertEqual(extended['testNames'], sorted(names))
 
     def test_old_five_count_cannot_hide_missing_newly_declared_tests(self):
         from bil_ios_runner_tests import ORIGINAL_TEST_NAMES

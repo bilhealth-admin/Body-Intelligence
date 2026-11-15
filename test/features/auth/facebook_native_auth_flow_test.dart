@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
-  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+  // iOS authentication-session completion is exercised with real GoTrue PKCE
+  // in native_facebook_oauth_test.dart; Android retains its browser contract.
+  for (final platform in [TargetPlatform.android]) {
     for (final launched in [true, false]) {
       test(
         '$platform Facebook launches Supabase PKCE in its supported browser: $launched',

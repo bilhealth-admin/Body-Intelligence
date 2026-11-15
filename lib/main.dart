@@ -32,6 +32,7 @@ import 'features/cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
 import 'features/community/services/community_owner_http_client.dart';
 import 'features/auth/apple_credential_lifecycle.dart';
 import 'features/auth/bil_auth_callback_controller.dart';
+import 'features/auth/native_facebook_oauth.dart';
 import 'features/auth/oauth_browser_return.dart';
 import 'features/notifications/services/inactivity_reminder_coordinator.dart';
 import 'features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';
@@ -321,6 +322,7 @@ class _BILLinkBootstrap extends StatefulWidget {
 class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
   late final BilIncomingLinkController _controller;
   late final BilAuthCallbackController _authController;
+  late final BilFacebookOAuthCallbackOwner _facebookOAuthOwner;
   late final BilSerialUriDispatcher _uriDispatcher;
   StreamSubscription<Uri>? _linkSubscription;
 
@@ -348,6 +350,9 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
           attributes: {'errorType': error.runtimeType.toString()},
         );
       },
+    );
+    _facebookOAuthOwner = BilNativeFacebookOAuth.attachCallbackOwner(
+      _authController.completeNativeCallback,
     );
     _uriDispatcher = BilSerialUriDispatcher(
       handle: _handleIncomingUri,
@@ -406,6 +411,7 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
 
   @override
   void dispose() {
+    _facebookOAuthOwner.dispose();
     unawaited(_linkSubscription?.cancel());
     unawaited(_uriDispatcher.dispose());
     unawaited(_controller.dispose());

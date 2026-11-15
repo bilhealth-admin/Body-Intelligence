@@ -107,6 +107,11 @@ class _LoginPageState extends State<LoginPage> {
         platform: defaultTargetPlatform,
       );
       final nativeSignIn = nativeApple || nativeGoogle;
+      final nativeFacebook = SupabaseAuthService.usesNativeFacebookOAuth(
+        provider,
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      );
       AuthResponse? nativeResponse;
       final completed = await (nativeApple
           ? (() async {
@@ -119,8 +124,8 @@ class _LoginPageState extends State<LoginPage> {
               return nativeResponse != null;
             })()
           : authService.signInWithOAuth(provider));
-      // Native Apple and Google sign-in complete inside BIL. Facebook uses
-      // Supabase OAuth in iOS Safari View Controller and the verified callback.
+      // Apple/Google return identity proofs. iOS Facebook completes its PKCE
+      // exchange through the shared callback owner from a native auth session.
       if (nativeSignIn && completed && mounted) {
         final sessionReady = await authService.waitForAuthenticatedSession(
           knownSession: nativeResponse?.session,
@@ -144,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
       }
       // Dismissing a native Google sheet is a deliberate cancellation, not a
       // provider outage. Keep the polished sign-in page quietly ready.
-      if (!completed && mounted && !nativeGoogle) {
+      if (!completed && mounted && !nativeGoogle && !nativeFacebook) {
         setState(
           () => status = authEntryText(
             context,

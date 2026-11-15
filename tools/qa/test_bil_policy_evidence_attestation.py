@@ -84,8 +84,10 @@ class PolicyNativePairTests(unittest.TestCase):
         self.assertEqual(len(self.fixture.downloads), 2)
         self.assertTrue(self.fixture.output.is_file())
         self.assertFalse(result['signed_build_or_store_acceptance_proven'])
-        self.assertTrue(all(row['xctest']['passedTests'] == 8
-            for row in result['native_pair']['native_results']))
+        names = policy.native.native_runner_test_names(ROOT)
+        for row in result['native_pair']['native_results']:
+            self.assertEqual(row['xctest']['passedTests'], len(names))
+            self.assertEqual(row['xctest']['testNames'], sorted(names))
 
     def test_missing_one_native_zip_never_writes_attestation_or_continues(self):
         missing = self.fixture.record['required_runs']['ipad_native']['artifact_id']

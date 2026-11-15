@@ -26,7 +26,9 @@ void main() {
     expect(service, contains('nativeGoogleSignIn.authenticate()'));
     expect(service, isNot(contains('signInWithFacebookNative')));
     expect(service, isNot(contains('native_facebook_sign_in.dart')));
-    expect(page, isNot(contains('nativeFacebook')));
+    expect(page, contains('SupabaseAuthService.usesNativeFacebookOAuth('));
+    expect(service, contains('BilNativeFacebookOAuth().authenticate(client)'));
+    expect(page, contains('!nativeGoogle && !nativeFacebook'));
     expect(service, contains('signInWithAppleNative'));
     expect(service, contains('client.auth.signInWithIdToken'));
     expect(service, contains('client.auth.generateRawNonce'));

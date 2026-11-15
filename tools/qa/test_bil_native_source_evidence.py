@@ -15,6 +15,11 @@ import bil_native_source_evidence as gate
 ROOT = Path(__file__).resolve().parents[2]
 BRANCH = 'codex/bil43-android35-verified-20261108'
 SHA, TREE = 'a' * 40, 'b' * 40
+ORIGINAL_EIGHT_TEST_NAMES = gate.ORIGINAL_TEST_NAMES | {
+    'testSplashCapsuleReducedMotionKeepsIdenticalPixels',
+    'testSplashCapsuleMotionChangesPaintWithoutChangingFootprint',
+    'testSplashCapsulePreservesPhysicalDirectionAndAccessibleColors',
+}
 CRYPTO_DRIVER = b"// Copyright 2014 The Flutter Authors. All rights reserved.\n// Use of this source code is governed by a BSD-style license that can be\n// found in the LICENSE file.\n\nimport 'package:integration_test/integration_test_driver.dart';\n\nFuture<void> main() => integrationDriver(writeResponseOnFailure: true);\n"
 
 
@@ -108,7 +113,11 @@ class NativeEvidenceTests(unittest.TestCase):
             fixture = self.fixture(device); fixture.write(); rows.append(fixture.validate())
         proof = gate.require_native_pair(rows, source_sha=SHA, source_tree=TREE)
         self.assertEqual(proof['devices'], ['iphone', 'ipad'])
-        self.assertTrue(all(row['xctest']['passedTests'] == 8 for row in rows))
+        names = gate.native_runner_test_names(ROOT)
+        self.assertTrue(ORIGINAL_EIGHT_TEST_NAMES.issubset(names))
+        for row in rows:
+            self.assertEqual(row['xctest']['passedTests'], len(names))
+            self.assertEqual(row['xctest']['testNames'], sorted(names))
         for invalid in ([], rows[:1], [rows[0], rows[0]], [rows[0], {**rows[1], 'source_sha': 'e90e04890d5c322cfd8b3554ff1f03fb3165414c'}]):
             with self.subTest(count=len(invalid)), self.assertRaises(ValueError):
                 gate.require_native_pair(invalid, source_sha=SHA, source_tree=TREE)
@@ -182,7 +191,8 @@ class NativeEvidenceTests(unittest.TestCase):
 
     def test_xctest_requires_every_declared_original_and_new_name_without_skip_or_duplicate(self):
         changes = [{'passedTests': 5, 'totalTestCount': 5}, {'skippedTests': 1}, {'failedTests': 1},
-            {'testNames': sorted(gate.ORIGINAL_TEST_NAMES)}, {'testNames': ['testForeign'] * 8}]
+            {'testNames': sorted(gate.ORIGINAL_TEST_NAMES)}, {'testNames': ['testForeign'] * 8},
+            {'passedTests': 8, 'totalTestCount': 8}, {'testNames': sorted(ORIGINAL_EIGHT_TEST_NAMES)}]
         for index, change in enumerate(changes):
             fixture = self.fixture()
             fixture.edit('runner-tests/runner-tests-result.json', lambda v: v['summary'].update(change)); fixture.write()

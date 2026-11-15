@@ -190,7 +190,11 @@ class NativeDeliveryProofTest(unittest.TestCase):
         proofs = self.invoke()
         self.assertEqual(self.downloads, ['iphone', 'ipad'])
         self.assertEqual({row['native_source_evidence']['device'] for row in proofs}, {'iphone', 'ipad'})
-        self.assertTrue(all(row['native_source_evidence']['xctest']['passedTests'] == 8 for row in proofs))
+        for row in proofs:
+            evidence = row['native_source_evidence']
+            names = self.fixtures[evidence['device']].names
+            self.assertEqual(evidence['xctest']['passedTests'], len(names))
+            self.assertEqual(evidence['xctest']['testNames'], sorted(names))
 
     def test_green_job_with_wrong_zip_or_stale_attempt_cannot_complete_release(self):
         self.fixtures['ipad'].files['crypto-driver.dart'] = b'Unverified driver'

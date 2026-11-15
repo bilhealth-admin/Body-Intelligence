@@ -11,6 +11,7 @@ import UserNotifications
   private var micSoundBridge: BILMicSoundBridge?
   private var appleSignInLifecycleBridge: BILAppleSignInLifecycleBridge?
   private var appAttestBridge: BILAppAttestBridge?
+  private var facebookOAuthBridge: BILFacebookOAuthBridge?
   private var healthStoragePrivacyChannel: FlutterMethodChannel?
   private var pushResult: FlutterResult?
   private var pushToken: String?
@@ -65,6 +66,8 @@ import UserNotifications
     appleSignInLifecycleBridge = BILAppleSignInLifecycleBridge(messenger: appleLifecycleRegistrar.messenger())
     let appAttestRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILAppAttestBridge")!
     appAttestBridge = BILAppAttestBridge(messenger: appAttestRegistrar.messenger())
+    let facebookRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILFacebookOAuthBridge")!
+    facebookOAuthBridge = BILFacebookOAuthBridge(messenger: facebookRegistrar.messenger())
     let speechRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILSpeechBridge")!
     speechBridge = BILSpeechBridge(messenger: speechRegistrar.messenger())
     communityTranslationBridge = BILCommunityTranslationBridge(messenger: speechRegistrar.messenger())

@@ -30,22 +30,22 @@ private final class InMemoryAppAttestKeyValueStore: BILAppAttestKeyValueStore {
 
 class RunnerTests: XCTestCase {
   @MainActor
-  func testSplashCapsuleReducedMotionKeepsIdenticalPixels() throws {
+  func testSplashCapsuleReducedMotionKeepsIdenticalPixels() async throws {
     guard #available(iOS 16.0, *) else { throw XCTSkip("ImageRenderer requires iOS 16") }
-    let first = try renderCapsule(phase: 0, reduced: true)
-    let last = try renderCapsule(phase: 1, reduced: true)
+    let first = try await renderCapsule(phase: 0, reduced: true)
+    let last = try await renderCapsule(phase: 1, reduced: true)
     XCTAssertEqual(first.width, 24)
     XCTAssertEqual(first.height, 7)
     XCTAssertEqual(try capsulePixels(first), try capsulePixels(last))
-    let moving = try renderCapsule(phase: 0.72, reduced: false)
+    let moving = try await renderCapsule(phase: 0.72, reduced: false)
     XCTAssertNotEqual(try capsulePixels(first), try capsulePixels(moving))
   }
 
   @MainActor
-  func testSplashCapsuleMotionChangesPaintWithoutChangingFootprint() throws {
+  func testSplashCapsuleMotionChangesPaintWithoutChangingFootprint() async throws {
     guard #available(iOS 16.0, *) else { throw XCTSkip("ImageRenderer requires iOS 16") }
-    let first = try renderCapsule(phase: 0, reduced: false)
-    let last = try renderCapsule(phase: 1, reduced: false)
+    let first = try await renderCapsule(phase: 0, reduced: false)
+    let last = try await renderCapsule(phase: 1, reduced: false)
     XCTAssertEqual(first.width, 24)
     XCTAssertEqual(first.height, 7)
     XCTAssertEqual(last.width, first.width)
@@ -57,22 +57,22 @@ class RunnerTests: XCTestCase {
     XCTAssertEqual(BILNativeSplashCapsulePaint.emphasized(.nan), 0)
     XCTAssertEqual(BILNativeSplashCapsulePaint.emphasized(-.infinity), 0)
     XCTAssertEqual(BILNativeSplashCapsulePaint.emphasized(.infinity), 1)
-    let invalid = try renderCapsule(phase: .nan, reduced: false)
-    let negativeInfinity = try renderCapsule(phase: -.infinity, reduced: false)
-    let positiveInfinity = try renderCapsule(phase: .infinity, reduced: false)
+    let invalid = try await renderCapsule(phase: .nan, reduced: false)
+    let negativeInfinity = try await renderCapsule(phase: -.infinity, reduced: false)
+    let positiveInfinity = try await renderCapsule(phase: .infinity, reduced: false)
     XCTAssertEqual(try capsulePixels(invalid), try capsulePixels(first))
     XCTAssertEqual(try capsulePixels(negativeInfinity), try capsulePixels(first))
     XCTAssertEqual(try capsulePixels(positiveInfinity), try capsulePixels(last))
   }
 
   @MainActor
-  func testSplashCapsulePreservesPhysicalDirectionAndAccessibleColors() throws {
+  func testSplashCapsulePreservesPhysicalDirectionAndAccessibleColors() async throws {
     guard #available(iOS 16.0, *) else { throw XCTSkip("ImageRenderer requires iOS 16") }
-    let light = try renderCapsule(phase: 1, reduced: false)
-    let dark = try renderCapsule(phase: 1, reduced: false, scheme: .dark)
-    let rtl = try renderCapsule(phase: 1, reduced: false, direction: .rightToLeft)
-    let highLight = try renderCapsule(phase: 1, reduced: false, contrast: .increased)
-    let highDark = try renderCapsule(phase: 1, reduced: false, scheme: .dark, contrast: .increased)
+    let light = try await renderCapsule(phase: 1, reduced: false)
+    let dark = try await renderCapsule(phase: 1, reduced: false, scheme: .dark)
+    let rtl = try await renderCapsule(phase: 1, reduced: false, direction: .rightToLeft)
+    let highLight = try await renderCapsule(phase: 1, reduced: false, contrast: .increased)
+    let highDark = try await renderCapsule(phase: 1, reduced: false, scheme: .dark, contrast: .increased)
     XCTAssertEqual(try capsulePixels(light), try capsulePixels(rtl))
     XCTAssertNotEqual(try capsulePixels(light), try capsulePixels(dark))
     for image in [light, dark, rtl, highLight, highDark] {
@@ -111,7 +111,7 @@ class RunnerTests: XCTestCase {
   private func renderCapsule(
     phase: Double, reduced: Bool, scheme: ColorScheme = .light,
     direction: LayoutDirection = .leftToRight, contrast: ColorSchemeContrast = .standard
-  ) throws -> CGImage {
+  ) async throws -> CGImage {
     // Snapshot the actual SwiftUI view through UIKit's real trait bridge.
     // A non-key fixture uses layer rendering, with a completed appearance
     // lifecycle, rather than drawHierarchy before SwiftUI has painted.
@@ -170,11 +170,12 @@ class RunnerTests: XCTestCase {
     hosting.view.setNeedsLayout()
     hosting.view.layoutIfNeeded()
 
-    // Yield the main run loop so UIKit/SwiftUI can commit their first frame.
-    // This is test-only readiness; no application timeout or state changes.
-    let ready = expectation(description: "Native capsule initial display transaction")
+    // Suspend this async fixture while the main queue takes another turn.
+    // This bounded yield does not prove a completed display transaction;
+    // actual pixels, dimensions and UIKit traits are asserted below.
+    let ready = expectation(description: "Native capsule render fixture main-queue turn")
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { ready.fulfill() }
-    wait(for: [ready], timeout: 2)
+    await fulfillment(of: [ready], timeout: 2)
     container.view.layoutIfNeeded()
     hosting.view.layoutIfNeeded()
     hosting.view.layer.displayIfNeeded()
@@ -314,6 +315,82 @@ class RunnerTests: XCTestCase {
       XCTAssertNil(try store.keyId(for: account))
       XCTAssertNil(defaults.object(forKey: legacyKey))
     }
+  }
+
+  func testModernCallbackRequiresExactAssociatedHTTPSOrigin() {
+    XCTAssertTrue(callback("https://www.bilhealth.com/auth/callback?code=synthetic", https: true))
+    for raw in [
+      "https://www.bilhealth.com.evil.example/auth/callback?code=synthetic",
+      "https://evil.example/auth/callback?code=synthetic",
+      "https://user@www.bilhealth.com/auth/callback?code=synthetic",
+      "https://www.bilhealth.com:8443/auth/callback?code=synthetic",
+      "https://www.bilhealth.com/auth/reset-password?code=synthetic",
+      "bil://auth-callback?code=synthetic"
+    ] { XCTAssertFalse(callback(raw, https: true), raw) }
+  }
+
+  func testLegacyCallbackIsExactAndCannotUseGenericRoutes() {
+    XCTAssertTrue(callback("bil://auth-callback?code=synthetic", https: false))
+    for raw in [
+      "bil://auth/callback?code=synthetic", "bil://plans?code=synthetic",
+      "bil://auth/reset-password?code=synthetic", "bil://user@auth/callback?code=synthetic",
+      "bil://auth:123/callback?code=synthetic", "https://www.bilhealth.com/auth/callback?code=synthetic"
+    ] { XCTAssertFalse(callback(raw, https: false), raw) }
+  }
+
+  func testCallbackRejectsTokenURLsEmptyOrRepeatedCodes() {
+    for raw in [
+      "https://www.bilhealth.com/auth/callback", "https://www.bilhealth.com/auth/callback?code=",
+      "https://www.bilhealth.com/auth/callback?code=one&code=two",
+      "https://www.bilhealth.com/auth/callback#access_token=synthetic",
+      "https://www.bilhealth.com/auth/callback?code=synthetic&refresh_token=synthetic",
+      "https://www.bilhealth.com/auth/callback?access_token=synthetic",
+      "https://www.bilhealth.com/auth/callback?id_token=synthetic"
+    ] { XCTAssertFalse(callback(raw, https: true), raw) }
+  }
+
+  func testProviderErrorsReturnToTheSameValidatedLocation() {
+    XCTAssertTrue(callback("https://www.bilhealth.com/auth/callback?error=access_denied", https: true))
+    XCTAssertTrue(callback("bil://auth-callback?error=access_denied", https: false))
+    XCTAssertFalse(callback("bil://plans?error=access_denied", https: false))
+  }
+
+  func testAuthorizationRequiresTargetProjectFacebookPKCEAndExactRedirect() {
+    XCTAssertTrue(authorization(https: true))
+    XCTAssertTrue(authorization(https: false))
+    XCTAssertFalse(authorization(https: true, host: "evil.example"))
+    XCTAssertFalse(authorization(https: true, provider: "google"))
+    XCTAssertFalse(authorization(https: true, redirect: "bil://auth-callback"))
+    XCTAssertFalse(authorization(https: false, redirect: "https://www.bilhealth.com/auth/callback"))
+    XCTAssertFalse(authorization(https: true, challenge: "short"))
+    XCTAssertFalse(authorization(https: true, method: "plain"))
+  }
+
+  func testAuthorizationRejectsAmbiguousProviderAndInjectedToken() {
+    XCTAssertFalse(authorization(https: true, extra: URLQueryItem(name: "provider", value: "facebook")))
+    XCTAssertFalse(authorization(https: true, extra: URLQueryItem(name: "access_token", value: "synthetic")))
+  }
+
+  private func callback(_ raw: String, https: Bool) -> Bool {
+    BILFacebookOAuthBridge.isAllowedCallbackURL(URL(string: raw)!, usesHTTPS: https)
+  }
+
+  private func authorization(https: Bool, host: String = "tgmanzhqulksykhslrzb.supabase.co",
+                             provider: String = "facebook", redirect: String? = nil,
+                             challenge: String = String(repeating: "a", count: 43),
+                             method: String = "s256", extra: URLQueryItem? = nil) -> Bool {
+    var components = URLComponents()
+    components.scheme = "https"
+    components.host = host
+    components.path = "/auth/v1/authorize"
+    components.queryItems = [
+      URLQueryItem(name: "provider", value: provider),
+      URLQueryItem(name: "redirect_to", value: redirect ?? (https ? "https://www.bilhealth.com/auth/callback" : "bil://auth-callback")),
+      URLQueryItem(name: "code_challenge", value: challenge),
+      URLQueryItem(name: "code_challenge_method", value: method)
+    ]
+    if let extra { components.queryItems?.append(extra) }
+    return BILFacebookOAuthBridge.isAllowedAuthorizationURL(components.url!, usesHTTPS: https)
   }
 
   private func withIsolatedDefaults(
