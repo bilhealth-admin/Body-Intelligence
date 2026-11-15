@@ -42,6 +42,82 @@ class _NativeHeldGateway implements LocalModelGateway {
   }
 }
 
+// Live native surfaces and caret/ambient paints can schedule frames without
+// an application transition. Wait for the actual interaction precondition,
+// within the same three-second setup budget, rather than global frame idleness.
+Future<void> _nativeWaitForCoachComposer(WidgetTester tester) async {
+  final watch = Stopwatch()..start();
+  const budgetUs = 3000000;
+  Rect? previousViewport;
+  Rect? previousComposer;
+  var stableComparisons = 0;
+  bool sameRect(Rect first, Rect second) =>
+      (first.left - second.left).abs() <= .5 &&
+      (first.top - second.top).abs() <= .5 &&
+      (first.width - second.width).abs() <= .5 &&
+      (first.height - second.height).abs() <= .5;
+  bool usable(Rect rect) =>
+      [
+        rect.left,
+        rect.top,
+        rect.width,
+        rect.height,
+      ].every((value) => value.isFinite) &&
+      rect.width > 0 &&
+      rect.height > 0;
+  while (watch.elapsedMicroseconds < budgetUs) {
+    await tester.pump(const Duration(milliseconds: 20));
+    final exception = tester.takeException();
+    if (exception != null) throw exception;
+    if (watch.elapsedMicroseconds > budgetUs) break;
+    final rawComposer = find.byKey(const Key('ai-coach-question-field'));
+    final viewport = find.byType(ChatHistoryViewport);
+    final composerBoxes = rawComposer
+        .evaluate()
+        .map((e) => e.findRenderObject())
+        .toList();
+    final viewportBoxes = viewport
+        .evaluate()
+        .map((e) => e.findRenderObject())
+        .toList();
+    bool laidOut(List<RenderObject?> boxes) =>
+        boxes.length == 1 &&
+        boxes.single is RenderBox &&
+        boxes.single!.attached &&
+        (boxes.single! as RenderBox).hasSize;
+    final composer = rawComposer.hitTestable();
+    if (!laidOut(composerBoxes) ||
+        !laidOut(viewportBoxes) ||
+        composer.evaluate().length != 1) {
+      previousViewport = null;
+      previousComposer = null;
+      stableComparisons = 0;
+      continue;
+    }
+    final viewRect = tester.getRect(viewport);
+    final composerRect = tester.getRect(composer);
+    if (!usable(viewRect) || !usable(composerRect)) {
+      previousViewport = null;
+      previousComposer = null;
+      stableComparisons = 0;
+      continue;
+    }
+    final stable =
+        previousViewport != null &&
+        previousComposer != null &&
+        sameRect(previousViewport, viewRect) &&
+        sameRect(previousComposer, composerRect);
+    stableComparisons = stable ? stableComparisons + 1 : 0;
+    previousViewport = viewRect;
+    previousComposer = composerRect;
+    // Count actual returned-frame/geometry work before accepting readiness.
+    if (stableComparisons >= 2 && watch.elapsedMicroseconds <= budgetUs) return;
+  }
+  throw FlutterError(
+    'Coach composer/viewport did not become interactable and stable within the original 3000ms setup budget.',
+  );
+}
+
 Future<GoRouter> _mountNativeCoach(
   WidgetTester tester,
   AppDatabase db,
@@ -188,7 +264,7 @@ Future<GoRouter> _mountNativeCoach(
   await tester.ensureVisible(openChat);
   await _nativeSettle(tester);
   await tester.tap(openChat);
-  await _nativeSettle(tester);
+  await _nativeWaitForCoachComposer(tester);
   expect(
     find.byKey(const Key('ai-coach-question-field')).hitTestable(),
     findsOneWidget,

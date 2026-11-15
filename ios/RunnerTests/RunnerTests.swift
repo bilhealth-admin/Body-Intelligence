@@ -170,12 +170,12 @@ class RunnerTests: XCTestCase {
     hosting.view.setNeedsLayout()
     hosting.view.layoutIfNeeded()
 
-    // Suspend this async fixture while the main queue takes another turn.
-    // This bounded yield does not prove a completed display transaction;
-    // actual pixels, dimensions and UIKit traits are asserted below.
-    let ready = expectation(description: "Native capsule render fixture main-queue turn")
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { ready.fulfill() }
-    await fulfillment(of: [ready], timeout: 2)
+    // A timer on the main queue is not evidence that this requested frame
+    // painted. Read the real raster first; only an unpainted frame needs a
+    // suspension. The monotonic two-second budget includes every capture and
+    // any actor resumption delay; it is a checked deadline, not cancellation
+    // of a synchronous UIKit call.
+    let renderingStarted = ProcessInfo.processInfo.systemUptime
     container.view.layoutIfNeeded()
     hosting.view.layoutIfNeeded()
     hosting.view.layer.displayIfNeeded()
@@ -187,10 +187,48 @@ class RunnerTests: XCTestCase {
     format.scale = 1
     format.opaque = false
     format.preferredRange = .standard
-    let rendered = UIGraphicsImageRenderer(size: bounds.size, format: format).image { context in
-      hosting.view.layer.render(in: context.cgContext)
+    let budget: TimeInterval = 2
+    var attempts = 0
+    var elapsed: TimeInterval = 0
+    var painted = false
+    var latestImage: CGImage?
+    while true {
+      container.view.layoutIfNeeded()
+      hosting.view.layoutIfNeeded()
+      hosting.view.layer.displayIfNeeded()
+      let rendered = UIGraphicsImageRenderer(size: bounds.size, format: format).image { context in
+        hosting.view.layer.render(in: context.cgContext)
+      }
+      let captured = try XCTUnwrap(rendered.cgImage, "Native capsule must rasterize a real image")
+      latestImage = captured
+      attempts += 1
+      let capturedPixels = try capsulePixels(captured)
+      painted = stride(from: 3, to: capturedPixels.count, by: 4).contains { capturedPixels[$0] > 0 }
+      elapsed = ProcessInfo.processInfo.systemUptime - renderingStarted
+      if painted || elapsed >= budget { break }
+      // This yields only while the actual requested image is still blank.
+      // Cancellation remains a thrown test failure, never a successful frame.
+      let remaining = budget - elapsed
+      try await Task.sleep(nanoseconds: UInt64(min(0.01, remaining) * 1_000_000_000))
     }
-    let image = try XCTUnwrap(rendered.cgImage, "Native capsule must rasterize a real image")
+    let image = try XCTUnwrap(latestImage, "Native capsule must rasterize a real image")
+    let observation: [String: Any] = [
+      "phase": String(describing: phase), "reducedMotion": reduced,
+      "scheme": String(describing: scheme), "direction": String(describing: direction),
+      "contrast": String(describing: contrast), "attempts": attempts,
+      "elapsedSeconds": elapsed, "budgetSeconds": budget, "painted": painted,
+      "windowHasScene": window.windowScene != nil,
+      "hostAttachedToFixtureWindow": hosting.view.window === window,
+      "actualContrast": hosting.view.traitCollection.accessibilityContrast.rawValue,
+      "width": image.width, "height": image.height
+    ]
+    let observationData = try JSONSerialization.data(withJSONObject: observation, options: [.sortedKeys])
+    let observationAttachment = XCTAttachment(data: observationData, uniformTypeIdentifier: "public.json")
+    observationAttachment.name = "capsule-render-readiness-phase\(phase)-reduced\(reduced)-\(scheme)-\(direction)-\(contrast)"
+    observationAttachment.lifetime = .keepAlways
+    add(observationAttachment)
+    XCTAssertLessThanOrEqual(elapsed, budget,
+      "Native capsule must paint its actual requested frame within the two-second render budget")
     let pixels = try capsulePixels(image)
     XCTAssertTrue(stride(from: 3, to: pixels.count, by: 4).contains { pixels[$0] > 0 },
       "Native capsule snapshot must contain actual painted pixels")
