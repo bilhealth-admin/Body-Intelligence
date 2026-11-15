@@ -22,9 +22,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
+          fetch-depth: 3
           persist-credentials: false
-      - name: Guard exact branch, S3 parent and two changed paths before preparation
+      - name: Guard exact branch, prior diagnostic parent and unchanged S3 application scope
         shell: bash
         run: |
           set -euo pipefail
@@ -37,7 +37,7 @@ jobs:
           assert os.environ['GITHUB_REF'] == 'refs/heads/codex/bil45-capsule-xctest-diagnostic-20261115'
           assert os.environ['GITHUB_EVENT_NAME'] == 'push'
           assert git('rev-parse', 'HEAD') == os.environ['GITHUB_SHA']
-          assert git('show', '-s', '--format=%P', 'HEAD') == parent
+          assert git('show', '-s', '--format=%P', 'HEAD') == '6034bafee1021cbe97cc1e42843e80da68e41c8a'
           assert set(git('diff', '--name-only', parent, 'HEAD').splitlines()) == {
               'ios/RunnerTests/RunnerTests.swift', '.github/workflows/bil45_capsule_xctest_diagnostic.yml'}
           assert not git('status', '--porcelain')
@@ -140,6 +140,7 @@ jobs:
           device = None
           receipt = {'schema': 'bil.capsule-xctest-diagnostic.v1', 'status': 'RUNNING',
                      'application_parent_sha': PARENT, 'diagnostic_source_sha': os.environ['GITHUB_SHA'],
+                     'diagnostic_parent_sha': '6034bafee1021cbe97cc1e42843e80da68e41c8a',
                      'event': os.environ['GITHUB_EVENT_NAME'], 'ref': os.environ['GITHUB_REF'],
                      'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
                      'native_scope': '14 declared RunnerTests plus three planned repetitions of the three capsule cases',
@@ -153,8 +154,63 @@ jobs:
           def git(*args):
               return subprocess.check_output(['git', *args], cwd=WORKSPACE, text=True).strip()
 
+          def resolved_pods(raw):
+              section = raw.decode('utf-8').split('DEPENDENCIES:', 1)[0]
+              pairs = re.findall(r'^  - ([^ ]+) \(([^)\r\n]+)\)(?::)?$', section, flags=re.M)
+              pods = dict(pairs)
+              if not pairs or len(pods) != len(pairs):
+                  raise ValueError('Actual unique top-level PODS versions are required')
+              return pods
+
+          def freeze_reconciled_dependency_locks():
+              initial = json.loads((OUTPUT / 'dependency-locks-resolution.json').read_text(encoding='utf-8'))
+              source_pod = WORKSPACE / 'ios/Podfile.lock'
+              initial_bytes = (OUTPUT / 'GENERATED_Podfile.lock').read_bytes()
+              actual_bytes = source_pod.read_bytes()
+              actual = {name: hashlib.sha256((WORKSPACE / name).read_bytes()).hexdigest()
+                        for name in ['pubspec.lock', 'ios/Podfile.lock']}
+              with (OUTPUT / 'RECONCILED_Podfile.lock').open('xb') as handle:
+                  handle.write(actual_bytes)
+              before_pods, after_pods = resolved_pods(initial_bytes), resolved_pods(actual_bytes)
+              proof = {**initial, 'after': actual,
+                  'initial_resolution': initial['after'],
+                  'canonical_verified': False,
+                  'canonical_stage': 'after normal Flutter native config reconciles plugins to SwiftPM; before any XCTest',
+                  'initial_pod_lock_copy': 'GENERATED_Podfile.lock',
+                  'generated_pod_lock_copy': 'RECONCILED_Podfile.lock',
+                  'initial_resolved_pods': before_pods, 'canonical_resolved_pods': after_pods,
+                  'actual_resolved_pod_versions': [key + ' (' + value + ')' for key, value in after_pods.items()],
+                  'pod_versions_changed_in_common': {key: [before_pods[key], after_pods[key]]
+                      for key in before_pods.keys() & after_pods.keys() if before_pods[key] != after_pods[key]},
+                  'source_pubspec_lock_preserved': actual['pubspec.lock'] == initial['before']['pubspec.lock']}
+              path = OUTPUT / 'dependency-locks-reconciled.json'
+              with path.open('x', encoding='utf-8') as handle:
+                  json.dump(proof, handle, indent=2)
+              if hashlib.sha256(initial_bytes).hexdigest() != initial['after']['ios/Podfile.lock']:
+                  raise ValueError('Initial actual Pod lock evidence changed')
+              if actual['pubspec.lock'] != 'bc3c559586313d4323233c0b5d66dde56441e0f03d7be45d00bae61efb4fa7ac':
+                  raise ValueError('Source pubspec.lock changed during normal native configuration')
+              # Original failed diagnostic proves all21 iOS plugin Pods migrate to
+              # SwiftPM here, leaving Flutter alone. Retain both real lock files and
+              # reject an unexpected Pod set or any retained version change.
+              if set(after_pods) != {'Flutter'} or proof['pod_versions_changed_in_common']:
+                  raise ValueError('Native reconciliation must leave only unchanged Flutter Pod')
+              if before_pods.get('Flutter') != after_pods.get('Flutter'):
+                  raise ValueError('Flutter Pod version changed during reconciliation')
+              proof['canonical_verified'] = True
+              path.write_text(json.dumps(proof, indent=2) + '\n', encoding='utf-8')
+
           def verify_dependency_locks(stage_name):
-              proof = json.loads((OUTPUT / 'dependency-locks-resolution.json').read_text(encoding='utf-8'))
+              reconciled = OUTPUT / 'dependency-locks-reconciled.json'
+              canonical = reconciled.is_file()
+              if canonical and stage_name == 'before-native-preflight':
+                  raise ValueError('A prior canonical lock cannot replace initial preparation evidence')
+              if not canonical and stage_name != 'before-native-preflight':
+                  raise ValueError('Canonical native locks must be captured before XCTest')
+              proof_path = reconciled if canonical else OUTPUT / 'dependency-locks-resolution.json'
+              proof = json.loads(proof_path.read_text(encoding='utf-8'))
+              if canonical and proof.get('canonical_verified') is not True:
+                  raise ValueError('Canonical reconciliation evidence was not accepted')
               if proof['source_pod_lock_state'] != 'SOURCE_POD_LOCK_ABSENT':
                   raise ValueError('Source Pod lock state must remain honestly absent')
               expected_pub = 'bc3c559586313d4323233c0b5d66dde56441e0f03d7be45d00bae61efb4fa7ac'
@@ -163,10 +219,11 @@ jobs:
               if proof['before']['pubspec.lock'] != expected_pub or proof['before']['ios/Podfile.lock'] is not None:
                   raise ValueError('Dependency preparation did not start from the exact S3 lock state')
               if actual_pub != expected_pub or actual_pod != proof['after']['ios/Podfile.lock']:
-                  raise ValueError('Actual dependency locks drifted after reviewed initial resolution')
+                  raise ValueError('Actual dependency locks drifted after the correct preparation boundary')
               receipt['dependency_lock_proof'] = proof
               receipt.setdefault('dependency_lock_checks', []).append({
-                  'stage': stage_name, 'pubspec_lock_sha256': actual_pub, 'generated_pod_lock_sha256': actual_pod})
+                  'stage': stage_name, 'canonical': canonical,
+                  'pubspec_lock_sha256': actual_pub, 'generated_pod_lock_sha256': actual_pod})
 
           def stage(label, command, timeout=120, output=None):
               log = output or OUTPUT / (label + '.log')
@@ -206,8 +263,8 @@ jobs:
               save()
               if sys.platform != 'darwin' or os.environ['GITHUB_EVENT_NAME'] != 'push' or os.environ['GITHUB_REF'] != BRANCH:
                   raise ValueError('Only the reviewed diagnostic branch push on macOS may run')
-              if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != PARENT:
-                  raise ValueError('One exact single-parent S3 diagnostic commit required')
+              if git('rev-parse', 'HEAD') != os.environ['GITHUB_SHA'] or git('show', '-s', '--format=%P', 'HEAD') != '6034bafee1021cbe97cc1e42843e80da68e41c8a':
+                  raise ValueError('Exact prior diagnostic parent and unchanged S3 application baseline required')
               if set(git('diff', '--name-only', PARENT, 'HEAD').splitlines()) != {WORKFLOW, 'ios/RunnerTests/RunnerTests.swift'}:
                   raise ValueError('Only the fixture and dedicated diagnostic workflow may differ from S3')
               test_source = WORKSPACE / 'ios/RunnerTests/RunnerTests.swift'
@@ -247,6 +304,7 @@ jobs:
               stage('flutter-native-config', ['flutter', '--verbose', 'build', 'ios', '--config-only', '--simulator',
                     '--debug', '--no-codesign', '--no-pub', '--build-number', '39', '--target', 'lib/main.dart',
                     *['--dart-define=' + value for value in DEFINES]], timeout=900)
+              freeze_reconciled_dependency_locks()
               verify_dependency_locks('after-native-config')
               device = stage('create-iphone', ['xcrun', 'simctl', 'create', 'BIL45-capsule-diagnostic-' + os.environ['GITHUB_RUN_ID'],
                   'com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro', 'com.apple.CoreSimulator.SimRuntime.iOS-26-5']).read_text().strip()
