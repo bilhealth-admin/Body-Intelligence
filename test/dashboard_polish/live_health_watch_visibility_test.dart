@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/features/connected_health/connected_health_copy.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/fitness_device_provider.dart';
 import 'package:body_intelligence_log/features/connected_health/widgets/connected_health_card.dart';
@@ -51,6 +52,13 @@ Widget _subject(
   ConnectedHealthSnapshot snapshot, {
   Locale locale = const Locale('en'),
   DateTime Function()? now,
+  bool compact = false,
+  bool showMetrics = true,
+  bool showConnectControl = true,
+  VoidCallback? onConnect,
+  double side = 280,
+  double textScale = 1,
+  bool dark = false,
 }) => ProviderScope(
   overrides: [
     liveHealthNowProvider.overrideWithValue(
@@ -58,6 +66,7 @@ Widget _subject(
     ),
   ],
   child: MaterialApp(
+    theme: dark ? ThemeData.dark() : ThemeData.light(),
     locale: locale,
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: const [
@@ -66,13 +75,20 @@ Widget _subject(
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
-    home: Scaffold(
-      body: Center(
-        child: SizedBox.square(
-          dimension: 280,
-          child: LiveHealthWatch(
-            snapshot: snapshot,
-            languageCode: locale.languageCode,
+    home: MediaQuery(
+      data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+      child: Scaffold(
+        body: Center(
+          child: SizedBox.square(
+            dimension: side,
+            child: LiveHealthWatch(
+              snapshot: snapshot,
+              languageCode: locale.languageCode,
+              compact: compact,
+              showMetrics: showMetrics,
+              showConnectControl: showConnectControl,
+              onConnectTap: onConnect,
+            ),
           ),
         ),
       ),
@@ -156,6 +172,7 @@ void main() {
     expect(find.text('71'), findsOneWidget);
     expect(find.text('415'), findsOneWidget);
     expect(find.text('7.5'), findsOneWidget);
+    expect(find.byKey(const Key('watch-no-recent-readings')), findsNothing);
     expect(find.text('—'), findsNothing);
     expect(find.byIcon(Icons.directions_run_rounded), findsOneWidget);
     expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
@@ -221,7 +238,8 @@ void main() {
       expect(find.byKey(const Key('watch-metric-heart-rate')), findsNothing);
       expect(find.byKey(const Key('watch-metric-active-energy')), findsNothing);
       expect(find.byKey(const Key('watch-metric-sleep')), findsNothing);
-      expect(find.byKey(const Key('watch-connect-health-cta')), findsOneWidget);
+      expect(find.byKey(const Key('watch-no-recent-readings')), findsOneWidget);
+      expect(find.byKey(const Key('watch-connect-health-cta')), findsNothing);
       expect(find.text('9999'), findsNothing);
       expect(find.text('—'), findsNothing);
     });
@@ -288,6 +306,7 @@ void main() {
       expect(find.byKey(const Key('watch-metric-steps')), findsNothing);
       expect(find.byKey(const Key('watch-metric-heart-rate')), findsNothing);
       expect(find.byKey(const Key('watch-metric-sleep')), findsNothing);
+      expect(find.text('No recent readings'), findsOneWidget);
       expect(find.byKey(const Key('watch-date-line')), findsOneWidget);
       expect(find.byKey(const Key('watch-digital-time')), findsOneWidget);
     }
@@ -404,6 +423,96 @@ void main() {
     expect(find.text('415'), findsOneWidget);
     expect(find.text('9000'), findsNothing);
     expect(find.text('900'), findsNothing);
+    expect(find.byKey(const Key('watch-no-recent-readings')), findsNothing);
+  });
+
+  for (final dark in [false, true]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('compact stale readings explain the empty face '
+          'without changing the clock dark=$dark scale=$scale', (tester) async {
+        final now = DateTime(2026, 11, 15, 4);
+        final snapshot = _snapshot(
+          status: ConnectedHealthStatus.synchronized,
+          verified: true,
+          signals: [
+            ConnectedHealthSignalView(
+              key: 'steps',
+              value: 1234,
+              unit: 'count',
+              source: 'Apple Health',
+              observedAt: now.subtract(const Duration(days: 1)),
+              confidence: 1,
+            ),
+          ],
+        );
+        Widget subject(bool showMetrics) => _subject(
+          snapshot,
+          now: () => now,
+          compact: true,
+          showMetrics: showMetrics,
+          showConnectControl: false,
+          onConnect: () => fail('Dashboard must not expose a connect action'),
+          side: 176,
+          textScale: scale,
+          dark: dark,
+        );
+        await tester.pumpWidget(subject(false));
+        await tester.pump();
+        final clock = tester.getRect(
+          find.byKey(const Key('watch-digital-time')),
+        );
+        final date = tester.getRect(find.byKey(const Key('watch-date-line')));
+        expect(find.byKey(const Key('watch-no-recent-readings')), findsNothing);
+        await tester.pumpWidget(subject(true));
+        await tester.pump();
+        final label = find.byKey(const Key('watch-no-recent-readings'));
+        expect(find.text('No recent readings'), findsOneWidget);
+        expect(find.text('1234'), findsNothing);
+        expect(find.byKey(const Key('watch-connect-health-cta')), findsNothing);
+        expect(
+          tester.getRect(find.byKey(const Key('watch-digital-time'))),
+          clock,
+        );
+        expect(tester.getRect(find.byKey(const Key('watch-date-line'))), date);
+        expect(tester.getRect(label).top, greaterThanOrEqualTo(clock.bottom));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
+    }
+  }
+
+  testWidgets('empty watch has reviewed text in every supported locale', (
+    tester,
+  ) async {
+    for (final locale in AppLocalizations.supportedLocales) {
+      await tester.pumpWidget(
+        _subject(
+          const ConnectedHealthSnapshot.unavailable(),
+          locale: locale,
+          compact: true,
+          showConnectControl: false,
+          side: 176,
+          textScale: 2,
+        ),
+      );
+      await tester.pump();
+      final label = tester.widget<Text>(
+        find.byKey(const Key('watch-no-recent-readings')),
+      );
+      expect(label.data, isNotEmpty);
+      if (locale.languageCode != 'en') {
+        expect(
+          label.data,
+          isNot('No recent readings'),
+          reason: locale.toString(),
+        );
+      }
+      final context = tester.element(find.byType(LiveHealthWatch));
+      expect(label.data, connectedHealthNoRecentReadingsText(context));
+      expect(find.byKey(const Key('watch-connect-health-cta')), findsNothing);
+      expect(tester.takeException(), isNull, reason: locale.toString());
+    }
+    await tester.pumpWidget(const SizedBox.shrink());
   });
 
   test('watch scope contains no oxygen or SpO2 metric', () {

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/entitlement_resolver.dart';
@@ -87,9 +87,9 @@ void main() {
     addTearDown(container.dispose);
     await _pump(tester, container, catalog);
     expect(find.text('Checking subscription'), findsOneWidget);
-    expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
+    expect(find.byType(BilCompactActivityIndicator), findsOneWidget);
     expect(find.byType(LinearProgressIndicator), findsNothing);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('Current plan'), findsNothing);
     expect(find.byKey(const Key('store-current-plan-status')), findsNothing);
     expect(find.byKey(const Key('store-purchase-cta')), findsNothing);

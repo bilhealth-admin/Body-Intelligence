@@ -313,6 +313,10 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                     child: Container(
                       constraints: widget.compact
                           ? BoxConstraints(minHeight: d(78), maxHeight: d(78))
+                          : widget.showMetrics && !showMeasuredMetrics
+                          // Keep empty-state copy and its real action inside
+                          // the face's lower zone, even at large text scales.
+                          ? BoxConstraints(maxHeight: d(100))
                           : null,
                       padding: EdgeInsets.symmetric(
                         horizontal: d(widget.compact ? 6 : 8),
@@ -458,8 +462,17 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                 ),
                               ),
                             )
-                          : !widget.showConnectControl
-                          ? const SizedBox.shrink()
+                          : !widget.showConnectControl ||
+                                (widget.showMetrics &&
+                                    widget.onConnectTap == null)
+                          ? widget.showMetrics
+                                ? Center(
+                                    child: _WatchNoRecentReadings(
+                                      compact: widget.compact,
+                                      scale: layoutScale,
+                                    ),
+                                  )
+                                : const SizedBox.shrink()
                           : widget.compact
                           ? Center(
                               child: _CompactWatchConnectButton(
@@ -469,25 +482,48 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                   'Link fitness',
                                   'ربط اللياقة',
                                 ),
+                                readingStatus: widget.showMetrics
+                                    ? _WatchNoRecentReadings(
+                                        compact: true,
+                                        scale: layoutScale,
+                                      )
+                                    : null,
                               ),
                             )
-                          : SizedBox(
-                              width: double.infinity,
-                              child: FilledButton.tonalIcon(
-                                key: const Key('watch-connect-health-cta'),
-                                onPressed: widget.onConnectTap,
-                                icon: const Icon(Icons.link_rounded, size: 15),
-                                label: Text(
-                                  connectedHealthText(
-                                    context,
-                                    'Connect fitness',
-                                    'ربط اللياقة',
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (widget.showMetrics) ...[
+                                  Flexible(
+                                    child: _WatchNoRecentReadings(
+                                      compact: false,
+                                      scale: layoutScale,
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 12),
+                                  const SizedBox(height: 8),
+                                ],
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton.tonalIcon(
+                                    key: const Key('watch-connect-health-cta'),
+                                    onPressed: widget.onConnectTap,
+                                    icon: const Icon(
+                                      Icons.link_rounded,
+                                      size: 15,
+                                    ),
+                                    label: Text(
+                                      connectedHealthText(
+                                        context,
+                                        'Connect fitness',
+                                        'ربط اللياقة',
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                     ),
                   ),
@@ -518,21 +554,51 @@ class _WatchMetricsLayout extends StatelessWidget {
         );
 }
 
+class _WatchNoRecentReadings extends StatelessWidget {
+  const _WatchNoRecentReadings({required this.compact, required this.scale});
+
+  final bool compact;
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(
+      connectedHealthNoRecentReadingsText(context),
+      key: const Key('watch-no-recent-readings'),
+      textAlign: TextAlign.center,
+      maxLines: compact ? 3 : 1,
+      softWrap: compact,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: const Color(0xFFB7D0DF),
+        fontSize: (compact ? 10 : 12) * scale,
+        height: 1.2,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+    return compact ? text : FittedBox(fit: BoxFit.scaleDown, child: text);
+  }
+}
+
 class _CompactWatchConnectButton extends StatelessWidget {
   const _CompactWatchConnectButton({
     required this.onPressed,
     required this.semanticLabel,
+    this.readingStatus,
   });
 
   final VoidCallback? onPressed;
   final String semanticLabel;
+  final Widget? readingStatus;
 
   @override
   Widget build(BuildContext context) => Semantics(
     key: const Key('watch-connect-health-semantics'),
     button: true,
     enabled: onPressed != null,
-    label: semanticLabel,
+    label: readingStatus == null
+        ? semanticLabel
+        : '${connectedHealthNoRecentReadingsText(context)}. $semanticLabel',
     child: ExcludeSemantics(
       child: Material(
         color: Colors.transparent,
@@ -541,29 +607,38 @@ class _CompactWatchConnectButton extends StatelessWidget {
           onTap: onPressed,
           radius: 24,
           customBorder: const CircleBorder(),
-          child: SizedBox.square(
-            dimension: 48,
-            child: Center(
-              child: Container(
-                key: const Key('watch-connect-health-icon-disc'),
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer.withValues(alpha: .92),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: .20),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox.square(
+                  dimension: 48,
+                  child: Center(
+                    child: Container(
+                      key: const Key('watch-connect-health-icon-disc'),
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withValues(alpha: .92),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: .20),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.link_rounded,
+                        key: const Key('watch-connect-health-icon'),
+                        size: 12,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                    ),
                   ),
                 ),
-                child: Icon(
-                  Icons.link_rounded,
-                  key: const Key('watch-connect-health-icon'),
-                  size: 12,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-              ),
+                if (readingStatus != null) Flexible(child: readingStatus!),
+              ],
             ),
           ),
         ),

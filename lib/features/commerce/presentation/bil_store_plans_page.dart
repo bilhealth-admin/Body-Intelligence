@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
-import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_compact_activity_indicator.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/subscription_state.dart';
 import '../domain/market_offer_policy.dart';
@@ -512,7 +512,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                 height: 24,
                 child: Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: BilFeatureWelcomeStatus(),
+                  child: BilCompactActivityIndicator(),
                 ),
               )
             else

@@ -45,7 +45,7 @@ WORKFLOWS = {
 }
 PROTECTED = {
     'lib/features/commerce/presentation/bil_dynamic_store_components.dart':
-        'fdd24dbfa5b16f78aad65a821a2f5cf1215f90d5',
+        '119f72914b468ff3db40dd07e72da96b837f7da7',
     'lib/shared/widgets/bil_glass_press_feedback.dart':
         '653d424ddb6cca8adeb0d394f5c8f8866da3792d',
 }

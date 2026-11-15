@@ -3,6 +3,7 @@ import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/coach_intent_normalizer.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'coach_review_actions_regression_test.dart' as scene;
 import 'coach_weight_concept_routing_test.dart'
     show physical42WeightConceptQuestion;
+import 'coach_weight_negated_history_routing_test.dart'
+    show physical43WeightConceptQuestion, coordinatedWeightConceptQuestions;
 
 const _table =
     '## الهدف والقياس\n\n'
@@ -139,6 +142,8 @@ void main() {
   _registerRecordedWeightReadTests();
   for (final request in const [
     physical42WeightConceptQuestion,
+    physical43WeightConceptQuestion,
+    ...coordinatedWeightConceptQuestions,
     'اشرح الفرق بين الوزن المستهدف والوزن المقاس في جدول قصير دون تعديل بياناتي.',
   ]) {
     testWidgets(
@@ -182,17 +187,44 @@ void main() {
           await tester.pump();
           await scene.waitForCoachReady(tester, send: true);
           await tester.tap(find.byKey(const Key('ai-coach-send-button')));
-          for (var n = 0; n < 100 && gateway.questions.isEmpty; n++) {
+          for (var n = 0; n < 100; n++) {
             await tester.runAsync(
               () => Future<void>.delayed(const Duration(milliseconds: 10)),
             );
             await tester.pump(const Duration(milliseconds: 20));
+            final answered = tester
+                .widgetList<CoachMessageText>(find.byType(CoachMessageText))
+                .any((body) => body.text == _table);
+            final voiceButton = find.byKey(const Key('ai-coach-voice-button'));
+            final composerReady =
+                voiceButton.evaluate().isNotEmpty &&
+                tester.widget<IconButton>(voiceButton).onPressed != null;
+            if (answered && composerReady) break;
           }
+          expect(gateway.questions, hasLength(1));
+          expect(
+            tester
+                .widgetList<CoachMessageText>(find.byType(CoachMessageText))
+                .where((body) => body.text == _table),
+            hasLength(1),
+          );
+          expect(find.byType(BottomSheet), findsNothing);
+          expect(
+            find.byKey(const Key('ai-coach-voice-button')),
+            findsOneWidget,
+          );
           await tester.pumpAndSettle();
           // Production normalization can lower case / add its existing Arabic
           // weight marker, but cannot replace the question with a history read.
           expect(gateway.questions, hasLength(1));
-          expect(gateway.questions.single, contains(request.toLowerCase()));
+          final normalizedQuestion = const CoachIntentNormalizer()
+              .normalize(
+                text: request,
+                locale: 'ar',
+                channel: CoachInputChannel.text,
+              )
+              .normalized;
+          expect(gateway.questions.single, normalizedQuestion);
           expect(gateway.contexts.single.weights, isEmpty);
           expect(gateway.contexts.single.profile, isEmpty);
           expect(
@@ -205,6 +237,7 @@ void main() {
           expect(bodies.where((body) => body.text == _table), hasLength(1));
           expect(find.text(_table), findsOneWidget);
           expect(find.textContaining('راجعت 2 قياسات'), findsNothing);
+          expect(find.textContaining('I reviewed'), findsNothing);
           expect(find.textContaining('تحديث الوزن المستهدف'), findsNothing);
           expect(await database.select(database.weightEntries).get(), before);
           expect(await database.select(database.meals).get(), isEmpty);

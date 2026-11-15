@@ -8,7 +8,7 @@ void main() {
   for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
     for (final launched in [true, false]) {
       test(
-        '$platform Facebook uses external Supabase PKCE OAuth: $launched',
+        '$platform Facebook launches Supabase PKCE in its supported browser: $launched',
         () async {
           final binding = TestWidgetsFlutterBinding.ensureInitialized();
           const channel = MethodChannel('plugins.flutter.io/url_launcher');
@@ -38,7 +38,9 @@ void main() {
                 isWeb: false,
                 platform: platform,
               ),
-              LaunchMode.externalApplication,
+              platform == TargetPlatform.iOS
+                  ? LaunchMode.inAppBrowserView
+                  : LaunchMode.externalApplication,
             );
             expect(
               await service.signInWithOAuth(OAuthProvider.facebook),
@@ -63,7 +65,10 @@ void main() {
             );
             expect(url.queryParameters.keys, isNot(contains('access_token')));
             expect(url.queryParameters.keys, isNot(contains('id_token')));
-            expect(arguments['useWebView'], isFalse);
+            expect(arguments['useSafariVC'], platform == TargetPlatform.iOS);
+            // The legacy method-channel adapter names both browser flags the
+            // same; url_launcher_ios presents SFSafariViewController for them.
+            expect(arguments['useWebView'], platform == TargetPlatform.iOS);
             expect(storage.values, isNotEmpty);
           } finally {
             debugDefaultTargetPlatformOverride = previousPlatform;

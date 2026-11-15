@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_compact_activity_indicator.dart';
 
 /// Cosmetic waiting copy only: never claims a tool, search or data read ran.
 /// Its complete text envelope is reserved, so phase changes cannot move history.
@@ -71,7 +71,11 @@ class _CoachThinkingStatusState extends State<CoachThinkingStatus>
                 width: constraints.maxWidth,
                 height: math.max(24, height),
                 child: Row(
+                  // The wait stays physically left of the localized copy.
+                  textDirection: TextDirection.ltr,
                   children: [
+                    const BilCompactActivityIndicator(),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: AnimatedBuilder(
                         animation: _motion,
@@ -126,8 +130,6 @@ class _CoachThinkingStatusState extends State<CoachThinkingStatus>
                         },
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const BilFeatureWelcomeStatus(),
                   ],
                 ),
               );

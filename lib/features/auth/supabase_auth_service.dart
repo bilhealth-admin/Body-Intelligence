@@ -69,13 +69,17 @@ class SupabaseAuthService {
   static const passwordResetRedirectUri =
       'https://www.bilhealth.com/auth/reset-password';
 
-  /// OAuth uses the operating system browser so provider credentials stay out
-  /// of an embedded WebView and return through BIL's verified HTTPS callback.
+  /// On iOS, browser OAuth stays inside BIL in SFSafariViewController, where
+  /// users can inspect the provider URL without leaving the app. Native Google
+  /// and Apple sign-in keep their own flows; callbacks still use verified HTTPS.
   static LaunchMode oauthLaunchModeFor(
     OAuthProvider provider, {
     required bool isWeb,
     required TargetPlatform platform,
   }) {
+    if (!isWeb && platform == TargetPlatform.iOS) {
+      return LaunchMode.inAppBrowserView;
+    }
     return LaunchMode.externalApplication;
   }
 

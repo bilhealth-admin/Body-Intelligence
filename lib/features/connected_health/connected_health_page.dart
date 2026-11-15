@@ -1,4 +1,4 @@
-import '../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
@@ -255,7 +255,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                     children: [
                       state.when(
                         loading: () =>
-                            const Center(child: BilFeatureWelcomeStatus()),
+                            const Center(child: BilCompactActivityIndicator()),
                         error: (_, _) => PremiumSurface(
                           dashboardGlass: true,
                           child: Text(

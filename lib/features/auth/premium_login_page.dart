@@ -120,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
             })()
           : authService.signInWithOAuth(provider));
       // Native Apple and Google sign-in complete inside BIL. Facebook uses
-      // Supabase's external browser OAuth and the verified HTTPS callback.
+      // Supabase OAuth in iOS Safari View Controller and the verified callback.
       if (nativeSignIn && completed && mounted) {
         final sessionReady = await authService.waitForAuthenticatedSession(
           knownSession: nativeResponse?.session,

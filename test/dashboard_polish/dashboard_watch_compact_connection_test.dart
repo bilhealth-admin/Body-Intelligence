@@ -52,7 +52,7 @@ void main() {
     (locale: Locale('ar'), semantics: 'ربط اللياقة'),
   ]) {
     testWidgets(
-      '${configuration.locale.languageCode} dashboard watch is icon-only at 160%',
+      '${configuration.locale.languageCode} empty watch retains its compact connection action at 160%',
       (tester) async {
         var taps = 0;
         final semantics = tester.ensureSemantics();
@@ -64,6 +64,10 @@ void main() {
 
         expect(find.text('Not connected · Connect'), findsNothing);
         expect(find.text('غير متصل · ربط'), findsNothing);
+        expect(
+          find.byKey(const Key('watch-no-recent-readings')),
+          findsOneWidget,
+        );
         expect(
           tester
               .getSemantics(

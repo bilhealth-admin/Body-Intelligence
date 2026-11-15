@@ -137,4 +137,36 @@ void main() {
 
     expect(await run(), await run());
   });
+
+  test(
+    'a repeated signal object still has exactly one winning candidate',
+    () async {
+      final store = InMemoryGlobalStore();
+      final memory = SourceReliabilityMemory(store: store);
+      final signal = GlobalHealthSignal(
+        key: 'steps',
+        canonicalValue: 10,
+        canonicalUnit: 'count',
+        provenance: GlobalProvenance(
+          providerId: 'bil/apple_health',
+          sourceId: 'synthetic-watch',
+          recordId: 'one-native-sample',
+          observedAt: DateTime.utc(2026, 11, 15, 1),
+          confidence: .9,
+        ),
+      );
+
+      final graph = await BilGlobalHealthEvidenceGraphEngine(
+        memory: memory,
+      ).build([signal, signal]);
+
+      expect(graph.nodes, hasLength(2));
+      expect(graph.nodes.where((node) => node.selected), hasLength(1));
+      expect(graph.selectedSignals.single, same(signal));
+      expect(graph.conflicts, hasLength(1));
+      final learned = await memory.read('bil/apple_health:synthetic-watch');
+      expect(learned.accepted, 1);
+      expect(learned.rejected, 1);
+    },
+  );
 }

@@ -1,0 +1,36 @@
+{
+  "status": "PREPARED_LOCAL_NOT_UPLOADED",
+  "purpose": "Original promotional artwork edited to remove all writing; distinct image per product",
+  "editedWith": "built-in image_gen",
+  "images": [
+    {
+      "productId": "bil_premium",
+      "file": "bil_premium_old_art_textfree_1024.png",
+      "bytes": 885964,
+      "sha256": "444104ba0f098516adbe98d1c64a1b2066a846dacaf3b18540af64feccea71c4",
+      "originalArtworkSha256": "5a5dd5966a00b8f6617ecf6c5af66c56b46a0ec67968bc091da134691d475e8e"
+    },
+    {
+      "productId": "bil_premium_annual",
+      "file": "bil_premium_annual_old_art_textfree_1024.png",
+      "bytes": 1120777,
+      "sha256": "cab6176caaf4ed30a824d19f572197dd219a6ddfbdb8fb2f7698a7c4e0cf7973",
+      "originalArtworkSha256": "c0182be8995d6be52e99b664ceebada15d52c012d91d37961bfa6983afdc0b48"
+    },
+    {
+      "productId": "bil_premium_ai_coach",
+      "file": "bil_premium_ai_coach_old_art_textfree_1024.png",
+      "bytes": 870753,
+      "sha256": "30c511cbd10a38baaee9f53e38f850140c268b257270682d388e34a0a63ccb08",
+      "originalArtworkSha256": "2cb611742fc2fb0f5781bd65a41d107618a5b2331fb69c0e1ffbdb0fcd01ffe2"
+    },
+    {
+      "productId": "bil_premium_ai_coach_annual",
+      "file": "bil_premium_ai_coach_annual_old_art_textfree_1024.png",
+      "bytes": 1320964,
+      "sha256": "d18f065f4c43b43350b03530d22b03ca4234092b4561c03d265e89afcad683d3",
+      "originalArtworkSha256": "167124f633c3758b2a3533a574d6a9b2580aa604f2c974e3cf1eb34ebe64025d"
+    }
+  ],
+  "doesNotAuthorizeStoreMutation": true
+}

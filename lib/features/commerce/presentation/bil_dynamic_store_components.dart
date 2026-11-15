@@ -371,7 +371,7 @@ class _StoreTierCard extends StatelessWidget {
                               child: SizedBox.square(
                                 dimension: 16,
                                 child: FittedBox(
-                                  child: BilFeatureWelcomeStatus(),
+                                  child: BilCompactActivityIndicator(),
                                 ),
                               ),
                             )
@@ -555,7 +555,7 @@ class _StickyPurchaseBar extends StatelessWidget {
                           const SizedBox.square(
                             key: ValueKey('store-operation-progress'),
                             dimension: 24,
-                            child: BilFeatureWelcomeStatus(),
+                            child: BilCompactActivityIndicator(),
                           ),
                           const SizedBox(width: 8),
                         ],

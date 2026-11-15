@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:body_intelligence_log/features/auth/bil_auth_callback_controller.dart';
+import 'package:body_intelligence_log/features/auth/oauth_browser_return.dart';
 import 'package:body_intelligence_log/features/auth/supabase_auth_service.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
@@ -14,16 +15,19 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
-    test(
-      '$platform Facebook OAuth returns through PKCE into a Supabase session',
-      () async {
+    for (final expectedOwnerId in [
+      'a1b2c3d4-1234-4abc-8def-0123456789ab',
+      'b2c3d4e5-2345-4bcd-9efa-123456789abc',
+    ]) {
+      test('$platform Facebook OAuth returns through PKCE for $expectedOwnerId', () async {
         const launcherChannel = MethodChannel(
           'plugins.flutter.io/url_launcher',
         );
         Uri? launchedUri;
+        final browserEvents = <String>[];
         final requests = <http.Request>[];
-        const expectedOwnerId = 'a1b2c3d4-1234-4abc-8def-0123456789ab';
         final transport = MockClient((request) async {
+          browserEvents.add('exchange');
           requests.add(request);
           expect(request.method, 'POST');
           expect(request.url.origin, 'https://bil-test.supabase.co');
@@ -40,7 +44,7 @@ void main() {
 
           return http.Response(
             jsonEncode({
-              'access_token': _testJwt(),
+              'access_token': _testJwt(expectedOwnerId),
               'token_type': 'bearer',
               'expires_in': 3600,
               'refresh_token': 'synthetic-refresh-token',
@@ -66,9 +70,15 @@ void main() {
         binding.defaultBinaryMessenger.setMockMethodCallHandler(
           launcherChannel,
           (call) async {
+            if (call.method == 'closeWebView') {
+              browserEvents.add('close');
+              return null;
+            }
             expect(call.method, 'launch');
+            browserEvents.add('launch');
             final args = Map<String, dynamic>.from(call.arguments as Map);
-            expect(args['useWebView'], isFalse);
+            expect(args['useSafariVC'], platform == TargetPlatform.iOS);
+            expect(args['useWebView'], platform == TargetPlatform.iOS);
             launchedUri = Uri.parse(args['url'] as String);
             return true;
           },
@@ -93,7 +103,7 @@ void main() {
           expect(client.auth.currentSession, isNull);
 
           // User taps Facebook: the production service generates PKCE state and
-          // opens the operating-system browser via the mocked platform channel.
+          // opens Safari View Controller on iOS via the mocked platform channel.
           expect(await service.signInWithOAuth(OAuthProvider.facebook), isTrue);
           expect(launchedUri, isNotNull);
           expect(launchedUri!.path, '/auth/v1/authorize');
@@ -109,20 +119,66 @@ void main() {
           );
           expect(client.auth.currentSession, isNull);
 
-          // The verified app link returns from the browser. The real callback
-          // controller invokes the real GoTrue PKCE exchange through local HTTP.
-          final callback = Uri.parse(
-            'https://www.bilhealth.com/auth/callback?code=synthetic-facebook-code',
-          );
+          // Use the same validated callback and browser cleanup order as main.
+          // A provider cancellation must not create a session or spend a code.
           final controller = BilAuthCallbackController(
-            resolve: (uri) async => client.auth.getSessionFromUrl(uri),
+            resolve: (uri) async {
+              await dismissIosOAuthBrowserAfterCallback();
+              await client.auth.getSessionFromUrl(uri);
+            },
             navigate: routes.add,
             onError: (error, _) => errors.add(error),
           );
+          final canceled = Uri.parse(
+            'https://www.bilhealth.com/auth/callback?error=access_denied&error_description=User+canceled',
+          );
+          final canceledChallenge =
+              launchedUri!.queryParameters['code_challenge'];
+          expect(await controller.handle(canceled), isTrue);
+          expect(await controller.handle(canceled), isTrue);
+          expect(errors, hasLength(1));
+          expect(errors.single, isA<AuthException>());
+          expect(client.auth.currentSession, isNull);
+          expect(requests, isEmpty);
+          expect(browserEvents, [
+            'launch',
+            if (platform == TargetPlatform.iOS) 'close',
+          ]);
+
+          // Signing in again creates a fresh verifier; it does not reuse the
+          // canceled attempt or leave its browser over the next auth screen.
+          expect(await service.signInWithOAuth(OAuthProvider.facebook), isTrue);
+          expect(
+            launchedUri!.queryParameters['code_challenge'],
+            isNot(canceledChallenge),
+          );
+          expect(
+            await controller.handle(
+              Uri.parse('https://evil.example/auth/callback?code=untrusted'),
+            ),
+            isFalse,
+          );
+          expect(requests, isEmpty);
+
+          // The real GoTrue exchange uses only the fresh attempt's verifier.
+          final callback = Uri.parse(
+            'https://www.bilhealth.com/auth/callback?code=synthetic-facebook-code',
+          );
           expect(await controller.handle(callback), isTrue);
 
-          expect(errors, isEmpty);
-          expect(routes, ['/auth-callback']);
+          expect(errors, hasLength(1));
+          expect(routes, [
+            '/auth-callback',
+            '/auth-callback?failed=1',
+            '/auth-callback',
+          ]);
+          expect(browserEvents, [
+            'launch',
+            if (platform == TargetPlatform.iOS) 'close',
+            'launch',
+            if (platform == TargetPlatform.iOS) 'close',
+            'exchange',
+          ]);
           expect(requests, hasLength(1));
           expect(
             storage.values,
@@ -148,17 +204,17 @@ void main() {
           await client.dispose();
           transport.close();
         }
-      },
-    );
+      });
+    }
   }
 }
 
-String _testJwt() {
+String _testJwt(String ownerId) {
   final payload = base64Url
       .encode(
         utf8.encode(
           jsonEncode({
-            'sub': 'a1b2c3d4-1234-4abc-8def-0123456789ab',
+            'sub': ownerId,
             'role': 'authenticated',
             'exp':
                 DateTime.now()

@@ -37,6 +37,40 @@ String connectedHealthDisplayName(
       connectedHealthText(context, 'Health source', 'مصدر الصحة');
 }
 
+String connectedHealthNoRecentReadingsText(BuildContext context) =>
+    _noRecentReadingsLabels[BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    )] ??
+    _noRecentReadingsLabels['en']!;
+
+const _noRecentReadingsLabels = <String, String>{
+  'ar': 'لا توجد قراءات حديثة',
+  'en': 'No recent readings',
+  'fr': 'Aucune mesure récente',
+  'es': 'No hay lecturas recientes',
+  'tr': 'Güncel ölçüm yok',
+  'de': 'Keine aktuellen Messwerte',
+  'it': 'Nessuna lettura recente',
+  'pt-BR': 'Nenhuma leitura recente',
+  'pt-PT': 'Sem leituras recentes',
+  'ur': 'کوئی حالیہ پیمائش نہیں',
+  'fa': 'دادهٔ اندازه‌گیری تازه‌ای نیست',
+  'hi': 'हाल की कोई रीडिंग नहीं',
+  'id': 'Belum ada pengukuran terbaru',
+  'ms': 'Tiada bacaan terkini',
+  'ja': '最近の測定値はありません',
+  'ko': '최근 측정값 없음',
+  'zh-Hans': '暂无近期测量数据',
+  'zh-Hant': '暫無近期測量資料',
+  'ru': 'Нет недавних измерений',
+  'bn': 'সাম্প্রতিক কোনো পরিমাপ নেই',
+  'vi': 'Chưa có số đo gần đây',
+  'th': 'ไม่มีค่าการวัดล่าสุด',
+  'pl': 'Brak ostatnich pomiarów',
+  'nl': 'Geen recente metingen',
+  'uk': 'Немає недавніх вимірювань',
+};
+
 const _unknownHealthSourceLabels = <String, String>{
   'ar': 'مصدر الصحة',
   'en': 'Health source',

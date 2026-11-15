@@ -28,22 +28,22 @@ export const subscriptionImageProducts = [
   {
     productId: "bil_premium",
     subscriptionId: "6806555342",
-    file: "bil_premium_subscription_1024.png",
+    file: "bil_premium_old_art_textfree_1024.png",
   },
   {
     productId: "bil_premium_annual",
     subscriptionId: "6806555198",
-    file: "bil_premium_subscription_1024.png",
+    file: "bil_premium_annual_old_art_textfree_1024.png",
   },
   {
     productId: "bil_premium_ai_coach",
     subscriptionId: "6806555282",
-    file: "bil_premium_subscription_1024.png",
+    file: "bil_premium_ai_coach_old_art_textfree_1024.png",
   },
   {
     productId: "bil_premium_ai_coach_annual",
     subscriptionId: "6806555344",
-    file: "bil_premium_subscription_1024.png",
+    file: "bil_premium_ai_coach_annual_old_art_textfree_1024.png",
   },
 ];
 

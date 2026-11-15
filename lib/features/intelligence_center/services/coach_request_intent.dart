@@ -148,6 +148,72 @@ bool _isCoachWeightMutationRequest(String text) => RegExp(
   r'(?:لي\s+)?(?:وزني|الوزن|هدفي|الهدف)',
 ).hasMatch(text);
 
+// A forbidden read or a quoted example is not a request to access saved
+// measurements. This projection is limited to weight-read routing: it never
+// changes the original model question or the action/confirmation admission.
+String _coachWeightReadDirectiveText(String input) {
+  const englishReadVerbs =
+      r'(?:show|display|view|read|review|compare|access|use|analy[sz]e|explain)';
+  var text = normalizeCoachMeaning(_coachDirectiveText(input)).replaceAllMapped(
+    RegExp(
+      r'''"[^"]*"|“[^”]*”|«[^»]*»|‘[^’]*’|(?<![a-z])'(?:[^']|(?<=[a-z])'(?=[a-z]))*'(?![a-z])''',
+    ),
+    (match) {
+      final quoted = match[0]!.substring(1, match[0]!.length - 1).trim();
+      final quotedReadCommand = RegExp(
+        r"^(?:(?:please\s+)?(?:(?:do not|don't|dont|never)\s+)?"
+        '$englishReadVerbs'
+        r'\b|(?:اعرض|استعرض|وريني|راجع|قارن|اقرا|اشرح|وضح)(?=[\s،,]|$)|'
+        r'و?لا\s*(?:تعرض|تستعرض|توريني|تقرا|تراجع|تقارن|تستخدم|تشرح|توضح)(?=[\s،,]|$))',
+      ).hasMatch(quoted.replaceAll('’', "'"));
+      // Keep quoted nouns in a real read, such as Show "my weight history".
+      return quotedReadCommand ? ' ' : quoted;
+    },
+  );
+  text = text.replaceAll('’', "'");
+  // Commas can coordinate several verbs under the same denial. Only a
+  // sentence/semicolon or an explicit contrasting/following clause ends it.
+  const englishClauseEnd = r'(?=[.!?;؛؟]|\b(?:but|however|then)\b|$)';
+  text = text.replaceAll(
+    RegExp(
+      r"\b(?:do not|don't|dont|never)\s+" +
+          englishReadVerbs +
+          r'\b.*?' +
+          englishClauseEnd,
+    ),
+    ' ',
+  );
+  text = text.replaceAll(
+    RegExp(
+      r'\bwithout\s+(?:using|showing|displaying|viewing|reading|reviewing|'
+      r'comparing|accessing|analy[sz]ing|explaining)\b.*?'
+      '$englishClauseEnd',
+    ),
+    ' ',
+  );
+  const arabicClauseEnd = r'(?=[.!?;؛؟]|[\s،,](?:و?لكن|ثم)(?=\s|$)|$)';
+  text = text.replaceAll(
+    RegExp(
+      r'(?:^|[\s.!?;،,؛؟])(?:و?لا|ما|مش|مو)\s*'
+      r'(?:تعرض|تستعرض|توريني|تظهر|تقرا|تراجع|تقارن|تستخدم|تحلل|تستعمل|تشرح|توضح)'
+      r'(?=[\s،,]|$).*?'
+      '$arabicClauseEnd',
+    ),
+    ' ',
+  );
+  return text
+      .replaceAll(
+        RegExp(
+          r'(?:^|[\s.!?;،,؛؟])(?:بدون|دون)\s+'
+          r'(?:عرض|استعراض|قراءة|مراجعة|مقارنة|استخدام|تحليل|استعمال|شرح|توضيح)'
+          r'(?=[\s،,]|$).*?'
+          '$arabicClauseEnd',
+        ),
+        ' ',
+      )
+      .trim();
+}
+
 /// Definitions/comparisons about weight concepts belong to the normal answer
 /// path. "Explain my recorded weight trend in a table" remains a personal read;
 /// merely mentioning a table is not evidence that measurements were requested.
@@ -157,6 +223,7 @@ bool isCoachWeightConceptQuestion(String input) {
       _isCoachWeightMutationRequest(text)) {
     return false;
   }
+  final readDirective = _coachWeightReadDirectiveText(input);
   final personalHistory = RegExp(
     r'\bmy\s+(?:(?:recorded|saved|logged|recent|past|last|current)\s+){0,3}'
     r'(?:weight\s+)?(?:history|trend|chart|timeline|measurements?|records?|progress)\b|'
@@ -166,20 +233,20 @@ bool isCoachWeightConceptQuestion(String input) {
     r'\b(?:saved|recorded|logged)\s+(?:body\s+)?(?:weights?|measurements?)\b|'
     r'(?:تغير|تطور|اتجاه|تقلب|سجل|تاريخ|نزول|تقدم)\s+(?:في\s+)?(?:وزني|اوزاني|الوزن)|'
     r'(?:وزني|اوزاني)[^.!?؛؟]{0,50}(?:المسجل|المحفوظ|اخر|خلال)',
-  ).hasMatch(text);
+  ).hasMatch(readDirective);
   if (personalHistory) return false;
   return RegExp(
     r'\b(?:explain|define|definition|meaning)\b|'
     r'\bwhat\b[^.!?]{0,120}\b(?:difference|mean)\b|'
     r'\bdifferences?\s+between\b|'
     r'اشرح|وضح|تعريف|ما\s+معن|الفرق|الفروق',
-  ).hasMatch(text);
+  ).hasMatch(readDirective);
 }
 
 /// Read-only history/chart intent. A weight diary must never be inferred
 /// to be a Smart Plan just because the user said "جدول" or "شهر".
 bool isCoachWeightHistoryReadRequest(String input) {
-  final text = normalizeCoachMeaning(input);
+  final text = _coachWeightReadDirectiveText(input);
   if (isCoachWeightConceptQuestion(input) ||
       _isCoachWeightMutationRequest(text)) {
     return false;

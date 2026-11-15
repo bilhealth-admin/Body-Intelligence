@@ -1,4 +1,4 @@
-import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_compact_activity_indicator.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,7 +96,7 @@ class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard> {
             ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
             : PremiumDesignTokens.cardPaddingLarge,
         child: state.when(
-          loading: () => const Center(child: BilFeatureWelcomeStatus()),
+          loading: () => const Center(child: BilCompactActivityIndicator()),
           error: (_, _) => ConnectedHealthErrorContent(
             languageCode: Localizations.localeOf(context).toLanguageTag(),
             onRetry: () => ref.read(connectedHealthProvider.notifier).refresh(),
@@ -661,7 +661,10 @@ class _DashboardSyncReading extends StatelessWidget {
           )
         : null,
     icon: syncing
-        ? const SizedBox.square(dimension: 17, child: BilFeatureWelcomeStatus())
+        ? const SizedBox.square(
+            dimension: 17,
+            child: BilCompactActivityIndicator(),
+          )
         : BilNavigationFeedback(
             child: Icon(Icons.sync_rounded, size: compact ? 14 : 17),
           ),

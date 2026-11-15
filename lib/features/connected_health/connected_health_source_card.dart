@@ -56,7 +56,7 @@ class _HealthSourceCard extends ConsumerWidget {
               icon: snapshot.isBusy
                   ? const SizedBox.square(
                       dimension: 18,
-                      child: BilFeatureWelcomeStatus(),
+                      child: BilCompactActivityIndicator(),
                     )
                   : const BilNavigationFeedback(
                       child: Icon(Icons.sync_rounded),

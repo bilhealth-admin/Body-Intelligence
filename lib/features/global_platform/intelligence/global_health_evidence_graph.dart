@@ -182,13 +182,15 @@ final class BilGlobalHealthEvidenceGraphEngine {
           ),
         );
       }
-      for (final candidate in candidates) {
+      for (final (index, candidate) in candidates.indexed) {
         workSinceUiYield++;
         if (workSinceUiYield >= _signalsPerUiYield) {
           workSinceUiYield = 0;
           await _yieldUiTurn();
         }
-        final chosen = identical(candidate, selected);
+        // Records have no stable identity in Dart. Select the first sorted
+        // candidate by position so every group has exactly one winner.
+        final chosen = index == 0;
         final sourceKey =
             '${candidate.signal.provenance.providerId}:${candidate.signal.provenance.sourceId}';
         await memory.record(

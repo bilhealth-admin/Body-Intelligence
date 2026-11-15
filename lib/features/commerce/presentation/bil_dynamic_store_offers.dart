@@ -1,6 +1,6 @@
 import '../../../shared/widgets/bil_glass_press_feedback.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
-import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import '../../../shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 

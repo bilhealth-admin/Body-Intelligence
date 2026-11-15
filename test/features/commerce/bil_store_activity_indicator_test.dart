@@ -1,11 +1,10 @@
-import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
-import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -27,7 +26,7 @@ void main() {
       for (final reduced in [false, true]) {
         for (final restoring in [false, true]) {
           testWidgets(
-            'one Splash indicator above checkout dark=$dark rtl=$rtl reduced=$reduced restore=$restoring',
+            'one compact indicator above checkout dark=$dark rtl=$rtl reduced=$reduced restore=$restoring',
             (tester) async {
               tester.view.physicalSize = const Size(390, 844);
               tester.view.devicePixelRatio = 1;
@@ -72,10 +71,12 @@ void main() {
               );
               await tester.pump(const Duration(milliseconds: 160));
               final cta = find.byKey(const ValueKey('store-purchase-cta'));
-              final spinner = find.byType(BilFeatureWelcomeStatus);
+              final spinner = find.byType(BilCompactActivityIndicator);
               expect(spinner, findsOneWidget);
-              expect(find.byType(CircularProgressIndicator), findsNothing);
+              final circle = find.byType(CircularProgressIndicator);
+              expect(circle, reduced ? findsNothing : findsOneWidget);
               expect(find.descendant(of: cta, matching: spinner), findsNothing);
+              expect(find.descendant(of: cta, matching: circle), findsNothing);
               expect(
                 tester.getRect(spinner).bottom,
                 lessThanOrEqualTo(tester.getRect(cta).top),
@@ -89,22 +90,26 @@ void main() {
                 findsOneWidget,
               );
               expect(tester.widget<InkWell>(cta).onTap, isNull);
-              final nativeIndicator = tester.widget<BilSplashCapsuleProgress>(
-                find.byType(BilSplashCapsuleProgress),
-              );
-              expect(
-                tester.getSize(find.byType(BilSplashCapsuleProgress)).height,
-                7,
-              );
-              expect(nativeIndicator.reducedMotion, reduced);
-              expect(
-                nativeIndicator.color,
-                dark ? const Color(0xFF8CCFFF) : const Color(0xFF10254A),
-              );
+              expect(tester.getSize(spinner), const Size.square(24));
+              if (!reduced) {
+                final nativeIndicator = tester
+                    .widget<CircularProgressIndicator>(circle);
+                expect(nativeIndicator.strokeWidth, 2);
+                expect(nativeIndicator.value, isNull);
+              } else {
+                expect(
+                  find.descendant(
+                    of: spinner,
+                    matching: find.byType(CustomPaint),
+                  ),
+                  findsOneWidget,
+                );
+              }
               await tester.tap(cta, warnIfMissed: false);
               await tester.pump(const Duration(milliseconds: 200));
               expect(launches, 0);
               expect(restores, 0);
+              if (reduced) expect(tester.binding.hasScheduledFrame, isFalse);
               expect(tester.takeException(), isNull);
               if (reduced && restoring) {
                 final boundary = tester.renderObject<RenderRepaintBoundary>(
@@ -121,7 +126,7 @@ void main() {
                   }
                 });
                 final file = File(
-                  'build/bil39_loading_review/store-${rtl ? 'ar' : 'en'}-${dark ? 'dark' : 'light'}-2x.png',
+                  'build/bil44_compact_loading_review/store-${rtl ? 'ar' : 'en'}-${dark ? 'dark' : 'light'}-2x.png',
                 );
                 file.parent.createSync(recursive: true);
                 file.writeAsBytesSync(bytes!.buffer.asUint8List());

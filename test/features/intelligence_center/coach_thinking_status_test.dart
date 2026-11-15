@@ -1,8 +1,7 @@
-import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_thinking_status.dart';
 import 'package:flutter/material.dart';
 
-import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -40,16 +39,31 @@ void main() {
           ),
         );
         final rect = tester.getRect(find.byKey(const Key('anchor')));
-        expect(find.byType(CircularProgressIndicator), findsNothing);
-        expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
-        expect(find.byType(BilSplashCapsuleProgress), findsOneWidget);
+        final spinner = find.byType(BilCompactActivityIndicator);
+        expect(spinner, findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(tester.getSize(spinner), const Size.square(24));
+        void expectIndicatorOnPhysicalLeft(String label) {
+          expect(
+            tester.getRect(spinner).right,
+            lessThan(tester.getRect(find.text(label)).left),
+          );
+          expect(
+            Directionality.of(tester.element(find.text(label))),
+            rtl ? TextDirection.rtl : TextDirection.ltr,
+          );
+        }
+
+        expectIndicatorOnPhysicalLeft(labels[0]);
         await tester.pump(const Duration(milliseconds: 4500));
         await tester.pump(const Duration(milliseconds: 500));
         expect(find.text(labels[1]), findsOneWidget);
+        expectIndicatorOnPhysicalLeft(labels[1]);
         expect(tester.getRect(find.byKey(const Key('anchor'))), rect);
         await tester.pump(const Duration(seconds: 4));
         await tester.pump(const Duration(milliseconds: 500));
         expect(find.text(labels[2]), findsOneWidget);
+        expectIndicatorOnPhysicalLeft(labels[2]);
         expect(tester.getRect(find.byKey(const Key('anchor'))), rect);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
@@ -61,29 +75,41 @@ void main() {
   testWidgets('reduced motion stays readable without repeated animation', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: Scaffold(
-            body: CoachThinkingStatus(labels: ['Preparing…', 'Please wait…']),
+    final semantics = tester.ensureSemantics();
+    try {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(disableAnimations: true),
+            child: Scaffold(
+              body: CoachThinkingStatus(labels: ['Preparing…', 'Please wait…']),
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump(const Duration(seconds: 20));
-    expect(find.text('Preparing…'), findsOneWidget);
-    expect(find.text('Please wait…'), findsNothing);
-    expect(find.byType(ShaderMask), findsNothing);
-    expect(
-      tester
-          .widget<BilSplashCapsuleProgress>(
-            find.byType(BilSplashCapsuleProgress),
-          )
-          .reducedMotion,
-      isTrue,
-    );
-    expect(tester.binding.hasScheduledFrame, isFalse);
-    expect(tester.takeException(), isNull);
+      );
+      await tester.pump(const Duration(seconds: 20));
+      expect(find.text('Preparing…'), findsOneWidget);
+      expect(find.text('Please wait…'), findsNothing);
+      expect(find.byType(ShaderMask), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(BilCompactActivityIndicator),
+          matching: find.byType(CustomPaint),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .getSemantics(find.byType(BilCompactActivityIndicator))
+            .getSemanticsData()
+            .value,
+        isEmpty,
+      );
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      expect(tester.takeException(), isNull);
+    } finally {
+      semantics.dispose();
+    }
   });
 }

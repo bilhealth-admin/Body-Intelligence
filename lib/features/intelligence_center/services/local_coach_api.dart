@@ -140,7 +140,11 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
         diagnosticCode: modelResult.diagnosticCode,
       );
     }
-    final action = coachExplicitlyForbidsActions(request.text)
+    // A definition is answer-only even if a model proposes an unsolicited
+    // measurement write. Explicit admitted commands returned above unchanged.
+    final action =
+        coachExplicitlyForbidsActions(request.text) ||
+            isCoachWeightConceptQuestion(request.text)
         ? null
         : _validatedModelAction(model.action, request.locale);
     return LocalCoachResult(
