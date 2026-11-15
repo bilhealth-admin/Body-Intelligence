@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -9,6 +10,9 @@ import 'package:body_intelligence_log/features/commerce/presentation/bil_store_c
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../../../integration_test/native_feature_splashes_test.dart' as native;
+import '../../../tools/qa/flutter/native_compact_activity_evidence.dart';
 
 const _offer = BilStoreOfferMetadata(
   productId: 'qa.premium.monthly',
@@ -25,115 +29,130 @@ void main() {
     for (final rtl in [false, true]) {
       for (final reduced in [false, true]) {
         for (final restoring in [false, true]) {
-          testWidgets(
-            'one compact indicator above checkout dark=$dark rtl=$rtl reduced=$reduced restore=$restoring',
-            (tester) async {
-              tester.view.physicalSize = const Size(390, 844);
-              tester.view.devicePixelRatio = 1;
-              addTearDown(tester.view.reset);
-              var launches = 0;
-              var restores = 0;
-              final status = BilStoreCopy.text(
-                rtl ? 'ar' : 'en',
-                restoring ? 'restore_checking' : 'purchase_in_progress',
-              );
-              await tester.pumpWidget(
-                MaterialApp(
-                  theme: dark ? ThemeData.dark() : ThemeData.light(),
-                  home: MediaQuery(
-                    data: MediaQueryData(
-                      size: const Size(390, 844),
-                      disableAnimations: reduced,
-                      textScaler: TextScaler.linear(reduced ? 2 : 1),
-                    ),
-                    child: Directionality(
-                      textDirection: rtl
-                          ? TextDirection.rtl
-                          : TextDirection.ltr,
-                      child: RepaintBoundary(
-                        key: const Key('qa-store-loading-frame'),
-                        child: Scaffold(
-                          body: BilDynamicStoreOffers(
-                            locale: rtl ? 'ar' : 'en',
-                            offers: const [_offer],
-                            purchaseInProgress: !restoring,
-                            restoreInProgress: restoring,
-                            purchaseStatusMessage: status,
-                            onPurchaseRequested: (_) => launches++,
-                            onRestore: () => restores++,
-                            onManage: () {},
+          for (final scale in [1.0, 2.0]) {
+            testWidgets(
+              'one compact indicator above checkout dark=$dark rtl=$rtl reduced=$reduced restore=$restoring scale=$scale',
+              (tester) async {
+                tester.view.physicalSize = const Size(390, 844);
+                tester.view.devicePixelRatio = 1;
+                addTearDown(tester.view.reset);
+                var launches = 0;
+                var restores = 0;
+                final status = BilStoreCopy.text(
+                  rtl ? 'ar' : 'en',
+                  restoring ? 'restore_checking' : 'purchase_in_progress',
+                );
+                await tester.pumpWidget(
+                  MaterialApp(
+                    theme: dark ? ThemeData.dark() : ThemeData.light(),
+                    home: MediaQuery(
+                      data: MediaQueryData(
+                        size: const Size(390, 844),
+                        disableAnimations: reduced,
+                        textScaler: TextScaler.linear(scale),
+                      ),
+                      child: Directionality(
+                        textDirection: rtl
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
+                        child: RepaintBoundary(
+                          key: const Key('qa-store-loading-frame'),
+                          child: Scaffold(
+                            body: BilDynamicStoreOffers(
+                              locale: rtl ? 'ar' : 'en',
+                              offers: const [_offer],
+                              purchaseInProgress: !restoring,
+                              restoreInProgress: restoring,
+                              purchaseStatusMessage: status,
+                              onPurchaseRequested: (_) => launches++,
+                              onRestore: () => restores++,
+                              onManage: () {},
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              );
-              await tester.pump(const Duration(milliseconds: 160));
-              final cta = find.byKey(const ValueKey('store-purchase-cta'));
-              final spinner = find.byType(BilCompactActivityIndicator);
-              expect(spinner, findsOneWidget);
-              final circle = find.byType(CircularProgressIndicator);
-              expect(circle, reduced ? findsNothing : findsOneWidget);
-              expect(find.descendant(of: cta, matching: spinner), findsNothing);
-              expect(find.descendant(of: cta, matching: circle), findsNothing);
-              expect(
-                tester.getRect(spinner).bottom,
-                lessThanOrEqualTo(tester.getRect(cta).top),
-              );
-              expect(find.text(status), findsWidgets);
-              expect(
-                find.descendant(
-                  of: cta,
-                  matching: find.textContaining(r'$2.49'),
-                ),
-                findsOneWidget,
-              );
-              expect(tester.widget<InkWell>(cta).onTap, isNull);
-              expect(tester.getSize(spinner), const Size.square(24));
-              if (!reduced) {
-                final nativeIndicator = tester
-                    .widget<CircularProgressIndicator>(circle);
-                expect(nativeIndicator.strokeWidth, 2);
-                expect(nativeIndicator.value, isNull);
-              } else {
+                );
+                await tester.pump(const Duration(milliseconds: 160));
+                final cta = find.byKey(const ValueKey('store-purchase-cta'));
+                final spinner = find.byType(BilCompactActivityIndicator);
+                expect(spinner, findsOneWidget);
+                expect(find.byType(BilSplashCapsuleProgress), findsNothing);
+                final circle = find.byType(CircularProgressIndicator);
+                expect(circle, reduced ? findsNothing : findsOneWidget);
+                expect(
+                  find.descendant(of: cta, matching: spinner),
+                  findsNothing,
+                );
+                expect(
+                  find.descendant(of: cta, matching: circle),
+                  findsNothing,
+                );
+                expect(
+                  tester.getRect(spinner).bottom,
+                  lessThanOrEqualTo(tester.getRect(cta).top),
+                );
+                expect(find.text(status), findsWidgets);
                 expect(
                   find.descendant(
-                    of: spinner,
-                    matching: find.byType(CustomPaint),
+                    of: cta,
+                    matching: find.textContaining(r'$2.49'),
                   ),
                   findsOneWidget,
                 );
-              }
-              await tester.tap(cta, warnIfMissed: false);
-              await tester.pump(const Duration(milliseconds: 200));
-              expect(launches, 0);
-              expect(restores, 0);
-              if (reduced) expect(tester.binding.hasScheduledFrame, isFalse);
-              expect(tester.takeException(), isNull);
-              if (reduced && restoring) {
-                final boundary = tester.renderObject<RenderRepaintBoundary>(
-                  find.byKey(const Key('qa-store-loading-frame')),
+                expect(tester.widget<InkWell>(cta).onTap, isNull);
+                expect(tester.getSize(spinner), const Size.square(24));
+                if (!reduced) {
+                  final nativeIndicator = tester
+                      .widget<CircularProgressIndicator>(circle);
+                  expect(nativeIndicator.strokeWidth, 2);
+                  expect(nativeIndicator.value, isNull);
+                } else {
+                  expect(
+                    find.descendant(
+                      of: spinner,
+                      matching: find.byType(CustomPaint),
+                    ),
+                    findsOneWidget,
+                  );
+                }
+                final paint = await native.verifyNativeCompactActivityProbe(
+                  tester,
+                  spinner,
+                  reduced: reduced,
                 );
-                final bytes = await tester.runAsync(() async {
-                  final image = await boundary.toImage(pixelRatio: 1);
-                  try {
-                    return await image.toByteData(
-                      format: ui.ImageByteFormat.png,
-                    );
-                  } finally {
-                    image.dispose();
-                  }
-                });
-                final file = File(
-                  'build/bil44_compact_loading_review/store-${rtl ? 'ar' : 'en'}-${dark ? 'dark' : 'light'}-2x.png',
-                );
-                file.parent.createSync(recursive: true);
-                file.writeAsBytesSync(bytes!.buffer.asUint8List());
-              }
-              await tester.pumpWidget(const SizedBox.shrink());
-            },
-          );
+                expect(isNativeCompactActivityPaintEvidence(paint), isTrue);
+                await tester.tap(cta, warnIfMissed: false);
+                await tester.pump(const Duration(milliseconds: 200));
+                expect(launches, 0);
+                expect(restores, 0);
+                if (reduced) expect(tester.binding.hasScheduledFrame, isFalse);
+                expect(tester.takeException(), isNull);
+                if (reduced && restoring && scale == 2) {
+                  final boundary = tester.renderObject<RenderRepaintBoundary>(
+                    find.byKey(const Key('qa-store-loading-frame')),
+                  );
+                  final bytes = await tester.runAsync(() async {
+                    final image = await boundary.toImage(pixelRatio: 1);
+                    try {
+                      return await image.toByteData(
+                        format: ui.ImageByteFormat.png,
+                      );
+                    } finally {
+                      image.dispose();
+                    }
+                  });
+                  final file = File(
+                    'build/bil44_compact_loading_review/store-${rtl ? 'ar' : 'en'}-${dark ? 'dark' : 'light'}-2x.png',
+                  );
+                  file.parent.createSync(recursive: true);
+                  file.writeAsBytesSync(bytes!.buffer.asUint8List());
+                }
+                await tester.pumpWidget(const SizedBox.shrink());
+              },
+            );
+          }
         }
       }
     }

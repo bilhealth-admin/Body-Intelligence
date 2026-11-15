@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 import '../tools/qa/flutter/native_capture_manifest.dart';
+import '../tools/qa/flutter/native_compact_activity_evidence.dart';
 import 'native_capture_transport.dart';
 
 // Host-only collector. No generated video, baseline updates, app/cloud writes.
@@ -162,6 +163,10 @@ Future<void> main() async {
                 row is! Map ||
                 row['completed'] != true ||
                 row['one_indicator_above_cta'] != true ||
+                row['pending_cta_tap_requested_no_purchase'] != true ||
+                !isNativeCompactActivityPaintEvidence(
+                  row['compact_activity_paint'],
+                ) ||
                 row['purchase_requests'] != 0,
           )) {
         throw StateError('Native Community/checkout evidence is incomplete.');

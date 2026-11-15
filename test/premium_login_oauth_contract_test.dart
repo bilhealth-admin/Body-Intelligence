@@ -93,7 +93,7 @@ void main() {
   });
 
   test(
-    'OAuth keeps Facebook on an external browser and Google native on mobile',
+    'browser OAuth stays in the iOS sheet and Google stays native on mobile',
     () {
       expect(
         SupabaseAuthService.oauthLaunchModeFor(
@@ -101,7 +101,7 @@ void main() {
           isWeb: false,
           platform: TargetPlatform.iOS,
         ),
-        LaunchMode.externalApplication,
+        LaunchMode.inAppBrowserView,
       );
       expect(
         SupabaseAuthService.oauthLaunchModeFor(
@@ -109,7 +109,7 @@ void main() {
           isWeb: false,
           platform: TargetPlatform.iOS,
         ),
-        LaunchMode.externalApplication,
+        LaunchMode.inAppBrowserView,
       );
       expect(
         SupabaseAuthService.oauthLaunchModeFor(
@@ -125,7 +125,7 @@ void main() {
           isWeb: false,
           platform: TargetPlatform.iOS,
         ),
-        LaunchMode.externalApplication,
+        LaunchMode.inAppBrowserView,
       );
       for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
         expect(
@@ -134,7 +134,9 @@ void main() {
             isWeb: false,
             platform: platform,
           ),
-          LaunchMode.externalApplication,
+          platform == TargetPlatform.iOS
+              ? LaunchMode.inAppBrowserView
+              : LaunchMode.externalApplication,
         );
         expect(
           SupabaseAuthService.oauthRedirectUriFor(
@@ -144,6 +146,23 @@ void main() {
           ),
           SupabaseAuthService.oauthRedirectUri,
         );
+      }
+      for (final provider in [
+        OAuthProvider.facebook,
+        OAuthProvider.google,
+        OAuthProvider.apple,
+      ]) {
+        for (final platform in TargetPlatform.values) {
+          expect(
+            SupabaseAuthService.oauthLaunchModeFor(
+              provider,
+              isWeb: true,
+              platform: platform,
+            ),
+            LaunchMode.externalApplication,
+            reason: 'Web does not use the native iOS browser sheet.',
+          );
+        }
       }
       expect(
         SupabaseAuthService.usesNativeAndroidGoogleSignIn(

@@ -44,6 +44,7 @@ import 'package:body_intelligence_log/features/nutrition_plans/presentation/nutr
 import 'package:body_intelligence_log/shared/widgets/bil_coach_identity.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_feature_entry_splash.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +63,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../tools/qa/flutter/native_conversation_observer.dart';
 import '../tools/qa/flutter/native_hold_observer.dart';
 import '../tools/qa/flutter/native_capture_manifest.dart';
+import '../tools/qa/flutter/native_compact_activity_evidence.dart';
 
 part 'native_feature_capture.dart';
 part 'native_feature_splashes_coach.dart';
@@ -69,6 +71,7 @@ part 'native_feature_splashes_observer.dart';
 part 'native_feature_splashes_warmup.dart';
 part 'native_feature_splashes_smart_plan.dart';
 part 'native_feature_splashes_conversations.dart';
+part 'native_feature_splashes_activity_probe.dart';
 
 // Standalone QA entrypoint. Does not call lib/main.dart or initialize cloud,
 // Firebase, purchases, ads, production Auth, First Use, or startup animations.

@@ -300,33 +300,44 @@ void _registerNativeConversationsAndStoreActivity(
           );
           await _nativeSettle(tester);
           final cta = find.byKey(const ValueKey('store-purchase-cta'));
-          final capsule = find.byType(BilSplashCapsuleProgress);
-          expect(capsule, findsOneWidget);
+          final indicator = find.byType(BilCompactActivityIndicator);
+          expect(indicator, findsOneWidget);
+          expect(find.byType(BilSplashCapsuleProgress), findsNothing);
           expect(find.byType(CupertinoActivityIndicator), findsNothing);
-          expect(find.byType(CircularProgressIndicator), findsNothing);
-          expect(find.descendant(of: cta, matching: capsule), findsNothing);
+          expect(find.descendant(of: cta, matching: indicator), findsNothing);
           expect(
-            _nativeRect(capsule).bottom,
+            find.descendant(
+              of: cta,
+              matching: find.byType(CircularProgressIndicator),
+            ),
+            findsNothing,
+          );
+          expect(
+            _nativeRect(indicator).bottom,
             lessThanOrEqualTo(_nativeRect(cta).top),
           );
           expect(tester.widget<InkWell>(cta).onTap, isNull);
           expect(find.text(status), findsWidgets);
           expect(launches, 0);
-          final element = capsule.evaluate().single;
+          final element = indicator.evaluate().single;
           final reduced =
               MediaQuery.disableAnimationsOf(element) ||
               View.of(
                 element,
               ).platformDispatcher.accessibilityFeatures.reduceMotion;
-          final capsulePaint = await _verifyNativeCapsulePaint(
+          expect(
+            find.byType(CircularProgressIndicator),
+            reduced ? findsNothing : findsOneWidget,
+          );
+          final compactPaint = await verifyNativeCompactActivityProbe(
             tester,
-            capsule,
+            indicator,
             reduced: reduced,
           );
           // An actual tap while pending must not request a store transaction.
           await tester.tap(cta);
           await tester.pump();
-          expect(capsule, findsOneWidget);
+          expect(indicator, findsOneWidget);
           expect(tester.widget<InkWell>(cta).onTap, isNull);
           expect(find.text(status), findsWidgets);
           expect(launches, 0);
@@ -346,7 +357,7 @@ void _registerNativeConversationsAndStoreActivity(
             'source_head': _head,
             'source_fingerprint': _fingerprint,
             'one_indicator_above_cta': true,
-            'capsule_paint': capsulePaint,
+            'compact_activity_paint': compactPaint,
             'pending_cta_tap_requested_no_purchase': launches == 0,
             'purchase_requests': launches,
           });
