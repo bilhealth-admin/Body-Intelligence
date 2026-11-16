@@ -24,6 +24,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../visual_closure/visual_evidence_font.dart';
 
+double _labelContrast(Color foreground, Color background) {
+  final ink = Color.alphaBlend(foreground, background).computeLuminance();
+  final paper = background.computeLuminance();
+  return ink >= paper
+      ? (ink + .05) / (paper + .05)
+      : (paper + .05) / (ink + .05);
+}
+
 void main() {
   setUpAll(loadVisualEvidenceFont);
 
@@ -145,6 +153,28 @@ void main() {
                   tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
                   canvas,
                 );
+                // The filled amount field must keep its real floating label readable.
+                final amountField = tester.widget<TextField>(
+                  find.byType(TextField).first,
+                );
+                expect(amountField.controller!.text, isNotEmpty);
+                final label = find.text(
+                  language == 'ar' ? 'كمية الماء (مل)' : 'Water amount (ml)',
+                );
+                expect(label, findsOneWidget);
+                final labelInk = tester
+                    .renderObject<RenderParagraph>(label)
+                    .text
+                    .style!
+                    .color!;
+                final fill = Theme.of(
+                  tester.element(label),
+                ).inputDecorationTheme.fillColor!;
+                expect(
+                  _labelContrast(labelInk, fill),
+                  greaterThanOrEqualTo(4.5),
+                );
+                if (!dark) expect(labelInk, const Color(0xFF0877D1));
               } else {
                 final overlay = tester
                     .widget<AnnotatedRegion<SystemUiOverlayStyle>>(

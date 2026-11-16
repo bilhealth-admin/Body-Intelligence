@@ -3,7 +3,6 @@ part of '../food_page.dart';
 extension _FoodPageActions on _FoodPageState {
   Future<void> _createFood([String? initialBarcode]) async {
     final repository = ref.read(foodRepositoryProvider);
-    final sync = ref.read(communityFoodSyncServiceProvider);
     bool current() =>
         mounted && identical(repository, ref.read(foodRepositoryProvider));
     final created = await showDialog<_FoodDraft>(
@@ -13,8 +12,7 @@ extension _FoodPageActions on _FoodPageState {
         initialBarcode: initialBarcode,
         onSave: (draft) async {
           if (!current()) throw StateError('Food edit owner changed.');
-          final localeCode = Localizations.localeOf(context).toLanguageTag();
-          final id = await repository.addFood(
+          await repository.addFood(
             name: draft.name,
             arabicName: draft.arabicName,
             barcode: draft.barcode,
@@ -43,7 +41,6 @@ extension _FoodPageActions on _FoodPageState {
             isCurrent: current,
           );
           if (!current()) throw StateError('Food edit owner changed.');
-          await sync.publishFood(id, localeCode: localeCode);
         },
       ),
     );

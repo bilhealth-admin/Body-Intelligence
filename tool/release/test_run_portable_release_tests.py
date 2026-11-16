@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import contextlib
+import importlib.util
 import io
+import json
 import os
+from pathlib import Path
 import re
 import subprocess
+import sys
+import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest import mock
@@ -15,6 +20,28 @@ from tool.release import run_portable_release_tests as runner
 
 
 class PortableReleaseSchedulingTest(unittest.TestCase):
+    DIRECTORY_CAPTURE_FILES = {
+        "test/features/commerce/personal_plan_gate_refresh_presentation_test.dart": "BIL_PREMIUM_CAPTURE_DIR",
+        "test/features/community/community_profile_relationship_flow_test.dart": "BIL_REFERENCE_CAPTURE_DIR",
+        "test/features/daily_log/daily_entry_theme_contrast_test.dart": "BIL_ENTRY_THEME_CAPTURE_DIR",
+        "test/features/intelligence_center/coach_overview_access_stability_test.dart": "BIL_PREMIUM_CAPTURE_DIR",
+        "test/features/intelligence_center/coach_overview_header_clearance_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+        "test/features/intelligence_center/coach_overview_plan_label_refresh_test.dart": "BIL_PREMIUM_CAPTURE_DIR",
+        "test/features/profile/dietary_plan_navigation_widget_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+        "test/features/settings/health_sources_nutrition_targets_localization_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+        "test/shared/widgets/bil_mobile_page_intro_contrast_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+        "test/shared/widgets/chat_history_viewport_first_paint_test.dart": "BIL_CHAT_VIEWPORT_EVIDENCE_DIR",
+    }
+    COMPILE_DIRECTORY_FILES = {
+        "test/features/settings/membership_navigation_stability_test.dart": "BIL_DASHBOARD_CAPTURE_DIR",
+        "test/features/smart_plan/bil_smart_plan_sources_test.dart": "BIL_DASHBOARD_CAPTURE_DIR",
+        "test/shared/widgets/bil_splash_capsule_layout_test.dart": "BIL_DASHBOARD_CAPTURE_DIR",
+    }
+    REQUIRED_RENDERER_FILES = {
+        "test/features/dashboard/dashboard_discover_stability_test.dart",
+        "test/shared/widgets/gray_wait_surface_visibility_test.dart",
+    }
+
     def setUp(self) -> None:
         environment = mock.patch.dict(os.environ)
         environment.start()
@@ -283,6 +310,174 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
             code, calls, output = self.run_main([], ["--code-only", "--list-only"])
         self.assertEqual((code, calls), (0, []))
         self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=0\n"))
+
+    def test_guarded_capture_files_keep_all_behavioral_tests_ordinary(self):
+        policy = runner.load_code_only_policy()
+        all_tests, ordinary = policy.discover()
+        for mapping, expected in (
+            (policy.ENV_CAPTURE_DIRECTORIES, self.DIRECTORY_CAPTURE_FILES),
+            (policy.COMPILE_TIME_CAPTURE_DIRECTORIES, self.COMPILE_DIRECTORY_FILES),
+        ):
+            for name, flag in expected.items():
+                with self.subTest(file=name):
+                    self.assertEqual(mapping[name], flag)
+                    self.assertIn(name, all_tests)
+                    self.assertIn(name, ordinary)
+                    self.assertNotIn(name, policy.NOT_RUN)
+                    self.assertNotIn(name, policy.MIXED_NAMES)
+
+    def test_capture_directories_cannot_leak_into_any_mocked_child(self):
+        flags = set(self.DIRECTORY_CAPTURE_FILES.values()) | set(self.COMPILE_DIRECTORY_FILES.values())
+        observed = []
+
+        def child(command, **kwargs):
+            observed.append(command)
+            self.assertTrue(flags.isdisjoint(os.environ))
+            self.assertIn("--dart-define=BIL_DASHBOARD_CAPTURE_DIR=", command)
+            self.assertNotIn("--dart-define=BIL_DASHBOARD_CAPTURE_DIR=false", command)
+            self.assertNotIn("--dart-define=BIL_DASHBOARD_CAPTURE_DIR=0", command)
+            return subprocess.CompletedProcess(command, 0)
+
+        with mock.patch.dict(os.environ, {flag: "inherited-output-must-not-leak" for flag in flags}), \
+             mock.patch.object(runner, "discover_tests", return_value=self.discovery), \
+             mock.patch.object(runner.subprocess, "run", side_effect=child), \
+             contextlib.redirect_stdout(io.StringIO()):
+            code = runner.main(["--code-only"])
+        self.assertEqual(code, 0)
+        self.assertEqual(len(observed), 2)
+
+    def test_compile_directory_defines_are_empty_strings_not_boolean_false(self):
+        policy = runner.load_code_only_policy()
+        with tempfile.TemporaryDirectory(prefix="bil-code-only-argv-") as folder:
+            binary = Path(folder) / "bin"
+            dart = binary / "cache/dart-sdk/bin" / ("dart.exe" if os.name == "nt" else "dart")
+            dart.parent.mkdir(parents=True)
+            dart.touch()
+            (binary / "cache/flutter_tools.snapshot").touch()
+            flutter = binary / ("flutter.bat" if os.name == "nt" else "flutter")
+            flutter.touch()
+            command = policy.flutter_test_command(str(flutter))
+        self.assertEqual(Path(command[0]).resolve(), dart.resolve())
+        self.assertEqual(command.count("--dart-define=BIL_DASHBOARD_CAPTURE_DIR="), 1)
+        for flag in set(policy.CAPTURE_GUARDED.values()):
+            self.assertIn(f"--dart-define={flag}=false", command)
+
+    def test_known_directory_guard_does_not_authorize_an_unknown_visual_file(self):
+        policy = runner.load_code_only_policy()
+        classifications = (set(policy.NOT_RUN) | set(policy.MIXED_NAMES)
+                           | set(policy.CAPTURE_GUARDED) | set(policy.ENV_CAPTURE_GUARDED)
+                           | set(policy.ENV_CAPTURE_DIRECTORIES)
+                           | set(policy.COMPILE_TIME_CAPTURE_DIRECTORIES)
+                           | set(policy.NON_VISUAL_BYTE_TESTS))
+        with tempfile.TemporaryDirectory(prefix="bil-unknown-visual-") as folder:
+            root = Path(folder)
+            for name in classifications:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("// reviewed fixture\n", encoding="utf-8")
+            unknown = "test/features/commerce/personal_plan_unreviewed_test.dart"
+            (root / unknown).write_text(
+                "void capture() { final dir = Platform.environment['BIL_PREMIUM_CAPTURE_DIR']; "
+                "if (dir == null) return; boundary.toImage(); }\n", encoding="utf-8")
+            with mock.patch.object(policy, "ROOT", root):
+                with self.assertRaisesRegex(ValueError, "New unreviewed visual operation: " + unknown):
+                    policy.discover()
+
+    def test_exact_required_renderers_stay_in_both_complete_local_schedules(self):
+        policy = runner.load_code_only_policy()
+        all_tests, ordinary = policy.discover()
+        self.assertEqual(set(policy.REQUIRED_RENDERER_TESTS), self.REQUIRED_RENDERER_FILES)
+        from tool.release import run_full_validation_batches as complete
+        complete_schedule = [name for group in complete.groups(all_tests) for name in group]
+        _, default_portable = runner.discover_tests()
+        for name in self.REQUIRED_RENDERER_FILES:
+            with self.subTest(file=name):
+                self.assertIn(name, all_tests)
+                self.assertEqual(complete_schedule.count(name), 1)
+                self.assertIn(name, default_portable)
+                self.assertNotIn(name, ordinary)
+                self.assertEqual(policy.NOT_RUN[name], policy.REQUIRED_RENDERER_TESTS[name])
+                self.assertIn("verify.yml", policy.REQUIRED_RENDERER_TESTS[name])
+
+    @staticmethod
+    def complete_file_gate():
+        qa = runner.REPOSITORY_ROOT / "tools/qa"
+        with mock.patch.object(sys, "path", [str(qa), *sys.path]):
+            spec = importlib.util.spec_from_file_location(
+                "code_only_complete_file_gate", qa / "bil39_full_suite_files.py")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+        return module
+
+    def test_actual_eight_shard_verifier_rejects_each_missing_renderer_execution(self):
+        full = self.complete_file_gate()
+        files = full.inventory(runner.REPOSITORY_ROOT)
+        actual_files = {p.relative_to(runner.REPOSITORY_ROOT).as_posix()
+                        for p in (runner.REPOSITORY_ROOT / "test").rglob("*_test.dart")}
+        self.assertEqual(set(files), actual_files)
+        self.assertGreater(len(files), 1500)
+        sha = "a" * 40  # Synthetic verifier fixtures, never CI execution evidence.
+        with tempfile.TemporaryDirectory(prefix="bil-required-renderer-receipts-") as folder:
+            artifacts = Path(folder)
+            receipts = {}
+            for index in range(8):
+                target = artifacts / str(index)
+                target.mkdir()
+                plan = full.plan(files, sha=sha, index=index, total=8)
+                (target / "plan.json").write_text(json.dumps(plan), encoding="utf-8")
+                receipt = {"source_sha": sha, "status": "PASS", "process_exit": 0,
+                           "protocol_success": True, "error_events": 0, "in_progress": [],
+                           "unexpected_skips": [], "counts": {"success": len(plan["files"]), "failure": 0, "error": 0},
+                           "files": {name: {"success": 1} for name in plan["files"]}}
+                receipts[index] = receipt
+                (target / "receipt.json").write_text(json.dumps(receipt), encoding="utf-8")
+            self.assertEqual(full.verify(runner.REPOSITORY_ROOT, artifacts, sha=sha, total=8)["status"], "PASS")
+            for name in self.REQUIRED_RENDERER_FILES:
+                with self.subTest(file=name):
+                    matches = [i for i, receipt in receipts.items() if name in receipt["files"]]
+                    self.assertEqual(len(matches), 1)
+                    index = matches[0]
+                    broken = {**receipts[index], "files": dict(receipts[index]["files"])}
+                    del broken["files"][name]
+                    path = artifacts / str(index) / "receipt.json"
+                    path.write_text(json.dumps(broken), encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "Actual executed files differ"):
+                        full.verify(runner.REPOSITORY_ROOT, artifacts, sha=sha, total=8)
+                    path.write_text(json.dumps(receipts[index]), encoding="utf-8")
+
+    def test_required_ci_executes_complete_plan_without_name_filters_and_requires_receipts(self):
+        source = (runner.REPOSITORY_ROOT / ".github/workflows/verify.yml").read_text(encoding="utf-8")
+        shards = source.split("\n  shards:\n", 1)[1].split("\n  integration-tools:", 1)[0]
+        command = shards.split("- name: Run complete Flutter test suite shard", 1)[1]
+        command = command.split("- name: Preserve exact-source", 1)[0]
+        self.assertIn("shard: [0, 1, 2, 3, 4, 5, 6, 7]", shards)
+        self.assertIn("bil39_full_suite_files.py", command)
+        self.assertIn("--total 8", command)
+        self.assertIn("ConvertFrom-Json).files", command)
+        self.assertIn("@bilTestFiles", command)
+        self.assertNotRegex(command, r"--(?:plain-name|name|exclude)(?:[=\s])")
+        self.assertIn("bil39_flutter_event_receipt.py", command)
+        self.assertIn("--test-exit $bilFlutterExit", command)
+        aggregate = source.split("\n  flutter:\n", 1)[1]
+        self.assertIn("needs: [source, p0, focused, broad, shards, integration-tools]", aggregate)
+        self.assertIn('$SHARDS_RESULT" != "success"', aggregate)
+        self.assertIn("bil39_full_suite_files.py", aggregate)
+        self.assertIn('--verify "$RUNNER_TEMP/bil39-full-coverage"', aggregate)
+
+    def test_code_only_plan_reports_mandatory_renderers_as_not_run_not_passed(self):
+        policy = runner.load_code_only_policy()
+        with tempfile.TemporaryDirectory(prefix="bil-code-only-plan-") as folder, \
+             mock.patch.object(policy, "EVIDENCE", Path(folder)), \
+             mock.patch.object(policy, "run_gate") as gate, \
+             mock.patch.object(sys, "argv", ["run_code_tests.py", "final", "--list-only"]), \
+             contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(policy.main(), 0)
+            plan = json.loads((Path(folder) / "final_test_plan.json").read_text())
+        gate.assert_not_called()
+        self.assertEqual(plan["required_renderer_in_complete_suite"], policy.REQUIRED_RENDERER_TESTS)
+        for name in self.REQUIRED_RENDERER_FILES:
+            self.assertIn(name, plan["NOT RUN"])
+            self.assertNotIn(name, plan["ordinary"])
 
 
 if __name__ == "__main__":

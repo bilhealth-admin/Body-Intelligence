@@ -46,38 +46,31 @@ abstract final class BilProgressPalette {
 
 /// Paints a static reference texture on the actual filled data region. The
 /// original Material indicator owns layout, keys, values and Semantics. A null
-/// value stays the original loading indicator; no ticker or task is added.
+/// value uses the shared neutral wait; measured values keep their data texture.
 class BilStripedProgress extends StatelessWidget {
   const BilStripedProgress({
     super.key,
     required this.child,
     this.tone,
     this.nutritionColors = false,
-  }) : _preserveDashboardWaiting = false;
+  });
 
+  /// Compatibility alias: unknown data never borrows the main splash style.
   const BilStripedProgress.dashboard({
     super.key,
     required this.child,
     this.tone,
     this.nutritionColors = false,
-  }) : _preserveDashboardWaiting = true;
+  });
 
   final ProgressIndicator child;
   final BilProgressTone? tone;
   final bool nutritionColors;
-  final bool _preserveDashboardWaiting;
 
   @override
   Widget build(BuildContext context) {
     final value = child.value;
     if (value == null) {
-      if (_preserveDashboardWaiting) {
-        return BilFeatureWelcomeStatus.splash(
-          key: child.key,
-          color: child.valueColor?.value ?? child.color,
-          label: child.semanticsLabel,
-        );
-      }
       return BilFeatureWelcomeStatus(
         key: child.key,
         color: child.valueColor?.value ?? child.color,

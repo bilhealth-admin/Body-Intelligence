@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
+import 'package:flutter/rendering.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
@@ -89,6 +91,7 @@ Widget _subject({
   required Locale locale,
   required double textScale,
   bool empty = false,
+  ThemeData? theme,
 }) {
   return ProviderScope(
     overrides: [
@@ -100,6 +103,7 @@ Widget _subject({
       ),
     ],
     child: MaterialApp(
+      theme: theme,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
@@ -136,7 +140,79 @@ Future<void> _loadReadableHealthSnapshot(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+double _labelContrast(Color foreground, Color background) {
+  final ink = Color.alphaBlend(foreground, background).computeLuminance();
+  final paper = background.computeLuminance();
+  return ink >= paper
+      ? (ink + .05) / (paper + .05)
+      : (paper + .05) / (ink + .05);
+}
+
 void main() {
+  for (final dark in [false, true]) {
+    for (final textScale in [1.0, 2.0]) {
+      testWidgets('real Dashboard Last sync contrast dark=$dark scale=$textScale', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(390, 1000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final base = dark ? BilFlagshipTheme.dark() : BilFlagshipTheme.light();
+        // Match the real Dashboard brand scope without changing its blue identity.
+        final theme = base.copyWith(
+          colorScheme: base.colorScheme.copyWith(
+            primary: const Color(0xFF2563EB),
+            primaryContainer: const Color(0xFFE4EDFF),
+          ),
+        );
+        try {
+          await tester.pumpWidget(
+            _subject(
+              locale: const Locale('en'),
+              textScale: textScale,
+              theme: theme,
+            ),
+          );
+          await _loadReadableHealthSnapshot(tester);
+          final sync = find.byKey(const Key('dashboard-fitness-last-sync'));
+          expect(sync, findsOneWidget);
+          final label = find
+              .descendant(of: sync, matching: find.byType(Text))
+              .first;
+          final ink = tester
+              .renderObject<RenderParagraph>(label)
+              .text
+              .style!
+              .color!;
+          final context = tester.element(label);
+          // Read the actual painted PremiumSurface gradient, not a copied palette.
+          final surface = tester.widget<AnimatedContainer>(
+            find
+                .descendant(
+                  of: find.byKey(const Key('connected-health-card')),
+                  matching: find.byType(AnimatedContainer),
+                )
+                .first,
+          );
+          final backgrounds =
+              (surface.decoration! as BoxDecoration).gradient!.colors;
+          for (final background in backgrounds) {
+            expect(_labelContrast(ink, background), greaterThanOrEqualTo(4.5));
+          }
+          expect(
+            Theme.of(context).colorScheme.primary,
+            const Color(0xFF2563EB),
+          );
+          if (!dark) expect(ink, const Color(0xFF2563EB));
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        }
+      });
+    }
+  }
+
   testWidgets('empty dashboard widget shows only the external link control', (
     tester,
   ) async {

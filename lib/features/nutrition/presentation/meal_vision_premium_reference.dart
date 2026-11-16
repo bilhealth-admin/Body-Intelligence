@@ -191,17 +191,19 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
     );
     final edit = OutlinedButton.icon(
       key: const Key('premium-vision-edit-ingredients'),
-      onPressed: () {
-        final target = _ingredientsAnchor.currentContext;
-        if (target != null) {
-          Scrollable.ensureVisible(
-            target,
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 250),
-          );
-        }
-      },
+      onPressed: _confirming
+          ? null
+          : () {
+              final target = _ingredientsAnchor.currentContext;
+              if (target != null) {
+                Scrollable.ensureVisible(
+                  target,
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 250),
+                );
+              }
+            },
       icon: const Icon(Icons.tune_rounded, size: 18),
       label: Text(_word(context, 'Edit ingredients', 'تعديل المكونات')),
       style: OutlinedButton.styleFrom(
@@ -231,7 +233,35 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
             '${_word(context, 'Selected ingredients: ', 'المكونات المحددة: ')}$count · ${_word(context, 'Nothing saved yet', 'لم يُحفظ شيء بعد')}',
             style: TextStyle(color: _secondary(context), fontSize: 10),
           ),
-          if (!enabled)
+          if (_matchMessage != null)
+            Semantics(
+              key: const Key('premium-vision-match-issue'),
+              liveRegion: true,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  _matchMessage!,
+                  style: TextStyle(color: _secondary(context), fontSize: 12),
+                ),
+              ),
+            ),
+          if (_confirming)
+            Padding(
+              key: const Key('premium-vision-matching-status'),
+              padding: const EdgeInsets.only(top: 6),
+              child: Row(
+                children: [
+                  const BilFeatureWelcomeStatus(),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _word(context, 'Match ingredients', 'مطابقة المكونات'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (!enabled && !_confirming)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(

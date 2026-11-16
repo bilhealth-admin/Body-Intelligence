@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_rollout_manifest.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'coach_review_actions_regression_test.dart' as harness;
+import '../../support/meal_vision_image_fixtures.dart';
 
 class RecordingPicker extends ImagePicker {
   int calls = 0;
@@ -43,8 +45,10 @@ class RecordingPicker extends ImagePicker {
 class RecordingAnalysis extends MealImageAnalysisService {
   RecordingAnalysis(String locale) : super(requestedLocale: locale);
   XFile? received;
+  int calls = 0;
   @override
   Future<MealImageAnalysis> analyze(XFile image) async {
+    calls++;
     received = image;
     return parseMealImageResponse(
       jsonEncode({
@@ -77,6 +81,20 @@ final cameraButton = find.byKey(const Key('ai-coach-food-image-button'));
 final galleryOption = find.byKey(const Key('ai-coach-image-source-gallery'));
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  const cleanupChannels = ['bil/tts', 'bil/speech', 'bil/mic_sound'];
+  setUpAll(() {
+    for (final name in cleanupChannels) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannel(name), (_) async => null);
+    }
+  });
+  tearDownAll(() {
+    for (final name in cleanupChannels) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(MethodChannel(name), null);
+    }
+  });
   for (final tag in BilLocaleRolloutManifest.releaseTargets25) {
     test('source picker and deletion selection stay in app locale $tag', () {
       final locale = BilLocalePolicy.localeFromTag(tag);
@@ -213,7 +231,19 @@ void main() {
         final db = AppDatabase.forTesting(NativeDatabase.memory());
         addTearDown(db.close);
         final picker = RecordingPicker();
-        final image = XFile('selected-local-photo.jpg');
+        final folder = await tester.runAsync(
+          () => Directory.systemTemp.createTemp('bil-coach-review-photo-'),
+        );
+        final file = File('${folder!.path}/selected-local-photo.png');
+        await tester.runAsync(
+          () => file.writeAsBytes(validMealVisionPngBytes()),
+        );
+        addTearDown(() async {
+          await harness.unmount(tester);
+          if (await file.exists()) await file.delete();
+          if (await folder.exists()) await folder.delete();
+        });
+        final image = XFile(file.path);
         picker.result.complete(image);
         RecordingAnalysis? service;
         await harness.mount(
@@ -224,17 +254,26 @@ void main() {
           imagePicker: picker,
           imageAnalysis: (locale) => service = RecordingAnalysis(locale),
         );
+        addTearDown(() => harness.unmount(tester));
         await tester.tap(cameraButton);
         await tester.pumpAndSettle();
         await tester.tap(galleryOption);
         await tester.pumpAndSettle();
         expect(service!.received, same(image));
+        expect(service!.calls, 1);
         expect(service!.requestedLocale, arabic ? 'ar' : 'en');
         // A regular Dialog hosts the premium review at phone widths.
         expect(
           find.byKey(const Key('premium-vision-render-surface')),
           findsOneWidget,
         );
+        final originalPhoto = find.byKey(const Key('premium-vision-photo'));
+        expect(originalPhoto, findsOneWidget);
+        final preview = tester.widget<Image>(
+          find.descendant(of: originalPhoto, matching: find.byType(Image)),
+        );
+        expect(preview.image, isA<FileImage>());
+        expect((preview.image as FileImage).file.path, image.path);
         expect(
           find
               .descendant(

@@ -210,7 +210,9 @@ class _LoginPageState extends State<LoginPage> {
             _AuthTopBar(
               title: authEntryText(context, AuthEntryCopyKey.signIn),
               backKey: const Key('login-back'),
-              onBack: () => context.go('/account-gateway'),
+              onBack: () => context.canPop()
+                  ? context.pop()
+                  : context.go('/account-gateway'),
             ),
             Expanded(
               child: LayoutBuilder(

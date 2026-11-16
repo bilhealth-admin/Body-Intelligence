@@ -36,6 +36,7 @@ bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
       snapshot.status == ConnectedHealthStatus.degraded &&
       snapshot.lastSyncAt != null &&
       (snapshot.failureCode == 'health_sync_timed_out' ||
+          snapshot.failureCode == 'health_history_sync_incomplete' ||
           snapshot.failureCode == 'health_cached_snapshot_pending_refresh' ||
           snapshot.failureCode == 'native_health_status_unavailable' ||
           snapshot.failureCode ==

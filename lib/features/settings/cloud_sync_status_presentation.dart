@@ -52,13 +52,17 @@ class CloudSyncStatusLine extends StatelessWidget {
                 ? context.strings.text(CloudSyncConsentCopy.localAction)
                 : _tr(
                     context,
-                    status.reason == 'conflict_review_required'
+                    status.reason == 'progress_conflict_unresolved'
+                        ? 'Sync status needs verification. Try again.'
+                        : status.reason == 'conflict_review_required'
                         ? 'Review backup conflicts.'
                         : status.reason == 'server_unsupported' ||
                               status.reason == 'server_or_consent_unavailable'
                         ? 'This server cannot currently restore the selected data.'
                         : 'Some data is still pending. Retry synchronization.',
-                    status.reason == 'conflict_review_required'
+                    status.reason == 'progress_conflict_unresolved'
+                        ? 'تحتاج حالة المزامنة إلى تحقق؛ حاول مجددًا.'
+                        : status.reason == 'conflict_review_required'
                         ? 'راجع تعارضات النسخة الاحتياطية.'
                         : status.reason == 'server_unsupported' ||
                               status.reason == 'server_or_consent_unavailable'
@@ -180,6 +184,12 @@ String cloudManualSyncOutcomeText(
         'المزامنة السحابية غير متاحة مؤقتًا؛ تبقى بياناتك المحلية على هذا الجهاز.',
       );
     case CloudManualSyncDisposition.partial:
+      if (result.reason == 'progress_conflict_unresolved') {
+        return tr(
+          'Sync status needs verification. Try again.',
+          'تحتاج حالة المزامنة إلى تحقق؛ حاول مجددًا.',
+        );
+      }
       if (result.reason == 'conflict_review_required') {
         return tr(
           'Some records conflict. Review backup conflicts to finish syncing.',

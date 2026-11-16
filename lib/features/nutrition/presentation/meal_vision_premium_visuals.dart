@@ -43,27 +43,30 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
         key: const Key('premium-vision-photo'),
         onTap: () => showDialog<void>(
           context: context,
-          builder: (zoomContext) => BilPearlMaterialDialog(
-            child: Stack(
-              children: [
-                InteractiveViewer(
-                  child: Image.file(
-                    File(path),
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) =>
-                        const Icon(Icons.broken_image_outlined),
+          builder: (zoomContext) => guardMealVisionReview(
+            lifetime: widget.lifetime,
+            child: BilPearlMaterialDialog(
+              child: Stack(
+                children: [
+                  InteractiveViewer(
+                    child: Image.file(
+                      File(path),
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) =>
+                          const Icon(Icons.broken_image_outlined),
+                    ),
                   ),
-                ),
-                PositionedDirectional(
-                  top: 4,
-                  end: 4,
-                  child: IconButton(
-                    tooltip: _word(context, 'Close photo', 'إغلاق الصورة'),
-                    onPressed: () => Navigator.pop(zoomContext),
-                    icon: const Icon(Icons.close_rounded),
+                  PositionedDirectional(
+                    top: 4,
+                    end: 4,
+                    child: IconButton(
+                      tooltip: _word(context, 'Close photo', 'إغلاق الصورة'),
+                      onPressed: () => Navigator.pop(zoomContext),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

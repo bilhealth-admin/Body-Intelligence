@@ -1,6 +1,8 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,6 +14,226 @@ void main() {
   });
 
   tearDown(() => database.close());
+
+  Future<MealWithItems> sourceDiary(DateTime date) async {
+    final meals = MealRepository(database);
+    await meals.addQuickMacroEntry(
+      date: date,
+      mealType: 'breakfast',
+      calories: 174,
+      protein: 10,
+      carbohydrates: 20,
+      fat: 6,
+      caloriesKnown: true,
+      proteinKnown: true,
+      carbohydratesKnown: true,
+      fatKnown: true,
+    );
+    return (await meals.watchMealsForDate(date).first).single;
+  }
+
+  Future<List<Object?>> diaryRows() async => [
+    for (final row in await database.select(database.meals).get()) row.toJson(),
+    for (final row in await database.select(database.mealItems).get())
+      row.toJson(),
+  ];
+
+  Map<String, dynamic> evidenceSnapshot(MealItem item) =>
+      Map.of(item.toJson())..removeWhere(
+        (key, _) => const {
+          'id',
+          'uuid',
+          'mealId',
+          'createdAt',
+          'updatedAt',
+          'revision',
+          'syncStatus',
+          'deletedAt',
+        }.contains(key),
+      );
+
+  test(
+    'copy fills an existing empty bucket without replacing its metadata',
+    () async {
+      final meals = MealRepository(database);
+      final source = await sourceDiary(DateTime(2026, 10, 26));
+      final target = DateTime(2026, 10, 27);
+      final bucketId = await meals.createMeal(
+        date: target,
+        name: 'My empty breakfast',
+        type: 'breakfast',
+      );
+      final before = await database.select(database.meals).get();
+      final bucket = before.singleWhere((m) => m.id == bucketId);
+
+      expect(
+        await meals.copyDay(
+          sourceDate: source.meal.date,
+          destinationDate: target,
+        ),
+        1,
+      );
+
+      final copied = (await meals.watchMealsForDate(target).first).single;
+      expect(copied.meal.toJson(), bucket.toJson());
+      expect(copied.items, hasLength(1));
+      expect(
+        evidenceSnapshot(copied.items.single),
+        evidenceSnapshot(source.items.single),
+      );
+      expect(copied.items.single.uuid, isNot(source.items.single.uuid));
+      expect(await database.select(database.meals).get(), hasLength(2));
+    },
+  );
+
+  test(
+    'copy ignores empty source buckets and preserves destination tombstones',
+    () async {
+      final meals = MealRepository(database);
+      final source = await sourceDiary(DateTime(2026, 10, 26));
+      await meals.createMeal(
+        date: source.meal.date,
+        name: 'Empty lunch',
+        type: 'lunch',
+      );
+      final target = DateTime(2026, 10, 27);
+      final removed = await sourceDiary(target);
+      await meals.deleteMealItem(removed.items.single.id);
+      final deleted = (await database.select(database.mealItems).get())
+          .singleWhere((i) => i.id == removed.items.single.id);
+
+      expect(
+        await meals.copyDay(
+          sourceDate: source.meal.date,
+          destinationDate: target,
+        ),
+        1,
+      );
+
+      final targetMeals = await meals.watchMealsForDate(target).first;
+      expect(targetMeals, hasLength(1));
+      expect(targetMeals.single.meal.id, removed.meal.id);
+      expect(targetMeals.single.items, hasLength(1));
+      expect(
+        evidenceSnapshot(targetMeals.single.items.single),
+        evidenceSnapshot(source.items.single),
+      );
+      final afterDeleted = (await database.select(database.mealItems).get())
+          .singleWhere((i) => i.id == deleted.id);
+      expect(afterDeleted.toJson(), deleted.toJson());
+    },
+  );
+
+  test(
+    'multi-day copy accepts empty headers but never overwrites an active entry',
+    () async {
+      final meals = MealRepository(database);
+      final source = await sourceDiary(DateTime(2026, 10, 26));
+      final targets = [DateTime(2026, 10, 27), DateTime(2026, 10, 28)];
+      for (final date in targets) {
+        await meals.createMeal(
+          date: date,
+          name: 'Empty breakfast',
+          type: 'breakfast',
+        );
+      }
+      final result = await meals.copyDayToDates(
+        sourceDate: source.meal.date,
+        destinationDates: targets,
+      );
+      expect(result.values, everyElement(1));
+      final before = await diaryRows();
+      await expectLater(
+        meals.copyDayToDates(
+          sourceDate: source.meal.date,
+          destinationDates: [DateTime(2026, 10, 29), targets.last],
+        ),
+        throwsStateError,
+      );
+      expect(await diaryRows(), before);
+    },
+  );
+
+  test(
+    'multi-day copy preserves closed empty days and rolls back every destination',
+    () async {
+      final meals = MealRepository(database);
+      final source = await sourceDiary(DateTime(2026, 10, 26));
+      final open = DateTime(2026, 10, 27);
+      final closed = DateTime(2026, 10, 28);
+      final daily = DailyLogRepository(database);
+      await daily.startDay(closed);
+      await daily.closeDay(closed);
+      final before = await diaryRows();
+
+      await expectLater(
+        meals.copyDayToDates(
+          sourceDate: source.meal.date,
+          destinationDates: [open, closed],
+        ),
+        throwsA(
+          isA<CoachMealConflict>().having(
+            (error) => error.reason,
+            'reason',
+            CoachMealConflictReason.closedDay,
+          ),
+        ),
+      );
+      expect(await diaryRows(), before);
+      expect((await daily.readLedger(closed)).state, DayLifecycleState.closed);
+    },
+  );
+
+  test(
+    'copy preserves separate legacy source buckets sharing the same meal type',
+    () async {
+      final meals = MealRepository(database);
+      final source = await sourceDiary(DateTime(2026, 10, 26));
+      final secondSourceId = await database
+          .into(database.meals)
+          .insert(
+            MealsCompanion.insert(
+              date: source.meal.date,
+              dayKey: source.meal.dayKey,
+              name: const Value('Second legacy breakfast'),
+              type: const Value('breakfast'),
+            ),
+          );
+      await meals.addMealItem(
+        mealId: secondSourceId,
+        foodId: source.items.single.foodId,
+        quantity: 1,
+      );
+      final target = DateTime(2026, 10, 27);
+      final targetId = await meals.createMeal(
+        date: target,
+        name: 'Existing empty breakfast',
+        type: 'breakfast',
+      );
+      final original = (await database.select(database.meals).get())
+          .singleWhere((m) => m.id == targetId);
+
+      expect(
+        await meals.copyDay(
+          sourceDate: source.meal.date,
+          destinationDate: target,
+        ),
+        2,
+      );
+
+      final copied = await meals.watchMealsForDate(target).first;
+      expect(copied, hasLength(2));
+      expect(copied.map((m) => m.items.length), everyElement(1));
+      expect(
+        copied.singleWhere((m) => m.meal.id == targetId).meal.toJson(),
+        original.toJson(),
+      );
+      expect(
+        copied.singleWhere((m) => m.meal.id != targetId).meal.name,
+        'Second legacy breakfast',
+      );
+    },
+  );
 
   test(
     'food access ranks favorites then frequency deterministically',

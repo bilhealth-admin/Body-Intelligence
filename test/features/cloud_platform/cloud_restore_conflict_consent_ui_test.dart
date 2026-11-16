@@ -1,3 +1,6 @@
+import 'package:body_intelligence_log/features/cloud_platform/presentation/cloud_restore_scope_controls.dart';
+import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_sync_providers.dart';
+import 'package:body_intelligence_log/features/cloud_platform/services/cloud_sync_consent_repository.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy_cloud_restore.dart';
@@ -17,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
+  _knownBaseOffRenderRegressionTests();
   for (final scopes in [
     <CloudRestoreScope>{},
     {CloudRestoreScope.goals},
@@ -279,4 +283,115 @@ Future<int Function()> _pumpConsentState(
     ),
   );
   return () => engineReads;
+}
+
+void _knownBaseOffRenderRegressionTests() {
+  for (final (granted, matchesOwner) in [
+    (false, true),
+    (true, true),
+    (false, false),
+  ]) {
+    testWidgets(
+      'current base off outranks unavailable V2 without inventing support: $granted/$matchesOwner',
+      (tester) async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(db.close);
+        try {
+          var reviewReads = 0;
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                cloudAuthOwnerIdProvider.overrideWith(
+                  (ref) => Stream.value('fixture-owner'),
+                ),
+                cloudSyncConsentStateProvider.overrideWith(
+                  (ref) async => CloudSyncConsentState(
+                    availability: CloudSyncConsentAvailability.available,
+                    ownerId: matchesOwner ? 'fixture-owner' : 'different-owner',
+                    granted: granted,
+                  ),
+                ),
+                cloudRestoreConsentStateProvider.overrideWith(
+                  (ref) async => const CloudRestoreConsentState(
+                    availability: CloudRestoreConsentAvailability.unavailable,
+                    ownerId: 'fixture-owner',
+                  ),
+                ),
+                cloudRestoreConflictServiceProvider.overrideWithValue(
+                  CloudRestoreConflictService(() async {
+                    reviewReads++;
+                    throw StateError(
+                      'No server operation permitted by this test',
+                    );
+                  }),
+                ),
+                cloudManualSyncStatusProvider.overrideWith(
+                  (ref) => CloudManualSyncStatusController(
+                    preferences: PreferencesRepository(db),
+                    cloudAvailable: true,
+                    ownerId: 'fixture-owner',
+                    runSync: () async => const CloudManualSyncResult(
+                      disposition: CloudManualSyncDisposition.unavailable,
+                    ),
+                  ),
+                ),
+              ],
+              child: const MaterialApp(
+                home: Scaffold(
+                  body: Column(
+                    children: [
+                      CloudRestoreScopeControls(),
+                      CloudRestoreConflictControls(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final knownOff = !granted && matchesOwner;
+          expect(
+            find.text(
+              knownOff
+                  ? CloudRestoreCopy.baseRequired
+                  : CloudRestoreCopy.unavailable,
+            ),
+            findsNWidgets(3),
+          );
+          expect(
+            find.text(
+              knownOff
+                  ? CloudRestoreCopy.unavailable
+                  : CloudRestoreCopy.baseRequired,
+            ),
+            findsNothing,
+          );
+          expect(
+            find.byKey(const Key('cloud-restore-refresh')),
+            knownOff ? findsNothing : findsOneWidget,
+          );
+          for (final scope in CloudRestoreScope.values) {
+            expect(
+              tester
+                  .widget<SwitchListTile>(
+                    find.byKey(Key('cloud-restore-${scope.name}-consent')),
+                  )
+                  .onChanged,
+              isNull,
+            );
+          }
+          final review = find.byKey(
+            const Key('cloud-restore-review-conflicts'),
+          );
+          expect(tester.widget<ListTile>(review).onTap, isNull);
+          await tester.tap(review);
+          await tester.pump();
+          expect(reviewReads, 0);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox());
+        }
+      },
+    );
+  }
 }

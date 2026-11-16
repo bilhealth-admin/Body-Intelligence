@@ -5,6 +5,7 @@ import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/app_database.dart';
@@ -26,6 +27,7 @@ import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'widgets/weight_trend_painter.dart';
 part 'widgets/history_page_components.dart';
+part 'widgets/weight_history_entry_dialog.dart';
 
 class HistoryPage extends ConsumerWidget {
   const HistoryPage({super.key});
@@ -35,6 +37,10 @@ class HistoryPage extends ConsumerWidget {
     WidgetRef ref, [
     WeightEntry? entry,
   ]) async {
+    final repository = ref.read(weightRepositoryProvider);
+    bool current() =>
+        context.mounted &&
+        identical(repository, ref.read(weightRepositoryProvider));
     final system =
         ref.read(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final currentWeight = ref.read(effectiveCurrentWeightProvider);
@@ -67,11 +73,27 @@ class HistoryPage extends ConsumerWidget {
                         minimum: UnitConverter.weightFromKg(20, system),
                         maximum: UnitConverter.weightFromKg(350, system),
                         step: UnitConverter.weightStep(system),
-                        decimalPlaces: 1,
+                        decimalPlaces: 2,
                         unit: UnitConverter.weightUnit(system),
                         label: context.strings.text('Weight'),
                         onChanged: (next) =>
                             setDialogState(() => displayed = next),
+                        onEdit: () async {
+                          final next = await showDialog<double>(
+                            context: dialogContext,
+                            builder: (_) => _WeightTextEntryDialog(
+                              value: displayed,
+                              minimum: UnitConverter.weightFromKg(20, system),
+                              maximum: UnitConverter.weightFromKg(350, system),
+                              unit: UnitConverter.weightUnit(system),
+                            ),
+                          );
+                          if (next != null &&
+                              dialogContext.mounted &&
+                              current()) {
+                            setDialogState(() => displayed = next);
+                          }
+                        },
                       ),
                       const SizedBox(height: 8),
                       Align(
@@ -126,6 +148,7 @@ class HistoryPage extends ConsumerWidget {
                       ),
                       DropdownButtonFormField<String>(
                         initialValue: measurementContext,
+                        isExpanded: true,
                         decoration: InputDecoration(
                           labelText: context.strings.text(
                             'Measurement conditions',
@@ -134,15 +157,22 @@ class HistoryPage extends ConsumerWidget {
                         items:
                             const [
                                   'morning',
+                                  'afterFood',
                                   'afterBathroom',
                                   'beforeFoodDrink',
                                   'differentConditions',
+                                  'unspecified',
                                 ]
                                 .map(
                                   (contextValue) => DropdownMenuItem(
                                     value: contextValue,
                                     child: Text(
-                                      context.strings.text(contextValue),
+                                      _weightConditionLabel(
+                                        context,
+                                        contextValue,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 )
@@ -178,8 +208,7 @@ class HistoryPage extends ConsumerWidget {
             ),
           ),
         );
-    if (value == null) return;
-    final repository = ref.read(weightRepositoryProvider);
+    if (value == null || !current()) return;
     try {
       if (entry == null) {
         await repository.addWeight(
@@ -215,30 +244,34 @@ class HistoryPage extends ConsumerWidget {
     WidgetRef ref,
     WeightEntry entry,
   ) async {
+    final repository = ref.read(weightRepositoryProvider);
+    bool current() =>
+        context.mounted &&
+        identical(repository, ref.read(weightRepositoryProvider));
     final system =
         ref.read(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final displayed = UnitConverter.weightFromKg(entry.weight, system);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => BilPearlMaterialAlertDialog(
+      builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(context.strings.text('Delete weight?')),
         content: Text(
-          '${context.strings.text('Delete')} ${displayed.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} ${context.strings.text('from history?')}',
+          '${context.strings.text('Delete')} ${_historyWeightText(displayed)} ${UnitConverter.weightUnit(system)} ${context.strings.text('from history?')}',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(context.strings.text('Delete')),
           ),
         ],
       ),
     );
-    if (confirmed == true) {
-      await ref.read(weightRepositoryProvider).deleteWeight(entry.id);
+    if (confirmed == true && current()) {
+      await repository.deleteWeight(entry.id);
     }
   }
 
@@ -421,7 +454,7 @@ class HistoryPage extends ConsumerWidget {
                         shape: BoxShape.rectangle,
                       ),
                       title: Text(
-                        '${UnitConverter.weightFromKg(entry.weight, system).toStringAsFixed(1)} $unit',
+                        '${_historyWeightText(UnitConverter.weightFromKg(entry.weight, system))} $unit',
                       ),
                       subtitle: Text(
                         '${entry.date.year}-${entry.date.month.toString().padLeft(2, '0')}-${entry.date.day.toString().padLeft(2, '0')}',

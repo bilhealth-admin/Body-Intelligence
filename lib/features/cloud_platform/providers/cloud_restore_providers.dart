@@ -5,6 +5,7 @@ import '../../../app/environment/app_environment.dart';
 import '../../../data/database/database_provider.dart';
 import '../services/cloud_restore_consent_local_store.dart';
 import '../services/cloud_restore_consent_repository.dart';
+import '../services/cloud_sync_consent_repository.dart';
 import 'cloud_sync_providers.dart';
 
 final cloudRestoreConsentRepositoryProvider =
@@ -43,3 +44,22 @@ final cloudRestoreConsentStateProvider =
       }
       return ref.watch(cloudRestoreConsentRepositoryProvider).read();
     });
+
+/// Presentation only: an authoritative current-owner opt-out outranks V2 errors.
+/// This does not supply a grant, capability, receipt or transport authority.
+final cloudRestoreBaseConsentOffProvider = Provider<bool>((ref) {
+  final owner = ref.watch(cloudAuthOwnerIdProvider);
+  final consent = ref.watch(cloudSyncConsentStateProvider);
+  if (owner.isLoading ||
+      owner.hasError ||
+      consent.isLoading ||
+      consent.hasError) {
+    return false;
+  }
+  final ownerId = owner.value;
+  final state = consent.value;
+  return ownerId != null &&
+      state?.ownerId == ownerId &&
+      state?.availability == CloudSyncConsentAvailability.available &&
+      state?.granted == false;
+});

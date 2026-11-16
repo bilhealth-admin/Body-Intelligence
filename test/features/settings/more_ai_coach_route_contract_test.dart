@@ -415,6 +415,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // Account identity is resolved; only credit access is pending.
+          verifiedEntitlementOwnerProvider.overrideWith(
+            (_) => Stream<String?>.value('qa-owner'),
+          ),
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue('qa-owner'),
           verifiedSubscriptionStateProvider.overrideWithValue(
             const AsyncLoading(),
           ),

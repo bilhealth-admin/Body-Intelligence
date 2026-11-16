@@ -21,6 +21,10 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   private let activeReadLock = NSLock()
   private var activeReadResult: FlutterResult?
   private var activeReadQueries: [HKQuery] = []
+  private var activeLatestReadID: UUID?
+  private var activeLatestReadResult: FlutterResult?
+  private var activeLatestReadQueries: [HKQuery] = []
+  private static let latestSleepSampleLimit = 1000
   private var backgroundObserver: NSObjectProtocol?
 
   init(store: HKHealthStore = HKHealthStore(), channelName: String = "bil/apple_health") {
@@ -35,6 +39,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       self?.cancelActiveReadChanges(
         message: "HealthKit reading stopped because the app entered the background."
       )
+      self?.cancelLatestSignals()
     }
   }
 
@@ -43,6 +48,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       NotificationCenter.default.removeObserver(backgroundObserver)
     }
     _ = cancelActiveReadChanges(message: "HealthKit bridge was released.")
+    cancelLatestSignals()
   }
 
   static func register(with registrar: FlutterPluginRegistrar) {
@@ -99,6 +105,11 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       ])
     case "readDailyTotals":
       readDailyTotals(arguments: call.arguments, result: result)
+    case "readLatestSignals":
+      readLatestSignals(arguments: call.arguments, result: result)
+    case "cancelLatestSignals":
+      cancelLatestSignals()
+      result(nil)
     case "write":
       write(arguments: call.arguments, result: result)
     case "delete":
@@ -316,6 +327,168 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       callback(self.error("read_cancelled", message))
     }
     return true
+  }
+
+  /// Recent measurements must not wait behind the year-long anchored backfill.
+  /// This foreground-only snapshot never changes that import's anchors. Sleep
+  /// returns every measured stage in the recent window, or fails as a whole if
+  /// its bounded result would truncate a night; Dart merges overlapping stages.
+  private func readLatestSignals(arguments: Any?, result: @escaping FlutterResult) {
+    guard HKHealthStore.isHealthDataAvailable() else {
+      result(error("unavailable", "HealthKit is unavailable on this device.")); return
+    }
+    guard UIApplication.shared.applicationState != .background else {
+      result(error("read_cancelled", "HealthKit foreground reading is suspended.")); return
+    }
+    activeReadLock.lock()
+    guard activeLatestReadID == nil else {
+      activeReadLock.unlock()
+      result(error("read_in_progress", "A recent HealthKit read is already in progress.")); return
+    }
+    let readID = UUID()
+    activeLatestReadID = readID
+    activeLatestReadResult = result
+    activeLatestReadQueries = []
+    activeReadLock.unlock()
+
+    let args = arguments as? [String: Any]
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    let asOf = formatter.date(from: args?["asOf"] as? String ?? "") ?? Date()
+    guard let sleepWindowStart = Self.recentSleepWindowStart(asOf: asOf) else {
+      completeLatestRead(readID, value: error("invalid_date", "Could not resolve the recent sleep window."))
+      return
+    }
+    healthQueryQueue.async { [weak self] in
+      guard let self else { return }
+      let names = ["heartRate", "restingHeartRate", "sleep"]
+      var index = 0
+      var records: [[String: Any]] = []
+
+      func executeNext() {
+        guard self.isLatestReadActive(readID) else { return }
+        guard index < names.count else {
+          self.completeLatestRead(readID, value: records)
+          return
+        }
+        let name = names[index]
+        index += 1
+        guard let type = self.sampleType(name) else {
+          executeNext(); return
+        }
+        let isSleep = name == "sleep"
+        let windowStart = isSleep ? sleepWindowStart : asOf.addingTimeInterval(-30 * 60)
+        let dateOptions: HKQueryOptions = isSleep ? [.strictEndDate] : [.strictStartDate, .strictEndDate]
+        let datePredicate = HKQuery.predicateForSamples(
+          withStart: windowStart, end: asOf, options: dateOptions
+        )
+        // Exclude BIL before applying the result limit: own-app rows remain
+        // readable even without external read grants and cannot prove a link.
+        let externalSource = NSCompoundPredicate(notPredicateWithSubpredicate:
+          HKQuery.predicateForObjects(from: HKSource.default())
+        )
+        var predicates = [datePredicate, externalSource]
+        if isSleep {
+          let values: [Int]
+          if #available(iOS 16.0, *) {
+            values = [
+              HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+              HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+              HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+              HKCategoryValueSleepAnalysis.asleepREM.rawValue,
+            ]
+          } else {
+            values = [HKCategoryValueSleepAnalysis.asleep.rawValue]
+          }
+          predicates.append(NSCompoundPredicate(orPredicateWithSubpredicates:
+            values.map { HKQuery.predicateForCategorySamples(with: .equalTo, value: $0) }
+          ))
+        }
+        let query = HKSampleQuery(
+          sampleType: type,
+          predicate: NSCompoundPredicate(andPredicateWithSubpredicates: predicates),
+          limit: isSleep ? Self.latestSleepSampleLimit + 1 : 1,
+          sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]
+        ) { [weak self] _, samples, failure in
+          guard let self else { return }
+          self.healthQueryQueue.async {
+            guard self.isLatestReadActive(readID) else { return }
+            if let failure {
+              self.completeLatestRead(readID, value: self.error("latest_query_failed", failure.localizedDescription))
+              return
+            }
+            if isSleep && (samples?.count ?? 0) > Self.latestSleepSampleLimit {
+              self.completeLatestRead(readID, value: self.error(
+                "latest_sleep_limit_exceeded", "The recent sleep snapshot exceeded its safe sample limit."
+              ))
+              return
+            }
+            records.append(contentsOf: (samples ?? []).compactMap { sample -> [String: Any]? in
+              guard var row = self.serialize(sample: sample, logicalType: name) else { return nil }
+              if isSleep {
+                // The overlap predicate also matches an interval ending exactly
+                // at the lower bound; that belongs to the preceding night.
+                guard sample.endDate > sleepWindowStart else { return nil }
+                var attributes = row["attributes"] as? [String: Any] ?? [:]
+                attributes["latestSleepWindowStart"] = formatter.string(from: sleepWindowStart)
+                row["attributes"] = attributes
+              }
+              return row
+            })
+            executeNext()
+          }
+        }
+        self.activeReadLock.lock()
+        let active = self.activeLatestReadID == readID
+        if active { self.activeLatestReadQueries.append(query) }
+        // Register and execute under the same lock, so background cancellation
+        // cannot stop a registered query before it has actually been started.
+        if active { self.store.execute(query) }
+        self.activeReadLock.unlock()
+      }
+      executeNext()
+    }
+  }
+
+  private static func recentSleepWindowStart(asOf: Date) -> Date? {
+    let calendar = Calendar.current
+    let cutoff = asOf.addingTimeInterval(-72 * 60 * 60)
+    guard let noon = calendar.date(bySettingHour: 12, minute: 0, second: 0, of: cutoff) else {
+      return nil
+    }
+    return noon > cutoff ? calendar.date(byAdding: .day, value: -1, to: noon) : noon
+  }
+
+  private func isLatestReadActive(_ readID: UUID) -> Bool {
+    activeReadLock.lock(); defer { activeReadLock.unlock() }
+    return activeLatestReadID == readID
+  }
+
+  private func completeLatestRead(_ readID: UUID, value: Any?) {
+    activeReadLock.lock()
+    guard activeLatestReadID == readID else { activeReadLock.unlock(); return }
+    let callback = activeLatestReadResult
+    activeLatestReadID = nil
+    activeLatestReadResult = nil
+    activeLatestReadQueries = []
+    activeReadLock.unlock()
+    if let callback { DispatchQueue.main.async { callback(value) } }
+  }
+
+  private func cancelLatestSignals() {
+    activeReadLock.lock()
+    let callback = activeLatestReadResult
+    let queries = activeLatestReadQueries
+    activeLatestReadID = nil
+    activeLatestReadResult = nil
+    activeLatestReadQueries = []
+    activeReadLock.unlock()
+    for query in queries { store.stop(query) }
+    if let callback {
+      DispatchQueue.main.async {
+        callback(self.error("read_cancelled", "Recent HealthKit reading was cancelled."))
+      }
+    }
   }
 
   /// One-shot statistics, not an observer/background query. HealthKit merges

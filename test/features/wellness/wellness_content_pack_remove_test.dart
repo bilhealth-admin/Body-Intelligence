@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/features/wellness/domain/wellness_content_pack.dart';
 import 'package:body_intelligence_log/features/wellness/domain/workout_release_catalog_item.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_discovery_catalog_repository.dart';
 import 'package:body_intelligence_log/features/wellness/repositories/workout_release_catalog_repository.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_content_pack_manager.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_media_cache.dart';
@@ -136,6 +137,16 @@ void main() {
     final release = _loadApprovedWorkoutRelease();
     final approval = release.firstWhere((item) => item.canPlay);
     final category = approval.primaryGroupId;
+    final approvedPack =
+        jsonDecode(
+              File(
+                'artifacts/workout_media/cloudflare_runtime_v2/packs/bil-workouts-home-v1-v1.json',
+              ).readAsStringSync(),
+            )
+            as Map<String, dynamic>;
+    final approvedMedia = (approvedPack['items'] as List)
+        .cast<Map<String, dynamic>>()
+        .singleWhere((raw) => raw['id'] == approval.variationId)['media'];
     const packId = 'bil-workouts-home-v1';
     final packFile = File(p.join(packsDirectory.path, '$packId-1.json'));
     final item = <String, dynamic>{
@@ -164,20 +175,7 @@ void main() {
         'paid': true,
         'offline': true,
       },
-      'media': <String, dynamic>{
-        'image': _media(
-          'https://cdn.example.test/${approval.variationId}.webp',
-          'image/webp',
-          List<String>.filled(64, 'a').join(),
-          1000,
-        ),
-        'video': _media(
-          'https://cdn.example.test/${approval.objectPath}',
-          'video/mp4',
-          approval.expectedSha256!,
-          approval.expectedBytes!,
-        ),
-      },
+      'media': approvedMedia,
       'segments': <Map<String, dynamic>>[],
     };
     await packFile.writeAsString(
@@ -207,6 +205,13 @@ void main() {
       mediaCache: mediaCache,
       packsDirectory: packsDirectory,
       workoutReleaseLoader: () async => release,
+      workoutDiscoveryLoader: () async =>
+          const WorkoutDiscoveryCatalogRepository().parse(
+            File(
+              WorkoutDiscoveryCatalogRepository.assetPath,
+            ).readAsStringSync(),
+            release,
+          ),
     );
 
     final trusted = await manager.loadTrustedInstalledItems(

@@ -18,6 +18,17 @@ import shutil
 from run_gate import EVIDENCE, ROOT, run_gate
 
 
+# These real pixel assertions are mandatory in the complete local suite and
+# verify.yml's eight whole-file shards, whose aggregate verifies actual file
+# execution receipts. Code-only cannot claim to have executed these assertions.
+REQUIRED_RENDERER_TESTS = {
+    "test/features/dashboard/dashboard_discover_stability_test.dart":
+        "mandatory real Discover frame comparisons; required by verify.yml complete eight-shard execution receipts, NOT RUN only in code-only",
+    "test/shared/widgets/gray_wait_surface_visibility_test.dart":
+        "mandatory real indicator visibility and animation pixels; required by verify.yml complete eight-shard execution receipts, NOT RUN only in code-only",
+}
+
+
 NOT_RUN = {
     "test/bil_crystal_calendar_video_test.dart": "all cases emit actual calendar/video captures; required Crystal CI and the complete Flutter suite retain these tests",
     "test/bil_crystal_calendar_visual_test.dart": "all cases compare calendar golden pixels; required Crystal CI and the complete Flutter suite retain these tests",
@@ -46,6 +57,10 @@ NOT_RUN = {
     "test/dashboard_polish/live_health_watch_layout_golden_test.dart": "pixel comparison",
     "test/release_metadata_test.dart": "combined metadata and image content comparison; reviewed statically instead",
     "test/splash_video_contract_test.dart": "binary video and fallback image validation",
+    "test/features/dashboard/dashboard_discover_stability_test.dart":
+        REQUIRED_RENDERER_TESTS["test/features/dashboard/dashboard_discover_stability_test.dart"],
+    "test/shared/widgets/gray_wait_surface_visibility_test.dart":
+        REQUIRED_RENDERER_TESTS["test/shared/widgets/gray_wait_surface_visibility_test.dart"],
 }
 
 # Negative matches are limited to the reviewed visual test names in these files.
@@ -98,6 +113,16 @@ ENV_CAPTURE_GUARDED = {
 # portable partition. Only PNG output is opt-in via a directory-valued variable.
 # Unset those variables: the string "0" would itself be a valid output directory.
 ENV_CAPTURE_DIRECTORIES = {
+    "test/features/commerce/personal_plan_gate_refresh_presentation_test.dart": "BIL_PREMIUM_CAPTURE_DIR",
+    "test/features/community/community_profile_relationship_flow_test.dart": "BIL_REFERENCE_CAPTURE_DIR",
+    "test/features/daily_log/daily_entry_theme_contrast_test.dart": "BIL_ENTRY_THEME_CAPTURE_DIR",
+    "test/features/intelligence_center/coach_overview_access_stability_test.dart": "BIL_PREMIUM_CAPTURE_DIR",
+    "test/features/intelligence_center/coach_overview_header_clearance_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+    "test/features/intelligence_center/coach_overview_plan_label_refresh_test.dart": "BIL_PREMIUM_CAPTURE_DIR",
+    "test/features/profile/dietary_plan_navigation_widget_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+    "test/features/settings/health_sources_nutrition_targets_localization_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+    "test/shared/widgets/bil_mobile_page_intro_contrast_test.dart": "BIL_UI_BATCH_CAPTURE_DIR",
+    "test/shared/widgets/chat_history_viewport_first_paint_test.dart": "BIL_CHAT_VIEWPORT_EVIDENCE_DIR",
     "test/features/community/community_earn_composer_test.dart": "BIL_EARN_CAPTURE_DIR",
     "test/features/community/community_reference_navigation_test.dart": "BIL_NAVIGATION_CAPTURE_DIR",
     "test/shared/bil_reference_navigation_test.dart": "BIL_NAVIGATION_CAPTURE_DIR",
@@ -108,6 +133,13 @@ ENV_CAPTURE_DIRECTORIES = {
     "test/qa_next/community_circles_reference_capture_test.dart": "BIL_CIRCLES_CAPTURE_DIR",
     "test/qa_next/community_chat_entry_capture_test.dart": "BIL_CHAT_CAPTURE_DIR",
     "test/parallel/bil07/community_channels_capture_widget_test.dart": "BIL07_CAPTURE_DIR",
+}
+# String.fromEnvironment treats both "false" and "0" as nonempty directories.
+# Override these exact optional PNG destinations with an explicit empty string.
+COMPILE_TIME_CAPTURE_DIRECTORIES = {
+    "test/features/settings/membership_navigation_stability_test.dart": "BIL_DASHBOARD_CAPTURE_DIR",
+    "test/features/smart_plan/bil_smart_plan_sources_test.dart": "BIL_DASHBOARD_CAPTURE_DIR",
+    "test/shared/widgets/bil_splash_capsule_layout_test.dart": "BIL_DASHBOARD_CAPTURE_DIR",
 }
 NON_VISUAL_BYTE_TESTS = {
     "test/features/community/community_image_privacy_test.dart":
@@ -138,10 +170,11 @@ def flutter_test_command(flutter: str) -> list[str]:
     # must not accidentally enable capture in their child Flutter processes.
     for flag in ENV_CAPTURE_GUARDED.values():
         os.environ[flag] = "0"
-    for flag in ENV_CAPTURE_DIRECTORIES.values():
+    for flag in {*ENV_CAPTURE_DIRECTORIES.values(), *COMPILE_TIME_CAPTURE_DIRECTORIES.values()}:
         os.environ.pop(flag, None)
     return [str(dart), str(snapshot), 'test', '--no-pub', '--concurrency', '1', '--reporter', 'expanded',
-            *[f'--dart-define={flag}=false' for flag in sorted(set(CAPTURE_GUARDED.values()))]]
+            *[f'--dart-define={flag}=false' for flag in sorted(set(CAPTURE_GUARDED.values()))],
+            *[f'--dart-define={flag}=' for flag in sorted(set(COMPILE_TIME_CAPTURE_DIRECTORIES.values()))]]
 
 
 def discover() -> tuple[list[str], list[str]]:
@@ -149,6 +182,7 @@ def discover() -> tuple[list[str], list[str]]:
                        for p in (ROOT / "test").rglob("*_test.dart"))
     classifications = (set(NOT_RUN) | set(MIXED_NAMES) | set(CAPTURE_GUARDED)
                        | set(ENV_CAPTURE_GUARDED) | set(ENV_CAPTURE_DIRECTORIES)
+                       | set(COMPILE_TIME_CAPTURE_DIRECTORIES)
                        | set(NON_VISUAL_BYTE_TESTS))
     missing = classifications - set(all_tests)
     if missing:
@@ -178,7 +212,9 @@ def main() -> int:
             "mixed_name_filters": MIXED_NAMES, "NOT RUN": excluded,
             "capture_defines_forced_false": list(CAPTURE_GUARDED.values()),
             "capture_environment_forced_zero": sorted(set(ENV_CAPTURE_GUARDED.values())),
-            "capture_directories_unset": sorted(set(ENV_CAPTURE_DIRECTORIES.values()))}
+            "capture_directories_unset": sorted(set(ENV_CAPTURE_DIRECTORIES.values())),
+            "capture_directory_defines_forced_empty": sorted(set(COMPILE_TIME_CAPTURE_DIRECTORIES.values())),
+            "required_renderer_in_complete_suite": REQUIRED_RENDERER_TESTS}
     EVIDENCE.mkdir(parents=True, exist_ok=True)
     (EVIDENCE / f"{args.phase}_test_plan.json").write_text(
         json.dumps(plan, indent=2) + "\n", encoding="utf-8")

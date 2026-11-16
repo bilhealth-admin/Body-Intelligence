@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../../../../data/database/app_database.dart';
-import '../domain/community_food_contribution.dart';
 
 class CommunityFoodOutboxEntry {
   const CommunityFoodOutboxEntry({
@@ -24,25 +23,23 @@ class CommunityFoodOutboxStore {
 
   final AppDatabase _database;
 
-  Future<void> enqueueUpsert(CommunityFoodContribution contribution) {
+  /// Earlier builds queued ordinary private food saves without a food-specific
+  /// Community choice. Preserve that payload locally, but never replay it.
+  /// Explicit submissions use CommunityFoodSubmissionSheet and its repository,
+  /// not this withdrawal queue or a general policy/cloud-backup consent.
+  Future<void> quarantineLegacyUpserts() {
     return _database.customStatement(
       '''
-      INSERT INTO community_food_outbox(
-        local_food_uuid, operation, payload_json, attempt_count,
-        next_attempt_at, last_error, updated_at
-      ) VALUES (?, 'upsert', ?, 0, NULL, NULL, ?)
-      ON CONFLICT(local_food_uuid) DO UPDATE SET
-        operation = 'upsert',
-        payload_json = excluded.payload_json,
-        attempt_count = 0,
-        next_attempt_at = NULL,
-        last_error = NULL,
-        updated_at = excluded.updated_at
+      UPDATE community_food_outbox
+      SET next_attempt_at = 9223372036854775807, last_error = ?
+      WHERE operation = 'upsert'
+        AND (last_error IS NULL OR last_error != ?
+             OR next_attempt_at IS NULL
+             OR next_attempt_at != 9223372036854775807)
       ''',
-      <Object?>[
-        contribution.localFoodUuid,
-        jsonEncode(contribution.payload),
-        DateTime.now().millisecondsSinceEpoch,
+      const <Object?>[
+        'explicit_community_submission_required_v1',
+        'explicit_community_submission_required_v1',
       ],
     );
   }
@@ -71,13 +68,20 @@ class CommunityFoodOutboxStore {
   }
 
   Future<List<CommunityFoodOutboxEntry>> due({int limit = 20}) async {
+    try {
+      await quarantineLegacyUpserts();
+    } on Object {
+      // Quarantine is a durable marker, not the admission boundary. The query
+      // below still excludes every upsert if a local migration cannot finish.
+    }
     final now = DateTime.now().millisecondsSinceEpoch;
     final rows = await _database
         .customSelect(
           '''
       SELECT local_food_uuid, operation, payload_json, attempt_count
       FROM community_food_outbox
-      WHERE next_attempt_at IS NULL OR next_attempt_at <= ?
+      WHERE operation = 'delete'
+        AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
       ORDER BY updated_at ASC
       LIMIT ?
       ''',

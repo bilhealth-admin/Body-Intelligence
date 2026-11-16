@@ -12,6 +12,46 @@ extension _DailyLogCopyAccess on _DailyLogPageState {
 }
 
 const _dailyLogCopy = <String, Map<String, String>>{
+  'There were no meals to copy.': {
+    'fr': 'Il n’y avait aucun repas à copier.',
+    'es': 'No había comidas para copiar.',
+    'tr': 'Kopyalanacak öğün yoktu.',
+  },
+  'Reopen the completed diary before copying meals.': {
+    'fr': 'Rouvrez le journal terminé avant de copier les repas.',
+    'es': 'Vuelve a abrir el diario completado antes de copiar las comidas.',
+    'tr': 'Öğünleri kopyalamadan önce tamamlanan günlüğü yeniden açın.',
+  },
+  'Meals could not be copied. Nothing was changed.': {
+    'fr': 'Les repas n’ont pas pu être copiés. Rien n’a été modifié.',
+    'es': 'No se pudieron copiar las comidas. No se cambió nada.',
+    'tr': 'Öğünler kopyalanamadı. Hiçbir şey değiştirilmedi.',
+  },
+  'Meals and their quantities will be copied to this day. Existing meals will not be replaced.': {
+    'fr':
+        'Les repas et leurs quantités seront copiés vers ce jour. Les repas existants ne seront pas remplacés.',
+    'es':
+        'Las comidas y sus cantidades se copiarán a este día. Las comidas existentes no se reemplazarán.',
+    'tr':
+        'Öğünler ve miktarları bu güne kopyalanacak. Mevcut öğünler değiştirilmeyecek.',
+  },
+  'There were no meals on the previous day.': {
+    'fr': 'Il n’y avait aucun repas la veille.',
+    'es': 'No había comidas el día anterior.',
+    'tr': 'Önceki gün hiç öğün yoktu.',
+  },
+  '{count} meals copied after your confirmation.': {
+    'fr': '{count} repas copiés après votre confirmation.',
+    'es': '{count} comidas copiadas después de tu confirmación.',
+    'tr': 'Onayınızdan sonra {count} öğün kopyalandı.',
+  },
+  'This day already has meals. Nothing was replaced or duplicated.': {
+    'fr': 'Ce jour contient déjà des repas. Rien n’a été remplacé ni dupliqué.',
+    'es': 'Este día ya contiene comidas. No se reemplazó ni duplicó nada.',
+    'tr':
+        'Bu günde zaten öğün var. Hiçbir şey değiştirilmedi veya çoğaltılmadı.',
+  },
+
   'Quick Add macros': {
     'fr': 'Ajout rapide des macros',
     'es': 'Añadir macros rápidamente',

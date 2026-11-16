@@ -41,7 +41,12 @@ class _HealthSourceCard extends ConsumerWidget {
           Semantics(
             label: tr('Connection status', 'حالة الاتصال'),
             child: Text(
-              connectedHealthStatusText(context, snapshot.status),
+              snapshot.failureCode == 'health_history_sync_incomplete'
+                  ? tr(
+                      connectedHealthHistoryIncompleteEnglish,
+                      connectedHealthHistoryIncompleteArabic,
+                    )
+                  : connectedHealthStatusText(context, snapshot.status),
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.35,

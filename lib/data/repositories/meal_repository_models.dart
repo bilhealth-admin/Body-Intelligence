@@ -1,5 +1,10 @@
 part of 'meal_repository.dart';
 
+/// A copy must never replace or duplicate an existing active diary entry.
+class MealDayCopyConflict extends StateError {
+  MealDayCopyConflict() : super('Destination day already contains meals.');
+}
+
 class MealWithItems {
   final Meal meal;
   final List<MealItem> items;

@@ -153,13 +153,24 @@ final class CloudSyncReport {
     this.hasMore = false,
     this.cursorAdvanced = false,
     this.failureCode,
-  }) : diagnostics = List.unmodifiable(diagnostics);
+    this.classifiedUnresolvedConflicts,
+  }) : diagnostics = List.unmodifiable(diagnostics) {
+    final unresolved = classifiedUnresolvedConflicts;
+    if (unresolved != null && (unresolved < 0 || unresolved > conflicts)) {
+      throw ArgumentError.value(unresolved, 'classifiedUnresolvedConflicts');
+    }
+  }
 
   final DateTime startedAt;
   final DateTime completedAt;
   final int pushed;
   final int pulled;
   final int conflicts;
+
+  /// Null preserves conservative behavior for unclassified legacy reports.
+  final int? classifiedUnresolvedConflicts;
+  int get unresolvedConflicts => classifiedUnresolvedConflicts ?? conflicts;
+
   final int pending;
   final CloudPlatformAvailability availability;
   final List<String> diagnostics;

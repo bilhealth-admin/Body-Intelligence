@@ -179,26 +179,94 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('Dashboard missing progress retains its capsule presentation', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Scaffold(
-          body: BilStripedProgress.dashboard(
-            child: CircularProgressIndicator(color: Colors.green),
+  for (final dark in [false, true]) {
+    for (final reduced in [false, true]) {
+      testWidgets(
+        'Dashboard missing progress uses a neutral wait dark=$dark reduced=$reduced',
+        (tester) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: dark ? ThemeData.dark() : ThemeData.light(),
+              home: MediaQuery(
+                data: MediaQueryData(disableAnimations: reduced),
+                child: const Scaffold(
+                  body: BilStripedProgress.dashboard(
+                    child: CircularProgressIndicator(
+                      key: Key('dashboard-pending-data'),
+                      color: Colors.green,
+                      semanticsLabel: 'Waiting for recorded data',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          final wait = find.byType(CupertinoActivityIndicator);
+          expect(wait, findsOneWidget);
+          final indicator = tester.widget<CupertinoActivityIndicator>(wait);
+          expect(
+            indicator.color,
+            dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
+          );
+          expect(indicator.animating, !reduced);
+          expect(find.byType(BilSplashCapsuleProgress), findsNothing);
+          expect(find.byType(CircularProgressIndicator), findsNothing);
+          final semantics = tester.ensureSemantics();
+          try {
+            final data = tester
+                .getSemantics(find.byKey(const Key('dashboard-pending-data')))
+                .getSemanticsData();
+            expect(data.label, 'Waiting for recorded data');
+            expect(data.role, ui.SemanticsRole.loadingSpinner);
+            expect(data.value, isEmpty);
+          } finally {
+            semantics.dispose();
+          }
+          await tester.pumpWidget(const SizedBox.shrink());
+        },
+      );
+    }
+  }
+
+  for (final value in [0.0, .25, 1.0]) {
+    testWidgets('Dashboard recorded progress remains determinate at $value', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: BilStripedProgress.dashboard(
+              child: CircularProgressIndicator(
+                key: const Key('dashboard-recorded-data'),
+                value: value,
+                color: Colors.green,
+                semanticsLabel: 'Recorded toward target',
+              ),
+            ),
           ),
         ),
-      ),
-    );
-    final capsule = tester.widget<BilSplashCapsuleProgress>(
-      find.byType(BilSplashCapsuleProgress),
-    );
-    expect(capsule.color, Colors.green);
-    expect(find.byType(CupertinoActivityIndicator), findsNothing);
-    expect(find.byType(CircularProgressIndicator), findsNothing);
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
+      );
+      final original = tester.widget<CircularProgressIndicator>(
+        find.byKey(const Key('dashboard-recorded-data')),
+      );
+      expect(original.value, value);
+      expect(original.color, Colors.green);
+      expect(find.byType(CupertinoActivityIndicator), findsNothing);
+      expect(find.byType(BilSplashCapsuleProgress), findsNothing);
+      final semantics = tester.ensureSemantics();
+      try {
+        final data = tester
+            .getSemantics(find.byKey(const Key('dashboard-recorded-data')))
+            .getSemanticsData();
+        expect(data.role, ui.SemanticsRole.progressBar);
+        expect(data.value, '${(value * 100).round()}');
+        expect(data.label, 'Recorded toward target');
+      } finally {
+        semantics.dispose();
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
 
   test('nutrition tones and explicit safety colors remain distinct', () {
     expect(

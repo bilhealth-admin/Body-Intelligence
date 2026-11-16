@@ -20,6 +20,7 @@ class SmartWeightScaleField extends StatelessWidget {
     required this.unit,
     required this.label,
     required this.onChanged,
+    this.onEdit,
   });
 
   final double value;
@@ -30,6 +31,7 @@ class SmartWeightScaleField extends StatelessWidget {
   final String unit;
   final String label;
   final ValueChanged<double> onChanged;
+  final VoidCallback? onEdit;
 
   int get _divisions => ((maximum - minimum) / step).round();
 
@@ -69,36 +71,54 @@ class SmartWeightScaleField extends StatelessWidget {
         children: [
           Text(label, style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
-          Container(
-            key: const Key('smart-weight-scale-readout'),
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            decoration: BoxDecoration(
-              color: scheme.primaryContainer.withValues(alpha: .58),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: scheme.primary.withValues(alpha: .38)),
-            ),
-            child: Text.rich(
-              TextSpan(
+          InkWell(
+            onTap: onEdit,
+            borderRadius: BorderRadius.circular(18),
+            child: Container(
+              key: const Key('smart-weight-scale-readout'),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer.withValues(alpha: .58),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: scheme.primary.withValues(alpha: .38),
+                ),
+              ),
+              child: Row(
                 children: [
-                  TextSpan(
-                    text: formatted,
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: scheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w900,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: formatted,
+                            style: Theme.of(context).textTheme.headlineLarge
+                                ?.copyWith(
+                                  color: scheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.w900,
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
+                                ),
+                          ),
+                          TextSpan(
+                            text: '  $unit',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: scheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                      textDirection: TextDirection.ltr,
                     ),
                   ),
-                  TextSpan(
-                    text: '  $unit',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: scheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  if (onEdit != null)
+                    Icon(Icons.edit_outlined, color: scheme.onPrimaryContainer),
                 ],
               ),
-              textAlign: TextAlign.center,
-              textDirection: TextDirection.ltr,
             ),
           ),
           const SizedBox(height: 8),

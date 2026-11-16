@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart' show getCrc32;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
@@ -306,21 +307,81 @@ class CatalogPackManager {
       if (response.contentLength > maximumManifestBytes) {
         throw const FormatException('Catalog manifest too large');
       }
+      final encoding =
+          response.headers
+              .value(HttpHeaders.contentEncodingHeader)
+              ?.trim()
+              .toLowerCase() ??
+          '';
+      if (!const {'', 'identity', 'gzip'}.contains(encoding)) {
+        throw const FormatException('Unsupported catalog manifest encoding');
+      }
       final builder = BytesBuilder(copy: false);
-      await (() async {
-        await for (final bytes in response.timeout(transferTimeout)) {
-          if (builder.length + bytes.length > maximumManifestBytes) {
-            throw const FormatException('Catalog manifest too large');
-          }
-          builder.add(bytes);
-        }
-      })().timeout(
-        transferTimeout,
-        onTimeout: () {
-          client.close(force: true);
-          throw TimeoutException('Catalog manifest timed out');
-        },
+      final output = _BoundedCatalogManifestSink(
+        builder,
+        maximumManifestBytes,
+        trackCrc: encoding == 'gzip',
       );
+      // A synchronous sink rejects oversized decoded chunks before a stream
+      // transformer can enqueue the rest of a large compressed input event.
+      final Sink<List<int>> input = encoding == 'gzip'
+          ? gzip.decoder.startChunkedConversion(output)
+          : output;
+      var wireBytes = 0;
+      var gzipFooter = <int>[];
+      var inputClosed = false;
+      try {
+        await (() async {
+          await for (final bytes in response.timeout(transferTimeout)) {
+            wireBytes += bytes.length;
+            if (wireBytes > maximumManifestBytes) {
+              throw const FormatException('Catalog manifest too large');
+            }
+            if (encoding == 'gzip') {
+              final tail = bytes.length >= 8
+                  ? bytes.sublist(bytes.length - 8)
+                  : <int>[...gzipFooter, ...bytes];
+              gzipFooter = tail.length <= 8
+                  ? tail
+                  : tail.sublist(tail.length - 8);
+            }
+            input.add(bytes);
+          }
+          inputClosed = true;
+          input.close();
+          if (encoding == 'gzip') {
+            // The native Dart decoder can accept a missing gzip trailer even
+            // after close(). Require a complete, coherent manifest member.
+            if (gzipFooter.length != 8) {
+              throw const FormatException('Incomplete catalog manifest gzip');
+            }
+            final footer = ByteData.sublistView(Uint8List.fromList(gzipFooter));
+            if (footer.getUint32(0, Endian.little) != output.crc32 ||
+                footer.getUint32(4, Endian.little) != builder.length) {
+              throw const FormatException(
+                'Invalid catalog manifest gzip trailer',
+              );
+            }
+          }
+        })().timeout(
+          transferTimeout,
+          onTimeout: () {
+            client.close(force: true);
+            throw TimeoutException('Catalog manifest timed out');
+          },
+        );
+      } finally {
+        if (!inputClosed) {
+          inputClosed = true;
+          try {
+            input.close();
+          } on Object {
+            // Cleanup of an interrupted/corrupt stream must not replace its
+            // original failure. The partial bytes are never parsed or saved.
+          }
+        }
+        output.close();
+      }
       final decoded = jsonDecode(utf8.decode(builder.takeBytes()));
       if (decoded is! Map<String, dynamic>) {
         throw const FormatException('Invalid catalog manifest');
@@ -359,4 +420,34 @@ class CatalogPackManager {
     );
     await replaceCatalogFile(temporary, registry);
   }
+}
+
+// Used only by the HTTP JSON manifest path. Binary downloads retain their
+// existing compressed-byte verification and separate expansion contracts.
+final class _BoundedCatalogManifestSink implements Sink<List<int>> {
+  _BoundedCatalogManifestSink(
+    this._builder,
+    this._maximumBytes, {
+    required this.trackCrc,
+  });
+
+  final BytesBuilder _builder;
+  final int _maximumBytes;
+  final bool trackCrc;
+  int _crc32 = 0;
+  int get crc32 => _crc32;
+  bool _closed = false;
+
+  @override
+  void add(List<int> bytes) {
+    if (_closed) throw StateError('Catalog manifest stream is closed');
+    if (_builder.length + bytes.length > _maximumBytes) {
+      throw const FormatException('Catalog manifest too large');
+    }
+    if (trackCrc) _crc32 = getCrc32(bytes, _crc32);
+    _builder.add(bytes);
+  }
+
+  @override
+  void close() => _closed = true;
 }

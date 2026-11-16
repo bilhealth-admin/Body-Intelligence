@@ -9,6 +9,7 @@ final class MethodChannelHealthBridge
         NativeHealthCapabilityBridge,
         NativeHealthAuthorizationReviewBridge,
         NativeHealthDailyTotalsBridge,
+        NativeHealthLatestSignalsBridge,
         NativeHealthCancellableReadBridge {
   MethodChannelHealthBridge({required String channelName})
     : _channel = MethodChannel(channelName);
@@ -79,6 +80,27 @@ final class MethodChannelHealthBridge
         ),
     ];
   }
+
+  @override
+  Future<List<NativeHealthRecord>> readLatestSignals({
+    required DateTime asOf,
+  }) async {
+    final rows = await _channel.invokeListMethod<Object?>(
+      'readLatestSignals',
+      <String, Object?>{'asOf': asOf.toUtc().toIso8601String()},
+    );
+    return [
+      for (final row in rows ?? const <Object?>[])
+        NativeHealthRecord.fromMap(
+          Map<String, Object?>.from(row! as Map),
+          providerId: id,
+        ),
+    ];
+  }
+
+  @override
+  Future<void> cancelLatestSignals() =>
+      _channel.invokeMethod<void>('cancelLatestSignals');
 
   @override
   Future<Map<String, bool>> permissions() async {

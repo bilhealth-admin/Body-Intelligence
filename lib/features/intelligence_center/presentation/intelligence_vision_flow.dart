@@ -63,12 +63,21 @@ final class _CoachMediaPageRequest {
   final _CoachMealOwnerHandle owner;
   final CoachMediaAttempt attempt;
   ProviderSubscription<CoachActionPermissionMode>? permissionSubscription;
+  StreamSubscription<String?>? ownerSubscription;
   final capabilities = <BilRuntimeCapability>[];
   bool retainOwner = false;
+  final visionReviewLifetime = MealVisionReviewLifetime();
   VoidCallback? releaseVoiceDraftListener;
+  void cancel() {
+    attempt.cancel();
+    visionReviewLifetime.retire();
+  }
+
   void dispose() {
+    visionReviewLifetime.retire();
     attempt.dispose();
     permissionSubscription?.close();
+    unawaited(ownerSubscription?.cancel());
     releaseVoiceDraftListener?.call();
     releaseVoiceDraftListener = null;
     if (!retainOwner) owner.dispose();
@@ -112,14 +121,23 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     request.permissionSubscription = ref.listenManual(
       coachActionPermissionModeProvider,
       (_, next) {
-        if (next != permission) request.attempt.cancel();
+        if (next != permission) request.cancel();
       },
     );
+    // The captured scope already rejects late results. Also retire its visible
+    // local photo routes immediately on a delivered owner transition.
+    final witness = ref.read(coachNativeOwnerWitnessProvider);
+    request.ownerSubscription = witness?.changes.listen((nextOwner) {
+      if (nextOwner != owner.database.localOwnerId) request.cancel();
+    }, onError: (Object _, StackTrace _) => request.cancel());
     return request;
   }
 
   Future<bool> _mediaRequestCurrent(_CoachMediaPageRequest request) async {
-    if (!request.attempt.isCurrent) return false;
+    if (!request.attempt.isCurrent) {
+      request.cancel();
+      return false;
+    }
     for (final capability in request.capabilities) {
       try {
         final status = await ref.read(
@@ -127,11 +145,11 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
         )(capability);
         if (!request.attempt.isCurrent ||
             status != BilRuntimePermissionState.granted) {
-          request.attempt.cancel();
+          request.cancel();
           return false;
         }
       } on Object {
-        request.attempt.cancel();
+        request.cancel();
         return false;
       }
     }
@@ -187,12 +205,21 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
   Future<CoachMediaFoodReady?> _matchMediaFood(
     _CoachMediaPageRequest request,
     CoachMediaFoodBridge bridge,
-    CoachMediaFoodInput input,
-  ) async {
+    CoachMediaFoodInput input, {
+    void Function(CoachMediaFoodIssue issue)? onIssue,
+  }) async {
+    void report(CoachMediaFoodIssue issue) {
+      if (onIssue != null) {
+        onIssue(issue);
+      } else {
+        _showMediaIssue(issue);
+      }
+    }
+
     final found = await bridge.lookup(input: input, attempt: request.attempt);
     if (!await _mediaRequestCurrent(request) || !mounted) return null;
     if (found is! CoachMediaFoodMatches) {
-      _showMediaIssue((found as CoachMediaFoodUnresolved).issue);
+      report((found as CoachMediaFoodUnresolved).issue);
       return null;
     }
     // This existing picker deliberately starts with no selected food, even
@@ -206,13 +233,14 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
       // Only the Coach adapter has already validated an owner-bound modern
       // Food V2 label snapshot. Standard Vision remains verified-catalog only.
       evidenceOwnerKey: request.attempt.ownerScope.captured.ownerKey,
+      lifetime: request.visionReviewLifetime,
     );
     if (!await _mediaRequestCurrent(request) || selected == null) return null;
     final entries = found.candidates
         .where((entry) => identical(entry.row, selected))
         .toList();
     if (entries.length != 1) {
-      _showMediaIssue(CoachMediaFoodIssue.selectionRequired);
+      report(CoachMediaFoodIssue.selectionRequired);
       return null;
     }
     var result = bridge.select(matches: found, selected: entries.single);
@@ -232,7 +260,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
       );
     }
     if (result is CoachMediaFoodReady) return result;
-    _showMediaIssue((result as CoachMediaFoodUnresolved).issue);
+    report((result as CoachMediaFoodUnresolved).issue);
     return null;
   }
 
@@ -243,10 +271,13 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     if (!await _mediaRequestCurrent(request) || !mounted) return null;
     return showDialog<double>(
       context: context,
-      builder: (_) => _CoachMediaGramsDialog(
-        request: request,
-        issue: issue,
-        copy: CoachMediaBridgeCopy(arabic: arabic),
+      builder: (_) => guardMealVisionReview(
+        lifetime: request.visionReviewLifetime,
+        child: _CoachMediaGramsDialog(
+          request: request,
+          issue: issue,
+          copy: CoachMediaBridgeCopy(arabic: arabic),
+        ),
       ),
     );
   }
@@ -254,7 +285,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
   Future<void> _reviewBarcodeInChat(String rawBarcode) async {
     if (!mounted || !conversationReady || sending) return;
     if (foodImageFlowOpening) {
-      foodMediaRequest?.attempt.cancel();
+      foodMediaRequest?.cancel();
       queuedMediaBarcode = rawBarcode;
       return;
     }
@@ -382,49 +413,72 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
           .analyze(image);
       if (!await _mediaRequestCurrent(request) || !mounted) return;
       _updateState(() => analyzingFoodImage = false);
+      final bridge = _foodMediaBridge(request);
+      final mediaCopy = CoachMediaBridgeCopy(arabic: arabic);
+      var ready = <CoachMediaFoodReady>[];
       final selections = await showMealImageReviewDialog(
         context,
         analysis: analysis,
+        imagePath: image.path,
+        lifetime: request.visionReviewLifetime,
+        onConfirm: (drafts) async {
+          if (!await _mediaRequestCurrent(request)) {
+            return const MealVisionReviewDecision.retired();
+          }
+          final matched = <CoachMediaFoodReady>[];
+          for (final selection in drafts) {
+            final candidate = selection.candidate;
+            final guessed =
+                candidate.amount == selection.amount &&
+                (candidate.unit ?? '').trim().toLowerCase() ==
+                    selection.unit.trim().toLowerCase();
+            final unit =
+                const {
+                  'piece',
+                  'pieces',
+                  'item',
+                  'items',
+                }.contains(selection.unit.trim().toLowerCase())
+                ? 'item'
+                : selection.unit;
+            CoachMediaFoodIssue? issue;
+            final result = await _matchMediaFood(
+              request,
+              bridge,
+              CoachMediaFoodInput(
+                source: CoachMediaFoodSource.photo,
+                requestId: request.operationId,
+                name: candidate.name,
+                amount: selection.amount,
+                unit: unit,
+                quantityKind: guessed
+                    ? CoachFoodQuantityKind.estimated
+                    : CoachFoodQuantityKind.userDeclared,
+                recognitionConfidence: candidate.confidence,
+              ),
+              onIssue: (value) => issue = value,
+            );
+            if (!await _mediaRequestCurrent(request)) {
+              return const MealVisionReviewDecision.retired();
+            }
+            if (result == null) {
+              return issue == null
+                  ? const MealVisionReviewDecision.cancelled()
+                  : MealVisionReviewDecision.retry(
+                      '${mediaCopy.issue(issue!)} ${mediaCopy.noFoodLogged}',
+                    );
+            }
+            matched.add(result);
+          }
+          ready = matched;
+          return const MealVisionReviewDecision.accepted();
+        },
       );
       if (!await _mediaRequestCurrent(request) ||
           selections == null ||
-          selections.isEmpty) {
+          selections.isEmpty ||
+          ready.isEmpty) {
         return;
-      }
-      final bridge = _foodMediaBridge(request);
-      final ready = <CoachMediaFoodReady>[];
-      for (final selection in selections) {
-        final candidate = selection.candidate;
-        final guessed =
-            candidate.amount == selection.amount &&
-            (candidate.unit ?? '').trim().toLowerCase() ==
-                selection.unit.trim().toLowerCase();
-        final unit =
-            const {
-              'piece',
-              'pieces',
-              'item',
-              'items',
-            }.contains(selection.unit.trim().toLowerCase())
-            ? 'item'
-            : selection.unit;
-        final result = await _matchMediaFood(
-          request,
-          bridge,
-          CoachMediaFoodInput(
-            source: CoachMediaFoodSource.photo,
-            requestId: request.operationId,
-            name: candidate.name,
-            amount: selection.amount,
-            unit: unit,
-            quantityKind: guessed
-                ? CoachFoodQuantityKind.estimated
-                : CoachFoodQuantityKind.userDeclared,
-            recognitionConfidence: candidate.confidence,
-          ),
-        );
-        if (result == null || !await _mediaRequestCurrent(request)) return;
-        ready.add(result);
       }
       final review = bridge.takeReview(ready);
       if (review != null && await _mediaRequestCurrent(request)) {

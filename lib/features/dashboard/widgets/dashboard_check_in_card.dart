@@ -97,7 +97,7 @@ class _DashboardCheckInCardState extends State<DashboardCheckInCard> {
                   icon: saving
                       ? const SizedBox.square(
                           dimension: 18,
-                          child: BilFeatureWelcomeStatus.splash(),
+                          child: BilFeatureWelcomeStatus(),
                         )
                       : const Icon(Icons.check),
                   label: Text(context.strings.text('Save check-in')),

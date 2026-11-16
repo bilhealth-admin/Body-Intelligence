@@ -1,38 +1,28 @@
 import 'dart:async';
 
-import '../../../../data/database/app_database.dart';
 import '../data/community_food_outbox_store.dart';
 import '../data/supabase_community_food_catalog.dart';
-import '../domain/community_food_contribution.dart';
 
 class CommunityFoodSyncService {
-  CommunityFoodSyncService(this._database, this._outbox, this._cloud);
+  CommunityFoodSyncService(
+    this._outbox,
+    this._cloud, {
+    bool Function()? isCurrent,
+  }) : _isCurrent = isCurrent ?? (() => true);
 
-  final AppDatabase _database;
   final CommunityFoodOutboxStore _outbox;
   final CommunityFoodCloudGateway? _cloud;
+  final bool Function() _isCurrent;
   Future<void>? _activeFlush;
 
-  Future<void> publishFood(
-    int localFoodId, {
-    required String localeCode,
-  }) async {
-    final food = await (_database.select(
-      _database.foods,
-    )..where((row) => row.id.equals(localFoodId))).getSingle();
-    if (!food.isCustom || food.deletedAt != null) return;
-    await _outbox.enqueueUpsert(
-      CommunityFoodContribution.fromFood(food, localeCode: localeCode),
-    );
-    unawaited(flush());
-  }
-
   Future<void> withdrawFood(String localFoodUuid) async {
+    if (!_isCurrent()) return;
     await _outbox.enqueueDelete(localFoodUuid);
-    unawaited(flush());
+    if (_isCurrent()) unawaited(flush());
   }
 
   Future<void> flush() {
+    if (!_isCurrent()) return Future<void>.value();
     final active = _activeFlush;
     if (active != null) return active;
     final run = _flushPending();
@@ -44,17 +34,27 @@ class CommunityFoodSyncService {
 
   Future<void> _flushPending() async {
     final cloud = _cloud;
-    if (cloud == null) return;
-    final entries = await _outbox.due();
+    if (cloud == null || !_isCurrent()) return;
+    final List<CommunityFoodOutboxEntry> entries;
+    try {
+      entries = await _outbox.due();
+    } on Object {
+      // Provider disposal retires/closes the former owner's database. Its
+      // pending read must not become an unhandled background flush error.
+      if (!_isCurrent()) return;
+      rethrow;
+    }
     for (final entry in entries) {
+      if (!_isCurrent()) return;
+      // This service has no publication authority. A legacy or unexpected
+      // upsert stays local even if an outbox implementation returns it.
+      if (entry.operation != 'delete') continue;
       try {
-        if (entry.operation == 'delete') {
-          await cloud.withdraw(entry.localFoodUuid);
-        } else {
-          await cloud.upsert(entry.payload);
-        }
+        await cloud.withdraw(entry.localFoodUuid);
+        if (!_isCurrent()) return;
         await _outbox.markSucceeded(entry.localFoodUuid);
       } catch (error) {
+        if (!_isCurrent()) return;
         await _outbox.markFailed(entry, error);
       }
     }

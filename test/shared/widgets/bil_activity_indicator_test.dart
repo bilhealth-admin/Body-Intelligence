@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_splash_capsule_progress.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,6 +7,63 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final dark in [false, true]) {
+    for (final reduced in [false, true]) {
+      testWidgets(
+        'Dashboard compatibility wait stays neutral at17px dark=$dark reduced=$reduced',
+        (tester) async {
+          final semantics = tester.ensureSemantics();
+          try {
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: dark ? ThemeData.dark() : ThemeData.light(),
+                home: MediaQuery(
+                  data: MediaQueryData(disableAnimations: reduced),
+                  child: const Scaffold(
+                    body: Center(
+                      child: SizedBox.square(
+                        dimension: 17,
+                        child: BilCompactActivityIndicator.dashboard(
+                          key: Key('compatibility-wait'),
+                          color: Colors.blue,
+                          label: 'Reading real health data',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await tester.pump(const Duration(milliseconds: 80));
+            final wait = find.byType(CupertinoActivityIndicator);
+            expect(wait, findsOneWidget);
+            final indicator = tester.widget<CupertinoActivityIndicator>(wait);
+            expect(
+              indicator.color,
+              dark ? const Color(0xFFBBC4CD) : const Color(0xFF697178),
+            );
+            expect(indicator.animating, !reduced);
+            expect(
+              tester.getSize(find.byKey(const Key('compatibility-wait'))),
+              const Size(17, 17),
+            );
+            expect(find.byType(CircularProgressIndicator), findsNothing);
+            expect(find.byType(BilSplashCapsuleProgress), findsNothing);
+            final role = tester
+                .getSemantics(find.byKey(const Key('compatibility-wait')))
+                .getSemanticsData();
+            expect(role.label, 'Reading real health data');
+            expect(role.role, ui.SemanticsRole.loadingSpinner);
+            expect(tester.takeException(), isNull);
+            await tester.pumpWidget(const SizedBox.shrink());
+          } finally {
+            semantics.dispose();
+          }
+        },
+      );
+    }
+  }
+
   for (final dark in [false, true]) {
     for (final reduced in [false, true]) {
       for (final size in [16.0, 24.0, 48.0]) {

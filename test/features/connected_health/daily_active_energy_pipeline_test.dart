@@ -25,6 +25,7 @@ void main() {
       var emptyRead = false;
       var partialRead = false;
       var failStatus = false;
+      var failLatest = false;
       final now = DateTime.now();
       final yesterday = now.subtract(const Duration(days: 1));
       Map<String, Object?> daily(String key, double value, DateTime at) => {
@@ -55,6 +56,10 @@ void main() {
             daily('activeEnergy', 321, now),
             daily('steps', 4321, now),
           ];
+        }
+        if (ios && call.method == 'readLatestSignals') {
+          if (failLatest) throw PlatformException(code: 'latest_query_failed');
+          return const <Object?>[];
         }
         if (call.method == 'readChanges') {
           return {
@@ -131,6 +136,34 @@ void main() {
         ownerId: ownerId,
         currentOwnerId: () => ownerId,
       );
+      if (ios) {
+        // The recent-signal query can fail independently of daily totals.
+        // Retain its error truth while fresh activity replaces cached111.
+        failLatest = true;
+        final latestFailure = await gateway.loadDailyActivity();
+        expect(
+          latestFailure.failureCode,
+          'daily_activity_refresh_failed_cache_preserved',
+        );
+        expect(
+          authoritativeExerciseEnergyForDay(latestFailure, now)?.kcal,
+          321,
+        );
+        expect(latestFailure.stepHistory.single.value, 4321);
+        expect(
+          latestFailure.signals.singleWhere((s) => s.key == 'heartRate').value,
+          75,
+        );
+        expect(
+          latestFailure.signals.singleWhere((s) => s.key == 'sleep').value,
+          7.5,
+        );
+        expect(
+          await healthStore.get('health_signals', 'preserved-raw-sample'),
+          original,
+        );
+        failLatest = false;
+      }
       for (var refresh = 0; refresh < 2; refresh++) {
         final result = await gateway.loadDailyActivity();
         expect(result.failureCode, isNull);

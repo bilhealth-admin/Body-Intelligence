@@ -1,6 +1,24 @@
 part of 'meal_repository.dart';
 
 extension MealRepositoryCopying on MealRepository {
+  Future<void> _requireEmptyDayForCopy(String dayKey) async {
+    final occupied =
+        await (_database.select(_database.mealItems).join([
+                innerJoin(
+                  _database.meals,
+                  _database.meals.id.equalsExp(_database.mealItems.mealId),
+                ),
+              ])
+              ..where(
+                _database.meals.dayKey.equals(dayKey) &
+                    _database.meals.deletedAt.isNull() &
+                    _database.mealItems.deletedAt.isNull(),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    if (occupied != null) throw MealDayCopyConflict();
+  }
+
   Future<void> repeatMeal({
     required UsualMealCandidate candidate,
     required DateTime date,
@@ -66,15 +84,16 @@ extension MealRepositoryCopying on MealRepository {
 
     return _database.transaction(() async {
       await _requireOpenDayForMeals(destinationKey);
-      final existingDestination =
-          await (_database.select(_database.meals)..where(
-                (row) =>
-                    row.dayKey.equals(destinationKey) & row.deletedAt.isNull(),
-              ))
+      await _requireEmptyDayForCopy(destinationKey);
+      final unusedEmptyBuckets =
+          await (_database.select(_database.meals)
+                ..where(
+                  (row) =>
+                      row.dayKey.equals(destinationKey) &
+                      row.deletedAt.isNull(),
+                )
+                ..orderBy([(row) => OrderingTerm.asc(row.id)]))
               .get();
-      if (existingDestination.isNotEmpty) {
-        throw StateError('Destination day already contains meals.');
-      }
 
       final sourceMeals =
           await (_database.select(_database.meals)
@@ -89,16 +108,6 @@ extension MealRepositoryCopying on MealRepository {
               .get();
       var copied = 0;
       for (final sourceMeal in sourceMeals) {
-        final destinationMealId = await _database
-            .into(_database.meals)
-            .insert(
-              MealsCompanion.insert(
-                date: destinationDate,
-                dayKey: destinationKey,
-                name: Value(sourceMeal.name),
-                type: Value(sourceMeal.type),
-              ),
-            );
         final sourceItems =
             await (_database.select(_database.mealItems)
                   ..where(
@@ -111,6 +120,25 @@ extension MealRepositoryCopying on MealRepository {
                     (item) => OrderingTerm.asc(item.id),
                   ]))
                 .get();
+        if (sourceItems.isEmpty) continue;
+        // A visited meal or deletion of its last item can leave an empty bucket.
+        // Consume each matching bucket only once: preserve its metadata and
+        // tombstones, and keep separate legacy source buckets separate.
+        final bucketIndex = unusedEmptyBuckets.indexWhere(
+          (meal) => meal.type == sourceMeal.type,
+        );
+        final destinationMealId = bucketIndex >= 0
+            ? unusedEmptyBuckets.removeAt(bucketIndex).id
+            : await _database
+                  .into(_database.meals)
+                  .insert(
+                    MealsCompanion.insert(
+                      date: destinationDate,
+                      dayKey: destinationKey,
+                      name: Value(sourceMeal.name),
+                      type: Value(sourceMeal.type),
+                    ),
+                  );
         for (final item in sourceItems) {
           if (!MealFoodEvidence.read(item, ownerKey: _coachOwnerKey).isValid) {
             throw const CoachMealConflict(
@@ -176,16 +204,7 @@ extension MealRepositoryCopying on MealRepository {
     return _database.transaction(() async {
       for (final key in byKey.keys) {
         await _requireOpenDayForMeals(key);
-        final occupied =
-            await (_database.select(_database.meals)
-                  ..where(
-                    (row) => row.dayKey.equals(key) & row.deletedAt.isNull(),
-                  )
-                  ..limit(1))
-                .getSingleOrNull();
-        if (occupied != null) {
-          throw StateError('A destination day already contains meals.');
-        }
+        await _requireEmptyDayForCopy(key);
       }
       final result = <DateTime, int>{};
       for (final date in byKey.values) {

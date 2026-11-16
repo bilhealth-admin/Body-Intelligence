@@ -251,6 +251,13 @@ abstract interface class NativeHealthDailyTotalsBridge {
   Future<List<NativeHealthRecord>> readDailyTotals({required DateTime asOf});
 }
 
+/// A bounded foreground snapshot, independent of the historical change anchor.
+/// Only iOS consumes this capability, after the existing explicit read opt-in.
+abstract interface class NativeHealthLatestSignalsBridge {
+  Future<List<NativeHealthRecord>> readLatestSignals({required DateTime asOf});
+  Future<void> cancelLatestSignals();
+}
+
 /// A native HealthKit import that exceeds its foreground deadline must be
 /// stopped at the native query owner. Cancelling only Dart's visible Future
 /// leaves the original HealthKit work alive in the app process.
@@ -334,8 +341,10 @@ final class UnifiedHealthDataRuntime {
     required DateTime asOf,
     required GlobalConsentGrant consent,
     Set<HealthDataType>? types,
+    Future<bool> Function()? canContinue,
   }) async {
     if (!consent.permits) return const <GlobalHealthSignal>[];
+    if (canContinue != null) await _requireContinuation(canContinue);
     final requestedTypes = (types ?? BilHealthScope.read)
         .where(BilHealthScope.read.contains)
         .toSet();
@@ -343,6 +352,7 @@ final class UnifiedHealthDataRuntime {
     final collected = <GlobalHealthSignal>[];
     final backgroundEligible = <NativeHealthCapabilityBridge>[];
     for (final bridge in bridges) {
+      if (canContinue != null) await _requireContinuation(canContinue);
       if (bridge is NativeHealthCapabilityBridge) {
         final capabilityBridge = bridge as NativeHealthCapabilityBridge;
         final availability = await capabilityBridge.availability();
@@ -362,6 +372,7 @@ final class UnifiedHealthDataRuntime {
         }
         backgroundEligible.add(capabilityBridge);
       }
+      if (canContinue != null) await _requireContinuation(canContinue);
       final permission = await bridge.permissions();
       // HealthKit intentionally does not expose read authorization state.
       // `HKHealthStore.authorizationStatus(for:)` describes sharing/write
@@ -413,12 +424,14 @@ final class UnifiedHealthDataRuntime {
       }
 
       while (pages < pageLimit) {
+        if (canContinue != null) await _requireContinuation(canContinue);
         final page = await _readPageWithForegroundDeadline(
           bridge: bridge,
           anchor: nextAnchor,
           asOf: asOf,
           types: allowed,
         );
+        if (canContinue != null) await _requireContinuation(canContinue);
         if (page.changesTokenExpired) {
           // Health Connect change tokens expire (and may be invalidated by the
           // provider). Never persist the response's unusable next token. Drop
@@ -458,6 +471,7 @@ final class UnifiedHealthDataRuntime {
         pages++;
         for (final deleted in page.deletedIds) {
           await cooperateWithUi();
+          if (canContinue != null) await _requireContinuation(canContinue);
           await store.put(
             'health_tombstones',
             '${bridge.id}:$deleted',
@@ -480,7 +494,11 @@ final class UnifiedHealthDataRuntime {
         // Scan the persisted bucket once for the entire page. A page may hold
         // hundreds of HeartRateRecord series; scanning once per parent would
         // otherwise turn synchronization into O(parents x stored signals).
-        await _removePersistedRecordFamilies(bridge.id, replacedRecordFamilies);
+        await _removePersistedRecordFamilies(
+          bridge.id,
+          replacedRecordFamilies,
+          canContinue: canContinue,
+        );
         for (final record in page.records) {
           await cooperateWithUi();
           if (record.observedAt.isAfter(asOf.toUtc())) continue;
@@ -502,13 +520,15 @@ final class UnifiedHealthDataRuntime {
               '${record.value}:${record.unit}:${record.observedAt.toIso8601String()}:${record.deleted}';
           final seen = await store.get('health_seen', identity);
           if (seen?['fingerprint'] == fingerprint) continue;
-          final normalized = _normalize(record);
+          final normalized = normalizeRecord(record);
           if (normalized != null) {
+            if (canContinue != null) await _requireContinuation(canContinue);
             await store.put('health_seen', identity, <String, Object?>{
               'identity': identity,
               'fingerprint': fingerprint,
               'updatedAt': asOf.toUtc().toIso8601String(),
             });
+            if (canContinue != null) await _requireContinuation(canContinue);
             await store.put(
               'health_signals',
               normalized.identity,
@@ -527,6 +547,7 @@ final class UnifiedHealthDataRuntime {
           }
         }
         nextAnchor = page.nextAnchor;
+        if (canContinue != null) await _requireContinuation(canContinue);
         await store.put('health_anchor', bridge.id, <String, Object?>{
           'anchor': nextAnchor,
           'scope': allowedScopeSignature,
@@ -540,10 +561,12 @@ final class UnifiedHealthDataRuntime {
       }
     }
     for (final bridge in backgroundEligible) {
+      if (canContinue != null) await _requireContinuation(canContinue);
       await bridge.enableBackgroundDelivery(
         requestedTypes.map((type) => type.name).toSet(),
       );
     }
+    if (canContinue != null) await _requireContinuation(canContinue);
     await audit.record(
       GlobalAuditEvent(
         action: 'health.integration.synchronized',
@@ -556,6 +579,12 @@ final class UnifiedHealthDataRuntime {
       ),
     );
     return List<GlobalHealthSignal>.unmodifiable(collected);
+  }
+
+  Future<void> _requireContinuation(Future<bool> Function() canContinue) async {
+    if (!await canContinue()) {
+      throw StateError('Health synchronization was cancelled.');
+    }
   }
 
   Future<void> export({
@@ -575,7 +604,8 @@ final class UnifiedHealthDataRuntime {
     await bridge.write(signals);
   }
 
-  GlobalHealthSignal? _normalize(NativeHealthRecord record) {
+  /// Shared unit/value validation for anchored imports and bounded snapshots.
+  GlobalHealthSignal? normalizeRecord(NativeHealthRecord record) {
     var value = record.value;
     var unit = record.unit;
     if (record.type == HealthDataType.weight && unit == 'lb') {
@@ -637,8 +667,9 @@ final class UnifiedHealthDataRuntime {
 
   Future<void> _removePersistedRecordFamilies(
     String providerId,
-    Set<String> parentRecordIds,
-  ) async {
+    Set<String> parentRecordIds, {
+    Future<bool> Function()? canContinue,
+  }) async {
     if (parentRecordIds.isEmpty) return;
     var workSinceUiYield = 0;
 
@@ -661,7 +692,9 @@ final class UnifiedHealthDataRuntime {
       final key = row['key'];
       if (recordId is! String || key is! String) continue;
       final identity = '$providerId:$recordId:$key';
+      if (canContinue != null) await _requireContinuation(canContinue);
       await store.remove('health_signals', identity);
+      if (canContinue != null) await _requireContinuation(canContinue);
       await store.remove('health_seen', identity);
     }
     // Preserve backward compatibility for pre-series records even when they
@@ -670,7 +703,9 @@ final class UnifiedHealthDataRuntime {
       for (final type in BilHealthScope.read) {
         await cooperateWithUi();
         final identity = '$providerId:$parentRecordId:${type.name}';
+        if (canContinue != null) await _requireContinuation(canContinue);
         await store.remove('health_signals', identity);
+        if (canContinue != null) await _requireContinuation(canContinue);
         await store.remove('health_seen', identity);
       }
     }

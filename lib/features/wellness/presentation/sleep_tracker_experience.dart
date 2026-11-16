@@ -22,17 +22,17 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   bool saving = false;
   bool recordLoading = true;
   Object? recordError;
+  Object? insightsRepository;
   int insightsRevision = 0;
+  Stream<List<DailyLog>>? insightsStream;
   late final DateTime recordDate;
   late final TabController tabController;
-  late Stream<List<DailyLog>> insightsStream;
 
   @override
   void initState() {
     super.initState();
     recordDate = ref.read(sleepNowProvider)();
     tabController = TabController(length: 2, vsync: this);
-    insightsStream = ref.read(dailyLogRepositoryProvider).watchAll();
     sleepScheduleStore = SleepScheduleStore();
     Future<void>.microtask(_loadRecord);
     Future<void>.microtask(_loadSleepSchedule);
@@ -240,7 +240,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       if (signal.key != 'sleep' ||
           !signal.value.isFinite ||
           signal.value <= 0 ||
-          signal.value > 14) {
+          signal.value > 24) {
         continue;
       }
       if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {
@@ -314,233 +314,263 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
     ),
   );
 
-  Widget _insightsTab() => StreamBuilder<List<DailyLog>>(
-    key: ValueKey(insightsRevision),
-    stream: insightsStream,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return _sleepState(
-          Icons.error_outline_rounded,
-          tr('Sleep history unavailable', 'سجل النوم غير متاح'),
-          tr(
-            'Your saved data was not changed. Try again.',
-            'لم تتغير بياناتك المحفوظة. حاول مجددًا.',
-          ),
-          onRetry: () => setState(() {
-            insightsRevision++;
-            insightsStream = ref.read(dailyLogRepositoryProvider).watchAll();
-          }),
+  Widget _insightsTab() {
+    final repository = ref.watch(dailyLogRepositoryProvider);
+    final health = ref.watch(connectedHealthProvider);
+    final native = health.isLoading || health.hasError ? null : health.value;
+    if (!identical(insightsRepository, repository)) {
+      insightsRepository = repository;
+      insightsStream = repository.watchAll();
+    }
+    return StreamBuilder<List<DailyLog>>(
+      key: ValueKey((repository, insightsRevision)),
+      stream: insightsStream,
+      builder: (context, manual) {
+        final projection = projectSleepInsights(
+          native: native,
+          manualRows:
+              manual.connectionState == ConnectionState.waiting ||
+                  manual.hasError
+              ? const []
+              : manual.data ?? const [],
+          now: ref.read(sleepNowProvider)(),
+          windowDays: insightWindowDays,
         );
-      }
-      if (!snapshot.hasData) {
-        return const Center(child: BilFeatureWelcomeStatus());
-      }
-      final cutoff = ref
-          .read(sleepNowProvider)()
-          .subtract(Duration(days: insightWindowDays));
-      final recorded = snapshot.data!
-          .where(
-            (entry) => entry.sleepHours != null && !entry.date.isBefore(cutoff),
-          )
-          .take(insightWindowDays)
-          .toList()
-          .reversed
-          .toList();
-      final average = recorded.isEmpty
-          ? null
-          : recorded.fold<double>(0, (sum, entry) => sum + entry.sleepHours!) /
-                recorded.length;
-      final latest = recorded.isEmpty ? null : recorded.last;
-      return ListView(
-        key: const Key('sleep-insights-tab'),
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-        children: [
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: SegmentedButton<int>(
-              key: const Key('sleep-insight-window'),
-              segments: [
-                ButtonSegment(value: 7, label: Text(tr('7 days', '7 أيام'))),
-                ButtonSegment(
-                  value: 30,
-                  label: Text(tr('30 days', '30 يومًا')),
-                ),
-              ],
-              selected: <int>{insightWindowDays},
-              onSelectionChanged: (selection) =>
-                  setState(() => insightWindowDays = selection.single),
+        if (manual.hasError && projection.nights.isEmpty) {
+          return _sleepState(
+            Icons.error_outline_rounded,
+            tr('Sleep history unavailable', 'سجل النوم غير متاح'),
+            tr(
+              'Your saved data was not changed. Try again.',
+              'لم تتغير بياناتك المحفوظة. حاول مجددًا.',
             ),
-          ),
-          const SizedBox(height: 14),
-          BilPearlMaterialCard(
-            key: const Key('sleep-stage-overview'),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Center(
-                    child: SizedBox(
-                      width: 142,
-                      height: 142,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              value: 1,
-                              strokeWidth: 12,
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.bedtime_outlined),
-                              Text(
-                                latest == null
-                                    ? 'N/A'
-                                    : '${latest.sleepHours!.floor()}h ${((latest.sleepHours! % 1) * 60).round()}m',
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(fontWeight: FontWeight.w800),
-                              ),
-                              Text(tr('Total sleep', 'إجمالي النوم')),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      key: const Key('sleep-connect-health'),
-                      onPressed: () => context.push('/connected-health'),
-                      icon: const BilSemanticIconBadge(
-                        kind: BilSemanticIconKind.devices,
-                        size: 32,
-                        iconSize: 18,
-                      ),
-                      label: Text(
-                        tr('Connect health data', 'ربط البيانات الصحية'),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ListTile(
-                    key: const Key('sleep-review-meals'),
-                    contentPadding: EdgeInsets.zero,
-                    leading: const BilSemanticIconBadge(
-                      kind: BilSemanticIconKind.meal,
-                    ),
-                    title: Text(
-                      tr(
-                        'Review meals alongside sleep',
-                        'راجع الوجبات بجانب النوم',
-                      ),
-                    ),
-                    // Sleep is a top-level route while Daily Log belongs to
-                    // the shell. Replace the route instead of stacking a
-                    // shell on top of the wellness page; this avoids the
-                    // blank child/white shell seen after returning via the
-                    // bottom navigation.
-                    onTap: () => context.go('/daily-log'),
-                    trailing: const BilNavigationFeedback(
-                      child: Icon(Icons.chevron_right_rounded),
-                    ),
+            onRetry: () => setState(() {
+              insightsRevision++;
+              insightsStream = repository.watchAll();
+            }),
+          );
+        }
+        if (manual.connectionState == ConnectionState.waiting &&
+            projection.nights.isEmpty) {
+          return const Center(child: BilFeatureWelcomeStatus());
+        }
+        final recorded = projection.nights;
+        final average = projection.average;
+        final latest = projection.latest;
+        final latestMinutes = ((latest?.sleepHours ?? 0) * 60).round();
+        return ListView(
+          key: const Key('sleep-insights-tab'),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+          children: [
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: SegmentedButton<int>(
+                key: const Key('sleep-insight-window'),
+                segments: [
+                  ButtonSegment(value: 7, label: Text(tr('7 days', '7 أيام'))),
+                  ButtonSegment(
+                    value: 30,
+                    label: Text(tr('30 days', '30 يومًا')),
                   ),
                 ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 18),
-          if (recorded.isEmpty)
-            _sleepState(
-              Icons.insights_outlined,
-              tr('No sleep trend yet', 'لا يوجد اتجاه للنوم بعد'),
-              tr(
-                'Record sleep to build a recorded trend. Missing days stay missing.',
-                'سجّل نومك لبناء اتجاه مسجل. تبقى الأيام الناقصة ناقصة.',
-              ),
-            )
-          else ...[
-            _HeroPanel(
-              icon: Icons.insights_rounded,
-              title: tr('Your recorded sleep', 'نومك المسجل'),
-              subtitle: tr(
-                '${recorded.length} recorded nights · ${average!.toStringAsFixed(1)} h average',
-                '${recorded.length} ليالٍ مسجلة · متوسط ${average.toStringAsFixed(1)} ساعة',
-              ),
-            ),
-            const SizedBox(height: 18),
-            BilPearlMaterialCard(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
-                child: SizedBox(
-                  height: 190,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      for (final entry in recorded)
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(entry.sleepHours!.toStringAsFixed(1)),
-                                const SizedBox(height: 6),
-                                Container(
-                                  height: (entry.sleepHours! / 14 * 120).clamp(
-                                    6,
-                                    120,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(8),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 7),
-                                Text(
-                                  '${entry.date.day}/${entry.date.month}',
-                                  style: Theme.of(context).textTheme.labelSmall,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+                selected: <int>{insightWindowDays},
+                onSelectionChanged: (selection) =>
+                    setState(() => insightWindowDays = selection.single),
               ),
             ),
             const SizedBox(height: 14),
-            _SafetyNote(
-              text: tr(
-                'Only saved nights are shown. BIL does not estimate missing nights or diagnose sleep conditions.',
-                'تظهر الليالي المحفوظة فقط. لا يقدّر BIL الليالي الناقصة ولا يشخّص اضطرابات النوم.',
+            BilPearlMaterialCard(
+              key: const Key('sleep-stage-overview'),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Center(
+                      child: SizedBox(
+                        width: 142,
+                        height: 142,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const SizedBox.expand(
+                              child: CircularProgressIndicator(
+                                value: 1,
+                                strokeWidth: 12,
+                              ),
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.bedtime_outlined),
+                                Text(
+                                  latest == null
+                                      ? 'N/A'
+                                      : '${latestMinutes ~/ 60}h ${latestMinutes % 60}m',
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                                Text(tr('Total sleep', 'إجمالي النوم')),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (latest != null)
+                      Text(
+                        latest.nativeSignal == null
+                            ? tr('Manual', 'يدوي')
+                            : '${wellnessSleepMeasuredByLabel(context)} ${connectedHealthDisplayName(context, latest.nativeSignal!)}',
+                      ),
+                    if (projection.historyIncomplete)
+                      Text(
+                        connectedHealthText(
+                          context,
+                          connectedHealthHistoryIncompleteEnglish,
+                          connectedHealthHistoryIncompleteArabic,
+                        ),
+                      )
+                    else if (projection.cached)
+                      Text(connectedHealthStatusText(context, native!.status)),
+                    if (!projection.hasVerifiedConnection) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          key: const Key('sleep-connect-health'),
+                          onPressed: () => context.push('/connected-health'),
+                          icon: const BilSemanticIconBadge(
+                            kind: BilSemanticIconKind.devices,
+                            size: 32,
+                            iconSize: 18,
+                          ),
+                          label: Text(
+                            tr('Connect health data', 'ربط البيانات الصحية'),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    ListTile(
+                      key: const Key('sleep-review-meals'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.meal,
+                      ),
+                      title: Text(
+                        tr(
+                          'Review meals alongside sleep',
+                          'راجع الوجبات بجانب النوم',
+                        ),
+                      ),
+                      // Sleep is a top-level route while Daily Log belongs to
+                      // the shell. Replace the route instead of stacking a
+                      // shell on top of the wellness page; this avoids the
+                      // blank child/white shell seen after returning via the
+                      // bottom navigation.
+                      onTap: () => context.go('/daily-log'),
+                      trailing: const BilNavigationFeedback(
+                        child: Icon(Icons.chevron_right_rounded),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            if (recorded.isEmpty)
+              _sleepState(
+                Icons.insights_outlined,
+                tr('No sleep trend yet', 'لا يوجد اتجاه للنوم بعد'),
+                tr(
+                  'Record sleep to build a recorded trend. Missing days stay missing.',
+                  'سجّل نومك لبناء اتجاه مسجل. تبقى الأيام الناقصة ناقصة.',
+                ),
+              )
+            else ...[
+              _HeroPanel(
+                icon: Icons.insights_rounded,
+                title: tr('Your recorded sleep', 'نومك المسجل'),
+                subtitle: tr(
+                  '${recorded.length} recorded nights · ${average!.toStringAsFixed(1)} h average',
+                  '${recorded.length} ليالٍ مسجلة · متوسط ${average.toStringAsFixed(1)} ساعة',
+                ),
+              ),
+              const SizedBox(height: 18),
+              BilPearlMaterialCard(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
+                  child: SizedBox(
+                    height: 190,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        for (final entry in recorded)
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(entry.sleepHours.toStringAsFixed(1)),
+                                  const SizedBox(height: 6),
+                                  Container(
+                                    height: (entry.sleepHours / 24 * 120).clamp(
+                                      6,
+                                      120,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 7),
+                                  Text(
+                                    '${entry.date.day}/${entry.date.month}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.labelSmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              _SafetyNote(
+                text: tr(
+                  'Only saved nights are shown. BIL does not estimate missing nights or diagnose sleep conditions.',
+                  'تظهر الليالي المحفوظة فقط. لا يقدّر BIL الليالي الناقصة ولا يشخّص اضطرابات النوم.',
+                ),
+              ),
+            ],
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                key: const Key('sleep-health-sources'),
+                onPressed: () =>
+                    context.push('/health-information-sources?topic=sleep'),
+                icon: const Icon(Icons.menu_book_outlined),
+                label: Text(
+                  tr('Sleep sources & methodology', 'مصادر ومنهجية النوم'),
+                ),
               ),
             ),
           ],
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: TextButton.icon(
-              key: const Key('sleep-health-sources'),
-              onPressed: () =>
-                  context.push('/health-information-sources?topic=sleep'),
-              icon: const Icon(Icons.menu_book_outlined),
-              label: Text(
-                tr('Sleep sources & methodology', 'مصادر ومنهجية النوم'),
-              ),
-            ),
-          ),
-        ],
-      );
-    },
-  );
+        );
+      },
+    );
+  }
 
   Future<void> _loadSleepSchedule() async {
     final value = await sleepScheduleStore.load();
@@ -733,11 +763,17 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       final repository = ref.read(dailyLogRepositoryProvider);
       await repository.updateSleepHours(date: date, sleepHours: selectedHours);
       if (!mounted) return;
-      final saved = await repository.getForDay(date);
+      DailyLog? saved;
+      try {
+        saved = await repository.getForDay(date);
+      } catch (_) {
+        // The write already committed. A missing optional timestamp must not
+        // report a failed save or invite repeating the completed write.
+      }
       if (!mounted) return;
       setState(() {
         recordedHours = selectedHours;
-        manualUpdatedAt = saved?.updatedAt ?? ref.read(sleepNowProvider)();
+        manualUpdatedAt = saved?.updatedAt;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

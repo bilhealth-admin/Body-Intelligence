@@ -165,6 +165,62 @@ void main() {
     expect(repository.writeCalls, 1);
   });
 
+  testWidgets('committed sleep stays saved when timestamp readback fails', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final repository = _ControlledDailyLogRepository(database);
+    final today = DateTime.now();
+    await repository.save(
+      date: today,
+      notes: 'keep',
+      steps: 6400,
+      exerciseNotes: 'walk',
+    );
+    await _pumpSleep(tester, database, repository);
+    await tester.pumpAndSettle();
+    await tester.drag(find.byType(Slider), const Offset(80, 0));
+    await tester.pump();
+    final selectedHours = tester.widget<Slider>(find.byType(Slider)).value;
+    final save = find.widgetWithText(FilledButton, 'Save sleep');
+    final staleSave = tester.widget<FilledButton>(save).onPressed!;
+    repository.pendingLoad = Completer<DailyLog?>();
+
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    final committed = await DailyLogRepository(database).getForDay(today);
+    expect(committed?.sleepHours, selectedHours);
+    expect(committed?.notes, 'keep');
+    expect(committed?.steps, 6400);
+    expect(committed?.exerciseNotes, 'walk');
+    expect(find.text('Saving…'), findsOneWidget);
+    staleSave();
+    await tester.pump();
+    expect(repository.writeCalls, 1);
+
+    repository.pendingLoad!.completeError(StateError('readback failed'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sleep saved to today’s health record.'), findsOneWidget);
+    expect(
+      find.textContaining('Your saved data was not changed'),
+      findsNothing,
+    );
+    expect(
+      find.text('Recorded today: ${selectedHours.toStringAsFixed(1)} h'),
+      findsOneWidget,
+    );
+    expect(find.text('Updated locally'), findsOneWidget);
+    expect(find.textContaining('Updated locally ·'), findsNothing);
+    expect(find.text('Saving…'), findsNothing);
+    expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
+    expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNotNull);
+    expect(repository.loadCalls, 2);
+    expect(repository.writeCalls, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('in-flight save suppresses duplicates and tab navigation', (
     tester,
   ) async {
@@ -569,6 +625,7 @@ final class _ControlledDailyLogRepository extends DailyLogRepository {
   int writeCalls = 0;
   bool failWrites = false;
   Completer<void>? pendingWrite;
+  Completer<DailyLog?>? pendingLoad;
 
   @override
   Future<DailyLog?> getForDay(DateTime date) {
@@ -577,6 +634,8 @@ final class _ControlledDailyLogRepository extends DailyLogRepository {
       remainingLoadFailures--;
       return Future<DailyLog?>.error(StateError('load failed'));
     }
+    final pending = pendingLoad;
+    if (pending != null) return pending.future;
     return super.getForDay(date);
   }
 

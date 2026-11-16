@@ -24,7 +24,7 @@ void main() {
   tearDown(() => database.close());
 
   test(
-    'custom food is durably published with its language and evidence',
+    'private custom food retains language and evidence without publishing',
     () async {
       final foodId = await foods.addFood(
         name: 'عدس منزلي',
@@ -39,49 +39,54 @@ void main() {
         fiber: 15,
       );
       final cloud = _FakeCommunityCloud();
-      final service = CommunityFoodSyncService(database, outbox, cloud);
+      final service = CommunityFoodSyncService(outbox, cloud);
 
-      await service.publishFood(foodId, localeCode: 'ar-EG');
       await service.flush();
 
-      expect(cloud.upserts, hasLength(1));
-      expect(cloud.upserts.single['canonical_name'], 'عدس منزلي');
-      expect(
-        (cloud.upserts.single['localized_names'] as Map)['ar'],
-        'عدس منزلي',
-      );
-      expect(cloud.upserts.single['fiber_g'], 15);
+      expect(cloud.upserts, isEmpty);
+      final food = await (database.select(
+        database.foods,
+      )..where((row) => row.id.equals(foodId))).getSingle();
+      expect(food.name, 'عدس منزلي');
+      expect(food.arabicName, 'عدس منزلي');
+      expect(food.fiber, 15);
       expect(await outbox.pendingCount(), 0);
     },
   );
 
-  test('failed cloud publication remains in the durable retry outbox', () async {
-    final foodId = await foods.addFood(
-      name: 'Offline oats',
-      category: 'custom',
-      servingSize: 50,
-      servingUnit: 'g',
-      calories: 190,
-      protein: 6,
-      carbs: 32,
-      fats: 4,
-    );
-    final cloud = _FakeCommunityCloud(failWrites: true);
-    final service = CommunityFoodSyncService(database, outbox, cloud);
+  test(
+    'failed authorized withdrawal remains in the durable retry outbox',
+    () async {
+      final foodId = await foods.addFood(
+        name: 'Offline oats',
+        category: 'custom',
+        servingSize: 50,
+        servingUnit: 'g',
+        calories: 190,
+        protein: 6,
+        carbs: 32,
+        fats: 4,
+      );
+      final cloud = _FakeCommunityCloud(failWrites: true);
+      final service = CommunityFoodSyncService(outbox, cloud);
 
-    await service.publishFood(foodId, localeCode: 'en-US');
-    await service.flush();
+      final food = await (database.select(
+        database.foods,
+      )..where((row) => row.id.equals(foodId))).getSingle();
+      await service.withdrawFood(food.uuid);
+      await service.flush();
 
-    expect(await outbox.pendingCount(), 1);
-    final row = await database
-        .customSelect(
-          'SELECT operation, attempt_count, last_error FROM community_food_outbox',
-        )
-        .getSingle();
-    expect(row.read<String>('operation'), 'upsert');
-    expect(row.read<int>('attempt_count'), 1);
-    expect(row.read<String>('last_error'), contains('offline'));
-  });
+      expect(await outbox.pendingCount(), 1);
+      final row = await database
+          .customSelect(
+            'SELECT operation, attempt_count, last_error FROM community_food_outbox',
+          )
+          .getSingle();
+      expect(row.read<String>('operation'), 'delete');
+      expect(row.read<int>('attempt_count'), 1);
+      expect(row.read<String>('last_error'), contains('offline'));
+    },
+  );
 
   test(
     'community result is searchable but never promoted as verified',

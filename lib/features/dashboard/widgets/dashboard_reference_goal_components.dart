@@ -174,6 +174,9 @@ class _ReferenceCaloriesCard extends StatelessWidget {
       'القيمة غير متاحة في أدلة الطعام المسجلة.',
     );
     final scheme = Theme.of(context).colorScheme;
+    final actionInk = Theme.of(context).brightness == Brightness.dark
+        ? const Color(0xFF82C4F2)
+        : scheme.primary;
     final localizedConsumed = _referenceText(context, 'consumed', 'المستهلك');
     final consumedLabel = Localizations.localeOf(context).languageCode == 'en'
         ? 'Consumed'
@@ -219,7 +222,7 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                       key: const Key('dashboard-reference-calories-edit'),
                       onPressed: onEdit,
                       style: TextButton.styleFrom(
-                        foregroundColor: scheme.primary,
+                        foregroundColor: actionInk,
                         minimumSize: const Size(0, 34),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -228,7 +231,7 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -.25,
-                              color: scheme.primary,
+                              color: actionInk,
                             ),
                       ),
                       child: Text(
@@ -237,7 +240,7 @@ class _ReferenceCaloriesCard extends StatelessWidget {
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           letterSpacing: -.25,
-                          color: scheme.primary,
+                          color: actionInk,
                         ),
                       ),
                     ),

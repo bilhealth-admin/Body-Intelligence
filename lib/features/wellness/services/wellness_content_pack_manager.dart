@@ -292,6 +292,7 @@ class WellnessContentPackManager {
     String? locale,
   }) async {
     final result = <Map<String, dynamic>>[];
+    Map<String, WellnessContentItem>? reviewedWorkoutMetadata;
     final approvedWorkoutBundles = type == WellnessContentType.workouts
         ? await _workoutReleaseVerifier.approvedRelease()
         : null;
@@ -323,6 +324,7 @@ class WellnessContentPackManager {
       final approvedWorkouts = approvedWorkoutBundles?[installed.id];
       for (final raw in decoded['items'] as List) {
         if (raw is! Map<String, dynamic>) continue;
+        List<String>? reviewedEquipment;
         if (type == WellnessContentType.workouts) {
           if (schemaVersion != 2) continue;
           final approval = approvedWorkouts?[raw['id']];
@@ -333,6 +335,36 @@ class WellnessContentPackManager {
               )) {
             continue;
           }
+          // Validate the original before projecting reviewed presentation metadata.
+          WellnessContentItem original;
+          try {
+            original = WellnessContentItem.fromJson(
+              raw,
+              expectedType: type,
+              schemaVersion: schemaVersion,
+            );
+          } on FormatException {
+            continue;
+          }
+          reviewedWorkoutMetadata ??= {
+            for (final item in await _loadWorkoutDiscovery())
+              item.stableId: item,
+          };
+          final reviewed = reviewedWorkoutMetadata[approval.releaseKey];
+          if (reviewed == null ||
+              reviewed.id != original.id ||
+              reviewed.releaseBundleId != approval.bundleId ||
+              !_samePinnedWorkoutMedia(
+                original.videoMedia,
+                reviewed.videoMedia,
+              ) ||
+              !_samePinnedWorkoutMedia(
+                original.imageMedia,
+                reviewed.imageMedia,
+              )) {
+            continue;
+          }
+          reviewedEquipment = reviewed.equipment;
         }
         final itemLocale = raw['locale'] as String? ?? 'en';
         if (locale != null && itemLocale != locale && itemLocale != 'all') {
@@ -344,6 +376,8 @@ class WellnessContentPackManager {
         }
         result.add({
           ...raw,
+          if (reviewedEquipment != null)
+            'equipment': List<String>.unmodifiable(reviewedEquipment),
           '_pack_id': installed.id,
           '_pack_version': installed.version,
           '_pack_schema_version': schemaVersion,
@@ -360,6 +394,18 @@ class WellnessContentPackManager {
     }
     return result;
   }
+
+  static bool _samePinnedWorkoutMedia(
+    WellnessMediaAsset? original,
+    WellnessMediaAsset? reviewed,
+  ) =>
+      original != null &&
+      reviewed != null &&
+      original.url == reviewed.url &&
+      original.sha256 == reviewed.sha256 &&
+      original.sizeBytes == reviewed.sizeBytes &&
+      original.mimeType == reviewed.mimeType &&
+      original.mediaRole == reviewed.mediaRole;
 
   /// Returns only typed, verified, attributable items from installed packs.
   /// Invalid entries fail closed at the item boundary and are never rendered.

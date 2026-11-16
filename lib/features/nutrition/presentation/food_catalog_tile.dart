@@ -36,7 +36,6 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
 
   Future<void> _edit() async {
     final repository = ref.read(foodRepositoryProvider);
-    final sync = ref.read(communityFoodSyncServiceProvider);
     bool current() =>
         mounted && identical(repository, ref.read(foodRepositoryProvider));
     final draft = await showDialog<_FoodDraft>(
@@ -46,7 +45,6 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
         food: widget.food,
         onSave: (draft) async {
           if (!current()) throw StateError('Food edit owner changed.');
-          final localeCode = Localizations.localeOf(context).toLanguageTag();
           await repository.updateCustomFood(
             id: widget.food.id,
             name: draft.name,
@@ -77,7 +75,6 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
             isCurrent: current,
           );
           if (!current()) throw StateError('Food edit owner changed.');
-          await sync.publishFood(widget.food.id, localeCode: localeCode);
         },
       ),
     );

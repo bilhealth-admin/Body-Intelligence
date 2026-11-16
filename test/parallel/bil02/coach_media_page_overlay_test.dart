@@ -165,6 +165,7 @@ Future<void> _mount(
     ],
   );
   fixture.router = router;
+  addTearDown(() => _unmount(tester));
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -265,6 +266,18 @@ Future<void> _mount(
 Future<void> _drain(WidgetTester tester) async {
   // Let actual Drift futures complete outside the widget fake clock.
   await tester.runAsync(() async => Future<void>.delayed(Duration.zero));
+  await tester.pump();
+  // Matching deliberately stays busy while its child picker is open. Wait
+  // for its route transition without trying to settle the indefinite status.
+  if (find
+      .byKey(const Key('premium-vision-matching-status'))
+      .evaluate()
+      .isNotEmpty) {
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.runAsync(() async => Future<void>.delayed(Duration.zero));
+    await tester.pump();
+    return;
+  }
   await tester.pumpAndSettle();
 }
 
@@ -370,6 +383,76 @@ final class _SyntheticAnalysis extends MealImageAnalysisService {
           ),
         ],
       );
+}
+
+final class _CountingPhotoAnalysis extends MealImageAnalysisService {
+  _CountingPhotoAnalysis(String locale, {this.name = 'Synthetic media food 1'})
+    : super(requestedLocale: locale);
+  final String name;
+  int calls = 0;
+  @override
+  Future<MealImageAnalysis> analyze(XFile image) {
+    calls++;
+    return Future.value(
+      MealImageAnalysis(
+        requestId: 'synthetic-photo-request',
+        notice: 'Synthetic identity only. Match a trusted local food.',
+        candidates: [
+          MealImageCandidate(
+            name: name,
+            confidence: .99,
+            evidence: 'Synthetic photo shape.',
+            identificationProvider: 'synthetic-test',
+            modelRevision: 'test-1',
+            nutritionResolution:
+                MealNutritionResolution.requiresVerifiedFoodMatch,
+            amount: 100,
+            unit: 'g',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Future<void> _selectPhotoDraft(
+  WidgetTester tester, {
+  String amount = '100',
+}) async {
+  final stage = find.byKey(const Key('premium-vision-stage-before'));
+  await _until(tester, stage);
+  await tester.ensureVisible(stage);
+  await tester.tap(stage);
+  await tester.pump();
+  final selection = find.byKey(const Key('premium-vision-select-0'));
+  await tester.ensureVisible(selection);
+  await tester.tap(selection);
+  await tester.pump();
+  final eaten = find.byKey(const Key('premium-vision-eaten-0'));
+  await tester.ensureVisible(eaten);
+  await tester.tap(eaten);
+  await tester.pump();
+  await tester.enterText(
+    find.byKey(const Key('premium-vision-amount-0')),
+    amount,
+  );
+  final next = find.byKey(const Key('premium-vision-continue'));
+  await tester.ensureVisible(next);
+  await tester.pump();
+  expect(tester.widget<FilledButton>(next).onPressed, isNotNull);
+  await tester.tap(next);
+}
+
+Future<void> _pumpPendingPhoto(
+  WidgetTester tester,
+  bool Function() settled,
+) async {
+  for (var turn = 0; turn < 40 && !settled(); turn++) {
+    await tester.runAsync(() async => Future<void>.delayed(Duration.zero));
+    await tester.pump(const Duration(milliseconds: 25));
+  }
+  await tester.pump();
+  expect(settled(), isTrue);
 }
 
 final class _PendingAnalysis extends _SyntheticAnalysis {
@@ -790,6 +873,256 @@ void main() {
       );
       expect(card.commit.after.single.item.foodVerifiedSnapshot, isFalse);
       expect(fixture.gateway.questions, isEmpty);
+      expect(tester.takeException(), isNull);
+      await _unmount(tester);
+    },
+  );
+
+  testWidgets(
+    'unmatched photo keeps editable draft and retries locally without another analysis',
+    (tester) async {
+      final fixture = await _fixture(tester);
+      final analysis = _CountingPhotoAnalysis(
+        'en',
+        name: 'Unmatched red apple',
+      );
+      final lookedUp = <String?>[];
+      await _mount(
+        tester,
+        fixture,
+        barcode: null,
+        picker: _SyntheticPicker(),
+        analysis: (_) => analysis,
+        lookup: (input) async {
+          lookedUp.add(input.name);
+          return input.name == fixture.rows.single.name ? fixture.entries : [];
+        },
+      );
+      await tester.tap(find.byKey(const Key('ai-coach-food-image-button')));
+      await _drain(tester);
+      await tester.tap(find.byKey(const Key('ai-coach-image-source-gallery')));
+      await _selectPhotoDraft(tester, amount: '125');
+      await _drain(tester);
+      expect(find.byKey(const Key('premium-vision-continue')), findsOneWidget);
+      expect(
+        find.byKey(const Key('premium-vision-match-issue')),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('premium-vision-amount-0')))
+            .controller!
+            .text,
+        '125',
+      );
+      expect(
+        tester
+            .widget<ChoiceChip>(
+              find.byKey(const Key('premium-vision-stage-before')),
+            )
+            .selected,
+        isTrue,
+      );
+      expect(
+        tester
+            .widget<ChoiceChip>(find.byKey(const Key('premium-vision-eaten-0')))
+            .selected,
+        isTrue,
+      );
+      expect(lookedUp, ['Unmatched red apple']);
+      expect(analysis.calls, 1);
+      await _expectNoMeal(tester, fixture);
+
+      final remove = find.byKey(const Key('premium-vision-exclude-0'));
+      await tester.ensureVisible(remove);
+      await tester.tap(remove);
+      await tester.pump();
+      final add = find.byKey(const Key('premium-vision-add-food'));
+      await tester.ensureVisible(add);
+      await tester.tap(add);
+      await _drain(tester);
+      final addDialog = find.bySubtype<AlertDialog>();
+      await tester.enterText(
+        find.descendant(of: addDialog, matching: find.byType(TextField)),
+        fixture.rows.single.name,
+      );
+      await tester.tap(
+        find.descendant(of: addDialog, matching: find.text('Add')),
+      );
+      await _drain(tester);
+      final eaten = find.byKey(const Key('premium-vision-eaten-1'));
+      await tester.ensureVisible(eaten);
+      await tester.tap(eaten);
+      await tester.pump();
+      await tester.enterText(
+        find.byKey(const Key('premium-vision-amount-1')),
+        '100',
+      );
+      await tester.pump();
+      final retry = find.byKey(const Key('premium-vision-continue'));
+      expect(tester.widget<FilledButton>(retry).onPressed, isNotNull);
+      await tester.tap(retry);
+      await _drain(tester);
+      await _chooseMatch(tester, fixture.rows.single.name);
+      await _until(tester, find.byType(CoachFoodReviewCard));
+      expect(lookedUp, ['Unmatched red apple', fixture.rows.single.name]);
+      expect(analysis.calls, 1);
+      await _expectNoMeal(tester, fixture);
+      expect(tester.takeException(), isNull);
+      await _unmount(tester);
+    },
+  );
+
+  testWidgets(
+    'canceling a photo match returns to the same confirmed photo draft',
+    (tester) async {
+      final fixture = await _fixture(tester);
+      final analysis = _CountingPhotoAnalysis('en');
+      await _mount(
+        tester,
+        fixture,
+        barcode: null,
+        picker: _SyntheticPicker(),
+        analysis: (_) => analysis,
+      );
+      await tester.tap(find.byKey(const Key('ai-coach-food-image-button')));
+      await _drain(tester);
+      await tester.tap(find.byKey(const Key('ai-coach-image-source-gallery')));
+      await _selectPhotoDraft(tester, amount: '127');
+      await _drain(tester);
+      final use = find.byKey(const Key('premium-vision-use-food'));
+      await _until(tester, use);
+      final dialog = find.ancestor(of: use, matching: find.bySubtype<Dialog>());
+      await tester.tap(
+        find.descendant(
+          of: dialog,
+          matching: find.widgetWithIcon(IconButton, Icons.close),
+        ),
+      );
+      await _drain(tester);
+      expect(find.byKey(const Key('premium-vision-continue')), findsOneWidget);
+      expect(find.byKey(const Key('premium-vision-match-issue')), findsNothing);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('premium-vision-amount-0')))
+            .controller!
+            .text,
+        '127',
+      );
+      expect(analysis.calls, 1);
+      await _expectNoMeal(tester, fixture);
+      await _unmount(tester);
+    },
+  );
+
+  for (final retire in ['owner A B A', 'route exit', 'permission revoke']) {
+    testWidgets(
+      'photo matching retires on $retire and repeated confirm cannot start another lookup',
+      (tester) async {
+        final fixture = await _fixture(tester);
+        final analysis = _CountingPhotoAnalysis('en');
+        final pending = Completer<List<CoachMediaCatalogEntry>>();
+        var lookups = 0;
+        await _mount(
+          tester,
+          fixture,
+          barcode: null,
+          picker: _SyntheticPicker(),
+          analysis: (_) => analysis,
+          lookup: (_) {
+            lookups++;
+            return pending.future;
+          },
+        );
+        await tester.tap(find.byKey(const Key('ai-coach-food-image-button')));
+        await _drain(tester);
+        await tester.tap(
+          find.byKey(const Key('ai-coach-image-source-gallery')),
+        );
+        await _selectPhotoDraft(tester);
+        await _pumpPendingPhoto(tester, () => lookups == 1);
+        final next = find.byKey(const Key('premium-vision-continue'));
+        expect(tester.widget<FilledButton>(next).onPressed, isNull);
+        await tester.tap(next);
+        await tester.pump();
+        expect(lookups, 1);
+        if (retire == 'route exit') {
+          fixture.router!.go('/dashboard');
+        } else if (retire == 'permission revoke') {
+          final container = ProviderScope.containerOf(
+            tester.element(find.byType(IntelligenceCenterPage)),
+          );
+          container.read(coachActionPermissionModeProvider.notifier).state =
+              CoachActionPermissionMode.readOnly;
+          await tester.pump();
+          container.read(coachActionPermissionModeProvider.notifier).state =
+              CoachActionPermissionMode.askBeforeWrite;
+        } else {
+          fixture.switchAwayAndBack();
+        }
+        await _pumpPendingPhoto(
+          tester,
+          () => find
+              .byKey(const Key('premium-vision-continue'))
+              .evaluate()
+              .isEmpty,
+        );
+        pending.complete(fixture.entries);
+        await _drain(tester);
+        expect(find.byKey(const Key('premium-vision-use-food')), findsNothing);
+        expect(find.byType(CoachFoodReviewCard), findsNothing);
+        expect(analysis.calls, 1);
+        await _expectNoMeal(tester, fixture);
+        expect(tester.takeException(), isNull);
+        await _unmount(tester);
+      },
+    );
+  }
+
+  testWidgets(
+    'owner retirement removes only its photo and zoom routes, preserving an unrelated dialog',
+    (tester) async {
+      final fixture = await _fixture(tester);
+      final analysis = _CountingPhotoAnalysis('en');
+      await _mount(
+        tester,
+        fixture,
+        barcode: null,
+        picker: _SyntheticPicker(),
+        analysis: (_) => analysis,
+      );
+      await tester.tap(find.byKey(const Key('ai-coach-food-image-button')));
+      await _drain(tester);
+      await tester.tap(find.byKey(const Key('ai-coach-image-source-gallery')));
+      final photo = find.byKey(const Key('premium-vision-photo'));
+      await _until(tester, photo);
+      await tester.tap(photo);
+      await _drain(tester);
+      expect(find.byTooltip('Close photo'), findsOneWidget);
+      unawaited(
+        showDialog<void>(
+          context: tester.element(find.byType(IntelligenceCenterPage)),
+          builder: (context) => AlertDialog(
+            title: const Text('Unrelated dialog'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close unrelated'),
+              ),
+            ],
+          ),
+        ),
+      );
+      await _drain(tester);
+      fixture.switchAwayAndBack();
+      await _drain(tester);
+      expect(find.text('Unrelated dialog'), findsOneWidget);
+      expect(find.byTooltip('Close photo'), findsNothing);
+      expect(find.byKey(const Key('premium-vision-continue')), findsNothing);
+      await tester.tap(find.text('Close unrelated'));
+      await _drain(tester);
+      await _expectNoMeal(tester, fixture);
+      expect(analysis.calls, 1);
       expect(tester.takeException(), isNull);
       await _unmount(tester);
     },

@@ -8,6 +8,11 @@ import '../../app/localization/runtime_copy_health_devices_review.dart';
 import '../../app/localization/runtime_copy_health_device_status.dart';
 import 'connected_health_model.dart';
 
+const connectedHealthHistoryIncompleteEnglish =
+    'Recent health readings updated. Earlier history is not fully synchronized.';
+const connectedHealthHistoryIncompleteArabic =
+    'تم تحديث القراءات الصحية الحديثة. لم تكتمل مزامنة السجل السابق بعد.';
+
 String connectedHealthText(
   BuildContext context,
   String english,
@@ -168,6 +173,8 @@ String connectedHealthDataTypeText(BuildContext context, String key) {
 
 const _translations = <String, Map<String, String>>{
   'fr': {
+    connectedHealthHistoryIncompleteEnglish:
+        'Les mesures de santé récentes ont été actualisées. L’historique antérieur n’est pas encore entièrement synchronisé.',
     'Apps & Devices': 'Applications et appareils',
     'All': 'Tout',
     'Connection capabilities': 'Capacités de connexion',
@@ -258,6 +265,8 @@ const _translations = <String, Map<String, String>>{
         'Poids, composition corporelle et fréquence cardiaque.',
   },
   'es': {
+    connectedHealthHistoryIncompleteEnglish:
+        'Las lecturas de salud recientes se actualizaron. El historial anterior aún no está completamente sincronizado.',
     'Apps & Devices': 'Aplicaciones y dispositivos',
     'All': 'Todo',
     'Connection capabilities': 'Capacidades de conexión',
@@ -346,6 +355,8 @@ const _translations = <String, Map<String, String>>{
         'Peso, composición corporal y frecuencia cardíaca.',
   },
   'tr': {
+    connectedHealthHistoryIncompleteEnglish:
+        'Son sağlık ölçümleri güncellendi. Önceki geçmiş henüz tamamen eşitlenmedi.',
     'Apps & Devices': 'Uygulamalar ve cihazlar',
     'All': 'Tümü',
     'Connection capabilities': 'Bağlantı özellikleri',

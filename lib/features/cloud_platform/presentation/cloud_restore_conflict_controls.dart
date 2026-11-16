@@ -28,14 +28,18 @@ class _ConflictControlsState
   @override
   Widget build(BuildContext context) {
     final syncing = ref.watch(cloudManualSyncStatusProvider).isSyncing;
+    final baseOff = ref.watch(cloudRestoreBaseConsentOffProvider);
     final asyncConsent = ref.watch(cloudRestoreConsentStateProvider);
     final consent = asyncConsent.value;
     final canReview =
+        !baseOff &&
         !asyncConsent.isLoading &&
         !asyncConsent.hasError &&
         consent?.availability == CloudRestoreConsentAvailability.available &&
         consent!.grantedScopes.isNotEmpty;
-    final disabledReason = asyncConsent.isLoading
+    final disabledReason = baseOff
+        ? CloudRestoreCopy.baseRequired
+        : asyncConsent.isLoading
         ? CloudRestoreCopy.checking
         : asyncConsent.hasError
         ? CloudRestoreCopy.unavailable

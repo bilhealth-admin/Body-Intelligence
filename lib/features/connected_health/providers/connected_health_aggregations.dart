@@ -177,6 +177,33 @@ List<GlobalHealthSignal> aggregateConnectedStepSignals(
   return List<GlobalHealthSignal>.unmodifiable(output);
 }
 
+DateTime _connectedNoonAtOrBefore(DateTime instant) {
+  final local = instant.toLocal();
+  return DateTime(
+    local.year,
+    local.month,
+    local.day - (local.hour < 12 ? 1 : 0),
+    12,
+  );
+}
+
+DateTime _connectedSleepNightStart(DateTime endedAt) =>
+    _connectedNoonAtOrBefore(endedAt.subtract(const Duration(microseconds: 1)));
+
+String? _connectedSleepNightKey(GlobalHealthSignal signal) {
+  if (signal.key != 'sleep') return null;
+  final end = DateTime.tryParse(signal.attributes['endedAt']?.toString() ?? '');
+  if (end == null) return null;
+  final start = _connectedSleepNightStart(end);
+  // Stages on both sides of midnight belong to the same noon-to-noon night.
+  final day = DateTime(start.year, start.month, start.day + 1);
+  final night =
+      '${day.year.toString().padLeft(4, '0')}-'
+      '${day.month.toString().padLeft(2, '0')}-'
+      '${day.day.toString().padLeft(2, '0')}';
+  return '${signal.provenance.providerId}|${signal.provenance.sourceId}|$night';
+}
+
 /// Converts HealthKit's overlapping in-bed/awake/stage samples into one
 /// measured asleep duration per source/night. Android SleepSessionRecord rows
 /// already carry a session total with nested stages and pass through unchanged.
@@ -207,13 +234,7 @@ List<GlobalHealthSignal> aggregateConnectedSleepSignals(
     if (endedAt == null || !endedAt.isAfter(signal.provenance.observedAt)) {
       continue;
     }
-    final localEnd = endedAt.toLocal();
-    final night =
-        '${localEnd.year.toString().padLeft(4, '0')}-'
-        '${localEnd.month.toString().padLeft(2, '0')}-'
-        '${localEnd.day.toString().padLeft(2, '0')}';
-    final key =
-        '${signal.provenance.providerId}|${signal.provenance.sourceId}|$night';
+    final key = _connectedSleepNightKey(signal)!;
     stagedByNight.putIfAbsent(key, () => <GlobalHealthSignal>[]).add(signal);
   }
 

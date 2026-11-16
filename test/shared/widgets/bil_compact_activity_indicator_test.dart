@@ -45,7 +45,7 @@ void main() {
 
   for (final reduced in [false, true]) {
     testWidgets(
-      'Dashboard explicitly retains its old circular wait reduced=$reduced',
+      'Dashboard operation alias uses the gray segmented wait reduced=$reduced',
       (tester) async {
         await tester.pumpWidget(
           MaterialApp(
@@ -57,11 +57,14 @@ void main() {
             ),
           ),
         );
-        expect(find.byType(CupertinoActivityIndicator), findsNothing);
-        expect(
-          find.byType(CircularProgressIndicator),
-          reduced ? findsNothing : findsOneWidget,
+        expect(find.byType(CupertinoActivityIndicator), findsOneWidget);
+        final indicator = tester.widget<CupertinoActivityIndicator>(
+          find.byType(CupertinoActivityIndicator),
         );
+        expect(indicator.color, const Color(0xFF697178));
+        expect(indicator.radius, 12);
+        expect(indicator.animating, !reduced);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(
           tester.getSize(find.byType(BilCompactActivityIndicator)),
           const Size.square(24),

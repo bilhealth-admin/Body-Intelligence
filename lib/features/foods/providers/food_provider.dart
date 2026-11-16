@@ -47,10 +47,21 @@ final communityFoodCloudProvider = Provider<SupabaseCommunityFoodCatalog?>((
 final communityFoodSyncServiceProvider = Provider<CommunityFoodSyncService>((
   ref,
 ) {
+  final database = ref.watch(databaseProvider);
+  final outbox = ref.watch(communityFoodOutboxProvider);
+  final cloud = ref.watch(communityFoodCloudProvider);
+  var active = true;
+  ref.onDispose(() => active = false);
   return CommunityFoodSyncService(
-    ref.watch(databaseProvider),
-    ref.watch(communityFoodOutboxProvider),
-    ref.watch(communityFoodCloudProvider),
+    outbox,
+    cloud,
+    isCurrent: () =>
+        active &&
+        ref.mounted &&
+        identical(database, ref.read(databaseProvider)) &&
+        (!AppEnvironment.supabaseRuntimeReady ||
+            Supabase.instance.client.auth.currentSession?.user.id ==
+                database.localOwnerId),
   );
 });
 

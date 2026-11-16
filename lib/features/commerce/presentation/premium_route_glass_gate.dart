@@ -2,6 +2,7 @@ import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -11,6 +12,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
+import '../../auth/auth_entry_locale_copy.dart';
+import '../../intelligence_center/intelligence_locale_copy.dart';
 import '../domain/commerce_entitlement.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/subscription_state.dart';
@@ -98,11 +101,70 @@ class _RetainedAiCoachSurfaceState
     extends ConsumerState<_RetainedAiCoachSurface> {
   bool _contentMounted = false;
   bool? _lastVerifiedAccess;
+  Timer? _ownerResolutionTimer;
+  bool _ownerResolutionExpired = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startOwnerResolutionWindow();
+  }
+
+  void _startOwnerResolutionWindow() {
+    _ownerResolutionTimer?.cancel();
+    _ownerResolutionExpired = false;
+    _ownerResolutionTimer = Timer(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      setState(() => _ownerResolutionExpired = true);
+    });
+  }
+
+  void _retryOwnerResolution() {
+    setState(_startOwnerResolutionWindow);
+    ref.invalidate(verifiedEntitlementOwnerProvider);
+    ref.invalidate(aiCoachCreditAccessProvider);
+  }
+
+  Future<void> _openSignIn() async {
+    await context.push<void>('/login');
+    if (!mounted) return;
+    _retryOwnerResolution();
+  }
+
+  @override
+  void dispose() {
+    _ownerResolutionTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final credits = ref.watch(aiCoachCreditAccessProvider);
+    final ownerSnapshot = ref.watch(verifiedEntitlementOwnerProvider);
     final ownerKnown = ref.watch(verifiedEntitlementOwnerIdProvider) != null;
+    if (ownerKnown || ownerSnapshot.hasValue || ownerSnapshot.hasError) {
+      _ownerResolutionTimer?.cancel();
+    }
+    if (!ownerKnown) {
+      // A settled signed-out owner is not an in-flight credit request. No
+      // entitlement is granted here, and no Coach child or paid offer mounts.
+      if (ownerSnapshot.hasError ||
+          (!ownerSnapshot.hasValue && _ownerResolutionExpired)) {
+        return _AiCoachAccountRecoverySurface(
+          unavailable: true,
+          onRetry: _retryOwnerResolution,
+          onSignIn: _openSignIn,
+        );
+      }
+      if (ownerSnapshot.hasValue) {
+        return _AiCoachAccountRecoverySurface(
+          unavailable: false,
+          onRetry: _retryOwnerResolution,
+          onSignIn: _openSignIn,
+        );
+      }
+      return const _AiCoachAccessCheckingSurface();
+    }
     // AsyncValue can retain previous data during a dependency reload. Only a
     // completed check for this owner may populate the owner's retained state.
     final freshAccess = credits.isLoading || credits.hasError || !ownerKnown
@@ -122,9 +184,7 @@ class _RetainedAiCoachSurfaceState
     final allowed = (freshAccess ?? _lastVerifiedAccess) == true;
     final unavailable = credits.hasError && _lastVerifiedAccess == null;
     final checking =
-        (!ownerKnown || credits.isLoading) &&
-        _lastVerifiedAccess == null &&
-        !unavailable;
+        credits.isLoading && _lastVerifiedAccess == null && !unavailable;
     if (allowed) {
       _contentMounted = true;
     }
@@ -162,28 +222,6 @@ class _RetainedAiCoachSurfaceState
       ],
     );
   }
-}
-
-/// Opaque first-frame surface for the one-time server credit check.
-///
-/// It matches the immersive Coach background, exposes no transcript or
-/// purchase offer, and still lets the member leave while access is resolving.
-class _AiCoachAccessCheckingSurface extends StatelessWidget {
-  const _AiCoachAccessCheckingSurface();
-
-  @override
-  Widget build(BuildContext context) => _PremiumRoutePageFrame(
-    title: _featureName(context, PremiumGateFeature.aiCoach),
-    returnToDashboard: true,
-    backKey: const ValueKey('premium-route-loading-back'),
-    child: const Center(
-      child: SizedBox.square(
-        key: ValueKey('ai-coach-access-checking-surface'),
-        dimension: 24,
-        child: BilFeatureWelcomeStatus(),
-      ),
-    ),
-  );
 }
 
 class _PremiumRouteGateContents extends ConsumerStatefulWidget {

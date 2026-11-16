@@ -108,6 +108,7 @@ final class DurableOfflineFirstCloudPlatform {
     var pushed = 0;
     var applied = 0;
     var conflicts = 0;
+    var unresolvedConflicts = 0;
     try {
       pending = await store.readReadyOperations(
         ownerId: consent.ownerId,
@@ -184,6 +185,10 @@ final class DurableOfflineFirstCloudPlatform {
             remote: remote,
           );
           conflicts++;
+          if (conflict.resolution == CloudConflictResolution.manualReview ||
+              conflict.merged == null) {
+            unresolvedConflicts++;
+          }
           stage = 'conflict_write';
           await store.saveConflict(
             CloudConflictRecord(
@@ -226,6 +231,7 @@ final class DurableOfflineFirstCloudPlatform {
         pushed: batch.acknowledgedOperationIds.length,
         pulled: applied,
         conflicts: conflicts,
+        classifiedUnresolvedConflicts: unresolvedConflicts,
         pending: remaining,
         availability: batch.hasMore || blocked || remaining > 0
             ? CloudPlatformAvailability.paused
@@ -274,6 +280,7 @@ final class DurableOfflineFirstCloudPlatform {
         pushed: pushed,
         pulled: applied,
         conflicts: conflicts,
+        classifiedUnresolvedConflicts: unresolvedConflicts,
         pending: await store.pendingCount(ownerId: consent.ownerId),
         availability: CloudPlatformAvailability.paused,
         diagnostics: [failureCode],

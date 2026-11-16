@@ -22,6 +22,7 @@ part 'meal_vision_premium_portion.dart';
 part 'meal_vision_premium_visuals.dart';
 part 'meal_vision_premium_glass.dart';
 part 'meal_vision_premium_reference.dart';
+part 'meal_vision_review_lifetime.dart';
 
 /// Only identity and serving suggestions are returned from image analysis.
 /// Nutrient values MUST be resolved by the existing trusted-food match flow.
@@ -80,14 +81,22 @@ Future<List<PremiumVisionSelection>?> showPremiumVisionReviewDialog(
   String? imagePath,
   String? mealType,
   DateTime? photographedAt,
+  MealVisionReviewLifetime? lifetime,
+  Future<MealVisionReviewDecision> Function(List<PremiumVisionSelection>)?
+  onConfirm,
 }) => showDialog<List<PremiumVisionSelection>>(
   context: context,
   barrierDismissible: false,
-  builder: (_) => _PremiumVisionReviewDialog(
-    analysis: analysis,
-    imagePath: imagePath,
-    mealType: mealType,
-    photographedAt: photographedAt,
+  builder: (_) => guardMealVisionReview(
+    lifetime: lifetime,
+    child: _PremiumVisionReviewDialog(
+      analysis: analysis,
+      imagePath: imagePath,
+      mealType: mealType,
+      photographedAt: photographedAt,
+      lifetime: lifetime,
+      onConfirm: onConfirm,
+    ),
   ),
 );
 
@@ -100,17 +109,21 @@ Future<Food?> showPremiumTrustedVisionFoodMatchDialog(
   double? reviewedAmount,
   String? reviewedUnit,
   String? evidenceOwnerKey,
+  MealVisionReviewLifetime? lifetime,
 }) {
   if (foods.isEmpty) return Future<Food?>.value(null);
   return showDialog<Food>(
     context: context,
     barrierDismissible: false,
-    builder: (_) => _PremiumTrustedMatchDialog(
-      recognizedName: recognizedName,
-      foods: foods,
-      reviewedAmount: reviewedAmount,
-      reviewedUnit: reviewedUnit,
-      evidenceOwnerKey: evidenceOwnerKey,
+    builder: (_) => guardMealVisionReview(
+      lifetime: lifetime,
+      child: _PremiumTrustedMatchDialog(
+        recognizedName: recognizedName,
+        foods: foods,
+        reviewedAmount: reviewedAmount,
+        reviewedUnit: reviewedUnit,
+        evidenceOwnerKey: evidenceOwnerKey,
+      ),
     ),
   );
 }
@@ -138,10 +151,15 @@ class _PremiumVisionReviewDialog extends StatefulWidget {
     this.imagePath,
     this.mealType,
     this.photographedAt,
+    this.lifetime,
+    this.onConfirm,
   });
   final MealImageAnalysis analysis;
   final String? imagePath, mealType;
   final DateTime? photographedAt;
+  final MealVisionReviewLifetime? lifetime;
+  final Future<MealVisionReviewDecision> Function(List<PremiumVisionSelection>)?
+  onConfirm;
 
   @override
   State<_PremiumVisionReviewDialog> createState() =>
@@ -160,6 +178,9 @@ class _PremiumVisionReviewDialogState
   final GlobalKey _ingredientsAnchor = GlobalKey();
   String? _photoStage;
   bool _adding = false;
+  bool _confirming = false;
+  bool _closing = false;
+  String? _matchMessage;
   final _newFood = TextEditingController();
 
   @override
@@ -248,26 +269,29 @@ class _PremiumVisionReviewDialogState
     setState(() => _adding = true);
     final name = await showDialog<String>(
       context: context,
-      builder: (dialog) => BilPearlMaterialAlertDialog(
-        title: Text(_word(context, 'Add missing food', 'أضف طعامًا مفقودًا')),
-        content: TextField(
-          controller: _newFood,
-          autofocus: true,
-          maxLength: 160,
-          decoration: InputDecoration(
-            labelText: _word(context, 'Food name', 'اسم الطعام'),
+      builder: (dialog) => guardMealVisionReview(
+        lifetime: widget.lifetime,
+        child: BilPearlMaterialAlertDialog(
+          title: Text(_word(context, 'Add missing food', 'أضف طعامًا مفقودًا')),
+          content: TextField(
+            controller: _newFood,
+            autofocus: true,
+            maxLength: 160,
+            decoration: InputDecoration(
+              labelText: _word(context, 'Food name', 'اسم الطعام'),
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialog),
+              child: Text(_word(context, 'Cancel', 'إلغاء')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialog, _newFood.text.trim()),
+              child: Text(_word(context, 'Add', 'إضافة')),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialog),
-            child: Text(_word(context, 'Cancel', 'إلغاء')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialog, _newFood.text.trim()),
-            child: Text(_word(context, 'Add', 'إضافة')),
-          ),
-        ],
       ),
     );
     if (!mounted) return;
@@ -313,6 +337,9 @@ class _PremiumVisionReviewDialogState
   }
 
   bool get _canContinue {
+    if (_confirming || _closing || widget.lifetime?.isActive == false) {
+      return false;
+    }
     if (_photoStage == null) return false;
     final active = _selected.difference(_excluded);
     if (active.isEmpty) return false;
@@ -334,7 +361,20 @@ class _PremiumVisionReviewDialogState
     return true;
   }
 
-  void _confirm() {
+  void _closeOwnedReview([List<PremiumVisionSelection>? result]) {
+    final route = ModalRoute.of<List<PremiumVisionSelection>>(context);
+    final navigator = route?.navigator;
+    if (route == null || !route.isActive || navigator == null) return;
+    _closing = true;
+    if (route.isCurrent) {
+      navigator.pop(result);
+    } else {
+      navigator.removeRoute(route, result);
+    }
+  }
+
+  Future<void> _confirm() async {
+    if (_confirming || _closing || widget.lifetime?.isActive == false) return;
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
@@ -384,7 +424,42 @@ class _PremiumVisionReviewDialogState
         ),
       );
     }
-    if (results.isNotEmpty) Navigator.of(context).pop(results);
+    if (results.isEmpty) return;
+    final confirm = widget.onConfirm;
+    if (confirm == null) {
+      _closeOwnedReview(results);
+      return;
+    }
+    setState(() {
+      _confirming = true;
+      _matchMessage = null;
+    });
+    try {
+      final decision = await confirm(List.unmodifiable(results));
+      if (!mounted) return;
+      switch (decision.kind) {
+        case MealVisionReviewDecisionKind.accepted:
+          _closeOwnedReview(results);
+        case MealVisionReviewDecisionKind.retired:
+          _closeOwnedReview();
+        case MealVisionReviewDecisionKind.retry:
+          setState(() => _matchMessage = decision.message);
+        case MealVisionReviewDecisionKind.cancelled:
+          break;
+      }
+    } on Object {
+      if (mounted) {
+        setState(
+          () => _matchMessage = _word(
+            context,
+            'The local match could not be read. Try again.',
+            'تعذرت قراءة المطابقة المحلية الآن. حاول مجددًا.',
+          ),
+        );
+      }
+    } finally {
+      if (mounted && !_closing) setState(() => _confirming = false);
+    }
   }
 
   String? get _sourceImagePath => widget.imagePath;
@@ -447,89 +522,92 @@ class _PremiumVisionReviewDialogState
                 IconButton(
                   key: const Key('premium-vision-close'),
                   tooltip: _word(context, 'Cancel', 'إلغاء'),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: _closeOwnedReview,
                   icon: Icon(Icons.close_rounded, color: _foreground(context)),
                 ),
               ],
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              key: const Key('premium-vision-review-scroll'),
-              padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _photo(context),
-                  const SizedBox(height: 12),
-                  Column(
-                    key: _ingredientsAnchor,
-                    children: [
-                      for (var index = 0; index < _foods.length; index++)
-                        if (!_excluded.contains(index)) _candidateCard(index),
-                    ],
-                  ),
-                  if (_excluded.isNotEmpty)
-                    Wrap(
-                      spacing: 6,
+            child: IgnorePointer(
+              ignoring: _confirming,
+              child: SingleChildScrollView(
+                key: const Key('premium-vision-review-scroll'),
+                padding: const EdgeInsets.fromLTRB(16, 2, 16, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _photo(context),
+                    const SizedBox(height: 12),
+                    Column(
+                      key: _ingredientsAnchor,
                       children: [
-                        for (final index in _excluded)
-                          ActionChip(
-                            label: Text(
-                              '${_word(context, 'Restore ', 'استعادة ')}${_foods[index].name}',
-                            ),
-                            onPressed: () =>
-                                setState(() => _excluded.remove(index)),
-                          ),
+                        for (var index = 0; index < _foods.length; index++)
+                          if (!_excluded.contains(index)) _candidateCard(index),
                       ],
                     ),
-                  _reviewContext(clock),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: _glassDecoration(context),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.info_outline_rounded,
-                          color: Color(0xFFF3C56E),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 9),
-                        Expanded(
-                          child: Text(
-                            _word(
-                              context,
-                              'If the photo shows leftovers, enter what you ate, not what remains. Recognition confidence is not calorie accuracy.',
-                              'إذا كانت الصورة لبقايا الطعام، أدخل ما أكلته بالفعل. ثقة التعرّف لا تثبت السعرات.',
+                    if (_excluded.isNotEmpty)
+                      Wrap(
+                        spacing: 6,
+                        children: [
+                          for (final index in _excluded)
+                            ActionChip(
+                              label: Text(
+                                '${_word(context, 'Restore ', 'استعادة ')}${_foods[index].name}',
+                              ),
+                              onPressed: () =>
+                                  setState(() => _excluded.remove(index)),
                             ),
-                            style: TextStyle(
-                              color: light
-                                  ? const Color(0xFF674F26)
-                                  : const Color(0xFFFFDE9A),
-                              fontSize: 12,
-                              height: 1.4,
+                        ],
+                      ),
+                    _reviewContext(clock),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: _glassDecoration(context),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            color: Color(0xFFF3C56E),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Text(
+                              _word(
+                                context,
+                                'If the photo shows leftovers, enter what you ate, not what remains. Recognition confidence is not calorie accuracy.',
+                                'إذا كانت الصورة لبقايا الطعام، أدخل ما أكلته بالفعل. ثقة التعرّف لا تثبت السعرات.',
+                              ),
+                              style: TextStyle(
+                                color: light
+                                    ? const Color(0xFF674F26)
+                                    : const Color(0xFFFFDE9A),
+                                fontSize: 12,
+                                height: 1.4,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _unverifiedNutrition(context),
-                  TextButton.icon(
-                    key: const Key('premium-vision-add-food'),
-                    onPressed: _addFood,
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text(
-                      _word(
-                        context,
-                        'Add missing ingredient',
-                        'إضافة مكوّن آخر',
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    _unverifiedNutrition(context),
+                    TextButton.icon(
+                      key: const Key('premium-vision-add-food'),
+                      onPressed: _addFood,
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text(
+                        _word(
+                          context,
+                          'Add missing ingredient',
+                          'إضافة مكوّن آخر',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

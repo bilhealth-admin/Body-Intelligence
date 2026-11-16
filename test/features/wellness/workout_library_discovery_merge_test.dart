@@ -198,6 +198,289 @@ void main() {
       expect(client.requests, 0);
     },
   );
+
+  test(
+    'warm immutable packs use reviewed equipment across raw trusted and library reads',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'bil-equipment-warm-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final originals = await _writeWarmWorkoutCopies(directory);
+      final before = _snapshotFiles(directory);
+      final client = _NoNetworkHttpClient();
+      var discoveryReads = 0;
+      final manager = WellnessContentPackManager(
+        client: client,
+        packsDirectory: directory,
+        workoutReleaseLoader: () async => release,
+        workoutDiscoveryLoader: () async {
+          discoveryReads++;
+          return discovery;
+        },
+      );
+      final reviewed = {for (final item in discovery) item.stableId: item};
+      final raw = await manager.loadInstalledItems(
+        WellnessContentType.workouts,
+      );
+      expect(raw, hasLength(302));
+      for (final row in raw) {
+        final key = row['_release_key'] as String;
+        final content = Map<String, dynamic>.from(row)
+          ..removeWhere((key, _) => key.startsWith('_'));
+        expect(content, {
+          ...originals[key]!,
+          'equipment': reviewed[key]!.equipment,
+        }, reason: key);
+      }
+      for (final items in [
+        await manager.loadTrustedInstalledItems(
+          WellnessContentType.workouts,
+          locale: 'en',
+        ),
+        await manager.loadWorkoutLibraryItems(locale: 'en'),
+      ]) {
+        expect(items, hasLength(302));
+        for (final item in items) {
+          final authority = reviewed[item.stableId]!;
+          expect(item.equipment, authority.equipment, reason: item.stableId);
+          final expected = WellnessContentItem.fromJson(
+            {
+              ...originals[item.stableId]!,
+              '_pack_minimum_access': 'pro',
+              '_release_bundle_id': authority.releaseBundleId,
+              '_release_key': item.stableId,
+              '_primary_plan_group_id': authority.primaryPlanGroupId,
+              '_plan_group_ids': authority.planGroupIds,
+            },
+            expectedType: WellnessContentType.workouts,
+            schemaVersion: 2,
+          );
+          expect(
+            _preservedWorkoutFields(item),
+            _preservedWorkoutFields(expected),
+            reason: item.stableId,
+          );
+        }
+        final bench = items.singleWhere(
+          (item) => item.stableId == _benchReleaseKey,
+        );
+        expect(bench.equipment, ['stable bench']);
+        expect(bench.steps.first, contains('locked, non-slip flat bench'));
+      }
+      expect(originals[_benchReleaseKey]!['equipment'], ['none']);
+      expect(_snapshotFiles(directory), before);
+      expect(discoveryReads, 1);
+      expect(client.requests, 0);
+    },
+  );
+
+  for (final invalid in <Object?>[
+    null,
+    'stable bench',
+    [],
+    ['none', 'none'],
+    [''],
+  ]) {
+    test(
+      'original malformed equipment ${jsonEncode(invalid)} is never blessed by reviewed overlay',
+      () async {
+        final directory = await Directory.systemTemp.createTemp(
+          'bil-equipment-invalid-',
+        );
+        addTearDown(() => directory.delete(recursive: true));
+        await _writeWarmWorkoutCopies(directory);
+        await _mutateWarmBench(directory, (raw) => raw['equipment'] = invalid);
+        final before = _snapshotFiles(directory);
+        final client = _NoNetworkHttpClient();
+        final manager = WellnessContentPackManager(
+          client: client,
+          packsDirectory: directory,
+          workoutReleaseLoader: () async => release,
+          workoutDiscoveryLoader: () async => discovery,
+        );
+        final raw = await manager.loadInstalledItems(
+          WellnessContentType.workouts,
+        );
+        expect(raw, hasLength(301));
+        expect(
+          raw.where((item) => item['_release_key'] == _benchReleaseKey),
+          isEmpty,
+        );
+        final trusted = await manager.loadTrustedInstalledItems(
+          WellnessContentType.workouts,
+        );
+        expect(
+          trusted.where((item) => item.stableId == _benchReleaseKey),
+          isEmpty,
+        );
+        final library = await manager.loadWorkoutLibraryItems(locale: 'en');
+        expect(
+          library
+              .singleWhere((item) => item.stableId == _benchReleaseKey)
+              .steps,
+          isEmpty,
+        );
+        expect(_snapshotFiles(directory), before);
+        expect(client.requests, 0);
+      },
+    );
+  }
+
+  for (final corruption in ['poster', 'video', 'rights']) {
+    test(
+      'reviewed equipment never blesses changed $corruption pins or rights',
+      () async {
+        final directory = await Directory.systemTemp.createTemp(
+          'bil-equipment-pins-',
+        );
+        addTearDown(() => directory.delete(recursive: true));
+        await _writeWarmWorkoutCopies(directory);
+        await _mutateWarmBench(directory, (raw) {
+          if (corruption == 'rights') {
+            (raw['rights'] as Map<String, dynamic>)['mobile'] = false;
+          } else {
+            final media = raw['media'] as Map<String, dynamic>;
+            (media[corruption == 'poster' ? 'image' : 'video']
+                as Map<String, dynamic>)['sha256'] = List.filled(
+              64,
+              '0',
+            ).join();
+          }
+        });
+        final before = _snapshotFiles(directory);
+        final client = _NoNetworkHttpClient();
+        final manager = WellnessContentPackManager(
+          client: client,
+          packsDirectory: directory,
+          workoutReleaseLoader: () async => release,
+          workoutDiscoveryLoader: () async => discovery,
+        );
+        final raw = await manager.loadInstalledItems(
+          WellnessContentType.workouts,
+        );
+        expect(
+          raw.where((item) => item['_release_key'] == _benchReleaseKey),
+          isEmpty,
+        );
+        final trusted = await manager.loadTrustedInstalledItems(
+          WellnessContentType.workouts,
+        );
+        expect(
+          trusted.where((item) => item.stableId == _benchReleaseKey),
+          isEmpty,
+        );
+        expect(_snapshotFiles(directory), before);
+        expect(client.requests, 0);
+      },
+    );
+  }
+
+  test(
+    'missing or failed reviewed authority cannot manufacture trusted equipment',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'bil-equipment-authority-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      await _writeWarmWorkoutCopies(directory);
+      final before = _snapshotFiles(directory);
+      final client = _NoNetworkHttpClient();
+      final missing = WellnessContentPackManager(
+        client: client,
+        packsDirectory: directory,
+        workoutReleaseLoader: () async => release,
+        workoutDiscoveryLoader: () async => discovery
+            .where((item) => item.stableId != _benchReleaseKey)
+            .toList(),
+      );
+      final raw = await missing.loadInstalledItems(
+        WellnessContentType.workouts,
+      );
+      expect(
+        raw.where((item) => item['_release_key'] == _benchReleaseKey),
+        isEmpty,
+      );
+      final failed = WellnessContentPackManager(
+        client: client,
+        packsDirectory: directory,
+        workoutReleaseLoader: () async => release,
+        workoutDiscoveryLoader: () async =>
+            throw StateError('review authority unavailable'),
+      );
+      await expectLater(
+        failed.loadTrustedInstalledItems(WellnessContentType.workouts),
+        throwsStateError,
+      );
+      expect(_snapshotFiles(directory), before);
+      expect(client.requests, 0);
+    },
+  );
+
+  test(
+    'recipe reads do not load reviewed workout discovery or approvals',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'bil-equipment-non-workout-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final file = File(p.join(directory.path, 'recipe-fixture-1.json'));
+      await file.writeAsString(
+        jsonEncode({
+          'schema_version': 1,
+          'pack_id': 'recipe-fixture',
+          'version': 1,
+          'type': 'recipes',
+          'items': [
+            {
+              'id': 'fixture-recipe',
+              'type': 'recipes',
+              'locale': 'en',
+              'title': 'Existing recipe fixture',
+              'description': 'Recipe unchanged by workout metadata.',
+              'publisher': 'BIL Health',
+              'source_url': 'https://www.bilhealth.com/terms',
+              'license_name': 'Existing fixture',
+              'verified': true,
+            },
+          ],
+        }),
+      );
+      final installed = InstalledWellnessContentPack(
+        id: 'recipe-fixture',
+        version: 1,
+        path: p.basename(file.path),
+        installedAt: DateTime.utc(2026, 11, 1),
+      );
+      await File(
+        p.join(directory.path, 'installed.json'),
+      ).writeAsString(jsonEncode([installed.toJson()]));
+      var authorityReads = 0;
+      final client = _NoNetworkHttpClient();
+      final manager = WellnessContentPackManager(
+        client: client,
+        packsDirectory: directory,
+        workoutReleaseLoader: () async {
+          authorityReads++;
+          throw StateError('not for recipes');
+        },
+        workoutDiscoveryLoader: () async {
+          authorityReads++;
+          throw StateError('not for recipes');
+        },
+      );
+      expect(
+        await manager.loadInstalledItems(WellnessContentType.recipes),
+        hasLength(1),
+      );
+      expect(
+        await manager.loadTrustedInstalledItems(WellnessContentType.recipes),
+        hasLength(1),
+      );
+      expect(authorityReads, 0);
+      expect(client.requests, 0);
+    },
+  );
 }
 
 List<WorkoutReleaseCatalogItem> _approvedRelease() {
@@ -283,3 +566,113 @@ final class _NoNetworkHttpClient implements HttpClient {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
+const _benchReleaseKey =
+    'gym-six-month:resistance-upper-body-bench-push-up-technique';
+
+Future<Map<String, Map<String, dynamic>>> _writeWarmWorkoutCopies(
+  Directory directory,
+) async {
+  final originals = <String, Map<String, dynamic>>{};
+  final registry = <Map<String, dynamic>>[];
+  for (final bundle in const [
+    ('home-training', 'bil-workouts-home-v1'),
+    ('gym-six-month', 'bil-workouts-gym-six-month-v1'),
+  ]) {
+    final source = File(
+      'artifacts/workout_media/cloudflare_runtime_v2/packs/${bundle.$2}-v1.json',
+    );
+    final bytes = await source.readAsBytes();
+    final root = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+    for (final raw in (root['items'] as List).cast<Map<String, dynamic>>()) {
+      originals['${bundle.$1}:${raw['id']}'] = raw;
+    }
+    final name = '${bundle.$2}-1.json';
+    await File(p.join(directory.path, name)).writeAsBytes(bytes);
+    registry.add(
+      InstalledWellnessContentPack(
+        id: bundle.$2,
+        version: 1,
+        path: name,
+        installedAt: DateTime.utc(2026, 11, 1),
+        minimumAccess: WellnessContentAccess.pro,
+      ).toJson(),
+    );
+  }
+  await File(
+    p.join(directory.path, 'installed.json'),
+  ).writeAsString(jsonEncode(registry));
+  return originals;
+}
+
+Map<String, List<int>> _snapshotFiles(Directory directory) => {
+  for (final file in directory.listSync().whereType<File>())
+    p.basename(file.path): file.readAsBytesSync(),
+};
+
+Future<void> _mutateWarmBench(
+  Directory directory,
+  void Function(Map<String, dynamic>) mutate,
+) async {
+  final file = File(
+    p.join(directory.path, 'bil-workouts-gym-six-month-v1-1.json'),
+  );
+  final root = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+  final raw = (root['items'] as List).cast<Map<String, dynamic>>().singleWhere(
+    (raw) => 'gym-six-month:${raw['id']}' == _benchReleaseKey,
+  );
+  mutate(raw);
+  await file.writeAsString(jsonEncode(root));
+}
+
+Object? _mediaFingerprint(WellnessMediaAsset? asset) => asset == null
+    ? null
+    : (
+        asset.url,
+        asset.sha256,
+        asset.sizeBytes,
+        asset.mimeType,
+        asset.mediaRole,
+      );
+
+Map<String, Object?> _preservedWorkoutFields(WellnessContentItem item) => {
+  'id': item.id,
+  'type': item.type,
+  'locale': item.locale,
+  'title': item.title,
+  'description': item.description,
+  'publisher': item.publisher,
+  'sourceUrl': item.sourceUrl,
+  'licenseName': item.licenseName,
+  'licenseUrl': item.licenseUrl,
+  'verified': item.verified,
+  'imageUrl': item.imageUrl,
+  'videoUrl': item.videoUrl,
+  'durationMinutes': item.durationMinutes,
+  'durationSeconds': item.durationSeconds,
+  'difficulty': item.difficulty,
+  'tags': item.tags,
+  'instructions': item.instructions,
+  'category': item.category,
+  'categoryDescription': item.categoryDescription,
+  'categoryOrder': item.categoryOrder,
+  'steps': item.steps,
+  'imageMedia': _mediaFingerprint(item.imageMedia),
+  'videoMedia': _mediaFingerprint(item.videoMedia),
+  'rights': item.rights == null
+      ? null
+      : (item.rights!.mobile, item.rights!.paid, item.rights!.offline),
+  'author': item.author,
+  'attribution': item.attribution,
+  'reviewedAt': item.reviewedAt,
+  'safetyReviewed': item.safetyReviewed,
+  'segments': item.segments,
+  'minimumAccess': item.minimumAccess,
+  'audience': item.audience,
+  'presenter': item.presenter,
+  'syntheticPerformer': item.syntheticPerformer,
+  'releaseBundleId': item.releaseBundleId,
+  'releaseKey': item.releaseKey,
+  'primaryPlanGroupId': item.primaryPlanGroupId,
+  'planGroupIds': item.planGroupIds,
+};

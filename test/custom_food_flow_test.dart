@@ -7,6 +7,10 @@ import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/food_page.dart';
+import 'package:body_intelligence_log/features/nutrition/community_catalog/data/community_food_outbox_store.dart';
+import 'package:body_intelligence_log/features/nutrition/community_catalog/data/supabase_community_food_catalog.dart';
+import 'package:body_intelligence_log/features/nutrition/community_catalog/services/community_food_sync_service.dart';
+import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -91,11 +95,15 @@ void main() {
     );
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
+    final communityCloud = _RecordingFoodCloud();
+    final outbox = CommunityFoodOutboxStore(database);
+    final communitySync = CommunityFoodSyncService(outbox, communityCloud);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
           seedCatalogProvider.overrideWith((ref) async {}),
+          communityFoodSyncServiceProvider.overrideWithValue(communitySync),
         ],
         child: const MaterialApp(
           locale: Locale('en'),
@@ -155,6 +163,13 @@ void main() {
     expect(find.text('Personal yogurt'), findsOneWidget);
     var food = await database.select(database.foods).getSingle();
     expect(food.calories, 120.5);
+    await communitySync.flush();
+    expect(
+      communityCloud.upserts,
+      isEmpty,
+      reason: 'Saving private food is not a Community submission.',
+    );
+    expect(await outbox.pendingCount(), 0);
     expect(
       NutrientEvidenceMask.contains(
         food.nutrientEvidenceMask,
@@ -202,6 +217,13 @@ void main() {
     food = await database.select(database.foods).getSingle();
     expect(food.calories, 130);
     expect(food.revision, 2);
+    await communitySync.flush();
+    expect(
+      communityCloud.upserts,
+      isEmpty,
+      reason: 'Editing private food must not publish its changed values.',
+    );
+    expect(await outbox.pendingCount(), 0);
 
     await _tapReach(tester, find.widgetWithText(ListTile, 'Personal yogurt'));
     await _tapReach(tester, find.widgetWithText(OutlinedButton, 'Delete'));
@@ -212,6 +234,9 @@ void main() {
     food = await database.select(database.foods).getSingle();
     expect(food.deletedAt, isNotNull);
     expect(food.revision, 3);
+    await communitySync.flush();
+    expect(communityCloud.withdrawals, [food.uuid]);
+    expect(communityCloud.upserts, isEmpty);
     await tester.pumpAndSettle();
     expect(find.text('Personal yogurt'), findsNothing);
     expect(tester.takeException(), isNull);
@@ -282,6 +307,22 @@ void main() {
       expect(arabic.text(key), isNot(key), reason: 'ar/$key');
     }
   });
+}
+
+class _RecordingFoodCloud implements CommunityFoodCloudGateway {
+  final upserts = <Map<String, dynamic>>[];
+  final withdrawals = <String>[];
+
+  @override
+  Future<void> upsert(Map<String, dynamic> payload) async =>
+      upserts.add(payload);
+
+  @override
+  Future<void> withdraw(String localFoodUuid) async =>
+      withdrawals.add(localFoodUuid);
+
+  @override
+  Future<List<UnifiedFood>> search(String query, {int limit = 10}) async => [];
 }
 
 Future<void> _tapReach(WidgetTester tester, Finder action) async {

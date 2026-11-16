@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
+import 'package:flutter/rendering.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_review.dart';
@@ -51,7 +53,95 @@ Widget _dashboard({bool discoverOnly = false}) => SingleChildScrollView(
   ),
 );
 
+double _labelContrast(Color foreground, Color background) {
+  final ink = Color.alphaBlend(foreground, background).computeLuminance();
+  final paper = background.computeLuminance();
+  return ink >= paper
+      ? (ink + .05) / (paper + .05)
+      : (paper + .05) / (ink + .05);
+}
+
 void main() {
+  for (final dark in [false, true]) {
+    testWidgets(
+      'real Dashboard Today action contrast dark=$dark retains navigation',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 1000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final base = dark ? BilFlagshipTheme.dark() : BilFlagshipTheme.light();
+        final theme = base.copyWith(
+          colorScheme: base.colorScheme.copyWith(
+            primary: const Color(0xFF2563EB),
+            primaryContainer: const Color(0xFFE4EDFF),
+          ),
+        );
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, _) => Scaffold(body: _dashboard()),
+            ),
+            GoRoute(
+              path: '/daily-log',
+              builder: (_, _) =>
+                  const Scaffold(body: Text('contrast diary target')),
+            ),
+          ],
+        );
+        try {
+          await tester.pumpWidget(
+            ProviderScope(
+              child: MaterialApp.router(
+                theme: theme,
+                routerConfig: router,
+                locale: const Locale('en'),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  ...GlobalMaterialLocalizations.delegates,
+                ],
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final action = find.byKey(
+            const Key('dashboard-reference-calories-edit'),
+          );
+          await tester.ensureVisible(action);
+          await tester.pump();
+          final label = find
+              .descendant(of: action, matching: find.byType(Text))
+              .first;
+          final ink = tester
+              .renderObject<RenderParagraph>(label)
+              .text
+              .style!
+              .color!;
+          final context = tester.element(label);
+          expect(
+            _labelContrast(ink, Theme.of(context).colorScheme.surface),
+            greaterThanOrEqualTo(4.5),
+          );
+          expect(
+            Theme.of(context).colorScheme.primary,
+            const Color(0xFF2563EB),
+          );
+          if (!dark) expect(ink, const Color(0xFF2563EB));
+          await tester.tap(action);
+          await tester.pumpAndSettle();
+          expect(router.routeInformationProvider.value.uri.path, '/daily-log');
+          expect(find.text('contrast diary target'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+          router.dispose();
+        }
+      },
+    );
+  }
+
   for (final checking in [false, true]) {
     testWidgets(
       'Community is free and tappable while premium checking=$checking',

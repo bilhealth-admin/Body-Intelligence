@@ -335,8 +335,8 @@ abstract final class BilFlagshipTheme {
           ),
         ),
         labelStyle: TextStyle(color: scheme.onSurfaceVariant),
-        floatingLabelStyle: const TextStyle(
-          color: BilFlagshipTokens.cyan500,
+        floatingLabelStyle: TextStyle(
+          color: dark ? scheme.primary : BilFlagshipTokens.cyan500,
           fontWeight: FontWeight.w600,
         ),
       ),

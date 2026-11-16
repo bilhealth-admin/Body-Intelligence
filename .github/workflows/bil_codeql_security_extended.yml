@@ -7,6 +7,7 @@ on:
       - codex/bil43-android35-verified-20261108
       - codex/bil44-android36-verified-20261115
       - codex/bil45-android37-inactive-catalog-20261115
+      - codex/bil46-android38-reviewer-fixes-20261116
       - integration/bil-qa-media-policy-20261011
       - bil39/integration-20261025
       - codex/bil40-device-fixes-20261028
@@ -632,11 +633,27 @@ jobs:
           shopt -s nullglob
           isolated_sql_tests=(supabase/tests/*_test.ts)
           test "${#isolated_sql_tests[@]}" -gt 0
-          deno test --no-lock --allow-env --allow-read --allow-net "${isolated_sql_tests[@]}"
+          root_sql_tests=()
+          package_sql_tests=()
+          for sql_test in "${isolated_sql_tests[@]}"; do
+            if [[ "$sql_test" == "supabase/tests/community_food_explicit_publication_pglite_test.ts" ]]; then
+              package_sql_tests+=("${sql_test#supabase/tests/}")
+            else
+              root_sql_tests+=("$sql_test")
+            fi
+          done
+          test "${#package_sql_tests[@]}" -eq 1
+          test "${#root_sql_tests[@]}" -gt 0
+          test "$(( ${#root_sql_tests[@]} + ${#package_sql_tests[@]} ))" -eq "${#isolated_sql_tests[@]}"
+          deno test --no-lock --allow-env --allow-read --allow-net "${root_sql_tests[@]}"
+          (
+            cd supabase/tests
+            deno test --no-lock --allow-env --allow-read --allow-net "${package_sql_tests[@]}"
+          )
           deno test --allow-env --allow-read --allow-net supabase/functions
 
   isolated-source-audit:
-    if: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/bil39/integration-20261025' || github.ref == 'refs/heads/codex/bil40-device-fixes-20261028' || github.ref == 'refs/heads/codex/bil41-android33-release-20261106' || github.ref == 'refs/heads/codex/bil43-android35-verified-20261108' || github.ref == 'refs/heads/codex/bil44-android36-verified-20261115' || github.ref == 'refs/heads/codex/bil45-android37-inactive-catalog-20261115')) || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
+    if: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/bil39/integration-20261025' || github.ref == 'refs/heads/codex/bil40-device-fixes-20261028' || github.ref == 'refs/heads/codex/bil41-android33-release-20261106' || github.ref == 'refs/heads/codex/bil43-android35-verified-20261108' || github.ref == 'refs/heads/codex/bil44-android36-verified-20261115' || github.ref == 'refs/heads/codex/bil45-android37-inactive-catalog-20261115' || github.ref == 'refs/heads/codex/bil46-android38-reviewer-fixes-20261116')) || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
     name: Isolated Semgrep source audit
     runs-on: ubuntu-24.04
     timeout-minutes: 30

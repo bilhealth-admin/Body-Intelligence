@@ -100,3 +100,97 @@ String _featureName(BuildContext context, PremiumGateFeature feature) =>
       PremiumGateFeature.sleep => 'Sleep',
       PremiumGateFeature.community => 'Community',
     });
+
+class _AiCoachAccountRecoverySurface extends StatelessWidget {
+  const _AiCoachAccountRecoverySurface({
+    required this.unavailable,
+    required this.onRetry,
+    required this.onSignIn,
+  });
+
+  final bool unavailable;
+  final VoidCallback onRetry;
+  final VoidCallback onSignIn;
+
+  @override
+  Widget build(BuildContext context) => _PremiumRoutePageFrame(
+    title: _featureName(context, PremiumGateFeature.aiCoach),
+    returnToDashboard: true,
+    child: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: BilPearlMaterialCard(
+          key: const ValueKey('ai-coach-account-recovery'),
+          elevation: 0,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  unavailable
+                      ? context.strings.text('Unavailable')
+                      : authEntryText(context, AuthEntryCopyKey.signIn),
+                  key: unavailable
+                      ? const ValueKey('ai-coach-account-check-unavailable')
+                      : null,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                if (unavailable) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    authEntryText(
+                      context,
+                      AuthEntryCopyKey.authenticationFailed,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton.tonal(
+                    key: const ValueKey('ai-coach-account-retry'),
+                    onPressed: onRetry,
+                    child: Text(context.strings.text('Try again')),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                FilledButton(
+                  key: const ValueKey('ai-coach-account-sign-in'),
+                  onPressed: onSignIn,
+                  child: Text(authEntryText(context, AuthEntryCopyKey.signIn)),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/// Opaque first-frame surface for the one-time server credit check.
+///
+/// Keep the approved entry artwork and Preparing capsule visible while the
+/// initial check resolves. No private Coach child or purchase offer is mounted.
+class _AiCoachAccessCheckingSurface extends StatelessWidget {
+  const _AiCoachAccessCheckingSurface();
+
+  @override
+  Widget build(BuildContext context) => _PremiumRoutePageFrame(
+    title: _featureName(context, PremiumGateFeature.aiCoach),
+    returnToDashboard: true,
+    backKey: const ValueKey('premium-route-loading-back'),
+    child: BilPearlFeatureWelcome(
+      key: const ValueKey('ai-coach-access-checking-surface'),
+      title: intelligenceText(
+        context,
+        'Welcome to AI Coach',
+        'مرحبًا بك في المدرب الذكي',
+      ),
+      subtitle: intelligenceText(context, 'Speak your language', 'أتكلم لغتك'),
+      statusLabel: intelligenceText(context, 'Preparing…', 'جارٍ التحضير…'),
+      artworkWidth: 216,
+      artwork: const BilCoachPortrait(fit: BoxFit.cover, cacheWidth: 512),
+    ),
+  );
+}

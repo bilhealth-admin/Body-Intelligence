@@ -96,8 +96,7 @@ class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard> {
             ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
             : PremiumDesignTokens.cardPaddingLarge,
         child: state.when(
-          loading: () =>
-              const Center(child: BilCompactActivityIndicator.dashboard()),
+          loading: () => const Center(child: BilCompactActivityIndicator()),
           error: (_, _) => ConnectedHealthErrorContent(
             languageCode: Localizations.localeOf(context).toLanguageTag(),
             onRetry: () => ref.read(connectedHealthProvider.notifier).refresh(),
@@ -284,7 +283,12 @@ class _ConnectedHealthContent extends StatelessWidget {
       HealthSlide(
         title: tr('Smart-watch reading', 'قراءة الساعة الذكية'),
         result: _statusLabel(snapshot.status),
-        explanation: _statusExplanation(snapshot.status),
+        explanation: snapshot.failureCode == 'health_history_sync_incomplete'
+            ? tr(
+                connectedHealthHistoryIncompleteEnglish,
+                connectedHealthHistoryIncompleteArabic,
+              )
+            : _statusExplanation(snapshot.status),
         footer: _displaySource(snapshot.platformSource),
         icon: Icons.watch_outlined,
       ),
@@ -653,6 +657,9 @@ class _DashboardSyncReading extends StatelessWidget {
     onPressed: onSync ?? () {},
     style: compact
         ? OutlinedButton.styleFrom(
+            foregroundColor: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF82C4F2)
+                : null,
             side: BorderSide.none,
             minimumSize: const Size(0, 40),
             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -660,11 +667,13 @@ class _DashboardSyncReading extends StatelessWidget {
               context,
             ).textTheme.labelSmall?.copyWith(fontSize: 10),
           )
+        : Theme.of(context).brightness == Brightness.dark
+        ? OutlinedButton.styleFrom(foregroundColor: const Color(0xFF82C4F2))
         : null,
     icon: syncing
         ? const SizedBox.square(
             dimension: 17,
-            child: BilCompactActivityIndicator.dashboard(),
+            child: BilCompactActivityIndicator(),
           )
         : BilNavigationFeedback(
             child: Icon(Icons.sync_rounded, size: compact ? 14 : 17),

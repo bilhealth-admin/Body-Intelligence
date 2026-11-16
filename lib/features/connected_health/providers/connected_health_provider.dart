@@ -23,39 +23,6 @@ part 'connected_health_aggregations.dart';
 part 'connected_health_native_gateway.dart';
 part 'connected_health_native_daily_activity.dart';
 
-abstract interface class ConnectedHealthGateway {
-  Future<ConnectedHealthSnapshot> load();
-  Future<ConnectedHealthSnapshot> synchronize();
-  Future<ConnectedHealthSnapshot> requestPermissions();
-  Future<ConnectedHealthSnapshot> requestWeightWritePermission();
-  Future<ConnectedHealthSnapshot> revokePermissions();
-  Future<void> openSystemSettings();
-}
-
-/// Bounded activity totals only: no permission prompts, raw-history import,
-/// anchor reset, or remote transfer during a dashboard visit.
-abstract interface class ConnectedHealthDailyActivityGateway {
-  Future<ConnectedHealthSnapshot> loadDailyActivity();
-}
-
-/// Local, consented native evidence only; never waits for OS status or reads.
-abstract interface class ConnectedHealthCachedSnapshotGateway {
-  Future<ConnectedHealthSnapshot> loadCachedSnapshot();
-}
-
-/// An initial native sheet is permitted after the user's setup completes.
-/// No repeat sheet, settings redirect, or silent grant is inferred here.
-abstract interface class ConnectedHealthStartupPermissionGateway {
-  Future<ConnectedHealthSnapshot?> requestStartupPermissions();
-}
-
-/// Implemented only by gateways that can stop an active native read.  The
-/// iOS controller uses this after a foreground deadline or app backgrounding;
-/// Android and Bluetooth flows are intentionally not affected.
-abstract interface class ConnectedHealthCancellableSyncGateway {
-  Future<void> cancelSynchronization();
-}
-
 String _connectedHealthOwnerId() {
   try {
     if (!Supabase.instance.isInitialized) {
@@ -112,6 +79,7 @@ final class DeferredConnectedHealthGateway
     implements
         ConnectedHealthGateway,
         ConnectedHealthDailyActivityGateway,
+        ConnectedHealthForegroundSyncGateway,
         ConnectedHealthCachedSnapshotGateway,
         ConnectedHealthStartupPermissionGateway,
         ConnectedHealthCancellableSyncGateway {
@@ -122,13 +90,15 @@ final class DeferredConnectedHealthGateway
 
   final String ownerId;
   final String Function() currentOwnerId;
+  NativeConnectedHealthGateway? _nativeGateway;
+  int _readGeneration = 0;
 
   Future<NativeConnectedHealthGateway> _native() async {
     final host = GlobalNativeIntegrationHost.instance;
     await host.initialize();
     final flows = host.productFlows;
     if (flows == null) throw StateError('global_product_flows_not_initialized');
-    return NativeConnectedHealthGateway(
+    return _nativeGateway ??= NativeConnectedHealthGateway(
       flows,
       ownerId: ownerId,
       currentOwnerId: currentOwnerId,
@@ -150,16 +120,37 @@ final class DeferredConnectedHealthGateway
       (await _native()).loadCachedSnapshot();
 
   @override
-  Future<ConnectedHealthSnapshot> synchronize() async =>
-      (await _native()).synchronize();
+  Future<ConnectedHealthSnapshot> synchronize() =>
+      _readAfterInitialization((native) => native.synchronize());
 
   @override
-  Future<void> cancelSynchronization() async =>
-      (await _native()).cancelSynchronization();
+  Future<ConnectedHealthSnapshot> synchronizeWithForeground(
+    void Function(ConnectedHealthSnapshot snapshot) onForeground,
+  ) => _readAfterInitialization(
+    (native) => native.synchronizeWithForeground(onForeground),
+  );
 
   @override
-  Future<ConnectedHealthSnapshot> loadDailyActivity() async =>
-      (await _native()).loadDailyActivity();
+  Future<void> cancelSynchronization() async {
+    _readGeneration++;
+    await (await _native()).cancelSynchronization();
+  }
+
+  @override
+  Future<ConnectedHealthSnapshot> loadDailyActivity() =>
+      _readAfterInitialization((native) => native.loadDailyActivity());
+
+  Future<ConnectedHealthSnapshot> _readAfterInitialization(
+    Future<ConnectedHealthSnapshot> Function(NativeConnectedHealthGateway) read,
+  ) async {
+    // Cancellation can arrive while the optional host is still starting.
+    final generation = _readGeneration;
+    final native = await _native();
+    if (generation != _readGeneration) {
+      return const ConnectedHealthSnapshot.unavailable();
+    }
+    return read(native);
+  }
 
   @override
   Future<ConnectedHealthSnapshot> requestPermissions() async =>
@@ -303,19 +294,38 @@ final class ConnectedHealthController
                   (gateway as ConnectedHealthDailyActivityGateway)
                       .loadDailyActivity()
                       .whenComplete(() => _nativeActivityTask = null))
-              .timeout(_synchronizationTimeout),
+              .timeout(
+                _synchronizationTimeout,
+                onTimeout: () {
+                  _cancelIosNativeSynchronization();
+                  throw TimeoutException(
+                    'Foreground health refresh timed out.',
+                  );
+                },
+              ),
     );
     if (mounted && state.asData?.value.failureCode == null && !state.hasError) {
       _activityRefreshedAt = now;
     }
   }
 
-  Future<ConnectedHealthSnapshot> _readNativeOnce() {
+  Future<ConnectedHealthSnapshot> _readNativeOnce({
+    void Function(ConnectedHealthSnapshot snapshot)? onForeground,
+  }) {
     // A visible timeout cannot cancel a HealthKit query. Retain its single
     // flight so another tap cannot start a competing importer/cache write.
-    return _nativeSyncTask ??= _gateway.synchronize().whenComplete(() {
-      _nativeSyncTask = null;
-    });
+    final gateway = _gateway;
+    return _nativeSyncTask ??=
+        (!kIsWeb &&
+                    defaultTargetPlatform == TargetPlatform.iOS &&
+                    gateway is ConnectedHealthForegroundSyncGateway &&
+                    onForeground != null
+                ? (gateway as ConnectedHealthForegroundSyncGateway)
+                      .synchronizeWithForeground(onForeground)
+                : gateway.synchronize())
+            .whenComplete(() {
+              _nativeSyncTask = null;
+            });
   }
 
   Future<void> _runMutation(
@@ -491,7 +501,7 @@ final class ConnectedHealthController
         _nativeSyncTask != null ||
         _nativeLoadTask != null ||
         _nativeActivityTask != null;
-    _readGeneration++;
+    final generation = ++_readGeneration;
     state = AsyncValue.data(
       current.copyWith(
         status: ConnectedHealthStatus.syncing,
@@ -502,9 +512,10 @@ final class ConnectedHealthController
     if (hadNativeReadInFlight) _cancelIosNativeSynchronization();
 
     late final Future<void> task;
-    task = _performExplicitSynchronization(current, deadline).whenComplete(() {
-      if (identical(_explicitSyncTask, task)) _explicitSyncTask = null;
-    });
+    task = _performExplicitSynchronization(current, deadline, generation)
+        .whenComplete(() {
+          if (identical(_explicitSyncTask, task)) _explicitSyncTask = null;
+        });
     _explicitSyncTask = task;
     return task;
   }
@@ -512,44 +523,74 @@ final class ConnectedHealthController
   Future<void> _performExplicitSynchronization(
     ConnectedHealthSnapshot previous,
     DateTime deadline,
+    int generation,
   ) async {
+    final ios = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+    bool current() =>
+        mounted && !_readsSuspended && (!ios || generation == _readGeneration);
+    ConnectedHealthSnapshot? foreground;
     await _yieldIosSynchronizationFrame();
-    if (!mounted || _readsSuspended) return;
+    if (!current()) return;
     // Invoke the single native flight before evaluating the remaining UX
     // budget. Even a zero-budget test/action must start (and then cancel) the
     // one requested synchronization rather than silently doing nothing.
-    final native = _readNativeOnce();
+    final native = _readNativeOnce(
+      onForeground: (snapshot) {
+        if (!current()) return;
+        foreground = snapshot;
+        state = AsyncValue.data(
+          snapshot.copyWith(
+            status: ConnectedHealthStatus.syncing,
+            isBusy: true,
+          ),
+        );
+      },
+    );
     final remaining = deadline.difference(DateTime.now());
     if (remaining <= Duration.zero) {
       _cancelIosNativeSynchronization();
-      _publishExplicitSyncTimeout(previous);
+      _publishExplicitSyncTimeout(
+        foreground ?? previous,
+        historyIncomplete: foreground != null,
+      );
       return;
     }
     try {
       final snapshot = await native.timeout(remaining);
-      if (!mounted || _readsSuspended) return;
+      if (!current()) return;
       state = AsyncValue.data(snapshot.copyWith(isBusy: false));
     } on TimeoutException {
+      if (!current()) return;
       _cancelIosNativeSynchronization();
-      _publishExplicitSyncTimeout(previous);
+      _publishExplicitSyncTimeout(
+        foreground ?? previous,
+        historyIncomplete: foreground != null,
+      );
     } catch (_) {
-      if (!mounted || _readsSuspended) return;
+      if (!current()) return;
       state = AsyncValue.data(
-        previous.copyWith(
+        (foreground ?? previous).copyWith(
           status: ConnectedHealthStatus.degraded,
-          failureCode: 'health_sync_failed_offline_cache_preserved',
+          failureCode: foreground != null
+              ? 'health_history_sync_incomplete'
+              : 'health_sync_failed_offline_cache_preserved',
           isBusy: false,
         ),
       );
     }
   }
 
-  void _publishExplicitSyncTimeout(ConnectedHealthSnapshot previous) {
+  void _publishExplicitSyncTimeout(
+    ConnectedHealthSnapshot previous, {
+    bool historyIncomplete = false,
+  }) {
     if (!mounted || _readsSuspended) return;
     state = AsyncValue.data(
       previous.copyWith(
         status: ConnectedHealthStatus.degraded,
-        failureCode: 'health_sync_timed_out',
+        failureCode: historyIncomplete
+            ? 'health_history_sync_incomplete'
+            : 'health_sync_timed_out',
         isBusy: false,
       ),
     );

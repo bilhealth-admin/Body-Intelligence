@@ -24,10 +24,13 @@ class _CloudRestoreScopeControlsState
 
   @override
   Widget build(BuildContext context) {
+    final baseOff = ref.watch(cloudRestoreBaseConsentOffProvider);
     final asyncState = ref.watch(cloudRestoreConsentStateProvider);
     final state = asyncState.value;
     String? status;
-    if (asyncState.isLoading) {
+    if (baseOff) {
+      status = CloudRestoreCopy.baseRequired;
+    } else if (asyncState.isLoading) {
       status = CloudRestoreCopy.checking;
     } else {
       status = switch (state?.availability) {
@@ -50,7 +53,10 @@ class _CloudRestoreScopeControlsState
             ),
             value: state?.grantedScopes.contains(scope) ?? false,
             onChanged:
-                !_saving && !_confirming && state?.canChange(scope) == true
+                !_saving &&
+                    !_confirming &&
+                    state?.canChange(scope) == true &&
+                    (!baseOff || state!.grantedScopes.contains(scope))
                 ? (granted) => _change(scope, granted, state!)
                 : null,
           ),
@@ -69,7 +75,8 @@ class _CloudRestoreScopeControlsState
               ),
             ),
           ),
-        if (state?.availability == CloudRestoreConsentAvailability.unavailable)
+        if (!baseOff &&
+            state?.availability == CloudRestoreConsentAvailability.unavailable)
           Align(
             alignment: AlignmentDirectional.centerStart,
             child: TextButton(

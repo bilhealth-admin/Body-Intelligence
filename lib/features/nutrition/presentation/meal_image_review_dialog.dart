@@ -1,4 +1,5 @@
 import '../../../shared/widgets/bil_pearl_material.dart';
+import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' show Bidi;
 
@@ -8,7 +9,12 @@ import '../../../data/database/app_database.dart';
 import '../services/meal_image_gateway_contract.dart';
 import 'meal_vision_premium_review.dart';
 
-export 'meal_vision_premium_review.dart' show TrustedVisionFoodSelection;
+export 'meal_vision_premium_review.dart'
+    show
+        TrustedVisionFoodSelection,
+        MealVisionReviewDecision,
+        MealVisionReviewLifetime,
+        guardMealVisionReview;
 
 Future<TrustedVisionFoodSelection?> showReviewedVisionFoodMatchDialog(
   BuildContext context, {
@@ -46,6 +52,7 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
   double? reviewedAmount,
   String? reviewedUnit,
   String? evidenceOwnerKey,
+  MealVisionReviewLifetime? lifetime,
 }) {
   if (foods.isEmpty) return Future<Food?>.value(null);
   FocusScope.of(context).unfocus();
@@ -57,6 +64,7 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
       reviewedAmount: reviewedAmount,
       reviewedUnit: reviewedUnit,
       evidenceOwnerKey: evidenceOwnerKey,
+      lifetime: lifetime,
     );
   }
   Food? selected;
@@ -64,55 +72,58 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
   return showDialog<Food>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => StatefulBuilder(
-      builder: (context, setState) => BilPearlMaterialAlertDialog(
-        title: Text(copy.matchTitle),
-        content: SizedBox(
-          width: 440,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              _NaturalText('${copy.recognized}: $recognizedName'),
-              const SizedBox(height: 10),
-              for (final food in foods)
-                ListTile(
-                  onTap:
-                      mealVisionFoodCanBeUsed(
-                        food,
+    builder: (dialogContext) => guardMealVisionReview(
+      lifetime: lifetime,
+      child: StatefulBuilder(
+        builder: (context, setState) => BilPearlMaterialAlertDialog(
+          title: Text(copy.matchTitle),
+          content: SizedBox(
+            width: 440,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                _NaturalText('${copy.recognized}: $recognizedName'),
+                const SizedBox(height: 10),
+                for (final food in foods)
+                  ListTile(
+                    onTap:
+                        mealVisionFoodCanBeUsed(
+                          food,
+                          evidenceOwnerKey: evidenceOwnerKey,
+                        )
+                        ? () => setState(() => selected = food)
+                        : null,
+                    leading: Icon(
+                      identical(selected, food)
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                    ),
+                    title: _NaturalText(food.name),
+                    subtitle: _NaturalText(
+                      '${food.servingSize} ${food.servingUnit} · ${food.source}',
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(copy.cancel),
+            ),
+            FilledButton(
+              onPressed:
+                  selected == null ||
+                      !mealVisionFoodCanBeUsed(
+                        selected!,
                         evidenceOwnerKey: evidenceOwnerKey,
                       )
-                      ? () => setState(() => selected = food)
-                      : null,
-                  leading: Icon(
-                    identical(selected, food)
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_off,
-                  ),
-                  title: _NaturalText(food.name),
-                  subtitle: _NaturalText(
-                    '${food.servingSize} ${food.servingUnit} · ${food.source}',
-                  ),
-                ),
-            ],
-          ),
+                  ? null
+                  : () => Navigator.pop(dialogContext, selected),
+              child: Text(copy.useFood),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(copy.cancel),
-          ),
-          FilledButton(
-            onPressed:
-                selected == null ||
-                    !mealVisionFoodCanBeUsed(
-                      selected!,
-                      evidenceOwnerKey: evidenceOwnerKey,
-                    )
-                ? null
-                : () => Navigator.pop(dialogContext, selected),
-            child: Text(copy.useFood),
-          ),
-        ],
       ),
     ),
   );
@@ -124,6 +135,9 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   String? imagePath,
   String? mealType,
   DateTime? photographedAt,
+  MealVisionReviewLifetime? lifetime,
+  Future<MealVisionReviewDecision> Function(List<MealImageReviewSelection>)?
+  onConfirm,
 }) {
   FocusScope.of(context).unfocus();
   if (MediaQuery.sizeOf(context).width >= 320) {
@@ -133,6 +147,17 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
       imagePath: imagePath,
       mealType: mealType,
       photographedAt: photographedAt,
+      lifetime: lifetime,
+      onConfirm: onConfirm == null
+          ? null
+          : (drafts) => onConfirm([
+              for (final draft in drafts)
+                MealImageReviewSelection(
+                  candidate: draft.candidate,
+                  amount: draft.amount,
+                  unit: draft.unit,
+                ),
+            ]),
     ).then(
       (drafts) => drafts == null
           ? null
@@ -149,6 +174,9 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   final locale = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
   final copy = _VisionReviewCopy.ofLocale(Localizations.localeOf(context));
   final selected = <int>{};
+  var confirming = false;
+  var closing = false;
+  String? matchMessage;
   final amounts = <TextEditingController>[
     for (final item in analysis.candidates)
       TextEditingController(text: item.amount?.toString() ?? ''),
@@ -157,76 +185,145 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
     for (final item in analysis.candidates)
       TextEditingController(text: mealImageUnitLabel(item.unit ?? '', locale)),
   ];
+  void closeOwnedReview(
+    BuildContext context, [
+    List<MealImageReviewSelection>? result,
+  ]) {
+    final route = ModalRoute.of<List<MealImageReviewSelection>>(context);
+    final navigator = route?.navigator;
+    if (route == null || !route.isActive || navigator == null) return;
+    closing = true;
+    if (route.isCurrent) {
+      navigator.pop(result);
+    } else {
+      navigator.removeRoute(route, result);
+    }
+  }
+
   return showDialog<List<MealImageReviewSelection>>(
     context: context,
     barrierDismissible: false,
-    builder: (dialogContext) => _MealImageReviewControllerOwner(
-      controllers: [...amounts, ...units],
-      child: StatefulBuilder(
-        builder: (context, setDialogState) => BilPearlMaterialAlertDialog(
-          title: Text(copy.review),
-          content: SizedBox(
-            width: 480,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                _NaturalText(analysis.notice),
-                const SizedBox(height: 12),
-                for (var index = 0; index < analysis.candidates.length; index++)
-                  _CandidateReviewCard(
-                    candidate: analysis.candidates[index],
-                    selected: selected.contains(index),
-                    amount: amounts[index],
-                    unit: units[index],
-                    copy: copy,
-                    onSelected: (value) => setDialogState(() {
-                      value ? selected.add(index) : selected.remove(index);
-                    }),
-                  ),
-              ],
+    builder: (dialogContext) => guardMealVisionReview(
+      lifetime: lifetime,
+      child: _MealImageReviewControllerOwner(
+        controllers: [...amounts, ...units],
+        child: StatefulBuilder(
+          builder: (context, setDialogState) => BilPearlMaterialAlertDialog(
+            title: Text(copy.review),
+            content: IgnorePointer(
+              ignoring: confirming,
+              child: SizedBox(
+                width: 480,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    _NaturalText(analysis.notice),
+                    if (matchMessage != null)
+                      Semantics(
+                        liveRegion: true,
+                        child: _NaturalText(matchMessage!),
+                      ),
+                    if (confirming) const BilFeatureWelcomeStatus(),
+                    const SizedBox(height: 12),
+                    for (
+                      var index = 0;
+                      index < analysis.candidates.length;
+                      index++
+                    )
+                      _CandidateReviewCard(
+                        candidate: analysis.candidates[index],
+                        selected: selected.contains(index),
+                        amount: amounts[index],
+                        unit: units[index],
+                        copy: copy,
+                        onSelected: (value) => setDialogState(() {
+                          value ? selected.add(index) : selected.remove(index);
+                        }),
+                      ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(copy.cancel),
-            ),
-            FilledButton(
-              onPressed: selected.isEmpty
-                  ? null
-                  : () {
-                      final result = <MealImageReviewSelection>[];
-                      for (final index in selected) {
-                        final amount = double.tryParse(
-                          amounts[index].text.trim(),
-                        );
-                        final unit = mealImageCanonicalUnit(
-                          units[index].text,
-                          locale,
-                        );
-                        if (amount == null ||
-                            !amount.isFinite ||
-                            amount <= 0 ||
-                            amount > 100000 ||
-                            unit.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(copy.amountRequired)),
-                          );
+            actions: [
+              TextButton(
+                onPressed: () => closeOwnedReview(dialogContext),
+                child: Text(copy.cancel),
+              ),
+              FilledButton(
+                onPressed:
+                    selected.isEmpty ||
+                        confirming ||
+                        closing ||
+                        lifetime?.isActive == false
+                    ? null
+                    : () async {
+                        if (confirming ||
+                            closing ||
+                            lifetime?.isActive == false) {
                           return;
                         }
-                        result.add(
-                          MealImageReviewSelection(
-                            candidate: analysis.candidates[index],
-                            amount: amount,
-                            unit: unit,
-                          ),
-                        );
-                      }
-                      Navigator.pop(dialogContext, result);
-                    },
-              child: Text(copy.continueLabel),
-            ),
-          ],
+                        final result = <MealImageReviewSelection>[];
+                        for (final index in selected) {
+                          final amount = double.tryParse(
+                            amounts[index].text.trim(),
+                          );
+                          final unit = mealImageCanonicalUnit(
+                            units[index].text,
+                            locale,
+                          );
+                          if (amount == null ||
+                              !amount.isFinite ||
+                              amount <= 0 ||
+                              amount > 100000 ||
+                              unit.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(copy.amountRequired)),
+                            );
+                            return;
+                          }
+                          result.add(
+                            MealImageReviewSelection(
+                              candidate: analysis.candidates[index],
+                              amount: amount,
+                              unit: unit,
+                            ),
+                          );
+                        }
+                        if (onConfirm == null) {
+                          closeOwnedReview(dialogContext, result);
+                          return;
+                        }
+                        setDialogState(() {
+                          confirming = true;
+                          matchMessage = null;
+                        });
+                        try {
+                          final decision = await onConfirm(
+                            List.unmodifiable(result),
+                          );
+                          if (!dialogContext.mounted) return;
+                          switch (decision.kind) {
+                            case MealVisionReviewDecisionKind.accepted:
+                              closeOwnedReview(dialogContext, result);
+                            case MealVisionReviewDecisionKind.retired:
+                              closeOwnedReview(dialogContext);
+                            case MealVisionReviewDecisionKind.retry:
+                              setDialogState(
+                                () => matchMessage = decision.message,
+                              );
+                            case MealVisionReviewDecisionKind.cancelled:
+                              break;
+                          }
+                        } finally {
+                          if (dialogContext.mounted && !closing) {
+                            setDialogState(() => confirming = false);
+                          }
+                        }
+                      },
+                child: Text(copy.continueLabel),
+              ),
+            ],
+          ),
         ),
       ),
     ),

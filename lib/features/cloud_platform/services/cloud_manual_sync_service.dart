@@ -44,6 +44,7 @@ final class CloudManualSyncResult {
     this.pulled = 0,
     this.applied = 0,
     this.conflicts = 0,
+    this.autoResolvedConflicts = 0,
     this.pending = 0,
     this.unsupported = 0,
     this.reason,
@@ -65,6 +66,7 @@ final class CloudManualSyncResult {
   final int pulled;
   final int applied;
   final int conflicts;
+  final int autoResolvedConflicts;
   final int pending;
   final int unsupported;
   final String? reason;
@@ -83,7 +85,7 @@ final class CloudManualSyncResult {
         sync.failureCode == null &&
         sync.pending == 0 &&
         produce.eligibleRemaining == 0 &&
-        sync.conflicts == 0 &&
+        sync.unresolvedConflicts == 0 &&
         apply.unsupported == 0 &&
         apply.conflicts == 0 &&
         (restore?.completed ?? true);
@@ -99,15 +101,21 @@ final class CloudManualSyncResult {
       pushed: sync.pushed + (restore?.pushed ?? 0),
       pulled: sync.pulled + (restore?.pulled ?? 0),
       applied: apply.applied + apply.acknowledged + (restore?.applied ?? 0),
-      conflicts: sync.conflicts + apply.conflicts + (restore?.conflicts ?? 0),
+      conflicts:
+          sync.unresolvedConflicts +
+          apply.conflicts +
+          (restore?.conflicts ?? 0),
+      autoResolvedConflicts: sync.conflicts - sync.unresolvedConflicts,
       pending:
           sync.pending + produce.eligibleRemaining + (restore?.pending ?? 0),
       unsupported: apply.unsupported,
       reason:
           sync.failureCode ??
           restore?.reason ??
-          ((sync.conflicts + apply.conflicts + (restore?.conflicts ?? 0)) > 0
+          ((restore?.conflicts ?? 0) > 0
               ? 'conflict_review_required'
+              : sync.unresolvedConflicts + apply.conflicts > 0
+              ? 'progress_conflict_unresolved'
               : apply.unsupported > 0
               ? 'record_unsupported'
               : !complete
@@ -375,6 +383,7 @@ Future<CloudSyncReport> drainCloudSyncPages(
   var pushed = 0;
   var pulled = 0;
   var conflicts = 0;
+  var unresolvedConflicts = 0;
   for (var page = 0; page < maximumPages; page++) {
     final report = await synchronizePage();
     startedAt ??= report.startedAt;
@@ -382,6 +391,7 @@ Future<CloudSyncReport> drainCloudSyncPages(
     pushed += report.pushed;
     pulled += report.pulled;
     conflicts += report.conflicts;
+    unresolvedConflicts += report.unresolvedConflicts;
     if (!report.canContinue) break;
     await Future<void>.delayed(Duration.zero);
   }
@@ -392,6 +402,7 @@ Future<CloudSyncReport> drainCloudSyncPages(
     pushed: pushed,
     pulled: pulled,
     conflicts: conflicts,
+    classifiedUnresolvedConflicts: unresolvedConflicts,
     pending: report.pending,
     availability: report.availability,
     diagnostics: report.diagnostics,
