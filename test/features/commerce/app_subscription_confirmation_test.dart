@@ -39,6 +39,9 @@ import '../../visual_closure/closure_surface_capture.dart';
 import '../../visual_closure/visual_evidence_font.dart';
 
 class _SubscriptionNative extends InAppPurchasePlatform {
+  _SubscriptionNative({required this.storeCountry});
+
+  final String storeCountry;
   final updates = StreamController<List<PurchaseDetails>>.broadcast(sync: true);
   final finish = Completer<void>();
   int launches = 0, finishes = 0;
@@ -46,6 +49,8 @@ class _SubscriptionNative extends InAppPurchasePlatform {
   Stream<List<PurchaseDetails>> get purchaseStream => updates.stream;
   @override
   Future<bool> isAvailable() async => true;
+  @override
+  Future<String> countryCode() async => storeCountry;
   @override
   Future<ProductDetailsResponse> queryProductDetails(Set<String> ids) async =>
       ProductDetailsResponse(
@@ -127,7 +132,12 @@ void main() {
         addTearDown(tester.view.reset);
         WidgetController.hitTestWarningShouldBeFatal = true;
         addTearDown(() => WidgetController.hitTestWarningShouldBeFatal = false);
-        final native = _SubscriptionNative();
+        // This suite exercises confirmation after a valid checkout. Give the
+        // native fixture an authoritative storefront for each plan family;
+        // unknown dual-family checkout is separately required to fail closed.
+        final native = _SubscriptionNative(
+          storeCountry: plan == CommercePlan.premium ? 'EGY' : 'JOR',
+        );
         debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
         InAppPurchasePlatform.instance = native;
         final sdk = InAppPurchase.instance;

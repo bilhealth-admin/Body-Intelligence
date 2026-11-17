@@ -4,13 +4,9 @@ extension _VerifiedStorePurchaseInitialization on VerifiedStorePurchaseService {
   Future<void> _initialize() async {
     final purchaseGeneration = _purchaseEventGeneration;
     final catalogVisit = _storeVisit.capture();
-    bool currentCatalog() =>
-        isCurrentCatalogVisit(catalogVisit) &&
-        (purchaseGeneration == _purchaseEventGeneration ||
-            (_storeStartupFaultBeforeCatalog &&
-                state == VerifiedStoreState.unavailable &&
-                messageCode == null &&
-                !busy));
+    // Catalog prices are independent of a newer same-owner receipt outcome.
+    // The visit still retires owner changes, A -> B -> A and disposal.
+    bool currentCatalog() => isCurrentCatalogVisit(catalogVisit);
     _storeStartupFaultBeforeCatalog = false;
     state = VerifiedStoreState.loading;
     messageCode = null;
@@ -97,8 +93,10 @@ extension _VerifiedStorePurchaseInitialization on VerifiedStorePurchaseService {
       if (!currentCatalog()) return;
       if (afterCountry != country) {
         products = const {};
-        state = VerifiedStoreState.unavailable;
-        messageCode = 'store_catalog_changed';
+        if (purchaseGeneration == _purchaseEventGeneration) {
+          state = VerifiedStoreState.unavailable;
+          messageCode = 'store_catalog_changed';
+        }
         notifyListeners();
         return;
       }
@@ -130,7 +128,10 @@ extension _VerifiedStorePurchaseInitialization on VerifiedStorePurchaseService {
       products = Map.unmodifiable(loaded);
       _catalogStoreCountryCode = country;
       if (state == VerifiedStoreState.loading ||
-          _storeStartupFaultBeforeCatalog) {
+          (_storeStartupFaultBeforeCatalog &&
+              state == VerifiedStoreState.unavailable &&
+              messageCode == null &&
+              !busy)) {
         state = VerifiedStoreState.ready;
         messageCode = null;
         _storeStartupFaultBeforeCatalog = false;

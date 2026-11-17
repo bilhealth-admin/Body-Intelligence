@@ -21,10 +21,18 @@ class NativeFixture extends Fake implements InAppPurchase {
   int queries = 0, finishes = 0, finished = 0, launches = 0;
   Future<void> Function()? finish;
   bool failFinish = false;
+  String storeCountry = 'EGY';
+  int countryReads = 0;
   @override
   Stream<List<PurchaseDetails>> get purchaseStream => updates.stream;
   @override
   Future<bool> isAvailable() async => true;
+  @override
+  Future<String> countryCode() async {
+    countryReads++;
+    return storeCountry;
+  }
+
   @override
   Future<ProductDetailsResponse> queryProductDetails(Set<String> ids) {
     queries++;
@@ -396,6 +404,51 @@ void main() {
       await until(() => native.finished == 1);
       expect(service.state, VerifiedStoreState.purchasePending);
       expect(service.canStartPurchase, isFalse);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'startup stream error cannot reset a newer pending receipt when catalog arrives',
+    () async {
+      final init = service.initialize();
+      await native.queried.future;
+      native.updates.addError(StateError('Synthetic startup stream error'));
+      await until(() => service.state == VerifiedStoreState.unavailable);
+      expect(service.messageCode, isNull);
+      native.updates.add([oldInactive(status: PurchaseStatus.pending)]);
+      await until(() => service.state == VerifiedStoreState.purchasePending);
+      native.settleCatalog();
+      await init;
+      expect(service.state, VerifiedStoreState.purchasePending);
+      expect(service.messageCode, 'reconciliation_pending');
+      expect(service.products.length, 2);
+      expect(native.countryReads, 2);
+      expect(service.canStartPurchase, isFalse);
+      expect(service.entitlement?.grantsPaidAccess ?? false, isFalse);
+      expect(verificationCalls, 0);
+      expect(native.finishes, 0);
+      expect(native.launches, 0);
+    },
+  );
+  test(
+    'country change clears unsafe prices without replacing a newer pending receipt',
+    () async {
+      final init = service.initialize();
+      await native.queried.future;
+      expect(native.countryReads, 1);
+      native.updates.add([oldInactive(status: PurchaseStatus.pending)]);
+      await until(() => service.state == VerifiedStoreState.purchasePending);
+      native.storeCountry = 'JOR';
+      native.settleCatalog();
+      await init;
+      expect(native.countryReads, 2);
+      expect(service.products, isEmpty);
+      expect(service.state, VerifiedStoreState.purchasePending);
+      expect(service.messageCode, 'reconciliation_pending');
+      expect(service.canStartPurchase, isFalse);
+      expect(service.entitlement?.grantsPaidAccess ?? false, isFalse);
+      expect(verificationCalls, 0);
+      expect(native.finishes, 0);
       expect(native.launches, 0);
     },
   );

@@ -71,16 +71,16 @@ class AndroidStartupWorkflowTest(unittest.TestCase):
         apis = [row["api-level"] for row in matrix["include"]]
         self.assertEqual(len(apis), len(set(apis)))
 
-    def test_full_matrix_preserves_profiles_and_explicit_newer_api_memory(self) -> None:
+    def test_full_matrix_preserves_profiles_and_explicit_api33_onward_memory(self) -> None:
         rows = {row["api-level"]: row for row in selected_matrix(self.source, False)["include"]}
         self.assertEqual({api: row["profile"] for api, row in rows.items()}, {
             26: "pixel_2", 29: "pixel_2", 33: "pixel_6",
             34: "pixel_6", 35: "pixel_6", 36: "pixel_6",
         })
-        for api in (34, 35, 36):
+        for api in (33, 34, 35, 36):
             with self.subTest(api=api):
                 self.assertEqual(rows[api]["ram-size"], "4096M")
-        for api in (26, 29, 33):
+        for api in (26, 29):
             with self.subTest(api=api):
                 self.assertNotIn("ram-size", rows[api])
 

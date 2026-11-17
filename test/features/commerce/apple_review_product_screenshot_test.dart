@@ -85,6 +85,18 @@ const _aiBoost = BilStoreOfferMetadata(
   storeCountryCode: 'USA',
 );
 
+// A catalog response carries one native storefront even when it includes Boost.
+// Existing synthetic price values stay unchanged; this is not live store data.
+const _aiBoostEgypt = BilStoreOfferMetadata(
+  productId: 'bil_ai_boost',
+  kind: BilStoreProductKind.aiBoostConsumable,
+  localizedTitle: 'BIL AI Boost — 2,500 Tokens',
+  localizedPrice: r'$1.99',
+  currencyCode: 'USD',
+  priceMicros: 1990000,
+  storeCountryCode: 'EGY',
+);
+
 final class _ReviewCatalog implements BilStoreCatalogGateway {
   const _ReviewCatalog(this.offers);
 
@@ -155,7 +167,7 @@ void main() {
       expectedCurrencyCode: 'EGP',
       expectedStoreCountryCode: 'EGY',
       annualProductId: 'bil_premium_annual',
-      offers: [_premiumMonthly, _premiumAnnual, _aiBoost],
+      offers: [_premiumMonthly, _premiumAnnual, _aiBoostEgypt],
     ),
     _ReviewScenario(
       productId: 'bil_premium_annual',
@@ -164,7 +176,7 @@ void main() {
       expectedStoreCountryCode: 'EGY',
       annualProductId: 'bil_premium_annual',
       expectedAnnualSavingsLabel: 'Save 36%',
-      offers: [_premiumMonthly, _premiumAnnual, _aiBoost],
+      offers: [_premiumMonthly, _premiumAnnual, _aiBoostEgypt],
     ),
     _ReviewScenario(
       productId: 'bil_premium_ai_coach',
@@ -189,7 +201,7 @@ void main() {
       expectedCurrencyCode: 'USD',
       expectedStoreCountryCode: 'USA',
       focusBoost: true,
-      offers: [_premiumMonthly, _premiumAnnual, _aiBoost],
+      offers: [_aiCoachMonthly, _aiCoachAnnual, _aiBoost],
     ),
   ];
 
@@ -207,6 +219,11 @@ void main() {
         fontFamily: 'RobotoEvidence',
       );
       final catalog = _ReviewCatalog(scenario.offers);
+      expect(
+        scenario.offers.map((offer) => offer.storeCountryCode).toSet(),
+        {scenario.expectedStoreCountryCode},
+        reason: 'One synthetic catalog must represent one native storefront.',
+      );
       final selectedMetadata = scenario.offers.singleWhere(
         (offer) => offer.productId == scenario.productId,
       );

@@ -82,6 +82,7 @@ jobs:
           python3 -m unittest discover -s .github/scripts -p test_bil39_simulator_vm_attach.py -v
           python3 -m unittest discover -s .github/scripts -p 'test_bil_ios_*.py' -v
           python3 -m unittest discover -s tools/qa -p test_bil39_native_split.py -v
+          python3 -B -m unittest discover -s tool/release -p 'test_prepare_ios_storekit_restore_codec_overlay*.py' -v
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:

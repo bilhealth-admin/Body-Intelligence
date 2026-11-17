@@ -155,6 +155,10 @@ jobs:
           OUT=artifacts/qa/text18/ios37-simulators
           mkdir -p "$OUT"
           xcodebuild -version | tee "$OUT/xcode-version.txt"
+          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
+          python3 tool/release/prepare_ios_storekit_restore_codec_overlay.py \
+            --project-root "$GITHUB_WORKSPACE" --verify-native-binding \
+            | tee "$OUT/storekit-native-binding-before-codeql.json"
           pod install --project-directory=ios 2>&1 | tee "$OUT/pod-install.log"
           SOURCE_PACKAGES="$GITHUB_WORKSPACE/build/ios/SourcePackages"
           mkdir -p "$SOURCE_PACKAGES"
@@ -209,6 +213,15 @@ jobs:
           --dart-define=BIL_ADS_ENABLED=false
           --dart-define=BIL_COMMUNITY_ENABLED=false
           --dart-define=BIL_PUSH_ENABLED=false
+
+      - name: Verify the patched native StoreKit binding after the traced iOS build
+        if: matrix.flutter-build == 'ios'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/prepare_ios_storekit_restore_codec_overlay.py \
+            --project-root "$GITHUB_WORKSPACE" --verify-native-binding \
+            | tee artifacts/qa/text18/ios37-simulators/storekit-native-binding-after-codeql.json
 
       - name: Preserve the isolated Android debug APK for static inspection
         if: matrix.flutter-build == 'android'

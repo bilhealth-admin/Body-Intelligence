@@ -64,6 +64,7 @@ class OverlayActualTests(unittest.TestCase):
   self.lock="packages:\n  in_app_purchase_storekit:\n    dependency: transitive\n    description:\n      name: in_app_purchase_storekit\n      sha256: \""+ARCHIVE+"\"\n      url: \"https://pub.dev\"\n    source: hosted\n    version: \"0.4.13+1\"\n"
   self.lock_path.write_text(self.lock,encoding="utf-8")
   self.initial_config=self.config_path.read_bytes();self.initial_graph=self.graph_path.read_bytes()
+  if os.name!="nt":self.make_native_graph()
   self.cache_manifest=tree(self.source)
   self.ads_manifests={name:tree(p) for name,p in self.other_paths.items()}
   self.addCleanup(self.cleanup)
@@ -78,6 +79,18 @@ class OverlayActualTests(unittest.TestCase):
   (path/"pubspec.yaml").write_text("name: in_app_purchase_storekit\nversion: 0.4.13+1\n",encoding="utf-8")
   (path/"LICENSE").write_bytes(FIXTURE_LICENSE)
   (path/"README.md").write_bytes(b"Companion bytes must remain unchanged.\n")
+  (path/"darwin"/PLUGIN/"Package.swift").write_text('// swift-tools-version: 6.0\nimport PackageDescription\nlet package = Package(name: "in_app_purchase_storekit", products: [], targets: [])\n',encoding="utf-8")
+ def make_native_graph(self,alias_name=PLUGIN+"-0.4.13+1",target=None):
+  managed=self.project/"ios"/"Flutter"/"ephemeral"/"Packages"
+  aliases=managed/".packages";aliases.mkdir(parents=True,exist_ok=True)
+  self.native_manifest=managed/"FlutterGeneratedPluginSwiftPackage"/"Package.swift"
+  self.native_manifest.parent.mkdir(parents=True,exist_ok=True)
+  self.native_alias=aliases/alias_name
+  self.junction(self.native_alias,target or self.source/"darwin"/PLUGIN)
+  other=self.base/"other-native-package";other.mkdir(exist_ok=True)
+  self.other_native_alias=aliases/"unrelated_plugin"
+  self.junction(self.other_native_alias,other)
+  self.native_manifest.write_text('// swift-tools-version: 6.0\nimport PackageDescription\nlet package = Package(name: "FlutterGeneratedPluginSwiftPackage", dependencies: [\n  .package(name: "unrelated_plugin", path: "../.packages/unrelated_plugin"),\n  .package(name: "in_app_purchase_storekit", path: "../.packages/'+alias_name+'"),\n])\n',encoding="utf-8")
  def config_obj(self):return json.loads(self.config_path.read_bytes())
  def graph_obj(self):return json.loads(self.graph_path.read_bytes())
  def set_roots(self,root):

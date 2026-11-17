@@ -135,17 +135,25 @@ DEFINES=(
 )
 # Final BIL39 certification never accepts a partial native scope.
 KINDS=(system-crypto native-settings feature-splashes)
+# --no-pub does not regenerate Flutter's SPM aliases. Require the actual
+# generated package path and Swift hash, not only overlay metadata, before Xcode.
+stage storekit-binding-before-preflight 60 "$OUT/storekit-binding-before-preflight.log" \
+  python3 tool/release/prepare_ios_storekit_restore_codec_overlay.py \
+  --project-root "$GITHUB_WORKSPACE" --verify-native-binding
 # Warm the Swift package graph in the fresh native job before Flutter's fixed
 # settings-query deadline. This is preparation, never native-test evidence.
 python3 .github/scripts/bil_ios_native_preflight.py \
   --workspace "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/$OUT"
 # Direct Xcode tests do not run Flutter's dependency preparation. In particular,
 # pub get + pod install can leave a plugin in both Pods and the Swift package
-# graph. Let Flutter reconcile the generated native configuration before XCTest;
-# config-only does not compile the app or count as a successful native test.
+# graph. Config-only reconciles Xcode/Pods but --no-pub does not regenerate SPM;
+# neither preparation nor the binding check counts as a native test pass.
 stage flutter-native-config 900 "$OUT/flutter-native-config.log" \
   flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub \
   --build-number 39 --target lib/main.dart "${DEFINES[@]}"
+stage storekit-binding-after-native-config 60 "$OUT/storekit-binding-after-native-config.log" \
+  python3 tool/release/prepare_ios_storekit_restore_codec_overlay.py \
+  --project-root "$GITHUB_WORKSPACE" --verify-native-binding
 # Exercise the existing native XCTest target, separately from Flutter drivers.
 # Its in-memory App Attest key-store tests are not hardware-attestation proof.
 ACTIVE_DEVICE="$DEVICE"
@@ -174,6 +182,9 @@ for KIND in "${KINDS[@]}"; do
   stage "$KIND-generic-config" 900 "$OUT/$KIND-generic-config.log" \
     flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub \
     --build-number 39 --target "$TARGET" "${DEFINES[@]}"
+  stage "$KIND-storekit-binding" 60 "$OUT/$KIND-storekit-binding.log" \
+    python3 tool/release/prepare_ios_storekit_restore_codec_overlay.py \
+    --project-root "$GITHUB_WORKSPACE" --verify-native-binding
   APP="$GITHUB_WORKSPACE/build/ios/Debug-iphonesimulator/Runner.app"
   # Xcode signs its actual output with the local '-' pseudo-identity. Keep
   # simulated iOS capabilities separate from the host code signature, as in

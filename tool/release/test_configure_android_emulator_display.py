@@ -33,8 +33,8 @@ class AndroidDisplayConfigurationTest(unittest.TestCase):
         )
         self.config.write_bytes(self.before)
 
-    def test_only_api34_and36_change_real_config_and_preserve_other_properties(self):
-        for api in (34, 36):
+    def test_only_api33_34_and36_change_real_config_and_preserve_other_properties(self):
+        for api in (33, 34, 36):
             with self.subTest(api=api):
                 self.config.write_bytes(self.before)
                 receipt = display.configure_display(api, self.config)
@@ -44,8 +44,8 @@ class AndroidDisplayConfigurationTest(unittest.TestCase):
                 self.assertEqual(self.config.read_bytes(), expected)
                 self.assertNotEqual(receipt['before_sha256'], receipt['after_sha256'])
 
-    def test_four_successful_api_configurations_remain_byte_identical(self):
-        for api in (26, 29, 33, 35):
+    def test_three_unchanged_api_configurations_remain_byte_identical(self):
+        for api in (26, 29, 35):
             with self.subTest(api=api):
                 result = display.configure_display(api, self.config)
                 self.assertEqual(result['status'], 'UNCHANGED_API')
@@ -53,7 +53,7 @@ class AndroidDisplayConfigurationTest(unittest.TestCase):
                 self.assertEqual(self.config.read_bytes(), self.before)
 
     def test_unchanged_api_does_not_require_a_file_or_make_adb_calls(self):
-        for api in (26, 29, 33, 35):
+        for api in (26, 29, 35):
             runner = mock.Mock(side_effect=AssertionError('Unexpected ADB call'))
             self.assertEqual(display.configure_display(api, self.root / 'missing')['status'], 'UNCHANGED_API')
             self.assertEqual(display.verify_runtime_display(api, runner)['status'], 'UNCHANGED_API')
@@ -116,7 +116,7 @@ class AndroidDisplayRuntimeTest(unittest.TestCase):
         ])
 
     def test_matching_physical_display_requires_both_readbacks_without_wm_mutation(self):
-        for api in (34, 36):
+        for api in (33, 34, 36):
             with self.subTest(api=api):
                 runner = self.runner()
                 result = display.verify_runtime_display(api, runner)
@@ -125,6 +125,10 @@ class AndroidDisplayRuntimeTest(unittest.TestCase):
                 self.assertEqual(result['physical_density'], 320)
                 self.assertEqual([call.args[0] for call in runner.call_args_list], [['adb', 'shell', 'wm', 'size'], ['adb', 'shell', 'wm', 'density']])
                 self.assertTrue(all(call.kwargs['timeout'] == 8 for call in runner.call_args_list))
+
+    def test_api33_rejects_its_historical_unbounded_physical_framebuffer(self):
+        with self.assertRaisesRegex(display.DisplayContractError, 'Physical framebuffer'):
+            display.verify_runtime_display(33, self.runner('Physical size: 1080x2400\n'))
 
     def test_logical_override_does_not_hide_a_full_size_physical_framebuffer(self):
         with self.assertRaisesRegex(display.DisplayContractError, 'Physical framebuffer'):

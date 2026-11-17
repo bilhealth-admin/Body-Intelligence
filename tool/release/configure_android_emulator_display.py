@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bound the API34/36 CI framebuffer without changing their OS or GPU.
+"""Bound the API33/34/36 CI framebuffer without changing their OS or GPU.
 
 The pinned emulator-runner hook executes after AVD creation and before launch.
 Only Android's supported hw.lcd.width/height/density configuration properties
@@ -31,7 +31,7 @@ class DisplayContractError(ValueError):
 def required_display(api: int) -> dict[str, str] | None:
     if api not in REVIEWED_APIS:
         raise ValueError('Unsupported Android API')
-    return dict(DISPLAY) if api in (34, 36) else None
+    return dict(DISPLAY) if api in (33, 34, 36) else None
 
 
 def configure_display(api: int, config: Path) -> dict:
