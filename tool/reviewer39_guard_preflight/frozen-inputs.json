@@ -1,0 +1,110 @@
+{
+  "source_C5": "c5b610276a3bbee8a0e446300296920b5cdc9570",
+  "source_tree": "4b290b167cf9579d7eadb0199e3445ff43e4dab1",
+  "preflight_branch": "codex/bil-reviewer39-guard-preflight-20261117",
+  "required_direct_parent": "c5b610276a3bbee8a0e446300296920b5cdc9570",
+  "exact_child_paths": [
+    ".github/workflows/verify.yml",
+    "tool/reviewer39_guard_preflight/run_preflight.py",
+    "tool/reviewer39_guard_preflight/candidate-controller.yml",
+    "tool/reviewer39_guard_preflight/frozen-inputs.json"
+  ],
+  "candidate_native_repository_path": ".github/workflows/bil_android39_approved_demo_progress_restore_a12_20261117.yml",
+  "candidate_yaml_sha256": "047efa683a4817fc839f3d1100b59157b0ca880d698dae712702ebfcea7e3b2a",
+  "corrected_test_sha256": "8ddb730b5a53312284cc9d448aa66fd6a0db8333fb73a9dd72c52d3cab0dc801",
+  "driver_sha256": "000e10e1c2b099b0ea724a6fabb52976890aa8af328fa201d5b6261df02cf8c6",
+  "runtime22": {
+    "android39-reviewer-entrypoint.sh": {
+      "bytes": 2278,
+      "sha256": "e8fe007b091bb466ab0ab179e6cf1907b06580a2120563c685ec39c5fc3f8406"
+    },
+    "artifact_binding.py": {
+      "bytes": 15378,
+      "sha256": "eaae0fcebdf97be74871f1cb611e9001e09b08cd419c2affebaec1c7e75244fe"
+    },
+    "ci_renderer_context.py": {
+      "bytes": 3377,
+      "sha256": "7ce66dc9eba537dc0740ec2f571b992599dafd72e615b221c5e14c44d448479a"
+    },
+    "ci_renderer_probe.py": {
+      "bytes": 8363,
+      "sha256": "fa14622d3e552d59aec9e0dbd240155bf7e898306dd4a8d30a5b9774c0a733de"
+    },
+    "cloud_consent_copy.py": {
+      "bytes": 5249,
+      "sha256": "41b1b9f680c85b73e4f326529ccdf51d716f6889b4fed319d36a900118a0bc63"
+    },
+    "exact-android39-pins.json": {
+      "bytes": 998,
+      "sha256": "6c2b95a35ddf7aa839ed9a39cd251988e162db72d83798d306942ea733ccf664"
+    },
+    "host_libpulse_prerequisite.py": {
+      "bytes": 4346,
+      "sha256": "5d55070f1db92d14ea8dcb375ff2017933e248cf740cdf15105e22ebf9f63ded"
+    },
+    "pinned_emulator_guard.py": {
+      "bytes": 7092,
+      "sha256": "e63c4d7f4b31613aa2c45eae9a7218aee7e1b6a82b52af7bffc5244128c79795"
+    },
+    "pinned_emulator_install.py": {
+      "bytes": 13918,
+      "sha256": "2866a426da596012d20a88750f441238c8123c11469d1c6ba9d83350998d2195"
+    },
+    "prepare_native_uia2_tools.py": {
+      "bytes": 11068,
+      "sha256": "785df3f1a6d3ec16cdc1ca7dd78197ccf9ed63cc411d92731729f92868a74363"
+    },
+    "read_only_emulator_host.py": {
+      "bytes": 7355,
+      "sha256": "7e89dcf27db83d6f774a93375e41b6c988248e7c09f693d155e8221011306354"
+    },
+    "review_common.py": {
+      "bytes": 5881,
+      "sha256": "6db4458992ab815d8a4b11edfb4bd5cb9e9f262228bea1ded5b24f5beffcfb15"
+    },
+    "reviewer-shell-contract.cjs": {
+      "bytes": 8706,
+      "sha256": "73e2234998936335eb1219e0b80faabcb5eec7b55888580314a945b4abe20ade"
+    },
+    "reviewer_auth_probe.py": {
+      "bytes": 11182,
+      "sha256": "e58fad70b8cb7a79f862c56b2a4437f1a34b38dd77997b1d61b188c598a09bab"
+    },
+    "reviewer_capture.py": {
+      "bytes": 17176,
+      "sha256": "335bb84f8d05633ca248d5408139946b756d53d959ebaca02f8a918007248fa0"
+    },
+    "reviewer_contract.py": {
+      "bytes": 1645,
+      "sha256": "62fbcaf6f363240583af60f893bf54fe76f2712a69c30013236d0e00516d0b2d"
+    },
+    "reviewer_home_probe.py": {
+      "bytes": 1452,
+      "sha256": "4b8312b544a945b136a4dd61da7e5cc5c15a79a9fc529be4b83e030ed07f173c"
+    },
+    "reviewer_launch_probe.py": {
+      "bytes": 5505,
+      "sha256": "84856627d0510e5f9623ba8dc27c4693b59105e5587969a4af4b79bc36180b60"
+    },
+    "reviewer_onboarding.py": {
+      "bytes": 44717,
+      "sha256": "404e6a02b90087fe85c33ca1615f3731f6870e21030b98f869a6dcca1c035b02"
+    },
+    "reviewer_ui.py": {
+      "bytes": 45841,
+      "sha256": "50d6d3ad19c6d48820a5edc65d0de5a61dbe787fd7db65cd4793e1b167eab051"
+    },
+    "uia2_source.py": {
+      "bytes": 6548,
+      "sha256": "b6d858ff4574499992d65d1e174fd984f71867cfce6a97b429d3ab97c73eca5d"
+    },
+    "VerifyApkCertificate.java": {
+      "bytes": 4744,
+      "sha256": "da5e49cf5daeb53a12ce4cd6554e6b55f68f7bff618666ae792d6389bb288c17"
+    }
+  },
+  "core_readback_count": 18,
+  "Node_Bash_case_count": 17,
+  "Python_case_count": 42,
+  "pinned_parser_sha256": "6d162ab4384c2ef9c261b5cc4dfb8947f69cab75b98fedb0ee34275619c170ff"
+}
