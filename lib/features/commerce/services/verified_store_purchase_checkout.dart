@@ -33,10 +33,18 @@ extension _VerifiedStorePurchaseCheckout on VerifiedStorePurchaseService {
     try {
       final country = await readStorefrontCountry();
       if (!isCurrent()) return null;
-      final expected = StorefrontMarketPolicy.normalizeCountry(
-        expectedStoreCountryCode,
-      );
+      final expected =
+          StorefrontMarketPolicy.normalizeCountry(expectedStoreCountryCode) ??
+          catalogStoreCountryCode;
+      final catalogPlans = products.keys
+          .map((id) => StoreCatalogConfiguration.bindingForProduct(id)?.plan)
+          .toSet();
+      final ambiguousUnknownCountry =
+          country == null &&
+          catalogPlans.contains(CommercePlan.premium) &&
+          catalogPlans.contains(CommercePlan.premiumAiCoach);
       if ((expected != null && expected != country) ||
+          ambiguousUnknownCountry ||
           !StorefrontMarketPolicy.allowsProduct(displayed.id, country)) {
         return changedCatalog();
       }

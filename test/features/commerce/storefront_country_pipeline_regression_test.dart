@@ -375,6 +375,103 @@ void main() {
     }
   });
 
+  test(
+    'unknown storefront guard blocks an ambiguous catalog before native charge',
+    () async {
+      native.readCountry = (_) => Future.error(
+        PlatformException(code: 'storekit2_failed_to_fetch_country_code'),
+      );
+      final offers = await adapter.loadOffers(
+        StoreCatalogConfiguration.storefrontProductIds,
+      );
+      // Retain the established read-only UI fallback and valid Boost. The
+      // protection belongs at checkout; it must not rewrite regional UI policy.
+      expect(_ids(offers), _premium);
+      expect(store.catalogStoreCountryCode, isNull);
+      expect(
+        store.products.keys.toSet(),
+        StoreCatalogConfiguration.storefrontProductIds,
+      );
+      final selected = MarketOfferPolicy.visibleOffers(offers).firstWhere(
+        (offer) => offer.productId == StoreCatalogConfiguration.premiumMonthly,
+      );
+      expect(selected.storeCountryCode, isNull);
+      expect(native.buys, 0);
+      await adapter.requestPurchase(selected);
+      expect(
+        native.buys,
+        0,
+        reason:
+            'Ambiguous unknown country must not open a charge that verified Production market policy can reject afterward.',
+      );
+      expect(store.messageCode, 'store_catalog_changed');
+      expect(store.entitlement, isNull);
+    },
+  );
+
+  for (final family in [_premium, _ai]) {
+    test(
+      'unknown storefront guard retains a single native subscription family ${family.first}',
+      () async {
+        native.readCountry = (_) => Future.error(
+          PlatformException(code: 'storekit2_failed_to_fetch_country_code'),
+        );
+        native.query = () async => ProductDetailsResponse(
+          productDetails: family.map(_product).toList(),
+          notFoundIDs: const [],
+        );
+        final offers = await adapter.loadOffers(
+          StoreCatalogConfiguration.storefrontProductIds,
+        );
+        expect(_ids(offers), family);
+        expect(store.catalogStoreCountryCode, isNull);
+        final selected = MarketOfferPolicy.visibleOffers(offers).firstWhere(
+          (offer) => offer.kind != BilStoreProductKind.aiBoostConsumable,
+        );
+        await adapter.requestPurchase(selected);
+        expect(
+          native.buys,
+          1,
+          reason:
+              'An unambiguous native family keeps the established fallback; no synthetic grant or receipt is emitted.',
+        );
+        expect(store.entitlement, isNull);
+      },
+    );
+  }
+
+  test('unknown storefront guard preserves the known warm catalog pin', () async {
+    final known = await adapter.loadOffers(
+      StoreCatalogConfiguration.storefrontProductIds,
+    );
+    expect(_ids(known), _ai);
+    expect(store.catalogStoreCountryCode, 'JO');
+    native.readCountry = (_) => Future.error(
+      PlatformException(code: 'storekit2_failed_to_fetch_country_code'),
+    );
+    final warm = await adapter.loadOffers(
+      StoreCatalogConfiguration.storefrontProductIds,
+    );
+    expect(_ids(warm), _ai);
+    final selected = MarketOfferPolicy.visibleOffers(warm).firstWhere(
+      (offer) =>
+          offer.productId == StoreCatalogConfiguration.premiumAiCoachMonthly,
+    );
+    // The adapter's failed warm country read currently erases offer metadata,
+    // but the service still owns its previous exact catalog-country snapshot.
+    expect(selected.storeCountryCode, isNull);
+    expect(store.catalogStoreCountryCode, 'JO');
+    await adapter.requestPurchase(selected);
+    expect(
+      native.buys,
+      0,
+      reason:
+          'Missing offer metadata must not discard a known catalog-country pin at checkout.',
+    );
+    expect(store.messageCode, 'store_catalog_changed');
+    expect(store.entitlement, isNull);
+  });
+
   Future<void> prepareCheckout() async {
     final product = _product(StoreCatalogConfiguration.premiumAiCoachMonthly);
     store.products = {product.id: product};
