@@ -3,6 +3,7 @@ import UIKit
 import XCTest
 import SwiftUI
 @testable import Runner
+@testable import in_app_purchase_storekit
 
 private enum BILAppAttestKeyStoreTestError: Error {
   case forcedWriteFailure
@@ -485,5 +486,48 @@ class RunnerTests: XCTestCase {
     defaults.removePersistentDomain(forName: suiteName)
     defer { defaults.removePersistentDomain(forName: suiteName) }
     try body(defaults)
+  }
+}
+
+extension RunnerTests {
+  func testStoreKitUnverifiedRestoreErrorFullPayloadCodecRoundTrip() throws {
+    guard #available(iOS 15.0, *) else {
+      XCTFail("This native QA target must run on an iOS 15+ Simulator")
+      return
+    }
+    for count in [1, 2, 257] {
+      let error = InAppPurchasePlugin.bilUnverifiedRestoreFailure(unverifiedCount: count)
+      XCTAssertEqual(error.code, "storekit2_restore_failed")
+      XCTAssertEqual(error.message, "This purchase could not be restored.")
+      let details = try XCTUnwrap(error.details as? [String: Int])
+      XCTAssertEqual(details, ["unverifiedPurchaseCount": count])
+      let codec = FlutterStandardMessageCodec.sharedInstance()
+      let data = try XCTUnwrap(codec.encode([error.code, error.message, error.details]))
+      let decoded = try XCTUnwrap(codec.decode(data) as? [Any])
+      XCTAssertEqual(decoded.count, 3)
+      XCTAssertEqual(decoded[0] as? String, error.code)
+      XCTAssertEqual(decoded[1] as? String, error.message)
+      XCTAssertEqual(decoded[2] as? [String: Int], details)
+    }
+  }
+
+  func testStoreKitUnverifiedRestoreErrorHasOnlySafeCountDetails() throws {
+    guard #available(iOS 15.0, *) else {
+      XCTFail("This native QA target must run on an iOS 15+ Simulator")
+      return
+    }
+    let error = InAppPurchasePlugin.bilUnverifiedRestoreFailure(unverifiedCount: 3)
+    let details = try XCTUnwrap(error.details as? [String: Int])
+    XCTAssertEqual(Set(details.keys), ["unverifiedPurchaseCount"])
+    XCTAssertEqual(details["unverifiedPurchaseCount"], 3)
+    XCTAssertNil(details["receipt"])
+    XCTAssertNil(details["jws"])
+    XCTAssertNil(details["transactionId"])
+    XCTAssertNil(details["error"])
+    let result: Result<Void, Error> = .failure(error)
+    switch result {
+    case .failure: break
+    case .success: XCTFail("An unverified restore must remain a failure")
+    }
   }
 }

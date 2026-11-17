@@ -1,5 +1,6 @@
 import 'commerce_plan.dart';
 import 'store_offer_metadata.dart';
+import 'storefront_market_policy.dart';
 
 /// Commercial boundary shared by the store surface and market gating.
 abstract final class MarketOfferPolicy {
@@ -24,10 +25,28 @@ abstract final class MarketOfferPolicy {
     Iterable<BilStoreOfferMetadata> offers,
   ) {
     final valid = offers.where((offer) => offer.valid).toList(growable: false);
-    final target = targetPlanForKinds(valid.map((offer) => offer.kind));
+    final countries = valid
+        .map(
+          (offer) =>
+              StorefrontMarketPolicy.normalizeCountry(offer.storeCountryCode),
+        )
+        .whereType<String>()
+        .toSet();
+    final conflicting = countries.length > 1;
+    final country = countries.length == 1 ? countries.single : null;
+    final held = StorefrontMarketPolicy.isHeld(country);
+    final target =
+        StorefrontMarketPolicy.planForCountry(country) ??
+        targetPlanForKinds(valid.map((offer) => offer.kind));
     return valid
         .where((offer) {
           if (offer.kind == BilStoreProductKind.aiBoostConsumable) return true;
+          if (conflicting || held) return false;
+          if (country != null &&
+              StorefrontMarketPolicy.normalizeCountry(offer.storeCountryCode) !=
+                  country) {
+            return false;
+          }
           return switch (target) {
             CommercePlan.premium =>
               offer.kind == BilStoreProductKind.premiumSubscription,

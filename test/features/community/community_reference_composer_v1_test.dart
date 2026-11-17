@@ -43,9 +43,25 @@ final class _ReferenceComposerRepository extends CommunityRepository {
 
   CommunityDraftSaveInput? savedDraft;
   CommunityDraftSaveInput? externalDraft;
-  CommunityDraftSaveInput? get availableDraft =>
-      externalDraft ??
-      (savedDraft?.draftId == publishedDraftId ? null : savedDraft);
+  final deletedDraftIds = <String>{};
+  final deleteCalls = <String>[];
+  final attemptedPublishDraftIds = <String?>[];
+  bool failDraftDelete = false;
+  bool rejectMissingDraftOnPublish = false;
+
+  CommunityDraftSaveInput? get availableDraft {
+    final external = externalDraft;
+    if (external != null && !deletedDraftIds.contains(external.draftId)) {
+      return external;
+    }
+    final saved = savedDraft;
+    return saved == null ||
+            saved.draftId == publishedDraftId ||
+            deletedDraftIds.contains(saved.draftId)
+        ? null
+        : saved;
+  }
+
   List<CommunityPostImageDraft>? savedImages;
   String? feedTitle;
   int saveCalls = 0;
@@ -174,6 +190,16 @@ final class _ReferenceComposerRepository extends CommunityRepository {
           ];
   }
 
+  @override
+  Future<void> deleteMyCommunityDraft(String draftId) async {
+    deleteCalls.add(draftId);
+    if (failDraftDelete) throw StateError('Synthetic delete failed');
+    if (availableDraft?.draftId != draftId) {
+      throw StateError('Synthetic draft is not owned or no longer exists');
+    }
+    deletedDraftIds.add(draftId);
+  }
+
   CommunityPersistentDraft persistentDraft(String draftId) {
     final input = availableDraft!;
     return CommunityPersistentDraft(
@@ -225,6 +251,17 @@ final class _ReferenceComposerRepository extends CommunityRepository {
         const <CommunityMentionCandidate>[],
     String? persistentDraftId,
   }) async {
+    attemptedPublishDraftIds.add(persistentDraftId);
+    if (rejectMissingDraftOnPublish &&
+        persistentDraftId != null &&
+        (deletedDraftIds.contains(persistentDraftId) ||
+            ![
+              savedDraft,
+              externalDraft,
+            ].any((draft) => draft?.draftId == persistentDraftId))) {
+      // Match the real consume contract: a missing saved row fails commit.
+      throw StateError('community_draft_publish_draft_unavailable');
+    }
     publishCalls++;
     publishedBody = body;
     publishedTitle = title;
@@ -606,6 +643,127 @@ void main() {
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump();
+      },
+    );
+  }
+
+  for (final scenario in ['same-deleted', 'other-deleted', 'delete-failed']) {
+    testWidgets(
+      'draft deletion lifecycle $scenario preserves editor and publishes only a valid association',
+      (tester) async {
+        final repository = _ReferenceComposerRepository()
+          ..rejectMissingDraftOnPublish = true;
+        try {
+          await tester.pumpWidget(_app(repository));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('community-create-post')));
+          await tester.pumpAndSettle();
+          final body = find.byKey(const Key('community-post-composer'));
+          final title = find.byKey(const Key('community-composer-title'));
+          await tester.enterText(title, 'Original editor title');
+          await tester.enterText(
+            body,
+            'Original editor content remains intact.',
+          );
+          tester.testTextInput.hide();
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('community-post-save-draft')));
+          await tester.pumpAndSettle();
+          final originalId = repository.savedDraft!.draftId;
+          expect(repository.saveCalls, 1);
+          if (scenario == 'other-deleted') {
+            repository.externalDraft = const CommunityDraftSaveInput(
+              draftId: '77777777-7777-4777-8777-777777777777',
+              title: 'Other saved draft',
+              body: 'A different saved row.',
+            );
+          }
+          final listId = repository.availableDraft!.draftId;
+          await tester.tap(
+            find.byKey(const Key('community-composer-open-drafts')),
+          );
+          await tester.pumpAndSettle();
+          if (scenario == 'same-deleted') {
+            // Actual device sequence: save, reopen/edit/update, close that
+            // editor, then delete its row while the original editor is kept.
+            await tester.tap(
+              find.byKey(Key('community-draft-continue-$listId')),
+            );
+            await tester.pumpAndSettle();
+            await tester.enterText(body, 'Updated saved row before deletion.');
+            tester.testTextInput.hide();
+            await tester.pumpAndSettle();
+            await tester.tap(
+              find.byKey(const Key('community-post-save-draft')),
+            );
+            await tester.pumpAndSettle();
+            expect(repository.saveCalls, 2);
+            expect(repository.savedDraft!.draftId, originalId);
+            expect(
+              repository.savedDraft!.body,
+              'Updated saved row before deletion.',
+            );
+            await tester.tap(
+              find.byKey(const Key('community-post-editor-close')),
+            );
+            await tester.pumpAndSettle();
+          }
+          repository.failDraftDelete = scenario == 'delete-failed';
+          await tester.tap(find.byKey(Key('community-draft-actions-$listId')));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(Key('community-draft-delete-$listId')));
+          await tester.pumpAndSettle();
+          expect(repository.deleteCalls, [listId]);
+          expect(
+            repository.deletedDraftIds.contains(listId),
+            scenario != 'delete-failed',
+          );
+          if (scenario == 'delete-failed') {
+            expect(find.byKey(Key('community-draft-$listId')), findsOneWidget);
+          } else {
+            expect(find.byKey(Key('community-draft-$listId')), findsNothing);
+          }
+          await tester.tap(find.byKey(const Key('community-safe-return')));
+          await tester.pumpAndSettle();
+          expect(
+            tester.widget<TextField>(body).controller!.text,
+            'Original editor content remains intact.',
+          );
+          expect(
+            tester.widget<TextField>(title).controller!.text,
+            'Original editor title',
+          );
+          final stillMarkedSaved = find
+              .text('Update draft')
+              .evaluate()
+              .isNotEmpty;
+          await tester.tap(find.byKey(const Key('community-post-publish')));
+          await tester.pumpAndSettle();
+          expect(
+            repository.publishCalls,
+            1,
+            reason:
+                'Only a valid live saved draft association can commit; '
+                'the deleted original must be detached by its success event.',
+          );
+          expect(repository.attemptedPublishDraftIds, [
+            scenario == 'same-deleted' ? null : originalId,
+          ]);
+          expect(stillMarkedSaved, scenario != 'same-deleted');
+          expect(
+            repository.publishedBody,
+            'Original editor content remains intact.',
+          );
+          expect(repository.publishedTitle, 'Original editor title');
+          expect(
+            find.byKey(const Key('community-post-editor-page')),
+            findsNothing,
+          );
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
+        }
       },
     );
   }

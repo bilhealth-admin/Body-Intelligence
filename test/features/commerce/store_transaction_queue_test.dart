@@ -44,6 +44,7 @@ class _NativeStore extends Fake implements InAppPurchase {
   final completionChanges = ChangeNotifier();
   int restoreCalls = 0;
   Object? restoreError;
+  Future<void> Function()? restoreAction;
   int appleSyncCalls = 0;
   final completionAttempted = Completer<void>();
   int queries = 0;
@@ -70,6 +71,8 @@ class _NativeStore extends Fake implements InAppPurchase {
   @override
   Future<void> restorePurchases({String? applicationUserName}) async {
     restoreCalls++;
+    final action = restoreAction;
+    if (action != null) return action();
     final error = restoreError;
     if (error != null) throw error;
     final receipt = restoreReceipt ?? _receipt();
@@ -142,6 +145,11 @@ class _NativeStore extends Fake implements InAppPurchase {
       notFoundIDs: const [],
     ),
   );
+}
+
+class _NeverDescribe {
+  @override
+  String toString() => throw StateError('Native details must not be formatted');
 }
 
 class _ConfiguredStore extends VerifiedStorePurchaseService {
@@ -337,6 +345,247 @@ void main() {
     expect(store.canStartPurchase, isFalse);
     expect(store.entitlement?.grantsPaidAccess, isNot(true));
   }
+
+  test(
+    'restore support sync code is fixed and clears at next operation',
+    () async {
+      await ready();
+      native.appleSync = () async => throw PlatformException(
+        code: 'storekit2_failed_to_sync_to_app_store',
+        message: 'DO_NOT_RENDER_JWS_OR_ACCOUNT',
+        details: 'private callback URL and credentials must stay private',
+      );
+      await store.restore();
+      expect(store.messageCode, 'restore_failed');
+      expect(store.restoreSupportCode, 'BIL-RS-SYNC-01');
+      expect(native.appleSyncCalls, 1);
+      expect(native.restoreCalls, 0);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      native.appleSync = null;
+      await store.initialize();
+      expect(store.restoreSupportCode, isNull);
+      expect(native.appleSyncCalls, 1);
+      expect(native.launches, 0);
+    },
+  );
+
+  for (final entry in {
+    'storekit2_restore_failed': 'BIL-RS-ENUM-02',
+    'DO_NOT_RENDER_SECRET_CODE': 'BIL-RS-ENUM-98',
+  }.entries) {
+    test(
+      'restore support safely categorizes native enum ${entry.value}',
+      () async {
+        await ready();
+        native.restoreError = PlatformException(
+          code: entry.key,
+          message: 'DO_NOT_RENDER_JWS_OR_ACCOUNT',
+          details: _NeverDescribe(),
+        );
+        await store.restore();
+        expect(store.messageCode, 'restore_failed');
+        expect(store.restoreSupportCode, entry.value);
+        expect(native.appleSyncCalls, 1);
+        expect(native.restoreCalls, 1);
+        expect(verificationCalls, 0);
+        expect(native.completionCalls, 0);
+        expect(native.launches, 0);
+        store.dispose();
+        expect(store.restoreSupportCode, isNull);
+      },
+    );
+  }
+
+  test(
+    'restore support unexpected native failure is a fixed category',
+    () async {
+      await ready();
+      native.appleSync = () async => throw _NeverDescribe();
+      await store.restore();
+      expect(store.restoreSupportCode, 'BIL-RS-SYNC-99');
+      expect(store.messageCode, 'restore_failed');
+      expect(native.restoreCalls, 0);
+      expect(verificationCalls, 0);
+    },
+  );
+
+  test(
+    'restore support native callback error does not verify or finish',
+    () async {
+      await ready();
+      native.restoreBatch = [_receipt(status: PurchaseStatus.error)];
+      await store.restore();
+      expect(store.messageCode, 'restore_failed');
+      expect(store.restoreSupportCode, 'BIL-RS-CALLBACK-03');
+      expect(native.appleSyncCalls, 1);
+      expect(native.restoreCalls, 1);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+
+  test(
+    'restore support retired A B A attempt cannot publish a late error',
+    () async {
+      await ready();
+      final sync = Completer<void>();
+      native.appleSync = () => sync.future;
+      final restoring = store.restore();
+      await drain();
+      final owners = <String>[];
+      var previousOwner = '00000000-0000-4000-8000-000000000001';
+      final delivered = Completer<void>();
+      final listener = Supabase.instance.client.auth.onAuthStateChange.listen((
+        event,
+      ) {
+        final id = event.session?.user.id;
+        if (id == null || id == previousOwner) return;
+        previousOwner = id;
+        owners.add(id);
+        if (owners.length == 2 && !delivered.isCompleted) delivered.complete();
+      });
+      try {
+        for (final id in [
+          '00000000-0000-4000-8000-000000000002',
+          '00000000-0000-4000-8000-000000000001',
+        ]) {
+          await Supabase.instance.client.auth.setInitialSession(
+            jsonEncode({
+              'access_token': 'synthetic-restoration-test',
+              'token_type': 'bearer',
+              'user': {
+                'id': id,
+                'aud': 'authenticated',
+                'app_metadata': {},
+                'user_metadata': {},
+                'created_at': '2026-01-01T00:00:00Z',
+              },
+            }),
+          );
+        }
+        await delivered.future.timeout(const Duration(seconds: 2));
+        expect(owners, [
+          '00000000-0000-4000-8000-000000000002',
+          '00000000-0000-4000-8000-000000000001',
+        ]);
+        sync.completeError(PlatformException(code: 'storekit2_restore_failed'));
+        await restoring;
+        expect(store.restoreSupportCode, isNull);
+        expect(store.messageCode, 'authentication_required');
+        expect(native.appleSyncCalls, 1);
+        expect(native.restoreCalls, 0);
+        expect(verificationCalls, 0);
+        expect(native.launches, 0);
+      } finally {
+        await listener.cancel();
+        if (!sync.isCompleted) sync.complete();
+        await restoring;
+      }
+    },
+  );
+
+  test(
+    'restore support late native error cannot replace fresh verified benefit',
+    () async {
+      await ready();
+      verificationResponse = (_) => _verifiedResponse();
+      native.restoreAction = () async {
+        native.updates.add([_receipt(status: PurchaseStatus.restored)]);
+        await waitForStoreCondition(
+          () => store.state == VerifiedStoreState.verified,
+        );
+        throw PlatformException(
+          code: 'storekit2_restore_failed',
+          details: _NeverDescribe(),
+        );
+      };
+      await store.restore();
+      expect(store.state, VerifiedStoreState.verified);
+      expect(store.messageCode, 'ai_boost_verified');
+      expect(store.verifiedBenefitRevision, 1);
+      expect(store.restoreSupportCode, isNull);
+      expect(verificationCalls, 1);
+      expect(native.appleSyncCalls, 1);
+      expect(native.restoreCalls, 1);
+      expect(native.launches, 0);
+    },
+  );
+
+  test(
+    'restore support late native error cannot replace current receipt denial',
+    () async {
+      await ready();
+      verificationResponse = (_) => http.Response('{"verified":false}', 200);
+      native.restoreAction = () async {
+        native.updates.add([_receipt(status: PurchaseStatus.restored)]);
+        await waitForStoreCondition(
+          () => store.messageCode == 'restore_verification_failed',
+        );
+        throw PlatformException(
+          code: 'storekit2_restore_failed',
+          details: _NeverDescribe(),
+        );
+      };
+      await store.restore();
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'restore_verification_failed');
+      expect(store.restoreSupportCode, isNull);
+      expect(store.verifiedBenefitRevision, 0);
+      expect(verificationCalls, 1);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
+
+  test(
+    'restore support old membership revision is not a new Restore proof',
+    () async {
+      await ready();
+      store.state = VerifiedStoreState.verified;
+      store.verifiedBenefitRevision = 7;
+      store.benefitOwnerId = Supabase.instance.client.auth.currentUser!.id;
+      native.restoreError = PlatformException(code: 'storekit2_restore_failed');
+      await store.restore();
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'restore_failed');
+      expect(store.restoreSupportCode, 'BIL-RS-ENUM-02');
+      expect(store.verifiedBenefitRevision, 7);
+      expect(verificationCalls, 0);
+      expect(native.completionCalls, 0);
+    },
+  );
+
+  test(
+    'restore support late native error cannot replace current ownership rejection',
+    () async {
+      await ready();
+      verificationResponse = (_) => http.Response(
+        '{"error":"purchase_owned_by_another_account"}',
+        409,
+        headers: {'content-type': 'application/json'},
+      );
+      native.restoreAction = () async {
+        native.updates.add([_receipt(status: PurchaseStatus.restored)]);
+        await waitForStoreCondition(
+          () => store.messageCode == 'purchase_owned_by_another_account',
+        );
+        throw PlatformException(
+          code: 'storekit2_restore_failed',
+          details: _NeverDescribe(),
+        );
+      };
+      await store.restore();
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'purchase_owned_by_another_account');
+      expect(store.restoreSupportCode, isNull);
+      expect(store.verifiedBenefitRevision, 0);
+      expect(verificationCalls, 1);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 0);
+    },
+  );
 
   test(
     'inactive finish retry releases checkout only after acknowledgement',
@@ -1663,6 +1912,7 @@ void main() {
 
       expect(native.restoreCalls, 0);
       expect(store.messageCode, 'restore_cancelled');
+      expect(store.restoreSupportCode, isNull);
       expect(store.state, VerifiedStoreState.ready);
       expect(store.busy, isFalse);
       expect(store.canStartPurchase, isTrue);
@@ -1723,6 +1973,7 @@ void main() {
       await VerifiedStoreCatalogAdapter(store).restorePurchases();
 
       expect(store.messageCode, 'restore_cancelled');
+      expect(store.restoreSupportCode, isNull);
       expect(store.state, VerifiedStoreState.ready);
       expect(store.busy, isFalse);
       expect(store.canStartPurchase, isTrue);

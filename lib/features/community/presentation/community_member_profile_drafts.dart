@@ -4,6 +4,7 @@ class CommunityDraftsPage extends StatefulWidget {
   const CommunityDraftsPage({
     this.repository,
     this.onDraftPublished,
+    this.onDraftDeleted,
     super.key,
   });
 
@@ -11,6 +12,9 @@ class CommunityDraftsPage extends StatefulWidget {
 
   /// A verified successful editor return, scoped to this owner's draft.
   final ValueChanged<String>? onDraftPublished;
+
+  /// A verified same-owner private draft deletion, not a list absence.
+  final ValueChanged<String>? onDraftDeleted;
 
   @override
   State<CommunityDraftsPage> createState() => _CommunityDraftsPageState();
@@ -243,6 +247,9 @@ class _CommunityDraftsPageState extends State<CommunityDraftsPage> {
               onOpenDraft: (draftId) {
                 if (sameOwner()) unawaited(_openDraft(draftId));
               },
+              onDraftDeleted: (draftId) {
+                if (sameOwner()) widget.onDraftDeleted?.call(draftId);
+              },
               onCountChanged: (value) {
                 if (sameOwner() && value != _draftCount) {
                   setState(() => _draftCount = value);
@@ -270,6 +277,7 @@ class _CommunityDraftsSheet extends StatefulWidget {
     required this.ownerIsCurrent,
     required this.onOpenDraft,
     this.onCountChanged,
+    this.onDraftDeleted,
     this.onHasMoreChanged,
     this.onSelectionChanged,
     this.fullPage = false,
@@ -280,6 +288,7 @@ class _CommunityDraftsSheet extends StatefulWidget {
   final ValueGetter<bool> ownerIsCurrent;
   final ValueChanged<String> onOpenDraft;
   final ValueChanged<int>? onCountChanged;
+  final ValueChanged<String>? onDraftDeleted;
   final ValueChanged<bool>? onHasMoreChanged;
   final ValueChanged<bool>? onSelectionChanged;
   final bool fullPage;
@@ -518,6 +527,7 @@ class _CommunityDraftsSheetState extends State<_CommunityDraftsSheet> {
         isCurrentOwner: () => _sameOwner,
       );
       if (!_sameOwner) return;
+      widget.onDraftDeleted?.call(draftId);
       _selected.remove(draftId);
       await _refresh();
     } on Object {

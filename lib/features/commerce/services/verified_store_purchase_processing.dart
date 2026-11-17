@@ -51,6 +51,9 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           };
           notifyListeners();
         case PurchaseStatus.error:
+          if (origin == _StorePurchaseEventOrigin.restore) {
+            _recordRestoreCallbackFailure();
+          }
           if (origin == _StorePurchaseEventOrigin.reconciliation) {
             // A StoreKit error replayed while merely opening the Plans screen
             // is not a new checkout and does not represent a charge.  It is
@@ -92,6 +95,9 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           notifyListeners();
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
+          if (origin == _StorePurchaseEventOrigin.restore) {
+            _observeRestoreReceipt();
+          }
           await _handleVerifiedPurchase(
             purchase,
             origin: origin,

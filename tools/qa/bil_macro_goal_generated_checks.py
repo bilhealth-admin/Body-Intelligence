@@ -90,6 +90,74 @@ void main() {
 """
 
 
+def _capture_baseline_output(line, state, phase):
+    # Retain the owned harness result even if it precedes the VM service banner.
+    # Never retain/print service URLs, arbitrary child text, values, or secrets.
+    if line.startswith('{'):
+        try:
+            document = json.loads(line)
+        except json.JSONDecodeError:
+            state['malformed_json_seen'] = True
+            return
+        if (isinstance(document, dict) and document.get('result') == 'PASS'
+                and document.get('seed') == 20261015
+                and document.get('generated_cases') == 10000
+                and type(document.get('checks')) is int and document['checks'] > 0):
+            state['observed'] = {key: document[key] for key in
+                                 ('seed', 'generated_cases', 'checks', 'result')}
+            state['result_phase'] = phase
+        else:
+            state['unexpected_json_seen'] = True
+    if 'Bad state: bil-generated-check:' in line:
+        # The known assertion text itself is not emitted; only its stable hash.
+        label = line.split('Bad state: bil-generated-check:', 1)[1].strip()
+        allowed = {
+            'percent sum', 'percent bounds', 'independent 4/4/9 energy',
+            'invalid edit accepted', 'invalid calories accepted',
+            'locked target edited', 'invalid source calories accepted',
+            'explicit protein lock', 'requested percentage',
+            'gram to percent conversion', 'gram lock must preserve grams',
+            'percentage lock must preserve percent',
+            'atomic allocation preference group', 'calorie serialization',
+            'gram serialization', 'percent serialization',
+        }
+        state['harness_assertion_sha256'] = hashlib.sha256(label.encode()).hexdigest()
+        state['harness_assertion_code'] = (
+            re.sub('[^A-Z0-9]+', '_', label.upper()).strip('_')
+            if label in allowed else 'UNKNOWN_ASSERTION_WITHHELD'
+        )
+    if 'FormatException:' in line:
+        state['child_failure_category'] = 'FORMAT_EXCEPTION'
+        message = line.split('FormatException:', 1)[1].strip()
+        messages = {
+            'Invalid energy allocation.': 'INVALID_ENERGY_ALLOCATION',
+            'Unlock this macro or review its energy.': 'UNLOCK_MACRO_OR_REVIEW_ENERGY',
+            'Both other macros are locked.': 'BOTH_OTHER_MACROS_LOCKED',
+            'Locked allocation exceeds the calorie goal.': 'LOCKED_ALLOCATION_EXCEEDS_GOAL',
+            'Unlock a macro before changing calories.': 'UNLOCK_MACRO_BEFORE_CALORIES',
+        }
+        state['format_exception_code'] = messages.get(message, 'UNKNOWN_FORMAT_MESSAGE_WITHHELD')
+    elif 'Error:' in line and 'Bad state: bil-generated-check:' not in line:
+        state['child_failure_category'] = 'CHILD_ERROR'
+
+
+def _read_until_vm_banner(lines, diagnostic):
+    for line in lines:
+        _capture_baseline_output(line, diagnostic, 'before_vm_banner')
+        match = re.search(r'The Dart VM service is listening on (http://127\.0\.0\.1:\d+/\S+)', line)
+        if match:
+            return match[1]
+    return None
+
+
+def _baseline_outcome(exit_code, diagnostic):
+    observed = diagnostic.get('observed')
+    safe = {key: value for key, value in diagnostic.items() if key != 'observed'}
+    safe.update(stage='BASELINE_PROCESS_FINISHED', baseline_exit_code=exit_code,
+                valid_result_seen=observed is not None)
+    return (observed if exit_code == 0 else None), safe
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dart', required=True)
@@ -118,24 +186,36 @@ def main():
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8')
     vm_uri = None
     observed = None
+    diagnostic = {'observed': None, 'result_phase': None}
     try:
-        for line in process.stdout:
-            match = re.search(r'The Dart VM service is listening on (http://127\.0\.0\.1:\d+/\S+)', line)
-            if match:
-                vm_uri = match[1]
-                break
+        vm_uri = _read_until_vm_banner(process.stdout, diagnostic)
         if not vm_uri:
             raise RuntimeError('The owned Dart VM did not expose its loopback service')
         coverage = owned / 'coverage.json'
-        subprocess.run([args.dart, '--packages=' + str(config), str(collector),
-            '--uri=' + vm_uri, '--out=' + str(coverage), '--wait-paused',
-            '--resume-isolates', '--function-coverage', '--branch-coverage'],
-            check=True, timeout=120, stdout=subprocess.DEVNULL)
+        try:
+            collected = subprocess.run([args.dart, '--packages=' + str(config), str(collector),
+                '--uri=' + vm_uri, '--out=' + str(coverage), '--wait-paused',
+                '--resume-isolates', '--function-coverage', '--branch-coverage'],
+                check=False, timeout=120, stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE)
+        except subprocess.TimeoutExpired:
+            raise RuntimeError('COVERAGE_COLLECTOR_TIMEOUT_NO_URL_EMITTED') from None
+        diagnostic['collector_exit_code'] = collected.returncode
+        diagnostic['collector_stderr_sha256'] = hashlib.sha256(collected.stderr).hexdigest()
+        if collected.returncode:
+            print(json.dumps({'baseline_diagnostic': {
+                'stage': 'COVERAGE_COLLECTOR_FAILED',
+                'collector_exit_code': collected.returncode,
+                'stderr_sha256': diagnostic['collector_stderr_sha256'],
+            }}), flush=True)
+            raise RuntimeError('COVERAGE_COLLECTOR_FAILED_NO_URL_EMITTED')
         for line in process.stdout:
-            if line.startswith('{'):
-                observed = json.loads(line)
-        if process.wait(timeout=30) != 0 or observed is None:
-            raise RuntimeError('Baseline generated checks failed')
+            _capture_baseline_output(line, diagnostic, 'after_vm_banner')
+        baseline_exit_code = process.wait(timeout=30)
+        observed, safe_diagnostic = _baseline_outcome(baseline_exit_code, diagnostic)
+        print(json.dumps({'baseline_diagnostic': safe_diagnostic}), flush=True)
+        if baseline_exit_code != 0 or observed is None:
+            raise RuntimeError('Baseline generated checks failed; see fixed diagnostic codes')
     finally:
         if process.poll() is None:
             process.kill()

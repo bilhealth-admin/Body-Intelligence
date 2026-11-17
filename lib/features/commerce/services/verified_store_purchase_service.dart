@@ -24,6 +24,7 @@ import 'store_native_purchase_completion.dart';
 import '../domain/store_benefit_delivery.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
+import '../domain/storefront_market_policy.dart';
 import '../domain/subscription_term.dart';
 import '../domain/subscription_state.dart';
 import '../repositories/server_entitlement_repository.dart'
@@ -34,6 +35,7 @@ part 'verified_store_purchase_processing.dart';
 part 'verified_store_receipt_verification.dart';
 part 'verified_store_purchase_checkout.dart';
 part 'verified_store_purchase_restore.dart';
+part 'verified_store_restore_diagnostics.dart';
 part 'verified_store_purchase_owned.dart';
 part 'verified_store_purchase_pending.dart';
 part 'verified_store_subscription_recovery.dart';
@@ -101,6 +103,22 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   VerifiedStoreState state = VerifiedStoreState.loading;
   Map<String, ProductDetails> products = const {};
+  // Ephemeral catalog metadata only; never stored with the account or ads.
+  String? _catalogStoreCountryCode;
+  String? get catalogStoreCountryCode => _catalogStoreCountryCode;
+  StoreAccountSnapshot captureCatalogVisit() => _storeVisit.capture();
+  bool isCurrentCatalogVisit(StoreAccountSnapshot visit) =>
+      !_disposed && _storeVisit.isCurrent(visit);
+  Future<String?> readStorefrontCountry() async {
+    try {
+      return StorefrontMarketPolicy.normalizeCountry(
+        await _purchase.countryCode().timeout(const Duration(seconds: 4)),
+      );
+    } on Object {
+      return null;
+    }
+  }
+
   VerifiedStoreEntitlement? entitlement;
   String? messageCode;
   String? ownershipConflictProductId;
@@ -113,6 +131,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   bool _restoring = false;
   Future<void>? _nativeRestoreOperation;
   bool _restoreOwnershipConflict = false;
+  _StoreRestoreAttempt? _restoreAttempt;
+  String? get restoreSupportCode => _currentRestoreSupportCode();
   bool _checkoutPreflightInFlight = false;
   bool _disposed = false;
   int _entitlementRefreshGeneration = 0;
@@ -250,6 +270,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     GooglePlayPurchaseDetails? replacesGooglePurchase,
     bool downgradeAtRenewal = false,
     String? expectedGoogleOfferToken,
+    String? expectedStoreCountryCode,
   }) async {
     // The button and service both guard this boundary. Keeping the service
     // idempotent prevents a second UI event from overwriting the truthful
@@ -274,6 +295,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    final checkoutVisit = _storeVisit.capture();
     final user = Supabase.instance.client.auth.currentUser;
     var product = productFor(plan, term: term);
     if (user == null ||
@@ -303,7 +325,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           product.id,
         );
         if (!reconciled ||
-            _disposed ||
+            !isCurrentCatalogVisit(checkoutVisit) ||
             Supabase.instance.client.auth.currentUser?.id != user.id) {
           return;
         }
@@ -333,6 +355,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         product,
         ownerId: user.id,
         generation: purchaseGeneration,
+        expectedStoreCountryCode: expectedStoreCountryCode,
       );
       if (product == null ||
           _disposed ||
@@ -433,6 +456,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
               replacesGooglePurchase: replacesGooglePurchase,
               downgradeAtRenewal: downgradeAtRenewal,
               expectedGoogleOfferToken: expectedGoogleOfferToken,
+              expectedStoreCountryCode: expectedStoreCountryCode,
             );
           } finally {
             _appleDuplicateRetryInFlight = false;
@@ -639,6 +663,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    _clearRestoreDiagnostic();
     _storeVisit.dispose();
     _purchaseWatchdog?.cancel();
     _purchaseWatchdog = null;
@@ -650,6 +675,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   @override
   void notifyListeners() {
+    if (!_restoring && messageCode != 'restore_failed') {
+      _clearRestoreDiagnostic();
+    }
     if (!_disposed) _notificationZone.run(super.notifyListeners);
   }
 }

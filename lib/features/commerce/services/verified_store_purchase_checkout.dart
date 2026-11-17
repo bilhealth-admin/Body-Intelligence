@@ -10,17 +10,46 @@ extension _VerifiedStorePurchaseCheckout on VerifiedStorePurchaseService {
     ProductDetails displayed, {
     required String ownerId,
     required int generation,
+    String? expectedStoreCountryCode,
   }) async {
     if (defaultTargetPlatform != TargetPlatform.android &&
         defaultTargetPlatform != TargetPlatform.iOS) {
       return displayed;
     }
     _checkoutPreflightInFlight = true;
+    final visit = _storeVisit.capture();
+    bool isCurrent() =>
+        isCurrentCatalogVisit(visit) &&
+        generation == _purchaseEventGeneration &&
+        Supabase.instance.client.auth.currentUser?.id == ownerId;
+    ProductDetails? changedCatalog() {
+      if (isCurrent()) {
+        state = VerifiedStoreState.ready;
+        messageCode = 'store_catalog_changed';
+      }
+      return null;
+    }
+
     try {
+      final country = await readStorefrontCountry();
+      if (!isCurrent()) return null;
+      final expected = StorefrontMarketPolicy.normalizeCountry(
+        expectedStoreCountryCode,
+      );
+      if ((expected != null && expected != country) ||
+          !StorefrontMarketPolicy.allowsProduct(displayed.id, country)) {
+        return changedCatalog();
+      }
       final response = await _purchase
           .queryProductDetails({displayed.id})
           .timeout(const Duration(seconds: 10));
-      if (_disposed || generation != _purchaseEventGeneration) return null;
+      if (!isCurrent()) return null;
+      final afterCountry = await readStorefrontCountry();
+      if (!isCurrent()) return null;
+      if (afterCountry != country ||
+          !StorefrontMarketPolicy.allowsProduct(displayed.id, afterCountry)) {
+        return changedCatalog();
+      }
       if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
         state = VerifiedStoreState.unavailable;
         messageCode = 'authentication_required';

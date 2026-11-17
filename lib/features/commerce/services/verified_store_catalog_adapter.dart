@@ -7,6 +7,7 @@ import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
+import '../domain/storefront_market_policy.dart';
 import 'verified_store_purchase_service.dart';
 
 final class GooglePlayOfferMetadata {
@@ -321,10 +322,20 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
 
   @override
   Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) async {
+    final visit = store.captureCatalogVisit();
+    final country = await store.readStorefrontCountry();
+    if (!store.isCurrentCatalogVisit(visit)) return const [];
     await Future.wait<void>([
-      if (store.products.isEmpty) store.initialize(),
+      if (store.products.isEmpty ||
+          (country != null && country != store.catalogStoreCountryCode))
+        store.initialize(),
       if (loadBoostCatalog != null) loadBoostCatalog!(),
     ]);
+    if (!store.isCurrentCatalogVisit(visit)) return const [];
+    // A store change during the refresh must not mix country and price batches.
+    if (country != null && country != store.catalogStoreCountryCode) {
+      return const [];
+    }
     // The exclusive Boost lane owns its freshly queried product. A subscription
     // service catalog may still contain the earlier pack price or offer token.
     final boost = boostProduct?.call();
@@ -343,12 +354,16 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
       // service already filters its map, but injected/restored catalog state
       // must not be able to surface a forbidden Premium trial or malformed
       // recurring term if it bypasses that first layer.
-      if (!releaseEligibleStoreProduct(product)) continue;
+      if (!releaseEligibleStoreProduct(product) ||
+          !StorefrontMarketPolicy.allowsProduct(product.id, country)) {
+        continue;
+      }
       if (product.id == StoreCatalogConfiguration.aiBoost) {
         final discount = googlePlayOneTimeDiscountMetadata(product);
         offers.add(
           BilStoreOfferMetadata(
             productId: product.id,
+            storeCountryCode: country,
             kind: BilStoreProductKind.aiBoostConsumable,
             localizedTitle: product.title,
             localizedPrice: discount?.localizedPrice ?? product.price,
@@ -368,12 +383,14 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
       if (binding == null) continue;
       final playOffer = googlePlayOfferMetadata(product);
       final appleOffer = await appleStoreOfferMetadata(product);
+      if (!store.isCurrentCatalogVisit(visit)) return const [];
       final allowsTrial =
           binding.plan == CommercePlan.premiumAiCoach &&
           StoreCatalogConfiguration.isAiTrialProduct(product.id);
       offers.add(
         BilStoreOfferMetadata(
           productId: product.id,
+          storeCountryCode: country,
           kind: binding.plan == CommercePlan.premiumAiCoach
               ? BilStoreProductKind.premiumAiCoachSubscription
               : BilStoreProductKind.premiumSubscription,
@@ -422,6 +439,7 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
       binding.plan,
       term: binding.term,
       expectedGoogleOfferToken: offer.purchaseOfferToken,
+      expectedStoreCountryCode: offer.storeCountryCode,
     );
   }
 

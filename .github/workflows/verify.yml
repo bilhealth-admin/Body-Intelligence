@@ -227,6 +227,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Verify POSIX StoreKit restore overlay isolation and reentry
+        if: ${{ matrix.suite == 'architecture' }}
+        run: python3 -B tool/release/test_prepare_ios_storekit_restore_codec_overlay.py
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -558,6 +561,8 @@ jobs:
           python-version: '3.14'
       - name: Execute all QA tool regression tests
         run: python -m unittest discover -s tools/qa -p 'test_*.py' -v
+      - name: Verify StoreKit restore overlay isolation and reentry
+        run: python -B tool/release/test_prepare_ios_storekit_restore_codec_overlay.py
 
   flutter:
     name: flutter

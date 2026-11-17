@@ -101,6 +101,23 @@ def expected_tests(source):
     return set(names)
 
 
+def _runner_pass_line(line):
+    """Recover a complete XCTest record interleaved with a Runner OS log."""
+    records = list(re.finditer(r"Test [Cc]ase '[^'\r\n]+' passed\b", line))
+    if len(records) > 1:
+        raise ValueError('Multiple XCTest pass records on one line are ambiguous')
+    if not records or records[0].start() == 0:
+        return line
+    prefix = line[:records[0].start()]
+    # This is an OS timestamp/process/tag envelope, not arbitrary fixture text.
+    # Exact XCTest class/method, source registry and duplicate checks stay below.
+    if re.fullmatch(
+            r"\s*\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,9}[+-]\d{4} "
+            r"Runner\[\d+:\d+\] \[[A-Za-z0-9_. -]+\] [^'\r\n]*", prefix):
+        return line[records[0].start():]
+    return line
+
+
 def verified_summary(raw_summary, execution_log, names):
     if not ORIGINAL_TEST_NAMES.issubset(names) or any(not re.fullmatch(r'test[A-Za-z0-9_]+', name) for name in names):
         raise ValueError('Actual complete named XCTest source registry required')
@@ -118,6 +135,7 @@ def verified_summary(raw_summary, execution_log, names):
         raise ValueError("Expected failures cannot stand in for successful tests")
     passed = []
     for line in execution_log.splitlines():
+        line = _runner_pass_line(line)
         match = re.match(r"\s*Test Case '-\[(?:RunnerTests\.)?RunnerTests (test[A-Za-z0-9_]+)\]' passed\b", line)
         if match is None:
             match = re.match(r"\s*Test case 'RunnerTests\.(test[A-Za-z0-9_]+)\(\)' passed\b", line)

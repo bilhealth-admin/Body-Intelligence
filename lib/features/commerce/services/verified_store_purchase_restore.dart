@@ -5,6 +5,7 @@ part of 'verified_store_purchase_service.dart';
 extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
   Future<void> restore() async {
     if (_disposed || !configured || busy) return;
+    _clearRestoreDiagnostic();
     if (Supabase.instance.client.auth.currentUser == null) {
       state = VerifiedStoreState.unavailable;
       messageCode = 'authentication_required';
@@ -19,6 +20,8 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
       return;
     }
     final visit = _storeVisit.capture();
+    final attempt = _StoreRestoreAttempt(visit, verifiedBenefitRevision);
+    _restoreAttempt = attempt;
     final previousState = state;
     final previousMessageCode = messageCode;
     _restoring = true;
@@ -33,7 +36,7 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
       // StoreKit 2's generic restore reads current entitlements but does not
       // itself force a server sync. This is an explicit Restore tap, which is
       // the only appropriate time to ask App Store to synchronize.
-      await _coalescedNativeRestore().timeout(pendingTimeout);
+      await _coalescedNativeRestore(attempt).timeout(pendingTimeout);
       // StoreKit may complete AppStore.sync just before it publishes its
       // restored transaction to the stream. Wait briefly for that callback
       // instead of falsely reporting an empty history; a later callback still
@@ -119,6 +122,7 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
           !_storeVisit.isCurrent(visit)) {
         return;
       }
+      if (_restoreResultHasPriority(attempt)) return;
       if (_isStoreRestoreCancellation(error)) {
         _settleRestoreWithoutReceipt(
           previousState: previousState,
@@ -126,6 +130,10 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
           resultCode: 'restore_cancelled',
         );
       } else {
+        _recordRestoreFailure(
+          attempt,
+          StoreRestoreDiagnostic.fromNativeCode(attempt.phase, error.code),
+        );
         state = VerifiedStoreState.failed;
         messageCode = 'restore_failed';
         notifyListeners();
@@ -136,6 +144,11 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
           !_storeVisit.isCurrent(visit)) {
         return;
       }
+      if (_restoreResultHasPriority(attempt)) return;
+      _recordRestoreFailure(
+        attempt,
+        StoreRestoreDiagnostic(attempt.phase, StoreRestoreFailure.unexpected),
+      );
       state = VerifiedStoreState.failed;
       messageCode = 'restore_failed';
       notifyListeners();
@@ -179,15 +192,24 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
     notifyListeners();
   }
 
-  Future<void> _coalescedNativeRestore() {
+  Future<void> _coalescedNativeRestore(_StoreRestoreAttempt attempt) {
     final running = _nativeRestoreOperation;
-    if (running != null) return running;
+    if (running != null) {
+      attempt.phase = StoreRestorePhase.coalescedWait;
+      return running;
+    }
     final visit = _storeVisit.capture();
     late final Future<void> operation;
     operation =
         Future<void>(() async {
+          if (_isCurrentRestoreAttempt(attempt)) {
+            attempt.phase = StoreRestorePhase.sync;
+          }
           await _syncAppleStoreForExplicitRestore();
           if (_disposed || !_storeVisit.isCurrent(visit)) return;
+          if (_isCurrentRestoreAttempt(attempt)) {
+            attempt.phase = StoreRestorePhase.enumeration;
+          }
           await _purchase.restorePurchases();
         }).whenComplete(() {
           if (identical(_nativeRestoreOperation, operation)) {

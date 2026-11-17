@@ -1,6 +1,14 @@
 part of 'bil_store_plans_page.dart';
 
 extension _BilStorePlansPresentation on _BilStorePlansPageState {
+  String _purchaseFeedbackText(String locale, String key) {
+    final text = BilStoreCopy.text(locale, key);
+    final code = key == 'restore_failed'
+        ? (widget.store ?? _ownedStore)?.restoreSupportCode
+        : null;
+    return code == null ? text : '$text ($code)';
+  }
+
   void _leavePlans() =>
       context.canPop() ? context.pop() : context.go('/dashboard');
 

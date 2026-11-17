@@ -65,6 +65,15 @@ extension _CommunityPostComposerReferenceActions
         context,
         CommunityDraftsPage(
           repository: repository,
+          onDraftDeleted: (draftId) {
+            if (!current() || widget.draft.persistentDraftId != draftId) return;
+            // Deleting this saved row detaches only its persistent identity.
+            // Keep the mounted editor's text, images and all selections intact.
+            _setComposerState(() {
+              widget.draft.persistentDraftId = null;
+              widget.draft.savedPersistently = false;
+            });
+          },
           onDraftPublished: (draftId) {
             if (!current() || widget.draft.persistentDraftId != draftId) return;
             // Only the same persisted draft was consumed. A different draft

@@ -4,6 +4,7 @@ extension _OwnedStorePurchase on VerifiedStorePurchaseService {
   void _retireStoreOwner() {
     if (_disposed) return;
     _purchaseEventGeneration++;
+    _clearRestoreDiagnostic();
     _entitlementRefreshGeneration++;
     _clearEntitlement();
     _clearPurchaseInitiation();

@@ -599,6 +599,31 @@ void main(List<String> arguments) {
         '--defer-ios-google-mobile-ads is valid only with --platform=ios.',
       );
     }
+    Map<String, Object?>? storeKitRestoreCodec;
+    if (platform == 'ios') {
+      final prepared =
+          Process.runSync(Platform.isWindows ? 'python' : 'python3', [
+            'tool/release/prepare_ios_storekit_restore_codec_overlay.py',
+            '--project-root',
+            Directory.current.absolute.path,
+          ]);
+      if (prepared.exitCode != 0) {
+        throw StateError('StoreKit codec overlay failed: ${prepared.stderr}');
+      }
+      final proof = jsonDecode(prepared.stdout as String);
+      if (proof is! Map<String, dynamic> ||
+          proof['recipe'] != 'bil-storekit-unverified-restore-codec-count-v1' ||
+          proof['swift_sha256'] !=
+              'be93cbd553c31c89d2aef0bfc021180da4bc70c43809fbf7c0e76e156b142bf2' ||
+          !{
+            'prepared',
+            'already-prepared',
+            'rebound',
+          }.contains(proof['status'])) {
+        throw const FormatException('StoreKit codec overlay proof is invalid.');
+      }
+      storeKitRestoreCodec = Map<String, Object?>.from(proof);
+    }
     final deferredBarcode = prepareDeferredIosSimpleBarcodeScannerPackage(
       Directory.current,
       removeAndroid: platform == 'android',
@@ -640,6 +665,7 @@ void main(List<String> arguments) {
         'removed_dev_native_plugins': removed,
         'excluded_mobile_native_plugins': excludedPlugins.toList()..sort(),
         'preserved_dev_native_plugins': preserveDevNativePlugins == 1,
+        'storekit_restore_codec': ?storeKitRestoreCodec,
         'deferred_windows_only_override':
             deferredBarcode.overrideDirectory.path,
         if (deferredAds != null)

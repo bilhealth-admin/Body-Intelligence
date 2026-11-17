@@ -20,6 +20,51 @@ const _offer = BilStoreOfferMetadata(
 );
 
 void main() {
+  for (final result in ['restore_failed', 'restore_cancelled']) {
+    testWidgets('restore support UI appends fixed code only for $result', (
+      tester,
+    ) async {
+      const supportCode = 'BIL-RS-SYNC-01';
+      final store = _OutcomeStore(supportCode: supportCode);
+      final catalog = _OutcomeCatalog(store, result);
+      addTearDown(store.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: catalog,
+            productIds: const {StoreCatalogConfiguration.premiumMonthly},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final restore = find.text(BilStoreCopy.text('en', 'restore'));
+      await tester.ensureVisible(restore);
+      await tester.tap(restore);
+      await tester.pumpAndSettle();
+      final expected =
+          BilStoreCopy.text('en', result) +
+          (result == 'restore_failed' ? ' ($supportCode)' : '');
+      expect(
+        tester
+            .widget<BilDynamicStoreOffers>(find.byType(BilDynamicStoreOffers))
+            .purchaseStatusMessage,
+        expected,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(SnackBar),
+          matching: find.text(expected),
+        ),
+        findsOneWidget,
+      );
+      expect(catalog.restores, 1);
+      expect(catalog.purchases, 0);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
   for (final code in ['restore_cancelled', 'restore_unconfirmed']) {
     testWidgets('actual Plans restore shows neutral $code and allows retry', (
       tester,
@@ -135,9 +180,13 @@ void main() {
 }
 
 final class _OutcomeStore extends VerifiedStorePurchaseService {
-  _OutcomeStore() {
+  _OutcomeStore({this.supportCode}) {
     state = VerifiedStoreState.ready;
   }
+
+  final String? supportCode;
+  @override
+  String? get restoreSupportCode => supportCode;
 
   @override
   bool get canStartPurchase => !busy;

@@ -3,6 +3,14 @@ part of 'verified_store_purchase_service.dart';
 extension _VerifiedStorePurchaseInitialization on VerifiedStorePurchaseService {
   Future<void> _initialize() async {
     final purchaseGeneration = _purchaseEventGeneration;
+    final catalogVisit = _storeVisit.capture();
+    bool currentCatalog() =>
+        isCurrentCatalogVisit(catalogVisit) &&
+        (purchaseGeneration == _purchaseEventGeneration ||
+            (_storeStartupFaultBeforeCatalog &&
+                state == VerifiedStoreState.unavailable &&
+                messageCode == null &&
+                !busy));
     _storeStartupFaultBeforeCatalog = false;
     state = VerifiedStoreState.loading;
     messageCode = null;
@@ -74,12 +82,31 @@ extension _VerifiedStorePurchaseInitialization on VerifiedStorePurchaseService {
         notifyListeners();
         return;
       }
+      final country = await readStorefrontCountry();
+      if (!currentCatalog()) return;
       final response = await _purchase
-          .queryProductDetails(StoreCatalogConfiguration.storefrontProductIds)
+          .queryProductDetails(
+            StorefrontMarketPolicy.productIds(
+              StoreCatalogConfiguration.storefrontProductIds,
+              country,
+            ),
+          )
           .timeout(const Duration(seconds: 10));
-      if (_disposed) return;
+      if (!currentCatalog()) return;
+      final afterCountry = await readStorefrontCountry();
+      if (!currentCatalog()) return;
+      if (afterCountry != country) {
+        products = const {};
+        state = VerifiedStoreState.unavailable;
+        messageCode = 'store_catalog_changed';
+        notifyListeners();
+        return;
+      }
       final loaded = <String, ProductDetails>{};
       for (final product in response.productDetails) {
+        if (!StorefrontMarketPolicy.allowsProduct(product.id, country)) {
+          continue;
+        }
         final existing = loaded[product.id];
         final selected = preferredStoreProduct(existing, product);
         if (selected == null) {
@@ -101,6 +128,7 @@ extension _VerifiedStorePurchaseInitialization on VerifiedStorePurchaseService {
         return;
       }
       products = Map.unmodifiable(loaded);
+      _catalogStoreCountryCode = country;
       if (state == VerifiedStoreState.loading ||
           _storeStartupFaultBeforeCatalog) {
         state = VerifiedStoreState.ready;

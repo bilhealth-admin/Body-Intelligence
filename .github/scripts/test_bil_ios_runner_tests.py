@@ -233,6 +233,70 @@ class NamedSourceRegistryTests(unittest.TestCase):
             with self.subTest(kind=len(log)), self.assertRaises(ValueError):
                 runner.verified_summary(self.summary(names), log, names)
 
+    @staticmethod
+    def os_prefix():
+        # Actual iphone47 log shape; no device/account values are copied.
+        return ('2026-11-17 01:11:57.784254+0000 Runner[123:456] '
+                '[player] <<<< Async >>>> signalled err=')
+
+    def interleaved(self, *, modern=False):
+        names = runner.expected_tests(self.source(
+            'func testSplashCapsuleMotionChangesPaintWithoutChangingFootprint() {}'))
+        target = 'testSplashCapsuleMotionChangesPaintWithoutChangingFootprint'
+        lines = self.log(names).splitlines()
+        record = next(line for line in lines if target in line)
+        if modern:
+            replacement = "Test case 'RunnerTests." + target + "()' passed on 'iPhone' (0.01 seconds)."
+        else:
+            replacement = record
+        return names, '\n'.join(self.os_prefix() + replacement if line == record else line
+                                for line in lines)
+
+    def test_actual_runner_os_log_interleaving_keeps_the_complete_named_pass(self):
+        names, log = self.interleaved()
+        self.assertEqual(set(runner.verified_summary(self.summary(names), log, names)['testNames']), names)
+
+    def test_modern_named_pass_with_runner_os_prefix_stays_supported(self):
+        names, log = self.interleaved(modern=True)
+        self.assertEqual(set(runner.verified_summary(self.summary(names), log, names)['testNames']), names)
+
+    def test_interleaving_cannot_relax_summary_counts_or_expected_failures(self):
+        names, log = self.interleaved()
+        base = json.loads(self.summary(names))
+        for changed in [{'failedTests': 1}, {'skippedTests': 1}, {'expectedFailures': 1},
+                        {'passedTests': len(names) - 1}, {'totalTestCount': len(names) + 1}]:
+            with self.subTest(changed=changed), self.assertRaises(ValueError):
+                runner.verified_summary(json.dumps({**base, **changed}), log, names)
+
+    def test_unknown_process_or_fixture_prefix_cannot_supply_a_missing_pass(self):
+        names, log = self.interleaved()
+        for prefix in ['A fixture says ', self.os_prefix().replace(' Runner[', ' OtherRunner['),
+                       self.os_prefix().replace('Runner[123:456]', 'Runner[not-a-pid]'),
+                       self.os_prefix().replace('+0000', '')]:
+            bad = log.replace(self.os_prefix(), prefix)
+            with self.subTest(prefix=prefix), self.assertRaises(ValueError):
+                runner.verified_summary(self.summary(names), bad, names)
+
+    def test_prefixed_foreign_class_or_unknown_method_still_fails_closed(self):
+        names, log = self.interleaved()
+        target = 'testSplashCapsuleMotionChangesPaintWithoutChangingFootprint'
+        for bad in [log.replace('RunnerTests.RunnerTests ' + target, 'OtherTests.OtherTests ' + target),
+                    log.replace(target, 'testNotDeclaredInSource')]:
+            with self.subTest(kind=len(bad)), self.assertRaises(ValueError):
+                runner.verified_summary(self.summary(names), bad, names)
+
+    def test_prefixed_duplicate_pass_is_not_a_new_source_test(self):
+        names, log = self.interleaved()
+        repeated = next(line for line in log.splitlines() if self.os_prefix() in line)
+        with self.assertRaises(ValueError):
+            runner.verified_summary(self.summary(names), log + '\n' + repeated, names)
+
+    def test_two_pass_records_on_one_line_are_ambiguous_not_counted_once(self):
+        names, log = self.interleaved()
+        repeated = next(line for line in log.splitlines() if self.os_prefix() in line)
+        with self.assertRaises(ValueError):
+            runner.verified_summary(self.summary(names), log + '\n' + repeated + repeated, names)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

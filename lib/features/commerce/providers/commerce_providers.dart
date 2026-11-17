@@ -10,6 +10,7 @@ import '../domain/commerce_plan.dart';
 import 'verified_purchase_handoff.dart';
 import '../domain/free_plan.dart';
 import '../domain/market_offer_policy.dart';
+import '../domain/storefront_market_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
 import '../domain/subscription_lifecycle.dart';
@@ -557,24 +558,90 @@ final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
       AiVisionCreditState.available;
 });
 
-/// The device store is authoritative for the market-facing tier before a
-/// purchase exists. Play/App Store already filter products by the account's
-/// billing storefront, so no IP, language, or device locale is consulted.
+/// Injectable read-only SDK/config boundaries; production defaults are fixed.
+final storefrontPurchaseClientProvider = Provider<InAppPurchase>(
+  (_) => InAppPurchase.instance,
+);
+final storefrontCatalogConfiguredProvider = Provider<bool>(
+  (_) => AppEnvironment.commerceConfigured,
+);
+
+/// Billing country comes from StoreKit/Play, never locale or profile data.
+/// Each owner visit retires pending reads, including A -> B -> A.
 final storefrontTargetPlanProvider = FutureProvider<CommercePlan?>((ref) async {
-  if (!AppEnvironment.commerceConfigured) return null;
-  final store = InAppPurchase.instance;
-  if (!await store.isAvailable()) return null;
+  final ownerVisit = ref.watch(verifiedEntitlementOwnerVisitProvider);
+  final owner = ref.watch(verifiedEntitlementOwnerIdProvider);
+  bool current() =>
+      ref.mounted &&
+      ref.read(verifiedEntitlementOwnerVisitProvider) == ownerVisit &&
+      ref.read(verifiedEntitlementOwnerIdProvider) == owner;
+  // No polling: only a visible consumer's actual app resume requests a new
+  // ephemeral storefront read. A FutureProvider refresh keeps its last value
+  // until the new catalog settles; it never starts checkout or grants access.
+  var observed = true;
+  ref.onCancel(() => observed = false);
+  ref.onResume(() {
+    final reattached = !observed;
+    observed = true;
+    if (reattached) {
+      scheduleMicrotask(() {
+        if (ref.mounted && observed) ref.invalidateSelf();
+      });
+    }
+  });
+  WidgetsBinding? binding;
+  try {
+    binding = WidgetsBinding.instance;
+  } on FlutterError {
+    /* Headless. */
+  }
+  final lifecycleBinding = binding;
+  if (lifecycleBinding != null) {
+    final observer = _VerifiedCommerceResumeObserver(() {
+      if (observed && ref.mounted) ref.invalidateSelf();
+    });
+    lifecycleBinding.addObserver(observer);
+    ref.onDispose(() => lifecycleBinding.removeObserver(observer));
+  }
+  if (!ref.watch(storefrontCatalogConfiguredProvider)) return null;
+  final store = ref.watch(storefrontPurchaseClientProvider);
+  if (!await store.isAvailable() || !current()) return null;
+  Future<String?> readCountry() async {
+    try {
+      return StorefrontMarketPolicy.normalizeCountry(
+        await store.countryCode().timeout(const Duration(seconds: 4)),
+      );
+    } on Object {
+      // Unknown retains the conservative query-only behavior, never a grant.
+      return null;
+    }
+  }
+
+  final country = await readCountry();
+  if (!current() || StorefrontMarketPolicy.isHeld(country)) return null;
   final response = await store.queryProductDetails(
-    StoreCatalogConfiguration.productIds,
+    StorefrontMarketPolicy.productIds(
+      StoreCatalogConfiguration.productIds,
+      country,
+    ),
   );
-  if (response.error != null) return null;
-  final kinds = response.productDetails.map((product) {
-    final plan = StoreCatalogConfiguration.bindingForProduct(product.id)?.plan;
-    return plan == CommercePlan.premiumAiCoach
-        ? BilStoreProductKind.premiumAiCoachSubscription
-        : plan == CommercePlan.premium
-        ? BilStoreProductKind.premiumSubscription
-        : null;
-  }).whereType<BilStoreProductKind>();
+  if (!current() || response.error != null) return null;
+  final afterCountry = await readCountry();
+  if (!current() || afterCountry != country) return null;
+  final kinds = response.productDetails
+      .where(
+        (product) => StorefrontMarketPolicy.allowsProduct(product.id, country),
+      )
+      .map((product) {
+        final plan = StoreCatalogConfiguration.bindingForProduct(
+          product.id,
+        )?.plan;
+        return plan == CommercePlan.premiumAiCoach
+            ? BilStoreProductKind.premiumAiCoachSubscription
+            : plan == CommercePlan.premium
+            ? BilStoreProductKind.premiumSubscription
+            : null;
+      })
+      .whereType<BilStoreProductKind>();
   return MarketOfferPolicy.targetPlanForKinds(kinds);
 });

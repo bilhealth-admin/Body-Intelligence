@@ -431,7 +431,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text(BilStoreCopy.text(locale, messageKey))),
+        SnackBar(content: Text(_purchaseFeedbackText(locale, messageKey))),
       );
   }
 
@@ -665,7 +665,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
               ),
               purchaseStatusMessage: purchaseFeedbackKey == null
                   ? null
-                  : BilStoreCopy.text(locale, purchaseFeedbackKey),
+                  : _purchaseFeedbackText(locale, purchaseFeedbackKey),
               purchaseStatusIsError:
                   blockedPurchaseKinds.isNotEmpty || _purchaseFeedbackIsError,
               currentPlan: currentPlan,
