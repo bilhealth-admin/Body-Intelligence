@@ -90,6 +90,7 @@ jobs:
           set -euo pipefail
           python3 -m unittest discover -s tool/release -p 'test_android_emulator_launch_options.py'
           python3 -m unittest discover -s tool/release -p 'test_configure_android_emulator_display.py'
+          python3 -m unittest discover -s tool/release -p 'test_android_emulator_fresh_install.py' -v
           python3 -m unittest discover -s tool/release -p 'test_android_startup_workflow.py'
           python3 -m unittest discover -s tool/release -p 'test_verify_android_startup_frame.py'
           python3 -m unittest discover -s tool/release -p 'test_classify_android_startup_anr.py'
@@ -133,6 +134,7 @@ jobs:
           arch: x86_64
           target: google_apis
           profile: ${{ matrix.profile }}
+          force-avd-creation: true
           cores: 2
           ram-size: ${{ matrix.ram-size }}
           disable-animations: true

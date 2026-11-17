@@ -106,10 +106,21 @@ stage='verify-emulator-display-budget'
 python3 tool/release/configure_android_emulator_display.py verify-runtime \
   --api-level "$api_level" --evidence-dir "$evidence"
 
+# The owned action creates a fresh, snapshot-disabled AVD. Fail closed if the
+# package is already present; never clear a running app immediately before launch.
+stage='verify-fresh-app-install'
+if ! adb shell pm list packages --user 0 "$app_id" \
+    > "$evidence/preinstall-packages.txt" \
+    2> "$evidence/preinstall-packages-errors.txt"; then
+  echo 'Could not verify that BIL is absent before the fresh install.' >&2
+  exit 5
+fi
+if [[ -n "$(tr -d '[:space:]' < "$evidence/preinstall-packages.txt")" ]]; then
+  echo 'BIL or a matching package already exists; a fresh install is required.' >&2
+  exit 5
+fi
 stage='install-debug-apk'
 adb install "$apk"
-stage='clear-app-data'
-adb shell pm clear "$app_id" >/dev/null
 stage='launch-main-activity'
 adb shell am start -n "$app_id/.MainActivity"
 stage='wait-for-app-foreground'
