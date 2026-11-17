@@ -159,6 +159,15 @@ class OverlayActualTests(unittest.TestCase):
   self.assertEqual(self.prepare()["status"],"rebound");self.assertEqual(tree(self.destination),overlay);self.assert_bound()
  def test_literal_percent_path_round_trips_once(self):
   new=self.base/"cache literal %20 directory";assert self.source.resolve().is_relative_to(self.base.resolve()) and new.parent.resolve()==self.base.resolve();self.source.rename(new);self.source=new;self.set_roots(new)
+  if os.name!="nt":
+   # Moving this owned fixture also moves its native package. Keep its
+   # generated alias coherent; the helper must still reject a dangling link.
+   self.assertTrue(self.native_alias.is_symlink())
+   self.assertEqual(self.native_alias.parent,self.project/"ios/Flutter/ephemeral/Packages/.packages")
+   self.assertFalse(self.native_alias.exists())
+   self.assert_rejected_no_writes()
+   self.native_alias.unlink()
+   self.native_alias.symlink_to(new/H.NATIVE_PACKAGE,target_is_directory=True)
   self.assertEqual(self.prepare()["status"],"prepared");self.assertEqual(tree(new),self.cache_manifest)
  def test_wrong_lock_version_fails_closed(self):
   self.lock_path.write_text(self.lock.replace('version: "0.4.13+1"','version: "0.4.12"'),encoding="utf-8");self.assert_rejected_no_writes()
