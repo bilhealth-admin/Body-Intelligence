@@ -33,6 +33,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   bool _sending = false;
   bool _safetyBusy = false;
   bool _safetyBlocked = false;
+  VoidCallback? _cancelMessageDeletionDialog;
   bool _confirmingReplacement = false;
   String? _sendRequestId, _sendRequestBody;
   bool _removedDelivery = false;

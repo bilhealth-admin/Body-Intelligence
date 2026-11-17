@@ -18,13 +18,16 @@ import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../../community/services/community_owner_operation.dart';
 import 'store_account_visit.dart';
 import 'store_purchase_trace.dart';
+import 'store_verification_request_policy.dart';
+import 'store_subscription_blocker_recovery.dart';
 import 'store_native_purchase_completion.dart';
 import '../domain/store_benefit_delivery.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/subscription_term.dart';
+import '../domain/subscription_state.dart';
 import '../repositories/server_entitlement_repository.dart'
-    show isAcceptableServerVerificationTimestamp;
+    show ServerEntitlementRepository, isAcceptableServerVerificationTimestamp;
 
 part 'verified_store_purchase_support.dart';
 part 'verified_store_purchase_processing.dart';
@@ -33,18 +36,28 @@ part 'verified_store_purchase_checkout.dart';
 part 'verified_store_purchase_restore.dart';
 part 'verified_store_purchase_owned.dart';
 part 'verified_store_purchase_pending.dart';
+part 'verified_store_subscription_recovery.dart';
 part 'verified_store_purchase_completion.dart';
+part 'verified_store_purchase_initialization.dart';
 
 class VerifiedStorePurchaseService extends ChangeNotifier {
   VerifiedStorePurchaseService({
     InAppPurchase? purchase,
     this._appleStoreSync,
+    this._subscriptionInventoryReader,
+    this._freshRecoveryEntitlementReader,
     this.pendingTimeout = const Duration(seconds: 90),
     this.handlesBoost = true,
   }) : _purchaseInstance = purchase;
 
   InAppPurchase? _purchaseInstance;
   final Future<void> Function()? _appleStoreSync;
+  final StoreSubscriptionInventoryReader? _subscriptionInventoryReader;
+  final Future<SubscriptionState> Function()? _freshRecoveryEntitlementReader;
+  bool _subscriptionRecoveryInFlight = false;
+  String? _failedSubscriptionProductId;
+  final Map<String, PurchaseDetails> _unresolvedVerificationReceipts = {};
+  bool _unresolvedReceiptOverflow = false;
   final Duration pendingTimeout;
   final bool handlesBoost;
   late final StoreAccountVisit _storeVisit = StoreAccountVisit(
@@ -141,18 +154,37 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   @visibleForTesting
   static void resetTransactionReplayProtectionForTesting() {
     _failedTransactionCooldowns.clear();
+    StoreVerificationRequestPolicy.shared.resetForTesting();
   }
 
   bool get configured => AppEnvironment.commerceConfigured;
   bool get hasPendingVerifiedFinish => _pendingVerifiedFinishes.isNotEmpty;
   bool get isRestoring => _restoring;
+  bool get isRecoveringSubscription => _subscriptionRecoveryInFlight;
   bool get busy =>
       _restoring ||
+      _subscriptionRecoveryInFlight ||
       _checkoutPreflightInFlight ||
       _queuedPurchaseUpdates > 0 ||
       state == VerifiedStoreState.purchasePending;
+
+  /// Busy includes the background receipt lane for duplicate-charge safety.
+  /// Only an explicit checkout/restore may animate purchase progress in UI.
+  bool get userOperationInProgress =>
+      _restoring ||
+      _subscriptionRecoveryInFlight ||
+      _checkoutPreflightInFlight ||
+      (_purchaseInitiatedByThisService &&
+          messageCode != 'purchase_status_unknown') ||
+      (state == VerifiedStoreState.purchasePending &&
+          messageCode != 'reconciliation_pending');
+  bool get verificationBackedOff =>
+      StoreVerificationRequestPolicy.shared.isBackedOff(_currentStoreOwnerId());
   bool get canStartPurchase =>
       !busy &&
+      !verificationBackedOff &&
+      _unresolvedVerificationReceipts.isEmpty &&
+      !_unresolvedReceiptOverflow &&
       _nativeRestoreOperation == null &&
       canStartStorePurchase(
         state: state,
@@ -198,121 +230,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     });
   }
 
-  Future<void> _initialize() async {
-    final purchaseGeneration = _purchaseEventGeneration;
-    _storeStartupFaultBeforeCatalog = false;
-    state = VerifiedStoreState.loading;
-    messageCode = null;
-    notifyListeners();
-    final user = AppEnvironment.supabaseRuntimeReady
-        ? Supabase.instance.client.auth.currentUser
-        : null;
-    if (!configured || user == null) {
-      state = VerifiedStoreState.unavailable;
-      messageCode = 'configuration_required';
-      notifyListeners();
-      return;
-    }
-    _subscription ??= _purchase.purchaseStream.listen(
-      (purchases) => unawaited(_enqueuePurchaseUpdates(purchases)),
-      onError: (_) {
-        // A receipt already being verified owns its outcome. A stream error
-        // while merely waiting for a native transaction must still leave a
-        // recoverable, non-retryable failure instead of a permanent spinner.
-        // StoreKit can deliver the stream error after the receipt callback has
-        // completed. In that ordering the queue count is already zero, but
-        // the verified entitlement is still the authoritative result and a
-        // stale stream fault must not downgrade it to a catalog-ready state.
-        if (_disposed ||
-            _queuedPurchaseUpdates > 0 ||
-            state == VerifiedStoreState.verified) {
-          return;
-        }
-        final outcome = storePurchaseStreamFailureOutcome(
-          productsAvailable: products.isNotEmpty,
-          initiatedByCurrentService: _purchaseInitiatedByThisService,
-          purchasePending: state == VerifiedStoreState.purchasePending,
-        );
-        if (products.isEmpty &&
-            !_purchaseInitiatedByThisService &&
-            state != VerifiedStoreState.purchasePending) {
-          // StoreKit can report a transient stream fault before the first
-          // product query has populated [products].  Keep that fault local to
-          // startup: a valid catalog arriving moments later must be actionable.
-          _storeStartupFaultBeforeCatalog = true;
-        }
-        _clearPurchaseInitiation();
-        if (outcome.state == VerifiedStoreState.failed) {
-          _purchaseEventGeneration++;
-        }
-        state = outcome.state;
-        messageCode = outcome.messageCode;
-        notifyListeners();
-      },
-    );
-    // Independent read-only work: a slow entitlement lookup must not delay
-    // asking the native store for prices. Both still settle before initialize.
-    final entitlementRefresh = refreshEntitlement();
-    try {
-      if (!await _purchase.isAvailable().timeout(const Duration(seconds: 8))) {
-        if (_disposed ||
-            busy ||
-            purchaseGeneration != _purchaseEventGeneration) {
-          return;
-        }
-        state = VerifiedStoreState.unavailable;
-        messageCode = 'store_unavailable';
-        notifyListeners();
-        return;
-      }
-      final response = await _purchase
-          .queryProductDetails(StoreCatalogConfiguration.storefrontProductIds)
-          .timeout(const Duration(seconds: 10));
-      if (_disposed) return;
-      final loaded = <String, ProductDetails>{};
-      for (final product in response.productDetails) {
-        final existing = loaded[product.id];
-        final selected = preferredStoreProduct(existing, product);
-        if (selected == null) {
-          loaded.remove(product.id);
-        } else {
-          loaded[product.id] = selected;
-        }
-      }
-      // Regional availability deliberately returns a partial catalog: a
-      // profitable market exposes Premium AI Coach, while a localized market
-      // exposes Premium. Treating the other tier as "missing" would make the
-      // whole paywall unusable in every correctly configured country.
-      if (response.error != null || loaded.isEmpty) {
-        if (busy || purchaseGeneration != _purchaseEventGeneration) return;
-        products = const {};
-        state = VerifiedStoreState.unavailable;
-        messageCode = 'prices_unavailable';
-        notifyListeners();
-        return;
-      }
-      products = Map.unmodifiable(loaded);
-      if (state == VerifiedStoreState.loading ||
-          _storeStartupFaultBeforeCatalog) {
-        state = VerifiedStoreState.ready;
-        messageCode = null;
-        _storeStartupFaultBeforeCatalog = false;
-      }
-      _restoreCatalogAfterSettledInactiveReceipt();
-      notifyListeners();
-      await _queryCompletedAndroidPurchases();
-    } on Object {
-      if (_disposed || busy || purchaseGeneration != _purchaseEventGeneration) {
-        return;
-      }
-      state = VerifiedStoreState.offline;
-      messageCode = 'store_network_failed';
-      notifyListeners();
-    } finally {
-      await entitlementRefresh;
-    }
-  }
-
   ProductDetails? productFor(
     CommercePlan plan, {
     required SubscriptionTerm term,
@@ -337,7 +254,26 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     // The button and service both guard this boundary. Keeping the service
     // idempotent prevents a second UI event from overwriting the truthful
     // pending state while the native sheet is opening.
-    if (_disposed || busy || _nativeRestoreOperation != null) return;
+    if (_disposed ||
+        busy ||
+        _nativeRestoreOperation != null ||
+        _unresolvedVerificationReceipts.isNotEmpty ||
+        _unresolvedReceiptOverflow) {
+      return;
+    }
+    if (const {
+      'purchase_status_unknown',
+      'store_finish_pending',
+      'purchase_owned_by_another_account',
+    }.contains(messageCode)) {
+      return;
+    }
+    if (verificationBackedOff) {
+      state = VerifiedStoreState.failed;
+      messageCode = 'verification_failed';
+      notifyListeners();
+      return;
+    }
     final user = Supabase.instance.client.auth.currentUser;
     var product = productFor(plan, term: term);
     if (user == null ||
@@ -403,6 +339,14 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           purchaseGeneration != _purchaseEventGeneration) {
         return;
       }
+    }
+    if (verificationBackedOff ||
+        _unresolvedVerificationReceipts.isNotEmpty ||
+        _unresolvedReceiptOverflow) {
+      state = VerifiedStoreState.failed;
+      messageCode = 'verification_failed';
+      notifyListeners();
+      return;
     }
     final accountHash = storeAccountIdentifier(
       ownerId: user.id,

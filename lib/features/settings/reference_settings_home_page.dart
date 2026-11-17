@@ -69,7 +69,7 @@ class _ReferenceSettingsHomePageState
     final ownerId = identity.asData?.value.ownerId;
     final sessionReady = identity.hasValue && !identity.hasError;
     final showPremiumUpsell = ref
-        .watch(verifiedSubscriptionStateProvider)
+        .watch(verifiedSubscriptionPresentationProvider)
         .when(
           data: (value) => value.plan == CommercePlan.free,
           loading: () => false,

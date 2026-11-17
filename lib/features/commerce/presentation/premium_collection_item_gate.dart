@@ -1,4 +1,3 @@
-import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,8 +27,10 @@ class PremiumCollectionItemGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (!locked) return child;
     final access = ref.watch(verifiedSubscriptionAccessProvider);
-    final checking = access.isLoading;
+    final publicFree = ref.watch(verifiedFreePresentationProvider);
+    final checking = access.isLoading && !publicFree;
     final verified =
+        publicFree ||
         access.asData?.value.authority == EntitlementAuthority.verifiedServer;
     final unavailable = !checking && !verified;
     final upgrade =
@@ -87,7 +88,7 @@ class PremiumCollectionItemGate extends ConsumerWidget {
                         child: checking
                             ? const SizedBox.square(
                                 dimension: 24,
-                                child: BilFeatureWelcomeStatus(),
+                                child: Icon(Icons.shield_outlined, size: 24),
                               )
                             : unavailable
                             ? const BilNavigationFeedback(

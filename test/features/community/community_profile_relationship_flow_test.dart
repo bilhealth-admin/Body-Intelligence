@@ -787,7 +787,7 @@ void main() {
     final repo = _RelationshipsRepository()
       ..relationship = CommunityRelationshipStatus.accepted;
     await _mount(tester, repo);
-    expect(find.text('1 Friends'), findsOneWidget);
+    expect(find.text('Friends · 1'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, 'Friends'), findsOneWidget);
     await _tap(tester, _friend);
     await _tap(

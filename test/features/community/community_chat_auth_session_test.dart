@@ -19,6 +19,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 part 'community_chat_repository_cases.dart';
 part 'community_message_safety_cases.dart';
+part 'community_message_deletion_cases.dart';
 part 'community_message_entry_owner_cases.dart';
 part 'community_message_retry_cases.dart';
 part 'community_chat_visibility_paging_cases.dart';
@@ -245,6 +246,7 @@ void main() {
     await auth.client.dispose();
   });
   _messageSafetyCases(() => auth, () => repo);
+  _messageDeletionCases(() => auth, () => repo);
   _repositoryCases(() => auth);
   _relationshipDeliveryCases(() => auth, (repo) => repositories.add(repo));
   _messageEntryCases(() => auth, (repo) => repositories.add(repo));

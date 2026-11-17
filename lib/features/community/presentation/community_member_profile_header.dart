@@ -304,7 +304,7 @@ class _CommunityMemberProfileHeader extends StatelessWidget {
                             size: 18,
                           ),
                           label: Text(
-                            '${profile.friendCount} ${communityText(context, 'Friends', 'أصدقاء')}',
+                            '${communityText(context, 'Friends', 'الأصدقاء')} · ${profile.friendCount}',
                           ),
                           onPressed: () {
                             if (visit.isCurrent()) {

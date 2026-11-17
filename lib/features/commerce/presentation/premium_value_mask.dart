@@ -1,4 +1,3 @@
-import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 
@@ -98,7 +97,7 @@ class PremiumValueMask extends StatelessWidget {
                   child: checking
                       ? const SizedBox.square(
                           dimension: 22,
-                          child: BilFeatureWelcomeStatus(),
+                          child: Icon(Icons.shield_outlined, size: 22),
                         )
                       : Tooltip(
                           message: onRetry != null ? text('Retry') : label,

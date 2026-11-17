@@ -266,13 +266,20 @@ void main() {
     });
 
     test('route glass paints real content, blurs it, and blocks its input', () {
+      final root = source(
+        'lib/features/commerce/presentation/premium_route_glass_gate.dart',
+      );
+      expect(root, contains("part 'premium_route_glass_gate_card.dart';"));
+      final card = source(
+        'lib/features/commerce/presentation/premium_route_glass_gate_card.dart',
+      );
+      expect(card, contains("part of 'premium_route_glass_gate.dart';"));
       final glass =
-          source(
-            'lib/features/commerce/presentation/premium_route_glass_gate.dart',
-          ) +
+          root +
           source(
             'lib/features/commerce/presentation/premium_route_glass_gate_components.dart',
-          );
+          ) +
+          card;
 
       expect(glass, contains('AbsorbPointer('));
       expect(glass, contains('BackdropFilter('));

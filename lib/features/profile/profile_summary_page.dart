@@ -141,7 +141,7 @@ class ProfileSummaryPage extends ConsumerWidget {
     final photo = avatar.bytes;
     final memberSince = ref.watch(profileMemberSinceProvider);
     final friends = friendsState.value;
-    final subscription = ref.watch(verifiedSubscriptionAccessProvider);
+    final subscription = ref.watch(verifiedSubscriptionPresentationProvider);
     final name = storedName?.trim().isNotEmpty == true
         ? storedName!.trim()
         : _copy(context, 'BIL member');
@@ -308,7 +308,7 @@ class ProfileSummaryPage extends ConsumerWidget {
                 alignment: Alignment.center,
                 child: const SizedBox.square(
                   dimension: 22,
-                  child: BilFeatureWelcomeStatus(),
+                  child: Icon(Icons.shield_outlined),
                 ),
               ),
               error: (_, _) => Container(

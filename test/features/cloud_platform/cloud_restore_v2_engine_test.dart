@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:body_intelligence_log/app/services/local_data_lifecycle_service.dart';
 
 import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
+import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_nutrition_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/database/meal_food_evidence.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
@@ -171,6 +173,113 @@ void main() {
       }
       expect(await pb.get('goal.vitaminAMcg'), isNull);
       expect((await eb.run({'goals'})).pushed, 0);
+    },
+  );
+
+  test(
+    'item-only deletion survives V2 fresh restore with active parent and untouched control',
+    () async {
+      final fixture = await seedCloudNutritionFixture(a, ownerId: 'owner');
+      final source = MealRepository(a);
+      final day = DateTime(2026, 10, 12);
+      final before = await source.watchMealsForDate(day).first;
+      final target = before.singleWhere(
+        (meal) => meal.meal.uuid == fixture.mealUuid,
+      );
+      final control = before.singleWhere(
+        (meal) => meal.meal.uuid == fixture.recipeMealUuid,
+      );
+      final removedItem = target.items.single;
+      final controlItem = control.items.single;
+      Map<String, dynamic> portableItem(MealItem item) => item.toJson()
+        ..remove('id')
+        ..remove('mealId')
+        ..remove('foodId')
+        ..remove('syncStatus');
+      Map<TrackedNutrient, double?> displayTotals(MealWithItems meal) {
+        final evidence = DailyLogNutritionEvidence.forItems(
+          meal.items,
+          ownerKey: meal.ownerKey,
+        );
+        return {
+          for (final nutrient in [
+            TrackedNutrient.calories,
+            TrackedNutrient.protein,
+            TrackedNutrient.carbohydrates,
+            TrackedNutrient.fat,
+          ])
+            nutrient: evidence.total(nutrient, emptyAsZero: true),
+        };
+      }
+
+      final controlTotals = displayTotals(control);
+      expect(controlTotals[TrackedNutrient.calories], greaterThan(0));
+      expect((await ea.run({'nutrition'})).completed, isTrue);
+
+      await source.deleteMealItem(removedItem.id);
+      final local = (await source.watchMealsForDate(day).first).singleWhere(
+        (meal) => meal.meal.uuid == target.meal.uuid,
+      );
+      expect(local.meal.deletedAt, isNull);
+      expect(local.items, isEmpty);
+      expect(displayTotals(local).values, everyElement(0));
+      final snapshot = (await ea.codec.capture(
+        scopes: {'nutrition'},
+      )).singleWhere((record) => record.id == target.meal.uuid);
+      expect(snapshot.deleted, isFalse);
+      final exportedItem = (snapshot.data['items']! as List).single as Map;
+      expect(exportedItem['uuid'], removedItem.uuid);
+      expect(exportedItem['deletedAt'], isNotNull);
+
+      final upload = await ea.run({'nutrition'});
+      expect(upload.completed, isTrue, reason: upload.reason);
+      expect(
+        server.records['nutrition:meal:${target.meal.uuid}']!['deleted'],
+        isFalse,
+      );
+      // The independent target starts empty and receives only V2 transport
+      // records, with the existing ordinary-owner/consent fixture gates.
+      expect(await b.select(b.meals).get(), isEmpty);
+      expect(await b.select(b.mealItems).get(), isEmpty);
+      final restore = await eb.run({'nutrition'});
+      expect(restore.completed, isTrue, reason: restore.reason);
+      expect(restore.pushed, 0);
+      final restored = await MealRepository(b).watchMealsForDate(day).first;
+      expect(restored, hasLength(before.length));
+      final empty = restored.singleWhere(
+        (meal) => meal.meal.uuid == target.meal.uuid,
+      );
+      expect(empty.meal.deletedAt, isNull);
+      expect(empty.items, isEmpty);
+      expect(displayTotals(empty).values, everyElement(0));
+      final retained = (await b.select(b.mealItems).get()).singleWhere(
+        (item) => item.uuid == removedItem.uuid,
+      );
+      expect(retained.deletedAt, isNotNull);
+      final localDeleted = (await a.select(a.mealItems).get()).singleWhere(
+        (item) => item.uuid == removedItem.uuid,
+      );
+      expect(portableItem(retained), portableItem(localDeleted));
+      final restoredControl = restored.singleWhere(
+        (meal) => meal.meal.uuid == control.meal.uuid,
+      );
+      expect(
+        portableItem(restoredControl.items.single),
+        portableItem(controlItem),
+      );
+      expect(displayTotals(restoredControl), controlTotals);
+      final csv = (await LocalDataLifecycleService(
+        b,
+      ).exportCsvFiles())['BIL-meal-nutrition.csv']!;
+      expect(
+        RegExp(r'^"meal",', multiLine: true).allMatches(csv),
+        hasLength(2),
+      );
+      expect(
+        RegExp(r'^"mealItem",', multiLine: true).allMatches(csv),
+        hasLength(1),
+      );
+      expect(await b.customSelect('PRAGMA foreign_key_check').get(), isEmpty);
     },
   );
 

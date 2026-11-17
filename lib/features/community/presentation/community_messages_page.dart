@@ -624,6 +624,19 @@ class MessageBodyContract {
   }
 }
 
+/// Decode compose-page metadata for display without changing the wire body.
+/// Invalid stored text uses the existing localized safe-load placeholder.
+String communityMessageTextForDisplay(BuildContext context, String value) {
+  try {
+    final message = MessageBodyContract.parse(value);
+    return message.subject.isEmpty
+        ? message.body
+        : '${message.subject}\n${message.body}';
+  } on FormatException {
+    return _MessagesCopy.of(context).loadFailed;
+  }
+}
+
 class _PeopleSearchError extends StatelessWidget {
   const _PeopleSearchError({required this.copy, required this.onRetry});
   final _MessagesCopy copy;

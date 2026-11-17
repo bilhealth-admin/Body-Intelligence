@@ -84,6 +84,8 @@ abstract final class BilStoreCopy {
 
   static const catalogs = <String, Map<String, String>>{
     'en': {
+      'purchase_confirmation_pending':
+          'Waiting for purchase confirmation. Do not purchase again. You can continue verification.',
       'legal_terms': 'Terms of Use',
       'legal_privacy': 'Privacy Policy',
       'free': 'Free',
@@ -184,6 +186,8 @@ abstract final class BilStoreCopy {
       'ads_consent': 'Choose whether BIL may show contextual ads.',
     },
     'ar': {
+      'purchase_confirmation_pending':
+          'بانتظار تأكيد الشراء. لا تشترِ مرة أخرى. يمكنك متابعة التحقق.',
       'legal_terms': 'شروط الاستخدام',
       'legal_privacy': 'سياسة الخصوصية',
       'free': 'مجاني',
@@ -279,6 +283,8 @@ abstract final class BilStoreCopy {
       'ads_consent': 'اختر ما إذا كان بإمكان BIL عرض إعلانات سياقية.',
     },
     'fr': {
+      'purchase_confirmation_pending':
+          'En attente de confirmation de l’achat. Ne rachetez pas. Vous pouvez poursuivre la vérification.',
       'legal_terms': 'Conditions d’utilisation',
       'legal_privacy': 'Politique de confidentialité',
       'free': 'Gratuit',
@@ -384,6 +390,8 @@ abstract final class BilStoreCopy {
           'Choisissez si BIL peut afficher des publicités contextuelles.',
     },
     'es': {
+      'purchase_confirmation_pending':
+          'Esperando la confirmación de la compra. No compres de nuevo. Puedes continuar la verificación.',
       'legal_terms': 'Términos de uso',
       'legal_privacy': 'Política de privacidad',
       'free': 'Gratis',
@@ -489,6 +497,8 @@ abstract final class BilStoreCopy {
       'ads_consent': 'Elige si BIL puede mostrar anuncios contextuales.',
     },
     'tr': {
+      'purchase_confirmation_pending':
+          'Satın alma onayı bekleniyor. Tekrar satın almayın. Doğrulamaya devam edebilirsiniz.',
       'legal_terms': 'Kullanım Koşulları',
       'legal_privacy': 'Gizlilik Politikası',
       'free': 'Ücretsiz',

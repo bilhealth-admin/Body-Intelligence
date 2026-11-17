@@ -45,6 +45,8 @@ import 'visual_closure/visual_evidence_font.dart';
 // server-verified Free member. Without that evidence, the UI correctly
 // fails closed to Retry rather than showing the reviewed Premium preview.
 // This affects only the screenshot fixture, never production entitlements.
+const _storeVisualOwner = 'store-visual-member';
+
 final _visualVerifiedFree = SubscriptionState(
   plan: CommercePlan.free,
   entitlements: FreePlan.entitlements,
@@ -244,6 +246,14 @@ void main() {
   }) async {
     SharedPreferences.setMockInitialValues({});
     final db = await seededDatabase(trends: trends);
+    ProviderSubscription<AsyncValue<String?>>? fixtureOwnerSubscription;
+    final verifiedMemberCapture =
+        page is DashboardPage ||
+        page is DailyLogPage ||
+        page is FoodPage ||
+        page is SettingsPage ||
+        page is AnalyticsPage ||
+        page is BilStorePlansPage;
     if (page is DailyLogPage) {
       // These existing store references intentionally display the macro row.
       // The actual preference is opt-in; absence correctly means disabled.
@@ -295,12 +305,13 @@ void main() {
           connectedHealthGatewayProvider.overrideWithValue(
             const _StoreHealthGateway(),
           ),
-          if (page is DashboardPage ||
-              page is DailyLogPage ||
-              page is FoodPage ||
-              page is SettingsPage ||
-              page is AnalyticsPage ||
-              page is BilStorePlansPage) ...[
+          if (verifiedMemberCapture) ...[
+            verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+              _storeVisualOwner,
+            ),
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream.value(_storeVisualOwner),
+            ),
             verifiedEntitlementClockProvider.overrideWithValue(
               () => DateTime.utc(2026, 8, 30, 9, 41, 12),
             ),
@@ -331,6 +342,20 @@ void main() {
         ),
       ),
     );
+    // Some Progress scenes do not consume commerce themselves. Subscribe
+    // to the fixture owner before settling, rather than assuming that rendering
+    // an unrelated screen has eagerly started this lazy stream provider.
+    if (verifiedMemberCapture) {
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp)),
+      );
+      fixtureOwnerSubscription = container.listen(
+        verifiedEntitlementOwnerProvider,
+        (_, _) {},
+      );
+      // Setup can fail before the capture's finally block is entered.
+      addTearDown(() => fixtureOwnerSubscription?.close());
+    }
     // MaterialApp installs its home route on the next frame.
     await tester.pumpAndSettle();
     if (page is DailyLogPage) {
@@ -370,11 +395,36 @@ void main() {
       );
     }
     try {
+      if (verifiedMemberCapture) {
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(Scaffold).first),
+        );
+        expect(
+          container.read(verifiedEntitlementOwnerProvider).requireValue,
+          _storeVisualOwner,
+          reason: 'The store scene represents the same verified member.',
+        );
+        expect(
+          container.read(verifiedEntitlementOwnerIdProvider),
+          _storeVisualOwner,
+        );
+        final presentation = container.read(
+          verifiedSubscriptionPresentationProvider,
+        );
+        expect(presentation.isLoading, isFalse);
+        expect(presentation.hasError, isFalse);
+        expect(
+          presentation.requireValue.authority,
+          EntitlementAuthority.verifiedServer,
+        );
+        expect(presentation.requireValue.plan, CommercePlan.free);
+      }
       await expectLater(
         find.byType(Scaffold).first,
         matchesGoldenFile('goldens/epic15_$name.png'),
       );
     } finally {
+      fixtureOwnerSubscription?.close();
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
       await db.close();

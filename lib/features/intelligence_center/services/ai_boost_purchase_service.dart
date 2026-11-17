@@ -16,6 +16,7 @@ import '../../commerce/services/store_purchase_trace.dart';
 import '../../commerce/services/verified_store_catalog_adapter.dart';
 import '../../commerce/services/verified_store_purchase_service.dart';
 import '../../commerce/services/store_account_visit.dart';
+import '../../commerce/services/store_verification_request_policy.dart';
 import '../../community/services/community_owner_operation.dart';
 
 part 'ai_boost_purchase_processing.dart';
@@ -114,8 +115,16 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   String? errorCode;
   int verifiedCreditsRevision = 0;
 
+  bool get userOperationInProgress =>
+      state == AiBoostPurchaseState.pending &&
+      _userInitiatedProduct == productId;
+  bool get hasUserInitiatedFeedback =>
+      _userInitiatedProduct == productId ||
+      (state == AiBoostPurchaseState.verified && lastDeliveryIsUserPurchase);
+
   bool get canPurchase =>
       !_disposed &&
+      !StoreVerificationRequestPolicy.shared.isBackedOff(_owner()) &&
       _queued == 0 &&
       !_reconciling &&
       _unresolved == null &&

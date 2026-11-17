@@ -1,9 +1,9 @@
 # Isolated BIL-02/BIL-21 diagnostic CI. Not an integration or release gate.
-# Protected purchase CTA, legacy glass widget and baseline remain untouched.
+# Versioned purchase source pins; legacy glass and image baselines remain unchanged.
 name: BIL39 Crystal Focused
 on:
   push:
-    branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028, codex/bil41-android33-release-20261106, codex/bil43-android35-verified-20261108, codex/bil44-android36-verified-20261115, codex/bil45-android37-inactive-catalog-20261115, codex/bil46-android38-reviewer-fixes-20261116]
+    branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028, codex/bil41-android33-release-20261106, codex/bil43-android35-verified-20261108, codex/bil44-android36-verified-20261115, codex/bil45-android37-inactive-catalog-20261115, codex/bil46-android38-reviewer-fixes-20261116, codex/bil47-android39-subscription-stability-20261116]
   pull_request:
     paths:
       - .github/workflows/bil39-crystal.yml
@@ -51,11 +51,25 @@ jobs:
       - name: Assert exact PR HEAD, never test the synthetic merge commit
         shell: bash
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
-      - name: Protect purchase CTA and shared legacy glass source blobs
+      - name: Protect versioned purchase CTA and shared legacy glass source blobs
         shell: bash
+        env:
+          BIL_PURCHASE_EVENT_NAME: ${{ github.event_name }}
+          BIL_PURCHASE_REF: ${{ github.ref }}
+          BIL_PURCHASE_REF_NAME: ${{ github.ref_name }}
+          BIL_PURCHASE_HEAD_REF: ${{ github.head_ref }}
+          BIL_PURCHASE_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          BIL_PURCHASE_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BIL_PURCHASE_EVENT_SHA: ${{ github.sha }}
+          BIL_PURCHASE_SOURCE_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          BIL_PURCHASE_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
-          test "$(git hash-object lib/features/commerce/presentation/bil_dynamic_store_components.dart)" = "119f72914b468ff3db40dd07e72da96b837f7da7"
-          test "$(git hash-object lib/shared/widgets/bil_glass_press_feedback.dart)" = "653d424ddb6cca8adeb0d394f5c8f8866da3792d"
+          if [[ "$BIL_PURCHASE_SOURCE_BRANCH" == "codex/bil47-android39-subscription-stability-20261116" ]]; then
+            python3 tools/qa/bil47_protected_purchase_contract.py
+          else
+            test "$(git hash-object lib/features/commerce/presentation/bil_dynamic_store_components.dart)" = "119f72914b468ff3db40dd07e72da96b837f7da7"
+            test "$(git hash-object lib/shared/widgets/bil_glass_press_feedback.dart)" = "653d424ddb6cca8adeb0d394f5c8f8866da3792d"
+          fi
       - name: Check scoped Dart formatting
         run: dart format --output=none --set-exit-if-changed lib/app/theme/bil_navigation_press_style.dart lib/shared/widgets/bil_crystal_arrow.dart lib/shared/widgets/secondary_page_app_bar.dart test/bil_crystal_arrow_test.dart test/bil_crystal_calendar_video_test.dart test/bil_crystal_purchase_cta_isolation_test.dart
       - name: Diagnose exact scoped formatter diff on failure

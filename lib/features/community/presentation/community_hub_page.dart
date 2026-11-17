@@ -70,6 +70,7 @@ import 'community_food_submission_sheet.dart';
 import 'community_policy_notice.dart';
 import 'community_return_button.dart';
 import 'community_safety_page.dart';
+import 'community_blocked_members_sheet.dart';
 import 'community_taxonomy_sheet.dart';
 import 'community_surface.dart';
 import 'community_post_gallery_page.dart';
@@ -585,6 +586,19 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       refreshProfile =
           destination == 'account' || destination == '/community/profile/edit';
       switch (destination) {
+        case 'blocked':
+          await showBilPearlBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            showDragHandle: true,
+            constraints: const BoxConstraints(maxWidth: 560),
+            builder: (_) => visit.guard(
+              CommunityBlockedMembersSheet(repository: repository),
+            ),
+          );
+          visit.check();
+          await _feedKey.currentState?._refreshAfterPeopleReturn();
         case '/community/connections':
           await pushCommunityPage<void>(
             context,
@@ -675,23 +689,3 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     }
   }
 }
-
-PopupMenuItem<String> _communityAction(
-  BuildContext context,
-  String route,
-  String english,
-  String arabic,
-) => PopupMenuItem<String>(
-  value: route,
-  child: Row(
-    children: [
-      BilFlatIcon(
-        kind: BilSemanticIcons.kindForRoute(route)!,
-        size: 34,
-        iconSize: 19,
-      ),
-      const SizedBox(width: 12),
-      Expanded(child: Text(communityText(context, english, arabic))),
-    ],
-  ),
-);

@@ -18,6 +18,8 @@ import '../repositories/entitlement_repository.dart';
 import '../repositories/local_entitlement_repository.dart';
 import '../repositories/server_entitlement_repository.dart';
 
+part 'commerce_presentation_providers.dart';
+
 final entitlementRepositoryProvider = Provider<EntitlementRepository>(
   (ref) => const LocalEntitlementRepository(),
 );
@@ -71,6 +73,29 @@ final verifiedEntitlementOwnerIdProvider = Provider<String?>((ref) {
   return ref.watch(verifiedEntitlementOwnerSeedProvider);
 });
 
+/// A -> B -> A can occur between UI frames, when a scalar owner read has
+/// coalesced back to A. Observe every actual auth-owner emission so no cached
+/// display or in-flight authority read is reused from the retired visit.
+final verifiedEntitlementOwnerVisitProvider =
+    NotifierProvider<VerifiedEntitlementOwnerVisit, int>(
+      VerifiedEntitlementOwnerVisit.new,
+    );
+
+final class VerifiedEntitlementOwnerVisit extends Notifier<int> {
+  @override
+  int build() {
+    var previous = ref.read(verifiedEntitlementOwnerSeedProvider);
+    ref.listen(verifiedEntitlementOwnerProvider, (_, next) {
+      if (!next.hasValue || next.isLoading) return;
+      final owner = next.value;
+      if (owner == previous) return;
+      previous = owner;
+      state += 1;
+    });
+    return 0;
+  }
+}
+
 /// Owner-scoped memory of a store receipt that the server has proved belongs
 /// to another BIL account. This is presentation state only: the backend remains
 /// the entitlement authority. Keeping it above the plans route prevents closing
@@ -121,6 +146,12 @@ final verifiedEntitlementLoaderProvider =
     Provider<Future<SubscriptionState> Function()>(
       (_) => const ServerEntitlementRepository().current,
     );
+
+bool isVerifiedCommerceSessionInvalid(Object? error) =>
+    (error is AuthException &&
+        const {'401', '403'}.contains(error.statusCode)) ||
+    (error is PostgrestException &&
+        const {'PGRST301', 'PGRST302'}.contains(error.code));
 
 /// Avoids the extra lifecycle transition assumptions of
 /// AppLifecycleListener. Each observed verification owns exactly one listener
@@ -217,6 +248,7 @@ final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
   ref,
 ) async {
   ref.watch(verifiedEntitlementOwnerIdProvider);
+  ref.watch(verifiedEntitlementOwnerVisitProvider);
   final loaded = _observedAuthorityReload(ref, ref.invalidateSelf);
   try {
     final loader = ref.watch(verifiedEntitlementLoaderProvider);
@@ -257,6 +289,10 @@ final verifiedSubscriptionBoundaryRefreshProvider =
 /// cache. A slow refresh must not keep a cached paid plan alive past its period.
 final verifiedSubscriptionAccessProvider =
     Provider.autoDispose<AsyncValue<SubscriptionState>>((ref) {
+      final owner = ref.watch(verifiedEntitlementOwnerProvider);
+      if (owner.hasError) {
+        return AsyncValue.error(owner.error!, owner.stackTrace!);
+      }
       final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
       final snapshot = purchaseHandoffView(
         ref.watch(verifiedSubscriptionStateProvider),
@@ -427,6 +463,7 @@ final class AiCoachAccessSnapshotStore {
 final aiCoachAccessSnapshotStoreProvider = Provider<AiCoachAccessSnapshotStore>(
   (ref) {
     ref.watch(verifiedEntitlementOwnerIdProvider);
+    ref.watch(verifiedEntitlementOwnerVisitProvider);
     return AiCoachAccessSnapshotStore();
   },
 );

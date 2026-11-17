@@ -290,6 +290,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+    ProviderSubscription<AsyncValue<String?>>? fixtureOwnerSubscription;
     try {
       await tester.pumpWidget(
         ProviderScope(
@@ -306,6 +307,12 @@ void main() {
             ),
             mealVisionUsageProvider.overrideWithValue(
               const AsyncData(MealVisionUsageSnapshot.unavailable()),
+            ),
+            verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+              'visual-golden-owner',
+            ),
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream<String?>.value('visual-golden-owner'),
             ),
             // Golden captures default to a deterministic, server-verified
             // Free fixture (Premium cases supply their own dated fixture).
@@ -422,11 +429,43 @@ void main() {
           ),
         ),
       );
+      final fixtureScope = ProviderScope.containerOf(
+        tester.element(find.byType(MaterialApp).first),
+      );
+      // Some scenes never consume commerce. Start this lazy fixture stream
+      // before pumping; awaiting it after the final pump would deadlock fake time.
+      fixtureOwnerSubscription = fixtureScope.listen(
+        verifiedEntitlementOwnerProvider,
+        (_, _) {},
+      );
       if (finiteSettle) {
         await tester.pump(const Duration(milliseconds: 600));
       } else {
         await tester.pumpAndSettle();
       }
+      expect(
+        fixtureScope.read(verifiedEntitlementOwnerProvider).requireValue,
+        'visual-golden-owner',
+      );
+      expect(
+        fixtureScope.read(verifiedEntitlementOwnerIdProvider),
+        'visual-golden-owner',
+      );
+      final expectedSubscription =
+          subscriptionOverride ?? _visualVerifiedFreeSubscription;
+      final resolvedPresentation = fixtureScope.read(
+        verifiedSubscriptionPresentationProvider,
+      );
+      expect(resolvedPresentation.isLoading, isFalse);
+      expect(resolvedPresentation.hasError, isFalse);
+      expect(
+        resolvedPresentation.asData?.value.authority,
+        EntitlementAuthority.verifiedServer,
+      );
+      expect(
+        resolvedPresentation.asData?.value.plan,
+        expectedSubscription.plan,
+      );
       if (prepare != null) {
         await prepare(tester);
         if (finiteSettle) {
@@ -472,6 +511,7 @@ void main() {
         );
       }
     } finally {
+      fixtureOwnerSubscription?.close();
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(milliseconds: 1));
       await tester.pump();

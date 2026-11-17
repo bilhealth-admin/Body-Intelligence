@@ -5,6 +5,9 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
     PurchaseDetails purchase, {
     required String ownerId,
   }) async {
+    if (StoreVerificationRequestPolicy.shared.isBackedOff(ownerId)) {
+      return _StoreReceiptVerificationResult.failed;
+    }
     if (StoreCatalogConfiguration.bindingForProduct(purchase.productID) ==
         null) {
       return _StoreReceiptVerificationResult.failed;
@@ -24,7 +27,8 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
       final protectedBody = await BilMobileIntegrityService.instance
           .protect(action: 'store.verify_purchase', payload: body)
           .timeout(const Duration(seconds: 12));
-      if (!_isCurrentStoreOwner(ownerId)) {
+      if (!_isCurrentStoreOwner(ownerId) ||
+          StoreVerificationRequestPolicy.shared.isBackedOff(ownerId)) {
         return _StoreReceiptVerificationResult.failed;
       }
       final response = await Supabase.instance.client.functions
@@ -35,6 +39,11 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
           response.status != 200 ||
           data is! Map ||
           data['verified'] != true) {
+        StoreVerificationRequestPolicy.shared.observeFailure(
+          ownerId: ownerId,
+          status: response.status,
+          body: data,
+        );
         return _verificationFailure(data);
       }
       _acceptDelivery(
@@ -103,6 +112,11 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
       }
       return _StoreReceiptVerificationResult.failed;
     } on FunctionException catch (error) {
+      StoreVerificationRequestPolicy.shared.observeFailure(
+        ownerId: ownerId,
+        status: error.status,
+        body: error.details,
+      );
       return _verificationFailure(error.details);
     } on Object {
       return _StoreReceiptVerificationResult.failed;
@@ -113,6 +127,9 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
     PurchaseDetails purchase, {
     required String ownerId,
   }) async {
+    if (StoreVerificationRequestPolicy.shared.isBackedOff(ownerId)) {
+      return _StoreReceiptVerificationResult.failed;
+    }
     if (purchase.productID != StoreCatalogConfiguration.aiBoost) {
       return _StoreReceiptVerificationResult.failed;
     }
@@ -129,7 +146,8 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
       final protectedBody = await BilMobileIntegrityService.instance
           .protect(action: 'store.verify_ai_boost', payload: body)
           .timeout(const Duration(seconds: 12));
-      if (!_isCurrentStoreOwner(ownerId)) {
+      if (!_isCurrentStoreOwner(ownerId) ||
+          StoreVerificationRequestPolicy.shared.isBackedOff(ownerId)) {
         return _StoreReceiptVerificationResult.failed;
       }
       final response = await Supabase.instance.client.functions
@@ -139,10 +157,20 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
       if (!_isCurrentStoreOwner(ownerId)) {
         return _StoreReceiptVerificationResult.failed;
       }
+      StoreVerificationRequestPolicy.shared.observeFailure(
+        ownerId: ownerId,
+        status: response.status,
+        body: data,
+      );
       return response.status == 200 && data is Map && data['verified'] == true
           ? _StoreReceiptVerificationResult.verifiedActive
           : _verificationFailure(data);
     } on FunctionException catch (error) {
+      StoreVerificationRequestPolicy.shared.observeFailure(
+        ownerId: ownerId,
+        status: error.status,
+        body: error.details,
+      );
       return _verificationFailure(error.details);
     } on Object {
       return _StoreReceiptVerificationResult.failed;

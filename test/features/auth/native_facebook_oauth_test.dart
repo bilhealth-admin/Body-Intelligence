@@ -459,6 +459,220 @@ void main() {
     },
   );
 
+  for (final mode in ['https', 'legacy']) {
+    for (final suffix in ['', '#', '#_=_']) {
+      test(
+        '$mode owned callback suffix $suffix exchanges exactly once',
+        () async {
+          h.mode = mode;
+          final records = <String>[];
+          h.nativeResult = (args) => {
+            ...h.success(args),
+            'callbackUrl': '${h.success(args)['callbackUrl']}$suffix',
+          };
+          expect(
+            await BilNativeFacebookOAuth(
+              diagnosticRecorder: (stage, reason) =>
+                  records.add('$stage:$reason'),
+            ).authenticate(h.client),
+            isTrue,
+          );
+          expect(h.requests, hasLength(1));
+          expect(h.resolvedCallbacks, hasLength(1));
+          expect(h.resolvedCallbacks.single.hasFragment, isFalse);
+          expect(
+            h.resolvedCallbacks.single.queryParameters['code'],
+            'synthetic-code',
+          );
+          expect(await h.controller.handle(h.resolvedCallbacks.single), isTrue);
+          expect(h.requests, hasLength(1));
+          expect(
+            await h.controller.handle(
+              Uri.parse('bil://auth-callback?code=synthetic-code#_=_'),
+            ),
+            isFalse,
+          );
+          expect(records.join(), isNot(contains('synthetic-code')));
+          expect(
+            records,
+            contains(
+              suffix == '#_=_'
+                  ? 'callback:facebook_marker_removed'
+                  : suffix == '#'
+                  ? 'callback:empty_fragment_removed'
+                  : 'callback:accepted',
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  for (final suffix in [
+    '#access_token=PRIVATE_TEST_TOKEN',
+    '#refresh_token=PRIVATE_TEST_TOKEN',
+    '#id_token=PRIVATE_TEST_TOKEN',
+    '#_=_&access_token=PRIVATE_TEST_TOKEN',
+    '#unknown',
+    '#_=_#',
+    '#%5F=%5F',
+    '#_=_%20',
+    '#error=access_denied&error_description=PRIVATE_TEST_TEXT',
+  ]) {
+    test('owned callback rejects unsafe fragment $suffix', () async {
+      h.mode = 'legacy';
+      final records = <String>[];
+      h.nativeResult = (args) => {
+        ...h.success(args),
+        'callbackUrl': '${h.success(args)['callbackUrl']}$suffix',
+      };
+      await expectLater(
+        BilNativeFacebookOAuth(
+          diagnosticRecorder: (stage, reason) => records.add('$stage:$reason'),
+        ).authenticate(h.client),
+        throwsA(isA<AuthException>()),
+      );
+      expect(h.resolvedCallbacks, isEmpty);
+      expect(h.requests, isEmpty);
+      expect(records.join(), isNot(contains('PRIVATE_TEST')));
+      expect(records.join(), isNot(contains('bil://')));
+      expect(
+        records,
+        contains(
+          suffix.startsWith('#error=')
+              ? 'callback:provider_error_fragment_rejected'
+              : 'callback:fragment_rejected',
+        ),
+      );
+    });
+  }
+
+  for (final raw in [
+    'bil://auth-callback/?code=synthetic-code#_=_',
+    'bil://user@auth-callback?code=synthetic-code#_=_',
+    'bil://auth-callback:123?code=synthetic-code#_=_',
+    'bil://auth-callback?code=one&code=two#_=_',
+    'bil://auth-callback?code=synthetic-code&access_token=PRIVATE_TEST_TOKEN#_=_',
+    'bil://auth-callback#_=_',
+  ]) {
+    test('marker does not relax origin path query policy $raw', () async {
+      h.mode = 'legacy';
+      h.nativeResult = (args) => {...h.success(args), 'callbackUrl': raw};
+      await expectLater(
+        const BilNativeFacebookOAuth().authenticate(h.client),
+        throwsA(isA<AuthException>()),
+      );
+      expect(h.requests, isEmpty);
+      expect(h.resolvedCallbacks, isEmpty);
+    });
+  }
+
+  test('marker from replaced same-account owner cannot resolve', () async {
+    h.mode = 'legacy';
+    final held = Completer<Map<String, dynamic>?>();
+    Map<String, dynamic>? arguments;
+    h.nativeResult = (args) {
+      arguments = args;
+      return held.future;
+    };
+    final first = const BilNativeFacebookOAuth().authenticate(h.client);
+    await h.nativeStarted.future;
+    var nextCalls = 0;
+    final next = BilNativeFacebookOAuth.attachCallbackOwner((_) async {
+      nextCalls++;
+      return true;
+    });
+    try {
+      held.complete({
+        ...h.success(arguments!),
+        'callbackUrl':
+            '${BilNativeFacebookOAuth.legacyCallback}?code=synthetic-code#_=_',
+      });
+      await expectLater(first, throwsA(isA<AuthException>()));
+      expect(nextCalls, 0);
+      expect(h.requests, isEmpty);
+      expect(h.resolvedCallbacks, isEmpty);
+    } finally {
+      next.dispose();
+    }
+  });
+
+  test(
+    'same-account logout and relogin retires marker attempt irreversibly',
+    () async {
+      h.mode = 'legacy';
+      await h.client.auth.recoverSession(_sessionResponse().body);
+      final held = Completer<Map<String, dynamic>?>();
+      Map<String, dynamic>? arguments;
+      h.nativeResult = (args) {
+        arguments = args;
+        return held.future;
+      };
+      final first = const BilNativeFacebookOAuth().authenticate(h.client);
+      await h.nativeStarted.future;
+      await h.client.auth.signOut(scope: SignOutScope.local);
+      await h.client.auth.recoverSession(_sessionResponse().body);
+      held.complete({
+        ...h.success(arguments!),
+        'callbackUrl':
+            '${BilNativeFacebookOAuth.legacyCallback}?code=synthetic-code#_=_',
+      });
+      await expectLater(first, throwsA(isA<AuthException>()));
+      expect(h.requests.where((r) => r.url.path == '/auth/v1/token'), isEmpty);
+      expect(h.resolvedCallbacks, isEmpty);
+      expect(h.client.auth.currentUser?.id, _ownerId);
+    },
+  );
+
+  test('diagnostic failure cannot change successful authentication', () async {
+    expect(
+      await BilNativeFacebookOAuth(
+        diagnosticRecorder: (_, _) =>
+            throw StateError('PRIVATE_TEST_LOG_FAILURE'),
+      ).authenticate(h.client),
+      isTrue,
+    );
+    expect(h.requests, hasLength(1));
+  });
+
+  test('shared callback diagnostics never copy raw error messages', () {
+    expect(
+      BilNativeFacebookOAuth.safeCallbackErrorReason(
+        const AuthException(
+          'Code verifier could not be found in local storage.',
+        ),
+      ),
+      'pkce_verifier_missing',
+    );
+    expect(
+      BilNativeFacebookOAuth.safeCallbackErrorReason(
+        const AuthPKCEGrantCodeExchangeError('PRIVATE_TEST_URL_AND_CODE'),
+      ),
+      'pkce_code_rejected',
+    );
+    expect(
+      BilNativeFacebookOAuth.safeCallbackErrorReason(
+        const AuthException('PRIVATE_TEST_URL_AND_CODE', code: 'access_denied'),
+      ),
+      'provider_error',
+    );
+    expect(
+      BilNativeFacebookOAuth.safeCallbackErrorReason(
+        const AuthException(
+          'PRIVATE_TEST_URL_AND_CODE',
+          code: 'PRIVATE_TEST_CODE',
+        ),
+      ),
+      'auth_exception',
+    );
+    expect(
+      BilNativeFacebookOAuth.safeCallbackErrorReason(
+        StateError('PRIVATE_TEST_URL_AND_CODE'),
+      ),
+      'unexpected_error',
+    );
+  });
+
   test(
     'Facebook transport selection leaves all other providers/platforms alone',
     () {
@@ -552,6 +766,7 @@ class _Harness {
     );
     controller = BilAuthCallbackController(
       resolve: (uri) async {
+        resolvedCallbacks.add(uri);
         await client.auth.getSessionFromUrl(uri);
       },
       navigate: routes.add,
@@ -570,6 +785,7 @@ class _Harness {
   final calls = <MethodCall>[];
   final requests = <http.Request>[];
   final routes = <String>[];
+  final resolvedCallbacks = <Uri>[];
   final errors = <Object>[];
   final nativeStarted = Completer<void>();
   final exchangeStarted = Completer<void>();

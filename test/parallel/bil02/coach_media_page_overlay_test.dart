@@ -20,6 +20,8 @@ import 'package:body_intelligence_log/features/intelligence_center/domain/coach_
 import 'package:body_intelligence_log/features/intelligence_center/domain/food_v2/coach_food_v2.dart';
 import 'package:body_intelligence_log/features/intelligence_center/media_bridge/coach_media_catalog_entry.dart';
 import 'package:body_intelligence_log/features/intelligence_center/media_bridge/coach_media_food_bridge.dart';
+import 'package:body_intelligence_log/features/nutrition/repositories/unified_food_repository.dart';
+import 'package:body_intelligence_log/features/nutrition/repositories/usda_core_catalog_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/workspace/coach_food_receipt_card.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/workspace/coach_food_review_card.dart';
@@ -124,6 +126,7 @@ Future<void> _mount(
   CoachActionPermissionMode permission =
       CoachActionPermissionMode.askBeforeWrite,
   CoachMediaCatalogLookup? lookup,
+  Future<UnifiedFoodRepository?> Function()? installedCatalog,
   ImagePicker? picker,
   MealImageAnalysisService Function(String)? analysis,
   Future<BilRuntimePermissionState> Function(BilRuntimeCapability)?
@@ -191,6 +194,14 @@ Future<void> _mount(
           intelligenceCoachMediaCatalogProvider.overrideWithValue(
             (_) => lookup,
           ),
+        // Keep existing local-only fixtures hermetic. The dedicated installed
+        // catalog case below injects the real immutable bundled USDA catalog.
+        intelligenceCoachInstalledCatalogProvider.overrideWithValue(
+          (ownerKey) => CoachMediaInstalledCatalogLookup(
+            ownerKey: ownerKey,
+            openCatalog: installedCatalog ?? () async => null,
+          ),
+        ),
         if (picker != null)
           intelligenceCoachImagePickerProvider.overrideWithValue(
             BilRecoverableImagePicker(picker: picker, isAndroid: false),
@@ -873,6 +884,74 @@ void main() {
       );
       expect(card.commit.after.single.item.foodVerifiedSnapshot, isFalse);
       expect(fixture.gateway.questions, isEmpty);
+      expect(tester.takeException(), isNull);
+      await _unmount(tester);
+    },
+  );
+
+  testWidgets(
+    'photo with no local match reviews a real installed source before committing',
+    (tester) async {
+      final fixture = await _fixture(tester);
+      final analysis = _CountingPhotoAnalysis('en', name: 'APPLE');
+      await _mount(
+        tester,
+        fixture,
+        barcode: null,
+        picker: _SyntheticPicker(),
+        analysis: (_) => analysis,
+        lookup: (_) async => [],
+        installedCatalog: () async => UsdaCoreCatalogRepository.open(
+          'assets/catalogs/bil_food_core.sqlite',
+        ),
+      );
+      await tester.tap(find.byKey(const Key('ai-coach-food-image-button')));
+      await _drain(tester);
+      await tester.tap(find.byKey(const Key('ai-coach-image-source-gallery')));
+      await _selectPhotoDraft(tester, amount: '100');
+      await _until(tester, find.byKey(const Key('premium-vision-use-food')));
+      expect(tester.widget<FilledButton>(_matchUse).onPressed, isNull);
+      await _expectNoMeal(tester, fixture);
+      final candidate = find
+          .byWidgetPredicate(
+            (widget) =>
+                widget is ListTile &&
+                widget.title is Text &&
+                ((widget.title as Text).data ?? '').startsWith('Apples,'),
+          )
+          .first;
+      await tester.tap(candidate);
+      await tester.pump();
+      await tester.tap(_matchUse);
+      await _until(tester, find.byType(CoachFoodReviewCard));
+      final review = tester.widget<CoachFoodReviewCard>(
+        find.byType(CoachFoodReviewCard),
+      );
+      final portion = review.review.items.single;
+      expect(portion.food.identity, startsWith('usda:'));
+      expect(portion.food.name, startsWith('Apples,'));
+      expect(portion.food.source.kind, CoachFoodSourceKind.reference);
+      expect(portion.food.source.ref, startsWith('USDA FoodData Central'));
+      expect(portion.quantity.grams, 100);
+      expect(analysis.calls, 1);
+      await _expectNoMeal(tester, fixture);
+      await tester.ensureVisible(
+        find.byKey(CoachFoodCardKeys.confirm(review.operationId)),
+      );
+      await tester.tap(
+        find.byKey(CoachFoodCardKeys.confirm(review.operationId)),
+      );
+      await _until(tester, find.byType(CoachFoodReceiptCard));
+      final receipt = tester.widget<CoachFoodReceiptCard>(
+        find.byType(CoachFoodReceiptCard),
+      );
+      expect(receipt.commit.after.single.item.foodId, greaterThan(0));
+      expect(
+        receipt.commit.after.single.item.calories,
+        portion.food.nutrients[FoodNutrient.calories],
+      );
+      expect(fixture.gateway.questions, isEmpty);
+      expect(analysis.calls, 1);
       expect(tester.takeException(), isNull);
       await _unmount(tester);
     },

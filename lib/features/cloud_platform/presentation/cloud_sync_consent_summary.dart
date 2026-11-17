@@ -7,8 +7,8 @@ import '../../../app/localization/runtime_copy_cloud_sync.dart';
 /// Shared, scannable explanation used by first-run consent and Settings.
 ///
 /// The three benefits deliberately describe only the selective encrypted
-/// backup implemented by BIL: profile, weight, and water. Meal and nutrition
-/// records remain private and fast on the current device.
+/// Progress backup: profile, weight, and water. Nutrition and goal backups
+/// require their own separate choices in Privacy.
 class CloudSyncConsentSummary extends StatelessWidget {
   const CloudSyncConsentSummary({super.key, this.showDeletionControl = false});
 

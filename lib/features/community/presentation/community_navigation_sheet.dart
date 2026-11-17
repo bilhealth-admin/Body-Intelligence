@@ -135,6 +135,13 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
             key: 'community-browse-circles',
           ),
           _item(
+            'blocked',
+            Icons.block_outlined,
+            'Blocked members',
+            'الأعضاء المحظورون',
+            key: 'community-blocked-members-shortcut',
+          ),
+          _item(
             '/community/safety',
             Icons.shield_outlined,
             'Safety and policy',
@@ -169,7 +176,11 @@ class _CommunityNavigationSheetState extends State<_CommunityNavigationSheet> {
           size: 20,
         ),
       ),
-      onTap: () => Navigator.pop(context, value),
+      onTap: () {
+        if (mounted && ModalRoute.of(context)?.isCurrent == true) {
+          Navigator.pop(context, value);
+        }
+      },
     ),
   );
 }
@@ -200,3 +211,23 @@ class _CommunityNavigationGlyph extends StatelessWidget {
         : CommunityUnreadBadge(kind: kind, child: child);
   }
 }
+
+PopupMenuItem<String> _communityAction(
+  BuildContext context,
+  String route,
+  String english,
+  String arabic,
+) => PopupMenuItem<String>(
+  value: route,
+  child: Row(
+    children: [
+      BilFlatIcon(
+        kind: BilSemanticIcons.kindForRoute(route)!,
+        size: 34,
+        iconSize: 19,
+      ),
+      const SizedBox(width: 12),
+      Expanded(child: Text(communityText(context, english, arabic))),
+    ],
+  ),
+);

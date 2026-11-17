@@ -219,7 +219,7 @@ class _BilCameraCapturePageState extends State<BilCameraCapturePage>
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(widget.title),
+        title: Text(widget.title, style: const TextStyle(color: Colors.white)),
         actions: [
           if (ready && _capturedForReview == null)
             IconButton(

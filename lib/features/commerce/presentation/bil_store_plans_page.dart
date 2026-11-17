@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
-import '../../../shared/widgets/bil_compact_activity_indicator.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/subscription_state.dart';
 import '../domain/market_offer_policy.dart';
@@ -18,6 +17,8 @@ import '../providers/app_purchase_providers.dart';
 import '../../intelligence_center/services/ai_boost_purchase_service.dart';
 import 'bil_dynamic_store_offers.dart';
 import 'bil_store_copy.dart';
+
+part 'bil_store_plans_presentation.dart';
 
 /// The production plan route. It no longer embeds legacy or synthetic prices.
 class BilStorePlansPage extends ConsumerStatefulWidget {
@@ -126,9 +127,16 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   void _onBoostChanged() {
     if (!mounted || _sharedBoost == null) return;
     final boost = _sharedBoost!;
+    if (!boost.hasUserInitiatedFeedback &&
+        !_purchaseRequestInFlight &&
+        boost.errorCode != 'purchase_inactive' &&
+        !(boost.errorCode == 'store_finish_pending' &&
+            boost.lastDelivery?.active == false)) {
+      return;
+    }
     setState(() {
       _purchaseFeedbackKey = switch (boost.errorCode) {
-        'purchase_status_unknown' ||
+        'purchase_status_unknown' => 'purchase_confirmation_pending',
         'verification_failed' => 'purchase_verification_unavailable',
         'store_catalog_changed' => 'purchase_catalog_changed',
         'purchase_inactive' => 'purchase_inactive',
@@ -143,7 +151,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
           _ => null,
         },
       };
-      _purchaseFeedbackIsError = _purchaseFeedbackKey == 'purchase_error';
+      _purchaseFeedbackIsError =
+          _purchaseFeedbackKey == 'purchase_error' ||
+          boost.errorCode == 'verification_failed';
     });
     if (boost.errorCode == 'store_catalog_changed' && !_loadInFlight) {
       unawaited(_load());
@@ -183,6 +193,13 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     _lastStoreState = store.state;
     _lastStoreMessage = store.messageCode;
     _syncOwnershipConflict(store);
+    if (store.messageCode == 'reconciliation_pending' ||
+        store.messageCode == 'reconciliation_verification_failed') {
+      // Do not replace an explicit operation's existing feedback, and do not
+      // manufacture new feedback from a passive transaction replay.
+      setState(() {});
+      return;
+    }
     final feedback = _purchaseFeedbackFor(store);
     setState(() {
       _purchaseFeedbackKey = feedback.$1;
@@ -223,6 +240,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         feedback == 'purchase_awaiting_approval' ||
         feedback == 'purchase_in_progress' ||
         feedback == 'purchase_verification_unavailable' ||
+        feedback == 'purchase_confirmation_pending' ||
         feedback == 'purchase_reconciliation_pending' ||
         feedback == 'purchase_reconciliation_failed' ||
         feedback == 'purchase_owned_by_another_account' ||
@@ -237,11 +255,27 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
 
   (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
     final code = store.messageCode;
+    // A background StoreKit replay is not a purchase made on this screen.
+    // Keep its failure in the service (including the checkout safety block),
+    // and explain it only after an explicit Restore/verification action.
+    if (code == 'reconciliation_pending' ||
+        code == 'reconciliation_verification_failed') {
+      return (null, false);
+    }
     // A verified receipt can arrive while AppStore.sync is still pending.
     // Preserve the valid benefit, but never call the Restore operation done
     // until its own lifecycle settles.
-    if (store.isRestoring && store.state != VerifiedStoreState.failed) {
+    if (store.isRecoveringSubscription ||
+        (store.isRestoring && store.state != VerifiedStoreState.failed)) {
       return ('restore_checking', false);
+    }
+    if (!store.lastDeliveryIsUserPurchase &&
+        !store.isRestoring &&
+        (code == 'subscription_verified' ||
+            code == 'ai_boost_verified' ||
+            (code == 'store_finish_pending' &&
+                store.verifiedInactiveAt == null))) {
+      return (null, false);
     }
     final key = switch (code) {
       'purchase_pending' => 'purchase_awaiting_approval',
@@ -256,8 +290,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       'store_catalog_changed' => 'purchase_catalog_changed',
       'store_catalog_refresh_failed' => 'purchase_error',
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
-      'verification_failed' ||
-      'purchase_status_unknown' => 'purchase_verification_unavailable',
+      'purchase_status_unknown' => 'purchase_confirmation_pending',
+      'verification_failed' => 'purchase_verification_unavailable',
       'store_finish_pending' =>
         store.verifiedInactiveAt != null
             ? 'purchase_inactive'
@@ -275,19 +309,22 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         _ => null,
       },
     };
-    final isError = const {
-      'purchase_error',
-      'purchase_owned_by_another_account',
-      'restore_verification_failed',
-      'purchase_reconciliation_failed',
-    }.contains(key);
+    final isError =
+        const {
+          'purchase_error',
+          'purchase_owned_by_another_account',
+          'restore_verification_failed',
+          'purchase_reconciliation_failed',
+        }.contains(key) ||
+        code == 'verification_failed';
     return (key, isError);
   }
 
   bool get _purchaseInProgress =>
       _purchaseRequestInFlight ||
-      (widget.store ?? _ownedStore)?.busy == true ||
-      _sharedBoost?.state == AiBoostPurchaseState.pending;
+      ((widget.store ?? _ownedStore)?.userOperationInProgress == true &&
+          (widget.store ?? _ownedStore)?.isRecoveringSubscription != true) ||
+      _sharedBoost?.userOperationInProgress == true;
 
   Future<void> _load() async {
     if (_loadInFlight) return;
@@ -359,7 +396,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         'restore_unconfirmed' => 'restore_unconfirmed',
         'authentication_required' => 'restore_sign_in',
         'restore_failed' => 'restore_failed',
-        'purchase_status_unknown' ||
+        'purchase_status_unknown' => 'purchase_confirmation_pending',
         'store_finish_pending' => 'purchase_verification_unavailable',
         'purchase_owned_by_another_account' =>
           'purchase_owned_by_another_account',
@@ -460,96 +497,47 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     }
   }
 
+  void _explainBlockedPurchase(BilStoreOfferMetadata _) {
+    final store = widget.store ?? _ownedStore;
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final unresolved =
+        _sharedBoost?.canRetry == true ||
+        store != null &&
+            (store.busy ||
+                store.verificationBackedOff ||
+                const {
+                  'reconciliation_verification_failed',
+                  'verification_failed',
+                  'restore_verification_failed',
+                  'purchase_status_unknown',
+                  'store_finish_pending',
+                }.contains(store.messageCode));
+    final message = unresolved
+        ? BilStoreCopy.text(locale, 'purchase_reconciliation_failed')
+        : AppLocalizations(
+            Localizations.localeOf(context),
+          ).text('Subscription check unavailable');
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          action: store?.canRecoverSubscriptionBlocker == true
+              ? SnackBarAction(
+                  label: BilStoreCopy.text(locale, 'continue_verification'),
+                  onPressed: () =>
+                      unawaited(store!.recoverSubscriptionBlocker()),
+                )
+              : null,
+        ),
+      );
+  }
+
   CommercePlan? _verifiedPlan(AsyncValue<SubscriptionState> snapshot) {
     final state = snapshot.asData?.value;
     return state?.authority == EntitlementAuthority.verifiedServer
         ? state!.plan
         : null;
-  }
-
-  void _leavePlans() =>
-      context.canPop() ? context.pop() : context.go('/dashboard');
-
-  Widget _accountAccessStatus({
-    required String locale,
-    required AsyncValue<SubscriptionState> access,
-    required CommercePlan? plan,
-  }) {
-    final copy = AppLocalizations(Localizations.localeOf(context));
-    final active = plan != null && plan != CommercePlan.free;
-    final checking = access.isLoading;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (active) ...[
-            Text(
-              '${BilStoreCopy.text(locale, 'current_plan')}: '
-              '${BilStoreCopy.text(locale, plan == CommercePlan.premiumAiCoach ? 'premium_ai_coach' : 'premium')}',
-              key: const Key('store-current-plan-status'),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text(copy.text('Active')),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              key: const Key('store-current-plan-continue'),
-              onPressed: _leavePlans,
-              icon: const Icon(Icons.check_circle_outline_rounded),
-              label: Text(BilStoreCopy.text(locale, 'continue')),
-            ),
-          ] else if (plan == null) ...[
-            Text(
-              copy.text(
-                checking
-                    ? 'Checking subscription'
-                    : 'Subscription check unavailable',
-              ),
-              key: const Key('store-account-access-status'),
-            ),
-            if (checking)
-              const SizedBox(
-                height: 24,
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: BilCompactActivityIndicator(),
-                ),
-              )
-            else
-              TextButton.icon(
-                key: const Key('store-account-access-retry'),
-                onPressed: () =>
-                    ref.invalidate(verifiedSubscriptionStateProvider),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(copy.text('Try again')),
-              ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Future<void> _openLegalLink(String value) async {
-    final uri = Uri.tryParse(value.trim());
-    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return;
-    try {
-      final opened =
-          await (widget.openLegalUrl?.call(uri) ??
-              launchUrl(uri, mode: LaunchMode.externalApplication));
-      if (opened || !mounted) return;
-    } on Object {
-      if (!mounted) return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          BilStoreCopy.text(
-            Localizations.localeOf(context).toLanguageTag(),
-            'purchase_error',
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -574,13 +562,18 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     // readiness says nothing about the signed-in account's existing access.
     AsyncValue<SubscriptionState>? accountAccess;
     CommercePlan? currentPlan;
+    CommercePlan? authoritativePlan;
     try {
-      final access = ref.watch(verifiedSubscriptionAccessProvider);
+      final access = ref.watch(verifiedSubscriptionPresentationProvider);
       accountAccess = access;
       currentPlan = _verifiedPlan(access);
+      authoritativePlan = _verifiedPlan(
+        ref.watch(verifiedSubscriptionAccessProvider),
+      );
     } on StateError {
       // Standalone previews have no account authority or native checkout.
       currentPlan = CommercePlan.free;
+      authoritativePlan = CommercePlan.free;
     }
     final store = widget.store ?? _ownedStore;
     PurchaseOwnershipConflictStore? ownershipConflict;
@@ -618,7 +611,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       ),
       body: Column(
         children: [
-          if (accountAccess != null && currentPlan != CommercePlan.free)
+          if (accountAccess != null &&
+              currentPlan != CommercePlan.free &&
+              (!accountAccess.isLoading || currentPlan != null))
             _accountAccessStatus(
               locale: locale,
               access: accountAccess,
@@ -630,13 +625,18 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
               offers: _offers,
               loading: _loading,
               purchaseInProgress: _purchaseInProgress,
-              restoreInProgress: _restoring,
-              purchaseEnabled: store?.canStartPurchase ?? true,
+              restoreInProgress:
+                  _restoring || store?.isRecoveringSubscription == true,
+              purchaseEnabled:
+                  authoritativePlan != null &&
+                  (store?.canStartPurchase ?? true),
               purchaseAllowedForKind: (kind) =>
                   kind == BilStoreProductKind.aiBoostConsumable &&
                       _sharedBoost != null
                   ? _sharedBoost!.canPurchase
-                  : (store?.canStartPurchase ?? true),
+                  : (kind == BilStoreProductKind.aiBoostConsumable ||
+                            authoritativePlan != null) &&
+                        (store?.canStartPurchase ?? true),
               onContinueVerification:
                   (_sharedBoost?.canRetry == true ||
                       (store != null &&
@@ -671,6 +671,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
               currentPlan: currentPlan,
               initialFocus: widget.initialFocus,
               onPurchaseRequested: _requestPurchase,
+              onBlockedPurchaseRequested: _explainBlockedPurchase,
               onOfferSelected: _onOfferSelected,
               onRestore: _catalog == null ? null : _restorePurchases,
               onManage: _catalog == null

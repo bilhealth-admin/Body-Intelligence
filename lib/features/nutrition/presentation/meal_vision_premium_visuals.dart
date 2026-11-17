@@ -162,7 +162,10 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
               'A photo of leftovers does not tell us how much you ate. Confirm the amount actually eaten below.',
               'الصورة لا تثبت الكمية التي أكلتها. أكّد الكمية المأكولة فعليًا أدناه.',
             ),
-            style: const TextStyle(color: Color(0xFFFFD18B), fontSize: 12),
+            style: TextStyle(
+              color: _reviewWarning(context, const Color(0xFFFFD18B)),
+              fontSize: 12,
+            ),
           ),
       ],
     );
@@ -204,10 +207,10 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.info_outline,
                     size: 17,
-                    color: Color(0xFFFFC66E),
+                    color: _reviewWarning(context, const Color(0xFFFFC66E)),
                   ),
                   const SizedBox(width: 7),
                   Expanded(
@@ -222,8 +225,8 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                         if (item.uncertainty != null) item.uncertainty!,
                         ...item.warnings,
                       ].join(' · '),
-                      style: const TextStyle(
-                        color: Color(0xFFFFDF9A),
+                      style: TextStyle(
+                        color: _reviewWarning(context, const Color(0xFFFFDF9A)),
                         fontSize: 12,
                       ),
                     ),
@@ -239,7 +242,10 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                 'Does the suggested amount mean eaten or remaining?',
                 'هل الكمية المقترحة هي ما أكلته أم ما تبقّى؟',
               ),
-              style: const TextStyle(color: Color(0xFFFFD18B), fontSize: 12),
+              style: TextStyle(
+                color: _reviewWarning(context, const Color(0xFFFFD18B)),
+                fontSize: 12,
+              ),
             ),
             Wrap(
               spacing: 6,

@@ -341,8 +341,18 @@ void main() {
 
     for (final path in paths) {
       expect(File(path).existsSync(), isTrue, reason: path);
+      final rootSource = File(path).readAsStringSync();
+      if (path.endsWith(
+        'features/community/presentation/community_hub_page.dart',
+      )) {
+        expect(
+          rootSource,
+          contains("part 'community_navigation_sheet.dart';"),
+          reason: path,
+        );
+      }
       final source = <String>[
-        File(path).readAsStringSync(),
+        rootSource,
         if (path.endsWith('daily_log_meals_list.dart'))
           File(
             'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
@@ -350,6 +360,12 @@ void main() {
         if (path.endsWith('features/settings/settings_page.dart'))
           File(
             'lib/features/settings/settings_page_polish.dart',
+          ).readAsStringSync(),
+        if (path.endsWith(
+          'features/community/presentation/community_hub_page.dart',
+        ))
+          File(
+            'lib/features/community/presentation/community_navigation_sheet.dart',
           ).readAsStringSync(),
       ].join('\n');
       expect(

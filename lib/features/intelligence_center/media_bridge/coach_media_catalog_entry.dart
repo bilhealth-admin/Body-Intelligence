@@ -1,12 +1,22 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:drift/drift.dart' show Value;
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/food_basis_evidence.dart';
+import '../../../data/database/nutrient_evidence.dart';
 import '../../nutrition/adapters/unified_food_adapter.dart';
-import '../../nutrition/domain/unified_food.dart' show FoodDataSource;
+import '../../nutrition/domain/unified_food.dart'
+    show FoodDataSource, UnifiedFood;
+import '../../nutrition/repositories/composite_food_catalog_repository.dart';
+import '../../nutrition/repositories/mobile_catalog_food_repository.dart';
+import '../../nutrition/repositories/unified_food_repository.dart';
+import '../../nutrition/repositories/usda_core_catalog_repository.dart';
 import '../domain/food_v2/coach_food_v2.dart';
+import 'coach_media_attempt.dart';
+
+part 'coach_media_installed_catalog_lookup.dart';
 
 /// A normalized row fetched independently from the existing local catalog.
 ///
@@ -21,7 +31,9 @@ final class CoachMediaCatalogEntry {
     required this.unitRule,
   });
 
-  /// Retained for the existing food-match selection dialog.
+  /// View data for the existing food-match selection dialog. Installed-only
+  /// candidates use an unpersisted id=0 projection; [food], not this row or its
+  /// integer ID, is the authority handed to the existing confirmed journal.
   final Food row;
   final CoachFoodSnapshot food;
   final CoachFoodUnitRule? unitRule;

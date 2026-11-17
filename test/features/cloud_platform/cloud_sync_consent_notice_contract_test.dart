@@ -15,12 +15,31 @@ void main() {
     ).readAsStringSync();
 
     expect(dashboard, contains('CloudSyncConsentNotice'));
-    expect(notice, contains('showBilPearlBottomSheet<bool>'));
+    expect(notice, contains('showBilPearlBottomSheet<_CloudConsentChoice>'));
     expect(notice, isNot(contains('showDialog<bool>')));
     expect(notice, contains('isDismissible: false'));
     expect(notice, contains('enableDrag: false'));
     expect(notice, contains('state.recordedAt == null'));
     expect(notice, contains('.setGranted(enable)'));
+    expect(
+      notice,
+      contains(
+        'enum _CloudConsentChoice { enableProgress, keepLocal, manageCategories }',
+      ),
+    );
+    final discovery = notice.substring(
+      notice.indexOf('if (choice == _CloudConsentChoice.manageCategories)'),
+      notice.indexOf(
+        'final enable = choice == _CloudConsentChoice.enableProgress;',
+      ),
+    );
+    expect(discovery, contains("context.push('/settings/sharing-privacy')"));
+    expect(discovery, contains('operation.check();'));
+    expect(discovery, contains('return;'));
+    expect(discovery, isNot(contains('setGranted')));
+    expect(discovery, isNot(contains('runOnce')));
+    expect(notice, contains('cloud-sync-manage-categories'));
+    expect(notice, contains('CloudSyncConsentCopy.manageCategoriesAction'));
     expect(notice, contains('cloud-sync-keep-local'));
     expect(notice, contains('cloud-sync-enable-backup'));
     expect(notice, contains('CloudSyncConsentCopy.title'));

@@ -347,7 +347,10 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
         AppObservability.logger.record(
           AppLogLevel.warning,
           'native_auth_callback_failed',
-          attributes: {'errorType': error.runtimeType.toString()},
+          attributes: {
+            'errorType': error.runtimeType.toString(),
+            'reason': BilNativeFacebookOAuth.safeCallbackErrorReason(error),
+          },
         );
       },
     );

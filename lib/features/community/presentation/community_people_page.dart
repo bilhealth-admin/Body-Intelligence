@@ -31,7 +31,10 @@ import '../services/community_owner_operation.dart';
 import 'community_visible_activity_scope.dart';
 import 'community_return_button.dart';
 import 'community_messages_page.dart'
-    show showCommunityMessagingPolicy, CommunityMessageOwnerVisit;
+    show
+        showCommunityMessagingPolicy,
+        CommunityMessageOwnerVisit,
+        communityMessageTextForDisplay;
 import 'community_chat_runtime_copy.dart';
 import 'community_copy.dart';
 import 'community_sapphire.dart';
@@ -40,6 +43,7 @@ import 'community_invite_copy.dart';
 part 'community_chat_page.dart';
 part 'community_chat_owner_scope.dart';
 part 'community_chat_safety.dart';
+part 'community_chat_message_deletion.dart';
 part 'community_chat_rendering.dart';
 part 'community_people_widgets.dart';
 part 'community_people_contact_invite.dart';

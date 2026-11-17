@@ -105,7 +105,7 @@ void main() {
       await tester.pumpWidget(page());
       await tester.pumpAndSettle();
       expect(
-        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        find.text(BilStoreCopy.text('en', 'purchase_confirmation_pending')),
         findsOneWidget,
       );
       expect(
@@ -116,8 +116,10 @@ void main() {
         tester
             .widget<InkWell>(find.byKey(const Key('store-purchase-cta')))
             .onTap,
-        isNull,
+        isNotNull,
       );
+      await tester.tap(find.byKey(const Key('store-purchase-cta')));
+      await tester.pump();
       expect(native.launches, 1);
       expect(boost.verifiedCreditsRevision, 0);
       await tester.pumpWidget(const SizedBox.shrink());

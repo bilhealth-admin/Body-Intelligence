@@ -106,7 +106,7 @@ void main() {
               matching: find.byType(BilFeatureWelcomeStatus),
             );
             final copy = ReferenceSettingsCopy.of(tester.element(entry));
-            expect(find.text(copy('Checking subscription')), findsOneWidget);
+            expect(find.text(copy('Plans')), findsOneWidget);
             expect(find.text(copy('Active')), findsNothing);
             expect(find.text(copy('Explore Premium')), findsNothing);
             expect(indicator, findsNothing);
@@ -122,7 +122,7 @@ void main() {
             expect(find.byType(BilStorePlansPage), findsOneWidget);
             expect(
               find.byKey(const Key('store-account-access-status')),
-              findsOneWidget,
+              findsNothing,
             );
             expect(
               find.byKey(const Key('store-current-plan-status')),

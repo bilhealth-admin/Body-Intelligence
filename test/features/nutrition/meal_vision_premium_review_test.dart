@@ -8,6 +8,22 @@ import 'package:body_intelligence_log/features/nutrition/services/meal_image_gat
 import 'food_basis_fixtures.dart';
 
 void main() {
+  void expectReadableOn(Text text, Iterable<Color> backgrounds) {
+    final foreground = text.style!.color!;
+    for (final background in backgrounds) {
+      final first = foreground.computeLuminance();
+      final second = background.computeLuminance();
+      final ratio = first > second
+          ? (first + .05) / (second + .05)
+          : (second + .05) / (first + .05);
+      expect(
+        ratio,
+        greaterThanOrEqualTo(4.5),
+        reason: 'Review guidance must remain legible on every gradient stop',
+      );
+    }
+  }
+
   MealImageAnalysis sample({bool leftovers = false}) => MealImageAnalysis(
     requestId: 'review-test',
     notice: 'Review every food before saving',
@@ -72,8 +88,10 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (context) => TextButton(
-                onPressed: () =>
-                    showPremiumVisionReviewDialog(context, analysis: sample()),
+                onPressed: () => showPremiumVisionReviewDialog(
+                  context,
+                  analysis: sample(leftovers: true),
+                ),
                 child: const Text('Open pearl'),
               ),
             ),
@@ -110,6 +128,34 @@ void main() {
       await tester.tap(select);
       await tester.pump();
       expect(foodPanels().every((item) => item.gradient == expected), isTrue);
+      final candidatePanel =
+          tester
+                  .widget<Container>(
+                    find.byKey(const Key('premium-vision-food-0')),
+                  )
+                  .decoration!
+              as BoxDecoration;
+      for (final text in [
+        find.textContaining('Recognition needs review'),
+        find.text('Does the suggested amount mean eaten or remaining?'),
+        find.text('42%'),
+      ]) {
+        expectReadableOn(
+          tester.widget<Text>(text),
+          candidatePanel.gradient!.colors,
+        );
+      }
+      await tester.ensureVisible(
+        find.byKey(const Key('premium-vision-stage-after')),
+      );
+      await tester.tap(find.byKey(const Key('premium-vision-stage-after')));
+      await tester.pump();
+      expectReadableOn(
+        tester.widget<Text>(
+          find.textContaining('A photo of leftovers does not tell us'),
+        ),
+        BilPearlFinish.background(context).colors,
+      );
       expect(tester.takeException(), isNull);
     });
   }

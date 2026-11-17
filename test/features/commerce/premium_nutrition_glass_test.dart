@@ -15,69 +15,135 @@ import 'package:go_router/go_router.dart';
 
 void main() {
   testWidgets(
-    'group gold action requires current verified denial, not stale data',
+    'verified Free badge survives same-owner refresh and offline while values stay protected',
     (tester) async {
-      var lookup = Future<SubscriptionState>.value(_state(CommercePlan.free));
-      final container = ProviderContainer(
-        overrides: [
-          verifiedSubscriptionStateProvider.overrideWith((_) => lookup),
-          // Exercise retained AsyncValue from Riverpod's real refresh, rather
-          // than constructing internal copyWithPrevious test objects.
-          verifiedSubscriptionAccessProvider.overrideWith(
-            (ref) => ref.watch(verifiedSubscriptionStateProvider),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
-      final router = GoRouter(
-        routes: [
-          GoRoute(
-            path: '/',
-            builder: (_, _) => const Scaffold(
-              body: PremiumNutritionFieldsGroup(child: SizedBox(height: 80)),
+      final semantics = tester.ensureSemantics();
+      ProviderContainer? fixtureContainer;
+      try {
+        const owner = 'nutrition-free-member';
+        final owners = StreamController<String?>();
+        var lookup = Future<SubscriptionState>.value(_state(CommercePlan.free));
+        final container = ProviderContainer(
+          overrides: [
+            verifiedEntitlementOwnerSeedProvider.overrideWithValue(owner),
+            verifiedEntitlementOwnerProvider.overrideWith((_) => owners.stream),
+            // Exercise Riverpod's real retained source and the production access
+            // and presentation guards; neither view is overridden here.
+            verifiedSubscriptionStateProvider.overrideWith((_) => lookup),
+          ],
+        );
+        fixtureContainer = container;
+        addTearDown(() async {
+          await owners.close();
+        });
+        owners.add(owner);
+        final router = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (_, _) => Scaffold(
+                body: PremiumNutritionFieldsGroup(
+                  child: PremiumNutritionGlass(
+                    showLabel: false,
+                    child: Semantics(
+                      label: 'private macro values',
+                      child: const Text('Protein 24 g'),
+                    ),
+                  ),
+                ),
+              ),
             ),
+            GoRoute(
+              path: '/plans',
+              builder: (_, _) =>
+                  const Scaffold(body: Text('plans destination')),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp.router(routerConfig: router),
           ),
-          GoRoute(
-            path: '/plans',
-            builder: (_, _) => const Scaffold(body: Text('plans destination')),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          container.read(verifiedEntitlementOwnerProvider).requireValue,
+          owner,
+        );
+        expect(container.read(verifiedEntitlementOwnerIdProvider), owner);
+        expect(find.byType(PremiumLabelBadge), findsOneWidget);
+        expect(find.bySemanticsLabel('private macro values'), findsNothing);
+        expect(
+          find.byKey(const Key('premium-nutrition-glass')),
+          findsOneWidget,
+        );
+        final pending = Completer<SubscriptionState>();
+        lookup = pending.future;
+        container.invalidate(verifiedSubscriptionStateProvider);
+        await tester.pump();
+        final refreshing = container.read(verifiedSubscriptionStateProvider);
+        expect(refreshing.isLoading, isTrue);
+        expect(refreshing.hasValue, isTrue);
+        final refreshingAccess = container.read(
+          verifiedSubscriptionAccessProvider,
+        );
+        expect(refreshingAccess.isLoading, isTrue);
+        expect(refreshingAccess.hasValue, isFalse);
+        expect(
+          refreshingAccess.value?.grants(
+            CommerceEntitlement.advancedIntelligence,
           ),
-        ],
-      );
-      addTearDown(router.dispose);
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp.router(routerConfig: router),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(PremiumLabelBadge), findsOneWidget);
-      final pending = Completer<SubscriptionState>();
-      lookup = pending.future;
-      container.invalidate(verifiedSubscriptionStateProvider);
-      await tester.pump();
-      final refreshing = container.read(verifiedSubscriptionStateProvider);
-      expect(refreshing.isLoading, isTrue);
-      expect(refreshing.hasValue, isTrue);
-      expect(find.byType(PremiumLabelBadge), findsNothing);
-      final observed = container
-          .read(verifiedSubscriptionStateProvider.future)
-          .then<Object?>((_) => null, onError: (Object error) => error);
-      pending.completeError(StateError('offline'));
-      expect(await observed, isA<StateError>());
-      await tester.pumpAndSettle();
-      final failed = container.read(verifiedSubscriptionStateProvider);
-      expect(failed.hasError, isTrue);
-      expect(failed.hasValue, isTrue);
-      expect(find.byType(PremiumLabelBadge), findsNothing);
-      lookup = Future.value(_state(CommercePlan.free));
-      container.invalidate(verifiedSubscriptionStateProvider);
-      await tester.pumpAndSettle();
-      expect(find.byType(PremiumLabelBadge), findsOneWidget);
-      await tester.tap(find.byType(PremiumLabelBadge));
-      await tester.pumpAndSettle();
-      expect(find.text('plans destination'), findsOneWidget);
-      expect(tester.takeException(), isNull);
+          isNot(true),
+        );
+        expect(find.byType(PremiumLabelBadge), findsOneWidget);
+        expect(find.bySemanticsLabel('private macro values'), findsNothing);
+        expect(
+          find.byKey(const Key('premium-nutrition-glass')),
+          findsOneWidget,
+        );
+        final observed = container
+            .read(verifiedSubscriptionStateProvider.future)
+            .then<Object?>((_) => null, onError: (Object error) => error);
+        pending.completeError(StateError('offline'));
+        expect(await observed, isA<StateError>());
+        await tester.pumpAndSettle();
+        final failed = container.read(verifiedSubscriptionStateProvider);
+        expect(failed.hasError, isTrue);
+        expect(failed.hasValue, isTrue);
+        final failedAccess = container.read(verifiedSubscriptionAccessProvider);
+        expect(failedAccess.hasError, isTrue);
+        expect(failedAccess.error, isA<StateError>());
+        expect(
+          failedAccess.value?.grants(CommerceEntitlement.advancedIntelligence),
+          isNot(true),
+        );
+        expect(find.byType(PremiumLabelBadge), findsOneWidget);
+        expect(find.bySemanticsLabel('private macro values'), findsNothing);
+        expect(
+          find.byKey(const Key('premium-nutrition-glass')),
+          findsOneWidget,
+        );
+        lookup = Future.value(_state(CommercePlan.free));
+        container.invalidate(verifiedSubscriptionStateProvider);
+        await tester.pumpAndSettle();
+        expect(find.byType(PremiumLabelBadge), findsOneWidget);
+        await tester.tap(find.byType(PremiumLabelBadge));
+        await tester.pumpAndSettle();
+        expect(find.text('plans destination'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        try {
+          await tester.pumpWidget(const SizedBox.shrink());
+        } finally {
+          try {
+            fixtureContainer?.dispose();
+          } finally {
+            semantics.dispose();
+          }
+        }
+      }
     },
   );
   testWidgets('verified Free hides nutrition semantics and routes to plans', (

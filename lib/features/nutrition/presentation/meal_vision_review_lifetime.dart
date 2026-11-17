@@ -96,6 +96,9 @@ class _MealVisionReviewLifetimeGuardState
         navigator.removeRoute(route);
       }
     });
+    // addPostFrameCallback alone does not request a frame. An idle matching
+    // dialog must retire without waiting for another user input or rebuild.
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   @override

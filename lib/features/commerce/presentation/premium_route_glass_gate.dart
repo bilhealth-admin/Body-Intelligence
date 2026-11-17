@@ -23,6 +23,7 @@ import 'premium_crown_emblem.dart';
 
 part 'premium_route_glass_gate_components.dart';
 part 'premium_route_access_surfaces.dart';
+part 'premium_route_glass_gate_card.dart';
 
 enum PremiumGateFeature {
   premium,
@@ -243,6 +244,7 @@ class _PremiumRouteGateContentsState
   int? _verifiedFreeVisit;
   Future<SubscriptionState>? _sourceReadWitness;
   final _retiredSourceReads = Expando<bool>();
+  int _retiredReadGeneration = -1;
 
   void _retireFreePresentationRead() {
     final previousRead = _sourceReadWitness;
@@ -257,6 +259,12 @@ class _PremiumRouteGateContentsState
       // its error; do not leave this extra Future projection unhandled.
       currentRead.ignore();
       _retiredSourceReads[currentRead] = true;
+      final generation = ref
+          .read(verifiedSubscriptionReadWitnessProvider)
+          .generation;
+      if (generation > _retiredReadGeneration) {
+        _retiredReadGeneration = generation;
+      }
     }
     _ownerVisit++;
     _verifiedFreeVisit = null;
@@ -330,6 +338,16 @@ class _PremiumRouteGateContentsState
         : ref.read(verifiedSubscriptionStateProvider.future);
     sourceRead?.ignore();
     _sourceReadWitness = sourceRead;
+    final readGeneration = isAiCoach
+        ? 0
+        : ref.read(verifiedSubscriptionReadWitnessProvider).generation;
+    // A pending Future can be forwarded by Riverpod across owner reloads.
+    // A genuinely new canonical read is identified by its loader generation,
+    // never by a previously retired Future handle. Direct preview overrides
+    // have no loader witness and retain the conservative identity check.
+    final currentPresentationRead = readGeneration == 0
+        ? sourceRead != null && _retiredSourceReads[sourceRead] != true
+        : readGeneration > _retiredReadGeneration;
     if (!isAiCoach && !subscription.isLoading) {
       _verifiedFreeVisit =
           !subscription.hasError &&
@@ -337,7 +355,7 @@ class _PremiumRouteGateContentsState
               !source.isLoading &&
               !source.hasError &&
               sourceRead != null &&
-              _retiredSourceReads[sourceRead] != true &&
+              currentPresentationRead &&
               owner != null &&
               state?.authority == EntitlementAuthority.verifiedServer &&
               state?.plan == CommercePlan.free
@@ -357,7 +375,7 @@ class _PremiumRouteGateContentsState
         !ownerSnapshot.hasError &&
         owner != null &&
         sourceRead != null &&
-        _retiredSourceReads[sourceRead] != true &&
+        currentPresentationRead &&
         _verifiedFreeVisit == _ownerVisit &&
         source.isRefreshing &&
         !source.hasError &&
@@ -616,178 +634,5 @@ _PremiumGateContent _contentFor(
     title: details.$1,
     body: details.$2,
     benefits: details.$3,
-  );
-}
-
-final class _PremiumGateContent {
-  const _PremiumGateContent({
-    required this.title,
-    required this.body,
-    required this.benefits,
-  });
-
-  final String title;
-  final String body;
-  final List<String> benefits;
-}
-
-class _PremiumGateCard extends StatelessWidget {
-  const _PremiumGateCard({
-    required this.tier,
-    required this.title,
-    required this.body,
-    required this.benefits,
-    required this.action,
-    required this.secondaryAction,
-    required this.loading,
-    required this.compact,
-    required this.isDark,
-    required this.showCoach,
-    required this.onPressed,
-    required this.onSecondaryPressed,
-  });
-
-  final String tier;
-  final String title;
-  final String body;
-  final List<String> benefits;
-  final String action;
-  final String? secondaryAction;
-  final bool loading;
-  final bool compact;
-  final bool isDark;
-  final bool showCoach;
-  final VoidCallback? onPressed;
-  final VoidCallback? onSecondaryPressed;
-
-  @override
-  Widget build(BuildContext context) => ConstrainedBox(
-    constraints: const BoxConstraints(maxWidth: 390),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(34),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(34),
-            color: Theme.of(context).colorScheme.surface.withValues(alpha: .97),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-              width: 1.1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? .22 : .12),
-                blurRadius: 34,
-                offset: const Offset(0, 18),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              compact ? 22 : 26,
-              compact ? 22 : 27,
-              compact ? 22 : 26,
-              compact ? 20 : 24,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    if (showCoach)
-                      Container(
-                        width: compact ? 54 : 60,
-                        height: compact ? 54 : 60,
-                        padding: const EdgeInsets.all(2),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFC8F3FF),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const ClipOval(child: BilCoachPortrait()),
-                      )
-                    else
-                      PremiumCrownEmblem(size: compact ? 54 : 60),
-                    const SizedBox(width: 15),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tier,
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            title,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  color: isDark
-                                      ? Colors.white
-                                      : const Color(0xFF17130B),
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.2,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: compact ? 16 : 20),
-                Text(
-                  body,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isDark
-                        ? const Color(0xFFE4E4E4)
-                        : const Color(0xFF3A352B),
-                    height: 1.55,
-                  ),
-                ),
-                SizedBox(height: compact ? 14 : 18),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final benefit in benefits)
-                      _BenefitPill(label: benefit, isDark: isDark),
-                  ],
-                ),
-                SizedBox(height: compact ? 18 : 24),
-                _GoldActionButton(
-                  label: action,
-                  loading: loading,
-                  onPressed: onPressed,
-                ),
-                if (secondaryAction != null && onSecondaryPressed != null) ...[
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: onSecondaryPressed,
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      foregroundColor: const Color(0xFFFFDB78),
-                      side: const BorderSide(color: Color(0x66F5D477)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(17),
-                      ),
-                    ),
-                    icon: const Icon(Icons.bolt_rounded, size: 20),
-                    label: Text(secondaryAction!),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
-    ),
   );
 }

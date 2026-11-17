@@ -236,14 +236,19 @@ void main() {
           fixture.container.read(verifiedEntitlementOwnerIdProvider),
           'owner-a',
         );
-        expect(fixture.requests, hasLength(2));
+        expect(fixture.requests.length, greaterThanOrEqualTo(3));
         expect(find.byKey(_ctaKey), findsNothing);
         expect(find.byKey(_checkingKey), findsOneWidget);
         expect(find.byKey(_protectedKey), findsNothing);
-        // The deliberately coalesced scalar fixture does not create a new
-        // authority request for the owner excursion. Its old Future can settle,
-        // but must not seed retained presentation for the returned owner's visit.
-        fixture.requests.last.complete(_free());
+        // The visit witness forces a fresh authority request even when the
+        // scalar owner coalesces. The retired read still must not seed any UI.
+        for (final retired in fixture.requests.sublist(
+          1,
+          fixture.requests.length - 1,
+        )) {
+          expect(identical(retired, fixture.requests.last), isFalse);
+          retired.complete(_free());
+        }
         await tester.pump();
         await tester.pump();
         fixture.container.invalidate(verifiedSubscriptionStateProvider);

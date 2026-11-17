@@ -145,6 +145,18 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
         notifyListeners();
       }
       transactionSettled = verifiedReceipt;
+      if (verifiedReceipt) {
+        if (ownershipConflictProductId == purchase.productID) {
+          ownershipConflictProductId = null;
+        }
+        final key = _transactionFingerprint(purchase);
+        if (key != null) _unresolvedVerificationReceipts.remove(key);
+        // Keep only the owner-scoped SKU witness of the previous failure.
+        // If a later stale phase survives after this receipt settles, its UI
+        // still needs the complete native+canonical empty proof to retire.
+      } else {
+        _retainUnresolvedReceipt(purchase);
+      }
       // Receipt verification remains serialized. Native acknowledgement owns
       // no benefit authority and must not hold the next distinct receipt.
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
@@ -235,7 +247,11 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       state = VerifiedStoreState.failed;
       // Receipt delivery/acknowledgement may already follow a charge. This is
       // not a safe pre-launch retry and must never enable a second purchase.
-      messageCode = 'verification_failed';
+      messageCode = _restoring
+          ? 'restore_verification_failed'
+          : _purchaseInitiatedByThisService
+          ? 'verification_failed'
+          : 'reconciliation_verification_failed';
       notifyListeners();
     }
   }
@@ -244,6 +260,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     if (_disposed || purchases.isEmpty) return Future<void>.value();
     final updates = <_QueuedStorePurchaseUpdate>[];
     var cooledDownReplaySuppressed = false;
+    var verifiedFinishReplay = false;
     for (final purchase in purchases) {
       if ((!handlesBoost &&
               purchase.productID == StoreCatalogConfiguration.aiBoost) ||
@@ -254,14 +271,25 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       }
       final visit = _storeVisit.capture();
       if (visit.ownerId == null) continue;
+      final pendingFinish =
+          _pendingVerifiedFinishes[_transactionFingerprint(purchase)];
+      if (pendingFinish != null &&
+          _settledReplayKey(pendingFinish) == _settledReplayKey(purchase)) {
+        // This exact signed event already has server proof. Retry only its
+        // native acknowledgement, never spend another verification quota slot.
+        verifiedFinishReplay = true;
+        continue;
+      }
       final transactionAttempt = _transactionAttemptFor(purchase);
       if (transactionAttempt != null) {
         switch (_reserveTransactionAttempt(transactionAttempt)) {
           case _StoreTransactionReservation.accepted:
             break;
           case _StoreTransactionReservation.alreadyQueued:
+          case _StoreTransactionReservation.alreadySettled:
             continue;
           case _StoreTransactionReservation.cooledDown:
+            _retainUnresolvedReceipt(purchase);
             cooledDownReplaySuppressed = true;
             continue;
         }
@@ -275,6 +303,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       );
     }
     if (updates.isEmpty) {
+      if (verifiedFinishReplay) unawaited(continueVerification());
       if (cooledDownReplaySuppressed) {
         _reportCooledDownReplay();
       }
@@ -322,6 +351,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     return _StoreTransactionAttempt(
       queueKey: cooldownKey ?? fingerprint,
       cooldownKey: cooldownKey,
+      replayKey: _settledReplayKey(purchase),
     );
   }
 
@@ -330,6 +360,12 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
   ) {
     if (!_queuedTransactionKeys.add(attempt.queueKey)) {
       return _StoreTransactionReservation.alreadyQueued;
+    }
+    if (StoreVerificationRequestPolicy.shared.isBackedOff(
+      _currentStoreOwnerId(),
+    )) {
+      _queuedTransactionKeys.remove(attempt.queueKey);
+      return _StoreTransactionReservation.cooledDown;
     }
     if (_restoring) {
       // A Restore tap may deliberately retry a prior failure, but a second
@@ -340,6 +376,12 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
         return _StoreTransactionReservation.alreadyQueued;
       }
       return _StoreTransactionReservation.accepted;
+    }
+    final replayKey = attempt.replayKey;
+    if (replayKey != null &&
+        StoreVerificationRequestPolicy.shared.isSettledReplay(replayKey)) {
+      _queuedTransactionKeys.remove(attempt.queueKey);
+      return _StoreTransactionReservation.alreadySettled;
     }
     final cooldownKey = attempt.cooldownKey;
     if (cooldownKey == null) {
@@ -359,6 +401,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
   void _finishTransactionAttempt(
     _StoreTransactionAttempt attempt, {
     required bool settled,
+    bool acknowledged = false,
   }) {
     if (!_queuedTransactionKeys.remove(attempt.queueKey)) return;
     final cooldownKey = attempt.cooldownKey;
@@ -371,6 +414,11 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       VerifiedStorePurchaseService._failedTransactionCooldowns.remove(
         cooldownKey,
       );
+      if (acknowledged && attempt.replayKey != null) {
+        StoreVerificationRequestPolicy.shared.rememberSettled(
+          attempt.replayKey!,
+        );
+      }
     } else {
       VerifiedStorePurchaseService._failedTransactionCooldowns[cooldownKey] =
           now.add(
@@ -378,6 +426,36 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           );
       _VerifiedStorePurchaseProcessing._pruneExpiredTransactionCooldowns(now);
     }
+  }
+
+  void _retainUnresolvedReceipt(PurchaseDetails purchase) {
+    if (StoreCatalogConfiguration.bindingForProduct(purchase.productID) !=
+        null) {
+      _failedSubscriptionProductId = purchase.productID;
+    }
+    final key = _transactionFingerprint(purchase);
+    if (key == null ||
+        (_unresolvedVerificationReceipts.length >= 32 &&
+            !_unresolvedVerificationReceipts.containsKey(key))) {
+      // Keep checkout fail-closed if the bounded in-memory retry lane cannot
+      // retain another exact receipt. Native StoreKit still owns its payload.
+      _unresolvedReceiptOverflow = true;
+      return;
+    }
+    _unresolvedVerificationReceipts[key] = purchase;
+  }
+
+  String? _settledReplayKey(PurchaseDetails purchase) {
+    final owner = _currentStoreOwnerId();
+    if (owner == null) return null;
+    return storeReceiptReplayKey(
+      ownerId: owner,
+      source: purchase.verificationData.source,
+      productId: purchase.productID,
+      purchaseId: purchase.purchaseID,
+      status: purchase.status.name,
+      verificationData: purchase.verificationData.serverVerificationData,
+    );
   }
 
   void _reportCooledDownReplay() {
@@ -549,7 +627,12 @@ enum _StoreReceiptVerificationResult {
   verifiedActive,
 }
 
-enum _StoreTransactionReservation { accepted, alreadyQueued, cooledDown }
+enum _StoreTransactionReservation {
+  accepted,
+  alreadyQueued,
+  alreadySettled,
+  cooledDown,
+}
 
 final class _QueuedStorePurchaseUpdate {
   const _QueuedStorePurchaseUpdate({
@@ -567,8 +650,10 @@ final class _StoreTransactionAttempt {
   const _StoreTransactionAttempt({
     required this.queueKey,
     required this.cooldownKey,
+    required this.replayKey,
   });
 
   final String queueKey;
   final String? cooldownKey;
+  final String? replayKey;
 }

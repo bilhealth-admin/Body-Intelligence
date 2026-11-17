@@ -17,6 +17,7 @@ extension _VerifiedNativeStoreCompletion on VerifiedStorePurchaseService {
         benefitRevision == verifiedBenefitRevision;
     final boost = purchase.productID == StoreCatalogConfiguration.aiBoost;
     final key = _transactionFingerprint(purchase) ?? purchase.productID;
+    var acknowledged = false;
     try {
       if (!current()) return;
       // Android consumables were consumed by the server after durable credit.
@@ -31,6 +32,7 @@ extension _VerifiedNativeStoreCompletion on VerifiedStorePurchaseService {
         }
       }
       if (current()) {
+        acknowledged = true;
         _pendingVerifiedFinishes.remove(key);
         trace?.mark(StorePurchaseStage.finishCompleted);
         // A verified inactive subscription can finish before its first prices.
@@ -58,6 +60,7 @@ extension _VerifiedNativeStoreCompletion on VerifiedStorePurchaseService {
       }
       if (!current()) return;
       if (recovered) {
+        acknowledged = true;
         trace?.mark(StorePurchaseStage.finishCompleted);
         return;
       }
@@ -71,7 +74,11 @@ extension _VerifiedNativeStoreCompletion on VerifiedStorePurchaseService {
       notifyListeners();
     } finally {
       if (transactionAttempt != null) {
-        _finishTransactionAttempt(transactionAttempt, settled: true);
+        _finishTransactionAttempt(
+          transactionAttempt,
+          settled: true,
+          acknowledged: acknowledged,
+        );
       }
     }
   }

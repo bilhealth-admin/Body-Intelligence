@@ -46,7 +46,7 @@ class SettingsPage extends ConsumerWidget {
     final displayName = ref.watch(displayNameProvider).value;
     final photo = ref.watch(profileAvatarStateProvider).bytes;
     final photoUrl = ref.watch(profileAvatarStateProvider).url;
-    final subscription = ref.watch(verifiedSubscriptionAccessProvider);
+    final subscription = ref.watch(verifiedSubscriptionPresentationProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
     final name = displayName?.trim().isNotEmpty == true
         ? displayName!.trim()
@@ -103,7 +103,7 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: 6),
             subscription.when(
               loading: () => _PremiumMembershipLink(
-                label: copy('Checking subscription'),
+                label: copy('Plans'),
                 // Plans owns account verification. A background membership
                 // recheck must not turn this public destination into a loader.
                 onTap: () => context.push('/plans'),

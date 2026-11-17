@@ -468,7 +468,6 @@ class _PremiumVisionReviewDialogState
 
   @override
   Widget build(BuildContext context) {
-    final light = _light(context);
     final count = _selected.difference(_excluded).length;
     final photographedAt = widget.photographedAt;
     final clock = photographedAt == null
@@ -567,9 +566,12 @@ class _PremiumVisionReviewDialogState
                       decoration: _glassDecoration(context),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.info_outline_rounded,
-                            color: Color(0xFFF3C56E),
+                            color: _reviewWarning(
+                              context,
+                              const Color(0xFFF3C56E),
+                            ),
                             size: 20,
                           ),
                           const SizedBox(width: 9),
@@ -581,9 +583,10 @@ class _PremiumVisionReviewDialogState
                                 'إذا كانت الصورة لبقايا الطعام، أدخل ما أكلته بالفعل. ثقة التعرّف لا تثبت السعرات.',
                               ),
                               style: TextStyle(
-                                color: light
-                                    ? const Color(0xFF674F26)
-                                    : const Color(0xFFFFDE9A),
+                                color: _reviewWarning(
+                                  context,
+                                  const Color(0xFFFFDE9A),
+                                ),
                                 fontSize: 12,
                                 height: 1.4,
                               ),

@@ -278,11 +278,13 @@ void main() {
           expect(native.launches, 1);
           native.updates.add([
             PurchaseDetails(
-              purchaseID: 'subscription-fixture-transaction',
+              purchaseID:
+                  'subscription-fixture-${plan.id}-${term.name}-$lifecycle',
               productID: productId,
               verificationData: PurchaseVerificationData(
                 localVerificationData: '',
-                serverVerificationData: 'fixture',
+                serverVerificationData:
+                    'fixture-${plan.id}-${term.name}-$lifecycle',
                 source: 'app_store',
               ),
               transactionDate: '0',

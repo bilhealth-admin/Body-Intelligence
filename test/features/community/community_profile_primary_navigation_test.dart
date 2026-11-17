@@ -149,7 +149,7 @@ void main() {
           }
           await tester.pumpAndSettle();
           expect(find.text('Synthetic metadata profile'), findsOneWidget);
-          expect(find.text('5 Friends'), findsOneWidget);
+          expect(find.text('Friends · 5'), findsOneWidget);
           expect(
             repository.coverReads,
             pending ? 0 : 1,

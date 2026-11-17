@@ -279,7 +279,8 @@ Future<StoreVerificationOutcome> _verifyOwnedBoost(
   String owner, {
   required bool finishStore,
 }) async {
-  if (client.auth.currentUser?.id != owner) {
+  if (client.auth.currentUser?.id != owner ||
+      StoreVerificationRequestPolicy.shared.isBackedOff(owner)) {
     return const StoreVerificationOutcome(false);
   }
   final protectedBody = await BilMobileIntegrityService.instance.protect(
@@ -293,14 +294,30 @@ Future<StoreVerificationOutcome> _verifyOwnedBoost(
       'verification_data': purchase.verificationData.serverVerificationData,
     },
   );
-  if (client.auth.currentUser?.id != owner) {
+  if (client.auth.currentUser?.id != owner ||
+      StoreVerificationRequestPolicy.shared.isBackedOff(owner)) {
     return const StoreVerificationOutcome(false);
   }
-  final response = await client.functions.invoke(
-    'verify-store-purchase',
-    body: protectedBody,
-  );
+  late final FunctionResponse response;
+  try {
+    response = await client.functions.invoke(
+      'verify-store-purchase',
+      body: protectedBody,
+    );
+  } on FunctionException catch (error) {
+    StoreVerificationRequestPolicy.shared.observeFailure(
+      ownerId: owner,
+      status: error.status,
+      body: error.details,
+    );
+    rethrow;
+  }
   final data = response.data;
+  StoreVerificationRequestPolicy.shared.observeFailure(
+    ownerId: owner,
+    status: response.status,
+    body: data,
+  );
   if (client.auth.currentUser?.id != owner ||
       response.status != 200 ||
       data is! Map ||

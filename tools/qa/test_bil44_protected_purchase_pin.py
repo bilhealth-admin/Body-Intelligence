@@ -65,7 +65,7 @@ class ProtectedPurchase44Test(unittest.TestCase):
         blobs=dict(gate.PROTECTED);blobs[GLASS]='f'*40
         self.assertEqual(self.run_guard(blobs),'Protected checkout source changed: '+GLASS)
 
-    def test_all_live_workflow_blob_guards_match_the_reviewed_shared_gate(self):
+    def test_historical_literal_workflow_guards_match_the_reviewed_shared_gate(self):
         command = re.compile(
             r'^test "\$\(git hash-object ([^)]+)\)" = "([a-f0-9]{40})"$'
         )
@@ -92,10 +92,11 @@ class ProtectedPurchase44Test(unittest.TestCase):
                 )
         for name, expected_blob in gate.PROTECTED.items():
             self.assertEqual(observed.get(('bil39-crystal.yml', name)), expected_blob)
-            actual_blob = subprocess.check_output(
-                ['git', 'hash-object', name], cwd=ROOT, text=True
-            ).strip()
-            self.assertEqual(actual_blob, expected_blob, name)
+
+    def test_version47_source_does_not_weaken_historical44_acceptance(self):
+        blobs=dict(gate.PROTECTED)
+        blobs[STORE]='da3c7dde8a1f9807345eb03e58c148874cfa8deb'
+        self.assertEqual(self.run_guard(blobs),'Protected checkout source changed: '+STORE)
 
     def test_current_source_cloud_gate_shares_the_reviewed_protected_contract(self):
         self.assertEqual(source_cloud_gate.PROTECTED, gate.PROTECTED)

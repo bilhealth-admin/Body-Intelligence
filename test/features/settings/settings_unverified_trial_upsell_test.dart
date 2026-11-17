@@ -64,6 +64,12 @@ void main() {
                   ),
                 ),
               ),
+              verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+                'trial-copy-test',
+              ),
+              verifiedEntitlementOwnerProvider.overrideWith(
+                (_) => Stream.value('trial-copy-test'),
+              ),
               verifiedSubscriptionStateProvider.overrideWithValue(
                 AsyncData(
                   SubscriptionState(
@@ -91,6 +97,28 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ReferenceSettingsHomePage)),
+        );
+        expect(
+          container.read(verifiedEntitlementOwnerProvider).requireValue,
+          'trial-copy-test',
+        );
+        expect(
+          container.read(verifiedEntitlementOwnerIdProvider),
+          'trial-copy-test',
+        );
+        final presentation = container.read(
+          verifiedSubscriptionPresentationProvider,
+        );
+        expect(presentation.isLoading, isFalse);
+        expect(presentation.hasError, isFalse);
+        expect(
+          presentation.requireValue.authority,
+          EntitlementAuthority.verifiedServer,
+        );
+        expect(presentation.requireValue.plan, CommercePlan.free);
+        expect(presentation.requireValue.lifecycle, lifecycle);
         final action = find.byType(FilledButton);
         await tester.scrollUntilVisible(action, 400);
         final label = ReferenceSettingsCopy.resolve(

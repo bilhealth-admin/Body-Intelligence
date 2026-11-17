@@ -226,6 +226,9 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              'review-free-owner',
+            ),
             verifiedEntitlementClockProvider.overrideWithValue(
               () => _reviewNow,
             ),

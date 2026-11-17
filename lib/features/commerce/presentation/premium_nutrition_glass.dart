@@ -14,7 +14,9 @@ class PremiumNutritionGroupLabel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final access = ref.watch(verifiedSubscriptionAccessProvider);
+    // This is only the public group badge. Private value masks below continue
+    // consuming the raw authority independently.
+    final access = ref.watch(verifiedSubscriptionPresentationProvider);
     final state = access.asData?.value;
     if (access.isLoading ||
         access.hasError ||
@@ -64,8 +66,10 @@ class PremiumNutritionGlass extends ConsumerWidget {
     final access = ref.watch(verifiedSubscriptionAccessProvider);
     final state = access.asData?.value;
     final verified = state?.authority == EntitlementAuthority.verifiedServer;
-    final checking = access.isLoading;
-    final unavailable = !checking && (access.hasError || !verified);
+    final publicFree = ref.watch(verifiedFreePresentationProvider);
+    final checking = access.isLoading && !publicFree;
+    final unavailable =
+        !checking && !publicFree && (access.hasError || !verified);
     final granted =
         verified && state!.grants(CommerceEntitlement.advancedIntelligence);
     return PremiumValueMask(

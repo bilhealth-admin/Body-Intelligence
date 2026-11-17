@@ -67,7 +67,12 @@ final class CoachCatalogGrounding {
   }) async {
     final normalized = _normalize(question);
     final tokens = _tokens(normalized);
-    if (!tokens.any(_workoutIntentTokens.contains)) return null;
+    // A generic routine is not a workout request; a direct refusal must not
+    // become a positive catalog lookup just because it mentions exercises.
+    if (!tokens.any(_workoutIntentTokens.contains) ||
+        _negatesWorkoutLookup(normalized)) {
+      return null;
+    }
     final language = locale.replaceAll('_', '-').split('-').first.toLowerCase();
     final catalog = await _workoutCatalogs.putIfAbsent(
       language,
@@ -147,6 +152,19 @@ final class CoachCatalogGrounding {
     );
   }
 
+  // Keep uncertain/negated requests on the normal Coach answer path. This
+  // conservative admission guard neither changes the question nor authorizes
+  // a different catalog or action.
+  static bool _negatesWorkoutLookup(String question) => RegExp(
+    r"\b(?:no|not|without)\s+(?:(?:any|a|an)\s+){0,2}"
+    r'(?:workouts?|exercises?|training)\b|'
+    r"\b(?:do not|don't|dont|never)\s+"
+    r'(?:show|give|suggest|recommend|find|include)\s+'
+    r'(?:(?:me|us|any|a|an)\s+){0,3}(?:workouts?|exercises?|training)\b|'
+    r'(?:^|[\s.!?،؛؟])(?:بدون|دون|لا اريد|لا تعرض|لا تقترح)\s+'
+    r'(?:لي\s+)?(?:اي\s+)?(?:تمارين|تمرين|تدريب)(?=[\s.!?،؛؟]|$)',
+  ).hasMatch(question.replaceAll('’', "'"));
+
   static Set<String> _tokens(String value) => value
       .split(RegExp(r'[^\p{L}\p{N}]+', unicode: true))
       .where((token) => token.length >= 2)
@@ -167,7 +185,6 @@ const _workoutIntentTokens = <String>{
   'exercise',
   'exercises',
   'training',
-  'routine',
   'strength',
   'cardio',
   'hiit',
@@ -178,7 +195,6 @@ const _workoutIntentTokens = <String>{
   'تمرين',
   'تمارين',
   'تدريب',
-  'روتين',
   'قوه',
   'كارديو',
   'يوغا',
@@ -187,7 +203,6 @@ const _workoutIntentTokens = <String>{
   'exercice',
   'entrenamiento',
   'ejercicio',
-  'rutina',
   'antrenman',
   'egzersiz',
   'spor',

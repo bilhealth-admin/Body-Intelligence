@@ -58,15 +58,30 @@ final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationCon
     presentationWindow = window
     let completion: ASWebAuthenticationSession.CompletionHandler = { [weak self] url, error in
       DispatchQueue.main.async { [weak self] in
-        guard let self, self.activeAttempt == attempt else { return }
+        guard let self else { return }
+        guard self.activeAttempt == attempt else {
+          self.recordDiagnostic("native_callback", "retired_completion"); return
+        }
         if let error = error as? ASWebAuthenticationSessionError,
            error.code == .canceledLogin {
+          self.recordDiagnostic("native_callback", "cancelled")
           self.finish(attempt, value: nil); return
         }
-        guard error == nil, let url, self.isAllowedCallbackURL(url) else {
+        guard error == nil else {
+          self.recordDiagnostic("native_callback", "os_error")
           self.finish(attempt, value: FlutterError(code: "facebook_oauth_failed", message: nil, details: nil)); return
         }
-        self.finish(attempt, value: ["attemptId": attempt, "callbackUrl": url.absoluteString])
+        guard let url else {
+          self.recordDiagnostic("native_callback", "missing_url")
+          self.finish(attempt, value: FlutterError(code: "facebook_oauth_failed", message: nil, details: nil)); return
+        }
+        guard let clean = Self.normalizedOwnedCallbackURL(url, usesHTTPS: Self.callbackMode == "https") else {
+          self.recordDiagnostic("native_callback", Self.callbackRejectionReason(url, usesHTTPS: Self.callbackMode == "https") ?? "callback_rejected")
+          self.finish(attempt, value: FlutterError(code: "facebook_oauth_failed", message: nil, details: nil)); return
+        }
+        let marker = URLComponents(url: url, resolvingAgainstBaseURL: false)?.percentEncodedFragment
+        self.recordDiagnostic("native_callback", marker == "_=_" ? "facebook_marker_removed" : (marker == "" ? "empty_fragment_removed" : "accepted"))
+        self.finish(attempt, value: ["attemptId": attempt, "callbackUrl": clean.absoluteString])
       }
     }
     let authSession: ASWebAuthenticationSession
@@ -81,13 +96,21 @@ final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationCon
     authSession.presentationContextProvider = self
     session = authSession
     guard authSession.start() else {
+      recordDiagnostic("native_start", "failed")
       finish(attempt, value: FlutterError(code: "facebook_oauth_start_failed", message: nil, details: nil), cancel: true); return
     }
+    recordDiagnostic("native_start", "started")
     let timeout = DispatchWorkItem { [weak self] in
+      self?.recordDiagnostic("native_callback", "timeout")
       self?.finish(attempt, value: FlutterError(code: "facebook_oauth_timeout", message: nil, details: nil), cancel: true)
     }
     deadline = timeout
     DispatchQueue.main.asyncAfter(deadline: .now() + 300, execute: timeout)
+  }
+
+  private func recordDiagnostic(_ stage: String, _ reason: String) {
+    // Only fixed local codes. Never log a callback, code, token or error text.
+    NSLog("BIL_FACEBOOK_OAUTH stage=%@ reason=%@", stage, reason)
   }
 
   private func finish(_ attempt: String, value: Any?, cancel: Bool = false) {
@@ -120,10 +143,6 @@ final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationCon
     Self.isAllowedAuthorizationURL(url, usesHTTPS: Self.callbackMode == "https")
   }
 
-  private func isAllowedCallbackURL(_ url: URL) -> Bool {
-    Self.isAllowedCallbackURL(url, usesHTTPS: Self.callbackMode == "https")
-  }
-
   private static func expectedCallback(usesHTTPS: Bool) -> String {
     usesHTTPS ? "https://www.bilhealth.com/auth/callback" : "bil://auth-callback"
   }
@@ -145,15 +164,34 @@ final class BILFacebookOAuthBridge: NSObject, ASWebAuthenticationPresentationCon
   }
 
   static func isAllowedCallbackURL(_ url: URL, usesHTTPS: Bool) -> Bool {
+    callbackRejectionReason(url, usesHTTPS: usesHTTPS) == nil
+  }
+
+  // Production calls this only from the active ASWebAuthenticationSession's
+  // completion. This pure helper does not grant a session or exchange a code.
+  static func normalizedOwnedCallbackURL(_ url: URL, usesHTTPS: Bool) -> URL? {
+    guard isAllowedCallbackURL(url, usesHTTPS: usesHTTPS),
+          var c = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return nil }
+    c.fragment = nil
+    return c.url
+  }
+
+  static func callbackRejectionReason(_ url: URL, usesHTTPS: Bool) -> String? {
     guard let c = URLComponents(url: url, resolvingAgainstBaseURL: false),
           let expected = URLComponents(string: expectedCallback(usesHTTPS: usesHTTPS)),
           c.scheme == expected.scheme, c.host == expected.host, c.path == expected.path,
-          c.user == nil, c.password == nil, c.port == nil, c.fragment == nil,
-          let items = c.queryItems else { return false }
+          c.user == nil, c.password == nil, c.port == nil else { return "origin_or_path_rejected" }
+    let fragment = c.percentEncodedFragment
+    if let fragment, !fragment.isEmpty, fragment != "_=_" {
+      return fragment.hasPrefix("error=") || fragment.hasPrefix("error_code=") || fragment.hasPrefix("error_description=")
+        ? "provider_error_fragment_rejected" : "fragment_rejected"
+    }
+    guard let items = c.queryItems else { return "missing_query" }
     let values = Dictionary(grouping: items, by: \.name)
-    guard values.values.allSatisfy({ $0.count == 1 }),
-          !items.contains(where: { ["access_token", "refresh_token", "id_token"].contains($0.name) }) else { return false }
-    return values["code"]?.first?.value?.isEmpty == false ||
-      ["error", "error_code", "error_description"].contains { values[$0] != nil }
+    guard values.values.allSatisfy({ $0.count == 1 }) else { return "duplicate_query_rejected" }
+    guard !items.contains(where: { ["access_token", "refresh_token", "id_token"].contains($0.name) }) else { return "token_query_rejected" }
+    guard values["code"]?.first?.value?.isEmpty == false ||
+      ["error", "error_code", "error_description"].contains(where: { values[$0] != nil }) else { return "missing_code_or_error" }
+    return nil
   }
 }

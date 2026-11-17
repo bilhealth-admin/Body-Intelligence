@@ -11,6 +11,28 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const _settingsOwner = 'settings-verified-member';
+final _settingsNow = DateTime.utc(2026, 11, 16, 12);
+
+void _expectVerifiedSettingsMember(WidgetTester tester, CommercePlan plan) {
+  final container = ProviderScope.containerOf(
+    tester.element(find.byType(ReferenceSettingsHomePage)),
+  );
+  expect(
+    container.read(verifiedEntitlementOwnerProvider).requireValue,
+    _settingsOwner,
+  );
+  expect(container.read(verifiedEntitlementOwnerIdProvider), _settingsOwner);
+  final access = container.read(verifiedSubscriptionAccessProvider);
+  final presentation = container.read(verifiedSubscriptionPresentationProvider);
+  for (final state in [access, presentation]) {
+    expect(state.isLoading, isFalse);
+    expect(state.hasError, isFalse);
+    expect(state.requireValue.authority, EntitlementAuthority.verifiedServer);
+    expect(state.requireValue.plan, plan);
+  }
+}
+
 void main() {
   testWidgets('verified Premium never receives a second Premium upsell', (
     tester,
@@ -23,10 +45,21 @@ void main() {
       authority: EntitlementAuthority.verifiedServer,
       isPurchasable: true,
       canRestorePurchases: true,
+      verifiedAt: _settingsNow,
+      currentPeriodEndsAt: _settingsNow.add(const Duration(days: 30)),
     );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+            _settingsOwner,
+          ),
+          verifiedEntitlementOwnerProvider.overrideWith(
+            (_) => Stream.value(_settingsOwner),
+          ),
+          verifiedEntitlementClockProvider.overrideWithValue(
+            () => _settingsNow,
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(premium),
           ),
@@ -45,6 +78,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    _expectVerifiedSettingsMember(tester, CommercePlan.premium);
 
     expect(find.text('Explore Premium'), findsNothing);
     expect(find.text('Go Premium'), findsNothing);
@@ -64,6 +98,15 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+              _settingsOwner,
+            ),
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream.value(_settingsOwner),
+            ),
+            verifiedEntitlementClockProvider.overrideWithValue(
+              () => _settingsNow,
+            ),
             verifiedSubscriptionStateProvider.overrideWithValue(
               AsyncData(free),
             ),
@@ -82,6 +125,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      _expectVerifiedSettingsMember(tester, CommercePlan.free);
 
       await tester.scrollUntilVisible(find.text('BIL Premium'), 400);
       expect(find.text('BIL Premium'), findsOneWidget);

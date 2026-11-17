@@ -30,6 +30,9 @@ extension _CommunityChatOwnerScope on _CommunityChatPageState {
 
   void _retire() {
     _ownerCancelled = true;
+    final cancelDeletionDialog = _cancelMessageDeletionDialog;
+    _cancelMessageDeletionDialog = null;
+    cancelDeletionDialog?.call();
     _binding++;
     _loadGeneration++;
     unawaited(_conversationChanges?.cancel());

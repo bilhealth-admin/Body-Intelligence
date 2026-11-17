@@ -195,7 +195,20 @@ extension _VerifiedStorePurchaseCheckout on VerifiedStorePurchaseService {
   }
 
   Future<void> _purchaseBoost({String? offerToken}) async {
-    if (_disposed || busy) return;
+    if (_disposed ||
+        busy ||
+        verificationBackedOff ||
+        _unresolvedVerificationReceipts.isNotEmpty ||
+        _unresolvedReceiptOverflow) {
+      return;
+    }
+    if (const {
+      'purchase_status_unknown',
+      'store_finish_pending',
+      'purchase_owned_by_another_account',
+    }.contains(messageCode)) {
+      return;
+    }
     final user = Supabase.instance.client.auth.currentUser;
     final product = products[StoreCatalogConfiguration.aiBoost];
     if (user == null ||

@@ -20,6 +20,7 @@ import 'verified_entitlement_session_cache.dart';
 export 'verified_entitlement_session_cache.dart';
 
 part 'server_entitlement_grant_continuity.dart';
+part 'server_entitlement_row_decoding.dart';
 
 /// Reads only the server-owned subscription snapshot.
 ///
@@ -72,7 +73,17 @@ final class ServerEntitlementRepository {
   >
   _latestStoreVersions = {};
 
-  Future<SubscriptionState> current() async {
+  Future<SubscriptionState> current() => _current();
+
+  /// An explicit store-recovery action needs a new complete network read.
+  /// Startup continuity and an unreadable independent grant cannot certify
+  /// Free for the purpose of retiring an old checkout presentation blocker.
+  Future<SubscriptionState> currentForExplicitStoreRecovery() =>
+      _current(requireFreshFreeProof: true);
+
+  Future<SubscriptionState> _current({
+    bool requireFreshFreeProof = false,
+  }) async {
     if (!AppEnvironment.supabaseRuntimeReady) return FreePlan.createState();
     final client = Supabase.instance.client;
     _observeOwnerChanges(client);
@@ -90,7 +101,11 @@ final class ServerEntitlementRepository {
     return CommunityOwnerOperation.run(
       client: client,
       ownerId: ownerId,
-      action: (_) => _currentOwned(client, ownerId),
+      action: (_) => _currentOwned(
+        client,
+        ownerId,
+        requireFreshFreeProof: requireFreshFreeProof,
+      ),
     );
   }
 
@@ -121,13 +136,14 @@ final class ServerEntitlementRepository {
 
   Future<SubscriptionState> _currentOwned(
     SupabaseClient client,
-    String ownerId,
-  ) async {
+    String ownerId, {
+    bool requireFreshFreeProof = false,
+  }) async {
     // On a cold process, render a still-valid server lease from encrypted
     // storage before waiting for network timeouts. Consume this shortcut once
     // per owner so the observed provider's next scheduled refresh reaches the
     // server and renews or revokes the lease normally.
-    if (_startupContinuityConsumed.add(ownerId)) {
+    if (!requireFreshFreeProof && _startupContinuityConsumed.add(ownerId)) {
       final now = _now();
       SubscriptionState? persistedAdmin;
       try {
@@ -238,6 +254,7 @@ final class ServerEntitlementRepository {
     } on CommunityOwnerOperationCancelled {
       rethrow;
     } on Object {
+      if (requireFreshFreeProof) return FreePlan.createState();
       // A transient RPC failure must not visibly switch a currently verified
       // admin lease between Premium and Free. Continuity is owner-scoped,
       // bounded to the exact server lease, and cannot cross owners. Secure
@@ -661,23 +678,6 @@ final class ServerEntitlementRepository {
     'pro' => CommercePlan.premium,
     'plus' || 'legacy_plus' => CommercePlan.plus,
     'free' => CommercePlan.free,
-    _ => null,
-  };
-
-  SubscriptionLifecycle? _lifecycleOrNull(String value) => switch (value) {
-    'pending' => SubscriptionLifecycle.pending,
-    'trial' => SubscriptionLifecycle.trial,
-    'active' => SubscriptionLifecycle.active,
-    'grace_period' => SubscriptionLifecycle.gracePeriod,
-    'billing_retry' => SubscriptionLifecycle.billingRetry,
-    'account_hold' => SubscriptionLifecycle.accountHold,
-    'paused' => SubscriptionLifecycle.paused,
-    'suspended' => SubscriptionLifecycle.suspended,
-    'deferred' => SubscriptionLifecycle.deferred,
-    'cancelled' => SubscriptionLifecycle.cancelled,
-    'expired' => SubscriptionLifecycle.expired,
-    'refunded' => SubscriptionLifecycle.refunded,
-    'revoked' => SubscriptionLifecycle.revoked,
     _ => null,
   };
 }

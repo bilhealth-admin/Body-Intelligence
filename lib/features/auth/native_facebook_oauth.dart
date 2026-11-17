@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -28,9 +29,41 @@ final class BilFacebookOAuthCallbackOwner {
 final class BilNativeFacebookOAuth {
   const BilNativeFacebookOAuth({
     this.sessionTimeout = const Duration(minutes: 5),
+    this.diagnosticRecorder,
   });
 
   final Duration sessionTimeout;
+  final void Function(String stage, String reason)? diagnosticRecorder;
+
+  void _record(String stage, String reason) {
+    // Only fixed stage/reason enums reach this private diagnostic boundary.
+    // A diagnostic sink must never change authentication behavior.
+    try {
+      if (diagnosticRecorder case final recorder?) {
+        recorder(stage, reason);
+      } else {
+        debugPrint('BIL_FACEBOOK_OAUTH stage=$stage reason=$reason');
+      }
+    } catch (_) {}
+  }
+
+  /// Returns a fixed category, never an exception message or URL/token value.
+  static String safeCallbackErrorReason(Object error) {
+    if (error is AuthException &&
+        error.message == 'Code verifier could not be found in local storage.') {
+      return 'pkce_verifier_missing';
+    }
+    if (error is AuthPKCEGrantCodeExchangeError) return 'pkce_code_rejected';
+    if (error is AuthException &&
+        const {
+          'access_denied',
+          'server_error',
+          'temporarily_unavailable',
+        }.contains(error.code)) {
+      return 'provider_error';
+    }
+    return error is AuthException ? 'auth_exception' : 'unexpected_error';
+  }
 
   static const _channel = MethodChannel('bil/facebook_oauth');
   static const httpsCallback = 'https://www.bilhealth.com/auth/callback';
@@ -63,6 +96,7 @@ final class BilNativeFacebookOAuth {
   Future<bool> authenticate(SupabaseClient client) async {
     final owner = _owner;
     if (owner == null || !owner._mounted || _activeAttempt != null) {
+      _record('owner', 'unavailable_or_busy');
       throw const AuthException(
         'Facebook sign-in is already active or unavailable.',
       );
@@ -79,6 +113,7 @@ final class BilNativeFacebookOAuth {
       if (!pendingNativeResult || authOwnerRetired) return;
       // Retirement is irreversible, including A -> B -> A and logout/relogin.
       authOwnerRetired = true;
+      _record('owner', 'retired');
       _cancelAttempt(attempt);
     }
 
@@ -132,29 +167,40 @@ final class BilNativeFacebookOAuth {
         redirectTo: redirect,
       );
       if (!ownsAttempt()) {
+        _record('owner', 'retired');
         throw const AuthException('Facebook sign-in was interrupted.');
       }
+      _record('authorize', 'pkce_url_ready');
       final result = await _channel
           .invokeMapMethod<String, dynamic>('authenticate', {
             'attemptId': attempt,
             'url': authorization.url,
           })
           .timeout(sessionTimeout);
+      _record('native', 'returned');
       if (!ownsAttempt()) {
+        _record('owner', 'retired');
         throw const AuthException('Facebook sign-in was interrupted.');
       }
-      if (result == null) return false; // User dismissed the system sheet.
+      if (result == null) {
+        _record('native', 'cancelled');
+        return false;
+      }
       if (result['attemptId'] != attempt || result['callbackUrl'] is! String) {
+        _record('native', 'result_binding_rejected');
         throw const AuthException('Facebook returned an invalid callback.');
       }
-      final Uri? callback;
-      try {
-        callback = Uri.tryParse(result['callbackUrl'] as String);
-        if (callback == null || !_matchesCallback(callback, redirect)) {
-          throw const FormatException();
-        }
-      } on FormatException {
-        throw const AuthException('Facebook returned an invalid callback.');
+      final inspected = _inspectOwnedCallback(
+        result['callbackUrl'] as String,
+        redirect,
+      );
+      _record('callback', inspected.reason);
+      final callback = inspected.callback;
+      if (callback == null) {
+        throw AuthException(
+          'Facebook returned an invalid callback.',
+          code: inspected.reason,
+        );
       }
       // Only this active native completion may normalize the legacy result.
       // Generic bil:// app links remain rejected by BilAuthCallbackController.
@@ -169,15 +215,30 @@ final class BilNativeFacebookOAuth {
       // From this synchronous boundary the trusted shared resolver owns the
       // exchange. Its own signedIn event is an expected new authenticated owner.
       pendingNativeResult = false;
+      _record('resolver', 'entered');
       final completed = await owner.resolve(verifiedLocation);
+      _record('resolver', completed ? 'succeeded' : 'failed');
       if (!ownsAttempt()) {
         throw const AuthException('Facebook sign-in was interrupted.');
       }
       return completed;
     } on PlatformException catch (error) {
+      // Do not copy untrusted native error.message/details into diagnostics.
+      final reason =
+          const {
+            'facebook_oauth_cancelled',
+            'facebook_oauth_failed',
+            'facebook_oauth_start_failed',
+            'facebook_oauth_timeout',
+            'facebook_oauth_unavailable',
+          }.contains(error.code)
+          ? error.code
+          : 'native_platform_error';
+      _record('native', reason);
       if (error.code == 'facebook_oauth_cancelled') return false;
       throw const AuthException('Facebook sign-in could not be completed.');
     } on TimeoutException {
+      _record('native', 'timeout');
       _cancelAttempt(attempt);
       throw const AuthException(
         'Facebook sign-in timed out. Please try again.',
@@ -187,6 +248,41 @@ final class BilNativeFacebookOAuth {
       await authChanges.cancel();
       if (_activeAttempt == attempt) _activeAttempt = null;
     }
+  }
+
+  // This is called only after this native result passes the active owner,
+  // attempt ID and mode fences. Generic app links never enter this boundary.
+  static ({Uri? callback, String reason}) _inspectOwnedCallback(
+    String raw,
+    String expected,
+  ) {
+    final delimiter = raw.indexOf('#');
+    final fragment = delimiter < 0 ? null : raw.substring(delimiter + 1);
+    if (fragment != null && fragment.isNotEmpty && fragment != '_=_') {
+      return (
+        callback: null,
+        reason:
+            fragment.startsWith('error=') ||
+                fragment.startsWith('error_code=') ||
+                fragment.startsWith('error_description=')
+            ? 'provider_error_fragment_rejected'
+            : 'fragment_rejected',
+      );
+    }
+    final parsed = Uri.tryParse(raw);
+    if (parsed == null) return (callback: null, reason: 'shape_rejected');
+    final clean = parsed.removeFragment();
+    if (!_matchesCallback(clean, expected)) {
+      return (callback: null, reason: 'shape_rejected');
+    }
+    return (
+      callback: clean,
+      reason: fragment == '_=_'
+          ? 'facebook_marker_removed'
+          : fragment == ''
+          ? 'empty_fragment_removed'
+          : 'accepted',
+    );
   }
 
   static bool _matchesCallback(Uri callback, String expected) {

@@ -18,6 +18,13 @@ class VerifiedPurchaseHandoff extends Notifier<SubscriptionState?> {
   @override
   SubscriptionState? build() {
     ref.watch(verifiedEntitlementOwnerIdProvider);
+    ref.watch(verifiedEntitlementOwnerVisitProvider);
+    ref.listen(verifiedSubscriptionStateProvider, (_, next) {
+      if (isVerifiedCommerceSessionInvalid(next.error)) retire();
+    });
+    ref.listen(verifiedEntitlementOwnerProvider, (_, next) {
+      if (next.hasError) retire();
+    });
     _expiry?.cancel();
     ref.onDispose(() => _expiry?.cancel());
     return null;
@@ -45,6 +52,9 @@ AsyncValue<SubscriptionState> purchaseHandoffView(
   SubscriptionState? handoff,
   DateTime now,
 ) {
+  if (isVerifiedCommerceSessionInvalid(read.error)) {
+    return AsyncValue.error(read.error!, read.stackTrace!);
+  }
   if (handoff == null) return read;
   final current = read.asData?.value ?? (read.isRefreshing ? read.value : null);
   bool independentGrant() =>

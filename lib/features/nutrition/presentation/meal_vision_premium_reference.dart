@@ -21,7 +21,9 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
     final scale = MediaQuery.textScalerOf(context).scale(12) / 12;
     final diameter = 72 * scale.clamp(1.0, 1.65);
     final low = item.confidence < .55;
-    final tint = low ? const Color(0xFFFFC66E) : _accent(context);
+    final tint = low
+        ? _reviewWarning(context, const Color(0xFFFFC66E))
+        : _accent(context);
     return Row(
       children: [
         SizedBox(

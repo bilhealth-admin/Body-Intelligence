@@ -411,6 +411,47 @@ class RunnerTests: XCTestCase {
     XCTAssertFalse(authorization(https: true, extra: URLQueryItem(name: "access_token", value: "synthetic")))
   }
 
+  func testOwnedCallbackAllowsOnlyAbsentEmptyOrLiteralFacebookMarker() {
+    for https in [false, true] {
+      let base = https ? "https://www.bilhealth.com/auth/callback" : "bil://auth-callback"
+      for suffix in ["", "#", "#_=_"] {
+        let url = URL(string: base + "?code=synthetic" + suffix)!
+        let clean = BILFacebookOAuthBridge.normalizedOwnedCallbackURL(url, usesHTTPS: https)
+        XCTAssertNotNil(clean)
+        let c = clean.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) }
+        XCTAssertNil(c?.fragment)
+        XCTAssertEqual(c?.scheme, https ? "https" : "bil")
+        XCTAssertEqual(c?.host, https ? "www.bilhealth.com" : "auth-callback")
+        XCTAssertEqual(c?.path, https ? "/auth/callback" : "")
+        XCTAssertEqual(c?.queryItems?.first(where: { $0.name == "code" })?.value, "synthetic")
+      }
+    }
+  }
+
+  func testOwnedCallbackRejectsCredentialMixedEncodedAndUnknownFragments() {
+    for suffix in ["#access_token=synthetic", "#refresh_token=synthetic", "#id_token=synthetic",
+      "#_=_&access_token=synthetic", "#unknown", "#_=_%20", "#%5F=%5F", "#_=_#",
+      "#error=access_denied&error_description=synthetic"] {
+      let url = URL(string: "bil://auth-callback?code=synthetic" + suffix)!
+      XCTAssertNil(BILFacebookOAuthBridge.normalizedOwnedCallbackURL(url, usesHTTPS: false))
+    }
+  }
+
+  func testFacebookMarkerDoesNotRelaxExactOriginPathOrQueryGuards() {
+    for raw in ["bil://auth-callback/?code=synthetic#_=_", "bil://plans?code=synthetic#_=_",
+      "bil://user@auth-callback?code=synthetic#_=_", "bil://auth-callback:123?code=synthetic#_=_",
+      "bil://auth-callback?code=one&code=two#_=_", "bil://auth-callback?code=synthetic&access_token=synthetic#_=_",
+      "bil://auth-callback#_=_"] {
+      XCTAssertNil(BILFacebookOAuthBridge.normalizedOwnedCallbackURL(URL(string: raw)!, usesHTTPS: false))
+    }
+  }
+
+  func testSupabaseErrorFragmentHasFixedDiagnosticButIsNotAccepted() {
+    let url = URL(string: "bil://auth-callback?error=access_denied#error=access_denied&sb=")!
+    XCTAssertEqual(BILFacebookOAuthBridge.callbackRejectionReason(url, usesHTTPS: false), "provider_error_fragment_rejected")
+    XCTAssertNil(BILFacebookOAuthBridge.normalizedOwnedCallbackURL(url, usesHTTPS: false))
+  }
+
   private func callback(_ raw: String, https: Bool) -> Bool {
     BILFacebookOAuthBridge.isAllowedCallbackURL(URL(string: raw)!, usesHTTPS: https)
   }

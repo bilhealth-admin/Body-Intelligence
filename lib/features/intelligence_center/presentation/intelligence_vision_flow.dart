@@ -53,6 +53,24 @@ final intelligenceCoachMediaCatalogProvider =
       };
     });
 
+/// A no-match can offer real installed-catalog candidates for explicit user
+/// selection. This never calls network/community enrichment or saves a row.
+final intelligenceCoachInstalledCatalogProvider =
+    Provider<CoachMediaInstalledCatalogLookup Function(String)>((ref) {
+      final database = ref.watch(databaseProvider);
+      final expectedOwner = LocalDatabaseScope.keyForOwner(
+        database.localOwnerId,
+      );
+      final resolver = ref.watch(activeMobileCatalogResolverProvider);
+      var active = true;
+      ref.onDispose(() => active = false);
+      return (ownerKey) => CoachMediaInstalledCatalogLookup(
+        openCatalog: resolver.openIfAvailable,
+        ownerKey: expectedOwner,
+        isCurrent: () => active && ref.mounted && ownerKey == expectedOwner,
+      );
+    });
+
 final class _CoachMediaPageRequest {
   _CoachMediaPageRequest({
     required this.operationId,
@@ -216,8 +234,20 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
       }
     }
 
-    final found = await bridge.lookup(input: input, attempt: request.attempt);
+    var found = await bridge.lookup(input: input, attempt: request.attempt);
     if (!await _mediaRequestCurrent(request) || !mounted) return null;
+    if (input.source == CoachMediaFoodSource.photo &&
+        found is CoachMediaFoodUnresolved &&
+        found.issue == CoachMediaFoodIssue.noMatch) {
+      final installed = ref.read(intelligenceCoachInstalledCatalogProvider)(
+        request.attempt.ownerScope.captured.ownerKey,
+      );
+      found = await CoachMediaFoodBridge(
+        lookupLocal: (candidate) =>
+            installed.lookup(candidate.name!, request.attempt),
+      ).lookup(input: input, attempt: request.attempt);
+      if (!await _mediaRequestCurrent(request) || !mounted) return null;
+    }
     if (found is! CoachMediaFoodMatches) {
       report((found as CoachMediaFoodUnresolved).issue);
       return null;

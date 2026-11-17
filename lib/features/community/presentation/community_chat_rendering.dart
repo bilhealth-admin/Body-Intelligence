@@ -187,10 +187,15 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                   );
                                 }
                                 final message = rows[rows.length - 1 - index];
+                                final displayText =
+                                    communityMessageTextForDisplay(
+                                      context,
+                                      message.body,
+                                    );
                                 final mine = message.senderId == _ownerId;
                                 final direction =
                                     BilWrittenLanguageResolver.directionFor(
-                                      message.body,
+                                      displayText,
                                       fallback: Directionality.of(context),
                                     );
                                 final messageStyle =
@@ -213,7 +218,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                       id: message.id,
                                       presentation: _presentation,
                                       mine: mine,
-                                      text: message.body,
+                                      text: displayText,
                                       direction: direction,
                                       style: messageStyle,
                                       outgoingGradient:
@@ -234,7 +239,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                               key: ValueKey(
                                                 'community-message-body-${message.id}',
                                               ),
-                                              text: message.body,
+                                              text: displayText,
                                               mine: mine,
                                               direction: direction,
                                               style: messageStyle,
@@ -249,7 +254,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                                 }
                                               },
                                               fallback: SelectableText(
-                                                message.body,
+                                                displayText,
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .bodyLarge
@@ -262,7 +267,7 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                                     ),
                                                 textDirection:
                                                     BilWrittenLanguageResolver.directionFor(
-                                                      message.body,
+                                                      displayText,
                                                       fallback:
                                                           Directionality.of(
                                                             context,
@@ -281,46 +286,13 @@ extension _CommunityChatRendering on _CommunityChatPageState {
                                               spacing: 4,
                                               runSpacing: 4,
                                               children: [
-                                                if (!mine)
-                                                  bilPearlPopupMenuButton<
-                                                    String
-                                                  >(
-                                                    key: Key(
-                                                      'community-message-safety-${message.id}',
-                                                    ),
-                                                    enabled: !_safetyBusy,
-                                                    tooltip: communityText(
-                                                      context,
-                                                      'Message actions',
-                                                      'إجراءات الرسالة',
-                                                    ),
-                                                    onSelected: (action) =>
-                                                        _messageSafety(
-                                                          message,
-                                                          action,
-                                                        ),
-                                                    itemBuilder: (_) => [
-                                                      PopupMenuItem(
-                                                        value: 'report',
-                                                        child: Text(
-                                                          communityText(
-                                                            context,
-                                                            'Report',
-                                                            'إبلاغ',
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      PopupMenuItem(
-                                                        value: 'block',
-                                                        child: Text(
-                                                          communityText(
-                                                            context,
-                                                            'Block member',
-                                                            'حظر العضو',
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
+                                                if (_canDeleteMessageForMe(
+                                                  message,
+                                                ))
+                                                  _messageActionMenu(
+                                                    context,
+                                                    message,
+                                                    mine: mine,
                                                   ),
                                                 Text(
                                                   TimeOfDay.fromDateTime(

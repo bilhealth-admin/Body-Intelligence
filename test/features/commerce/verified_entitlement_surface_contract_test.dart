@@ -82,7 +82,7 @@ void main() {
     );
     expect(
       normalizedSource,
-      isNot(contains('verifiedSubscription.isLoading &&')),
+      isNot(contains('if (verifiedSubscription.isLoading')),
     );
     expect(
       normalizedSource,

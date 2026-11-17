@@ -148,37 +148,64 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
         isCurrentOwner: () => mounted,
         action: (operation) async {
           if (granted) {
-            final confirmed =
-                await showDialog<bool>(
-                  context: context,
-                  builder: (dialogContext) => BilPearlMaterialAlertDialog(
-                    title: Text(
-                      dialogContext.strings.text(CloudSyncConsentCopy.title),
-                    ),
-                    content: const SingleChildScrollView(
-                      child: CloudSyncConsentSummary(showDeletionControl: true),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(false),
-                        child: Text(
-                          dialogContext.strings.text(
-                            CloudSyncConsentCopy.localAction,
-                          ),
-                        ),
-                      ),
-                      FilledButton(
-                        onPressed: () => Navigator.of(dialogContext).pop(true),
-                        child: Text(
-                          dialogContext.strings.text(
-                            CloudSyncConsentCopy.primaryAction,
-                          ),
-                        ),
-                      ),
-                    ],
+            final navigator = Navigator.of(context, rootNavigator: true);
+            var decided = false;
+            late final DialogRoute<bool> dialog;
+            dialog = DialogRoute<bool>(
+              context: context,
+              themes: InheritedTheme.capture(
+                from: context,
+                to: navigator.context,
+              ),
+              barrierColor:
+                  Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
+              barrierDismissible: true,
+              traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+              builder: (dialogContext) {
+                void decide(bool enable) {
+                  if (decided) return;
+                  decided = true;
+                  if (!navigator.mounted || !dialog.isActive) return;
+                  if (!mounted ||
+                      !dialogContext.mounted ||
+                      !operation.isCurrent ||
+                      !dialog.isCurrent) {
+                    // Retire only this confirmation, never a route above it.
+                    navigator.removeRoute<bool>(dialog, false);
+                    return;
+                  }
+                  navigator.pop<bool>(enable);
+                }
+
+                return BilPearlMaterialAlertDialog(
+                  title: Text(
+                    dialogContext.strings.text(CloudSyncConsentCopy.title),
                   ),
-                ) ??
-                false;
+                  content: const SingleChildScrollView(
+                    child: CloudSyncConsentSummary(showDeletionControl: true),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => decide(false),
+                      child: Text(
+                        dialogContext.strings.text(
+                          CloudSyncConsentCopy.localAction,
+                        ),
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: () => decide(true),
+                      child: Text(
+                        dialogContext.strings.text(
+                          CloudSyncConsentCopy.primaryAction,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+            final confirmed = await navigator.push<bool>(dialog) ?? false;
             operation.check();
             if (!confirmed) return;
           }

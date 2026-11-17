@@ -16,16 +16,18 @@ class _WorkoutVideoAccessGate extends ConsumerWidget {
     if (workoutItemAccessGranted(item, null)) return child;
     final access = ref.watch(verifiedSubscriptionAccessProvider);
     if (workoutItemAccessGranted(item, access.asData?.value)) return child;
+    final checking =
+        access.isLoading && !ref.watch(verifiedFreePresentationProvider);
     return Scaffold(
       key: ValueKey(
-        access.isLoading
+        checking
             ? 'workout-video-access-checking'
             : 'workout-video-access-locked',
       ),
       appBar: AppBar(title: Text(item.title)),
       body: Center(
-        child: access.isLoading
-            ? const BilFeatureWelcomeStatus()
+        child: checking
+            ? const Icon(Icons.shield_outlined)
             : Padding(
                 padding: const EdgeInsets.all(24),
                 child: _LockedWorkoutPanel(minimumAccess: item.minimumAccess),

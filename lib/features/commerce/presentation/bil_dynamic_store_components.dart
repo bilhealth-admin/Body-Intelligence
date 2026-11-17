@@ -502,6 +502,8 @@ class _StickyPurchaseBar extends StatelessWidget {
     required this.statusMessage,
     required this.statusIsError,
     required this.onPressed,
+    this.onBlockedTap,
+    this.blockedActionLabel,
   });
 
   final String label;
@@ -511,6 +513,8 @@ class _StickyPurchaseBar extends StatelessWidget {
   final String? statusMessage;
   final bool statusIsError;
   final VoidCallback onPressed;
+  final VoidCallback? onBlockedTap;
+  final String? blockedActionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -604,10 +608,19 @@ class _StickyPurchaseBar extends StatelessWidget {
                       color: Colors.transparent,
                       child: Semantics(
                         button: true,
-                        enabled: enabled && !loading,
+                        enabled: !loading && (enabled || onBlockedTap != null),
+                        label: !enabled && onBlockedTap != null
+                            ? blockedActionLabel
+                            : null,
+                        excludeSemantics: !enabled && onBlockedTap != null,
+                        onTap: !loading && !enabled ? onBlockedTap : null,
                         child: InkWell(
                           key: const ValueKey('store-purchase-cta'),
-                          onTap: loading || !enabled ? null : onPressed,
+                          onTap: loading
+                              ? null
+                              : enabled
+                              ? onPressed
+                              : onBlockedTap,
                           borderRadius: BorderRadius.circular(19),
                           child: SizedBox(
                             height: 56,

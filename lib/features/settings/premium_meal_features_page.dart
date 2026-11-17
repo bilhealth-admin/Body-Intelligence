@@ -85,11 +85,32 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(verifiedSubscriptionAccessProvider);
-    return state.when(
-      loading: () => Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: const Center(child: BilFeatureWelcomeStatus()),
+    Widget lockedSurface() => Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.workspace_premium_rounded, size: 54),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: () => context.push('/plans'),
+                child: Text(_copy(context, 'View Premium plans')),
+              ),
+            ],
+          ),
+        ),
       ),
+    );
+    return state.when(
+      loading: () => ref.watch(verifiedFreePresentationProvider)
+          ? lockedSurface()
+          : Scaffold(
+              appBar: AppBar(title: Text(title)),
+              body: const Center(child: Icon(Icons.shield_outlined)),
+            ),
       error: (_, _) => Scaffold(
         appBar: AppBar(title: Text(title)),
         body: Center(
@@ -124,25 +145,7 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
         if (subscription.grants(CommerceEntitlement.advancedIntelligence)) {
           return child;
         }
-        return Scaffold(
-          appBar: AppBar(title: Text(title)),
-          body: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.workspace_premium_rounded, size: 54),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () => context.push('/plans'),
-                    child: Text(_copy(context, 'View Premium plans')),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+        return lockedSurface();
       },
     );
   }

@@ -27,6 +27,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const _diaryVisualOwner = 'diary-verified-free-member';
+
 void main() {
   for (final locale in AppLocalizations.supportedLocales) {
     final tag = BilLocalePolicy.canonicalTag(locale);
@@ -68,6 +70,12 @@ void main() {
         ProviderScope(
           overrides: [
             databaseProvider.overrideWithValue(database),
+            verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+              _diaryVisualOwner,
+            ),
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream.value(_diaryVisualOwner),
+            ),
             seedCatalogProvider.overrideWith((ref) async {}),
             foodsProvider.overrideWithValue(AsyncData([food])),
             dailyWaterProvider.overrideWithValue(
@@ -338,6 +346,28 @@ void main() {
         findsNWidgets(3),
         reason: '$tag masks each paid macro value without masking its name',
       );
+      final container = ProviderScope.containerOf(
+        tester.element(find.byKey(const Key('daily-log-food-premium-group'))),
+      );
+      expect(
+        container.read(verifiedEntitlementOwnerProvider).requireValue,
+        _diaryVisualOwner,
+        reason: '$tag uses its verified member fixture',
+      );
+      expect(
+        container.read(verifiedEntitlementOwnerIdProvider),
+        _diaryVisualOwner,
+      );
+      final presentation = container.read(
+        verifiedSubscriptionPresentationProvider,
+      );
+      expect(presentation.isLoading, isFalse);
+      expect(presentation.hasError, isFalse);
+      expect(
+        presentation.requireValue.authority,
+        EntitlementAuthority.verifiedServer,
+      );
+      expect(presentation.requireValue.plan, CommercePlan.free);
       expect(
         find.descendant(
           of: find.byKey(const Key('daily-log-food-premium-group')),

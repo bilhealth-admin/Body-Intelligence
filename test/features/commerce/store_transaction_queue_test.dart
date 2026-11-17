@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/services/store_subscription_blocker_recovery.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_term.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
@@ -142,8 +145,12 @@ class _NativeStore extends Fake implements InAppPurchase {
 }
 
 class _ConfiguredStore extends VerifiedStorePurchaseService {
-  _ConfiguredStore(_NativeStore native, {super.pendingTimeout})
-    : super(purchase: native, appleStoreSync: native.syncAppleStore);
+  _ConfiguredStore(
+    _NativeStore native, {
+    super.pendingTimeout,
+    super.subscriptionInventoryReader,
+    super.freshRecoveryEntitlementReader,
+  }) : super(purchase: native, appleStoreSync: native.syncAppleStore);
   @override
   bool get configured => true;
 }
@@ -152,17 +159,33 @@ PurchaseDetails _receipt({
   PurchaseStatus status = PurchaseStatus.purchased,
   String productId = StoreCatalogConfiguration.aiBoost,
   String purchaseId = 'local-receipt',
+  String verificationData = 'fixture',
 }) => PurchaseDetails(
   purchaseID: purchaseId,
   productID: productId,
   verificationData: PurchaseVerificationData(
     localVerificationData: 'fixture',
-    serverVerificationData: 'fixture',
+    serverVerificationData: verificationData,
     source: 'app_store',
   ),
   transactionDate: '1',
   status: status,
 )..pendingCompletePurchase = true;
+
+class _Inventory implements StoreSubscriptionInventoryReader {
+  int reads = 0;
+  Future<NativeStoreSubscriptionInventory> Function()? onRead;
+  @override
+  Future<NativeStoreSubscriptionInventory> read() async {
+    reads++;
+    return onRead == null
+        ? const NativeStoreSubscriptionInventory(
+            currentEntitlementCount: 0,
+            unfinishedCount: 0,
+          )
+        : await onRead!();
+  }
+}
 
 http.Response _verifiedResponse() => http.Response(
   '{"verified":true}',
@@ -432,6 +455,163 @@ void main() {
       );
       expect(native.launches, 1);
       expect(native.completionCalls, 0);
+      expect(
+        store.userOperationInProgress,
+        isFalse,
+        reason:
+            'Waiting for a late native confirmation is not opening another sheet',
+      );
+      final now = DateTime.now().toUtc();
+      subscriptionRows = [
+        {
+          'provider': 'apple',
+          'plan_id': 'premium',
+          'lifecycle': 'active',
+          'verified_at': now.toIso8601String(),
+          'started_at': now
+              .subtract(const Duration(minutes: 1))
+              .toIso8601String(),
+          'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+        },
+      ];
+      await store.refreshEntitlement();
+      expect(store.entitlement?.grantsPaidAccess, isTrue);
+      expect(store.messageCode, 'purchase_status_unknown');
+      expect(store.canStartPurchase, isFalse);
+      expect(native.launches, 1);
+      verificationResponse = (_) => _verifiedSubscriptionResponse();
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'late-after-modal-confirmation',
+        ),
+      ]);
+      await waitForStoreCondition(
+        () => store.state == VerifiedStoreState.verified,
+      );
+      expect(store.messageCode, 'subscription_verified');
+      expect(store.lastDeliveryIsUserPurchase, isTrue);
+      expect(native.launches, 1);
+    },
+  );
+
+  test(
+    'explicit recovery retries retained receipt normally without restore, inventory or checkout',
+    () async {
+      store.dispose();
+      final inventory = _Inventory();
+      var freshReads = 0;
+      store = _ConfiguredStore(
+        native,
+        subscriptionInventoryReader: inventory,
+        freshRecoveryEntitlementReader: () async {
+          freshReads++;
+          return FreePlan.createState();
+        },
+      );
+      await ready();
+      verificationResponse = (_) => http.Response(
+        '{"verified":false}',
+        503,
+        headers: {'content-type': 'application/json'},
+      );
+      final receipt = _receipt(
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        purchaseId: 'explicit-recovery-exact-receipt',
+      );
+      native.updates.add([receipt]);
+      await waitForVerificationFailure();
+      expect(store.canRecoverSubscriptionBlocker, isTrue);
+      expect(store.canStartPurchase, isFalse);
+      verificationResponse = (_) => http.Response(
+        '{"verified":true,"entitlement_active":false}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      await store.recoverSubscriptionBlocker();
+      expect(verificationCalls, 2);
+      expect(native.completionCalls, 1);
+      expect(native.restoreCalls, 0);
+      expect(native.appleSyncCalls, 0);
+      expect(native.launches, 0);
+      expect(inventory.reads, 0);
+      expect(freshReads, 0);
+      expect(store.canStartPurchase, isTrue);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      // A stale UI phase after the now-settled known subscription needs two
+      // successful empty inventories and a new canonical verified Free read.
+      store.state = VerifiedStoreState.failed;
+      store.messageCode = 'reconciliation_verification_failed';
+      expect(store.canRecoverSubscriptionBlocker, isTrue);
+      await store.recoverSubscriptionBlocker();
+      expect(inventory.reads, 1);
+      expect(freshReads, 1);
+      expect(
+        store.canStartPurchase,
+        isFalse,
+        reason: 'An unverified Free fallback is never empty-history proof',
+      );
+      expect(store.messageCode, 'reconciliation_verification_failed');
+    },
+  );
+
+  test(
+    'explicit stale UI recovery needs complete proof and never launches a purchase',
+    () async {
+      store.dispose();
+      final inventory = _Inventory();
+      var freshReads = 0;
+      store = _ConfiguredStore(
+        native,
+        subscriptionInventoryReader: inventory,
+        freshRecoveryEntitlementReader: () async {
+          freshReads++;
+          return SubscriptionState(
+            plan: CommercePlan.free,
+            entitlements: FreePlan.entitlements,
+            authority: EntitlementAuthority.verifiedServer,
+            verifiedAt: DateTime.now().toUtc(),
+            isPurchasable: false,
+            canRestorePurchases: true,
+          );
+        },
+      );
+      await ready();
+      verificationResponse = (_) => http.Response(
+        '{"verified":false}',
+        503,
+        headers: {'content-type': 'application/json'},
+      );
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'strict-ui-recovery-known-failed',
+        ),
+      ]);
+      await waitForVerificationFailure();
+      verificationResponse = (_) => http.Response(
+        '{"verified":true,"entitlement_active":false}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      await store.recoverSubscriptionBlocker();
+      expect(store.canStartPurchase, isTrue);
+      store.state = VerifiedStoreState.failed;
+      store.messageCode = 'reconciliation_verification_failed';
+      final revision = store.verifiedBenefitRevision;
+      final finishes = native.completionCalls;
+      await store.recoverSubscriptionBlocker();
+      expect(inventory.reads, 2);
+      expect(freshReads, 1);
+      expect(store.canStartPurchase, isTrue);
+      expect(store.state, VerifiedStoreState.ready);
+      expect(store.verifiedBenefitRevision, revision);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      expect(verificationCalls, 2);
+      expect(native.completionCalls, finishes);
+      expect(native.launches, 0);
+      expect(native.restoreCalls, 0);
+      expect(native.appleSyncCalls, 0);
     },
   );
 
@@ -1166,7 +1346,8 @@ void main() {
       await drain();
       expect(store.busy, isFalse);
       expect(store.state, VerifiedStoreState.failed);
-      expect(store.messageCode, 'store_stream_failed');
+      expect(store.messageCode, 'reconciliation_verification_failed');
+      expect(store.userOperationInProgress, isFalse);
       expect(store.canStartPurchase, isFalse);
     },
   );
@@ -1657,6 +1838,119 @@ void main() {
     },
   );
   test(
+    'settled exact passive receipts verify once; a changed signed payload rechecks',
+    () async {
+      await ready();
+      verificationResponse = (_) => http.Response(
+        '{"verified":true,"entitlement_active":false}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      final receipt = _receipt(
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        purchaseId: 'settled-passive',
+      );
+      native.updates.add([receipt]);
+      await waitForStoreCondition(
+        () => !store.busy && native.completionCalls == 1,
+      );
+      expect(verificationCalls, 1);
+      native.updates.add([receipt]);
+      await drain();
+      expect(verificationCalls, 1);
+      expect(native.completionCalls, 1);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'settled-passive',
+          verificationData: 'fixture-new-signed-revocation',
+        ),
+      ]);
+      await waitForStoreCondition(
+        () => !store.busy && native.completionCalls == 2,
+      );
+      expect(verificationCalls, 2);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+    },
+  );
+
+  test(
+    'acknowledgement failure replays only native finish, then becomes settled',
+    () async {
+      await ready();
+      native.failCompletion = true;
+      verificationResponse = (_) => http.Response(
+        '{"verified":true,"entitlement_active":false}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      final receipt = _receipt(
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        purchaseId: 'ack-only-passive',
+      );
+      native.updates.add([receipt]);
+      await waitForStoreCondition(
+        () => !store.busy && store.hasPendingVerifiedFinish,
+      );
+      expect(verificationCalls, 1);
+      native.updates.add([receipt]);
+      await waitForStoreCondition(() => native.completionCalls >= 2);
+      expect(verificationCalls, 1);
+      expect(store.hasPendingVerifiedFinish, isTrue);
+      native.failCompletion = false;
+      await store.continueVerification();
+      expect(store.hasPendingVerifiedFinish, isFalse);
+      final completed = native.completionCalls;
+      native.updates.add([receipt]);
+      await drain();
+      expect(verificationCalls, 1);
+      expect(native.completionCalls, completed);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+    },
+  );
+
+  test(
+    '429 pauses distinct passive receipts and explicit Restore before native billing',
+    () async {
+      await ready();
+      verificationResponse = (_) => http.Response(
+        '{"error":"rate_limited","verified":false,"entitlement_active":false,"retry_after_seconds":3600}',
+        429,
+        headers: {'content-type': 'application/json'},
+      );
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'quota-first',
+        ),
+      ]);
+      await waitForStoreCondition(
+        () => !store.busy && store.state == VerifiedStoreState.failed,
+      );
+      expect(verificationCalls, 1);
+      expect(store.verificationBackedOff, isTrue);
+      expect(store.userOperationInProgress, isFalse);
+      expect(store.canStartPurchase, isFalse);
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.premiumMonthly,
+          purchaseId: 'quota-distinct',
+        ),
+      ]);
+      await drain();
+      expect(verificationCalls, 1);
+      await store.restore();
+      expect(verificationCalls, 1);
+      expect(native.restoreCalls, 0);
+      expect(native.appleSyncCalls, 0);
+      expect(store.messageCode, 'restore_verification_failed');
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      expect(native.launches, 0);
+    },
+  );
+
+  test(
     'deduplicates a queued failed transaction but permits a new purchase id',
     () async {
       await ready();
@@ -1738,7 +2032,7 @@ void main() {
         CommercePlan.premium,
         term: SubscriptionTerm.oneMonth,
       );
-      await drain();
+      await waitForNativeLaunch();
       expect(store.state, VerifiedStoreState.purchasePending);
       expect(store.messageCode, isNull);
 

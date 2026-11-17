@@ -40,6 +40,10 @@ extension VerifiedStorePurchasePending on VerifiedStorePurchaseService {
         ).timeout(const Duration(seconds: 12));
         if (_disposed || !_storeVisit.isCurrent(visit)) return;
         _pendingVerifiedFinishes.remove(entry.key);
+        final replayKey = _settledReplayKey(entry.value);
+        if (replayKey != null) {
+          StoreVerificationRequestPolicy.shared.rememberSettled(replayKey);
+        }
       } on Object {
         if (_disposed || !_storeVisit.isCurrent(visit)) return;
         /* Keep this native acknowledgement available for retry. */

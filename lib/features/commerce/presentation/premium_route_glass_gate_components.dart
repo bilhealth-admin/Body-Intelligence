@@ -20,7 +20,7 @@ class _PremiumRouteAccessChecking extends StatelessWidget {
       child: SizedBox.square(
         key: ValueKey('premium-route-access-checking'),
         dimension: 24,
-        child: BilFeatureWelcomeStatus(),
+        child: Icon(Icons.shield_outlined),
       ),
     ),
   );
@@ -132,12 +132,10 @@ class _GoldActionButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     ),
-    child: loading
-        ? const SizedBox.square(dimension: 20, child: BilFeatureWelcomeStatus())
-        : Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+    child: Text(
+      label,
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    ),
   );
 }

@@ -21,6 +21,7 @@ class _CommunityBlockedMembersSheetState
   StreamSubscription<AuthState>? _subscription;
   String? _busy;
   bool _retired = false;
+  VoidCallback? _cancelUnblockDialog;
   bool get _current {
     if (!mounted || _retired) return false;
     try {
@@ -44,7 +45,7 @@ class _CommunityBlockedMembersSheetState
         .listen((event) {
           final next = event.session?.user.id;
           if (next != previous || !_current) {
-            _retired = true;
+            _retire();
             if (mounted) setState(() {});
           }
           previous = next ?? '';
@@ -54,13 +55,19 @@ class _CommunityBlockedMembersSheetState
   @override
   void didUpdateWidget(covariant CommunityBlockedMembersSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.repository, widget.repository)) _retired = true;
+    if (!identical(oldWidget.repository, widget.repository)) _retire();
   }
 
   @override
   void dispose() {
+    _retire();
     unawaited(_subscription?.cancel());
     super.dispose();
+  }
+
+  void _retire() {
+    _retired = true;
+    _cancelUnblockDialog?.call();
   }
 
   void _retry() {
@@ -71,13 +78,30 @@ class _CommunityBlockedMembersSheetState
     }
   }
 
-  Future<void> _unblock(CommunityBlockedMember member) async {
-    if (!_current || _busy != null) return;
-    setState(() => _busy = member.id);
-    try {
-      final yes = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => BilPearlMaterialAlertDialog(
+  Future<bool> _confirmUnblock() async {
+    final navigator = Navigator.of(context, rootNavigator: true);
+    var decided = false;
+    late final DialogRoute<bool> dialog;
+    dialog = DialogRoute<bool>(
+      context: context,
+      themes: InheritedTheme.capture(from: context, to: navigator.context),
+      barrierColor:
+          Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
+      barrierDismissible: true,
+      traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+      builder: (dialogContext) {
+        void decide(bool unblock) {
+          if (decided) return;
+          decided = true;
+          if (!navigator.mounted || !dialog.isActive) return;
+          if (!dialogContext.mounted || !_current || !dialog.isCurrent) {
+            navigator.removeRoute<bool>(dialog, false);
+            return;
+          }
+          navigator.pop<bool>(unblock);
+        }
+
+        return BilPearlMaterialAlertDialog(
           title: Text(
             communityText(
               context,
@@ -94,17 +118,43 @@ class _CommunityBlockedMembersSheetState
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
+              onPressed: () => decide(false),
               child: Text(communityText(context, 'Cancel', 'إلغاء')),
             ),
             FilledButton(
               key: const Key('community-unblock-confirm'),
-              onPressed: () => Navigator.pop(dialogContext, true),
+              onPressed: () => decide(true),
               child: Text(communityText(context, 'Unblock', 'إلغاء الحظر')),
             ),
           ],
-        ),
-      );
+        );
+      },
+    );
+    void cancelDialog() {
+      decided = true;
+      // Retire only this dialog, even if another route is now above it.
+      scheduleMicrotask(() {
+        if (navigator.mounted && dialog.isActive) {
+          navigator.removeRoute<bool>(dialog, false);
+        }
+      });
+    }
+
+    _cancelUnblockDialog = cancelDialog;
+    try {
+      return await navigator.push<bool>(dialog) == true;
+    } finally {
+      if (identical(_cancelUnblockDialog, cancelDialog)) {
+        _cancelUnblockDialog = null;
+      }
+    }
+  }
+
+  Future<void> _unblock(CommunityBlockedMember member) async {
+    if (!_current || _busy != null) return;
+    setState(() => _busy = member.id);
+    try {
+      final yes = await _confirmUnblock();
       if (yes != true || !mounted || !_current) {
         return;
       }

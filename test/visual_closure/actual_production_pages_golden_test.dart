@@ -521,6 +521,12 @@ void main() {
         liveHealthNowProvider.overrideWithValue(() => _visualNow),
         sleepNowProvider.overrideWithValue(() => _visualNow),
         if (effectiveSubscription != null) ...[
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue(
+            'visual-golden-owner',
+          ),
+          verifiedEntitlementOwnerProvider.overrideWith(
+            (_) => Stream<String?>.value('visual-golden-owner'),
+          ),
           // The derived expiry-aware access provider must share the same
           // root scope as its snapshot and clock, not a nested UI-only scope.
           verifiedEntitlementClockProvider.overrideWithValue(
@@ -533,11 +539,48 @@ void main() {
       ],
       child: wrapper?.call(app) ?? app,
     );
+    ProviderSubscription<AsyncValue<String?>>? fixtureOwnerSubscription;
     try {
       await tester.pumpWidget(databaseScope);
+      if (effectiveSubscription != null) {
+        final fixtureScope = ProviderScope.containerOf(
+          tester.element(find.byType(MaterialApp).first),
+        );
+        // Prime this lazy fixture even when the page has no commerce consumer.
+        fixtureOwnerSubscription = fixtureScope.listen(
+          verifiedEntitlementOwnerProvider,
+          (_, _) {},
+        );
+      }
       await tester.pumpAndSettle();
       await settleVisualAssetImages(tester);
       await tester.pumpAndSettle();
+      if (effectiveSubscription != null) {
+        final fixtureScope = ProviderScope.containerOf(
+          tester.element(find.byType(MaterialApp).first),
+        );
+        expect(
+          fixtureScope.read(verifiedEntitlementOwnerProvider).requireValue,
+          'visual-golden-owner',
+        );
+        expect(
+          fixtureScope.read(verifiedEntitlementOwnerIdProvider),
+          'visual-golden-owner',
+        );
+        final resolvedPresentation = fixtureScope.read(
+          verifiedSubscriptionPresentationProvider,
+        );
+        expect(resolvedPresentation.isLoading, isFalse);
+        expect(resolvedPresentation.hasError, isFalse);
+        expect(
+          resolvedPresentation.asData?.value.authority,
+          EntitlementAuthority.verifiedServer,
+        );
+        expect(
+          resolvedPresentation.asData?.value.plan,
+          effectiveSubscription.plan,
+        );
+      }
       if (interact != null) {
         await interact(tester);
         await settleVisualAssetImages(tester);
@@ -560,6 +603,7 @@ void main() {
     } finally {
       // Dispose the real page and its expiry timers even when an assertion
       // fails; cleanup must not depend on a successful golden comparison.
+      fixtureOwnerSubscription?.close();
       try {
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump(const Duration(milliseconds: 1));

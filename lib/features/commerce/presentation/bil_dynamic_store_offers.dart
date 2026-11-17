@@ -33,6 +33,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onRestore,
     required this.onManage,
     this.onOfferSelected,
+    this.onBlockedPurchaseRequested,
     this.onRetry,
     this.onTerms,
     this.onPrivacy,
@@ -62,6 +63,9 @@ class BilDynamicStoreOffers extends StatefulWidget {
   /// can clear transient feedback from the previous attempt without changing
   /// the verified store outcome or re-enabling an unverified transaction.
   final ValueChanged<BilStoreOfferMetadata>? onOfferSelected;
+
+  /// Explains an unavailable checkout on an explicit tap; never bills.
+  final ValueChanged<BilStoreOfferMetadata>? onBlockedPurchaseRequested;
   final VoidCallback? onRetry;
   final VoidCallback? onTerms;
   final VoidCallback? onPrivacy;
@@ -409,6 +413,13 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                   ? true
                   : widget.purchaseStatusIsError,
               onPressed: () => widget.onPurchaseRequested(selectedOffer),
+              onBlockedTap:
+                  selectedOwnershipBlocked ||
+                      !subscriptionPurchaseAllowed ||
+                      widget.onBlockedPurchaseRequested == null
+                  ? null
+                  : () => widget.onBlockedPurchaseRequested!(selectedOffer),
+              blockedActionLabel: _copy('continue_verification'),
             ),
           ),
       ],

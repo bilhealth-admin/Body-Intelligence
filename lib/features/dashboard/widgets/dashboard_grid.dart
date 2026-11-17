@@ -52,6 +52,7 @@ import 'premium_dashboard_benchmark.dart';
 part 'dashboard_unprofiled_reference.dart';
 part 'dashboard_nutrient_goal_cards.dart';
 part 'dashboard_grid_actions.dart';
+part 'dashboard_nutrient_goal_section.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key, this.hero});
@@ -660,37 +661,21 @@ class DashboardGrid extends ConsumerWidget {
             weightUnit: UnitConverter.weightUnit(system),
             visibleSections: visibleSections,
             premiumUnlocked: premiumUnlocked,
-            premiumAccessResolved: premiumAccessResolved,
-            premiumAccessChecking: verifiedSubscription.isLoading,
+            premiumAccessResolved:
+                premiumAccessResolved ||
+                ref.watch(verifiedFreePresentationProvider),
+            premiumAccessChecking:
+                verifiedSubscription.isLoading &&
+                !ref.watch(verifiedFreePresentationProvider),
             onPremiumRetry: () =>
                 ref.invalidate(verifiedSubscriptionStateProvider),
           ),
         ),
         if (visibleNutrientGoalCards.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-            child: _DashboardNutrientGoalCards(
-              selected: visibleNutrientGoalCards,
-              values: {
-                DashboardNutrientGoalIds.protein: evidenced(
-                  TrackedNutrient.protein,
-                ),
-                DashboardNutrientGoalIds.carbohydrates: evidenced(
-                  TrackedNutrient.carbohydrates,
-                ),
-                DashboardNutrientGoalIds.fat: evidenced(TrackedNutrient.fat),
-                DashboardNutrientGoalIds.fiber: evidenced(
-                  TrackedNutrient.fiber,
-                ),
-                DashboardNutrientGoalIds.sodium: evidenced(
-                  TrackedNutrient.sodium,
-                ),
-                DashboardNutrientGoalIds.potassium: evidenced(
-                  TrackedNutrient.potassium,
-                ),
-              },
-              goals: cardNutrientGoals,
-            ),
+          _dashboardNutrientGoalSection(
+            visibleNutrientGoalCards: visibleNutrientGoalCards,
+            evidenced: evidenced,
+            cardNutrientGoals: cardNutrientGoals,
           ),
       ],
     );

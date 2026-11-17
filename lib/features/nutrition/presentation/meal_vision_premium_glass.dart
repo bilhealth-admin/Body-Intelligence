@@ -13,6 +13,8 @@ Color _secondary(BuildContext context) =>
     _light(context) ? const Color(0xFF46636B) : _muted;
 Color _accent(BuildContext context) =>
     _light(context) ? const Color(0xFF087A5D) : _mint;
+Color _reviewWarning(BuildContext context, Color darkColor) =>
+    _light(context) ? const Color(0xFF674F26) : darkColor;
 
 BoxDecoration _glassDecoration(BuildContext context, {bool active = false}) {
   final panel = BilPearlFinish.panel(

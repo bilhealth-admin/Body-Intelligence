@@ -125,14 +125,66 @@ class AppleCertificateVerificationFailure extends Error {
   }
 }
 
-const json = (body: unknown, status = 200) =>
+const json = (
+  body: unknown,
+  status = 200,
+  headers: Record<string, string> = {},
+) =>
   new Response(JSON.stringify(body), {
     status,
     headers: {
       "content-type": "application/json",
       "cache-control": "no-store",
+      ...headers,
     },
   });
+
+class StoreRateLimitFailure extends Error {
+  readonly retryAfterSeconds: number;
+
+  constructor(nowMs: number) {
+    super("rate_limited");
+    this.name = "StoreRateLimitFailure";
+    // bil_consume_rate_limit uses a fixed UTC hour, not a rolling window.
+    // Read the clock only after the rejected RPC, including across an hour
+    // boundary. Never return zero, a fractional delay, or more than one hour.
+    const windowMs = 3600 * 1000;
+    const remaining = Number.isFinite(nowMs)
+      ? Math.ceil(
+        ((Math.floor(nowMs / windowMs) + 1) * windowMs - nowMs) / 1000,
+      )
+      : 3600;
+    this.retryAfterSeconds = Math.min(3600, Math.max(1, remaining));
+  }
+}
+
+async function requireStoreRateLimit(
+  auth: ReturnType<typeof clients>["auth"],
+  action: "store_purchase_verification" | "ai_boost_purchase_verification",
+  now: () => number,
+) {
+  let error: unknown;
+  try {
+    ({ error } = await auth.rpc("bil_consume_rate_limit", {
+      p_action: action,
+      p_limit: 20,
+      p_window_seconds: 3600,
+    }));
+  } catch {
+    // A transport/SDK rejection is not the database's quota exception.
+    throw new Error("rate_limit_unavailable");
+  }
+  if (!error) return;
+  // The RPC has separate authentication and contract errors. Only its exact
+  // quota exception is retryable as quota; never echo arbitrary RPC messages.
+  if (
+    isRecord(error) && error.code === "P0001" &&
+    error.message === "rate limit exceeded"
+  ) {
+    throw new StoreRateLimitFailure(now());
+  }
+  throw new Error("rate_limit_unavailable");
+}
 
 // Production diagnostics must never include the purchase body, receipt, JWT,
 // or exception text.  The static route and error code are sufficient to
@@ -439,6 +491,9 @@ function clients(authorization?: string) {
 export type StoreBackendHandlerDependencies = {
   clients?: typeof clients;
   requireIntegrity?: typeof requireMobileIntegrityGrant;
+  // In-process clock seam for the fixed-window rejection response only.
+  // Request fields cannot replace the server clock or the quota contract.
+  now?: () => number;
   // In-process test seams only. The HTTP body can never replace these trust
   // boundaries; production always uses signature verification and store APIs.
   verifyAppleJws?: typeof verifyAppleJws;
@@ -1243,12 +1298,11 @@ async function verifyPurchase(
     action: "store.verify_purchase",
     body,
   });
-  const { error: rateError } = await auth.rpc("bil_consume_rate_limit", {
-    p_action: "store_purchase_verification",
-    p_limit: 20,
-    p_window_seconds: 3600,
-  });
-  if (rateError) throw new Error("rate_limited");
+  await requireStoreRateLimit(
+    auth,
+    "store_purchase_verification",
+    dependencies.now ?? Date.now,
+  );
   const source = String(body.source ?? "");
   const verification = String(body.verification_data ?? "");
   if (!verification) throw new Error("invalid_receipt_payload");
@@ -1378,12 +1432,11 @@ async function verifyAiBoost(
     action: "store.verify_ai_boost",
     body,
   });
-  const { error: rateError } = await auth.rpc("bil_consume_rate_limit", {
-    p_action: "ai_boost_purchase_verification",
-    p_limit: 20,
-    p_window_seconds: 3600,
-  });
-  if (rateError) throw new Error("rate_limited");
+  await requireStoreRateLimit(
+    auth,
+    "ai_boost_purchase_verification",
+    dependencies.now ?? Date.now,
+  );
   const source = String(body.source ?? "");
   const productId = String(body.product_id ?? "");
   const verification = String(body.verification_data ?? "");
@@ -2182,6 +2235,18 @@ export async function handler(
       safeVerificationErrorCode(error),
       safeVerificationErrorStage(error),
     );
+    if (error instanceof StoreRateLimitFailure) {
+      return json(
+        {
+          error: "rate_limited",
+          verified: false,
+          entitlement_active: false,
+          retry_after_seconds: error.retryAfterSeconds,
+        },
+        429,
+        { "retry-after": String(error.retryAfterSeconds) },
+      );
+    }
     const clientCodes = new Set([
       "authentication_required",
       "invalid_session",

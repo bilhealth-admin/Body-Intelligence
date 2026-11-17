@@ -15,6 +15,7 @@ import 'package:body_intelligence_log/features/commerce/providers/commerce_provi
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   testWidgets(
@@ -114,9 +115,7 @@ void main() {
         await tester.pump();
         final result = BilStoreCopy.text(
           'en',
-          verifiedEarly
-              ? 'restore_verified'
-              : 'purchase_verification_unavailable',
+          verifiedEarly ? 'restore_verified' : 'purchase_confirmation_pending',
         );
         expect(find.text(result), findsWidgets);
         expect(
@@ -157,7 +156,7 @@ void main() {
           'en',
           pending
               ? 'purchase_awaiting_approval'
-              : 'purchase_verification_unavailable',
+              : 'purchase_confirmation_pending',
         );
         expect(find.text(message), findsOneWidget);
         await tester.pumpWidget(const SizedBox.shrink());
@@ -173,9 +172,12 @@ void main() {
           tester
               .widget<InkWell>(find.byKey(const Key('store-purchase-cta')))
               .onTap,
-          isNull,
+          pending ? isNull : isNotNull,
         );
         if (!pending) {
+          await tester.tap(find.byKey(const Key('store-purchase-cta')));
+          await tester.pump();
+          expect(catalog.requested, isEmpty);
           expect(
             find.byKey(const Key('store-continue-verification')),
             findsOneWidget,
@@ -183,6 +185,146 @@ void main() {
         }
         expect(catalog.requested, isEmpty);
         await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  testWidgets(
+    'passive replay notifications never claim a newly opened purchase',
+    (tester) async {
+      final store = _PersistedAttemptStore();
+      addTearDown(store.dispose);
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            home: BilStorePlansPage(
+              store: store,
+              catalog: _RecordingCatalog(const [_monthlyOffer]),
+              productIds: const {'premium.monthly'},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      store.report(
+        VerifiedStoreState.purchasePending,
+        'reconciliation_pending',
+      );
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_in_progress')),
+        findsNothing,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_reconciliation_pending')),
+        findsNothing,
+      );
+      expect(store.canStartPurchase, isFalse);
+      store.report(
+        VerifiedStoreState.failed,
+        'reconciliation_verification_failed',
+      );
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_reconciliation_failed')),
+        findsNothing,
+      );
+      expect(store.canStartPurchase, isFalse);
+      store.report(VerifiedStoreState.verified, 'subscription_verified');
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_verified')),
+        findsNothing,
+      );
+      store.report(VerifiedStoreState.failed, 'restore_verification_failed');
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'restore_verification_failed')),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  for (final locale in ['en', 'ar', 'fr', 'es', 'tr']) {
+    testWidgets(
+      'late native confirmation stays neutral after Premium proof: $locale',
+      (tester) async {
+        final store = _PersistedAttemptStore()
+          ..state = VerifiedStoreState.failed
+          ..messageCode = 'purchase_status_unknown';
+        final catalog = _RecordingCatalog(const [_monthlyOffer]);
+        final paid = SubscriptionState(
+          plan: CommercePlan.premium,
+          entitlements: const {},
+          authority: EntitlementAuthority.verifiedServer,
+          currentPeriodEndsAt: DateTime.now().toUtc().add(
+            const Duration(hours: 1),
+          ),
+          isPurchasable: false,
+          canRestorePurchases: true,
+        );
+        final scope = ProviderContainer(
+          overrides: [
+            verifiedSubscriptionStateProvider.overrideWith((_) async => paid),
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              'confirmation-owner',
+            ),
+          ],
+        );
+        addTearDown(store.dispose);
+        try {
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: scope,
+              child: MaterialApp(
+                locale: Locale(locale),
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                home: BilStorePlansPage(
+                  store: store,
+                  catalog: catalog,
+                  productIds: const {'premium.monthly'},
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final pending = find.text(
+            BilStoreCopy.text(locale, 'purchase_confirmation_pending'),
+          );
+          expect(pending, findsOneWidget);
+          expect(
+            find.byKey(const Key('store-current-plan-status')),
+            findsOneWidget,
+          );
+          expect(
+            find.text(
+              BilStoreCopy.text(locale, 'purchase_verification_unavailable'),
+            ),
+            findsNothing,
+          );
+          expect(
+            find.text(BilStoreCopy.text(locale, 'purchase_in_progress')),
+            findsNothing,
+          );
+          final status = tester.widget<Text>(pending);
+          expect(
+            status.style?.color,
+            isNot(Theme.of(tester.element(pending)).colorScheme.error),
+          );
+          expect(store.userOperationInProgress, isFalse);
+          expect(store.canStartPurchase, isFalse);
+          expect(catalog.requested, isEmpty);
+          await tester.pumpWidget(const SizedBox.shrink());
+        } finally {
+          scope.dispose();
+        }
       },
     );
   }
@@ -251,7 +393,7 @@ void main() {
       await tester.pumpWidget(page(oldStore));
       await tester.pump();
       expect(
-        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        find.text(BilStoreCopy.text('en', 'purchase_confirmation_pending')),
         findsOneWidget,
       );
       await tester.pumpWidget(const SizedBox.shrink());
@@ -267,7 +409,7 @@ void main() {
       );
       await tester.pump();
       expect(
-        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        find.text(BilStoreCopy.text('en', 'purchase_confirmation_pending')),
         findsNothing,
       );
       expect(

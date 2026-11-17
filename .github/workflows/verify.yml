@@ -8,6 +8,7 @@ on:
       - codex/bil44-android36-verified-20261115
       - codex/bil45-android37-inactive-catalog-20261115
       - codex/bil46-android38-reviewer-fixes-20261116
+      - codex/bil47-android39-subscription-stability-20261116
       - fix/admob-clean-production-2026-10-02
       - bil39/integration-20261025
       - codex/bil40-device-fixes-20261028

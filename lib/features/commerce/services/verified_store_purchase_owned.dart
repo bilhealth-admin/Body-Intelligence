@@ -8,6 +8,10 @@ extension _OwnedStorePurchase on VerifiedStorePurchaseService {
     _clearEntitlement();
     _clearPurchaseInitiation();
     _pendingVerifiedFinishes.clear();
+    _unresolvedVerificationReceipts.clear();
+    _unresolvedReceiptOverflow = false;
+    _failedSubscriptionProductId = null;
+    ownershipConflictProductId = null;
     _verifiedFinishRetry = null;
     _publishedBenefits.clear();
     benefitOwnerId = null;

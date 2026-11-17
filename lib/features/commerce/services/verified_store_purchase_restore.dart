@@ -12,6 +12,12 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
       return;
     }
     final restoreOwnerId = _currentStoreOwnerId()!;
+    if (StoreVerificationRequestPolicy.shared.isBackedOff(restoreOwnerId)) {
+      state = VerifiedStoreState.failed;
+      messageCode = 'restore_verification_failed';
+      notifyListeners();
+      return;
+    }
     final visit = _storeVisit.capture();
     final previousState = state;
     final previousMessageCode = messageCode;

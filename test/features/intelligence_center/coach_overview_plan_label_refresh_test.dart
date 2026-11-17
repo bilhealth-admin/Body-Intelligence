@@ -12,6 +12,7 @@ import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dar
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/premium_route_glass_gate.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/workspace/coach_overview_paid_label_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/workspace/coach_reference_workspace.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,9 +26,13 @@ const _ownerA = 'overview-owner-a';
 const _ownerB = 'overview-owner-b';
 
 class _OverviewFixture {
-  _OverviewFixture({bool coalescedOwnerProjection = false}) {
+  _OverviewFixture({
+    bool coalescedOwnerProjection = false,
+    bool recordSubscriptionReads = false,
+    int initialCreditRemaining = 2500,
+  }) {
     subscription = Future.value(paid());
-    usage = Future.value(quota(2500));
+    usage = Future.value(quota(initialCreditRemaining));
     container = ProviderContainer(
       overrides: [
         verifiedEntitlementOwnerSeedProvider.overrideWithValue(_ownerA),
@@ -37,9 +42,22 @@ class _OverviewFixture {
         verifiedEntitlementClockProvider.overrideWithValue(() => now),
         verifiedEntitlementLoaderProvider.overrideWithValue(() {
           subscriptionLoads++;
-          return subscriptionQueue.isEmpty
-              ? subscription
-              : subscriptionQueue.removeAt(0);
+          if (recordSubscriptionReads) {
+            final read = _OverviewSubscriptionRead(
+              rawOwner: owner,
+              scalarOwner: container.read(verifiedEntitlementOwnerIdProvider),
+              visit: container.read(verifiedEntitlementOwnerVisitProvider),
+              generation: container
+                  .read(verifiedSubscriptionReadWitnessProvider)
+                  .generation,
+            );
+            subscriptionReads.add(read);
+            // The initial verified snapshot is explicit and has its own
+            // producer. Every later real loader invocation stays independent.
+            if (subscriptionReads.length == 1) read.result.complete(paid());
+            return read.result.future;
+          }
+          return subscription;
         }),
         aiCoachUsageStatusLoaderProvider.overrideWithValue(() {
           usageLoads++;
@@ -55,7 +73,7 @@ class _OverviewFixture {
   DateTime now = DateTime.utc(2026, 10, 29, 12);
   final owners = StreamController<String?>.broadcast(sync: true);
   late Future<SubscriptionState> subscription;
-  final subscriptionQueue = <Future<SubscriptionState>>[];
+  final subscriptionReads = <_OverviewSubscriptionRead>[];
   late Future<Object?> usage;
   late ProviderContainer container;
   final boundaryKey = GlobalKey();
@@ -88,6 +106,7 @@ class _OverviewFixture {
     bool arabic = false,
     bool dark = false,
     bool showOverview = true,
+    bool settle = true,
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(390, 844);
@@ -140,11 +159,14 @@ class _OverviewFixture {
     );
     await tester.pump();
     await tester.pump();
-    await tester.pumpAndSettle();
+    if (settle) await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   }
 
   Future<void> close(WidgetTester tester) async {
+    for (final read in subscriptionReads) {
+      if (!read.result.isCompleted) read.result.complete(_free());
+    }
     await tester.pumpWidget(const SizedBox.shrink());
     container.dispose();
     await tester.pump();
@@ -194,6 +216,114 @@ class _OverviewFixture {
       }
     }))!;
   }
+}
+
+final class _OverviewSubscriptionRead {
+  _OverviewSubscriptionRead({
+    required this.rawOwner,
+    required this.scalarOwner,
+    required this.visit,
+    required this.generation,
+  });
+
+  final String? rawOwner;
+  final String? scalarOwner;
+  final int visit;
+  final int generation;
+  final result = Completer<SubscriptionState>();
+
+  Map<String, Object?> get trace => {
+    'rawOwner': rawOwner,
+    'scalarOwner': scalarOwner,
+    'visit': visit,
+    'readGeneration': generation,
+  };
+}
+
+void _expectDistinctOwnerReads(
+  _OverviewFixture fixture,
+  int count, {
+  int expectedVisit = 2,
+}) {
+  final reads = fixture.subscriptionReads;
+  final trace = reads.map((read) => read.trace).toList();
+  expect(fixture.subscriptionLoads, count, reason: '$trace');
+  expect(reads.length, count, reason: '$trace');
+  expect(reads.map((read) => read.result.future).toSet().length, count);
+  expect(
+    reads.map((read) => read.generation),
+    orderedEquals(List.generate(count, (index) => index + 1)),
+    reason: '$trace',
+  );
+  expect(reads.first.rawOwner, _ownerA);
+  expect(reads.first.scalarOwner, _ownerA);
+  expect(reads.first.visit, 0);
+  expect(reads.last.rawOwner, _ownerA, reason: '$trace');
+  expect(reads.last.scalarOwner, _ownerA, reason: '$trace');
+  expect(reads.last.visit, expectedVisit, reason: '$trace');
+  expect(
+    fixture.container.read(verifiedEntitlementOwnerVisitProvider),
+    expectedVisit,
+    reason: 'Completing a retired source must not manufacture another visit.',
+  );
+}
+
+void _expectPendingOwnerRead(
+  _OverviewFixture fixture,
+  int count, {
+  int expectedVisit = 2,
+}) {
+  _expectDistinctOwnerReads(fixture, count, expectedVisit: expectedVisit);
+  final credits = fixture.container.read(aiCoachCreditAccessProvider);
+  expect(credits.isLoading, isFalse);
+  expect(credits.hasError, isFalse);
+  expect(credits.requireValue, isFalse);
+  expect(find.byKey(_label), findsNothing);
+  expect(find.text('Premium AI Coach'), findsNothing);
+  expect(find.byKey(_authorized, skipOffstage: false), findsNothing);
+  final raw = fixture.container.read(verifiedSubscriptionAccessProvider);
+  expect(raw.isLoading, isTrue);
+  expect(
+    raw.asData?.value.grants(CommerceEntitlement.advancedIntelligence),
+    isNot(true),
+  );
+}
+
+Future<void> _completeOnlyCurrentOwnerRead(
+  WidgetTester tester,
+  _OverviewFixture fixture,
+  int count, {
+  int expectedVisit = 2,
+}) async {
+  _expectPendingOwnerRead(fixture, count, expectedVisit: expectedVisit);
+  // Each retired request returns a paid result independently. None may seed
+  // the label or mount the protected child while the newest read is pending.
+  for (final retired in fixture.subscriptionReads.sublist(1, count - 1)) {
+    retired.result.complete(fixture.paid());
+    await tester.pump();
+    await tester.pump();
+    _expectPendingOwnerRead(fixture, count, expectedVisit: expectedVisit);
+  }
+  final current = fixture.subscriptionReads.last;
+  expect(current.result.isCompleted, isFalse);
+  current.result.complete(fixture.paid(plan: CommercePlan.premium));
+  await tester.pump();
+  await tester.pumpAndSettle();
+  _expectDistinctOwnerReads(fixture, count, expectedVisit: expectedVisit);
+  expect(fixture.label(tester), 'Premium');
+  expect(find.text('Premium AI Coach'), findsNothing);
+  expect(find.byKey(_authorized, skipOffstage: false), findsOneWidget);
+  final raw = fixture.container.read(verifiedSubscriptionAccessProvider);
+  expect(raw.isLoading, isFalse);
+  expect(raw.hasError, isFalse);
+  expect(raw.asData?.value.plan, CommercePlan.premium);
+  expect(
+    raw.asData?.value.grants(CommerceEntitlement.advancedIntelligence),
+    isTrue,
+  );
+  await tester.pump();
+  await tester.pump();
+  _expectDistinctOwnerReads(fixture, count, expectedVisit: expectedVisit);
 }
 
 void main() {
@@ -401,49 +531,157 @@ void main() {
     },
   );
 
-  testWidgets(
-    'a modeled coalesced scalar retires the old pending label until a new read',
-    (tester) async {
-      // Model Riverpod delivering both raw owner events while the scalar
-      // dependency remains A. The separate real-projection case below supplies
-      // an independent producer Future to every actual loader invocation.
-      final fixture = _OverviewFixture(coalescedOwnerProjection: true);
-      final old = Completer<SubscriptionState>();
+  test(
+    'headless coalesced raw owner visits retire every old producer and accept only the current read',
+    () async {
+      // This models a scalar fixed at A while raw auth makes A -> B -> A.
+      // Keep the real providers and strict producer retirement here. Native
+      // widget scheduling is covered separately with the actual scalar graph.
+      final fixture = _OverviewFixture(
+        coalescedOwnerProjection: true,
+        recordSubscriptionReads: true,
+        initialCreditRemaining: 0,
+      );
+      final labels = fixture.container.listen(
+        coachOverviewPaidLabelProvider,
+        (_, _) {},
+      );
+      final credits = fixture.container.listen(
+        coachOverviewCreditAccessProvider,
+        (_, _) {},
+      );
+      final access = fixture.container.listen(
+        verifiedSubscriptionAccessProvider,
+        (_, _) {},
+      );
       try {
-        await fixture.mount(tester);
-        fixture.subscription = old.future;
-        fixture.container.invalidate(verifiedSubscriptionStateProvider);
-        await tester.pump();
-        final retired = fixture.container.read(
-          verifiedSubscriptionStateProvider.future,
-        );
-        retired.ignore();
-        final loadsBeforeVisit = fixture.subscriptionLoads;
-        fixture.emitOwner(_ownerB);
-        fixture.emitOwner(_ownerA);
-        await tester.pump();
-        await tester.pump();
-        expect(
-          fixture.subscriptionLoads,
-          loadsBeforeVisit,
-          reason:
-              'A coalesced account visit must not start a hidden intermediate read.',
-        );
-        old.complete(fixture.paid());
-        await retired;
-        await tester.pump();
-        expect(find.text('Premium AI Coach'), findsNothing);
-        fixture.subscription = Future.value(
-          fixture.paid(plan: CommercePlan.premium),
-        );
-        fixture.container.invalidate(verifiedSubscriptionStateProvider);
         await fixture.container.read(verifiedSubscriptionStateProvider.future);
-        await tester.pump();
-        expect(fixture.label(tester), 'Premium');
-        expect(fixture.subscriptionLoads, loadsBeforeVisit + 1);
+        await fixture.container.read(aiCoachCreditAccessProvider.future);
+        await fixture.container.pump();
+        expect(fixture.subscriptionLoads, 1);
+        expect(
+          fixture.container.read(coachOverviewPaidLabelProvider),
+          CommercePlan.premiumAiCoach,
+        );
+        expect(
+          fixture.container.read(coachOverviewCreditAccessProvider),
+          isFalse,
+        );
+
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
+        fixture.container
+            .read(verifiedSubscriptionStateProvider.future)
+            .ignore();
+        expect(fixture.subscriptionLoads, 2);
+        fixture.emitOwner(_ownerB);
+        // A real read begun for the intermediate raw owner is an independent
+        // producer. This is a headless business operation, not a UI preflush.
+        fixture.container
+            .read(verifiedSubscriptionStateProvider.future)
+            .ignore();
+        expect(fixture.subscriptionLoads, 3);
+        expect(fixture.subscriptionReads.last.visit, 1);
+        final returnedA = Completer<void>();
+        final rawOwnerReturn = fixture.container.listen(
+          verifiedEntitlementOwnerProvider,
+          (_, next) {
+            if (!next.isLoading &&
+                next.hasValue &&
+                next.value == _ownerA &&
+                !returnedA.isCompleted) {
+              returnedA.complete();
+            }
+          },
+          fireImmediately: false,
+        );
+        try {
+          fixture.emitOwner(_ownerA);
+          // Await the actual raw A delivery. ProviderContainer.pump waits for
+          // scheduled provider work, not a paused stream's buffered auth event.
+          await returnedA.future.timeout(const Duration(seconds: 5));
+          fixture.container
+              .read(verifiedSubscriptionStateProvider.future)
+              .ignore();
+          await fixture.container.pump();
+          _expectDistinctOwnerReads(fixture, 4);
+        } finally {
+          rawOwnerReturn.close();
+        }
+        // Credit authority is independent and asynchronous. Await this current
+        // zero-credit result before asserting the subscription-only boundary.
+        await fixture.container.read(aiCoachCreditAccessProvider.future);
+        await fixture.container.pump();
+
+        void expectPendingAuthority() {
+          _expectDistinctOwnerReads(fixture, 4);
+          final currentAccess = fixture.container.read(
+            verifiedSubscriptionAccessProvider,
+          );
+          expect(currentAccess.isLoading, isTrue);
+          expect(
+            currentAccess.asData?.value.grants(
+              CommerceEntitlement.advancedIntelligence,
+            ),
+            isNot(true),
+          );
+          expect(
+            fixture.container.read(coachOverviewPaidLabelProvider),
+            isNull,
+          );
+          final currentCredits = fixture.container.read(
+            aiCoachCreditAccessProvider,
+          );
+          expect(currentCredits.isLoading, isFalse);
+          expect(currentCredits.hasError, isFalse);
+          expect(currentCredits.requireValue, isFalse);
+          expect(
+            fixture.container.read(coachOverviewCreditAccessProvider),
+            isFalse,
+          );
+        }
+
+        expectPendingAuthority();
+        for (final retired in fixture.subscriptionReads.sublist(1, 3)) {
+          expect(retired.result.isCompleted, isFalse);
+          retired.result.complete(fixture.paid());
+          await fixture.container.pump();
+          expectPendingAuthority();
+        }
+        final current = fixture.subscriptionReads.last;
+        expect(current.result.isCompleted, isFalse);
+        current.result.complete(fixture.paid(plan: CommercePlan.premium));
+        await fixture.container.read(verifiedSubscriptionStateProvider.future);
+        await fixture.container.pump();
+        _expectDistinctOwnerReads(fixture, 4);
+        final currentAccess = fixture.container.read(
+          verifiedSubscriptionAccessProvider,
+        );
+        expect(currentAccess.isLoading, isFalse);
+        expect(currentAccess.hasError, isFalse);
+        expect(currentAccess.requireValue.plan, CommercePlan.premium);
+        expect(
+          currentAccess.requireValue.grants(
+            CommerceEntitlement.advancedIntelligence,
+          ),
+          isTrue,
+        );
+        expect(
+          fixture.container.read(coachOverviewPaidLabelProvider),
+          CommercePlan.premium,
+        );
+        expect(
+          fixture.container.read(coachOverviewCreditAccessProvider),
+          isFalse,
+        );
       } finally {
-        if (!old.isCompleted) old.complete(_free());
-        await fixture.close(tester);
+        labels.close();
+        credits.close();
+        access.close();
+        fixture.container.dispose();
+        for (final read in fixture.subscriptionReads) {
+          if (!read.result.isCompleted) read.result.complete(_free());
+        }
+        await fixture.owners.close();
       }
     },
   );
@@ -451,40 +689,27 @@ void main() {
   testWidgets(
     'real owner visits ignore old producer results and accept the current producer',
     (tester) async {
-      final fixture = _OverviewFixture();
-      final old = Completer<SubscriptionState>();
-      final ownerB = Completer<SubscriptionState>();
-      final ownerA = Completer<SubscriptionState>();
+      final fixture = _OverviewFixture(
+        recordSubscriptionReads: true,
+        initialCreditRemaining: 0,
+      );
       try {
         await fixture.mount(tester);
-        fixture.subscription = old.future;
+        expect(fixture.subscriptionLoads, 1);
+        expect(fixture.label(tester), 'Premium AI Coach');
         fixture.container.invalidate(verifiedSubscriptionStateProvider);
         await tester.pump();
-        fixture.container
-            .read(verifiedSubscriptionStateProvider.future)
-            .ignore();
-        final loads = fixture.subscriptionLoads;
-        fixture.subscriptionQueue.addAll([ownerB.future, ownerA.future]);
+        expect(fixture.subscriptionLoads, 2);
         fixture.emitOwner(_ownerB);
         await tester.pump();
         fixture.emitOwner(_ownerA);
         await tester.pump();
-        expect(fixture.subscriptionLoads, loads + 2);
-        old.complete(fixture.paid());
         await tester.pump();
-        expect(find.text('Premium AI Coach'), findsNothing);
-        ownerB.complete(fixture.paid());
-        await tester.pump();
-        expect(find.text('Premium AI Coach'), findsNothing);
-        ownerA.complete(fixture.paid(plan: CommercePlan.premium));
-        await fixture.container.read(verifiedSubscriptionStateProvider.future);
-        await tester.pump();
-        expect(fixture.label(tester), 'Premium');
-        expect(fixture.subscriptionLoads, loads + 2);
+        // The real scalar projection and mounted gate have three bounded
+        // invocations across these two delivered visits. No queue reuses old.
+        _expectDistinctOwnerReads(fixture, 5);
+        await _completeOnlyCurrentOwnerRead(tester, fixture, 5);
       } finally {
-        if (!old.isCompleted) old.complete(_free());
-        if (!ownerB.isCompleted) ownerB.complete(_free());
-        if (!ownerA.isCompleted) ownerA.complete(_free());
         await fixture.close(tester);
       }
     },
@@ -493,40 +718,65 @@ void main() {
   testWidgets(
     'a read begun while Overview is hidden is retired before the next UI pump',
     (tester) async {
-      final fixture = _OverviewFixture(coalescedOwnerProjection: true);
-      final old = Completer<SubscriptionState>();
+      final fixture = _OverviewFixture(
+        recordSubscriptionReads: true,
+        initialCreditRemaining: 0,
+      );
       final authorityObserver = fixture.container.listen(
         verifiedSubscriptionStateProvider,
         (_, _) {},
       );
       try {
         await fixture.mount(tester);
-        await fixture.mount(tester, showOverview: false);
-        fixture.subscription = old.future;
-        fixture.container.invalidate(verifiedSubscriptionStateProvider);
-        final pending = fixture.container.read(
-          verifiedSubscriptionStateProvider.future,
+        expect(fixture.subscriptionLoads, 1);
+        final initialVisit = fixture.container.read(
+          verifiedEntitlementOwnerVisitProvider,
         );
-        pending.ignore();
-        final loads = fixture.subscriptionLoads;
+        expect(initialVisit, 0);
+        await fixture.mount(tester, showOverview: false);
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
+        fixture.container
+            .read(verifiedSubscriptionStateProvider.future)
+            .ignore();
+        expect(fixture.subscriptionLoads, 2);
         fixture.emitOwner(_ownerB);
         fixture.emitOwner(_ownerA);
         await tester.pump();
-        expect(fixture.subscriptionLoads, loads);
-        old.complete(fixture.paid());
-        await pending;
-        await fixture.mount(tester);
-        expect(find.text('Premium AI Coach'), findsNothing);
-        fixture.subscription = Future.value(
-          fixture.paid(plan: CommercePlan.premium),
+        final currentVisit = fixture.container.read(
+          verifiedEntitlementOwnerVisitProvider,
         );
-        fixture.container.invalidate(verifiedSubscriptionStateProvider);
-        await fixture.container.read(verifiedSubscriptionStateProvider.future);
-        await tester.pump();
-        expect(fixture.label(tester), 'Premium');
-        expect(fixture.subscriptionLoads, loads + 1);
+        // Both raw visits have arrived, but the latest loader was begun in
+        // the retired visit. A dirty lazy provider need not start its next
+        // producer until the real Overview watches it again.
+        expect(currentVisit, 2);
+        final hiddenReads = fixture.subscriptionReads;
+        expect(fixture.subscriptionLoads, 3);
+        expect(hiddenReads, hasLength(3));
+        expect(
+          hiddenReads.map((read) => read.result.future).toSet(),
+          hasLength(3),
+        );
+        expect(
+          hiddenReads.map((read) => read.generation),
+          orderedEquals([1, 2, 3]),
+        );
+        expect(hiddenReads.last.visit, 1);
+        expect(hiddenReads.last.visit, lessThan(currentVisit));
+        expect(hiddenReads.last.result.isCompleted, isFalse);
+        // Reopen the actual Overview; its real watch starts generation four
+        // for visit two. No fixture invalidation forces a replacement read.
+        // Checking has a live animation, so drain frames without settling it.
+        await fixture.mount(tester, settle: false);
+        _expectDistinctOwnerReads(fixture, 4, expectedVisit: currentVisit);
+        // Retired generations two and three each return paid independently;
+        // neither may grant before the current generation four completes.
+        await _completeOnlyCurrentOwnerRead(
+          tester,
+          fixture,
+          4,
+          expectedVisit: currentVisit,
+        );
       } finally {
-        if (!old.isCompleted) old.complete(_free());
         authorityObserver.close();
         await fixture.close(tester);
       }

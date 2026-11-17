@@ -139,9 +139,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
     final state = ref.watch(connectedHealthProvider);
     final subscription = ref.watch(verifiedSubscriptionAccessProvider);
     final verified = subscription.asData?.value;
-    final confirmedFree =
-        verified?.authority == EntitlementAuthority.verifiedServer &&
-        verified?.plan == CommercePlan.free;
+    final confirmedFree = ref.watch(verifiedFreePresentationProvider);
     final fitnessDevicesUnlocked =
         verified?.authority == EntitlementAuthority.verifiedServer &&
         verified?.plan != CommercePlan.free;
@@ -357,7 +355,8 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                             if (fitnessBleAvailableOnCurrentPlatform)
                               _FitnessDeviceSection(
                                 accessGranted: fitnessDevicesUnlocked,
-                                checking: subscription.isLoading,
+                                checking:
+                                    subscription.isLoading && !confirmedFree,
                                 verifiedDenied: confirmedFree,
                                 onRequestAccess: () {
                                   if (confirmedFree) {

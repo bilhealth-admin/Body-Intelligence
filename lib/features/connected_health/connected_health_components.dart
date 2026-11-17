@@ -347,7 +347,7 @@ class _FitnessDeviceSection extends ConsumerWidget {
                       accessGranted
                           ? Icons.bluetooth_searching_rounded
                           : checking
-                          ? Icons.hourglass_empty_rounded
+                          ? Icons.shield_outlined
                           : verifiedDenied
                           ? Icons.lock_outline_rounded
                           : Icons.refresh_rounded,
