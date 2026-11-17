@@ -581,13 +581,7 @@ final storefrontTargetPlanProvider = FutureProvider<CommercePlan?>((ref) async {
   var observed = true;
   ref.onCancel(() => observed = false);
   ref.onResume(() {
-    final reattached = !observed;
     observed = true;
-    if (reattached) {
-      scheduleMicrotask(() {
-        if (ref.mounted && observed) ref.invalidateSelf();
-      });
-    }
   });
   WidgetsBinding? binding;
   try {

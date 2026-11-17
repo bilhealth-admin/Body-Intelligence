@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
@@ -45,6 +46,13 @@ ProductDetailsResponse _all() => ProductDetailsResponse(
   ],
   notFoundIDs: const [],
 );
+
+final class _LifecycleWitness with WidgetsBindingObserver {
+  final states = <AppLifecycleState>[];
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) => states.add(state);
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -250,7 +258,7 @@ void main() {
   });
 
   test(
-    'reattached consumer refreshes the changed storefront exactly once',
+    'reattach keeps the settled target; only observed app resume refreshes once',
     () async {
       expect(
         await scope.read(storefrontTargetPlanProvider.future),
@@ -258,23 +266,60 @@ void main() {
       );
       expect(sdk.countryReads, 2);
       expect(sdk.queries, 1);
-      listener.close();
-      await scope.pump();
-      sdk.country = 'EGY';
-      listener = scope.listen(storefrontTargetPlanProvider, (_, next) {
-        if (next.hasValue && !next.isLoading) published.add(next.value);
-      });
-      await scope.pump();
-      expect(
-        await scope.read(storefrontTargetPlanProvider.future),
-        CommercePlan.premium,
-      );
-      expect(published, [CommercePlan.premiumAiCoach, CommercePlan.premium]);
-      expect(sdk.countryReads, 4);
-      expect(sdk.queries, 2);
-      await scope.pump();
-      expect(sdk.countryReads, 4);
-      expect(sdk.queries, 2);
+      final binding = WidgetsBinding.instance;
+      final witness = _LifecycleWitness();
+      binding.addObserver(witness);
+      void resumeApp() {
+        for (final state in [
+          AppLifecycleState.inactive,
+          AppLifecycleState.hidden,
+          AppLifecycleState.paused,
+          AppLifecycleState.hidden,
+          AppLifecycleState.inactive,
+          AppLifecycleState.resumed,
+        ]) {
+          binding.handleAppLifecycleStateChanged(state);
+        }
+      }
+
+      try {
+        listener.close();
+        await scope.pump();
+        sdk.country = 'EGY';
+        resumeApp();
+        await scope.pump();
+        expect(witness.states, contains(AppLifecycleState.resumed));
+        expect(sdk.countryReads, 2);
+        expect(sdk.queries, 1, reason: 'An unobserved app resume cannot poll.');
+        listener = scope.listen(storefrontTargetPlanProvider, (_, next) {
+          if (next.hasValue && !next.isLoading) published.add(next.value);
+        });
+        await scope.pump();
+        expect(
+          await scope.read(storefrontTargetPlanProvider.future),
+          CommercePlan.premiumAiCoach,
+          reason: 'Consumer reattachment keeps the settled snapshot.',
+        );
+        expect(published, [CommercePlan.premiumAiCoach]);
+        expect(sdk.countryReads, 2);
+        expect(sdk.queries, 1);
+        witness.states.clear();
+        resumeApp();
+        await scope.pump();
+        expect(witness.states, contains(AppLifecycleState.resumed));
+        expect(
+          await scope.read(storefrontTargetPlanProvider.future),
+          CommercePlan.premium,
+        );
+        expect(published, [CommercePlan.premiumAiCoach, CommercePlan.premium]);
+        expect(sdk.countryReads, 4);
+        expect(sdk.queries, 2);
+        await scope.pump();
+        expect(sdk.countryReads, 4);
+        expect(sdk.queries, 2);
+      } finally {
+        binding.removeObserver(witness);
+      }
       expect(sdk.buys, 0);
     },
   );
