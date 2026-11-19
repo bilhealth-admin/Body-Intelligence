@@ -1,6 +1,6 @@
 import { buildProviderRequest } from "./builders.ts";
 import { loadProviderConfig } from "./config.ts";
-import { normalizeProviderResponse } from "./normalize.ts";
+import { classifyProviderHttpFailure, normalizeProviderResponse } from "./normalize.ts";
 import { ProviderConfig, VisionProviderError } from "./types.ts";
 
 const configs: Record<string, ProviderConfig> = {
@@ -388,4 +388,65 @@ Deno.test("Vision accepts only Google-published Gemini on Vertex with header-onl
     denied = true;
   }
   if (!denied) throw new Error("Undisclosed Vertex publisher accepted");
+});
+
+
+Deno.test("HTTP diagnostics classify structured schema complexity without returning the message", () => {
+  const value = classifyProviderHttpFailure(400, { error: { code: 400, status: "INVALID_ARGUMENT",
+    message: "The specified responseSchema has too many states; minimum maximum nullable propertyOrdering enum required." } });
+  if (value.category !== "schema_too_complex" || value.code !== "INVALID_ARGUMENT" ||
+      !["schema", "minimum", "maximum", "nullable", "propertyOrdering", "enum", "required"].every((key) => value.keywords[key])) {
+    throw new Error("Structured schema complexity diagnostic lost");
+  }
+  if (JSON.stringify(value).includes("specified")) throw new Error("Raw message leaked");
+});
+
+Deno.test("HTTP diagnostics distinguish unsupported known schema fields from generic invalid arguments", () => {
+  const unsupported = classifyProviderHttpFailure(400, { error: { status: "INVALID_ARGUMENT",
+    message: 'Invalid JSON payload: unknown name "additionalProperties" at response_schema.' } });
+  const generic = classifyProviderHttpFailure(400, { error: { status: "INVALID_ARGUMENT", message: "Image input rejected." } });
+  if (unsupported.category !== "unsupported_schema_field" || !unsupported.keywords.additionalProperties ||
+      generic.category !== "invalid_argument" || Object.values(generic.keywords).some(Boolean)) {
+    throw new Error("Unsupported field and generic argument categories confused");
+  }
+});
+
+Deno.test("HTTP diagnostics retain credentials rejection as a separate fixed category", () => {
+  for (const [http, status] of [[401, "UNAUTHENTICATED"], [403, "PERMISSION_DENIED"]] as const) {
+    const value = classifyProviderHttpFailure(http, { error: { status, message: "Request rejected." } });
+    if (value.category !== "credentials_rejected" || value.code !== status) throw new Error("Credentials category lost");
+  }
+});
+
+Deno.test("HTTP diagnostics inspect only structured error message and never root/details text", () => {
+  for (const payload of [null, [], "responseSchema too complex", { message: "schema too complex" },
+    { error: "schema too complex" }, { error: { details: [{ message: "schema too complex" }] } }]) {
+    const value = classifyProviderHttpFailure(500, payload);
+    if (value.category !== "other" || value.code !== null || Object.values(value.keywords).some(Boolean)) {
+      throw new Error("Unstructured/details input was scanned");
+    }
+  }
+});
+
+Deno.test("HTTP diagnostics never copy account/token/body strings or arbitrary status codes", () => {
+  const privateMarker = "private-person@example.invalid Bearer very-private-token image_base64_private";
+  const value = classifyProviderHttpFailure(400, { error: { status: privateMarker,
+    code: 1234567890123, message: privateMarker + " responseSchema minimum maximum" },
+    account: privateMarker, body: privateMarker });
+  if (value.code !== null || value.category !== "invalid_argument" ||
+      JSON.stringify(value).includes("private") || JSON.stringify(value).includes("Bearer") ||
+      Object.keys(value).sort().join(",") !== "category,code,keywords" ||
+      !Object.values(value.keywords).every((flag) => typeof flag === "boolean")) {
+    throw new Error("Private upstream field escaped diagnostic allowlist");
+  }
+});
+
+Deno.test("HTTP diagnostics bound safe numeric code and message work without parsing text bodies", () => {
+  const numeric = classifyProviderHttpFailure(400, { error: { code: 400, message: "Malformed request" } });
+  const oversized = classifyProviderHttpFailure(500, { error: { code: -1,
+    message: "x".repeat(8192) + " responseSchema too complex" } });
+  if (numeric.code !== 400 || numeric.category !== "invalid_argument" || oversized.code !== null ||
+      oversized.category !== "other" || Object.values(oversized.keywords).some(Boolean)) {
+    throw new Error("Diagnostic bounds changed");
+  }
 });

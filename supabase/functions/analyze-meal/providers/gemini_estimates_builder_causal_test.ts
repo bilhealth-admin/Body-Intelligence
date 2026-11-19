@@ -51,7 +51,7 @@ Deno.test("V2 wire schema fixes object types, nullable unknown nutrients and exa
     const field = nutrients.properties[name];
     assertContract(field.type === "OBJECT" && field.properties.value.type === "NUMBER"
       && field.properties.value.nullable === true, "Unknown nutrient cannot become a required number");
-    assertContract(field.properties.value.minimum === 0 && field.properties.value.maximum === 1e9, "Nutrient numeric bounds drifted");
+    assertContract(!("minimum" in field.properties.value) && !("maximum" in field.properties.value), "Numeric ranges stay on the server, not in provider grammar");
     assertContract(field.properties.unit.type === "STRING" && JSON.stringify(field.properties.unit.enum) === JSON.stringify([canonical]), "Canonical unit changed");
     assertContract(!("default" in field.properties.value), "Schema must not fill missing values");
   }
@@ -61,7 +61,7 @@ Deno.test("V2 wire schema fixes object types, nullable unknown nutrients and exa
 
 Deno.test("V2 provider schema uses only documented subset and matching property order for both locales", () => {
   const allowed = new Set(["type", "properties", "required", "propertyOrdering", "nullable", "enum", "items",
-    "minimum", "maximum", "maxItems", "description"]);
+    "maxItems", "description"]);
   function inspect(schema: Record<string, unknown>) {
     assertContract(Object.keys(schema).every((key) => allowed.has(key)), "Unsupported provider schema keyword");
     if (schema.type === "OBJECT") {
@@ -121,4 +121,64 @@ Deno.test("V2 wire declares visible component objects and strict parser rejects 
   assertContract(accepted.candidates[0].visible_components[0].name === "Apple", "Valid typed visible component lost");
   assertContract(Object.values(accepted.candidates[0].estimate.nutrients).every((value) => value === null),
     "A shape repair must not fabricate unknown nutrient values");
+});
+
+function numericRangeEnvelope(change: (food: Record<string, unknown>) => void) {
+  const food: Record<string, unknown> = {
+    name: "Red apple", confidence: .98, evidence: "One foreground apple", amount: 150, unit: "g",
+    alternatives: [], uncertainty: null, warnings: [], dish_identity: null, visible_components: [],
+    estimate: { basis: { quantity: 150, unit: "g" }, uncertainty: null,
+      nutrients: Object.fromEntries(Object.entries(geminiNutrientUnits).map(([key, unit]) => [key, { value: null, unit }])) },
+  };
+  change(food);
+  return { candidates: [{ finishReason: "STOP", content: { parts: [{ text: JSON.stringify({
+    response_locale: "en", candidates: [food],
+  }) }] } }] };
+}
+
+for (const [label, change] of [
+  ["negative confidence", (f: Record<string, unknown>) => { f.confidence = -.1; }],
+  ["confidence above one", (f: Record<string, unknown>) => { f.confidence = 1.1; }],
+  ["zero basis", (f: Record<string, unknown>) => {
+    ((f.estimate as Record<string, unknown>).basis as Record<string, unknown>).quantity = 0;
+  }],
+  ["oversized basis", (f: Record<string, unknown>) => {
+    ((f.estimate as Record<string, unknown>).basis as Record<string, unknown>).quantity = 100001;
+  }],
+  ["oversized pictured amount", (f: Record<string, unknown>) => { f.amount = 100001; }],
+  ["negative nutrient", (f: Record<string, unknown>) => {
+    ((f.estimate as Record<string, unknown>).nutrients as Record<string, unknown>).protein = { value: -1, unit: "g" };
+  }],
+  ["nutrient above server maximum", (f: Record<string, unknown>) => {
+    ((f.estimate as Record<string, unknown>).nutrients as Record<string, unknown>).protein = { value: 1e9 + 1, unit: "g" };
+  }],
+  ["calories above gram-basis maximum", (f: Record<string, unknown>) => {
+    ((f.estimate as Record<string, unknown>).nutrients as Record<string, unknown>).calories = { value: 1501, unit: "kcal" };
+  }],
+  ["fat above gram-basis maximum", (f: Record<string, unknown>) => {
+    ((f.estimate as Record<string, unknown>).nutrients as Record<string, unknown>).fat = { value: 151, unit: "g" };
+  }],
+] as const) {
+  Deno.test(`request grammar omits numeric bounds but server rejects ${label}`, () => {
+    const body = JSON.parse(buildProviderRequest(syntheticGemini, { ...syntheticInput, schemaVersion: 2 }).body);
+    const encodedSchema = JSON.stringify(body.generationConfig.responseSchema);
+    assertContract(!encodedSchema.includes('"minimum":') && !encodedSchema.includes('"maximum":'),
+      "Provider numeric-bound grammar was not removed");
+    let rejected = false;
+    try { normalizeGeminiEstimateResponse(numericRangeEnvelope(change), syntheticGemini, "en"); }
+    catch (error) { rejected = error instanceof VisionProviderError && error.code === "malformed_response"; }
+    assertContract(rejected, "Actual server normalizer no longer rejects the numeric range violation");
+  });
+}
+
+Deno.test("simplified request schema does not replace server null or known-zero semantics", () => {
+  const normalized = normalizeGeminiEstimateResponse(numericRangeEnvelope((food) => {
+    const nutrients = (food.estimate as Record<string, unknown>).nutrients as Record<string, unknown>;
+    nutrients.calories = { value: 0, unit: "kcal" };
+    nutrients.protein = { value: 0, unit: "g" };
+  }), syntheticGemini, "en").candidates[0].estimate.nutrients;
+  assertContract(normalized.calories === 0 && normalized.protein === 0, "Known zero changed");
+  assertContract(Object.entries(normalized).every(([key, value]) =>
+    key === "calories" || key === "protein" ? value === 0 : value === null),
+    "Unknown values were synthesized while simplifying provider grammar");
 });

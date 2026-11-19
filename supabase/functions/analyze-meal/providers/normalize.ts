@@ -11,6 +11,65 @@ const finiteMetric = (value: unknown): number | null =>
     ? value
     : null;
 
+
+export type SafeVisionProviderErrorCategory =
+  | "schema_too_complex" | "unsupported_schema_field" | "invalid_argument"
+  | "credentials_rejected" | "other";
+
+const safeProviderStatuses = [
+  "INVALID_ARGUMENT", "UNAUTHENTICATED", "PERMISSION_DENIED", "RESOURCE_EXHAUSTED",
+  "NOT_FOUND", "UNAVAILABLE", "INTERNAL", "DEADLINE_EXCEEDED", "FAILED_PRECONDITION",
+  "OUT_OF_RANGE", "ABORTED", "ALREADY_EXISTS", "CANCELLED", "DATA_LOSS", "UNKNOWN", "OK",
+] as const;
+
+/** Bounded diagnostics only: never return message/body/details/paths/account values. */
+export function classifyProviderHttpFailure(httpStatus: number, payload: unknown): {
+  code: string | number | null;
+  category: SafeVisionProviderErrorCategory;
+  keywords: Record<string, boolean>;
+} {
+  const root = payload && typeof payload === "object" && !Array.isArray(payload)
+    ? payload as Record<string, unknown> : {};
+  // Google error.message is the only text inspected. Never scan the root,
+  // details, headers, image payload or an unstructured upstream body.
+  const error = root.error && typeof root.error === "object" && !Array.isArray(root.error)
+    ? root.error as Record<string, unknown> : {};
+  const message = typeof error.message === "string" ? error.message.slice(0, 8192) : "";
+  const status = typeof error.status === "string" && error.status.length <= 64
+    ? safeProviderStatuses.find((known) => known === error.status) ?? null : null;
+  const rawCode = error.code;
+  const numericCode = typeof rawCode === "number" && Number.isInteger(rawCode) &&
+      ((rawCode >= 0 && rawCode <= 16) || (rawCode >= 100 && rawCode <= 599))
+    ? rawCode : null;
+  const code = status ?? numericCode;
+  const keywords = {
+    schema: /\b(?:response[_\s-]?schema|schema)\b/i.test(message),
+    propertyOrdering: /\bproperty_?ordering\b/i.test(message),
+    nullable: /\bnullable\b/i.test(message),
+    minimum: /\bminimum\b/i.test(message),
+    maximum: /\bmaximum\b/i.test(message),
+    required: /\brequired\b/i.test(message),
+    enum: /\benum\b/i.test(message),
+    additionalProperties: /\badditional_?properties\b/i.test(message),
+    anyOf: /\bany_?of\b/i.test(message),
+    responseMimeType: /\bresponse_?mime_?type\b/i.test(message),
+  };
+  let category: SafeVisionProviderErrorCategory = "other";
+  if (httpStatus === 401 || httpStatus === 403 ||
+      status === "UNAUTHENTICATED" || status === "PERMISSION_DENIED" ||
+      /\b(?:api key not valid|invalid api key|api_key_invalid)\b/i.test(message)) {
+    category = "credentials_rejected";
+  } else if (keywords.schema && /\b(?:too complex|too many states|schema complexity|schema is too large)\b/i.test(message)) {
+    category = "schema_too_complex";
+  } else if (Object.values(keywords).some(Boolean) &&
+      /\b(?:unsupported|not supported|unknown name|unknown field|unrecognized field|cannot find field)\b/i.test(message)) {
+    category = "unsupported_schema_field";
+  } else if (httpStatus === 400 || status === "INVALID_ARGUMENT" || numericCode === 3 || numericCode === 400) {
+    category = "invalid_argument";
+  }
+  return { code, category, keywords };
+}
+
 export function jsonObject(
   text: string,
   config: ProviderConfig,

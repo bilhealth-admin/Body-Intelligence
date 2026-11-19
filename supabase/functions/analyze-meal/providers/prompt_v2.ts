@@ -1,7 +1,7 @@
 import { mealVisionPrompt } from "./prompt.ts";
 import { geminiNutrientUnits } from "./nutrients_v2.ts";
 
-export const geminiVisionEstimateRevision = "gemini-photo-estimate-v2-structured-schema-20261119";
+export const geminiVisionEstimateRevision = "gemini-photo-estimate-v2-schema-server-ranges-20261119";
 
 export function mealVisionEstimatePrompt(locale: string): string {
   const legacy = mealVisionPrompt(locale);
@@ -24,8 +24,8 @@ export function mealVisionEstimateResponseSchema(locale: string): VisionOutputSc
   const text = (nullable = false): VisionOutputSchema => ({
     type: "STRING", ...(nullable ? { nullable: true } : {}),
   });
-  const number = (nullable = false, maximum = 1e9): VisionOutputSchema => ({
-    type: "NUMBER", minimum: 0, maximum, ...(nullable ? { nullable: true } : {}),
+  const number = (nullable = false): VisionOutputSchema => ({
+    type: "NUMBER", ...(nullable ? { nullable: true } : {}),
   });
   const object = (properties: Record<string, VisionOutputSchema>, nullable = false): VisionOutputSchema => ({
     type: "OBJECT", properties, required: Object.keys(properties),
@@ -35,7 +35,7 @@ export function mealVisionEstimateResponseSchema(locale: string): VisionOutputSc
     type: "ARRAY", items, maxItems,
   });
   const unit = (): VisionOutputSchema => ({ type: "STRING", enum: ["g", "ml", "piece"] });
-  const namedConfidence = (): VisionOutputSchema => object({ name: text(), confidence: number(false, 1) });
+  const namedConfidence = (): VisionOutputSchema => object({ name: text(), confidence: number() });
   const nutrients = Object.fromEntries(Object.entries(geminiNutrientUnits).map(([key, canonicalUnit]) => [
     key, object({
       value: { ...number(true), description: "An independently supported estimate for the stated basis, or null when unknown; never invent zero." },
@@ -45,18 +45,18 @@ export function mealVisionEstimateResponseSchema(locale: string): VisionOutputSc
   return object({
     response_locale: { type: "STRING", enum: [locale] },
     candidates: array(object({
-      name: text(), confidence: number(false, 1), evidence: text(),
-      amount: { ...number(true, 100000), description: "Positive estimated pictured portion, or null if unsupported." },
+      name: text(), confidence: number(), evidence: text(),
+      amount: { ...number(true), description: "Positive estimated pictured portion, or null if unsupported." },
       unit: { ...unit(), nullable: true },
       alternatives: array(namedConfidence(), 3), uncertainty: text(true),
       warnings: array(text(), 5),
       dish_identity: object({
-        name: text(), confidence: number(false, 1), alternatives: array(namedConfidence(), 3),
+        name: text(), confidence: number(), alternatives: array(namedConfidence(), 3),
       }, true),
-      visible_components: array(object({ name: text(), confidence: number(false, 1), evidence: text() }), 12),
+      visible_components: array(object({ name: text(), confidence: number(), evidence: text() }), 12),
       estimate: object({
         basis: object({
-          quantity: { ...number(false, 100000), description: "Strictly positive explicit nutrient basis quantity; use a null basis if unsupported." },
+          quantity: { ...number(), description: "Strictly positive explicit nutrient basis quantity; use a null basis if unsupported." },
           unit: unit(),
         }, true),
         nutrients: object(nutrients), uncertainty: text(true),

@@ -10,7 +10,7 @@ import {
 } from "./consent.ts";
 import { buildProviderRequest } from "./providers/builders.ts";
 import { loadProviderConfig } from "./providers/config.ts";
-import { normalizeProviderResponse } from "./providers/normalize.ts";
+import { classifyProviderHttpFailure, normalizeProviderResponse } from "./providers/normalize.ts";
 import { GeminiVisionCandidate, normalizeGeminiEstimateResponse } from "./providers/normalize_v2.ts";
 import {
   resolveVisionLocale,
@@ -362,23 +362,20 @@ deno.serve(async (request: Request) => {
   }
   if (!upstream.ok) {
     await settle(false, { latency_ms: Date.now() - startedAt });
-    let providerErrorCode: string | number | null = null;
+    let providerDiagnostic = classifyProviderHttpFailure(upstream.status, null);
     try {
-      const failure = JSON.parse(upstreamText ?? "") as Record<string, unknown>;
-      const nested = failure.error && typeof failure.error === "object"
-        ? failure.error as Record<string, unknown>
-        : failure;
-      const rawCode = nested.status ?? nested.code;
-      if (typeof rawCode === "string" || typeof rawCode === "number") {
-        providerErrorCode = rawCode;
-      }
+      providerDiagnostic = classifyProviderHttpFailure(
+        upstream.status, JSON.parse(upstreamText ?? ""),
+      );
     } catch (_) {
       // Never return or log an unstructured upstream body.
     }
     return reply({
       error: directConfig ? "vision_provider_failed" : "vision_gateway_failed",
       provider_status: upstream.status,
-      provider_error_code: providerErrorCode,
+      provider_error_code: providerDiagnostic.code,
+      provider_error_category: providerDiagnostic.category,
+      provider_error_keywords: providerDiagnostic.keywords,
     }, 502);
   }
   if (upstreamText == null) {
