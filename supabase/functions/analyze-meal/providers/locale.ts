@@ -1,3 +1,4 @@
+import { geminiVisionEstimateRevision } from "./prompt_v2.ts";
 import { resolveBilLocale } from "../../_shared/bcp47.ts";
 import { VisionProviderError } from "./types.ts";
 
@@ -108,5 +109,7 @@ function hasMixedArabicLatinWord(text: string): boolean {
 
 // The same photo in a different app language needs a separately localized
 // result; do not reuse an English response from the image-only cache.
-export const visionCacheInput = (locale: string, mime: string, image: string) =>
-  `${resolveVisionLocale(locale)}:${mime}:${image}`;
+export const visionCacheInput = (locale: string, mime: string, image: string,
+  schemaVersion: 1 | 2 = 1) => schemaVersion === 2
+    ? `v2:${geminiVisionEstimateRevision}:${resolveVisionLocale(locale)}:${mime}:${image}`
+    : `${resolveVisionLocale(locale)}:${mime}:${image}`;

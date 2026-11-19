@@ -1,5 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:body_intelligence_log/features/commerce/services/store_verification_request_policy.dart';
+
+import 'package:body_intelligence_log/features/commerce/domain/entitlement_resolver.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_provider.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_record.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
+import 'package:flutter/material.dart';
 
 import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
@@ -145,6 +155,30 @@ class _NativeStore extends Fake implements InAppPurchase {
       notFoundIDs: const [],
     ),
   );
+}
+
+// Deterministic held native query; no production hook.
+class _IosHeldFreshQueryNative extends _NativeStore {
+  final freshQueryReached = Completer<void>();
+  final releaseFreshQuery = Completer<ProductDetailsResponse>();
+  final events = <String>[];
+  void Function()? beforeLaunch;
+
+  @override
+  Future<ProductDetailsResponse> queryProductDetails(Set<String> ids) {
+    if (queries == 0) return super.queryProductDetails(ids);
+    queries++;
+    events.add('fresh-query-held');
+    if (!freshQueryReached.isCompleted) freshQueryReached.complete();
+    return releaseFreshQuery.future;
+  }
+
+  @override
+  Future<bool> buyNonConsumable({required PurchaseParam purchaseParam}) {
+    beforeLaunch?.call();
+    events.add('native-launch');
+    return super.buyNonConsumable(purchaseParam: purchaseParam);
+  }
 }
 
 class _NeverDescribe {
@@ -1260,6 +1294,278 @@ void main() {
     },
   );
 
+  Future<void> waitForStoreIdle() async {
+    final deadline = DateTime.now().add(const Duration(seconds: 2));
+    while (store.busy) {
+      if (DateTime.now().isAfter(deadline)) {
+        fail('Store purchase queue did not become idle.');
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+    }
+  }
+
+  for (final product in [
+    StoreCatalogConfiguration.premiumMonthly,
+    StoreCatalogConfiguration.aiBoost,
+  ]) {
+    test(
+      'passive ownership rejection stays quiet and blocked for $product',
+      () async {
+        await ready();
+        native.updates.add([
+          _receipt(
+            productId: product,
+            status: PurchaseStatus.restored,
+            purchaseId: 'passive-other-owner',
+          ),
+        ]);
+        await verificationStarted.future;
+        verification.complete(
+          http.Response(
+            '{"verified":false,"error":"purchase_owned_by_another_account"}',
+            409,
+            headers: {'content-type': 'application/json'},
+          ),
+        );
+        await waitForStoreIdle();
+        expect(store.state, VerifiedStoreState.failed);
+        expect(store.messageCode, 'reconciliation_verification_failed');
+        expect(store.ownershipConflictProductId, product);
+        expect(store.canStartPurchase, isFalse);
+        expect(store.canRecoverSubscriptionBlocker, isFalse);
+        expect(store.entitlement, isNull);
+        expect(store.verifiedBenefitRevision, 0);
+        expect(native.restoreCalls, 0);
+        expect(native.completionCalls, 0);
+        await store.purchaseBoost();
+        await store.purchasePlan(
+          CommercePlan.premium,
+          term: SubscriptionTerm.oneMonth,
+        );
+        expect(native.launches, 0);
+        expect(verificationCalls, 1);
+      },
+    );
+  }
+
+  test(
+    'explicit Boost ownership rejection survives a late native launch reply',
+    () async {
+      await ready();
+      final launch = store.purchaseBoost();
+      expect(native.launches, 1);
+      native.updates.add([_receipt(purchaseId: 'explicit-buy-other-owner')]);
+      await verificationStarted.future;
+      verification.complete(
+        http.Response(
+          '{"verified":false,"error":"purchase_owned_by_another_account"}',
+          409,
+          headers: {'content-type': 'application/json'},
+        ),
+      );
+      await waitForStoreIdle();
+      native.purchaseLaunch.complete(false);
+      await launch;
+      expect(store.state, VerifiedStoreState.failed);
+      expect(store.messageCode, 'purchase_owned_by_another_account');
+      expect(
+        store.ownershipConflictProductId,
+        StoreCatalogConfiguration.aiBoost,
+      );
+      expect(store.canStartPurchase, isFalse);
+      expect(store.entitlement, isNull);
+      expect(store.verifiedBenefitRevision, 0);
+      expect(native.completionCalls, 0);
+      expect(native.launches, 1);
+      expect(verificationCalls, 1);
+    },
+  );
+
+  test(
+    'a passive conflict cannot replace an earlier explicit Restore SKU witness',
+    () async {
+      await ready();
+      verificationResponse = (_) => http.Response(
+        '{"verified":false,"error":"purchase_owned_by_another_account"}',
+        409,
+        headers: {'content-type': 'application/json'},
+      );
+      native.restoreReceipt = _receipt(
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        status: PurchaseStatus.restored,
+        purchaseId: 'explicit-restore-other-owner',
+      );
+      await store.restore();
+      expect(store.messageCode, 'purchase_owned_by_another_account');
+      expect(
+        store.ownershipConflictProductId,
+        StoreCatalogConfiguration.premiumMonthly,
+      );
+      native.updates.add([
+        _receipt(
+          productId: StoreCatalogConfiguration.aiBoost,
+          status: PurchaseStatus.restored,
+          purchaseId: 'later-passive-different-sku',
+        ),
+      ]);
+      await waitForStoreIdle();
+      expect(store.messageCode, 'purchase_owned_by_another_account');
+      expect(
+        store.ownershipConflictProductId,
+        StoreCatalogConfiguration.premiumMonthly,
+      );
+      expect(store.canStartPurchase, isFalse);
+      expect(store.canRecoverSubscriptionBlocker, isFalse);
+      expect(store.entitlement, isNull);
+      expect(store.verifiedBenefitRevision, 0);
+      expect(native.restoreCalls, 1);
+      expect(native.launches, 0);
+      expect(native.completionCalls, 0);
+      expect(verificationCalls, 2);
+    },
+  );
+
+  testWidgets(
+    'real passive ownership replay stays quiet in paid Plans and after reopening',
+    (tester) async {
+      try {
+        final now = DateTime.now().toUtc();
+        final owner = Supabase.instance.client.auth.currentUser!.id;
+        final paid = const EntitlementResolver().resolve(
+          record: SubscriptionRecord(
+            plan: CommercePlan.premium,
+            lifecycle: SubscriptionLifecycle.active,
+            provider: SubscriptionProvider.apple,
+            authorityVerified: true,
+            startedAt: now.subtract(const Duration(days: 1)),
+            currentPeriodEndsAt: now.add(const Duration(days: 1)),
+            verifiedAt: now,
+          ),
+          now: now,
+        );
+        subscriptionRows = [
+          {
+            'provider': 'apple',
+            'plan_id': 'premium',
+            'lifecycle': 'active',
+            'verified_at': now.toIso8601String(),
+            'started_at': now
+                .subtract(const Duration(days: 1))
+                .toIso8601String(),
+            'expires_at': now.add(const Duration(days: 1)).toIso8601String(),
+            'grace_period_ends_at': null,
+          },
+        ];
+        await tester.runAsync(() async {
+          await ready();
+          await store.refreshEntitlement();
+        });
+        final priorEntitlement = store.entitlement;
+        expect(priorEntitlement?.grantsPaidAccess, isTrue);
+        final conflict = PurchaseOwnershipConflictStore();
+        final container = ProviderContainer(
+          overrides: [
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (ref) => Stream.value(owner),
+            ),
+            verifiedEntitlementClockProvider.overrideWithValue(() => now),
+            verifiedEntitlementLoaderProvider.overrideWithValue(
+              () async => paid,
+            ),
+            purchaseOwnershipConflictStoreProvider.overrideWithValue(conflict),
+          ],
+        );
+        addTearDown(container.dispose);
+        Future<void> openPlans() async {
+          await tester.pumpWidget(
+            UncontrolledProviderScope(
+              container: container,
+              child: MaterialApp(
+                home: BilStorePlansPage(
+                  store: store,
+                  connectToDeviceStore: false,
+                  productIds: const {StoreCatalogConfiguration.premiumMonthly},
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+        }
+
+        void expectQuietPaidPlans() {
+          final offers = tester.widget<BilDynamicStoreOffers>(
+            find.byType(BilDynamicStoreOffers),
+          );
+          expect(find.text('Current plan: Premium'), findsOneWidget);
+          expect(
+            find.byKey(const Key('store-current-plan-continue')),
+            findsOneWidget,
+          );
+          expect(offers.purchaseStatusMessage, isNull);
+          expect(offers.purchaseStatusIsError, isFalse);
+          expect(offers.blockedPurchaseKinds, isEmpty);
+          expect(
+            find.text(
+              BilStoreCopy.text('en', 'purchase_owned_by_another_account'),
+            ),
+            findsNothing,
+          );
+          expect(conflict.blockedKinds, isEmpty);
+        }
+
+        try {
+          await openPlans();
+          expectQuietPaidPlans();
+          await tester.runAsync(() async {
+            native.updates.add([
+              _receipt(
+                productId: StoreCatalogConfiguration.premiumMonthly,
+                status: PurchaseStatus.restored,
+                purchaseId: 'paid-member-passive-other-owner',
+              ),
+            ]);
+            await verificationStarted.future;
+            verification.complete(
+              http.Response(
+                '{"verified":false,"error":"purchase_owned_by_another_account"}',
+                409,
+                headers: {'content-type': 'application/json'},
+              ),
+            );
+            await waitForStoreIdle();
+          });
+          await tester.pumpAndSettle();
+          expect(store.state, VerifiedStoreState.failed);
+          expect(store.messageCode, 'reconciliation_verification_failed');
+          expect(
+            store.ownershipConflictProductId,
+            StoreCatalogConfiguration.premiumMonthly,
+          );
+          expect(store.entitlement, same(priorEntitlement));
+          expect(store.entitlement?.grantsPaidAccess, isTrue);
+          expect(store.verifiedBenefitRevision, 0);
+          expect(store.canStartPurchase, isFalse);
+          expectQuietPaidPlans();
+          await tester.pumpWidget(const SizedBox.shrink());
+          await openPlans();
+          expectQuietPaidPlans();
+          expect(native.restoreCalls, 0);
+          expect(native.launches, 0);
+          expect(native.completionCalls, 0);
+          expect(verificationCalls, 1);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          container.dispose();
+          await tester.pump();
+        }
+      } finally {
+        // Widget invariants run before the file's package:test tearDown.
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
+
   for (final product in [
     StoreCatalogConfiguration.premiumMonthly,
     StoreCatalogConfiguration.aiBoost,
@@ -1327,16 +1633,6 @@ void main() {
       expect(store.entitlement, isNull);
     },
   );
-
-  Future<void> waitForStoreIdle() async {
-    final deadline = DateTime.now().add(const Duration(seconds: 2));
-    while (store.busy) {
-      if (DateTime.now().isAfter(deadline)) {
-        fail('Store purchase queue did not become idle.');
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 1));
-    }
-  }
 
   // A fixed count of microtask drains is insufficient under parallel CI.
   // Poll the observable native handoff with a strict deadline instead.
@@ -1676,6 +1972,553 @@ void main() {
       expect(store.busy, isFalse);
     },
   );
+
+  // These two cases intentionally differ only in how the
+  // identical expired receipt became verified+finished before the held query.
+  // No drain()/microtask count/physical StoreKit calls are used for ordering.
+  for (final seededByPreflight in [false, true]) {
+    test('IOS_REPLAY_COUNTEREXAMPLE settled expired receipt from '
+        '${seededByPreflight ? "unfinished-preflight" : "observer-control"} '
+        'does not retire one held-quote checkout', () async {
+      store.dispose();
+      await native.updates.close();
+      native.completionChanges.dispose();
+      final held = _IosHeldFreshQueryNative();
+      native = held;
+      store = _ConfiguredStore(native);
+      await ready();
+      final stableQuote = await native.productResponse.future;
+      final owner = Supabase.instance.client.auth.currentUser!.id;
+      var finished = false;
+      var nativeFinishInFlight = false;
+      var finishedCount = 0;
+      final verifiedNativeFinish = Completer<void>();
+      native.finish = () async {
+        nativeFinishInFlight = true;
+        held.events.add('finish-${++finishedCount}-started');
+        finished = true;
+        nativeFinishInFlight = false;
+        held.events.add('finish-$finishedCount-ended');
+        if (!verifiedNativeFinish.isCompleted) verifiedNativeFinish.complete();
+      };
+      verificationResponse = (_) {
+        held.events.add('expired-verification-$verificationCalls');
+        return http.Response(
+          '{"verified":true,"entitlement_active":false}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      };
+      const unfinishedChannel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.in_app_purchase_storekit.InAppPurchase2API.unfinishedTransactions',
+        sk2.InAppPurchase2API.pigeonChannelCodec,
+      );
+      var nativeInventoryReads = 0;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<Object?>(unfinishedChannel, (_) async {
+            nativeInventoryReads++;
+            return <Object?>[
+              <Object?>[
+                if (seededByPreflight && !finished)
+                  sk2.SK2TransactionMessage(
+                    id: 123,
+                    originalId: 123,
+                    productId: StoreCatalogConfiguration.premiumMonthly,
+                    purchaseDate: 1,
+                    receiptData: 'signed-expired-identical-fixture',
+                    status: sk2.SK2PurchaseStatusMessage.purchased,
+                  ),
+              ],
+            ];
+          });
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<Object?>(unfinishedChannel, null),
+      );
+      // Exactly the same source/product/purchaseID/status/JWS as the direct
+      // unfinished preflight. A changed payload/status is not needed to make
+      // this counterexample; the control detects false dedup assumptions.
+      final old = SK2PurchaseDetails(
+        productID: StoreCatalogConfiguration.premiumMonthly,
+        purchaseID: '123',
+        verificationData: PurchaseVerificationData(
+          localVerificationData: '',
+          serverVerificationData: 'signed-expired-identical-fixture',
+          source: 'app_store',
+        ),
+        transactionDate: '1',
+        status: PurchaseStatus.purchased,
+        appAccountToken: null,
+      );
+      if (!seededByPreflight) {
+        native.updates.add([old]);
+        await verifiedNativeFinish.future.timeout(const Duration(seconds: 2));
+        // This observed public idle gate proves the ordinary receipt queue
+        // and native acknowledgement settled, rather than guessing drains.
+        await waitForStoreCondition(() => store.canStartPurchase);
+        expect(verificationCalls, 1);
+        expect(native.completionCalls, 1);
+      }
+      held.beforeLaunch = () {
+        expect(Supabase.instance.client.auth.currentUser!.id, owner);
+        expect(finished, isTrue);
+        expect(nativeFinishInFlight, isFalse);
+        expect(store.hasPendingVerifiedFinish, isFalse);
+        expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      };
+      native.purchaseLaunch.complete(false); // No simulated payment outcome.
+      final checkout = store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      await held.freshQueryReached.future.timeout(const Duration(seconds: 2));
+      await verifiedNativeFinish.future.timeout(const Duration(seconds: 2));
+      expect(finished, isTrue);
+      expect(verificationCalls, 1);
+      expect(native.completionCalls, 1);
+      expect(native.launches, 0);
+      held.events.add('identical-observer-replay-enqueued');
+      native.updates.add([
+        old,
+      ]); // synchronous enqueue; known order before quote.
+      held.events.add('stable-quote-released');
+      held.releaseFreshQuery.complete(stableQuote);
+      await checkout.timeout(const Duration(seconds: 3));
+      await waitForStoreCondition(() => !store.busy);
+      // Regression: direct unfinished preflight previously omitted settled
+      // replay reservation. An identical observer then retired this held
+      // query's user intent. Both receipt paths must now launch exactly once.
+      expect(
+        held.events.indexOf('identical-observer-replay-enqueued'),
+        lessThan(held.events.indexOf('stable-quote-released')),
+      );
+      expect(nativeInventoryReads, greaterThanOrEqualTo(1));
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      expect(native.restoreCalls, 0);
+      expect(
+        native.launches,
+        1,
+        reason:
+            'Same owner, same quote, already verified inactive+finished '
+            'historical receipt must not silently consume the user intent. '
+            'Observed order: ${held.events}; verifications=$verificationCalls; '
+            'completions=${native.completionCalls}; state=${store.state}; '
+            'code=${store.messageCode}',
+      );
+      if (!seededByPreflight) {
+        expect(
+          verificationCalls,
+          1,
+          reason:
+              'Ordinary settled fingerprint dedup must precede generation increment.',
+        );
+        expect(native.completionCalls, 1);
+      }
+    });
+  }
+
+  // Supporting guard matrix. Same real service, same held-query
+  // native hook as IOS_REPLAY_COUNTEREXAMPLE; never run against device/network.
+  Future<
+    ({
+      _IosHeldFreshQueryNative held,
+      ProductDetailsResponse quote,
+      Future<void> checkout,
+      String owner,
+    })
+  >
+  beginHeldQueryAfterVerifiedInactivePreflight() async {
+    store.dispose();
+    await native.updates.close();
+    native.completionChanges.dispose();
+    final held = _IosHeldFreshQueryNative();
+    native = held;
+    store = _ConfiguredStore(native);
+    await ready();
+    final quote = await native.productResponse.future;
+    final owner = Supabase.instance.client.auth.currentUser!.id;
+    var finished = false;
+    final finishObserved = Completer<void>();
+    native.finish = () async {
+      finished = true;
+      held.events.add('verified-inactive-native-finish');
+      if (!finishObserved.isCompleted) finishObserved.complete();
+    };
+    verificationResponse = (_) => http.Response(
+      '{"verified":true,"entitlement_active":false}',
+      200,
+      headers: {'content-type': 'application/json'},
+    );
+    const channel = BasicMessageChannel<Object?>(
+      'dev.flutter.pigeon.in_app_purchase_storekit.InAppPurchase2API.unfinishedTransactions',
+      sk2.InAppPurchase2API.pigeonChannelCodec,
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockDecodedMessageHandler<Object?>(
+          channel,
+          (_) async => <Object?>[
+            <Object?>[
+              if (!finished)
+                sk2.SK2TransactionMessage(
+                  id: 123,
+                  originalId: 123,
+                  productId: StoreCatalogConfiguration.premiumMonthly,
+                  purchaseDate: 1,
+                  receiptData: 'signed-expired-negative-guard-fixture',
+                  status: sk2.SK2PurchaseStatusMessage.purchased,
+                ),
+            ],
+          ],
+        );
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<Object?>(channel, null),
+    );
+    native.purchaseLaunch.complete(false);
+    final checkout = store.purchasePlan(
+      CommercePlan.premium,
+      term: SubscriptionTerm.oneMonth,
+    );
+    await held.freshQueryReached.future.timeout(const Duration(seconds: 2));
+    await finishObserved.future.timeout(const Duration(seconds: 2));
+    expect(finished, isTrue);
+    expect(verificationCalls, 1);
+    expect(native.completionCalls, 1);
+    expect(native.launches, 0);
+    return (held: held, quote: quote, checkout: checkout, owner: owner);
+  }
+
+  for (final guard in [
+    'fresh-active',
+    'fresh-pending',
+    'verification-failed',
+    'owner-ABA',
+    'quote-change',
+  ]) {
+    test(
+      'IOS_REPLAY_FENCES $guard still aborts the held original intent',
+      () async {
+        final gate = await beginHeldQueryAfterVerifiedInactivePreflight();
+        final originalVisit = store.captureCatalogVisit();
+        var releasedQuote = gate.quote;
+        if (guard == 'fresh-active') {
+          final now = DateTime.now().toUtc();
+          subscriptionRows = [
+            {
+              'provider': 'apple',
+              'plan_id': 'premium',
+              'lifecycle': 'active',
+              'verified_at': now.toIso8601String(),
+              'started_at': now
+                  .subtract(const Duration(minutes: 1))
+                  .toIso8601String(),
+              'expires_at': now.add(const Duration(hours: 1)).toIso8601String(),
+              'grace_period_ends_at': null,
+            },
+          ];
+          verificationResponse = (_) => http.Response(
+            '{"verified":true,"entitlement_active":true}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+          native.updates.add([
+            _receipt(
+              productId: StoreCatalogConfiguration.premiumMonthly,
+              purchaseId: '124-new-active-not-an-old-replay',
+              verificationData: 'signed-new-active-guard-fixture',
+            ),
+          ]);
+          await waitForStoreCondition(
+            () => store.entitlement?.grantsPaidAccess == true,
+          );
+        } else if (guard == 'fresh-pending') {
+          native.updates.add([
+            _receipt(
+              productId: StoreCatalogConfiguration.premiumMonthly,
+              purchaseId: '124-new-pending-not-an-old-replay',
+              status: PurchaseStatus.pending,
+            ),
+          ]);
+          await waitForStoreCondition(
+            () =>
+                store.state == VerifiedStoreState.purchasePending &&
+                store.messageCode == 'reconciliation_pending',
+          );
+          expect(
+            verificationCalls,
+            1,
+          ); // Pending must never be verified/finished.
+          expect(native.completionCalls, 1);
+        } else if (guard == 'verification-failed') {
+          verificationResponse = (_) => http.Response(
+            '{"verified":false}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+          native.updates.add([
+            _receipt(
+              productId: StoreCatalogConfiguration.premiumMonthly,
+              purchaseId: '124-unverified-not-an-old-settled-replay',
+              verificationData: 'unverified-guard-fixture',
+            ),
+          ]);
+          await waitForStoreCondition(
+            () => store.state == VerifiedStoreState.failed,
+          );
+          expect(store.messageCode, 'reconciliation_verification_failed');
+          expect(
+            native.completionCalls,
+            1,
+          ); // Unverified receipt never finishes.
+        } else if (guard == 'owner-ABA') {
+          final owners = <String>[];
+          var previous = gate.owner;
+          final delivered = Completer<void>();
+          final listener = Supabase.instance.client.auth.onAuthStateChange
+              .listen((event) {
+                final id = event.session?.user.id;
+                if (id == null || id == previous) return;
+                previous = id;
+                owners.add(id);
+                if (owners.length == 2 && !delivered.isCompleted) {
+                  delivered.complete();
+                }
+              });
+          try {
+            for (final owner in [
+              '00000000-0000-4000-8000-000000000002',
+              gate.owner,
+            ]) {
+              await Supabase.instance.client.auth.setInitialSession(
+                jsonEncode({
+                  'access_token': 'synthetic-external-guard-test',
+                  'token_type': 'bearer',
+                  'user': {
+                    'id': owner,
+                    'app_metadata': {},
+                    'user_metadata': {},
+                    'aud': 'authenticated',
+                    'created_at': '2026-01-01T00:00:00Z',
+                  },
+                }),
+              );
+            }
+            await delivered.future.timeout(const Duration(seconds: 2));
+            expect(owners, [
+              '00000000-0000-4000-8000-000000000002',
+              gate.owner,
+            ]);
+            expect(Supabase.instance.client.auth.currentUser!.id, gate.owner);
+            expect(
+              store.isCurrentCatalogVisit(originalVisit),
+              isFalse,
+              reason:
+                  'Returning to the same UID must not revive the old visit.',
+            );
+          } finally {
+            await listener.cancel();
+          }
+        } else if (guard == 'quote-change') {
+          final changed = AppStoreProduct2Details.fromSK2Product(
+            SK2Product(
+              id: StoreCatalogConfiguration.premiumMonthly,
+              displayName: 'Premium',
+              description: 'Fixture',
+              displayPrice: '3.49',
+              price: 3.49,
+              type: SK2ProductType.autoRenewable,
+              priceLocale: SK2PriceLocale(
+                currencyCode: 'USD',
+                currencySymbol: r'$',
+              ),
+              subscription: SK2SubscriptionInfo(
+                subscriptionGroupID: 'fixture-premium',
+                promotionalOffers: const [],
+                subscriptionPeriod: const SK2SubscriptionPeriod(
+                  value: 1,
+                  unit: SK2SubscriptionPeriodUnit.month,
+                ),
+              ),
+            ),
+          );
+          releasedQuote = ProductDetailsResponse(
+            productDetails: [changed],
+            notFoundIDs: const [],
+          );
+        }
+        gate.held.events.add('guard-$guard-established-before-quote-release');
+        gate.held.releaseFreshQuery.complete(releasedQuote);
+        await gate.checkout.timeout(const Duration(seconds: 3));
+        if (guard != 'fresh-pending') {
+          await waitForStoreCondition(() => !store.busy);
+        }
+        expect(
+          native.launches,
+          0,
+          reason:
+              'Do not ignore a real $guard invalidation to fix old replay. '
+              'Order: ${gate.held.events}',
+        );
+        expect(native.restoreCalls, 0);
+        if (guard == 'fresh-active') {
+          expect(store.entitlement?.grantsPaidAccess, isTrue);
+          expect(store.state, VerifiedStoreState.verified);
+          expect(store.messageCode, 'subscription_verified');
+        } else {
+          expect(store.entitlement?.grantsPaidAccess, isNot(true));
+        }
+        if (guard == 'fresh-pending') {
+          expect(store.state, VerifiedStoreState.purchasePending);
+          expect(store.canStartPurchase, isFalse);
+        }
+        if (guard == 'verification-failed') {
+          expect(store.canStartPurchase, isFalse);
+          expect(native.completionCalls, 1);
+        }
+        if (guard == 'owner-ABA') {
+          expect(store.messageCode, 'authentication_required');
+          expect(store.isCurrentCatalogVisit(originalVisit), isFalse);
+        }
+        if (guard == 'quote-change') {
+          expect(store.messageCode, 'store_catalog_changed');
+          expect(verificationCalls, 1);
+        }
+      },
+    );
+  }
+
+  // Direct preflight must not mark an unresolved or retired
+  // native acknowledgement as settled merely to suppress observer generation.
+  for (final ownerRetiresDuringFinish in [false, true]) {
+    test('IOS_PREFLIGHT_FINISH_GUARD '
+        '${ownerRetiresDuringFinish ? "ownerABA-during-finish" : "finish-failure"} '
+        'does not publish settled replay or launch checkout', () async {
+      await ready();
+      final owner = Supabase.instance.client.auth.currentUser!.id;
+      const signed = 'signed-expired-finish-guard-fixture';
+      final replayKey = storeReceiptReplayKey(
+        ownerId: owner,
+        source: 'app_store',
+        productId: StoreCatalogConfiguration.premiumMonthly,
+        purchaseId: '123',
+        status: PurchaseStatus.purchased.name,
+        verificationData: signed,
+      );
+      var finished = false;
+      final finishPermit = Completer<void>();
+      if (ownerRetiresDuringFinish) {
+        native.finish = () async {
+          await finishPermit.future;
+          finished = true;
+        };
+      } else {
+        native.failCompletion = true;
+      }
+      verificationResponse = (_) => http.Response(
+        '{"verified":true,"entitlement_active":false}',
+        200,
+        headers: {'content-type': 'application/json'},
+      );
+      const channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.in_app_purchase_storekit.InAppPurchase2API.unfinishedTransactions',
+        sk2.InAppPurchase2API.pigeonChannelCodec,
+      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockDecodedMessageHandler<Object?>(
+            channel,
+            (_) async => <Object?>[
+              <Object?>[
+                if (!finished)
+                  sk2.SK2TransactionMessage(
+                    id: 123,
+                    originalId: 123,
+                    productId: StoreCatalogConfiguration.premiumMonthly,
+                    purchaseDate: 1,
+                    receiptData: signed,
+                    status: sk2.SK2PurchaseStatusMessage.purchased,
+                  ),
+              ],
+            ],
+          );
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<Object?>(channel, null),
+      );
+      native.purchaseLaunch.complete(false);
+      final checkout = store.purchasePlan(
+        CommercePlan.premium,
+        term: SubscriptionTerm.oneMonth,
+      );
+      await native.completionAttempted.future.timeout(
+        const Duration(seconds: 2),
+      );
+      if (ownerRetiresDuringFinish) {
+        final delivered = Completer<void>();
+        final owners = <String>[];
+        var previous = owner;
+        final listener = Supabase.instance.client.auth.onAuthStateChange.listen(
+          (event) {
+            final id = event.session?.user.id;
+            if (id == null || id == previous) return;
+            previous = id;
+            owners.add(id);
+            if (owners.length == 2 && !delivered.isCompleted) {
+              delivered.complete();
+            }
+          },
+        );
+        try {
+          for (final id in ['00000000-0000-4000-8000-000000000002', owner]) {
+            await Supabase.instance.client.auth.setInitialSession(
+              jsonEncode({
+                'access_token': 'synthetic-external-preflight-finish-guard',
+                'token_type': 'bearer',
+                'user': {
+                  'id': id,
+                  'app_metadata': {},
+                  'user_metadata': {},
+                  'aud': 'authenticated',
+                  'created_at': '2026-01-01T00:00:00Z',
+                },
+              }),
+            );
+          }
+          await delivered.future.timeout(const Duration(seconds: 2));
+          expect(owners, ['00000000-0000-4000-8000-000000000002', owner]);
+        } finally {
+          await listener.cancel();
+          if (!finishPermit.isCompleted) finishPermit.complete();
+        }
+      }
+      await checkout.timeout(const Duration(seconds: 6));
+      expect(native.launches, 0);
+      expect(native.restoreCalls, 0);
+      expect(
+        native.queries,
+        1,
+        reason:
+            'No fresh checkout price request before unresolved finish/retired visit.',
+      );
+      expect(verificationCalls, 1);
+      expect(store.entitlement?.grantsPaidAccess, isNot(true));
+      expect(
+        StoreVerificationRequestPolicy.shared.isSettledReplay(replayKey),
+        isFalse,
+        reason:
+            'Verified inactive alone is insufficient: native finish must '
+            'be acknowledged while its original owner visit remains current.',
+      );
+      if (ownerRetiresDuringFinish) {
+        expect(store.messageCode, 'authentication_required');
+        expect(Supabase.instance.client.auth.currentUser!.id, owner);
+      } else {
+        expect(store.hasPendingVerifiedFinish, isTrue);
+        expect(store.messageCode, 'store_finish_pending');
+        expect(store.canStartPurchase, isFalse);
+      }
+    });
+  }
+
   test('expired unfinished preflight waits for verified native finish', () async {
     await ready();
     final finish = Completer<void>();

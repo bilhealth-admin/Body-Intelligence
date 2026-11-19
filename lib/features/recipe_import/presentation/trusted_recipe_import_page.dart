@@ -111,13 +111,16 @@ class _TrustedRecipeImportPageState
           ),
           centerTitle: true,
         ),
-        body: _loading && _draft == null
-            ? const Center(child: BilFeatureWelcomeStatus())
-            : _retired
-            ? Center(child: Text(_error!))
-            : _draft == null
-            ? _input()
-            : _review(_draft!),
+        body: SafeArea(
+          top: false,
+          child: _loading && _draft == null
+              ? const Center(child: BilFeatureWelcomeStatus())
+              : _retired
+              ? Center(child: Text(_error!))
+              : _draft == null
+              ? _input()
+              : _review(_draft!),
+        ),
       ),
     );
   }

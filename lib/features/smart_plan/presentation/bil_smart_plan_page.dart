@@ -54,6 +54,8 @@ part 'bil_smart_plan_sections.dart';
 part 'bil_smart_plan_progress_sections.dart';
 part 'bil_smart_plan_privacy_surface.dart';
 part 'bil_smart_plan_creation_sheet.dart';
+part 'bil_smart_plan_creation_validation.dart';
+part 'bil_smart_plan_creation_flow.dart';
 part 'bil_smart_plan_session.dart';
 part 'bil_smart_plan_session_warmup.dart';
 part 'bil_smart_plan_meal_flow.dart';
@@ -97,6 +99,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
   bool _catalogBlocked = false;
   bool _confirmationOpen = false;
   int _reviewDepth = 0;
+  _PlanCreationAttempt? _creationAttempt;
 
   String _t(String en, String ar) => _smartPlanText(context, en, ar);
 
@@ -133,37 +136,6 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
     }
   }
 
-  String _failureText() => smartPlanLoadFailureMessage(_error ?? '', _t);
-
-  String? get _owner => ref.read(verifiedEntitlementOwnerIdProvider);
-
-  BilSmartPlanRepository get _repository {
-    final epoch = _ownerEpoch;
-    return BilSmartPlanRepository(
-      preferences: ref.read(preferencesRepositoryProvider),
-      currentOwnerId: () => mounted && epoch == _ownerEpoch ? _owner : null,
-    );
-  }
-
-  void _checkAccess() {
-    if (_unverifiedPlanReadOnly) {
-      throw StateError('smart_plan_catalog_unavailable');
-    }
-    if (widget.privacyOnly) {
-      throw StateError('smart_plan_verified_subscription_required');
-    }
-    widget.toolRequest?.checkAccess?.call();
-    final access = ref.read(verifiedSubscriptionAccessProvider);
-    if (!mounted ||
-        _owner == null ||
-        access.isLoading ||
-        access.hasError ||
-        access.value?.authority != EntitlementAuthority.verifiedServer ||
-        access.value?.plan == CommercePlan.free) {
-      throw StateError('smart_plan_verified_subscription_required');
-    }
-  }
-
   void _returnReceipt(BilSmartPlan saved) {
     if (widget.toolRequest == null || !mounted) return;
     context.pop(
@@ -187,6 +159,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
       next,
     ) {
       _ownerEpoch++;
+      _creationAttempt = null;
       if (!mounted) return;
       final pageRoute = ModalRoute.of(context);
       if (_reviewDepth > 0 && pageRoute != null) {
@@ -212,7 +185,8 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
     super.dispose();
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool preserveCreationAttempt = false}) async {
+    if (!preserveCreationAttempt) _creationAttempt = null;
     final generation = ++_loadGeneration;
     final owner = _owner;
     final currentLocalOwner = ref
@@ -417,6 +391,10 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
         : const Color(0xFF07518F);
     final plan = _plan;
     final readOnly = _unverifiedPlanReadOnly;
+    final owner = _owner;
+    final canReadOwnedPlanData =
+        owner != null &&
+        ref.read(preferencesRepositoryProvider).localOwnerId == owner;
     return Scaffold(
       appBar: AppBar(
         title: Text(_t('My Plan', 'خطتي')),
@@ -501,6 +479,23 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                   child: Text(_t('Delete plan', 'حذف الخطة')),
                 ),
               ],
+              // Deleting the current schedule must not hide this owner's
+              // retained local history or its existing private export action.
+              if (plan == null && canReadOwnedPlanData) ...[
+                PopupMenuItem(
+                  value: 'previous-plans',
+                  child: Text(
+                    _t(
+                      'Previous plans on this device',
+                      'الخطط السابقة على هذا الجهاز',
+                    ),
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'export',
+                  child: Text(_t('Export plan', 'تصدير الخطة')),
+                ),
+              ],
               // The released cloud capability also exposes deletion sync after local removal.
               if (const bool.fromEnvironment(
                 'BIL_SMART_PLAN_CLOUD_ENABLED',
@@ -549,7 +544,7 @@ class _BilSmartPlanPageState extends ConsumerState<BilSmartPlanPage> {
                             style: OutlinedButton.styleFrom(
                               foregroundColor: _smartPlanActionInk(context),
                             ),
-                            onPressed: _busy ? null : _load,
+                            onPressed: _busy ? null : _retryPlanAction,
                             icon: const Icon(Icons.refresh_rounded),
                             label: Text(_t('Try again', 'إعادة المحاولة')),
                           ),

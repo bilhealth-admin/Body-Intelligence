@@ -183,6 +183,17 @@ class $DailyLogsTable extends DailyLogs
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _finalVisionNutrientEvidenceJsonMeta =
+      const VerificationMeta('finalVisionNutrientEvidenceJson');
+  @override
+  late final GeneratedColumn<String> finalVisionNutrientEvidenceJson =
+      GeneratedColumn<String>(
+        'final_vision_nutrient_evidence_json',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _finalNutrientEvidenceMaskMeta =
       const VerificationMeta('finalNutrientEvidenceMask');
   @override
@@ -237,6 +248,7 @@ class $DailyLogsTable extends DailyLogs
     lifecycleState,
     closedAt,
     finalFiber,
+    finalVisionNutrientEvidenceJson,
     finalNutrientEvidenceMask,
     createdAt,
     updatedAt,
@@ -362,6 +374,15 @@ class $DailyLogsTable extends DailyLogs
         finalFiber.isAcceptableOrUnknown(data['final_fiber']!, _finalFiberMeta),
       );
     }
+    if (data.containsKey('final_vision_nutrient_evidence_json')) {
+      context.handle(
+        _finalVisionNutrientEvidenceJsonMeta,
+        finalVisionNutrientEvidenceJson.isAcceptableOrUnknown(
+          data['final_vision_nutrient_evidence_json']!,
+          _finalVisionNutrientEvidenceJsonMeta,
+        ),
+      );
+    }
     if (data.containsKey('final_nutrient_evidence_mask')) {
       context.handle(
         _finalNutrientEvidenceMaskMeta,
@@ -460,6 +481,10 @@ class $DailyLogsTable extends DailyLogs
         DriftSqlType.double,
         data['${effectivePrefix}final_fiber'],
       ),
+      finalVisionNutrientEvidenceJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}final_vision_nutrient_evidence_json'],
+      ),
       finalNutrientEvidenceMask: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}final_nutrient_evidence_mask'],
@@ -499,6 +524,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
   final String? lifecycleState;
   final DateTime? closedAt;
   final double? finalFiber;
+
+  /// Typed, owner/day/closedAt-bound nullable photo nutrition snapshot.
+  /// Null historical rows keep their existing legacy ledger interpretation.
+  final String? finalVisionNutrientEvidenceJson;
   final int? finalNutrientEvidenceMask;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -520,6 +549,7 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     this.lifecycleState,
     this.closedAt,
     this.finalFiber,
+    this.finalVisionNutrientEvidenceJson,
     this.finalNutrientEvidenceMask,
     required this.createdAt,
     required this.updatedAt,
@@ -569,6 +599,11 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     }
     if (!nullToAbsent || finalFiber != null) {
       map['final_fiber'] = Variable<double>(finalFiber);
+    }
+    if (!nullToAbsent || finalVisionNutrientEvidenceJson != null) {
+      map['final_vision_nutrient_evidence_json'] = Variable<String>(
+        finalVisionNutrientEvidenceJson,
+      );
     }
     if (!nullToAbsent || finalNutrientEvidenceMask != null) {
       map['final_nutrient_evidence_mask'] = Variable<int>(
@@ -623,6 +658,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       finalFiber: finalFiber == null && nullToAbsent
           ? const Value.absent()
           : Value(finalFiber),
+      finalVisionNutrientEvidenceJson:
+          finalVisionNutrientEvidenceJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finalVisionNutrientEvidenceJson),
       finalNutrientEvidenceMask:
           finalNutrientEvidenceMask == null && nullToAbsent
           ? const Value.absent()
@@ -655,6 +694,9 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       lifecycleState: serializer.fromJson<String?>(json['lifecycleState']),
       closedAt: serializer.fromJson<DateTime?>(json['closedAt']),
       finalFiber: serializer.fromJson<double?>(json['finalFiber']),
+      finalVisionNutrientEvidenceJson: serializer.fromJson<String?>(
+        json['finalVisionNutrientEvidenceJson'],
+      ),
       finalNutrientEvidenceMask: serializer.fromJson<int?>(
         json['finalNutrientEvidenceMask'],
       ),
@@ -683,6 +725,9 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       'lifecycleState': serializer.toJson<String?>(lifecycleState),
       'closedAt': serializer.toJson<DateTime?>(closedAt),
       'finalFiber': serializer.toJson<double?>(finalFiber),
+      'finalVisionNutrientEvidenceJson': serializer.toJson<String?>(
+        finalVisionNutrientEvidenceJson,
+      ),
       'finalNutrientEvidenceMask': serializer.toJson<int?>(
         finalNutrientEvidenceMask,
       ),
@@ -709,6 +754,7 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     Value<String?> lifecycleState = const Value.absent(),
     Value<DateTime?> closedAt = const Value.absent(),
     Value<double?> finalFiber = const Value.absent(),
+    Value<String?> finalVisionNutrientEvidenceJson = const Value.absent(),
     Value<int?> finalNutrientEvidenceMask = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -734,6 +780,9 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
         : this.lifecycleState,
     closedAt: closedAt.present ? closedAt.value : this.closedAt,
     finalFiber: finalFiber.present ? finalFiber.value : this.finalFiber,
+    finalVisionNutrientEvidenceJson: finalVisionNutrientEvidenceJson.present
+        ? finalVisionNutrientEvidenceJson.value
+        : this.finalVisionNutrientEvidenceJson,
     finalNutrientEvidenceMask: finalNutrientEvidenceMask.present
         ? finalNutrientEvidenceMask.value
         : this.finalNutrientEvidenceMask,
@@ -767,6 +816,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       finalFiber: data.finalFiber.present
           ? data.finalFiber.value
           : this.finalFiber,
+      finalVisionNutrientEvidenceJson:
+          data.finalVisionNutrientEvidenceJson.present
+          ? data.finalVisionNutrientEvidenceJson.value
+          : this.finalVisionNutrientEvidenceJson,
       finalNutrientEvidenceMask: data.finalNutrientEvidenceMask.present
           ? data.finalNutrientEvidenceMask.value
           : this.finalNutrientEvidenceMask,
@@ -795,6 +848,9 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
           ..write('lifecycleState: $lifecycleState, ')
           ..write('closedAt: $closedAt, ')
           ..write('finalFiber: $finalFiber, ')
+          ..write(
+            'finalVisionNutrientEvidenceJson: $finalVisionNutrientEvidenceJson, ',
+          )
           ..write('finalNutrientEvidenceMask: $finalNutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -803,7 +859,7 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     uuid,
     date,
@@ -821,10 +877,11 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     lifecycleState,
     closedAt,
     finalFiber,
+    finalVisionNutrientEvidenceJson,
     finalNutrientEvidenceMask,
     createdAt,
     updatedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -846,6 +903,8 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
           other.lifecycleState == this.lifecycleState &&
           other.closedAt == this.closedAt &&
           other.finalFiber == this.finalFiber &&
+          other.finalVisionNutrientEvidenceJson ==
+              this.finalVisionNutrientEvidenceJson &&
           other.finalNutrientEvidenceMask == this.finalNutrientEvidenceMask &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -869,6 +928,7 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
   final Value<String?> lifecycleState;
   final Value<DateTime?> closedAt;
   final Value<double?> finalFiber;
+  final Value<String?> finalVisionNutrientEvidenceJson;
   final Value<int?> finalNutrientEvidenceMask;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -890,6 +950,7 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     this.lifecycleState = const Value.absent(),
     this.closedAt = const Value.absent(),
     this.finalFiber = const Value.absent(),
+    this.finalVisionNutrientEvidenceJson = const Value.absent(),
     this.finalNutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -912,6 +973,7 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     this.lifecycleState = const Value.absent(),
     this.closedAt = const Value.absent(),
     this.finalFiber = const Value.absent(),
+    this.finalVisionNutrientEvidenceJson = const Value.absent(),
     this.finalNutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -935,6 +997,7 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     Expression<String>? lifecycleState,
     Expression<DateTime>? closedAt,
     Expression<double>? finalFiber,
+    Expression<String>? finalVisionNutrientEvidenceJson,
     Expression<int>? finalNutrientEvidenceMask,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -957,6 +1020,8 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
       if (lifecycleState != null) 'lifecycle_state': lifecycleState,
       if (closedAt != null) 'closed_at': closedAt,
       if (finalFiber != null) 'final_fiber': finalFiber,
+      if (finalVisionNutrientEvidenceJson != null)
+        'final_vision_nutrient_evidence_json': finalVisionNutrientEvidenceJson,
       if (finalNutrientEvidenceMask != null)
         'final_nutrient_evidence_mask': finalNutrientEvidenceMask,
       if (createdAt != null) 'created_at': createdAt,
@@ -982,6 +1047,7 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     Value<String?>? lifecycleState,
     Value<DateTime?>? closedAt,
     Value<double?>? finalFiber,
+    Value<String?>? finalVisionNutrientEvidenceJson,
     Value<int?>? finalNutrientEvidenceMask,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -1004,6 +1070,9 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
       lifecycleState: lifecycleState ?? this.lifecycleState,
       closedAt: closedAt ?? this.closedAt,
       finalFiber: finalFiber ?? this.finalFiber,
+      finalVisionNutrientEvidenceJson:
+          finalVisionNutrientEvidenceJson ??
+          this.finalVisionNutrientEvidenceJson,
       finalNutrientEvidenceMask:
           finalNutrientEvidenceMask ?? this.finalNutrientEvidenceMask,
       createdAt: createdAt ?? this.createdAt,
@@ -1065,6 +1134,11 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     if (finalFiber.present) {
       map['final_fiber'] = Variable<double>(finalFiber.value);
     }
+    if (finalVisionNutrientEvidenceJson.present) {
+      map['final_vision_nutrient_evidence_json'] = Variable<String>(
+        finalVisionNutrientEvidenceJson.value,
+      );
+    }
     if (finalNutrientEvidenceMask.present) {
       map['final_nutrient_evidence_mask'] = Variable<int>(
         finalNutrientEvidenceMask.value,
@@ -1099,6 +1173,9 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
           ..write('lifecycleState: $lifecycleState, ')
           ..write('closedAt: $closedAt, ')
           ..write('finalFiber: $finalFiber, ')
+          ..write(
+            'finalVisionNutrientEvidenceJson: $finalVisionNutrientEvidenceJson, ',
+          )
           ..write('finalNutrientEvidenceMask: $finalNutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -14795,6 +14872,7 @@ typedef $$DailyLogsTableCreateCompanionBuilder =
       Value<String?> lifecycleState,
       Value<DateTime?> closedAt,
       Value<double?> finalFiber,
+      Value<String?> finalVisionNutrientEvidenceJson,
       Value<int?> finalNutrientEvidenceMask,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -14818,6 +14896,7 @@ typedef $$DailyLogsTableUpdateCompanionBuilder =
       Value<String?> lifecycleState,
       Value<DateTime?> closedAt,
       Value<double?> finalFiber,
+      Value<String?> finalVisionNutrientEvidenceJson,
       Value<int?> finalNutrientEvidenceMask,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -14916,6 +14995,12 @@ class $$DailyLogsTableFilterComposer
     column: $table.finalFiber,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get finalVisionNutrientEvidenceJson =>
+      $composableBuilder(
+        column: $table.finalVisionNutrientEvidenceJson,
+        builder: (column) => ColumnFilters(column),
+      );
 
   ColumnFilters<int> get finalNutrientEvidenceMask => $composableBuilder(
     column: $table.finalNutrientEvidenceMask,
@@ -15027,6 +15112,12 @@ class $$DailyLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get finalVisionNutrientEvidenceJson =>
+      $composableBuilder(
+        column: $table.finalVisionNutrientEvidenceJson,
+        builder: (column) => ColumnOrderings(column),
+      );
+
   ColumnOrderings<int> get finalNutrientEvidenceMask => $composableBuilder(
     column: $table.finalNutrientEvidenceMask,
     builder: (column) => ColumnOrderings(column),
@@ -15111,6 +15202,12 @@ class $$DailyLogsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get finalVisionNutrientEvidenceJson =>
+      $composableBuilder(
+        column: $table.finalVisionNutrientEvidenceJson,
+        builder: (column) => column,
+      );
+
   GeneratedColumn<int> get finalNutrientEvidenceMask => $composableBuilder(
     column: $table.finalNutrientEvidenceMask,
     builder: (column) => column,
@@ -15168,6 +15265,8 @@ class $$DailyLogsTableTableManager
                 Value<String?> lifecycleState = const Value.absent(),
                 Value<DateTime?> closedAt = const Value.absent(),
                 Value<double?> finalFiber = const Value.absent(),
+                Value<String?> finalVisionNutrientEvidenceJson =
+                    const Value.absent(),
                 Value<int?> finalNutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -15189,6 +15288,8 @@ class $$DailyLogsTableTableManager
                 lifecycleState: lifecycleState,
                 closedAt: closedAt,
                 finalFiber: finalFiber,
+                finalVisionNutrientEvidenceJson:
+                    finalVisionNutrientEvidenceJson,
                 finalNutrientEvidenceMask: finalNutrientEvidenceMask,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -15212,6 +15313,8 @@ class $$DailyLogsTableTableManager
                 Value<String?> lifecycleState = const Value.absent(),
                 Value<DateTime?> closedAt = const Value.absent(),
                 Value<double?> finalFiber = const Value.absent(),
+                Value<String?> finalVisionNutrientEvidenceJson =
+                    const Value.absent(),
                 Value<int?> finalNutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -15233,6 +15336,8 @@ class $$DailyLogsTableTableManager
                 lifecycleState: lifecycleState,
                 closedAt: closedAt,
                 finalFiber: finalFiber,
+                finalVisionNutrientEvidenceJson:
+                    finalVisionNutrientEvidenceJson,
                 finalNutrientEvidenceMask: finalNutrientEvidenceMask,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

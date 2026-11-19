@@ -50,7 +50,20 @@ class CoachMemoryRepository {
 
   Future<List<Map<String, Object?>>> readLocal() async {
     try {
-      final raw = await preferences.get(storageKey);
+      return _localRows(await preferences.get(storageKey));
+    } on Object {
+      return [];
+    }
+  }
+
+  /// Observe the owner-bound committed preference, regardless of which local
+  /// editor, native command/Undo, or verified cloud merge wrote it. No cloud
+  /// request or consent change is performed by this read-only stream.
+  Stream<List<Map<String, Object?>>> watchLocal() =>
+      preferences.watch(storageKey).distinct().map(_localRows);
+
+  List<Map<String, Object?>> _localRows(String? raw) {
+    try {
       if (raw == null || raw.trim().isEmpty) return [];
       return (jsonDecode(raw) as List<Object?>)
           .whereType<Map>()

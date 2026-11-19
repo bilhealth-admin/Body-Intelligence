@@ -381,6 +381,18 @@ class _BoostCard extends StatelessWidget {
                   ),
           ),
         ),
+        if (boost.canRecoverPlayLicense) ...[
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: boost.recoverPlayLicense,
+            child: Text(
+              BilStoreCopy.text(
+                Localizations.localeOf(context).toLanguageTag(),
+                'fix_play_license',
+              ),
+            ),
+          ),
+        ],
         if (boost.canRetry) ...[
           const SizedBox(height: 8),
           OutlinedButton(
@@ -415,6 +427,16 @@ class _BoostCard extends StatelessWidget {
                     'Boost vérifié. La confirmation du magasin reste en attente.',
                     'Boost verificado. La confirmación de la tienda sigue pendiente.',
                     'Boost doğrulandı. Mağaza onayı bekleniyor.',
+                  )
+                : const {
+                    'license_unlicensed',
+                    'play_license_recovered',
+                    'play_license_recovered_pending',
+                    'play_readiness_unavailable',
+                  }.contains(boost.errorCode)
+                ? BilStoreCopy.text(
+                    Localizations.localeOf(context).toLanguageTag(),
+                    boost.errorCode!,
                   )
                 : boost.errorCode == 'purchase_cancelled'
                 ? t(

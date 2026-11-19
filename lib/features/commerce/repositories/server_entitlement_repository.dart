@@ -4,7 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../community/services/community_owner_operation.dart';
+import '../../auth/retryable_auth_session.dart';
 import '../domain/commerce_plan.dart';
+import '../domain/store_renewal_observation.dart';
 import '../domain/admin_subscription_access.dart';
 import '../domain/entitlement_resolver.dart';
 import '../domain/free_plan.dart';
@@ -21,6 +23,7 @@ export 'verified_entitlement_session_cache.dart';
 
 part 'server_entitlement_grant_continuity.dart';
 part 'server_entitlement_row_decoding.dart';
+part 'server_entitlement_checkout_recovery.dart';
 
 /// Reads only the server-owned subscription snapshot.
 ///
@@ -75,6 +78,10 @@ final class ServerEntitlementRepository {
 
   Future<SubscriptionState> current() => _current();
 
+  /// Fresh proof for an explicit checkout presentation recovery, never UI continuity.
+  Future<SubscriptionState> currentForExplicitCheckoutRecovery() =>
+      _currentForExplicitCheckoutRecovery();
+
   /// An explicit store-recovery action needs a new complete network read.
   /// Startup continuity and an unreadable independent grant cannot certify
   /// Free for the purpose of retiring an old checkout presentation blocker.
@@ -101,6 +108,7 @@ final class ServerEntitlementRepository {
     return CommunityOwnerOperation.run(
       client: client,
       ownerId: ownerId,
+      retainSessionOnRetryableAuthReadError: !requireFreshFreeProof,
       action: (_) => _currentOwned(
         client,
         ownerId,
@@ -128,176 +136,61 @@ final class ServerEntitlementRepository {
           _activeOwnerId = nextOwner;
         }
       },
-      onError: (Object _, StackTrace _) {
+      onError: (Object error, StackTrace _) {
+        if (isSameOwnerRetryableAuthReadFailure(
+          error,
+          auth: client.auth,
+          previousOwnerId: _activeOwnerId,
+        )) {
+          return;
+        }
         _sessionCache.discardPendingPeriods();
       },
     );
   }
 
-  Future<SubscriptionState> _currentOwned(
-    SupabaseClient client,
-    String ownerId, {
-    bool requireFreshFreeProof = false,
-  }) async {
-    // On a cold process, render a still-valid server lease from encrypted
-    // storage before waiting for network timeouts. Consume this shortcut once
-    // per owner so the observed provider's next scheduled refresh reaches the
-    // server and renews or revokes the lease normally.
-    if (!requireFreshFreeProof && _startupContinuityConsumed.add(ownerId)) {
-      final now = _now();
-      SubscriptionState? persistedAdmin;
-      try {
-        persistedAdmin = await _adminContinuityStore.read(
-          ownerId: ownerId,
-          now: now,
-        );
-        CommunityOwnerOperation.checkCurrent();
-        if (client.auth.currentUser?.id != ownerId) {
-          return FreePlan.createState();
-        }
-        if (persistedAdmin != null) {
-          _adminSessionCache.remember(
-            ownerId: ownerId,
-            state: persistedAdmin,
-            now: now,
-          );
-        }
-
-        final persistedSubscription = await _subscriptionStore.read(
-          ownerId: ownerId,
-          now: now,
-        );
-        CommunityOwnerOperation.checkCurrent();
-        if (client.auth.currentUser?.id != ownerId) {
-          return FreePlan.createState();
-        }
-        // Legacy provider-null storage does not identify an independent grant.
-        // Confirm that source again rather than turning it into fresh proof.
-        if (persistedSubscription != null &&
-            persistedSubscription.provider != null) {
-          _rememberRestoredStoreVersion(ownerId, persistedSubscription);
-          _sessionCache.remember(
-            ownerId: ownerId,
-            state: persistedSubscription,
-            now: now,
-          );
-          return persistedAdmin == null
-              ? persistedSubscription
-              : _withAdminContinuity(persistedSubscription, persistedAdmin);
-        }
-        if (persistedAdmin != null) return persistedAdmin;
-      } on CommunityOwnerOperationCancelled {
-        rethrow;
-      } on Object {
-        // Continue to the authoritative network path when secure storage is
-        // unavailable or corrupt.
-        CommunityOwnerOperation.checkCurrent();
-        if (persistedAdmin != null && client.auth.currentUser?.id == ownerId) {
-          return persistedAdmin;
-        }
-      }
-    }
-    // A verified empty store/closed-test read is only a negative paid-source
-    // witness. Do not treat it as Free until the independent admin RPC also
-    // succeeds and explicitly returns no active grant.
-    var verifiedNoStorePaidSource = false;
-    int? closedTestObservationGeneration;
-    final store = await _storeCurrent(
-      onVerifiedNoStorePaidSource: () => verifiedNoStorePaidSource = true,
-      onClosedTestObservation: (generation) =>
-          closedTestObservationGeneration = generation,
-    );
-    SubscriptionState currentStore() => _revalidateClosedTestObservation(
-      ownerId,
-      store,
-      closedTestObservationGeneration,
-    );
-    CommunityOwnerOperation.checkCurrent();
-    if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
-    try {
-      final grant = await client
-          .rpc('bil_get_my_admin_subscription')
-          .timeout(const Duration(seconds: 10));
-      CommunityOwnerOperation.checkCurrent();
-      if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
-      final independentAdmin = composeAdminSubscriptionAccess(
-        store: FreePlan.createState(),
-        grant: grant,
-        ownerId: ownerId,
-        now: _now(),
-      );
-      _adminSessionCache.remember(
-        ownerId: ownerId,
-        // This cache is exclusively the independent admin authority. A store
-        // period must never reappear here after a later store revocation.
-        state: independentAdmin,
-        now: _now(),
-      );
-      await _adminContinuityStore.remember(
-        ownerId: ownerId,
-        state: independentAdmin,
-        now: _now(),
-      );
-      // Neither encrypted storage nor the independent admin lookup may pin
-      // an older closed-test snapshot across a later successful revocation.
-      final effectiveStore = currentStore();
-      return grant == null &&
-              verifiedNoStorePaidSource &&
-              effectiveStore.plan == CommercePlan.free
-          ? _verifiedFree(verifiedAt: _now())
-          : composeAdminSubscriptionAccess(
-              store: effectiveStore,
-              grant: grant,
-              ownerId: ownerId,
-              now: _now(),
-            );
-    } on CommunityOwnerOperationCancelled {
-      rethrow;
-    } on Object {
-      if (requireFreshFreeProof) return FreePlan.createState();
-      // A transient RPC failure must not visibly switch a currently verified
-      // admin lease between Premium and Free. Continuity is owner-scoped,
-      // bounded to the exact server lease, and cannot cross owners. Secure
-      // continuity also survives a process restart during that same lease.
-      if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
-      final inMemory = _adminSessionCache.fallbackFor(
-        ownerId: ownerId,
-        now: _now(),
-      );
-      if (inMemory != null) {
-        return _withAdminContinuity(currentStore(), inMemory);
-      }
-      try {
-        final persisted = await _adminContinuityStore.read(
-          ownerId: ownerId,
-          now: _now(),
-        );
-        CommunityOwnerOperation.checkCurrent();
-        if (client.auth.currentUser?.id != ownerId) {
-          return FreePlan.createState();
-        }
-        if (persisted != null) {
-          _adminSessionCache.remember(
-            ownerId: ownerId,
-            state: persisted,
-            now: _now(),
-          );
-          return _withAdminContinuity(currentStore(), persisted);
-        }
-      } on CommunityOwnerOperationCancelled {
-        rethrow;
-      } on Object {
-        // Secure storage is continuity only. Store authority still determines
-        // access when the local encrypted slot is unavailable.
-      }
-      return currentStore();
-    }
-  }
-
   Future<SubscriptionState> _storeCurrent({
     void Function()? onVerifiedNoStorePaidSource,
     void Function(int generation)? onClosedTestObservation,
+    _ExplicitCheckoutCanonicalRead? explicitCheckoutRead,
   }) async {
+    SubscriptionState? freshClosedTest;
+    Future<SubscriptionState> fallback(String ownerId, DateTime now) =>
+        explicitCheckoutRead == null
+        ? _transientFallback(ownerId, now)
+        : Future.value(explicitCheckoutRead.unresolved());
+    Future<SubscriptionState> remember(
+      String ownerId,
+      SubscriptionState state,
+      DateTime now,
+    ) => explicitCheckoutRead == null
+        ? _remember(ownerId, state, now)
+        : Future.value(state);
+    void recordVersion(
+      String ownerId,
+      DateTime verifiedAt,
+      int? revision,
+      String? provider,
+      String? lineage,
+    ) {
+      if (explicitCheckoutRead == null) {
+        _recordStoreVersion(ownerId, verifiedAt, revision, provider, lineage);
+      }
+    }
+
+    void clearPending(String ownerId) {
+      if (explicitCheckoutRead == null) {
+        _sessionCache.discardPendingPeriods(ownerId: ownerId);
+      }
+    }
+
+    SubscriptionState withClosed(String ownerId, SubscriptionState state) =>
+        _withClosedTestContinuity(
+          ownerId,
+          state,
+          allowContinuity: explicitCheckoutRead == null,
+          overrideGrant: freshClosedTest,
+        );
     CommunityOwnerOperation.checkCurrent();
     if (!AppEnvironment.supabaseRuntimeReady) {
       return FreePlan.createState();
@@ -326,15 +219,23 @@ final class ServerEntitlementRepository {
         // An independently verified Free subscription is not proof that the
         // unreadable additive grant is also Free.
         closedTestReadFailed = true;
+        explicitCheckoutRead?.unresolved();
         closedTestRows = const [];
       }
       CommunityOwnerOperation.checkCurrent();
       if (client.auth.currentUser?.id != user.id) return FreePlan.createState();
+      if (!closedTestReadFailed && explicitCheckoutRead != null) {
+        explicitCheckoutRead.observeClosedTestRows(closedTestRows);
+        if (!explicitCheckoutRead.closedTestReadComplete) {
+          closedTestReadFailed = true;
+        }
+      }
       if (!closedTestReadFailed) {
         if (closedTestReadGeneration < _settledClosedTestReadGeneration) {
           // A retired response cannot restore a grant after newer revocation,
           // or clear a newer verified grant. Its own observation is unknown.
           closedTestReadFailed = true;
+          explicitCheckoutRead?.unresolved();
           closedTestRows = const [];
         } else {
           _settledClosedTestReadGeneration = closedTestReadGeneration;
@@ -350,29 +251,40 @@ final class ServerEntitlementRepository {
           closedTestExpiresAt != null &&
           closedTestExpiresAt.isAfter(now);
       if (closedTestActive) {
-        final continuityBoundary = now.add(_closedTestSessionCache.maximumAge);
-        _closedTestSessionCache.remember(
-          ownerId: user.id,
-          state: _closedTestState(
+        if (explicitCheckoutRead != null) {
+          // A positive grant is fresh, but strict recovery still reads the
+          // separate store source before certifying a complete snapshot.
+          freshClosedTest = _closedTestState(
             now: now,
-            expiresAt: closedTestExpiresAt.isBefore(continuityBoundary)
-                ? closedTestExpiresAt
-                : continuityBoundary,
-          ),
-          now: now,
-        );
-        final remembered = await _remember(
-          user.id,
-          _closedTestState(now: now, expiresAt: closedTestExpiresAt),
-          now,
-        );
-        return _revalidateClosedTestObservation(
-          user.id,
-          remembered,
-          closedTestReadGeneration,
-        );
+            expiresAt: closedTestExpiresAt,
+          );
+        } else {
+          final continuityBoundary = now.add(
+            _closedTestSessionCache.maximumAge,
+          );
+          _closedTestSessionCache.remember(
+            ownerId: user.id,
+            state: _closedTestState(
+              now: now,
+              expiresAt: closedTestExpiresAt.isBefore(continuityBoundary)
+                  ? closedTestExpiresAt
+                  : continuityBoundary,
+            ),
+            now: now,
+          );
+          final remembered = await _remember(
+            user.id,
+            _closedTestState(now: now, expiresAt: closedTestExpiresAt),
+            now,
+          );
+          return _revalidateClosedTestObservation(
+            user.id,
+            remembered,
+            closedTestReadGeneration,
+          );
+        }
       }
-      if (!closedTestReadFailed) {
+      if (!closedTestReadFailed && explicitCheckoutRead == null) {
         // A successful absent, inactive or expired grant retires its proof
         // immediately, even if the separate store lookup later fails.
         _closedTestSessionCache.remember(
@@ -387,6 +299,9 @@ final class ServerEntitlementRepository {
           .eq('owner_id', user.id)
           .limit(1)
           .timeout(const Duration(seconds: 10));
+      if (explicitCheckoutRead != null && rows.length > 1) {
+        return explicitCheckoutRead.unresolved();
+      }
       if (rows.isEmpty) {
         // An empty store mirror can briefly follow a successful purchase.
         // Preserve an existing, still-valid paid continuity lease. Only a
@@ -394,7 +309,12 @@ final class ServerEntitlementRepository {
         // grant can later establish verified Free. A failed read stays
         // unverified, so the premium gate never mistakes network failure for
         // a real revocation.
-        final previous = await _transientFallback(user.id, now);
+        if (explicitCheckoutRead != null) {
+          explicitCheckoutRead.storeReadComplete = true;
+        }
+        final previous = explicitCheckoutRead == null
+            ? await fallback(user.id, now)
+            : withClosed(user.id, FreePlan.createState());
         if (!closedTestReadFailed &&
             previous.authority == EntitlementAuthority.localDefault &&
             previous.plan == CommercePlan.free) {
@@ -404,8 +324,8 @@ final class ServerEntitlementRepository {
       }
       final row = rows.first;
       if (row['owner_id'] != user.id) {
-        _sessionCache.discardPendingPeriods(ownerId: user.id);
-        return await _transientFallback(user.id, now);
+        clearPending(user.id);
+        return await fallback(user.id, now);
       }
       final providerValue = row['provider']?.toString().trim().toLowerCase();
       final originalTransaction = row['original_transaction_id'];
@@ -421,44 +341,59 @@ final class ServerEntitlementRepository {
         // A malformed/future timestamp is not an authoritative revocation;
         // it is an unreadable snapshot. Keep a previously verified member
         // visible for the bounded continuity window instead.
-        return await _transientFallback(user.id, now);
+        return await fallback(user.id, now);
       }
       final plan = _planOrNull('${row['plan_id']}');
-      if (plan == null) return await _transientFallback(user.id, now);
+      if (plan == null) return await fallback(user.id, now);
       final rawRevision = row['revision'];
       final revision = rawRevision is int && rawRevision > 0
           ? rawRevision
           : null;
+      if (explicitCheckoutRead != null &&
+          (providerValue != 'apple' && providerValue != 'google' ||
+              _lifecycleOrNull('${row['lifecycle']}') == null ||
+              revision == null ||
+              const ['started_at', 'expires_at', 'grace_period_ends_at'].any(
+                (key) =>
+                    row[key] != null &&
+                    (row[key] is! String ||
+                        DateTime.tryParse(row[key] as String) == null),
+              ))) {
+        return explicitCheckoutRead.unresolved();
+      }
       if (plan == CommercePlan.free) {
-        _recordStoreVersion(
-          user.id,
-          verifiedAt!,
-          revision,
-          providerValue,
-          lineage,
-        );
-        final denied = await _remember(
-          user.id,
-          _verifiedFree(verifiedAt: verifiedAt),
-          now,
-        );
+        if (explicitCheckoutRead != null) {
+          explicitCheckoutRead.storeReadComplete = true;
+        }
+        recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
+        final denied = explicitCheckoutRead == null
+            ? await _remember(
+                user.id,
+                _verifiedFree(
+                  verifiedAt: verifiedAt,
+                  storeDefinitive:
+                      providerValue == 'google' || providerValue == 'apple',
+                ),
+                now,
+              )
+            : _verifiedFree(
+                verifiedAt: verifiedAt,
+                storeDefinitive:
+                    providerValue == 'google' || providerValue == 'apple',
+              );
         return closedTestReadFailed
-            ? _withClosedTestContinuity(user.id, FreePlan.createState())
-            : denied;
+            ? withClosed(user.id, FreePlan.createState())
+            : explicitCheckoutRead == null
+            ? denied
+            : withClosed(user.id, denied);
       }
       final lifecycle = _lifecycleOrNull('${row['lifecycle']}');
-      if (lifecycle == null) return await _transientFallback(user.id, now);
+      if (lifecycle == null) return await fallback(user.id, now);
       if (!lifecycle.mayGrantPaidAccess) {
         // A verified terminal response always retires scheduled activation,
         // including when an independent grant cannot currently be read.
-        _recordStoreVersion(
-          user.id,
-          verifiedAt!,
-          revision,
-          providerValue,
-          lineage,
-        );
-        await _remember(user.id, _verifiedFree(verifiedAt: verifiedAt), now);
+        recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
+        await remember(user.id, _verifiedFree(verifiedAt: verifiedAt), now);
       }
       final expiresAt = DateTime.tryParse('${row['expires_at']}')?.toUtc();
       final gracePeriodEndsAt = DateTime.tryParse(
@@ -469,7 +404,7 @@ final class ServerEntitlementRepository {
           : providerValue == 'google'
           ? SubscriptionProvider.google
           : null;
-      if (provider == null) return await _transientFallback(user.id, now);
+      if (provider == null) return await fallback(user.id, now);
       final accessBoundary = lifecycle == SubscriptionLifecycle.gracePeriod
           ? gracePeriodEndsAt
           : expiresAt;
@@ -479,33 +414,54 @@ final class ServerEntitlementRepository {
               (startedAt != null &&
                   accessBoundary != null &&
                   !accessBoundary.isAfter(startedAt)))) {
-        _sessionCache.discardPendingPeriods(ownerId: user.id);
-        return await _transientFallback(user.id, now);
+        clearPending(user.id);
+        return await fallback(user.id, now);
       }
       if (lifecycle.mayGrantPaidAccess && accessBoundary == null) {
         // A paid lifecycle without its boundary is malformed, not a verified
         // cancellation. Treat it like a transient read so the last valid
         // entitlement can carry the UI through replication/schema lag.
-        return await _transientFallback(user.id, now);
+        return await fallback(user.id, now);
       }
+      final storeDefinitive =
+          (provider == SubscriptionProvider.google ||
+              provider == SubscriptionProvider.apple) &&
+          (storeRenewalTerminalLifecycle(lifecycle.name, row['auto_renews']) ||
+              (accessBoundary != null &&
+                  !accessBoundary.isAfter(now) &&
+                  (row['auto_renews'] == false ||
+                      lifecycle == SubscriptionLifecycle.cancelled)));
+      final storeRenewal = StoreRenewalObservation.fromCanonicalRow(
+        row,
+        ownerId: user.id,
+      );
       if (lifecycle.mayGrantPaidAccess && !accessBoundary!.isAfter(now)) {
+        if (explicitCheckoutRead != null) {
+          explicitCheckoutRead.storeReadComplete = true;
+        }
         // An expired store receipt does not prove that an unreadable separate
         // closed-test grant is revoked. Keep verification unresolved.
-        _recordStoreVersion(
-          user.id,
-          verifiedAt!,
-          revision,
-          providerValue,
-          lineage,
-        );
-        final denied = await _remember(
-          user.id,
-          _verifiedFree(verifiedAt: verifiedAt),
-          now,
-        );
+        recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
+        final denied = explicitCheckoutRead == null
+            ? await _remember(
+                user.id,
+                _verifiedFree(
+                  verifiedAt: verifiedAt,
+                  storeRenewal: storeRenewal,
+                  storeDefinitive: storeDefinitive,
+                ),
+                now,
+              )
+            : _verifiedFree(
+                verifiedAt: verifiedAt,
+                storeRenewal: storeRenewal,
+                storeDefinitive: storeDefinitive,
+              );
         return closedTestReadFailed
-            ? _withClosedTestContinuity(user.id, FreePlan.createState())
-            : denied;
+            ? withClosed(user.id, FreePlan.createState())
+            : explicitCheckoutRead == null
+            ? denied
+            : withClosed(user.id, denied);
       }
       final latest = _latestStoreVersions[user.id];
       if (lifecycle.mayGrantPaidAccess &&
@@ -517,8 +473,8 @@ final class ServerEntitlementRepository {
                             lineage == latest.lineage &&
                             providerValue == latest.provider &&
                             verifiedAt!.isBefore(latest.verifiedAt))))) {
-        _sessionCache.discardPendingPeriods(ownerId: user.id);
-        return await _transientFallback(user.id, now);
+        clearPending(user.id);
+        return await fallback(user.id, now);
       }
       final record = SubscriptionRecord(
         plan: plan,
@@ -535,12 +491,16 @@ final class ServerEntitlementRepository {
         serverRevision: revision,
         storeOriginalTransactionId: lineage,
       );
-      final resolved = _resolver.resolve(record: record, now: now);
+      final resolved = _withStoreRenewalObservation(
+        _resolver.resolve(record: record, now: now),
+        storeRenewal,
+        definitiveInactive: storeDefinitive,
+      );
       // The resolver can still fail closed for a future-dated/malformed
       // snapshot. Preserve the last valid paid state instead of converting
       // that unreadable response into a visible Free flicker.
       if (lifecycle.mayGrantPaidAccess && resolved.plan == CommercePlan.free) {
-        final previous = await _transientFallback(user.id, now);
+        final previous = await fallback(user.id, now);
         final start = record.startedAt?.toUtc();
         final oldEnd = verifiedSubscriptionBoundary(previous)?.toUtc();
         // The row is valid future proof, rather than permission to extend the
@@ -562,42 +522,36 @@ final class ServerEntitlementRepository {
                       previous.verifiedAt == null ||
                       !verifiedAt!.isBefore(previous.verifiedAt!))) {
           final next = _resolver.resolve(record: record, now: start);
-          _recordStoreVersion(
-            user.id,
-            verifiedAt!,
-            revision,
-            providerValue,
-            lineage,
-          );
-          return await _remember(
+          recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
+          return await remember(
             user.id,
             previous.withVerifiedNextPeriod(next),
             now,
           );
         }
-        _sessionCache.discardPendingPeriods(ownerId: user.id);
-        return previous.withVerifiedNextPeriod(null);
+        clearPending(user.id);
+        return _withStoreRenewalObservation(
+          previous.withVerifiedNextPeriod(null),
+          storeRenewal,
+        );
       }
       if (closedTestReadFailed && resolved.plan == CommercePlan.free) {
         // Never resurrect a terminal store receipt. Only the independently
         // verified, bounded closed-test proof can survive its own read outage.
-        return _withClosedTestContinuity(user.id, FreePlan.createState());
+        return withClosed(user.id, FreePlan.createState());
       }
-      _recordStoreVersion(
-        user.id,
-        verifiedAt!,
-        revision,
-        providerValue,
-        lineage,
-      );
-      final remembered = await _remember(user.id, resolved, now);
-      return _withClosedTestContinuity(user.id, remembered);
+      if (explicitCheckoutRead != null) {
+        explicitCheckoutRead.storeReadComplete = true;
+      }
+      recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
+      final remembered = await remember(user.id, resolved, now);
+      return withClosed(user.id, remembered);
     } on CommunityOwnerOperationCancelled {
       rethrow;
     } on Object {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return FreePlan.createState();
-      return await _transientFallback(user.id, _now());
+      return await fallback(user.id, _now());
     }
   }
 

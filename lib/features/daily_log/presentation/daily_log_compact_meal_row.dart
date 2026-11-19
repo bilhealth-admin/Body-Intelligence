@@ -78,9 +78,28 @@ class _DiaryCompactMealRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: LayoutBuilder(
                 builder: (context, constraints) {
+                  final scaler = MediaQuery.textScalerOf(context);
+                  double lineWidth(Text text) {
+                    final painter = TextPainter(
+                      text: TextSpan(text: text.data, style: text.style),
+                      textDirection: Directionality.of(context),
+                      textScaler: scaler,
+                      locale: Localizations.localeOf(context),
+                      maxLines: 1,
+                    )..layout();
+                    final width = painter.width;
+                    painter.dispose();
+                    return width;
+                  }
+
+                  // The icon, gaps and chevron occupy 66 logical pixels.
+                  // Localized labels must fit beside their actual total before
+                  // selecting the compact single-line presentation.
+                  final inlineWidth = lineWidth(name) + 10 + lineWidth(total);
                   final stacked =
                       constraints.maxWidth < 290 ||
-                      MediaQuery.textScalerOf(context).scale(1) > 1.3;
+                      scaler.scale(1) > 1.3 ||
+                      inlineWidth > constraints.maxWidth - 66;
                   return Row(
                     key: Key('daily-meal-header-$type'),
                     children: [

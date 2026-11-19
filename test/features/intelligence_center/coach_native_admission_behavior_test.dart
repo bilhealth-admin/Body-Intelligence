@@ -198,6 +198,47 @@ void main() {
     await _dispose(tester);
   });
 
+  testWidgets('Read only explains Coach actions without changing permission', (
+    tester,
+  ) async {
+    final fixture = await _mount(
+      tester,
+      restoredGoalId: 'navigate',
+      restoredToolId: 'update_goal',
+    );
+    try {
+      final chip = find.byKey(const Key('ai-coach-action-updateGoal-navigate'));
+      await Scrollable.ensureVisible(tester.element(chip), alignment: .5);
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(chip.hitTestable(), findsOneWidget);
+      await tester.tap(chip);
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(
+        find.widgetWithText(SnackBarAction, 'Coach settings'),
+        findsOneWidget,
+      );
+      final body = tester.widget<Text>(
+        find.byKey(const Key('coach-permission-guidance-body')),
+      );
+      expect(body.data, contains('Coach actions are set to Read only'));
+      expect(
+        _container(tester).read(coachActionPermissionModeProvider),
+        CoachActionPermissionMode.readOnly,
+      );
+      expect(
+        (await UserProfileRepository(
+          fixture.database,
+        ).getProfile())!.targetWeight,
+        82,
+      );
+      expect(fixture.gateway.calls, 0);
+      expect(await fixture.committedReceipts(), isEmpty);
+      expect(tester.takeException(), isNull);
+    } finally {
+      await _dispose(tester);
+    }
+  });
+
   testWidgets(
     'canonical identity governs an opaque UI ID and a denied proposal can retry',
     (tester) async {
@@ -208,7 +249,9 @@ void main() {
       );
       final chip = find.byKey(const Key('ai-coach-action-updateGoal-navigate'));
       expect(chip, findsOneWidget);
-      await tester.ensureVisible(chip);
+      await Scrollable.ensureVisible(tester.element(chip), alignment: .5);
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(chip.hitTestable(), findsOneWidget);
       await tester.tap(chip);
       await tester.pumpAndSettle();
       expect(
@@ -227,8 +270,13 @@ void main() {
             tester,
           ).read(coachActionPermissionModeProvider.notifier).state =
           CoachActionPermissionMode.askBeforeWrite;
-      await tester.pump();
-      await tester.ensureVisible(chip);
+      // The preceding read-only guidance is an intentional transient surface.
+      // Allow its normal lifetime before testing this separate proposal tap.
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      await Scrollable.ensureVisible(tester.element(chip), alignment: .5);
+      await tester.pump(const Duration(milliseconds: 350));
+      expect(chip.hitTestable(), findsOneWidget);
       await tester.tap(chip);
       await tester.pumpAndSettle();
       expect(find.bySubtype<AlertDialog>(), findsOneWidget);

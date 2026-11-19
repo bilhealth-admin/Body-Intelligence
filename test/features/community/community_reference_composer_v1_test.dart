@@ -594,6 +594,12 @@ void main() {
       expect(repository.publishedCollaborators.single.userId, _collaborator);
       expect(repository.publishedDraftId, savedId);
       expect(find.byKey(const Key('community-post-editor-page')), findsNothing);
+      const submissionNotice =
+          'Post submitted for human review. Only you can see it until it is approved.';
+      expect(find.text(submissionNotice), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      expect(find.text(submissionNotice), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );

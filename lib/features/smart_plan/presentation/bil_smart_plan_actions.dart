@@ -1,159 +1,6 @@
 part of 'bil_smart_plan_page.dart';
 
 extension _BilSmartPlanActions on _BilSmartPlanPageState {
-  Future<void> _createPlan() async {
-    if (widget.privacyOnly) return;
-    if (_busy || _owner == null) return;
-    if (_plan != null && await _repository.readDraft(_owner!) != null) {
-      await _openDraft();
-      return;
-    }
-    if (!mounted) return;
-    final owner = _owner;
-    final epoch = _ownerEpoch;
-    final request = await _reviewSurface(
-      () => showBilModalBottomSheet<_PlanOptions>(
-        context: context,
-        useSafeArea: true,
-        isScrollControlled: true,
-        builder: (context) => _PlanCreationSheet(
-          initialHorizon:
-              BilPlanHorizon.values
-                  .where(
-                    (value) =>
-                        value.name == widget.toolRequest?.arguments['horizon'],
-                  )
-                  .firstOrNull ??
-              _plan?.horizon,
-          initialFocus:
-              BilPlanFocus.values
-                  .where(
-                    (value) =>
-                        value.name == widget.toolRequest?.arguments['focus'],
-                  )
-                  .firstOrNull ??
-              _plan?.focus,
-          initialSetup: _plan?.setup,
-          initialSessionsPerWeek: _plan?.days
-              .take(7)
-              .where((day) => day.workout != null)
-              .length,
-        ),
-      ),
-    );
-    if (!mounted ||
-        request == null ||
-        owner == null ||
-        owner != _owner ||
-        epoch != _ownerEpoch) {
-      return;
-    }
-    _mutate(() => _busy = true);
-    try {
-      _checkAccess();
-      final dietary = await ref
-          .read(dietaryPreferencesRepositoryProvider)
-          .read();
-      final catalog = const BilSmartPlanCatalog();
-      final gym = request.focus == BilPlanFocus.nutrition
-          ? <BilVerifiedWorkout>[]
-          : request.setup?.environment == BilPlanEnvironment.home
-          ? await catalog.homeSessions(request.setup!)
-          : await catalog.gymSessions(
-              sessionMinutes: request.setup!.sessionMinutes,
-            );
-      final recipes = request.focus == BilPlanFocus.training
-          ? <BilVerifiedRecipe>[]
-          : await catalog.sourcedRecipes(
-              dietary: dietary,
-              preferences: MealPlanPreferences(diet: request.diet),
-            );
-      if (!mounted || _owner != owner || epoch != _ownerEpoch) return;
-      final profile = await ref
-          .read(userProfileRepositoryProvider)
-          .getProfile();
-      if (!mounted || epoch != _ownerEpoch) return;
-      final goal = await ref.read(goalRepositoryProvider).getActive();
-      if (!mounted || epoch != _ownerEpoch) return;
-      final setup = request.setup == null
-          ? null
-          : BilPlanSetup(
-              environment: request.setup!.environment,
-              experience: request.setup!.experience,
-              sessionMinutes: request.setup!.sessionMinutes,
-              equipment: request.setup!.equipment,
-              preferredTime: request.setup!.preferredTime,
-              goalId: goal?.uuid,
-            );
-      final start = ref.read(bilSmartPlanClockProvider)();
-      final snapshot = await BilSmartPlanNutritionGoals.readSavedSnapshot(
-        _repository.preferences,
-      );
-      final schedule = await ref
-          .read(nutritionGoalScheduleRepositoryProvider)
-          .read();
-      final nutritionTargets = BilSmartPlanNutritionGoals.forPlan(
-        start: start,
-        horizon: request.horizon,
-        snapshot: snapshot,
-        schedule: schedule,
-      );
-      final latestWeight = await ref
-          .read(weightRepositoryProvider)
-          .watchLatestWeight()
-          .first;
-      if (!mounted || epoch != _ownerEpoch) return;
-      final targetCalories =
-          nutritionTargets.values
-              .map((target) => target.values['kcal']!)
-              .toList()
-            ..sort();
-      final creation = BilPlanCreationRequest(
-        ownerId: owner,
-        planId: const Uuid().v4(),
-        startOn: start,
-        nutritionTargets: nutritionTargets,
-        requestedDailyCalories: targetCalories.firstOrNull?.round(),
-        targetWeightKg: goal?.targetWeight,
-        currentWeightKg: latestWeight?.weight,
-        targetBy: goal?.targetDate,
-        horizon: request.horizon,
-        focus: request.focus,
-        workoutsPerWeek: request.focus == BilPlanFocus.nutrition
-            ? 0
-            : request.workoutsPerWeek,
-        confirmedPreferences: request.confirmedPreferences,
-        adultConfirmed: request.confirmedPreferences,
-        ageYears: profile?.age,
-        workoutCatalog: gym,
-        recipeCatalog: recipes,
-        highRiskSymptoms: request.highRiskSymptoms,
-        underMedicalReview: request.needsMedicalReview,
-        setup: setup,
-        phases:
-            request.focus == BilPlanFocus.nutrition ||
-                setup?.environment == BilPlanEnvironment.home
-            ? const []
-            : await const BilSmartPlanPrescriptions().phases(),
-      );
-      final safety = BilPlanSafety.assess(creation);
-      if (safety.result != BilPlanSafetyResult.ready) {
-        throw StateError(safety.reasons.join(', '));
-      }
-      final plan = const BilSmartPlanEngine().generate(
-        creation,
-        ref.read(bilSmartPlanClockProvider)(),
-      );
-      await _save(plan, prior: 0);
-    } on Object catch (error) {
-      if (!mounted || _owner != owner) return;
-      _mutate(() {
-        _busy = false;
-        _error = error.toString();
-      });
-    }
-  }
-
   Future<void> _changeStatus(BilPlanStatus target) async {
     final current = _plan;
     if (current == null || _busy) return;
@@ -167,9 +14,13 @@ extension _BilSmartPlanActions on _BilSmartPlanPageState {
               ? _t(
                   _reviewingDraft
                       ? 'Replace your current plan with this reviewed draft? The previous plan stays on this device. Diary records will not change.'
+                      : current.status == BilPlanStatus.paused
+                      ? 'Resume this paused plan? Meals remain suggestions; nothing is logged automatically.'
                       : 'Activate this draft? Meals remain suggestions; nothing is logged automatically.',
                   _reviewingDraft
                       ? 'استبدال خطتك الحالية بهذه المسودة التي راجعتها؟ تبقى الخطة السابقة على هذا الجهاز ولا تتغير سجلات الدفتر.'
+                      : current.status == BilPlanStatus.paused
+                      ? 'استئناف هذه الخطة المتوقفة مؤقتًا؟ تبقى الوجبات مقترحات فقط ولن يُسجّل أي شيء تلقائيًا.'
                       : 'اعتماد هذه المسودة؟ الوجبات مقترحات فقط ولن يُسجّل أي شيء تلقائيًا.',
                 )
               : _t(

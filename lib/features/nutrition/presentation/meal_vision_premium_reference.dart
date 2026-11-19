@@ -100,6 +100,7 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
         ),
         Checkbox(
           key: Key('premium-vision-select-$index'),
+          focusNode: _requiredFields.node('selection-$index'),
           value: _selected.contains(index),
           onChanged: (value) => _visualUpdate(() {
             if (value == true) {
@@ -183,10 +184,14 @@ extension _PremiumVisionReference on _PremiumVisionReviewDialogState {
   }
 
   Widget _reviewActionBar(int count) {
-    final enabled = _canContinue;
+    final enabled =
+        !_confirming &&
+        !_closing &&
+        _requiredFields.current &&
+        widget.lifetime?.isActive != false;
     final primary = FilledButton.icon(
       key: const Key('premium-vision-continue'),
-      onPressed: enabled ? _confirm : null,
+      onPressed: enabled ? _attemptRequiredConfirmation : null,
       icon: const Icon(Icons.check_rounded),
       label: Text(_word(context, 'Match ingredients', 'مطابقة المكونات')),
       style: _visionActionStyle(context),

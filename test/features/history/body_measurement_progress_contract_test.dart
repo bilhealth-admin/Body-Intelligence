@@ -41,7 +41,7 @@ void main() {
     expect(progress, contains('bodyMeasurementHistoryProvider'));
     expect(profile, contains('bodyMeasurementRepositoryProvider'));
     expect(profile, contains('.saveForDay('));
-    expect(database, contains('int get schemaVersion => 22'));
+    expect(database, contains('int get schemaVersion => 23'));
     expect(database, contains('migrator.createTable(bodyMeasurementEntries)'));
     expect(database, contains('if (from < 22)'));
     expect(

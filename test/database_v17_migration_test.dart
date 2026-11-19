@@ -63,13 +63,18 @@ void main() {
               "VALUES ('legacy-decision', '2026-07-30', 'hydrate', "
               "'Hydrate', 'Local evidence', 'helped', 1785405600)",
             );
+            // This focused historical fixture also includes the pre-existing
+            // daily log table touched by the additive v23 migration.
+            raw.execute(
+              'CREATE TABLE daily_logs (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT)',
+            );
             raw.execute('PRAGMA user_version = 16');
           },
         ),
       );
       addTearDown(database.close);
 
-      expect(database.schemaVersion, 22);
+      expect(database.schemaVersion, 23);
       final decision = await database
           .select(database.decisionMemories)
           .getSingle();

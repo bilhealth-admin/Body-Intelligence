@@ -67,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -227,6 +227,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 22) {
         await _addColumns('meal_items', <String>['food_evidence_json TEXT']);
         await _addColumns('foods', <String>['food_evidence_json TEXT']);
+      }
+      if (from < 23) {
+        await _addColumns('daily_logs', <String>[
+          'final_vision_nutrient_evidence_json TEXT',
+        ]);
       }
     },
   );

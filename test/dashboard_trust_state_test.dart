@@ -35,7 +35,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final title = find.text('AI COACH');
+    final title = find.text('BIL AI Coach');
     expect(title, findsOneWidget);
     expect(
       find.ancestor(of: title, matching: find.byType(ShaderMask)),

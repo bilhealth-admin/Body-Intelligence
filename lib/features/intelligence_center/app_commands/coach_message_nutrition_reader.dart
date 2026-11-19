@@ -1,3 +1,4 @@
+import '../../../data/database/final_vision_nutrition.dart';
 // Actual immutable SQLite reads. No mutable Food catalog and no writes.
 import 'package:drift/drift.dart';
 import '../../../data/database/app_database.dart';
@@ -76,6 +77,19 @@ final class CoachMessageNutritionReader {
     final captured = clock().toUtc();
     return database.transaction(() async {
       final ledger = await DailyLogRepository(database).readLedger(day);
+      final closedRow = ledger.state == DayLifecycleState.closed
+          ? await DailyLogRepository(database).getForDay(day)
+          : null;
+      final frozenRaw = closedRow?.finalVisionNutrientEvidenceJson;
+      FinalVisionNutrition? frozen;
+      if (frozenRaw != null) {
+        try {
+          final candidate = FinalVisionNutrition.decode(frozenRaw);
+          if (candidate.matches(closedRow!, owner)) frozen = candidate;
+        } on FormatException {
+          /* Unavailable closed evidence never falls back. */
+        }
+      }
       checkAccess();
       final rows = await _itemsForDay(day, checkAccess: checkAccess);
       final evidence = rows
@@ -99,6 +113,23 @@ final class CoachMessageNutritionReader {
       };
       final metrics = detailed.metrics
           .map((metric) {
+            if (frozenRaw != null) {
+              double? amount;
+              if (metric.id == 'netCarbohydrates') {
+                amount = frozen?.directNetCarbohydrates;
+              } else {
+                for (final n in FoodNutrient.values) {
+                  if (n.name == metric.id) amount = frozen?.nutrients[n];
+                }
+              }
+              return CoachVisualMetric.localRead(
+                id: metric.id,
+                knownSubtotal: amount,
+                knownItems: amount == null ? 0 : 1,
+                missingItems: amount == null ? 1 : 0,
+                estimated: true,
+              );
+            }
             // Open-day complete totals are intentionally null when one item is
             // missing. Retain the explicitly labelled known subtotal + coverage.
             // Closed canonical null remains unknown and must never fall back.
@@ -146,6 +177,7 @@ final class CoachMessageNutritionReader {
                   ? 'saved_day_ledger'
                   : 'known_food_subtotal',
               'immutable_food_details',
+              if (frozenRaw != null) 'frozen_gemini_estimate_day',
               ...detailed.sourceKinds,
             }.toList(growable: false),
             sourceRevisions: detailed.sourceRevisions,
@@ -217,7 +249,11 @@ final class CoachMessageNutritionReader {
     final revisions = <String>{};
     for (final row in evidence) {
       final portion = row.portion;
-      if (portion != null) {
+      if (row.vision case final vision?) {
+        sourceKinds.add('gemini_photo_estimate');
+        revisions.add(vision.food.estimate.modelRevision);
+        revisions.add(vision.food.estimate.promptRevision);
+      } else if (portion != null) {
         sourceKinds.add(portion.food.source.kind.wireName);
         revisions.add(portion.food.source.revision);
         if (portion.quantity.evidence.kind == CoachFoodQuantityKind.estimated) {
@@ -263,6 +299,7 @@ final class CoachMessageNutritionReader {
       total += value;
       known++;
       estimated |=
+          row.vision != null ||
           row.portion?.food.source.kind == CoachFoodSourceKind.estimated ||
           row.portion?.quantity.evidence.kind ==
               CoachFoodQuantityKind.estimated;
@@ -288,6 +325,7 @@ final class CoachMessageNutritionReader {
     // Valid normalized v1 contract: total carbohydrate includes fiber.
     // Legacy arithmetic is intentionally not promoted to a defined net fact.
     if (!row.isValid) return null;
+    if (row.vision != null) return row.directNetCarbohydrates;
     try {
       if (row.portion case final portion?) {
         return portion.nutrients.netCarbohydrates;

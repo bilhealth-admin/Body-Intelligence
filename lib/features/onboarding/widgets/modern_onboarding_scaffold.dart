@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../app/theme/bil_navigation_press_style.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
@@ -9,9 +11,45 @@ import 'package:flutter/services.dart';
 
 import '../../../shared/widgets/bil_wordmark.dart';
 import '../onboarding_runtime_copy.dart';
+import 'onboarding_validation_feedback.dart';
 
 String _copy(BuildContext context, String english) =>
     OnboardingRuntimeCopy.resolve(english, Localizations.localeOf(context));
+
+// Measure the actual localized label and OS TextScaler. A narrow screen is
+// not itself a reason to consume another row when the controls still fit.
+double _onboardingActionWidth(
+  BuildContext context,
+  String label,
+  ButtonStyle? style, {
+  required double fallbackHorizontalPadding,
+}) {
+  const states = <WidgetState>{};
+  final textStyle =
+      style?.textStyle?.resolve(states) ??
+      Theme.of(context).textTheme.labelLarge;
+  final painter = TextPainter(
+    text: TextSpan(text: label, style: textStyle),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  );
+  late final double labelWidth;
+  try {
+    painter.layout();
+    labelWidth = painter.width;
+  } finally {
+    painter.dispose();
+  }
+  final padding =
+      style?.padding?.resolve(states)?.resolve(Directionality.of(context)) ??
+      EdgeInsets.symmetric(horizontal: fallbackHorizontalPadding);
+  final minimum = math.max(
+    48.0,
+    style?.minimumSize?.resolve(states)?.width ?? 48.0,
+  );
+  final fixed = style?.fixedSize?.resolve(states)?.width ?? 0.0;
+  return math.max(minimum, math.max(fixed, labelWidth + padding.horizontal));
+}
 
 class ModernOnboardingScaffold extends StatelessWidget {
   const ModernOnboardingScaffold({
@@ -29,6 +67,7 @@ class ModernOnboardingScaffold extends StatelessWidget {
     this.nextPending = false,
     this.busy = false,
     this.artwork,
+    this.validationFeedback,
   });
 
   final int step;
@@ -48,9 +87,14 @@ class ModernOnboardingScaffold extends StatelessWidget {
   /// has no approved release asset.
   final Widget? artwork;
 
+  /// User-triggered validation stays visible beside navigation, not below a
+  /// potentially offscreen field. It never changes the form's scroll or focus.
+  final Widget? validationFeedback;
+
   @override
   Widget build(BuildContext context) {
     final baseTheme = Theme.of(context);
+    final compact = MediaQuery.sizeOf(context).width < 400;
     final baseScheme = baseTheme.colorScheme;
     final dark = baseTheme.brightness == Brightness.dark;
     final scheme = baseScheme.copyWith(
@@ -107,7 +151,12 @@ class ModernOnboardingScaffold extends StatelessWidget {
                           key: ValueKey<String>('onboarding-scroll-$step'),
                           keyboardDismissBehavior:
                               ScrollViewKeyboardDismissBehavior.onDrag,
-                          padding: const EdgeInsets.fromLTRB(22, 26, 22, 24),
+                          padding: EdgeInsets.fromLTRB(
+                            22,
+                            compact ? 20 : 26,
+                            22,
+                            compact ? 20 : 24,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -120,6 +169,7 @@ class ModernOnboardingScaffold extends StatelessWidget {
                                       .textTheme
                                       .headlineMedium
                                       ?.copyWith(
+                                        fontSize: compact ? 24 : null,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: -.7,
                                         height: 1.12,
@@ -127,21 +177,24 @@ class ModernOnboardingScaffold extends StatelessWidget {
                                 ),
                               ),
                               if (subtitle case final subtitle?) ...[
-                                const SizedBox(height: 10),
+                                SizedBox(height: compact ? 8 : 10),
                                 Text(
                                   subtitle,
-                                  style: Theme.of(context).textTheme.bodyLarge
-                                      ?.copyWith(
-                                        color: scheme.onSurfaceVariant,
-                                        height: 1.45,
-                                      ),
+                                  style:
+                                      (compact
+                                              ? baseTheme.textTheme.bodyMedium
+                                              : baseTheme.textTheme.bodyLarge)
+                                          ?.copyWith(
+                                            color: scheme.onSurfaceVariant,
+                                            height: 1.45,
+                                          ),
                                 ),
                               ],
                               if (artwork case final artwork?) ...[
-                                const SizedBox(height: 18),
+                                SizedBox(height: compact ? 16 : 18),
                                 artwork,
                               ],
-                              const SizedBox(height: 24),
+                              SizedBox(height: compact ? 20 : 24),
                               FocusTraversalOrder(
                                 key: const Key('onboarding-step-input-content'),
                                 order: const NumericFocusOrder(1),
@@ -151,7 +204,10 @@ class ModernOnboardingScaffold extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (validationFeedback case final feedback?)
+                        OnboardingValidationFeedback(child: feedback),
                       DecoratedBox(
+                        key: const Key('onboarding-footer'),
                         decoration: BoxDecoration(
                           color: scheme.surface,
                           border: Border(
@@ -162,12 +218,39 @@ class ModernOnboardingScaffold extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              final textScale = MediaQuery.textScalerOf(
+                              const states = <WidgetState>{};
+                              final iconStyle = baseTheme.iconButtonTheme.style;
+                              final backWidth = math.max(
+                                48.0,
+                                math.max(
+                                  iconStyle?.minimumSize
+                                          ?.resolve(states)
+                                          ?.width ??
+                                      48.0,
+                                  iconStyle?.fixedSize
+                                          ?.resolve(states)
+                                          ?.width ??
+                                      0.0,
+                                ),
+                              );
+                              final nextWidth = _onboardingActionWidth(
                                 context,
-                              ).scale(1);
+                                nextLabel ?? _copy(context, 'Continue'),
+                                baseTheme.filledButtonTheme.style,
+                                fallbackHorizontalPadding: 24,
+                              );
+                              final skipWidth = onSkip == null
+                                  ? 0.0
+                                  : 8 +
+                                        _onboardingActionWidth(
+                                          context,
+                                          _copy(context, 'Skip'),
+                                          baseTheme.textButtonTheme.style,
+                                          fallbackHorizontalPadding: 12,
+                                        );
                               final stackActions =
-                                  textScale >= 1.6 ||
-                                  constraints.maxWidth < 330;
+                                  constraints.maxWidth <
+                                  backWidth + 12 + skipWidth + nextWidth;
                               final back = FocusTraversalOrder(
                                 order: const NumericFocusOrder(2),
                                 child: IconButton.filledTonal(

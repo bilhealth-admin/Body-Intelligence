@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/commerce/presentation/app_purchas
 import 'package:body_intelligence_log/features/commerce/providers/app_purchase_providers.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
+import 'package:body_intelligence_log/features/commerce/services/android_store_purchase_readiness.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/ai_boost_purchase_service.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_experience_presentation.dart';
@@ -180,8 +181,24 @@ void main() {
         );
         final verify = Completer<StoreVerificationOutcome>();
         final finishProof = Completer<StoreVerificationOutcome>();
+        var readinessChecks = 0;
         final boost = AiBoostPurchaseService(
           purchase: sdk,
+          // This case exercises a later verified-refund boundary. Supply a
+          // positive fresh preflight rather than bypassing the production gate.
+          androidReadiness: refundAtFinish
+              ? AndroidStorePurchaseReadiness(
+                  probe: (product, attempt) async {
+                    expect(product, StoreCatalogConfiguration.aiBoost);
+                    expect(attempt, isNotEmpty);
+                    readinessChecks++;
+                  },
+                  recover: (_) async =>
+                      throw StateError('Positive fixture must not open repair'),
+                  release: (_) async =>
+                      throw StateError('Positive fixture has no repair handle'),
+                )
+              : null,
           owner: () => 'fixture-A',
           verifyDelivery: (_, _) => verify.future,
           finishDelivery: refundAtFinish ? (_, _) => finishProof.future : null,
@@ -246,6 +263,7 @@ void main() {
           unawaited(bilAppNavigatorKey.currentState!.push(checkout));
           await tester.pumpAndSettle();
           await boost.purchaseBoost();
+          expect(readinessChecks, refundAtFinish ? 1 : 0);
           expect(native.launches, 1);
           native.updates.add([
             PurchaseDetails(

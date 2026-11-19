@@ -176,31 +176,36 @@ class BilCrystalDatePickerHeader extends StatelessWidget {
       case Orientation.portrait:
         return Semantics(
           container: true,
-          child: SizedBox(
-            height:
-                _datePickerHeaderPortraitHeight * fontScaleAdjustedHeaderHeight,
-            child: Material(
-              color: backgroundColor,
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  start: 24,
-                  end: 12,
-                  bottom: 12,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const SizedBox(height: 16),
-                    help,
-                    const Flexible(child: SizedBox(height: 38)),
-                    Row(
-                      children: <Widget>[
-                        Expanded(child: title),
-                        if (entryModeButton != null)
-                          Semantics(container: true, child: entryModeButton),
-                      ],
-                    ),
-                  ],
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  _datePickerHeaderPortraitHeight *
+                  fontScaleAdjustedHeaderHeight,
+            ),
+            child: IntrinsicHeight(
+              child: Material(
+                color: backgroundColor,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: 24,
+                    end: 12,
+                    bottom: 12,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const SizedBox(height: 16),
+                      help,
+                      const Spacer(),
+                      Row(
+                        children: <Widget>[
+                          Expanded(child: title),
+                          if (entryModeButton != null)
+                            Semantics(container: true, child: entryModeButton),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

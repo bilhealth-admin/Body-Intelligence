@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/meal_planner/domain/meal_plan.dart';
 import '../../support/bil_waiting_indicators.dart';
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_coach.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../visual_closure/visual_evidence_font.dart';
+import 'dart:convert';
 import 'dart:io';
 
 // The complete candidate suite forces this to 1. Only the separate legacy
@@ -39,7 +41,13 @@ bool get _capturePlanGoldens =>
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  setUpAll(loadVisualEvidenceFont);
+  setUpAll(() async {
+    await loadVisualEvidenceFont();
+    // Keep real source-catalog I/O outside a retired widget's FakeAsync zone.
+    await const BilSmartPlanCatalog().sourcedRecipes(
+      dietary: const DietaryPreferences(),
+    );
+  });
   final now = DateTime(2026, 10, 22, 12);
   late AppDatabase db;
   setUp(() async {
@@ -81,6 +89,7 @@ void main() {
     double scale, {
     bool privacyOnly = false,
     bool premium = true,
+    String? ownerId = 'owner-123',
     BilSmartPlanToolRequest? toolRequest,
   }) async {
     tester.view.physicalSize = Size(width, 844);
@@ -92,7 +101,7 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
-          verifiedEntitlementOwnerIdProvider.overrideWithValue('owner-123'),
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(ownerId),
           verifiedSubscriptionAccessProvider.overrideWithValue(
             AsyncData(
               SubscriptionState(
@@ -252,7 +261,19 @@ void main() {
               .initialValue,
           '19:30',
         );
-        expect(tester.widgetList<Slider>(find.byType(Slider)).first.value, 120);
+        expect(
+          tester
+              .widget<DropdownButtonFormField<int>>(
+                find.descendant(
+                  of: find.byKey(
+                    const ValueKey('bil-smart-plan-field-minutes'),
+                  ),
+                  matching: find.byType(DropdownButtonFormField<int>),
+                ),
+              )
+              .initialValue,
+          120,
+        );
         expect(
           tester
               .widget<CheckboxListTile>(find.byType(CheckboxListTile).first)
@@ -265,7 +286,7 @@ void main() {
                 find.byKey(const ValueKey('bil-smart-plan-review-draft')),
               )
               .onPressed,
-          isNull,
+          isNotNull,
         );
         expect(tester.takeException(), isNull);
         Navigator.of(
@@ -333,7 +354,17 @@ void main() {
       );
       final prepare = find.byKey(const ValueKey('bil-smart-plan-review-draft'));
       await tester.ensureVisible(prepare);
-      expect(tester.widget<FilledButton>(prepare).onPressed, isNull);
+      expect(tester.widget<FilledButton>(prepare).onPressed, isNotNull);
+      await tester.tap(prepare);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('bil-smart-plan-required-choices')),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('bil-smart-plan-validation-cancel')),
+      );
+      await tester.pumpAndSettle();
       expect(await repo.readFor('owner-123'), isNull);
       Navigator.of(tester.element(prepare)).pop();
       await tester.pumpAndSettle();
@@ -356,6 +387,39 @@ void main() {
       await pump(tester, 'en', 390, 1);
       await tester.tap(find.byKey(const ValueKey('bil-smart-plan-create')));
       await tester.pumpAndSettle();
+      Future<void> choose(Finder control, String label) async {
+        await tester.ensureVisible(control);
+        await tester.tap(control);
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text(label).last);
+        await tester.tap(find.text(label).last);
+        await tester.pumpAndSettle();
+      }
+
+      Finder field<T>(String name) => find.descendant(
+        of: find.byKey(ValueKey('bil-smart-plan-field-$name')),
+        matching: find.byType(DropdownButtonFormField<T>),
+      );
+      await choose(
+        find.byType(DropdownButtonFormField<BilPlanHorizon>),
+        'One month',
+      );
+      await choose(
+        find.byType(DropdownButtonFormField<BilPlanFocus>),
+        'Training and nutrition',
+      );
+      await choose(
+        find.byType(DropdownButtonFormField<BilPlanEnvironment>),
+        'Gym',
+      );
+      await choose(field<int>('minutes'), '30 min');
+      await choose(field<int>('sessions'), '3');
+      await choose(
+        find.byType(DropdownButtonFormField<MealPlanDiet>),
+        'Balanced recipes',
+      );
+      await choose(field<bool>('symptoms'), 'No');
+      await choose(field<bool>('medical'), 'No');
       final experience = find.byType(
         DropdownButtonFormField<BilPlanExperience>,
       );
@@ -371,27 +435,36 @@ void main() {
       final prepare = find.byKey(const ValueKey('bil-smart-plan-review-draft'));
       await tester.ensureVisible(prepare);
       await tester.tap(prepare);
-      Future<void> settleSaved() async {
+      Future<void> settleSaved({bool allowOffscreenTabs = false}) async {
+        bool ready() =>
+            // The tabs are a lazy body child and can be off-screen while
+            // completing a workout. The app-bar action stays mounted.
+            find.byType(BilSmartPlanPage).evaluate().isNotEmpty &&
+            (allowOffscreenTabs ||
+                find
+                    .byKey(const ValueKey('bil-smart-plan-tabs'))
+                    .evaluate()
+                    .isNotEmpty) &&
+            tester
+                .widget<PopupMenuButton<String>>(
+                  find.byKey(const ValueKey('bil-smart-plan-options')),
+                )
+                .enabled &&
+            find.byType(BilPearlMaterialAlertDialog).evaluate().isEmpty;
         await tester.runAsync(() async {
           final end = DateTime.now().add(const Duration(seconds: 10));
           while (DateTime.now().isBefore(end)) {
             await tester.pump(const Duration(milliseconds: 20));
-            if (find
-                    .byKey(const ValueKey('bil-smart-plan-tabs'))
-                    .evaluate()
-                    .isNotEmpty &&
-                tester
-                    .widget<PopupMenuButton<String>>(
-                      find.byKey(const ValueKey('bil-smart-plan-options')),
-                    )
-                    .enabled &&
-                find.byType(BilPearlMaterialAlertDialog).evaluate().isEmpty) {
-              break;
-            }
+            if (ready()) break;
             await Future<void>.delayed(const Duration(milliseconds: 10));
           }
         });
-        await tester.pumpAndSettle();
+        expect(
+          ready(),
+          isTrue,
+          reason: 'The actual saved-plan phase must complete.',
+        );
+        await tester.pump(const Duration(milliseconds: 300));
       }
 
       await settleSaved();
@@ -426,7 +499,7 @@ void main() {
       expect(find.text('Enter 5–120 minutes.'), findsOneWidget);
       await tester.enterText(find.byType(TextFormField), '27');
       await tester.tap(find.widgetWithText(FilledButton, 'Confirm'));
-      await settleSaved();
+      await settleSaved(allowOffscreenTabs: true);
       debugPrint('Smart Plan journey: persisted step verified');
       expect(
         (await tester.runAsync(
@@ -444,7 +517,7 @@ void main() {
       await tester.tap(finish);
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Confirm'));
-      await settleSaved();
+      await settleSaved(allowOffscreenTabs: true);
       debugPrint('Smart Plan journey: persisted step verified');
       expect(
         (await tester.runAsync(
@@ -541,18 +614,22 @@ void main() {
           }
         }
 
+        debugPrint('Plan book journey: entering real active-plan storage');
         final repo = (await tester.runAsync(activePlan))!;
+        debugPrint('Plan book journey: real active-plan storage ready');
         final original = (await tester.runAsync(
           () => repo.readFor('owner-123'),
         ))!;
         // The older generic fixture intentionally includes planner estimates
         // without recipe provenance. This journey requires a real source-backed
         // recipe, selected through the same released catalog used at creation.
+        debugPrint('Plan book journey: entering verified recipe catalog');
         final verifiedRecipes = (await tester.runAsync(
           () => const BilSmartPlanCatalog().sourcedRecipes(
             dietary: const DietaryPreferences(),
           ),
         ))!;
+        debugPrint('Plan book journey: verified recipe catalog ready');
         final sourceMeal = original.days.first.meals.first;
         final recipe = verifiedRecipes.firstWhere(
           (entry) => entry.slot == sourceMeal.slot,
@@ -864,6 +941,120 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  for (final locale in ['en', 'ar']) {
+    testWidgets(
+      'deleted current $locale plan keeps owner archives readable and export available',
+      (tester) async {
+        final prepared = await tester.runAsync(() async {
+          final repo = BilSmartPlanRepository(
+            preferences: PreferencesRepository(db),
+            currentOwnerId: () => 'owner-123',
+          );
+          final seed = (await repo.readFor('owner-123'))!;
+          final original = await repo.save(
+            seed.withStatus(BilPlanStatus.active, now),
+            expectedRevision: seed.revision,
+          );
+          final replacement = BilSmartPlan.decode(
+            jsonEncode(seed.toJson()..['id'] = 'archive-access-replacement'),
+          );
+          final staged = await repo.stageDraft(replacement, approved: original);
+          final accepted = staged.withStatus(
+            BilPlanStatus.active,
+            now.add(const Duration(minutes: 1)),
+          );
+          await repo.activateDraft(accepted);
+          await repo.removeWithConfirmation(
+            owner: 'owner-123',
+            expectedId: accepted.id,
+            expectedRevision: accepted.revision,
+          );
+          expect(await repo.readFor('owner-123'), isNull);
+          expect(
+            (await repo.readArchives('owner-123')).single.encode(),
+            original.encode(),
+          );
+          return (repo, original);
+        });
+        final (repo, original) = prepared!;
+        await pump(tester, locale, 390, 1);
+        final options = find.byKey(const ValueKey('bil-smart-plan-options'));
+        await tester.tap(options);
+        await tester.pumpAndSettle();
+        final history = find.byWidgetPredicate(
+          (widget) =>
+              widget is PopupMenuItem<String> &&
+              widget.value == 'previous-plans',
+        );
+        final export = find.byWidgetPredicate(
+          (widget) =>
+              widget is PopupMenuItem<String> && widget.value == 'export',
+        );
+        expect(tester.widget<PopupMenuItem<String>>(history).enabled, isTrue);
+        expect(tester.widget<PopupMenuItem<String>>(export).enabled, isTrue);
+        for (final mutation in ['new-draft', 'pause', 'delete']) {
+          expect(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is PopupMenuItem<String> && widget.value == mutation,
+            ),
+            findsNothing,
+          );
+        }
+        await tester.tap(history);
+        await waitForSurface(tester, find.byType(ExpansionTile));
+        expect(
+          find.text(
+            locale == 'ar'
+                ? 'للقراءة فقط. يشمل التصدير هذه الخطط، ولا يشملها النسخ السحابي للخطة الحالية.'
+                : 'Read only. Export includes these plans. They are not included in active-plan cloud backup.',
+          ),
+          findsOneWidget,
+        );
+        final archived = tester.widget<ExpansionTile>(
+          find.byType(ExpansionTile).first,
+        );
+        expect((archived.title as Text).data, startsWith(original.startDate));
+        expect(await tester.runAsync(() => repo.readFor('owner-123')), isNull);
+        expect(
+          (await tester.runAsync(
+            () => repo.readArchives('owner-123'),
+          ))!.single.encode(),
+          original.encode(),
+        );
+        expect(await tester.runAsync(() => db.select(db.meals).get()), isEmpty);
+        expect(
+          await tester.runAsync(() => db.select(db.dailyLogs).get()),
+          isEmpty,
+        );
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
+  for (final owner in <String?>[null, 'another-owner']) {
+    testWidgets(
+      'missing or foreign owner $owner cannot expose retained history or export',
+      (tester) async {
+        await pump(tester, 'en', 390, 1, ownerId: owner);
+        await tester.tap(find.byKey(const ValueKey('bil-smart-plan-options')));
+        await tester.pumpAndSettle();
+        for (final action in ['previous-plans', 'export']) {
+          expect(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is PopupMenuItem<String> && widget.value == action,
+            ),
+            findsNothing,
+          );
+        }
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 
   testWidgets(
     'Free can manage plan privacy without obtaining paid plan actions',

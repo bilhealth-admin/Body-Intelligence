@@ -312,6 +312,15 @@ String snapshotFingerprint(CloudNutritionSnapshot value) {
           'type': value.type,
           'id': value.id,
           'deleted': true,
+          // Legacy tombstones keep their stable identity-only fingerprint.
+          // A typed Vision tombstone also carries a changing day instruction.
+          if (value.type == 'meal' &&
+              value.data['visionDayLifecycle'] is Map) ...{
+            'visionDayLifecycle': value.data['visionDayLifecycle'],
+            'dayKey': value.data['meal'] is Map
+                ? (value.data['meal']! as Map)['dayKey']
+                : null,
+          },
         }
       : value.toJson();
   return sha256

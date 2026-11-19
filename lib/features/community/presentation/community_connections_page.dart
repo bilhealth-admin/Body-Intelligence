@@ -18,6 +18,7 @@ import '../data/community_repository.dart';
 import '../domain/community_attention.dart';
 import 'community_attention_scope.dart';
 import 'community_return_button.dart';
+import 'community_outgoing_copy.dart';
 
 part 'community_connections_copy.dart';
 part 'community_connections_states.dart';
@@ -320,6 +321,14 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                   onTap: () => setState(() => _tab = 1),
                 ),
               ),
+              Expanded(
+                child: _ConnectionTab(
+                  key: const Key('community-connections-sent-tab'),
+                  label: CommunityOutgoingCopy.sent(context),
+                  selected: _tab == 2,
+                  onTap: () => setState(() => _tab = 2),
+                ),
+              ),
             ],
           ),
         ),
@@ -348,9 +357,11 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                 final visibleRows = rows
                     .where((row) {
                       final status = row.status;
-                      return _tab == 0
-                          ? status == 'accepted'
-                          : status == 'pending';
+                      return switch (_tab) {
+                        0 => status == 'accepted',
+                        1 => status == 'pending',
+                        _ => row.requesterId == _repository!.currentUserId,
+                      };
                     })
                     .toList(growable: false);
                 if (visibleRows.isEmpty) {
@@ -477,7 +488,8 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                                     ),
                                   ],
                                 )
-                              : IconButton(
+                              : status == 'pending'
+                              ? IconButton(
                                   tooltip: context.strings.text(
                                     'Cancel request',
                                   ),
@@ -488,7 +500,8 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage>
                                           cancelRequest: true,
                                         ),
                                   icon: const Icon(Icons.close_rounded),
-                                ),
+                                )
+                              : null,
                         ),
                       );
                     },
@@ -505,17 +518,19 @@ class _ConnectionRow {
     required this.id,
     required this.otherUserId,
     required this.addresseeId,
+    required this.requesterId,
     required this.status,
     this.displayName,
     this.avatarUrl,
   });
-  final String id, otherUserId, addresseeId, status;
+  final String id, otherUserId, requesterId, addresseeId, status;
   final String? displayName, avatarUrl;
 
   static _ConnectionRow? tryParse(Map<String, dynamic> row) {
     final id = row['id'];
     final other = row['other_user_id'];
     final addressee = row['addressee_id'];
+    final requester = row['requester_id'];
     final status = row['status'];
     if (id is! String ||
         id.isEmpty ||
@@ -523,8 +538,10 @@ class _ConnectionRow {
         other.isEmpty ||
         addressee is! String ||
         addressee.isEmpty ||
+        requester is! String ||
+        requester.isEmpty ||
         status is! String ||
-        !const {'pending', 'accepted'}.contains(status)) {
+        !const {'pending', 'accepted', 'declined'}.contains(status)) {
       return null;
     }
     final profile = row['profile'];
@@ -543,6 +560,7 @@ class _ConnectionRow {
       id: id,
       otherUserId: other,
       addresseeId: addressee,
+      requesterId: requester,
       status: status,
       displayName: name as String?,
       avatarUrl: avatar as String?,

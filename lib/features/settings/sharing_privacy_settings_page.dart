@@ -1,3 +1,5 @@
+import '../nutrition/presentation/meal_vision_estimate_consent.dart';
+import '../nutrition/presentation/gemini_vision_copy.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'dart:async';
 
@@ -328,6 +330,8 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             const CloudRestoreScopeControls(),
             const CloudRestoreConflictControls(),
             const _MealVisionConsentTile(),
+            if (const bool.fromEnvironment('BIL_GEMINI_PHOTO_ESTIMATES_V2'))
+              const _MealVisionConsentTile(estimates: true),
             ListTile(
               leading: const BilSemanticIconBadge(
                 kind: BilSemanticIconKind.profile,
@@ -447,7 +451,8 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
 }
 
 class _MealVisionConsentTile extends StatefulWidget {
-  const _MealVisionConsentTile();
+  const _MealVisionConsentTile({this.estimates = false});
+  final bool estimates;
 
   @override
   State<_MealVisionConsentTile> createState() => _MealVisionConsentTileState();
@@ -456,7 +461,10 @@ class _MealVisionConsentTile extends StatefulWidget {
 class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
   late final SupabaseClient? _client = mealVisionConsentClient();
   bool _saving = false;
-  late Future<bool> _current = loadMealVisionConsent();
+  Future<bool> _load() => widget.estimates
+      ? loadMealVisionEstimateConsent()
+      : loadMealVisionConsent();
+  late Future<bool> _current = _load();
   StreamSubscription<AuthState>? _auth;
   int _ownerEpoch = 0;
 
@@ -470,7 +478,7 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
         setState(() {
           _ownerEpoch++;
           _saving = false;
-          _current = loadMealVisionConsent();
+          _current = _load();
         });
       }
       deliveredOwner = nextOwner;
@@ -489,7 +497,11 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
     future: _current,
     builder: (context, snapshot) {
       return BilPremiumConsentToggle(
-        controlKey: const Key('meal-vision-ai-consent'),
+        controlKey: Key(
+          widget.estimates
+              ? 'gemini-nutrition-estimates-consent'
+              : 'meal-vision-ai-consent',
+        ),
         icon: Icons.image_search_rounded,
         value: snapshot.data ?? false,
         onChanged:
@@ -499,11 +511,15 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
         // Keep the initial async lookup static/disabled; reserve the
         // progress spinner for an actual user-initiated save.
         loading: _saving,
-        title: _privacyText(context, 'Google Gemini meal-photo consent'),
-        subtitle: _privacyText(
-          context,
-          'Only when enabled, a selected photo, app language, and technical request metadata may be sent to Google’s third-party AI service to suggest food. Turn it off to stop new uploads.',
-        ),
+        title: widget.estimates
+            ? geminiEstimateCopy(context, 2)
+            : _privacyText(context, 'Google Gemini meal-photo consent'),
+        subtitle: widget.estimates
+            ? geminiEstimateCopy(context, 3)
+            : _privacyText(
+                context,
+                'Only when enabled, a selected photo, app language, and technical request metadata may be sent to Google’s third-party AI service to suggest food. Turn it off to stop new uploads.',
+              ),
       );
     },
   );
@@ -512,7 +528,17 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
     final epoch = _ownerEpoch;
     final owner = _client?.auth.currentUser?.id;
     setState(() => _saving = true);
-    final saved = next
+    final saved = widget.estimates
+        ? next
+              ? await ensureMealVisionEstimateConsent(
+                  context,
+                  isCurrent: () =>
+                      mounted &&
+                      epoch == _ownerEpoch &&
+                      owner == _client?.auth.currentUser?.id,
+                )
+              : await revokeMealVisionEstimateConsent()
+        : next
         ? await ensureMealVisionConsent(context)
         : await revokeMealVisionConsent();
     if (!mounted ||
@@ -522,7 +548,7 @@ class _MealVisionConsentTileState extends State<_MealVisionConsentTile> {
     }
     setState(() {
       _saving = false;
-      _current = loadMealVisionConsent();
+      _current = _load();
     });
     if (!next && !saved) {
       ScaffoldMessenger.of(context).showSnackBar(

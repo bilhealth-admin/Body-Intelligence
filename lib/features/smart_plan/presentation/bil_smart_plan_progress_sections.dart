@@ -241,7 +241,11 @@ extension _BilSmartPlanProgressSections on _BilSmartPlanPageState {
           FilledButton.icon(
             onPressed: _busy ? null : () => _changeStatus(BilPlanStatus.active),
             icon: const Icon(Icons.check_circle_outline),
-            label: Text(_t('Approve and activate', 'اعتماد وتفعيل')),
+            label: Text(
+              plan.status == BilPlanStatus.paused
+                  ? _t('Resume plan', 'استئناف الخطة')
+                  : _t('Approve and activate', 'اعتماد وتفعيل'),
+            ),
           ),
         ],
       ],

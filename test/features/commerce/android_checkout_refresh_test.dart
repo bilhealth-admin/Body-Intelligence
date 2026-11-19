@@ -1,9 +1,11 @@
+import '../../support/google_subscription_replacement_fixture.dart';
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_term.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
+import 'package:body_intelligence_log/features/commerce/services/android_store_purchase_readiness.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_catalog_adapter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +16,19 @@ import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+// These tests start after a positive Android licensing preflight and retain
+// their original country, native Billing, receipt and owner assertions.
+// Dedicated readiness tests cover licensing rejection and remediation.
+AndroidStorePurchaseReadiness _licensedReadinessForBillingBoundary() {
+  return AndroidStorePurchaseReadiness(
+    probe: (_, _) async {},
+    recover: (_) async {
+      throw StateError('Unexpected license remediation in billing fixture');
+    },
+    release: (_) async {},
+  );
+}
 
 GooglePlayProductDetails _product({
   String token = 'old-token',
@@ -66,6 +81,8 @@ class _Play extends Fake implements InAppPurchase {
   int launches = 0;
   PurchaseParam? lastPurchase;
   @override
+  Future<String> countryCode() async => 'JOR';
+  @override
   Stream<List<PurchaseDetails>> get purchaseStream => updates.stream;
   @override
   Future<bool> isAvailable() async => true;
@@ -84,7 +101,12 @@ class _Play extends Fake implements InAppPurchase {
 }
 
 class _Store extends VerifiedStorePurchaseService {
-  _Store(_Play play) : super(purchase: play);
+  _Store(_Play play)
+    : super(
+        googleReplacementReader: emptyGoogleSubscriptionProofFixture(),
+        purchase: play,
+        androidReadiness: _licensedReadinessForBillingBoundary(),
+      );
   @override
   bool get configured => true;
 }
@@ -255,9 +277,14 @@ void main() {
   test(
     'duplicate taps during preflight produce one query and one purchase',
     () async {
+      final queryEntered = Completer<void>();
       final pending = Completer<ProductDetailsResponse>();
-      play.query = (_) => pending.future;
+      play.query = (_) {
+        queryEntered.complete();
+        return pending.future;
+      };
       final first = buy();
+      await queryEntered.future;
       await buy();
       expect(play.queries, 1);
       expect(play.launches, 0);

@@ -1,74 +1,6 @@
 part of 'intelligence_center_page.dart';
 
 extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
-  Future<bool> _readVerifiedWeightHistoryInChat(
-    String questionText,
-    String locale,
-    int generation, {
-    required bool autoSpeakReply,
-  }) async {
-    // All supported locales still use the general Coach flow. This
-    // deterministic in-chat readout is limited to reviewed Arabic/English copy.
-    if (!locale.startsWith('ar') && !locale.startsWith('en')) return false;
-    final readQuestion = _resolvedWeightHistoryReadQuestion(questionText);
-    if (!isCoachWeightHistoryReadRequest(readQuestion)) return false;
-
-    final ownerAtStart = conversationPreferences.localOwnerId;
-    final epoch = conversationPersistenceEpoch;
-    CoachContextSnapshot? snapshot;
-    try {
-      snapshot = await readCoachContextSnapshot(
-        ProviderScope.containerOf(context, listen: false),
-      );
-    } on Object {
-      // A timeout is an unknown dataset, never a verified empty history.
-    }
-    if (!mounted ||
-        generation != requestGeneration ||
-        epoch != conversationPersistenceEpoch ||
-        coachMessageVisitCancelled ||
-        ownerAtStart != conversationPreferences.localOwnerId) {
-      return true;
-    }
-    final text =
-        snapshot != null &&
-            snapshot.weightReadStatus == CoachWeightReadStatus.verified
-        ? CoachWeightHistoryReadout.build(
-            snapshot: snapshot,
-            question: readQuestion,
-            languageTag: locale,
-            now: ref.read(intelligenceConversationClockProvider)(),
-          ).message
-        : CoachWeightHistoryReadout.statusMessage(
-            status:
-                snapshot?.weightReadStatus ?? CoachWeightReadStatus.unavailable,
-            languageTag: locale,
-          );
-    final message = IntelligenceMessage(
-      id: 'coach-verified-weight-${DateTime.now().microsecondsSinceEpoch}',
-      role: IntelligenceMessageRole.bil,
-      kind: IntelligenceMessageKind.coach,
-      text: text,
-      createdAt: DateTime.now(),
-      evidence: const ['owner-scoped-local-weight-history'],
-      confidence: 1,
-      modality: autoSpeakReply
-          ? IntelligenceMessageModality.voice
-          : IntelligenceMessageModality.text,
-    );
-    _updateState(() {
-      messages.add(message);
-      animatedResponseIds.add(message.id);
-    });
-    _scrollToLatest();
-    unawaited(_saveConversation());
-    if (autoSpeakReply) {
-      await _speakCoachText(message.text, locale);
-      await _resumeLiveCallIfNeeded(generation);
-    }
-    return true;
-  }
-
   Future<void> ask({
     CoachInputChannel inputChannel = CoachInputChannel.text,
     String? detectedLanguageTag,
@@ -399,6 +331,12 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
             messages.add(notice);
             animatedResponseIds.add(notice.id);
           });
+          if (coachContext.weightReadStatus == CoachWeightReadStatus.withheld) {
+            _offerCoachSettingsGuidance(
+              focus: CoachContextFocus.analytics,
+              appendReceipt: false,
+            );
+          }
           _scrollToLatest();
           unawaited(_saveConversation());
           return;

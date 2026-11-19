@@ -46,11 +46,19 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
 
   SubscriptionState _withClosedTestContinuity(
     String ownerId,
-    SubscriptionState store,
-  ) {
+    SubscriptionState store, {
+    bool allowContinuity = true,
+    SubscriptionState? overrideGrant,
+  }) {
     final effectiveNow = _now();
-    final grant = ServerEntitlementRepository._closedTestSessionCache
-        .fallbackFor(ownerId: ownerId, now: effectiveNow);
+    final grant =
+        overrideGrant ??
+        (allowContinuity
+            ? ServerEntitlementRepository._closedTestSessionCache.fallbackFor(
+                ownerId: ownerId,
+                now: effectiveNow,
+              )
+            : null);
     if (grant == null) return store;
     final storeBoundary = verifiedSubscriptionBoundary(store)?.toUtc();
     if (store.authority == EntitlementAuthority.verifiedServer &&
@@ -68,8 +76,9 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
   SubscriptionState _revalidateClosedTestObservation(
     String ownerId,
     SubscriptionState state,
-    int? observationGeneration,
-  ) {
+    int? observationGeneration, {
+    bool allowContinuity = true,
+  }) {
     CommunityOwnerOperation.checkCurrent();
     if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
       return FreePlan.createState();
@@ -87,10 +96,20 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
     }
     // Retired or expired responses may use only the latest independent,
     // bounded same-owner proof. A fallback never renews that proof's lease.
-    return _withClosedTestContinuity(ownerId, FreePlan.createState());
+    return _withClosedTestContinuity(
+      ownerId,
+      FreePlan.createState(),
+      allowContinuity: allowContinuity,
+    );
   }
 
-  SubscriptionState _verifiedFree({DateTime? verifiedAt}) => SubscriptionState(
+  SubscriptionState _verifiedFree({
+    DateTime? verifiedAt,
+    StoreRenewalObservation? storeRenewal,
+    bool storeDefinitive = true,
+  }) => SubscriptionState(
+    storeRenewalObservation: storeRenewal,
+    storeRenewalDefinitivelyInactive: storeDefinitive,
     verifiedAt: verifiedAt,
     plan: CommercePlan.free,
     entitlements: FreePlan.entitlements,
@@ -114,4 +133,30 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
     ),
     now: now,
   );
+
+  SubscriptionState _withStoreRenewalObservation(
+    SubscriptionState state,
+    StoreRenewalObservation? observation, {
+    bool definitiveInactive = false,
+  }) => observation == null && !definitiveInactive
+      ? state
+      : SubscriptionState(
+          plan: state.plan,
+          entitlements: state.entitlements,
+          authority: state.authority,
+          lifecycle: state.lifecycle,
+          provider: state.provider,
+          startedAt: state.startedAt,
+          currentPeriodEndsAt: state.currentPeriodEndsAt,
+          trialEndsAt: state.trialEndsAt,
+          gracePeriodEndsAt: state.gracePeriodEndsAt,
+          verifiedAt: state.verifiedAt,
+          serverRevision: state.serverRevision,
+          storeOriginalTransactionId: state.storeOriginalTransactionId,
+          verifiedNextPeriod: state.verifiedNextPeriod,
+          isPurchasable: state.isPurchasable,
+          canRestorePurchases: state.canRestorePurchases,
+          storeRenewalObservation: observation,
+          storeRenewalDefinitivelyInactive: definitiveInactive,
+        );
 }

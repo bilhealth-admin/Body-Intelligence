@@ -1,3 +1,5 @@
+import '../../data/database/database_provider.dart';
+import '../nutrition/presentation/gemini_vision_capture.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
@@ -106,6 +108,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final quantity = TextEditingController(text: '100');
   final foodSearch = SearchController();
   bool mealSearchOpenScheduled = false;
+  int mealSearchGeneration = 0;
   static const FoodSearchAssistance _searchAssistance = FoodSearchAssistance();
   final scrollController = ScrollController();
   final mealEntryKey = GlobalKey();
@@ -127,44 +130,13 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   @override
   void initState() {
     super.initState();
-    if (const {
-      'breakfast',
-      'lunch',
-      'dinner',
-      'snack',
-    }.contains(widget.initialMealType)) {
-      mealType = widget.initialMealType!;
-    }
-    if (widget.focusMealEntry) {
-      mealSearchActive = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _focusMealEntry();
-      });
-    }
-    if (widget.initialAction != null) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _applyInitialAction(),
-      );
-    }
+    _initializeEntryCapture();
   }
 
   @override
   void didUpdateWidget(covariant DailyLogPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final actionChanged = oldWidget.initialAction != widget.initialAction;
-    if (!oldWidget.focusMealEntry && widget.focusMealEntry) {
-      mealFocusApplied = false;
-      mealSearchActive = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _focusMealEntry();
-      });
-    }
-    if (widget.initialAction != null && actionChanged) {
-      initialActionApplied = false;
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _applyInitialAction(),
-      );
-    }
+    _updateEntryCapture(oldWidget);
   }
 
   @override

@@ -2,6 +2,8 @@ import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 
 import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/database/database_provider.dart';
+import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_repository.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
@@ -28,6 +30,15 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          databaseProvider.overrideWithValue(database),
+          defaultNutritionGoalTargetProvider.overrideWithValue(
+            const NutritionGoalTarget(
+              calories: 2000,
+              carbsPercent: 45,
+              proteinPercent: 30,
+              fatPercent: 25,
+            ),
+          ),
           nutritionGoalScheduleRepositoryProvider.overrideWithValue(repository),
           nutritionGoalScheduleProvider.overrideWithValue(
             const AsyncData(NutritionGoalSchedule()),
@@ -94,14 +105,22 @@ class _FailingNutritionGoalScheduleRepository
   Completer<void>? pendingDaySave;
 
   @override
-  Future<void> saveDay(int weekday, NutritionGoalTarget? target) async {
+  Future<void> saveDay(
+    int weekday,
+    NutritionGoalTarget? target, {
+    bool Function()? isCurrent,
+  }) async {
     daySaveAttempts += 1;
     if (pendingDaySave case final pending?) await pending.future;
     throw StateError('simulated local storage failure');
   }
 
   @override
-  Future<void> saveMeal(String mealType, NutritionGoalTarget? target) async {
+  Future<void> saveMeal(
+    String mealType,
+    NutritionGoalTarget? target, {
+    bool Function()? isCurrent,
+  }) async {
     mealSaveAttempts += 1;
     throw StateError('simulated local storage failure');
   }

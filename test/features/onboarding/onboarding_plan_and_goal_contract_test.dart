@@ -26,6 +26,24 @@ void main() {
     hipsCm: 98,
   );
 
+  test('optional country does not block or change the nutrition estimate', () {
+    final withoutCountry = valid().copyWith(countryRegion: '');
+    final now = DateTime(2026, 8, 30);
+    expect(
+      OnboardingPlanCalculator.validate(withoutCountry, on: now).isValid,
+      isTrue,
+    );
+    final optional = OnboardingPlanCalculator.calculate(
+      withoutCountry,
+      now: now,
+    );
+    final selected = OnboardingPlanCalculator.calculate(valid(), now: now);
+    expect(optional.targets.calories, selected.targets.calories);
+    expect(optional.model.tdeeKcal, selected.model.tdeeKcal);
+    expect(optional.targetDate, selected.targetDate);
+    expect(withoutCountry.countryRegion, isEmpty);
+  });
+
   test('selected weekly pace changes the persisted calorie recommendation', () {
     final slower = OnboardingPlanCalculator.calculate(
       valid(pace: .25),

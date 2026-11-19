@@ -12,6 +12,7 @@ import '../../../app/theme/premium_design_tokens.dart';
 import '../../../data/database/app_database.dart';
 import '../../../shared/widgets/actionable_error_state.dart';
 import '../../../shared/widgets/premium_surface.dart';
+import 'daily_logged_workout_list.dart';
 
 part 'daily_log_input_copy.dart';
 
@@ -94,16 +95,7 @@ class DailyExerciseSection extends StatelessWidget {
         trailing: const BilCrystalExpansionIndicator(),
         children: [
           browseButton,
-          if (structuredExerciseNames.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            for (final name in structuredExerciseNames)
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.fitness_center_rounded),
-                title: Text(name, maxLines: 1, overflow: TextOverflow.ellipsis),
-              ),
-          ],
+          const DailyLoggedWorkoutList(),
           TextField(
             key: const Key('daily-log-exercise-notes'),
             controller: controller,
@@ -140,6 +132,7 @@ class DailyExerciseSection extends StatelessWidget {
               ],
             ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
+          const DailyLoggedWorkoutList(),
           TextField(
             key: const Key('daily-log-exercise-notes'),
             controller: controller,

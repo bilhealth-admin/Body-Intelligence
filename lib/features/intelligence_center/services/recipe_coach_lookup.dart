@@ -33,7 +33,24 @@ final class RecipeCoachLookup {
   }) async {
     final normalizedQuestion = _normalize(question);
     final questionTokens = _tokens(normalizedQuestion);
-    if (!_hasRecipeIntent(questionTokens)) return null;
+    final explicitRecipeIntent =
+        questionTokens.any(
+          (token) =>
+              _recipeIntentTokens.contains(token) &&
+              !_genericRecipeIntentTokens.contains(token),
+        ) ||
+        _hasVietnameseRecipePhrase(normalizedQuestion);
+    if (!explicitRecipeIntent && !_hasRecipeIntent(questionTokens)) return null;
+    final methodSubject = explicitRecipeIntent
+        ? const <String>[]
+        : _tokensInOrder(normalizedQuestion)
+              .where(
+                (token) =>
+                    !_ignoredTokens.contains(token) &&
+                    !_recipeLookupWrapperTokens.contains(token),
+              )
+              .toList(growable: false);
+    if (!explicitRecipeIntent && methodSubject.isEmpty) return null;
 
     final language = _supportedLocale(locale);
     final searchIndex = await _searchIndices.putIfAbsent(
@@ -61,6 +78,16 @@ final class RecipeCoachLookup {
     }
     for (final index in matchingIndices) {
       final entry = searchIndex.entries[index];
+      // A method/preparation word does not establish the food domain. The
+      // whole remaining requested subject must name a contiguous catalog
+      // title/ID span. Generic adjectives or two-letter prefix overlaps cannot
+      // turn an unrelated request into a recipe answer.
+      if (!explicitRecipeIntent &&
+          !entry.candidates.any(
+            (candidate) => _containsMethodSubject(candidate, methodSubject),
+          )) {
+        continue;
+      }
       var score = 0;
       for (final candidate in entry.candidates) {
         if (candidate.length >= 4 && normalizedQuestion.contains(candidate)) {
@@ -250,6 +277,34 @@ final class RecipeCoachLookup {
   static bool _hasRecipeIntent(Set<String> tokens) =>
       tokens.any(_recipeIntentTokens.contains);
 
+  static bool _hasVietnameseRecipePhrase(String question) => RegExp(
+    r'(^|[^\p{L}\p{N}])công\s+thức(?=$|[^\p{L}\p{N}])',
+    unicode: true,
+  ).hasMatch(question);
+
+  static List<String> _tokensInOrder(String value) => value
+      .split(RegExp(r'[^\p{L}\p{N}]+', unicode: true))
+      .where((token) => token.length >= 2)
+      .toList(growable: false);
+
+  static bool _containsMethodSubject(String candidate, List<String> subject) {
+    if (!subject.any((token) => token.length >= 3)) return false;
+    final named = _tokensInOrder(
+      candidate,
+    ).where((token) => !_ignoredTokens.contains(token)).toList(growable: false);
+    for (var start = 0; start + subject.length <= named.length; start++) {
+      var matches = true;
+      for (var offset = 0; offset < subject.length; offset++) {
+        if (named[start + offset] != subject[offset]) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) return true;
+    }
+    return false;
+  }
+
   static Set<String> _tokens(String value) => value
       .split(RegExp(r'[^\p{L}\p{N}]+', unicode: true))
       .where((token) => token.length >= 2)
@@ -331,8 +386,6 @@ const _recipeIntentTokens = <String>{
   'приготовить',
   'রেসিপি',
   'রান্না',
-  'công',
-  'thức',
   'nấu',
   'สูตร',
   'วิธีทำ',
@@ -341,6 +394,86 @@ const _recipeIntentTokens = <String>{
   'recept',
   'koken',
   'приготувати',
+};
+
+// These also describe non-food methods, preparation and instructions. They
+// are only lookup cues when the requested subject names a verified recipe.
+const _genericRecipeIntentTokens = <String>{
+  'make',
+  'طريقه',
+  'تحضير',
+  'préparer',
+  'preparar',
+  'tarif',
+  'tarifi',
+  'hazırla',
+  'zubereiten',
+  'ترکیب',
+  'دستور',
+  'طرز',
+  'विधि',
+  '作り方',
+  '만드는법',
+  '做法',
+  'приготовить',
+  'สูตร',
+  'วิธีทำ',
+  'приготувати',
+};
+
+// Lookup wrappers may surround a named subject. Descriptive/subject words
+// such as simple, morning, sleep and walking deliberately remain meaningful.
+const _recipeLookupWrapperTokens = <String>{
+  'can',
+  'could',
+  'you',
+  'please',
+  'give',
+  'me',
+  'show',
+  'find',
+  'want',
+  'need',
+  'an',
+  'to',
+  'do',
+  'my',
+  'اعطني',
+  'اعطيني',
+  'اريد',
+  'لي',
+  'كيف',
+  'رجاء',
+  'فضلك',
+  'donne',
+  'donnez',
+  'moi',
+  'une',
+  'un',
+  'la',
+  'le',
+  'les',
+  'comment',
+  'je',
+  'veux',
+  'voudrais',
+  'vous',
+  'dame',
+  'quiero',
+  'una',
+  'como',
+  'por',
+  'favor',
+  'muéstrame',
+  'bana',
+  'bir',
+  'nasil',
+  'nasıl',
+  'lütfen',
+  'isterim',
+  'wie',
+  'ich',
+  'bitte',
 };
 
 const _ignoredTokens = <String>{

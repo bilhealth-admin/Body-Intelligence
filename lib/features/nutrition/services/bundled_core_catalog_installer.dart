@@ -16,7 +16,28 @@ class BundledCoreCatalogInstaller {
   static const expectedSha256 =
       '2801A24BC8E53BC5724BA9A73A1A9262410C71A1E4128C7F59902D8E4D4EBA83';
 
+  // A verified immutable bundled catalog can be reused while its file identity
+  // stays unchanged. Owner rows/results are never held in this shared cache.
+  static final _verifiedFiles = <String, _VerifiedCatalogStamp>{};
+  static final _installing = <String, Future<File>>{};
+
   Future<File> ensureInstalled(Directory root) async {
+    await root.create(recursive: true);
+    final rootPath = await root.resolveSymbolicLinks();
+    final inFlight = _installing[rootPath];
+    if (inFlight != null) return inFlight;
+    final installation = _ensureInstalled(Directory(rootPath));
+    _installing[rootPath] = installation;
+    try {
+      return await installation;
+    } finally {
+      if (identical(_installing[rootPath], installation)) {
+        _installing.remove(rootPath);
+      }
+    }
+  }
+
+  Future<File> _ensureInstalled(Directory root) async {
     final catalog = await safeCatalogFile(root, [
       'catalogs',
       catalogVersion,
@@ -61,11 +82,28 @@ class BundledCoreCatalogInstaller {
   }
 
   Future<bool> _verified(File file) async {
-    if (!await file.exists() || await file.length() != expectedSizeBytes) {
+    final before = await file.stat();
+    if (before.type != FileSystemEntityType.file ||
+        before.size != expectedSizeBytes) {
+      _verifiedFiles.remove(file.path);
       return false;
     }
+    if (_verifiedFiles[file.path]?.matches(before) ?? false) return true;
+
+    // Never cache an unverified file or a file changed during the digest read.
     final digest = await sha256.bind(file.openRead()).first;
-    return digest.toString() == expectedSha256.toLowerCase();
+    final after = await file.stat();
+    final stamp = _VerifiedCatalogStamp.fromStat(before);
+    if (digest.toString() != expectedSha256.toLowerCase() ||
+        !stamp.matches(after)) {
+      _verifiedFiles.remove(file.path);
+      return false;
+    }
+    if (_verifiedFiles.length >= 8) {
+      _verifiedFiles.remove(_verifiedFiles.keys.first);
+    }
+    _verifiedFiles[file.path] = stamp;
+    return true;
   }
 
   Future<void> _writeRegistry(Directory root, File catalog) async {
@@ -83,10 +121,37 @@ class BundledCoreCatalogInstaller {
         'size_bytes': expectedSizeBytes,
       },
     };
-    await temporary.writeAsString(
-      const JsonEncoder.withIndent('  ').convert(payload),
-      flush: true,
-    );
+    final encoded = const JsonEncoder.withIndent('  ').convert(payload);
+    if (await registry.exists() &&
+        await registry.length() == utf8.encode(encoded).length &&
+        await registry.readAsString() == encoded) {
+      return;
+    }
+    await temporary.writeAsString(encoded, flush: true);
     await replaceCatalogFile(temporary, registry);
   }
+}
+
+final class _VerifiedCatalogStamp {
+  const _VerifiedCatalogStamp(
+    this.size,
+    this.modified,
+    this.changed,
+    this.mode,
+  );
+
+  factory _VerifiedCatalogStamp.fromStat(FileStat stat) =>
+      _VerifiedCatalogStamp(stat.size, stat.modified, stat.changed, stat.mode);
+
+  final int size;
+  final DateTime modified;
+  final DateTime changed;
+  final int mode;
+
+  bool matches(FileStat stat) =>
+      stat.type == FileSystemEntityType.file &&
+      stat.size == size &&
+      stat.modified == modified &&
+      stat.changed == changed &&
+      stat.mode == mode;
 }

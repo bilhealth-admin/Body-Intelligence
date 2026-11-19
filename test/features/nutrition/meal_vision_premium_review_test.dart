@@ -173,7 +173,7 @@ void main() {
             find.byKey(const Key('premium-vision-continue')),
           )
           .onPressed,
-      isNull,
+      isNotNull,
     );
     await tester.ensureVisible(
       find.byKey(const Key('premium-vision-select-0')),
@@ -186,7 +186,7 @@ void main() {
             find.byKey(const Key('premium-vision-continue')),
           )
           .onPressed,
-      isNull,
+      isNotNull,
     );
     expect(result, isNull);
     await tester.ensureVisible(
@@ -239,7 +239,7 @@ void main() {
             find.byKey(const Key('premium-vision-continue')),
           )
           .onPressed,
-      isNull,
+      isNotNull,
     );
     await tester.ensureVisible(find.byKey(const Key('premium-vision-eaten-0')));
     await tester.tap(find.byKey(const Key('premium-vision-eaten-0')));
@@ -291,7 +291,7 @@ void main() {
             find.byKey(const Key('premium-vision-continue')),
           )
           .onPressed,
-      isNull,
+      isNotNull,
     );
   });
 
@@ -395,7 +395,7 @@ void main() {
       await tester.tap(find.text('Open source'));
       await tester.pumpAndSettle();
       final use = find.byKey(const Key('premium-vision-use-food'));
-      expect(tester.widget<FilledButton>(use).onPressed, isNull);
+      expect(tester.widget<FilledButton>(use).onPressed, isNotNull);
       await tester.tap(find.text(record.name));
       await tester.pump();
       expect(tester.widget<FilledButton>(use).onPressed, isNotNull);

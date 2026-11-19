@@ -296,11 +296,69 @@ extension _CloudNutritionRows on CloudNutritionSnapshotCodec {
     await _putFood(food, dependency: false);
   }
 
+  Meal _decodeDeletedVisionMeal(CloudNutritionSnapshot snapshot) {
+    const keys = {
+      'schema',
+      'ownerId',
+      'deletedAt',
+      'meal',
+      'visionDayLifecycle',
+    };
+    if (snapshot.data.length != keys.length ||
+        !snapshot.data.keys.toSet().containsAll(keys)) {
+      throw const FormatException('Unsupported deleted photo meal fields.');
+    }
+    final lineageMeal = Meal.fromJson(
+      _localRow(snapshot.data['meal'], _mealRowKeys),
+    );
+    if (snapshot.data['visionDayLifecycle'] is! Map ||
+        snapshot.data['deletedAt'] is! String ||
+        lineageMeal.uuid != snapshot.id ||
+        lineageMeal.deletedAt == null ||
+        lineageMeal.deletedAt!.toUtc() != _deletionTime(snapshot).toUtc() ||
+        lineageMeal.revision < 1 ||
+        !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(lineageMeal.dayKey) ||
+        !const {
+          'breakfast',
+          'lunch',
+          'dinner',
+          'snack',
+          'other',
+        }.contains(lineageMeal.type)) {
+      throw const FormatException('Invalid deleted photo meal binding.');
+    }
+    _text(lineageMeal.name, max: 500);
+    _decodeVisionDayLifecycle(snapshot.data['visionDayLifecycle'], lineageMeal);
+    return lineageMeal;
+  }
+
   Future<void> _applyMeal(CloudNutritionSnapshot snapshot) async {
     final existing = await (database.select(
       database.meals,
     )..where((row) => row.uuid.equals(snapshot.id))).getSingleOrNull();
     if (snapshot.deleted) {
+      Meal? lineageMeal;
+      if (snapshot.data.containsKey('visionDayLifecycle')) {
+        // Only typed Vision tombstones carry their real historical meal row.
+        // Keep it deleted on first restore so recapture retains the parent
+        // identity/lifecycle without a marker table or resurrected live meal.
+        lineageMeal = _decodeDeletedVisionMeal(snapshot);
+        if (existing != null && existing.dayKey != lineageMeal.dayKey) {
+          throw const FormatException('Conflicting deleted photo meal day.');
+        }
+        if (existing == null) {
+          await database
+              .into(database.meals)
+              .insert(
+                lineageMeal
+                    .toCompanion(false)
+                    .copyWith(
+                      id: const Value.absent(),
+                      syncStatus: const Value('synced'),
+                    ),
+              );
+        }
+      }
       if (existing != null) {
         final deletedAt = Value(_deletionTime(snapshot));
         await (database.update(
@@ -318,6 +376,12 @@ extension _CloudNutritionRows on CloudNutritionSnapshotCodec {
             deletedAt: deletedAt,
             syncStatus: const Value('synced'),
           ),
+        );
+      }
+      if (lineageMeal != null) {
+        await _applyVisionDayLifecycle(
+          snapshot.data['visionDayLifecycle'],
+          lineageMeal,
         );
       }
       await _retireHistoricalFirstFood();
@@ -400,6 +464,11 @@ extension _CloudNutritionRows on CloudNutritionSnapshotCodec {
       );
     }
     if (seen.isNotEmpty) await _retireHistoricalFirstFood();
+    if (snapshot.data.containsKey('visionDayLifecycle')) {
+      await _applyVisionDayLifecycle(snapshot.data['visionDayLifecycle'], meal);
+    } else {
+      await _applyClosedVisionDay(snapshot.data['closedVisionDay'], meal);
+    }
   }
 
   Future<void> _retireHistoricalFirstFood() async {

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:body_intelligence_log/features/commerce/domain/store_catalog_configuration.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_term.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -354,14 +356,52 @@ void main() {
         expect(service.state, VerifiedStoreState.failed);
         expect(
           service.messageCode,
-          ownershipConflict
-              ? 'purchase_owned_by_another_account'
-              : 'reconciliation_verification_failed',
+          'reconciliation_verification_failed',
+          reason:
+              'Unsolicited replay stays quiet; receipt ownership remains blocked.',
         );
         expect(service.canStartPurchase, isFalse);
         expect(native.finishes, 0);
         expect(native.launches, 0);
         expect(service.entitlement?.grantsPaidAccess ?? false, isFalse);
+        expect(
+          service.ownershipConflictProductId,
+          ownershipConflict ? StoreCatalogConfiguration.premiumMonthly : null,
+        );
+        expect(service.hasPendingVerifiedFinish, isFalse);
+        expect(service.verifiedBenefitRevision, 0);
+        expect(verificationCalls, 1);
+        expect(service.verificationBackedOff, isFalse);
+        await service.purchasePlan(
+          CommercePlan.premium,
+          term: SubscriptionTerm.oneMonth,
+        );
+        expect(native.launches, 0);
+        expect(native.finishes, 0);
+        expect(verificationCalls, 1);
+
+        // A stale ready UI must still fail the private retained-receipt guard.
+        // Public state fields can be stale independently of receipt authority.
+        final blockedState = service.state;
+        final blockedMessage = service.messageCode;
+        service.state = VerifiedStoreState.ready;
+        service.messageCode = null;
+        try {
+          expect(service.canStartPurchase, isFalse);
+          await service.purchasePlan(
+            CommercePlan.premium,
+            term: SubscriptionTerm.oneMonth,
+          );
+          expect(native.launches, 0);
+          expect(native.finishes, 0);
+          expect(verificationCalls, 1);
+          expect(service.entitlement?.grantsPaidAccess ?? false, isFalse);
+        } finally {
+          service.state = blockedState;
+          service.messageCode = blockedMessage;
+        }
+        expect(service.state, VerifiedStoreState.failed);
+        expect(service.messageCode, 'reconciliation_verification_failed');
       },
     );
   }

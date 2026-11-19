@@ -5,6 +5,9 @@ class _ReceiptStatusGateway extends _HeldGateway
   final boundRequests = <CoachCloudRequest>[];
   final receiptRequestIds = <String>[];
   String receiptState = 'reserved';
+  String? failureDiagnostic;
+  Completer<void>? statusHold;
+  Completer<void>? statusEntered;
   late CoachCloudRequest _request;
 
   @override
@@ -26,7 +29,12 @@ class _ReceiptStatusGateway extends _HeldGateway
     if (request.beginSubmission(
       readReceipt: () async {
         receiptRequestIds.add(request.requestId);
+        if (statusEntered case final entered? when !entered.isCompleted) {
+          entered.complete();
+        }
+        await statusHold?.future;
         final settled = receiptState == 'succeeded';
+        final terminal = settled || receiptState == 'refunded';
         return {
           'request_id': request.requestId,
           'capability': 'text',
@@ -34,14 +42,15 @@ class _ReceiptStatusGateway extends _HeldGateway
           'credit_actual': settled ? 3 : 0,
           'credit_included_actual': settled ? 3 : 0,
           'credit_paid_actual': 0,
-          'completed_at': settled ? '2026-10-20T12:00:00Z' : null,
+          'completed_at': terminal ? '2026-10-20T12:00:00Z' : null,
         };
       },
     )) {
       calls++;
     }
-    return const LocalModelResult(
+    return LocalModelResult(
       status: CoachServiceStatus.temporarilyUnavailable,
+      diagnosticCode: failureDiagnostic,
     );
   }
 }

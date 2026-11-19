@@ -6,13 +6,7 @@ extension _IntelligenceActionConfirmation on _IntelligenceCenterPageState {
     CoachActionPermissionMode mode,
   ) {
     if (binding.allows(mode)) return true;
-    _appendToolReceipt(
-      tr(
-        'This action needs write permission. Change the shield setting to continue.',
-        'يحتاج هذا الإجراء إلى إذن كتابة. غيّر إعداد الدرع للمتابعة.',
-      ),
-      verifiedResult: false,
-    );
+    _offerCoachSettingsGuidance(actionPermission: true);
     return false;
   }
 

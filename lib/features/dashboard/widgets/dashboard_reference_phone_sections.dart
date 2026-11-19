@@ -268,89 +268,10 @@ class _ReferenceAiCoachCard extends StatelessWidget {
   final bool arabic;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: const Key('dashboard-mobile-ai-coach-entry'),
-        onTap: () => context.push('/intelligence-center'),
-        borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: const LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
-              colors: [Color(0xFF12394E), Color(0xFF071923)],
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x30071822),
-                blurRadius: 26,
-                offset: Offset(0, 12),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFC8F3FF),
-                  border: Border.all(color: Colors.white70, width: 1.5),
-                ),
-                child: ClipOval(
-                  child: const BilCoachPortrait(fit: BoxFit.cover),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _referenceText(context, 'BIL AI Coach', 'مدرب BIL الذكي'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15,
-                        letterSpacing: 0.25,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      _referenceText(
-                        context,
-                        'Ask about your body, meals, and training',
-                        'اسأل عن جسمك ووجباتك وتمارينك',
-                      ),
-                      style: const TextStyle(
-                        color: Color(0xFFC3D7E0),
-                        height: 1.25,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              const BilNavigationFeedback(
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Color(0xFFC8F3FF),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => const KeyedSubtree(
+    key: Key('dashboard-mobile-ai-coach-entry'),
+    child: DashboardHeader(),
+  );
 }
 
 class _CompactIntelligenceCard extends StatelessWidget {

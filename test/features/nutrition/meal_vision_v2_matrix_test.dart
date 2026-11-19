@@ -105,7 +105,7 @@ void main() {
                 tester
                     .widget<FilledButton>(key('premium-vision-continue'))
                     .onPressed,
-                isNull,
+                isNotNull,
               );
               expect(tester.takeException(), isNull, reason: id);
             },
@@ -142,7 +142,7 @@ void main() {
                 tester
                     .widget<FilledButton>(key('premium-vision-use-food'))
                     .onPressed,
-                isNull,
+                isNotNull,
               );
               final foodTitle = language == 'ar' ? food.arabicName! : food.name;
               await tester.scrollUntilVisible(

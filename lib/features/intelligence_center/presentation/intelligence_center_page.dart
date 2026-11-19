@@ -1,3 +1,4 @@
+import '../../nutrition/presentation/gemini_vision_capture.dart';
 import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import '../../../app/router/bil_primary_navigation.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
@@ -172,10 +173,12 @@ part 'intelligence_conversation_voice.dart';
 part 'intelligence_conversation_voice_transcript.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_media_confirmation.dart';
+part 'intelligence_gemini_vision_confirmation.dart';
 part 'intelligence_query_flow.dart';
 part 'intelligence_query_guard_flow.dart';
 part 'intelligence_smart_plan_flow.dart';
 part 'intelligence_query_retry.dart';
+part 'intelligence_context_recovery.dart';
 part 'intelligence_query_decision.dart';
 part 'intelligence_action_flow.dart';
 part 'intelligence_meal_action_flow.dart';
@@ -285,6 +288,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     CoachCloudRequest cloudRequest,
   })?
   failedRequest;
+  CoachCloudRequest? checkedRefundedRequest;
   bool sending = false;
   bool listening = false;
   bool voiceSubmitPending = false;

@@ -5,11 +5,13 @@ import { fetchDisclosedProvider } from "../_shared/ai_provider_recipient.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   mealVisionConsentIsCurrent,
+  mealVisionNutritionConsentPurpose,
   mealVisionProviderMatchesConsent,
 } from "./consent.ts";
 import { buildProviderRequest } from "./providers/builders.ts";
 import { loadProviderConfig } from "./providers/config.ts";
 import { normalizeProviderResponse } from "./providers/normalize.ts";
+import { GeminiVisionCandidate, normalizeGeminiEstimateResponse } from "./providers/normalize_v2.ts";
 import {
   resolveVisionLocale,
   validateVisionResponseLocale,
@@ -163,11 +165,26 @@ deno.serve(async (request: Request) => {
   }
   const body = await request.json().catch(() => null);
   if (
-    !body || body.schema_version !== 1 ||
+    !body || ![1, 2].includes(body.schema_version) ||
     typeof body.image_base64 !== "string" ||
     typeof body.mime_type !== "string" || !allowedMimeTypes.has(body.mime_type)
   ) {
     return reply({ error: "invalid_image_payload" }, 400);
+  }
+  const schemaVersion: 1 | 2 = body.schema_version === 2 ? 2 : 1;
+  if (schemaVersion === 2) {
+    if (deno.env.get("BIL_MEAL_VISION_ESTIMATES_V2_ENABLED") !== "true" ||
+        directConfig?.provider !== "gemini") {
+      return reply({ error: "vision_estimates_not_enabled" }, 503);
+    }
+    const { data: nutritionConsent, error: nutritionConsentError } = await admin
+      .from("bil_consent_receipts").select("granted,policy_version")
+      .eq("user_id", data.user.id).eq("purpose", mealVisionNutritionConsentPurpose)
+      .order("recorded_at", { ascending: false }).limit(1).maybeSingle();
+    if (nutritionConsentError) return reply({ error: "consent_check_failed" }, 503);
+    if (!mealVisionConsentIsCurrent(nutritionConsent)) {
+      return reply({ error: "meal_vision_nutrition_consent_required" }, 403);
+    }
   }
   if (!base64Pattern.test(body.image_base64)) {
     return reply({ error: "invalid_image_payload" }, 400);
@@ -180,7 +197,7 @@ deno.serve(async (request: Request) => {
   const digestBytes = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(
-      visionCacheInput(requestedLocale, body.mime_type, body.image_base64),
+      visionCacheInput(requestedLocale, body.mime_type, body.image_base64, schemaVersion),
     ),
   );
   const payloadDigest = Array.from(new Uint8Array(digestBytes))
@@ -223,6 +240,9 @@ deno.serve(async (request: Request) => {
   if (reservation?.duplicate === true) {
     if (reservation.state === "succeeded" && reservation.response_body) {
       const cached = reservation.response_body as Record<string, unknown>;
+      if (schemaVersion === 2 && cached.schema_version !== 2) {
+        return reply({ error: "idempotency_payload_mismatch" }, 409);
+      }
       return reply({
         ...cached,
         cache: {
@@ -276,6 +296,7 @@ deno.serve(async (request: Request) => {
           imageBase64: body.image_base64,
           mimeType: body.mime_type,
           requestedLocale,
+          schemaVersion,
         });
         upstream = await fetchDisclosedProvider(fetch, providerRequest.url, {
           method: "POST",
@@ -380,6 +401,7 @@ deno.serve(async (request: Request) => {
       warnings: string[];
     }
   >;
+  let estimatedCandidates: GeminiVisionCandidate[] | null = null;
   let providerUsage: {
     input_tokens: number | null;
     output_tokens: number | null;
@@ -399,11 +421,10 @@ deno.serve(async (request: Request) => {
   };
   if (directConfig) {
     try {
-      const normalized = normalizeProviderResponse(
-        decoded,
-        directConfig,
-        requestedLocale,
-      );
+      const normalized = schemaVersion === 2
+        ? normalizeGeminiEstimateResponse(decoded, directConfig, requestedLocale)
+        : normalizeProviderResponse(decoded, directConfig, requestedLocale);
+      if (normalized.schema_version === 2) estimatedCandidates = normalized.candidates;
       candidates = normalized.candidates;
       providerUsage = normalized.usage;
     } catch (error) {
@@ -484,7 +505,7 @@ deno.serve(async (request: Request) => {
       costSource = "pricing_table";
     }
   }
-  const responseBody = {
+  const legacyResponseBody = {
     schema_version: 1,
     response_locale: requestedLocale,
     request_id: idempotencyKey,
@@ -511,6 +532,10 @@ deno.serve(async (request: Request) => {
     },
     quota: reservation,
   };
+  const responseBody = schemaVersion === 2
+    ? { ...legacyResponseBody, schema_version: 2,
+      candidates: estimatedCandidates!, notice_key: "review_gemini_estimate" }
+    : legacyResponseBody;
   if (candidates.length === 0) {
     const { data: nonFoodPolicy, error: policyError } = await admin.rpc(
       "bil_decide_unknown_nonfood_settlement",

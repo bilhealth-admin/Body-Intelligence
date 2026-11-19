@@ -15,8 +15,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/security/bil_mobile_integrity_service.dart';
+import 'android_store_purchase_readiness.dart';
+import 'verified_store_catalog_adapter.dart'
+    show googlePlayOneTimeDiscountMetadata;
 import '../../community/services/community_owner_operation.dart';
 import 'store_account_visit.dart';
+import 'android_checkout_failure_recovery.dart';
 import 'store_purchase_trace.dart';
 import 'store_verification_request_policy.dart';
 import 'store_subscription_blocker_recovery.dart';
@@ -37,7 +41,9 @@ part 'verified_store_purchase_checkout.dart';
 part 'verified_store_purchase_restore.dart';
 part 'verified_store_restore_diagnostics.dart';
 part 'verified_store_purchase_owned.dart';
+part 'verified_store_google_replacement.dart';
 part 'verified_store_purchase_pending.dart';
+part 'verified_store_android_checkout_recovery.dart';
 part 'verified_store_subscription_recovery.dart';
 part 'verified_store_purchase_completion.dart';
 part 'verified_store_purchase_initialization.dart';
@@ -45,14 +51,26 @@ part 'verified_store_purchase_initialization.dart';
 class VerifiedStorePurchaseService extends ChangeNotifier {
   VerifiedStorePurchaseService({
     InAppPurchase? purchase,
+    AndroidStorePurchaseReadiness? androidReadiness,
+    GoogleSubscriptionReplacementReader? googleReplacementReader,
     this._appleStoreSync,
     this._subscriptionInventoryReader,
     this._freshRecoveryEntitlementReader,
     this.pendingTimeout = const Duration(seconds: 90),
     this.handlesBoost = true,
-  }) : _purchaseInstance = purchase;
+    this._androidCheckoutRecovery = const AndroidCheckoutFailureRecovery(),
+  }) : _googleReplacementReader =
+           googleReplacementReader ??
+           const GoogleSubscriptionReplacementReader(),
+       _androidReadiness = androidReadiness ?? AndroidStorePurchaseReadiness(),
+       _purchaseInstance = purchase;
 
   InAppPurchase? _purchaseInstance;
+  final AndroidStorePurchaseReadiness _androidReadiness;
+  final GoogleSubscriptionReplacementReader _googleReplacementReader;
+  final AndroidCheckoutFailureRecovery _androidCheckoutRecovery;
+  AndroidCheckoutFailureAttempt? _androidCheckoutAttempt;
+  int _androidReceiptObservationEpoch = 0;
   final Future<void> Function()? _appleStoreSync;
   final StoreSubscriptionInventoryReader? _subscriptionInventoryReader;
   final Future<SubscriptionState> Function()? _freshRecoveryEntitlementReader;
@@ -123,7 +141,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   String? messageCode;
   String? ownershipConflictProductId;
   String? lastVerifiedProductId;
-  GooglePlayPurchaseDetails? _activeGooglePurchase;
   Future<void>? _initialization;
   Future<void> _purchaseUpdates = Future<void>.value();
   int _queuedPurchaseUpdates = 0;
@@ -211,24 +228,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         productAvailable: products.isNotEmpty,
         messageCode: messageCode,
       );
-
-  bool _restoreCatalogAfterSettledInactiveReceipt() {
-    final settled = _settledInactiveCatalogRecovery;
-    if (settled == null ||
-        _disposed ||
-        products.isEmpty ||
-        state != VerifiedStoreState.unavailable ||
-        messageCode != 'no_restorable_purchases' ||
-        hasPendingVerifiedFinish ||
-        settled.generation != _purchaseEventGeneration ||
-        settled.benefitRevision != verifiedBenefitRevision ||
-        !_storeVisit.isCurrent(settled.visit)) {
-      return false;
-    }
-    _settledInactiveCatalogRecovery = null;
-    state = VerifiedStoreState.ready;
-    return true;
-  }
 
   Future<void> initialize() {
     if (_disposed || busy) return Future<void>.value();
@@ -346,9 +345,41 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
     checkoutTrace = StorePurchaseTrace();
     final purchaseGeneration = _purchaseEventGeneration;
-    state = VerifiedStoreState.purchasePending;
+    // Play has not opened while the catalog country and terms are checked.
+    final androidPreflight = defaultTargetPlatform == TargetPlatform.android;
+    if (androidPreflight) _checkoutPreflightInFlight = true;
+    state = androidPreflight
+        ? VerifiedStoreState.loading
+        : VerifiedStoreState.purchasePending;
     messageCode = null;
     notifyListeners();
+    if (androidPreflight &&
+        (!await _checkAndroidReadiness(
+              user.id,
+              product.id,
+              checkoutVisit,
+              purchaseGeneration,
+            ) ||
+            !_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration))) {
+      return;
+    }
+    GooglePlayPurchaseDetails? freshGoogleReplacement;
+    GoogleReplacementProof? googleReplacementProof;
+    if (androidPreflight) {
+      final proof = await _freshGoogleReplacement(
+        owner: user.id,
+        visit: checkoutVisit,
+        generation: purchaseGeneration,
+        targetProductId: product.id,
+        requested: replacesGooglePurchase,
+      );
+      if (proof == null ||
+          !_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration)) {
+        return;
+      }
+      googleReplacementProof = proof;
+      freshGoogleReplacement = proof.previous;
+    }
     if (defaultTargetPlatform == TargetPlatform.android ||
         defaultTargetPlatform == TargetPlatform.iOS) {
       product = await _freshCheckoutProduct(
@@ -358,10 +389,18 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         expectedStoreCountryCode: expectedStoreCountryCode,
       );
       if (product == null ||
-          _disposed ||
-          purchaseGeneration != _purchaseEventGeneration) {
+          !_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration)) {
         return;
       }
+    }
+    if (androidPreflight &&
+        !_replacementProofCurrent(
+          googleReplacementProof,
+          user.id,
+          checkoutVisit,
+          purchaseGeneration,
+        )) {
+      return;
     }
     if (verificationBackedOff ||
         _unresolvedVerificationReceipts.isNotEmpty ||
@@ -371,6 +410,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    if (androidPreflight) {
+      state = VerifiedStoreState.purchasePending;
+      messageCode = null;
+      notifyListeners();
+    }
+    if (!_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration)) return;
     final accountHash = storeAccountIdentifier(
       ownerId: user.id,
       platform: defaultTargetPlatform,
@@ -378,12 +423,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     final PurchaseParam purchaseParam;
     if (defaultTargetPlatform == TargetPlatform.android &&
         product is GooglePlayProductDetails) {
-      final previous = replacesGooglePurchase ?? _activeGooglePurchase;
-      // Same-product checkout is not a cross-subscription replacement. Play
-      // handles existing ownership; a replacement of itself is invalid.
-      final previousPurchase = previous?.productID == product.id
-          ? null
-          : previous;
+      // Only this attempt's fresh native + canonical proof may select an old SKU.
+      final previousPurchase = freshGoogleReplacement;
       final isDowngrade = downgradeAtRenewal;
       // The platform wrapper already selects the exact base plan/offer used
       // to construct this ProductDetails instance. Reusing its token avoids
@@ -409,8 +450,19 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         applicationUserName: accountHash,
       );
     }
+    _armAndroidCheckout(checkoutVisit, purchaseGeneration, product.id);
     _armPurchaseWatchdog(purchaseGeneration);
     try {
+      if (!_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration) ||
+          (androidPreflight &&
+              !_replacementProofCurrent(
+                googleReplacementProof,
+                user.id,
+                checkoutVisit,
+                purchaseGeneration,
+              ))) {
+        return;
+      }
       _purchaseInitiatedByThisService = true;
       _purchaseInitiatedProductId = product.id;
       checkoutTrace?.mark(StorePurchaseStage.nativeLaunch);
@@ -418,9 +470,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         purchaseParam: purchaseParam,
       );
       checkoutTrace?.mark(StorePurchaseStage.nativeLaunchReturned);
-      if (_disposed ||
-          started ||
-          purchaseGeneration != _purchaseEventGeneration) {
+      if (!_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration) ||
+          started) {
         return;
       }
       state = VerifiedStoreState.failed;
@@ -428,7 +479,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       _clearPurchaseInitiation();
       notifyListeners();
     } on PlatformException catch (error) {
-      if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
+      if (!_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration)) {
+        return;
+      }
       if (defaultTargetPlatform == TargetPlatform.iOS &&
           error.code == 'storekit_duplicate_product_object') {
         _clearPurchaseInitiation();
@@ -476,7 +529,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       messageCode = 'purchase_status_unknown';
       notifyListeners();
     } on Object {
-      if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
+      if (!_canLaunchCheckout(user.id, checkoutVisit, purchaseGeneration)) {
+        return;
+      }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_status_unknown';
       notifyListeners();
@@ -487,112 +542,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       _purchaseBoost(offerToken: offerToken);
 
   Future<void> refreshEntitlement() async {
-    if (_disposed) return;
-    final visit = _storeVisit.capture();
-    final generation = ++_entitlementRefreshGeneration;
-    final user = AppEnvironment.supabaseRuntimeReady
-        ? Supabase.instance.client.auth.currentUser
-        : null;
-    if (user == null) {
-      _clearEntitlement();
-      return;
-    }
-    if (_hasServerVerifiedInactiveMarker(user.id)) {
-      // Do not let a read replica briefly restore paid access after a receipt
-      // was already verified as expired, revoked, or refunded on the server.
-      _clearEntitlement();
-    }
-    try {
-      final rows = await Supabase.instance.client
-          .from('bil_subscriptions')
-          .select()
-          .eq('owner_id', user.id)
-          .limit(1)
-          .timeout(const Duration(seconds: 10));
-      if (_disposed ||
-          generation != _entitlementRefreshGeneration ||
-          !_storeVisit.isCurrent(visit)) {
-        return;
-      }
-      if (Supabase.instance.client.auth.currentUser?.id != user.id) {
-        // Never carry one member's verified purchase into another member's
-        // session, even if the original request finishes after auth changes.
-        _clearEntitlement();
-        return;
-      }
-      if (rows.isEmpty) {
-        // A successful empty read is possible for a short period while the
-        // verification function's write is replicating. Keep a still-valid,
-        // server-verified entitlement for this owner instead of flashing the
-        // paid surfaces back to Free.
-        _retainEntitlementIfValid(user.id);
-        return;
-      }
-      final row = rows.first;
-      final verifiedAt = DateTime.tryParse('${row['verified_at']}')?.toUtc();
-      if (verifiedAt == null) {
-        _retainEntitlementIfValid(user.id);
-        return;
-      }
-      if (_entitlementOwnerId == user.id &&
-          entitlement != null &&
-          verifiedAt.isBefore(entitlement!.verifiedAt)) {
-        return;
-      }
-      final plan = _planFromIdOrNull('${row['plan_id']}');
-      final lifecycle = '${row['lifecycle']}'.trim().toLowerCase();
-      final provider = row['provider']?.toString().trim().toLowerCase();
-      final expiresAt = DateTime.tryParse('${row['expires_at']}')?.toUtc();
-      final gracePeriodEndsAt = DateTime.tryParse(
-        '${row['grace_period_ends_at']}',
-      )?.toUtc();
-      if (plan == null ||
-          !_knownStoreLifecycles.contains(lifecycle) ||
-          (provider != 'apple' && provider != 'google') ||
-          (_accessLifecycles.contains(lifecycle) &&
-              (lifecycle == 'grace_period'
-                  ? gracePeriodEndsAt == null
-                  : expiresAt == null))) {
-        // Unknown/malformed rows are unreadable snapshots, not proof of a
-        // revocation. Preserve the last valid entitlement only within its
-        // own billing boundary.
-        _retainEntitlementIfValid(user.id);
-        return;
-      }
-      final refreshedEntitlement = VerifiedStoreEntitlement(
-        plan: plan,
-        lifecycle: lifecycle,
-        verifiedAt: verifiedAt,
-        renewsOrExpiresAt: expiresAt,
-        gracePeriodEndsAt: gracePeriodEndsAt,
-        provider: provider,
-      );
-      if (_hasServerVerifiedInactiveMarker(user.id) &&
-          refreshedEntitlement.grantsPaidAccess) {
-        final inactiveAt = _serverVerifiedInactiveAt;
-        if (inactiveAt == null ||
-            !refreshedEntitlement.verifiedAt.isAfter(inactiveAt)) {
-          // The verify response is newer and authoritative. Do not
-          // momentarily unlock paid surfaces from an active row that has not
-          // caught up yet.
-          _clearEntitlement();
-          return;
-        }
-        // A newer canonical verification is evidence of a real later active
-        // subscription, not a replica of the inactive receipt's old row.
-        _clearServerVerifiedInactiveOwner(user.id);
-      }
-      entitlement = refreshedEntitlement;
-      _entitlementOwnerId = user.id;
-    } on Object {
-      // Never turn an unverifiable local label into paid access, but do not
-      // erase a still-valid server-verified result for a transient failure.
-      if (!_disposed &&
-          generation == _entitlementRefreshGeneration &&
-          _storeVisit.isCurrent(visit)) {
-        _retainEntitlementIfValid(user.id);
-      }
-    }
+    await _refreshCanonicalEntitlement();
   }
 
   static const _knownStoreLifecycles = {
@@ -617,20 +567,6 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     'grace_period',
     'cancelled',
   };
-
-  void _clearEntitlement() {
-    entitlement = null;
-    _entitlementOwnerId = null;
-  }
-
-  void _retainEntitlementIfValid(String ownerId) {
-    final current = entitlement;
-    if (_entitlementOwnerId != ownerId ||
-        current == null ||
-        !current.grantsPaidAccess) {
-      _clearEntitlement();
-    }
-  }
 
   Future<void> manageSubscription({String? productId}) async {
     final Uri uri;

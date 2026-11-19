@@ -1,3 +1,4 @@
+import '../commerce/providers/store_renewal_recheck_provider.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
 import '../../shared/widgets/bil_crystal_arrow.dart';
@@ -17,6 +18,7 @@ import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/profile_auth_identity_provider.dart';
 import '../cloud_platform/presentation/cloud_auto_sync_coordinator.dart';
 import 'reference_settings_copy.dart';
+import '../auth/services/local_account_sign_out.dart';
 
 /// Explicitly local sign-out: never revoke the member's other devices.
 final settingsSignOutProvider = Provider<Future<void> Function(String)>((ref) {
@@ -34,20 +36,11 @@ final settingsSignOutProvider = Provider<Future<void> Function(String)>((ref) {
 Future<void> signOutSettingsSession(
   GoTrueClient auth,
   String expectedOwnerId,
-) async {
-  if (auth.currentUser?.id != expectedOwnerId) {
-    throw StateError('The active account changed');
-  }
-  try {
-    await CloudBeforeSignOutSync.runBounded();
-    await auth.signOut(scope: SignOutScope.local);
-  } catch (_) {
-    // GoTrue clears the local session before contacting the revocation API.
-    // A network error must not claim that a cleared device session is signed in.
-    if (auth.currentUser != null) rethrow;
-  }
-  if (auth.currentUser != null) throw StateError('The active account changed');
-}
+) => signOutMatchingAccount(
+  auth,
+  expectedOwnerId,
+  prepare: (_) => CloudBeforeSignOutSync.runBounded(),
+);
 
 /// Grouped settings with a native-symbol pilot. iOS visual approval is separate.
 class ReferenceSettingsHomePage extends ConsumerStatefulWidget {
@@ -68,13 +61,16 @@ class _ReferenceSettingsHomePageState
     final identity = ref.watch(profileAuthIdentityProvider);
     final ownerId = identity.asData?.value.ownerId;
     final sessionReady = identity.hasValue && !identity.hasError;
-    final showPremiumUpsell = ref
-        .watch(verifiedSubscriptionPresentationProvider)
-        .when(
-          data: (value) => value.plan == CommercePlan.free,
-          loading: () => false,
-          error: (_, _) => false,
-        );
+    final renewalPending = ref.watch(storeRenewalPresentationPendingProvider);
+    final showPremiumUpsell =
+        !renewalPending &&
+        ref
+            .watch(verifiedSubscriptionPresentationProvider)
+            .when(
+              data: (value) => value.plan == CommercePlan.free,
+              loading: () => false,
+              error: (_, _) => false,
+            );
     return Scaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(
         context,
@@ -257,7 +253,11 @@ class _ReferenceSettingsHomePageState
     FocusManager.instance.primaryFocus?.unfocus();
     try {
       await ref.read(settingsSignOutProvider)(ownerId);
-      if (mounted) context.go('/login');
+      if (mounted &&
+          (!AppEnvironment.supabaseRuntimeReady ||
+              Supabase.instance.client.auth.currentUser == null)) {
+        context.go('/login');
+      }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

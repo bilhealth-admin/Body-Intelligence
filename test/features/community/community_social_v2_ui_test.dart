@@ -1,5 +1,10 @@
 import 'dart:async';
 
+import 'package:body_intelligence_log/app/theme/bil_flat_icon.dart';
+import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_sapphire.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_native_symbols.dart';
+
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_comment_threads.dart';
 import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
@@ -490,6 +495,114 @@ void main() {
       expect(find.byKey(const Key('community-nav-messages')), findsOneWidget);
     },
   );
+
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    testWidgets('ordinary flat icons retain native symbols on $platform', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const Scaffold(
+            body: BilFlatIcon(kind: BilSemanticIconKind.community),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final native = tester.widget<BilNativeSymbolGlyph>(
+        find.byType(BilNativeSymbolGlyph),
+      );
+      expect(native.symbol, BilSettingsSymbol.people);
+      expect(tester.takeException(), isNull);
+    });
+
+    group('Community action glyph fixtures on $platform', () {
+      late _SocialV2Repository repository;
+      // Match the existing Unicode fixture: SDK workers live outside WidgetFakeAsync.
+      setUp(() => repository = _SocialV2Repository());
+      tearDown(() => repository.communitySocialClient.dispose());
+
+      for (final brightness in Brightness.values) {
+        testWidgets(
+          'Community action glyphs stay distinct through the badge on $platform $brightness',
+          (tester) async {
+            try {
+              await tester.pumpWidget(
+                MaterialApp(
+                  theme: ThemeData(platform: platform, brightness: brightness),
+                  locale: const Locale('en'),
+                  home: CommunityHubPage(repository: repository),
+                ),
+              );
+              await tester.pumpAndSettle();
+              await tapCommunityControl(
+                tester,
+                find.byKey(const Key('community-settings')),
+              );
+              await tester.pumpAndSettle();
+
+              const actions = {
+                'community-nav-account': Icons.account_circle_outlined,
+                'community-nav-messages': Icons.chat_bubble_outline_rounded,
+                'community-nav-channels': Icons.forum_outlined,
+                'community-nav-friends': Icons.people_outline_rounded,
+                'community-my-bil-code': Icons.qr_code_2_rounded,
+              };
+              final renderedGlyphs = <IconData>{};
+              for (final action in actions.entries) {
+                final row = find.byKey(Key(action.key));
+                await tester.scrollUntilVisible(
+                  row,
+                  180,
+                  scrollable: find
+                      .descendant(
+                        of: find.byKey(const Key('community-navigation-sheet')),
+                        matching: find.byType(Scrollable),
+                      )
+                      .first,
+                );
+                await tester.pumpAndSettle();
+                final badge = find.descendant(
+                  of: row,
+                  matching: find.byType(BilSemanticIconBadge),
+                );
+                expect(
+                  find.descendant(of: row, matching: find.byType(BilFlatIcon)),
+                  findsOneWidget,
+                );
+                expect(badge, findsOneWidget);
+                // This checks the production branch before host/native selection:
+                // no category bitmap can replace these explicit action glyphs.
+                expect(
+                  find.descendant(
+                    of: badge,
+                    matching: find.byType(BilNativeSymbolGlyph),
+                  ),
+                  findsNothing,
+                );
+                final glyph = tester.widget<Icon>(
+                  find.descendant(of: badge, matching: find.byType(Icon)),
+                );
+                expect(glyph.icon, action.value);
+                expect(glyph.size, 22);
+                expect(
+                  glyph.color,
+                  CommunitySapphire.actionBlue(tester.element(row)),
+                );
+                expect(tester.getSize(badge), const Size(42, 42));
+                renderedGlyphs.add(glyph.icon!);
+              }
+              expect(renderedGlyphs, hasLength(actions.length));
+              expect(tester.takeException(), isNull);
+            } finally {
+              await tester.pumpWidget(const SizedBox.shrink());
+              await tester.pump();
+            }
+          },
+        );
+      }
+    });
+  }
 
   testWidgets('save action is authoritative and saved collection is private', (
     tester,

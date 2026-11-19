@@ -5,8 +5,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('BIL-09 recovery copy covers all 25 locales', () {
-    expect(SmartPlanRecoveryRuntimeCopy.sources, hasLength(6));
+    expect(SmartPlanRecoveryRuntimeCopy.sources, hasLength(8));
     expect(SmartPlanRecoveryRuntimeCopy.balanced, isTrue);
+    expect(
+      SmartPlanRecoveryRuntimeCopy.resolve('Resume plan', 'ar'),
+      'استئناف الخطة',
+    );
+    expect(
+      SmartPlanRecoveryRuntimeCopy.sources,
+      contains(
+        'Resume this paused plan? Meals remain suggestions; nothing is logged automatically.',
+      ),
+    );
     for (final source in SmartPlanRecoveryRuntimeCopy.sources) {
       for (final tag in BilLocalePolicy.productionTags) {
         final native = SmartPlanRecoveryRuntimeCopy.resolve(source, tag);

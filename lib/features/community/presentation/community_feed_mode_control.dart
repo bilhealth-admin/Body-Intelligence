@@ -44,10 +44,18 @@ class _CommunityFeedModeControl extends StatelessWidget {
       child: ListTile(
         minTileHeight: 60,
         contentPadding: const EdgeInsetsDirectional.fromSTEB(20, 4, 16, 4),
-        leading: const Icon(Icons.tune_rounded),
+        leading: Icon(switch (selectedMode) {
+          CommunityFeedMode.explore => Icons.explore_outlined,
+          CommunityFeedMode.following => Icons.person_add_alt_1_outlined,
+          CommunityFeedMode.friends => Icons.people_outline_rounded,
+          CommunityFeedMode.forYou => Icons.auto_awesome_outlined,
+        }, color: CommunitySapphire.actionBlue(context)),
         title: Text(_communityFeedModeLabel(context, selectedMode)),
-        trailing: const BilNavigationFeedback(
-          child: Icon(Icons.expand_more_rounded),
+        trailing: BilNavigationFeedback(
+          child: Icon(
+            Icons.expand_more_rounded,
+            color: CommunitySapphire.actionBlue(context),
+          ),
         ),
       ),
     ),

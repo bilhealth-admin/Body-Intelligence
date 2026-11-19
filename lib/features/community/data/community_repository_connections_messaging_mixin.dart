@@ -33,6 +33,7 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
             .whereType<Map>()
             .map(Map<String, dynamic>.from)
             .where((row) {
+              final owner = operation.ownerId;
               final id = row['id'];
               final requester = row['requester_id'];
               final addressee = row['addressee_id'];
@@ -46,12 +47,13 @@ mixin _CommunityConnectionsMessagingRepositoryMixin {
                   CommunityRepository._uuid.hasMatch(requester) &&
                   addressee is String &&
                   CommunityRepository._uuid.hasMatch(addressee) &&
-                  (requester == operation.ownerId ||
-                      addressee == operation.ownerId) &&
+                  (requester == owner || addressee == owner) &&
                   status is String &&
-                  const {'pending', 'accepted'}.contains(status) &&
+                  (const {'pending', 'accepted'}.contains(status) ||
+                      (status == 'declined' && requester == owner)) &&
                   otherUserId is String &&
                   CommunityRepository._uuid.hasMatch(otherUserId) &&
+                  otherUserId == (requester == owner ? addressee : requester) &&
                   (displayName == null ||
                       (displayName is String &&
                           displayName.trim().length >= 2 &&

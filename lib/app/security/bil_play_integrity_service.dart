@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import 'bil_integrity_exception.dart';
+import '../../features/community/services/community_owner_operation.dart';
 
 /// Google Play Integrity Standard requests for Android.
 ///
@@ -38,6 +39,7 @@ final class BilPlayIntegrityService {
   }
 
   bool _prepared = false;
+  int _prepareEpoch = 0;
   Future<void>? _prepareFuture;
 
   bool get supported =>
@@ -49,12 +51,14 @@ final class BilPlayIntegrityService {
     final pending = _prepareFuture;
     if (pending != null) return pending;
 
-    final future = _prepareNative();
+    final future = _prepareNative(_prepareEpoch);
     _prepareFuture = future;
-    return future.whenComplete(() => _prepareFuture = null);
+    return future.whenComplete(() {
+      if (identical(_prepareFuture, future)) _prepareFuture = null;
+    });
   }
 
-  Future<void> _prepareNative() async {
+  Future<void> _prepareNative(int epoch) async {
     final cloudProjectNumber = _cloudProjectNumber;
     if (cloudProjectNumber == null) {
       throw const BilIntegrityException('play_integrity_not_configured');
@@ -64,17 +68,45 @@ final class BilPlayIntegrityService {
         'prepare',
         <String, Object?>{'cloudProjectNumber': cloudProjectNumber},
       );
-      _prepared = ready == true;
+      if (epoch == _prepareEpoch) _prepared = ready == true;
     } on PlatformException {
-      _prepared = false;
+      if (epoch == _prepareEpoch) _prepared = false;
     } on MissingPluginException {
-      _prepared = false;
+      if (epoch == _prepareEpoch) _prepared = false;
     }
   }
 
   Future<String> authorize({
     required String action,
     required String payloadDigest,
+    bool retainLicenseRecovery = false,
+  }) async {
+    late final SupabaseClient client;
+    try {
+      client = Supabase.instance.client;
+    } on Object {
+      throw const BilIntegrityException('cloud_not_initialized');
+    }
+    final owner = client.auth.currentUser?.id;
+    if (owner == null) {
+      throw const BilIntegrityException('authentication_required');
+    }
+    // Observe the original authenticated visit BEFORE any native async work.
+    return CommunityOwnerOperation.run(
+      client: client,
+      ownerId: owner,
+      action: (_) => _authorize(
+        action: action,
+        payloadDigest: payloadDigest,
+        retainLicenseRecovery: retainLicenseRecovery,
+      ),
+    );
+  }
+
+  Future<String> _authorize({
+    required String action,
+    required String payloadDigest,
+    required bool retainLicenseRecovery,
   }) async {
     if (!supported) {
       throw const BilIntegrityException('play_integrity_not_supported');
@@ -94,6 +126,7 @@ final class BilPlayIntegrityService {
       throw const BilIntegrityException('authentication_required');
     }
 
+    final owner = client.auth.currentUser!.id;
     final requestId = 'pi-${_uuid.v4()}';
     final requestHash = _requestHash(
       action: action,
@@ -104,58 +137,133 @@ final class BilPlayIntegrityService {
     String integrityToken;
     try {
       if (!_prepared) await prepare();
-      integrityToken = await _requestToken(requestHash);
+      integrityToken = await _requestToken(requestHash, retainLicenseRecovery);
     } on Object {
       _prepared = false;
       await prepare();
       try {
-        integrityToken = await _requestToken(requestHash);
+        integrityToken = await _requestToken(
+          requestHash,
+          retainLicenseRecovery,
+        );
       } on Object {
         throw const BilIntegrityException('integrity_token_unavailable');
       }
     }
 
+    var keepRecovery = false;
+    BilIntegrityException licenseRequired() {
+      keepRecovery = retainLicenseRecovery;
+      return BilIntegrityException(
+        'license_unlicensed',
+        recoveryHandle: retainLicenseRecovery ? requestHash : null,
+        recoveryOwner: retainLicenseRecovery ? owner : null,
+      );
+    }
+
     try {
-      final response = await client.functions.invoke(
-        'play-integrity',
-        body: <String, Object?>{
-          'request_id': requestId,
-          'action': action,
-          'payload_digest': payloadDigest,
-          'request_hash': requestHash,
-          'integrity_token': integrityToken,
-        },
+      CommunityOwnerOperation.checkCurrent();
+      final response = await CommunityOwnerOperation.run(
+        client: client,
+        ownerId: owner,
+        action: (_) => client.functions.invoke(
+          'play-integrity',
+          body: <String, Object?>{
+            'request_id': requestId,
+            'action': action,
+            'payload_digest': payloadDigest,
+            'request_hash': requestHash,
+            'integrity_token': integrityToken,
+          },
+        ),
       );
 
       final data = response.data;
       if (data is! Map) {
         throw const BilIntegrityException('integrity_response_invalid');
       }
+      if (_isLicenseDenial(response.status, data)) throw licenseRequired();
       final grant = data['grant'];
       final grantId = grant is Map ? grant['id']?.toString().trim() ?? '' : '';
       if (response.status != 200 ||
           data['allowed'] != true ||
           data['trustworthy'] != true ||
           grantId.isEmpty) {
-        throw BilIntegrityException(
-          data['reason']?.toString() ?? 'play_integrity_rejected',
-        );
+        throw BilIntegrityException('play_integrity_rejected');
       }
       return grantId;
     } on BilIntegrityException {
       rethrow;
+    } on FunctionException catch (error) {
+      if (client.auth.currentUser?.id == owner &&
+          _isLicenseDenial(error.status, error.details)) {
+        throw licenseRequired();
+      }
+      throw const BilIntegrityException('integrity_backend_unavailable');
     } on Object {
       throw const BilIntegrityException('integrity_backend_unavailable');
     } finally {
       // Do not retain Google's encrypted integrity token in application state.
       integrityToken = '';
+      if (!keepRecovery) await releaseLicenseRecovery(requestHash);
     }
   }
 
-  Future<String> _requestToken(String requestHash) async {
+  // Only the authenticated backend's exact 403 denial permits remediation.
+  static bool _isLicenseDenial(int status, Object? data) =>
+      status == 403 &&
+      data is Map &&
+      data['allowed'] == false &&
+      data['trustworthy'] == false &&
+      data['reason'] == 'license_unlicensed' &&
+      data['mode'] == 'enforce' &&
+      data['grant'] == null;
+
+  Future<void> releaseLicenseRecovery(String handle) async {
+    try {
+      await _channel
+          .invokeMethod<void>('releaseToken', {'handle': handle})
+          .timeout(const Duration(seconds: 2));
+    } on Object {
+      // Native leases also expire independently after 60 seconds.
+    }
+  }
+
+  Future<bool> recoverLicense(BilIntegrityException denial) async {
+    final handle = denial.recoveryHandle;
+    final owner = denial.recoveryOwner;
+    if (denial.code != 'license_unlicensed' ||
+        handle == null ||
+        owner == null ||
+        Supabase.instance.client.auth.currentUser?.id != owner) {
+      return false;
+    }
+    try {
+      // Any dialog result is interaction only. A fresh server check follows.
+      final code = await _channel.invokeMethod<int>('getLicensed', {
+        'handle': handle,
+      });
+      return code == 3 &&
+          Supabase.instance.client.auth.currentUser?.id == owner;
+    } on Object {
+      return false;
+    } finally {
+      _prepareEpoch++;
+      _prepared = false;
+      _prepareFuture = null;
+    }
+  }
+
+  Future<String> _requestToken(
+    String requestHash,
+    bool retainForRecovery,
+  ) async {
     final token = await _channel.invokeMethod<String>(
       'requestToken',
-      <String, Object?>{'requestHash': requestHash},
+      <String, Object?>{
+        'requestHash': requestHash,
+        'retainForRecovery': retainForRecovery,
+      },
     );
     if (token == null || token.isEmpty) {
       throw StateError('integrity_token_empty');

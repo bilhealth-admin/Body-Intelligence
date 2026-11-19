@@ -69,15 +69,19 @@ extension _CoachMessageReadFlow on _IntelligenceCenterPageState {
       _scrollToLatest();
       unawaited(_saveConversation());
       return true;
-    } on CoachHealthContextUnavailable {
+    } on CoachHealthContextUnavailable catch (error) {
       if (mounted && owner.scope.isCurrent) {
-        _appendToolReceipt(
-          tr(
-            'Nutrition is disabled in Coach context settings.',
-            'التغذية معطلة في إعدادات سياق المدرب.',
-          ),
-          verifiedResult: false,
-        );
+        if (error.disabledFocus case final focus?) {
+          _offerCoachSettingsGuidance(focus: focus);
+        } else {
+          _appendToolReceipt(
+            tr(
+              'The saved nutrition details could not be read. Nothing was changed.',
+              'تعذرت قراءة تفاصيل التغذية المحفوظة. لم يتغير شيء.',
+            ),
+            verifiedResult: false,
+          );
+        }
       }
       return true;
     } on FormatException {

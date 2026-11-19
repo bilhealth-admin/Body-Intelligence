@@ -258,13 +258,33 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
           onTap: _pickCountry,
           decoration: InputDecoration(
             labelText: t('Country or region'),
-            helperText: null,
-            suffixIcon: IconButton(
-              tooltip: t('Country or region'),
-              onPressed: _pickCountry,
-              icon: const BilNavigationFeedback(
-                child: Icon(Icons.arrow_drop_down_rounded),
-              ),
+            helperText: t('Optional'),
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_draft.countryRegion.trim().isNotEmpty)
+                  IconButton(
+                    key: const Key('onboarding-country-clear'),
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).deleteButtonTooltip,
+                    onPressed: () {
+                      _country.clear();
+                      _setDraft(
+                        _draft.copyWith(countryRegion: ''),
+                        persist: true,
+                      );
+                    },
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+                IconButton(
+                  tooltip: t('Country or region'),
+                  onPressed: _pickCountry,
+                  icon: const BilNavigationFeedback(
+                    child: Icon(Icons.arrow_drop_down_rounded),
+                  ),
+                ),
+              ],
             ),
             border: const OutlineInputBorder(),
           ),

@@ -31,7 +31,7 @@ void main() {
       expect(field(tester, 'amount'), isEmpty);
       expect(
         tester.widget<FilledButton>(key('premium-vision-continue')).onPressed,
-        isNull,
+        isNotNull,
       );
       expect(result, isNull);
       await tap(tester, key('premium-vision-eaten-0'));
@@ -79,7 +79,7 @@ void main() {
     expect(key('premium-vision-food-0'), findsNothing);
     expect(
       tester.widget<FilledButton>(key('premium-vision-continue')).onPressed,
-      isNull,
+      isNotNull,
     );
     await tap(tester, key('premium-vision-close'));
     expect(completed, isTrue);

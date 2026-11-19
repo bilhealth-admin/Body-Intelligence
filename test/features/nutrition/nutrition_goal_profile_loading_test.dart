@@ -55,6 +55,12 @@ void main() {
           ],
         );
         addTearDown(container.dispose);
+        final pace = nutritionPaceIntentProvider(
+          container.read(preferencesRepositoryProvider),
+        );
+        final paceSubscription = container.listen(pace, (_, _) {});
+        addTearDown(paceSubscription.close);
+        await container.read(pace.future).timeout(const Duration(seconds: 5));
         final defaults = container.read(nutritionGoalDefaultsProvider);
         expect(defaults['goal.fiber'], 28);
         if (state == 'absent') {

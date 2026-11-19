@@ -105,81 +105,97 @@ class _CloudSyncConsentNoticeState
                   24,
                   20 + MediaQuery.viewPaddingOf(sheetContext).bottom,
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              sheetContext,
-                            ).colorScheme.primaryContainer,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.backup_rounded,
-                            size: 28,
-                            color: Theme.of(
-                              sheetContext,
-                            ).colorScheme.onPrimaryContainer,
-                          ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // The route supplies bounded height. Only the explanation
+                    // scrolls; neither explicit privacy choice can fall below
+                    // this nested navigator's viewport or its primary dock.
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: SingleChildScrollView(
+                        key: const Key('cloud-sync-consent-details-scroll'),
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Center(
+                              child: Container(
+                                width: 52,
+                                height: 52,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    sheetContext,
+                                  ).colorScheme.primaryContainer,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.backup_rounded,
+                                  size: 28,
+                                  color: Theme.of(
+                                    sheetContext,
+                                  ).colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              sheetContext.strings.text(
+                                CloudSyncConsentCopy.title,
+                              ),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(height: 18),
+                            const CloudSyncConsentSummary(),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              key: const Key('cloud-sync-manage-categories'),
+                              onPressed: () => _closeChoice(
+                                sheetContext,
+                                _CloudConsentChoice.manageCategories,
+                              ),
+                              child: Text(
+                                sheetContext.strings.text(
+                                  CloudSyncConsentCopy.manageCategoriesAction,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Text(
-                        sheetContext.strings.text(CloudSyncConsentCopy.title),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      key: const Key('cloud-sync-enable-backup'),
+                      onPressed: () => _closeChoice(
+                        sheetContext,
+                        _CloudConsentChoice.enableProgress,
                       ),
-                      const SizedBox(height: 18),
-                      const CloudSyncConsentSummary(),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        key: const Key('cloud-sync-manage-categories'),
-                        onPressed: () => _closeChoice(
-                          sheetContext,
-                          _CloudConsentChoice.manageCategories,
-                        ),
-                        child: Text(
-                          sheetContext.strings.text(
-                            CloudSyncConsentCopy.manageCategoriesAction,
-                          ),
+                      child: Text(
+                        sheetContext.strings.text(
+                          CloudSyncConsentCopy.primaryAction,
                         ),
                       ),
-                      const SizedBox(height: 22),
-                      FilledButton(
-                        key: const Key('cloud-sync-enable-backup'),
-                        onPressed: () => _closeChoice(
-                          sheetContext,
-                          _CloudConsentChoice.enableProgress,
-                        ),
-                        child: Text(
-                          sheetContext.strings.text(
-                            CloudSyncConsentCopy.primaryAction,
-                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      key: const Key('cloud-sync-keep-local'),
+                      onPressed: () => _closeChoice(
+                        sheetContext,
+                        _CloudConsentChoice.keepLocal,
+                      ),
+                      child: Text(
+                        sheetContext.strings.text(
+                          CloudSyncConsentCopy.localAction,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        key: const Key('cloud-sync-keep-local'),
-                        onPressed: () => _closeChoice(
-                          sheetContext,
-                          _CloudConsentChoice.keepLocal,
-                        ),
-                        child: Text(
-                          sheetContext.strings.text(
-                            CloudSyncConsentCopy.localAction,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

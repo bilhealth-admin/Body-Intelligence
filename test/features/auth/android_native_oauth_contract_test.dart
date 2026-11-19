@@ -64,7 +64,7 @@ void main() {
       manifest,
       contains('android.permission.ACCESS_ADSERVICES_CUSTOM_AUDIENCE'),
     );
-    expect(strings, contains('Body Intelligence Log™'));
+    expect(strings, contains('Body Intelligence Log'));
     expect(gradle, contains('com.bilhealth.bodyintelligencelog'));
     expect(activity, isNot(contains('BILGoogleOAuthBridge')));
     expect(activity, isNot(contains('BILFacebookOAuthBridge')));

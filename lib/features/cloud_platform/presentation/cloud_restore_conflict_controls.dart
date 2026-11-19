@@ -117,9 +117,12 @@ class _ConflictControlsState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(_describe(choice.local)),
+                Text(_describe(choice.local, comparedWith: choice.remote)),
                 const SizedBox(height: 12),
-                Text(tr('Cloud: ', 'السحابة: ') + _describe(choice.remote)),
+                Text(
+                  tr('Cloud: ', 'السحابة: ') +
+                      _describe(choice.remote, comparedWith: choice.local),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   tr(
@@ -189,7 +192,10 @@ class _ConflictControlsState
     }
   }
 
-  String _describe(CloudNutritionSnapshot? snapshot) {
+  String _describe(
+    CloudNutritionSnapshot? snapshot, {
+    CloudNutritionSnapshot? comparedWith,
+  }) {
     if (snapshot == null || snapshot.deleted) {
       return tr('Deleted record', 'سجل محذوف');
     }
@@ -206,6 +212,40 @@ class _ConflictControlsState
       return '${(data['meal'] as Map?)?['dayKey']} · ${(data['meal'] as Map?)?['name']}';
     }
     final values = data['values'] as Map?;
-    return '${tr('Nutrition goals', 'أهداف التغذية')} · ${values?['goal.calories'] ?? '—'} kcal';
+    final other = comparedWith?.data['values'] as Map?;
+    final lines = [
+      '${tr('Nutrition goals', 'أهداف التغذية')} · ${_goalText(values?['goal.calories'])} kcal',
+    ];
+    for (final (macro, en, ar) in const [
+      ('carbs', 'Carbohydrate', 'الكربوهيدرات'),
+      ('protein', 'Protein', 'البروتين'),
+      ('fat', 'Fat', 'الدهون'),
+    ]) {
+      final grams = values?['goal.${macro}Grams'];
+      final percent = values?['goal.${macro}Percent'];
+      if (_sameGoal(grams, other?['goal.${macro}Grams']) &&
+          _sameGoal(percent, other?['goal.${macro}Percent'])) {
+        continue;
+      }
+      lines.add(
+        '${tr(en, ar)}: ${_goalText(grams)} ${tr('g', 'غ')} · ${_goalText(percent)}%',
+      );
+    }
+    return lines.join('\n');
+  }
+
+  bool _sameGoal(Object? a, Object? b) {
+    final left = double.tryParse(a?.toString() ?? '');
+    final right = double.tryParse(b?.toString() ?? '');
+    if (left != null && right != null && left.isFinite && right.isFinite) {
+      return left == right;
+    }
+    return a == b;
+  }
+
+  String _goalText(Object? raw) {
+    final value = double.tryParse(raw?.toString() ?? '');
+    if (value == null || !value.isFinite) return '—';
+    return value.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '');
   }
 }

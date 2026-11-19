@@ -176,6 +176,11 @@ void main() {
 
     expect(find.byKey(const Key('community-bil-code-qr')), findsOneWidget);
     expect(find.text('@bil_runner'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('community-bil-code-rotate')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.tap(find.byKey(const Key('community-bil-code-rotate')));
     await tester.pumpAndSettle();
     expect(

@@ -15,3 +15,7 @@ export const mealVisionProviderMatchesConsent = (
   provider: string | null | undefined,
 ): boolean =>
   provider?.trim().toLowerCase() === mealVisionConsentProvider;
+
+// Supplemental scope only; the original photo-purpose grant and withdrawal
+// stay mandatory. A nutrition receipt never authorizes uploading on its own.
+export const mealVisionNutritionConsentPurpose = "meal_vision_nutrition_ai";

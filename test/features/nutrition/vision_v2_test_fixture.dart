@@ -14,11 +14,15 @@ import '../../visual_closure/visual_evidence_font.dart';
 
 const visionV2MealAsset =
     'assets/images/professional/recipes/ful-medames-tahini.png';
-const visionV2PhotoPath = 'build/vision-v2-captures/TEST_FIXTURE_MEAL_ful.png';
+late final String visionV2PhotoPath;
 
 Future<void> prepareVisionV2Fixture() async {
   await loadVisualEvidenceFont();
   await Directory('build/vision-v2-captures').create(recursive: true);
+  final fixtureDirectory = await Directory(
+    'build/vision-v2-captures',
+  ).createTemp('fixture-');
+  visionV2PhotoPath = '${fixtureDirectory.path}/TEST_FIXTURE_MEAL_ful.png';
   // Deliberately supplied TEST input, byte-for-byte copy of repository art.
   // Never a substitute when the product receives no imagePath.
   await File(visionV2MealAsset).copy(visionV2PhotoPath);

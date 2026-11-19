@@ -114,7 +114,12 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: Text(_copy(context, 'Export local data'))),
     body: ListView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        16 + MediaQuery.paddingOf(context).bottom,
+      ),
       children: [
         Text(
           _copy(context, 'Choose an inclusive date range'),

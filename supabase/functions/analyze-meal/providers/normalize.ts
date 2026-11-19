@@ -11,7 +11,7 @@ const finiteMetric = (value: unknown): number | null =>
     ? value
     : null;
 
-function jsonObject(
+export function jsonObject(
   text: string,
   config: ProviderConfig,
 ): Record<string, unknown> {
@@ -32,7 +32,7 @@ function jsonObject(
   );
 }
 
-function textAndUsage(envelope: unknown, config: ProviderConfig): {
+export function textAndUsage(envelope: unknown, config: ProviderConfig): {
   text: string;
   input: number | null;
   output: number | null;
@@ -178,7 +178,7 @@ function textAndUsage(envelope: unknown, config: ProviderConfig): {
   };
 }
 
-function candidate(value: unknown, config: ProviderConfig): BilVisionCandidate {
+export function candidate(value: unknown, config: ProviderConfig): BilVisionCandidate {
   if (!value || typeof value !== "object") {
     throw new VisionProviderError(
       "malformed_response",

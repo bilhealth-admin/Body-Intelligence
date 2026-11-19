@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,13 +17,18 @@ import '../../auth/auth_entry_locale_copy.dart';
 import '../../intelligence_center/intelligence_locale_copy.dart';
 import '../domain/commerce_entitlement.dart';
 import '../domain/commerce_plan.dart';
+import '../domain/subscription_provider.dart';
+import '../domain/store_renewal_observation.dart';
+import '../providers/store_renewal_recheck_provider.dart';
 import '../domain/subscription_state.dart';
 import '../providers/commerce_providers.dart';
 import 'bil_store_copy.dart';
 import 'premium_crown_emblem.dart';
 
 part 'premium_route_glass_gate_components.dart';
+part 'premium_route_google_renewal_surface.dart';
 part 'premium_route_access_surfaces.dart';
+part 'premium_route_ai_credit_surface.dart';
 part 'premium_route_glass_gate_card.dart';
 
 enum PremiumGateFeature {
@@ -44,6 +50,15 @@ enum PremiumGateFeature {
   sleep,
   community,
 }
+
+bool _verifiedSubscriptionAllowsFeature(
+  SubscriptionState? state,
+  PremiumGateFeature feature,
+) =>
+    state?.authority == EntitlementAuthority.verifiedServer &&
+    (feature == PremiumGateFeature.nutritionPrograms
+        ? state!.grants(CommerceEntitlement.premiumPrograms)
+        : state?.plan != CommercePlan.free);
 
 void _handlePremiumRouteBack(
   BuildContext context, {
@@ -78,149 +93,22 @@ class PremiumRouteGlassGate extends ConsumerWidget {
     // suspension, relationship permissions and moderation on the server.
     if (feature == PremiumGateFeature.community) return child;
     if (feature != PremiumGateFeature.aiCoach) {
-      return _PremiumRouteGateContents(feature: feature, child: child);
+      return _RetainedStorePremiumSurface(
+        key: ValueKey((
+          ref.watch(verifiedEntitlementOwnerIdProvider),
+          ref.watch(verifiedEntitlementOwnerVisitProvider),
+        )),
+        feature: feature,
+        child: child,
+      );
     }
     return _RetainedAiCoachSurface(
       // Never retain a previous member's screen across an account change.
-      key: ValueKey(ref.watch(verifiedEntitlementOwnerIdProvider)),
+      key: ValueKey((
+        ref.watch(verifiedEntitlementOwnerIdProvider),
+        ref.watch(verifiedEntitlementOwnerVisitProvider),
+      )),
       child: child,
-    );
-  }
-}
-
-class _RetainedAiCoachSurface extends ConsumerStatefulWidget {
-  const _RetainedAiCoachSurface({required this.child, super.key});
-
-  final Widget child;
-
-  @override
-  ConsumerState<_RetainedAiCoachSurface> createState() =>
-      _RetainedAiCoachSurfaceState();
-}
-
-class _RetainedAiCoachSurfaceState
-    extends ConsumerState<_RetainedAiCoachSurface> {
-  bool _contentMounted = false;
-  bool? _lastVerifiedAccess;
-  Timer? _ownerResolutionTimer;
-  bool _ownerResolutionExpired = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _startOwnerResolutionWindow();
-  }
-
-  void _startOwnerResolutionWindow() {
-    _ownerResolutionTimer?.cancel();
-    _ownerResolutionExpired = false;
-    _ownerResolutionTimer = Timer(const Duration(seconds: 10), () {
-      if (!mounted) return;
-      setState(() => _ownerResolutionExpired = true);
-    });
-  }
-
-  void _retryOwnerResolution() {
-    setState(_startOwnerResolutionWindow);
-    ref.invalidate(verifiedEntitlementOwnerProvider);
-    ref.invalidate(aiCoachCreditAccessProvider);
-  }
-
-  Future<void> _openSignIn() async {
-    await context.push<void>('/login');
-    if (!mounted) return;
-    _retryOwnerResolution();
-  }
-
-  @override
-  void dispose() {
-    _ownerResolutionTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final credits = ref.watch(aiCoachCreditAccessProvider);
-    final ownerSnapshot = ref.watch(verifiedEntitlementOwnerProvider);
-    final ownerKnown = ref.watch(verifiedEntitlementOwnerIdProvider) != null;
-    if (ownerKnown || ownerSnapshot.hasValue || ownerSnapshot.hasError) {
-      _ownerResolutionTimer?.cancel();
-    }
-    if (!ownerKnown) {
-      // A settled signed-out owner is not an in-flight credit request. No
-      // entitlement is granted here, and no Coach child or paid offer mounts.
-      if (ownerSnapshot.hasError ||
-          (!ownerSnapshot.hasValue && _ownerResolutionExpired)) {
-        return _AiCoachAccountRecoverySurface(
-          unavailable: true,
-          onRetry: _retryOwnerResolution,
-          onSignIn: _openSignIn,
-        );
-      }
-      if (ownerSnapshot.hasValue) {
-        return _AiCoachAccountRecoverySurface(
-          unavailable: false,
-          onRetry: _retryOwnerResolution,
-          onSignIn: _openSignIn,
-        );
-      }
-      return const _AiCoachAccessCheckingSurface();
-    }
-    // AsyncValue can retain previous data during a dependency reload. Only a
-    // completed check for this owner may populate the owner's retained state.
-    final freshAccess = credits.isLoading || credits.hasError || !ownerKnown
-        ? null
-        : credits.asData?.value;
-    if (freshAccess != null) {
-      _lastVerifiedAccess = freshAccess;
-    }
-
-    // Keep the last server-verified result while the same account silently
-    // revalidates. The parent widget is keyed by verified entitlement owner,
-    // so an auth/account change recreates this state and cannot inherit another
-    // member's cached access.
-    //
-    // This is presentation continuity only. AI reservations/settlement remain
-    // server-authoritative, so stale UI cannot spend unavailable credit.
-    final allowed = (freshAccess ?? _lastVerifiedAccess) == true;
-    final unavailable = credits.hasError && _lastVerifiedAccess == null;
-    final checking =
-        credits.isLoading && _lastVerifiedAccess == null && !unavailable;
-    if (allowed) {
-      _contentMounted = true;
-    }
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        if (!_contentMounted && checking) const _AiCoachAccessCheckingSurface(),
-        // Keep the same element position even when the gate is shown. Credit
-        // settlement must not discard a draft, scroll position or transcript.
-        if (_contentMounted)
-          KeyedSubtree(
-            key: const ValueKey('ai-coach-retained-content'),
-            child: ExcludeFocus(
-              excluding: !allowed,
-              child: AbsorbPointer(
-                absorbing: !allowed,
-                child: ExcludeSemantics(
-                  excluding: !allowed,
-                  child: TooltipVisibility(
-                    visible: allowed,
-                    child: Opacity(
-                      opacity: allowed ? 1 : 0,
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (!allowed && (!checking || _contentMounted || unavailable))
-          const _PremiumRouteGateContents(
-            feature: PremiumGateFeature.aiCoach,
-            child: SizedBox.shrink(),
-          ),
-      ],
     );
   }
 }
@@ -381,7 +269,6 @@ class _PremiumRouteGateContentsState
         !source.hasError &&
         source.value?.authority == EntitlementAuthority.verifiedServer &&
         source.value?.plan == CommercePlan.free;
-    final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
     final creditSnapshot = isAiCoach
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
@@ -432,11 +319,7 @@ class _PremiumRouteGateContentsState
     }
     final hasAccess = isAiCoach
         ? creditAccess
-        : isNutritionPrograms
-        ? state?.authority == EntitlementAuthority.verifiedServer &&
-              (state?.grants(CommerceEntitlement.premiumPrograms) ?? false)
-        : state?.authority == EntitlementAuthority.verifiedServer &&
-              state?.plan != CommercePlan.free;
+        : _verifiedSubscriptionAllowsFeature(state, feature);
     if (hasAccess) return child;
 
     final content = _contentFor(context, feature);

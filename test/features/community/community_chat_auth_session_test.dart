@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/community/presentation/community_chat_runtime_copy.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
@@ -20,6 +21,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 part 'community_chat_repository_cases.dart';
 part 'community_message_safety_cases.dart';
 part 'community_message_deletion_cases.dart';
+part 'community_message_everyone_deletion_cases.dart';
 part 'community_message_entry_owner_cases.dart';
 part 'community_message_retry_cases.dart';
 part 'community_chat_visibility_paging_cases.dart';
@@ -114,6 +116,9 @@ class _Repository extends CommunityRepository {
   _Repository(super.client);
   final changes = StreamController<void>.broadcast();
   final reads = <List<String>>[];
+  final visibilityReads = <List<String>>[];
+  bool failVisibility = false;
+  Completer<Set<String>>? pendingVisibility;
   final loads = <String>[];
   final sends = <String>[];
   final operationRequests = <String>[];
@@ -127,6 +132,21 @@ class _Repository extends CommunityRepository {
   List<CommunityMessage> olderRows = [];
   bool failRead = false;
   Set<String> confirmed = {_messageId};
+  @override
+  Future<Set<String>> loadVisibleConversationMessageIds(
+    String peer,
+    List<String> ids,
+  ) async {
+    visibilityReads.add(List.of(ids));
+    if (failVisibility) throw StateError('Local presence fixture unavailable');
+    final pending = pendingVisibility;
+    if (pending != null) return pending.future;
+    return {
+      ...rows,
+      ...olderRows,
+    }.where((row) => ids.contains(row.id)).map((row) => row.id).toSet();
+  }
+
   @override
   Stream<void> watchConversationChanges(String id) => changes.stream;
   @override
@@ -247,6 +267,7 @@ void main() {
   });
   _messageSafetyCases(() => auth, () => repo);
   _messageDeletionCases(() => auth, () => repo);
+  _messageEveryoneDeletionCases(() => auth, () => repo);
   _repositoryCases(() => auth);
   _relationshipDeliveryCases(() => auth, (repo) => repositories.add(repo));
   _messageEntryCases(() => auth, (repo) => repositories.add(repo));

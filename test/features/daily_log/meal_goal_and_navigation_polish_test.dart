@@ -38,7 +38,7 @@ void main() {
       for (final width in [320.0, 390.0, 430.0]) {
         for (final scale in [1.0, 2.0]) {
           testWidgets(
-            'compact meal minerals and goals $language dark=$dark $width $scale',
+            'compact meal macros and goal editor $language dark=$dark $width $scale',
             (tester) async {
               final boundary = GlobalKey();
               var edits = 0;
@@ -62,8 +62,8 @@ void main() {
                 theme: theme(language, dark),
                 repaintKey: boundary,
               );
-              final minerals = find.byKey(
-                const Key('daily-meal-detail-minerals'),
+              final macroTotals = find.byKey(
+                const Key('daily-meal-detail-macro-totals'),
               );
               final targets = find.byKey(const Key('daily-meal-detail-goal'));
               final macroDials = find.byKey(
@@ -83,7 +83,7 @@ void main() {
               final metricSizes = tester
                   .widgetList<NutrientMetric>(
                     find.descendant(
-                      of: minerals,
+                      of: macroTotals,
                       matching: find.byType(NutrientMetric),
                     ),
                   )
@@ -95,23 +95,23 @@ void main() {
               }
               expect(find.text('/ 1000'), findsNothing);
               expect(
-                find.descendant(of: minerals, matching: find.text('—')),
+                find.descendant(of: macroTotals, matching: find.text('0.0')),
                 findsNWidgets(3),
               );
               expect(
                 find.descendant(
-                  of: minerals,
+                  of: macroTotals,
                   matching: find.text('Unavailable'),
                 ),
                 findsNothing,
               );
               expect(
-                tester.getRect(minerals).top,
+                tester.getRect(macroTotals).top,
                 greaterThan(tester.getRect(macroDials).bottom),
               );
               expect(
                 tester.getRect(targets).top,
-                greaterThan(tester.getRect(minerals).bottom),
+                greaterThan(tester.getRect(macroTotals).bottom),
               );
               expect(
                 find.descendant(
@@ -132,18 +132,32 @@ void main() {
               await tester.pump();
               expect(edits, 1);
               expect(
+                tester
+                    .getRect(
+                      find.byKey(
+                        Key(
+                          language == 'ar'
+                              ? 'daily-meal-goal-label'
+                              : 'daily-meal-goal-calories',
+                        ),
+                      ),
+                    )
+                    .right,
+                closeTo(tester.getRect(targets).right, .01),
+              );
+              expect(
                 find.descendant(
                   of: targets,
                   matching: find.textContaining('112.5'),
                 ),
-                findsOneWidget,
+                findsNothing,
               );
               expect(
                 find.descendant(
                   of: targets,
                   matching: find.textContaining('38.9'),
                 ),
-                findsOneWidget,
+                findsNothing,
               );
               if (language == 'ar' && !dark && width == 390 && scale == 1) {
                 await captureClosureSurface(
@@ -169,26 +183,28 @@ void main() {
             modernDiaryItem(
               values: const {
                 FoodNutrient.calories: 100,
-                FoodNutrient.sodium: 0,
-                FoodNutrient.potassium: 50,
-                FoodNutrient.magnesium: null,
+                FoodNutrient.protein: 0,
+                FoodNutrient.carbohydrates: 20,
+                FoodNutrient.fat: null,
               },
             ),
           ]),
         ),
         theme: theme('en', false),
       );
-      final minerals = find.byKey(const Key('daily-meal-detail-minerals'));
+      final macroTotals = find.byKey(
+        const Key('daily-meal-detail-macro-totals'),
+      );
       expect(
-        find.descendant(of: minerals, matching: find.text('0.0')),
+        find.descendant(of: macroTotals, matching: find.text('0.0')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: minerals, matching: find.text('50.0')),
+        find.descendant(of: macroTotals, matching: find.text('20.0')),
         findsOneWidget,
       );
       expect(
-        find.descendant(of: minerals, matching: find.text('—')),
+        find.descendant(of: macroTotals, matching: find.text('—')),
         findsOneWidget,
       );
     },
@@ -217,8 +233,8 @@ void main() {
         findsNothing,
       );
       expect(
-        find.descendant(of: targets, matching: find.text('—')),
-        findsNWidgets(3),
+        find.descendant(of: targets, matching: find.text('— kcal')),
+        findsOneWidget,
       );
     },
   );

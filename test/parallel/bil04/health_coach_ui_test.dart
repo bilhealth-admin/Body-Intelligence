@@ -405,7 +405,7 @@ void main() {
           expect(
             messages.any(
               (message) => message['text'].toString().contains(
-                'This category is disabled in Coach context settings',
+                'This request needs access to Sleep, fasting and habits.',
               ),
             ),
             isTrue,

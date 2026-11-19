@@ -6,25 +6,22 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     String query,
     String locale,
   ) async {
+    final generation = ++mealSearchGeneration;
     final effectiveQuery = query.trim();
     if (effectiveQuery.isEmpty) return const <Widget>[];
     final authority = ref.read(foodRuntimeSearchAuthorityProvider);
     bool current() =>
         mounted &&
+        generation == mealSearchGeneration &&
         controller.text.trim() == effectiveQuery &&
         identical(authority, ref.read(foodRuntimeSearchAuthorityProvider));
     return <Widget>[
       StreamBuilder<List<Food>>(
-        key: ValueKey((authority, effectiveQuery)),
+        key: ValueKey((authority, generation, effectiveQuery)),
         stream: authority.searchProgressively(effectiveQuery, limit: 20),
         builder: (context, snapshot) {
           if (!current()) return const SizedBox.shrink();
-          if (!snapshot.hasData) {
-            return const Padding(
-              padding: EdgeInsets.all(20),
-              child: BilFeatureWelcomeStatus(),
-            );
-          }
+          final pending = snapshot.connectionState != ConnectionState.done;
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -32,18 +29,10 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
                 controller,
                 effectiveQuery,
                 locale,
-                snapshot.data!,
+                snapshot.data ?? const <Food>[],
+                pending: pending,
                 current: current,
               ),
-              if (snapshot.connectionState != ConnectionState.done)
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(
-                    Localizations.localeOf(context).languageCode == 'ar'
-                        ? 'نتائج الجهاز أولًا؛ يجري البحث عن نتائج إضافية.'
-                        : 'On-device results first; checking for more matches.',
-                  ),
-                ),
             ],
           );
         },
@@ -56,6 +45,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     String effectiveQuery,
     String locale,
     List<Food> results, {
+    required bool pending,
     required bool Function() current,
   }) {
     final resultLocale = FoodPresentationLocalizer.resultLocaleForQuery(
@@ -63,6 +53,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       interfaceLocaleTag: locale,
     );
     if (results.isEmpty) {
+      if (pending) return const <Widget>[_DailyMealSearchPending()];
       final correction = _DailyLogPageState._searchAssistance
           .explicitCorrectionFor(effectiveQuery);
       return <Widget>[
@@ -116,6 +107,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       if (identities.add(identity)) uniqueResults.add(food);
     }
     if (uniqueResults.isEmpty) {
+      if (pending) return const <Widget>[_DailyMealSearchPending()];
       return <Widget>[
         ListTile(
           leading: const Icon(Icons.translate_rounded),
@@ -345,6 +337,19 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     return '$normalizedName|${food.servingUnit.trim().toLowerCase()}|'
         '${food.servingSize.toStringAsFixed(2)}';
   }
+}
+
+/// A real search with no usable result yet must not claim it has finished.
+/// The shared operation indicator remains neutral grey in every locale/theme.
+class _DailyMealSearchPending extends StatelessWidget {
+  const _DailyMealSearchPending();
+
+  @override
+  Widget build(BuildContext context) => const Padding(
+    key: Key('daily-search-pending'),
+    padding: EdgeInsets.all(20),
+    child: BilFeatureWelcomeStatus(),
+  );
 }
 
 const _mealEntryCopy = <String, Map<String, String>>{

@@ -78,3 +78,27 @@ class BilPearlAlertDialog extends StatelessWidget {
     );
   }
 }
+
+/// Gives two decisions equal space while respecting enlarged text and RTL.
+class BilDialogDecisionActions extends StatelessWidget {
+  const BilDialogDecisionActions({
+    super.key,
+    required this.secondaryAction,
+    required this.primaryAction,
+  });
+
+  final Widget secondaryAction;
+  final Widget primaryAction;
+
+  @override
+  Widget build(BuildContext context) => IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(child: secondaryAction),
+        const SizedBox(width: 8),
+        Expanded(child: primaryAction),
+      ],
+    ),
+  );
+}

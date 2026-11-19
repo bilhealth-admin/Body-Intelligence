@@ -72,9 +72,6 @@ final class OnboardingPlanCalculator {
     if (weightGoalCount > 1) {
       return const OnboardingPlanValidation.invalid('conflicting_weight_goals');
     }
-    if (draft.countryRegion.trim().length < 2) {
-      return const OnboardingPlanValidation.invalid('country_required');
-    }
     final height = draft.heightCm;
     if (height == null || !height.isFinite || height < 120 || height > 250) {
       return const OnboardingPlanValidation.invalid('height_out_of_range');

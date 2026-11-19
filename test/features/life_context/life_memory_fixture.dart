@@ -10,9 +10,11 @@ import 'package:body_intelligence_log/engine/one_best_action_engine.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_memory_repository.dart';
 import 'package:body_intelligence_log/features/life_context/coach_memory_sync_review_panel.dart';
 import 'package:body_intelligence_log/features/life_context/decision_memory_page.dart';
+import 'package:body_intelligence_log/features/life_context/providers/coach_memory_identity_provider.dart';
 import 'package:body_intelligence_log/features/life_context/life_context_page.dart';
 import 'package:body_intelligence_log/features/life_context/providers/life_context_provider.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/features/profile/providers/profile_auth_identity_provider.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -165,6 +167,39 @@ class ControlledMemoryPreferences extends PreferencesRepository {
   }
 }
 
+// Widget-created Drift watches retain the test's FakeAsync zone. Start the
+// real SQL operation once, then let fake timers and real IO both drain. The
+// action keeps the original five-second real timeout and original failure.
+Future<T> runLifeMemoryActionWithFrames<T>(
+  WidgetTester tester,
+  Future<T> Function() action,
+) async {
+  T? result;
+  Object? failure;
+  StackTrace? stack;
+  var completed = false;
+  await tester.runAsync(() async {
+    unawaited(() async {
+      try {
+        result = await action().timeout(const Duration(seconds: 5));
+      } on Object catch (error, trace) {
+        failure = error;
+        stack = trace;
+      } finally {
+        completed = true;
+      }
+    }());
+  });
+  while (!completed) {
+    await tester.pump(const Duration(milliseconds: 20));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+  }
+  if (failure != null) Error.throwWithStackTrace(failure!, stack!);
+  return result as T;
+}
+
 class LifeMemoryFixture {
   LifeMemoryFixture(
     this.tester,
@@ -187,21 +222,8 @@ class LifeMemoryFixture {
   bool _disposed = false;
   String t(String value) => AppLocalizations(Locale(language)).text(value);
 
-  Future<T> real<T>(Future<T> Function() action) async {
-    T? result;
-    Object? failure;
-    StackTrace? stack;
-    await tester.runAsync(() async {
-      try {
-        result = await action().timeout(const Duration(seconds: 5));
-      } on Object catch (error, trace) {
-        failure = error;
-        stack = trace;
-      }
-    });
-    if (failure != null) Error.throwWithStackTrace(failure!, stack!);
-    return result as T;
-  }
+  Future<T> real<T>(Future<T> Function() action) =>
+      runLifeMemoryActionWithFrames(tester, action);
 
   Future<void> waitFor(bool Function() ready) async {
     final watch = Stopwatch()..start();
@@ -336,6 +358,17 @@ Future<LifeMemoryFixture> pumpLifeMemory(
       lifeContextRepositoryProvider.overrideWithValue(lifeRepository),
       decisionMemoryRepositoryProvider.overrideWithValue(memoryRepository),
       preferencesRepositoryProvider.overrideWithValue(preferences),
+      // Match this fixture's explicit local owner namespace; no live Auth.
+      profileAuthIdentityProvider.overrideWith(
+        (ref) => Stream.value(
+          ProfileAuthIdentity(ownerId: database.localOwnerId, email: null),
+        ),
+      ),
+      coachMemoryIdentityProvider.overrideWith(
+        (ref) => Stream.value(
+          ProfileAuthIdentity(ownerId: database.localOwnerId, email: null),
+        ),
+      ),
       // This fixture exercises local page writes; cloud conflict review has its
       // own suite and must never contact a real account from a local widget test.
       coachMemorySyncIssuesProvider.overrideWith((_) async => []),

@@ -1,3 +1,4 @@
+import 'vision_estimate_evidence.dart';
 import 'dart:convert';
 
 import '../../features/intelligence_center/domain/food_v2/coach_food_v2.dart';
@@ -15,6 +16,7 @@ final class FoodBasisEvidence {
     this.state,
     this.snapshot, [
     this.catalog,
+    this.vision,
   ]);
 
   factory FoodBasisEvidence.read(Food row, {String? ownerKey}) {
@@ -25,7 +27,9 @@ final class FoodBasisEvidence {
       // Losing the envelope of an explicitly modern row cannot manufacture
       // the required-core semantics of a historical bundled food.
       if (row.source.startsWith('coach_food_v2:') ||
-          row.category == 'coach_snapshot') {
+          row.category == 'coach_snapshot' ||
+          row.source == VisionFoodEvidence.source ||
+          row.category == VisionFoodEvidence.category) {
         return invalid();
       }
       return FoodBasisEvidence._(row, FoodBasisEvidenceState.legacy, null);
@@ -33,6 +37,21 @@ final class FoodBasisEvidence {
     try {
       if (utf8.encode(raw).length > 65536) return invalid();
       final envelope = jsonDecode(raw);
+      if (row.source == VisionFoodEvidence.source ||
+          row.category == VisionFoodEvidence.category ||
+          (envelope is Map &&
+              envelope['schema'] == VisionFoodEvidence.schema)) {
+        final vision = VisionFoodEvidence.fromJson(envelope);
+        return vision.matchesFood(row, expectedOwner: ownerKey)
+            ? FoodBasisEvidence._(
+                row,
+                FoodBasisEvidenceState.valid,
+                null,
+                null,
+                vision,
+              )
+            : invalid();
+      }
       if (envelope is Map &&
           envelope['schema'] == CatalogNutrientEvidence.schema) {
         final catalog = CatalogNutrientEvidence.decode(
@@ -97,6 +116,7 @@ final class FoodBasisEvidence {
   final FoodBasisEvidenceState state;
   final CoachFoodSnapshot? snapshot;
   final CatalogNutrientEvidence? catalog;
+  final VisionFoodEvidence? vision;
 
   bool get isModern => state != FoodBasisEvidenceState.legacy;
   bool get isCatalog => catalog != null;
@@ -104,10 +124,13 @@ final class FoodBasisEvidence {
 
   /// Only a valid immutable modern snapshot proves this gram basis. Legacy
   /// serving units require their existing explicit mass conversion instead.
-  double? get basisGrams => snapshot?.basisGrams;
+  double? get basisGrams => vision?.basisGrams ?? snapshot?.basisGrams;
+
+  double? get directNetCarbohydrates => vision?.netCarbohydrates;
 
   double? value(FoodNutrient nutrient) {
     if (state == FoodBasisEvidenceState.invalid) return null;
+    if (vision != null) return vision!.value(nutrient);
     if (catalog != null) return catalog!.nutrients[nutrient];
     final food = snapshot;
     if (food != null) return food.nutrients[nutrient];

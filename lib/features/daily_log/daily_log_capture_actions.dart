@@ -1,6 +1,45 @@
 part of 'daily_log_page.dart';
 
 extension _DailyLogCaptureActions on _DailyLogPageState {
+  void _initializeEntryCapture() {
+    if (const {
+      'breakfast',
+      'lunch',
+      'dinner',
+      'snack',
+    }.contains(widget.initialMealType)) {
+      mealType = widget.initialMealType!;
+    }
+    if (widget.focusMealEntry) {
+      mealSearchActive = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _focusMealEntry();
+      });
+    }
+    if (widget.initialAction != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _applyInitialAction(),
+      );
+    }
+  }
+
+  void _updateEntryCapture(DailyLogPage oldWidget) {
+    final actionChanged = oldWidget.initialAction != widget.initialAction;
+    if (!oldWidget.focusMealEntry && widget.focusMealEntry) {
+      mealFocusApplied = false;
+      mealSearchActive = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _focusMealEntry();
+      });
+    }
+    if (widget.initialAction != null && actionChanged) {
+      initialActionApplied = false;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _applyInitialAction(),
+      );
+    }
+  }
+
   Future<bool> _ensureCameraPermission() async {
     final policy = ref.read(dailyLogRuntimePermissionPolicyProvider);
     final current = await policy.status(BilRuntimeCapability.camera);
@@ -182,6 +221,21 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     bool directCamera = false,
   }) async {
     if (mealImageBusy) return;
+    final estimateDatabase =
+        const bool.fromEnvironment('BIL_GEMINI_PHOTO_ESTIMATES_V2')
+        ? ref.read(databaseProvider)
+        : null;
+    final estimateVisit = estimateDatabase == null
+        ? null
+        : MealVisionEstimateVisit.capture(
+            database: estimateDatabase,
+            isCurrentDatabase: () =>
+                mounted &&
+                identical(ref.read(databaseProvider), estimateDatabase),
+          );
+    if (estimateDatabase != null && estimateVisit == null) return;
+    final estimateDay = ref.read(selectedLogDateProvider);
+    final estimateMealType = mealType;
     _updateState(() => mealImageBusy = true);
     try {
       final visionCopy = MealVisionUiCopy.ofLocale(
@@ -190,7 +244,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
       final hasVisionTokens = await ref.read(
         aiBoostVisionAccessProvider.future,
       );
-      if (!mounted) return;
+      if ((!mounted || estimateVisit?.current == false)) return;
       if (!hasVisionTokens) {
         await explainVisionAccess(context, ref);
         return;
@@ -221,7 +275,13 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         );
         return;
       }
-      if (!await ensureMealVisionConsent(context) || !mounted) return;
+      final consent = service.usesGeminiEstimates
+          ? await ensureMealVisionEstimateConsent(
+              context,
+              isCurrent: () => estimateVisit?.current == true,
+            )
+          : await ensureMealVisionConsent(context);
+      if (!consent || (!mounted || estimateVisit?.current == false)) return;
       XFile? image;
       try {
         if (recoveredOnly) {
@@ -232,7 +292,10 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
             BilImagePickerPurpose.mealPhoto,
           );
         } else if (directCamera) {
-          if (!await _ensureCameraPermission() || !mounted) return;
+          if (!await _ensureCameraPermission() ||
+              (!mounted || estimateVisit?.current == false)) {
+            return;
+          }
           image = await Navigator.of(context).push<XFile>(
             MaterialPageRoute<XFile>(
               builder: (_) => BilCameraCapturePage(
@@ -278,9 +341,13 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
               ),
             ),
           );
-          if (imageSource == null || !mounted) return;
+          if (imageSource == null ||
+              (!mounted || estimateVisit?.current == false)) {
+            return;
+          }
           if (imageSource == ImageSource.camera &&
-              (!await _ensureCameraPermission() || !mounted)) {
+              (!await _ensureCameraPermission() ||
+                  (!mounted || estimateVisit?.current == false))) {
             return;
           }
           image = imageSource == ImageSource.camera
@@ -300,18 +367,44 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
                 );
         }
       } catch (_) {
-        if (!mounted) return;
+        if ((!mounted || estimateVisit?.current == false)) return;
         _message(visionCopy.text('camera_failed'));
         return;
       }
-      if (image == null || !mounted) return;
+      if (image == null || (!mounted || estimateVisit?.current == false)) {
+        return;
+      }
       try {
-        final analysis = await service.analyze(image);
-        if (!mounted) return;
+        final analysis = service.usesGeminiEstimates
+            ? await service.analyzeForOwner(
+                image,
+                isCurrent: () => estimateVisit?.current == true,
+              )
+            : await service.analyze(image);
+        if ((!mounted || estimateVisit?.current == false)) return;
         if (analysis.candidates.isEmpty) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(visionCopy.text('none'))));
+          return;
+        }
+        if (analysis.schemaVersion == 2) {
+          if (estimateVisit == null || !estimateVisit.current) return;
+          final saved = await reviewGeminiVisionForDiary(
+            context,
+            analysis: analysis,
+            visit: estimateVisit,
+            day: estimateDay,
+            mealType: estimateMealType,
+            imagePath: image.path,
+            beforeSave: _ensureDiaryOpen,
+          );
+          if (saved && mounted && estimateVisit.current) {
+            ref.invalidate(selectedDailyLedgerProvider);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(visionCopy.text('confirmed_added'))),
+            );
+          }
           return;
         }
         final selections = await showMealImageReviewDialog(
@@ -321,7 +414,11 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
           mealType: mealType,
           photographedAt: DateTime.now(),
         );
-        if (selections == null || selections.isEmpty || !mounted) return;
+        if (selections == null ||
+            selections.isEmpty ||
+            (!mounted || estimateVisit?.current == false)) {
+          return;
+        }
         final confirmed =
             <({Food food, double quantity, bool quantityInGrams})>[];
         for (final selection in selections) {
@@ -341,7 +438,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
                   selection.candidate.name,
                   limit: 10,
                 )).where((food) => food.verified).toList(growable: false);
-          if (!mounted) return;
+          if ((!mounted || estimateVisit?.current == false)) return;
           if (foods.isEmpty) {
             foodSearch.text = selection.candidate.name;
             ScaffoldMessenger.of(context).showSnackBar(
@@ -361,7 +458,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
             reviewedUnit: selection.unit,
             imagePath: image.path,
           );
-          if (!mounted) return;
+          if ((!mounted || estimateVisit?.current == false)) return;
           if (reviewed != null) {
             final portion = mealImageReviewedQuantity(
               amount: reviewed.amount,
@@ -413,12 +510,12 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
           }
         }
         ref.invalidate(selectedDailyLedgerProvider);
-        if (!mounted) return;
+        if ((!mounted || estimateVisit?.current == false)) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(visionCopy.text('confirmed_added'))),
         );
       } on MealImageAnalysisException catch (error) {
-        if (!mounted) return;
+        if ((!mounted || estimateVisit?.current == false)) return;
         if (error.failure == MealImageAnalysisFailure.boostRequired) {
           ref.invalidate(aiVisionCreditStateProvider);
           ref.invalidate(aiBoostVisionAccessProvider);
@@ -436,7 +533,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
           ),
         );
       } catch (_) {
-        if (!mounted) return;
+        if ((!mounted || estimateVisit?.current == false)) return;
         const failure = MealImageAnalysisException(
           MealImageAnalysisFailure.serviceUnavailable,
         );
@@ -452,9 +549,12 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         );
       }
     } finally {
-      ref.invalidate(aiVisionCreditStateProvider);
-      ref.invalidate(aiBoostVisionAccessProvider);
-      if (mounted) _updateState(() => mealImageBusy = false);
+      estimateVisit?.dispose();
+      if (mounted) {
+        ref.invalidate(aiVisionCreditStateProvider);
+        ref.invalidate(aiBoostVisionAccessProvider);
+        _updateState(() => mealImageBusy = false);
+      }
     }
   }
 }

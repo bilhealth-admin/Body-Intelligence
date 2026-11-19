@@ -6,6 +6,7 @@ import 'runtime_copy_closure_food.dart';
 import 'runtime_copy_closure_review.dart';
 import 'runtime_copy_next_workspace.dart';
 import 'runtime_copy_coach_controls.dart';
+import 'runtime_copy_coach_recovery.dart';
 import 'runtime_copy_primary.dart';
 import 'runtime_copy_secondary.dart';
 import 'runtime_copy_workouts.dart';
@@ -92,6 +93,8 @@ abstract final class RuntimeCopy {
   };
 
   static String? resolve(String english, String localeTag) {
+    final coachRecovery = CoachRecoveryRuntimeCopy.resolve(english, localeTag);
+    if (coachRecovery != null) return coachRecovery;
     final nextBatch = NextBatchClosureRuntimeCopy.resolve(english, localeTag);
     if (nextBatch != null) return nextBatch;
     final experiments = ExperimentsRuntimeCopy.resolve(english, localeTag);

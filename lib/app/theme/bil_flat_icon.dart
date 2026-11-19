@@ -13,6 +13,7 @@ class BilFlatIcon extends StatelessWidget {
     this.color,
     this.materialIcon,
     this.appleIcon,
+    this.useNativeSymbol = true,
   }) : assert(size > 0),
        assert(iconSize > 0);
 
@@ -23,6 +24,7 @@ class BilFlatIcon extends StatelessWidget {
   final Color? color;
   final IconData? materialIcon;
   final IconData? appleIcon;
+  final bool useNativeSymbol;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class BilFlatIcon extends StatelessWidget {
       iconOverride: materialIcon,
       appleIconOverride: appleIcon,
       colorOverride: color,
+      useNativeSymbol: useNativeSymbol,
     );
     final label = semanticLabel?.trim();
     if (label == null || label.isEmpty) return visual;

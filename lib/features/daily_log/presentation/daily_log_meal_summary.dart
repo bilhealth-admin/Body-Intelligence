@@ -55,9 +55,6 @@ class DailyMealDetailSummary extends StatelessWidget {
         consumed == null || goal == null || !goal.isFinite || goal <= 0
         ? 0
         : (consumed / goal).clamp(0.0, 1.0).toDouble();
-    final sodium = evidence.total(TrackedNutrient.sodium);
-    final potassium = evidence.total(TrackedNutrient.potassium);
-    final magnesium = evidence.total(TrackedNutrient.magnesium);
     final scheme = Theme.of(context).colorScheme;
     final macroColors = DailyMealMacroPalette.forBrightness(scheme.brightness);
     return Container(
@@ -120,23 +117,23 @@ class DailyMealDetailSummary extends StatelessWidget {
               ),
             ],
           );
-          final minerals = IntrinsicHeight(
+          final macroTotals = IntrinsicHeight(
             child: Row(
-              key: const Key('daily-meal-detail-minerals'),
+              key: const Key('daily-meal-detail-macro-totals'),
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final metric in [
-                  (context.strings.text('Sodium'), sodium),
-                  (context.strings.text('Potassium'), potassium),
-                  (context.strings.text('Magnesium'), magnesium),
+                  (_summaryText(context, 'proteinShort'), protein),
+                  (_summaryText(context, 'carbs'), carbs),
+                  (_summaryText(context, 'fat'), fat),
                 ]) ...[
-                  if (metric.$1 != context.strings.text('Sodium'))
+                  if (metric.$1 != _summaryText(context, 'proteinShort'))
                     const SizedBox(width: 6),
                   Expanded(
                     child: NutrientMetric(
                       label: metric.$1,
                       value: metric.$2,
-                      unit: 'mg',
+                      unit: 'g',
                       compact: true,
                       unknownAsDash: true,
                     ),
@@ -155,7 +152,7 @@ class DailyMealDetailSummary extends StatelessWidget {
                     macroDials,
                     const SizedBox(height: 14),
                   ],
-                  minerals,
+                  macroTotals,
                 ],
               ),
             ),
@@ -290,9 +287,6 @@ class _MealGoalSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final calories = goal?.calories ?? calorieOnly;
-    String grams(double? amount) => amount == null
-        ? '—'
-        : '${amount.toStringAsFixed(1).replaceFirst(RegExp(r"\.0$"), "")} ${_summaryText(context, 'g')}';
     final theme = Theme.of(context);
     return Column(
       key: const Key('daily-meal-detail-goal'),
@@ -303,118 +297,78 @@ class _MealGoalSummary extends StatelessWidget {
           children: [
             Expanded(
               flex: 3,
-              child: Wrap(
-                spacing: 4,
-                runSpacing: 2,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    _summaryText(context, 'mealGoal'),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  IconButton(
-                    key: const Key('daily-meal-edit-goal'),
-                    tooltip:
-                        '${context.strings.text('Edit')} · ${_summaryText(context, 'mealGoal')}',
-                    onPressed: onEdit,
-                    style: IconButton.styleFrom(
-                      minimumSize: const Size.square(48),
-                      padding: EdgeInsets.zero,
-                      foregroundColor: theme.colorScheme.onSurface,
-                      shape: const CircleBorder(),
-                    ),
-                    icon: BilNavigationFeedback(
-                      always: true,
-                      child: Container(
-                        width: 34,
-                        height: 34,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              theme.colorScheme.surfaceContainerLowest,
-                              theme.colorScheme.surfaceContainerHigh,
-                            ],
-                          ),
-                          border: Border.all(
-                            color: theme.colorScheme.outlineVariant,
-                            width: .8,
-                          ),
-                        ),
-                        child: const Icon(Icons.edit_outlined, size: 18),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              flex: 2,
-              child: Text(
-                calories == null
-                    ? '— ${_summaryText(context, 'kcal')}'
-                    : '${formatDiaryMacroGrams(calories)} ${_summaryText(context, 'kcal')}',
-                textAlign: TextAlign.end,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (final item in [
-              ('carbs', _summaryText(context, 'carbs'), goal?.carbsGrams),
-              ('fat', _summaryText(context, 'fat'), goal?.fatGrams),
-              (
-                'protein',
-                _summaryText(context, 'proteinShort'),
-                goal?.proteinGrams,
-              ),
-            ])
-              Expanded(
-                key: Key('daily-meal-goal-${item.$1}'),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+              child: Directionality(
+                textDirection: Directionality.of(context),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 2,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      item.$2,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
+                      _summaryText(context, 'mealGoal'),
+                      key: const Key('daily-meal-goal-label'),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 3),
-                    if (item.$3 == null)
-                      const Text('—')
-                    else
-                      PremiumNutritionGlass(
-                        compact: true,
-                        showLabel: false,
-                        child: Text(
-                          grams(item.$3),
-                          textAlign: TextAlign.center,
-                          textDirection: TextDirection.ltr,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
+                    IconButton(
+                      key: const Key('daily-meal-edit-goal'),
+                      tooltip:
+                          '${context.strings.text('Edit')} · ${_summaryText(context, 'mealGoal')}',
+                      onPressed: onEdit,
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size.square(48),
+                        padding: EdgeInsets.zero,
+                        foregroundColor: theme.colorScheme.onSurface,
+                        shape: const CircleBorder(),
+                      ),
+                      icon: BilNavigationFeedback(
+                        always: true,
+                        child: Container(
+                          width: 34,
+                          height: 34,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                theme.colorScheme.surfaceContainerLowest,
+                                theme.colorScheme.surfaceContainerHigh,
+                              ],
+                            ),
+                            border: Border.all(
+                              color: theme.colorScheme.outlineVariant,
+                              width: .8,
+                            ),
                           ),
+                          child: const Icon(Icons.edit_outlined, size: 18),
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 2,
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: Text(
+                  calories == null
+                      ? '— ${_summaryText(context, 'kcal')}'
+                      : '${formatDiaryMacroGrams(calories)} ${_summaryText(context, 'kcal')}',
+                  key: const Key('daily-meal-goal-calories'),
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.ltr,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ],

@@ -1,3 +1,8 @@
+import 'package:uuid/uuid.dart';
+import '../database/vision_estimate_evidence.dart';
+import '../../features/nutrition/domain/gemini_vision_estimate.dart';
+import '../../features/nutrition/services/meal_image_gateway_contract.dart'
+    show mealImageReviewedQuantity;
 import '../database/unit_food_evidence.dart';
 import 'dart:convert';
 
@@ -36,6 +41,7 @@ part 'meal_repository_food_portions.dart';
 part 'meal_repository_recipe_servings.dart';
 part 'meal_repository_validation.dart';
 part 'meal_repository_vision_journal.dart';
+part 'meal_repository_gemini_vision.dart';
 
 class MealRepository {
   final AppDatabase _database;
@@ -347,6 +353,7 @@ class MealRepository {
       }
       _validateQuantity(existing.quantity);
       if (await _updateCoachFoodQuantity(existing, quantity)) return;
+      if (await _updateVisionFoodQuantity(existing, quantity)) return;
       final recipeEvidence = MealFoodEvidence.read(
         existing,
         ownerKey: _coachOwnerKey,

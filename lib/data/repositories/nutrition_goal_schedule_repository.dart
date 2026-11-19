@@ -235,7 +235,11 @@ class NutritionGoalScheduleRepository {
       .watch(nutritionGoalSchedulePreferenceKey)
       .map(NutritionGoalSchedule.decode);
 
-  Future<void> saveDay(int weekday, NutritionGoalTarget? target) async {
+  Future<void> saveDay(
+    int weekday,
+    NutritionGoalTarget? target, {
+    bool Function()? isCurrent,
+  }) async {
     if (weekday < 1 || weekday > 7) throw ArgumentError.value(weekday);
     if (target != null && !target.isValid) throw ArgumentError.value(target);
     await _mutate((current) {
@@ -245,10 +249,14 @@ class NutritionGoalScheduleRepository {
         dayTargets: days,
         mealTargets: current.mealTargets,
       );
-    });
+    }, isCurrent: isCurrent);
   }
 
-  Future<void> saveMeal(String mealType, NutritionGoalTarget? target) async {
+  Future<void> saveMeal(
+    String mealType,
+    NutritionGoalTarget? target, {
+    bool Function()? isCurrent,
+  }) async {
     if (!_mealTypes.contains(mealType)) throw ArgumentError.value(mealType);
     if (target != null && !target.isValid) throw ArgumentError.value(target);
     await _mutate((current) {
@@ -258,7 +266,7 @@ class NutritionGoalScheduleRepository {
         dayTargets: current.dayTargets,
         mealTargets: meals,
       );
-    });
+    }, isCurrent: isCurrent);
   }
 
   Future<void> replaceDayTargets(Map<int, NutritionGoalTarget> targets) async {
@@ -275,11 +283,12 @@ class NutritionGoalScheduleRepository {
   }
 
   Future<void> _mutate(
-    NutritionGoalSchedule Function(NutritionGoalSchedule current) derive,
-  ) async {
+    NutritionGoalSchedule Function(NutritionGoalSchedule current) derive, {
+    bool Function()? isCurrent,
+  }) async {
     await _preferences.update(nutritionGoalSchedulePreferenceKey, (source) {
       final next = derive(NutritionGoalSchedule.decode(source));
       return jsonEncode(next.toJson());
-    });
+    }, isCurrent: isCurrent);
   }
 }

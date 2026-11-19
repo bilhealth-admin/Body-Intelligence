@@ -262,11 +262,18 @@ void main() {
           final macroDials = find.byKey(const Key('daily-meal-detail-macros'));
           final fatDial = find.byKey(const Key('daily-meal-macro-fat'));
           expect(
-            tester.getCenter(fatDial).dx,
-            closeTo(
-              tester.getCenter(find.byKey(const Key('daily-meal-goal-fat'))).dx,
-              .1,
-            ),
+            tester
+                .getRect(
+                  find.byKey(
+                    Key(
+                      language == 'ar'
+                          ? 'daily-meal-goal-label'
+                          : 'daily-meal-goal-calories',
+                    ),
+                  ),
+                )
+                .right,
+            closeTo(tester.getRect(target).right, .1),
           );
           await _waitFor(
             tester,
@@ -291,25 +298,25 @@ void main() {
           );
           expect(ring.calories, 400);
           expect(ring.calorieGoal, targetCalories);
-          final mineralGroup = find.byKey(
-            const Key('daily-meal-detail-minerals'),
+          final macroTotals = find.byKey(
+            const Key('daily-meal-detail-macro-totals'),
           );
-          for (final value in ['400.0', '900.0', '250.0']) {
+          for (final value in ['15.0', '40.0', '20.0']) {
             expect(
-              find.descendant(of: mineralGroup, matching: find.text(value)),
+              find.descendant(of: macroTotals, matching: find.text(value)),
               findsOneWidget,
             );
           }
-          for (final dayTotal in ['600.0', '1350.0', '375.0']) {
+          for (final dayTotal in ['22.5', '60.0', '30.0']) {
             expect(
-              find.descendant(of: mineralGroup, matching: find.text(dayTotal)),
+              find.descendant(of: macroTotals, matching: find.text(dayTotal)),
               findsNothing,
             );
           }
           if (!legacy) {
             expect(
               find.descendant(of: target, matching: find.textContaining('40')),
-              findsOneWidget,
+              findsNothing,
             );
             if (language == 'ar') {
               await captureClosureSurface(
@@ -322,7 +329,9 @@ void main() {
           expect(macroDials, findsOneWidget);
           expect(
             tester
-                .getRect(find.byKey(const Key('daily-meal-detail-minerals')))
+                .getRect(
+                  find.byKey(const Key('daily-meal-detail-macro-totals')),
+                )
                 .top,
             greaterThan(tester.getRect(macroDials).bottom),
           );
@@ -330,7 +339,9 @@ void main() {
             tester.getRect(target).top,
             greaterThan(
               tester
-                  .getRect(find.byKey(const Key('daily-meal-detail-minerals')))
+                  .getRect(
+                    find.byKey(const Key('daily-meal-detail-macro-totals')),
+                  )
                   .bottom,
             ),
           );
@@ -419,6 +430,9 @@ void main() {
           expect(saved.mealTargets['breakfast']!.calories, 400);
           if (!legacy) {
             expect(saved.mealTargets['lunch']!.calories, 600);
+            expect(saved.mealTargets['lunch']!.carbsGrams, 75);
+            expect(saved.mealTargets['lunch']!.proteinGrams, 30);
+            expect(saved.mealTargets['lunch']!.fatGrams, 20);
           } else {
             expect(
               await tester.runAsync(

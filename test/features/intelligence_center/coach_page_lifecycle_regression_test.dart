@@ -16,6 +16,8 @@ import 'package:body_intelligence_log/features/profile/providers/user_profile_pr
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
+import 'package:body_intelligence_log/features/cloud_platform/services/local_data_account_boundary.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_preferences.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
@@ -47,6 +49,7 @@ part 'support/coach_page_accessibility_cases.dart';
 part 'support/coach_page_presentation_cases.dart';
 part 'support/coach_page_voice_cases.dart';
 part 'support/coach_page_request_cases.dart';
+part 'support/coach_page_recovery_cases.dart';
 part 'support/coach_page_scroll_cases.dart';
 part 'support/coach_page_restart_cases.dart';
 part 'support/coach_page_caret_idle_cases.dart';
@@ -167,6 +170,11 @@ Future<GoRouter> _mount(
       GoRoute(
         path: '/dashboard',
         builder: (_, _) => const Scaffold(body: Text('Audit dashboard')),
+      ),
+      GoRoute(
+        path: '/settings/ai-coach',
+        builder: (_, _) =>
+            const Scaffold(body: Text('Audit Coach settings destination')),
       ),
       GoRoute(
         path: '/settings',
@@ -423,6 +431,7 @@ void main() {
   registerCoachAccessibilityCases();
   registerCoachVoiceCases();
   registerCoachRequestCases();
+  registerCoachRecoveryCases();
   registerCoachScrollCases();
   registerCoachRestartCases();
   registerCoachCaretIdleCases();

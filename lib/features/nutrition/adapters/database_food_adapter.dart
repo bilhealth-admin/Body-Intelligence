@@ -49,7 +49,9 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
           : sourceFor(food),
       sourceLabel: evidence.isModern && !evidence.isCatalog
           ? snapshot == null
-                ? 'unknown'
+                ? evidence.vision != null
+                      ? food.source
+                      : 'unknown'
                 : FoodBasisEvidence.sourceLabel(snapshot)
           : food.source,
       verified: (!evidence.isModern || evidence.isCatalog) && food.verified,

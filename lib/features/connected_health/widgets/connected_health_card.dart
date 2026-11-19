@@ -12,6 +12,7 @@ import '../../dashboard/widgets/dashboard_carousel.dart';
 import '../../global_platform/health_data/unified_health_data_integration.dart';
 import '../../global_platform/fitness_devices/ble_fitness_device_platform.dart';
 import '../connected_health_model.dart';
+import '../connected_health_display_scope.dart';
 import '../connected_health_copy.dart';
 import '../providers/connected_health_provider.dart';
 import '../providers/fitness_device_provider.dart';
@@ -315,6 +316,7 @@ class _ConnectedHealthContent extends StatelessWidget {
         in snapshot.signals
             .where(
               (signal) =>
+                  connectedHealthDeviceSignalIsSupported(signal.key) &&
                   !BilHealthScope.excludesKey(signal.key) &&
                   !hiddenSignalKeys.contains(signal.key),
             )

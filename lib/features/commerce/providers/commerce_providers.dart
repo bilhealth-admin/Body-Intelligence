@@ -6,6 +6,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../auth/retryable_auth_session.dart';
 import '../domain/commerce_plan.dart';
 import 'verified_purchase_handoff.dart';
 import '../domain/free_plan.dart';
@@ -29,22 +30,43 @@ final subscriptionStateProvider = Provider<SubscriptionState>(
   (ref) => ref.watch(entitlementRepositoryProvider).current(),
 );
 
+/// The real SDK auth client; injectable only at the identity I/O boundary.
+final verifiedEntitlementAuthClientProvider = Provider<GoTrueClient?>((_) {
+  if (!AppEnvironment.supabaseRuntimeReady) {
+    return null;
+  }
+  return Supabase.instance.client.auth;
+});
+
 /// Tracks the authenticated owner that server-verified entitlements belong to.
 ///
 /// Entitlements must be refreshed when authentication changes. Otherwise a
 /// cached Guest result can survive sign-in, or a verified Free result can
 /// survive sign-out and incorrectly make a Guest eligible for ads.
 final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
-  if (!AppEnvironment.supabaseRuntimeReady) {
+  final auth = ref.watch(verifiedEntitlementAuthClientProvider);
+  if (auth == null) {
     yield null;
     return;
   }
-
-  final auth = Supabase.instance.client.auth;
   var previousOwnerId = auth.currentUser?.id;
   yield previousOwnerId;
 
-  await for (final state in auth.onAuthStateChange) {
+  final changes = auth.onAuthStateChange.transform(
+    StreamTransformer<AuthState, AuthState>.fromHandlers(
+      handleError: (error, stack, sink) {
+        if (isSameOwnerRetryableAuthReadFailure(
+          error,
+          auth: auth,
+          previousOwnerId: previousOwnerId,
+        )) {
+          return;
+        }
+        sink.addError(error, stack);
+      },
+    ),
+  );
+  await for (final state in changes) {
     // Native session persistence can emit a transient null. An explicit
     // sign-out remains authoritative and clears all owner-scoped state.
     if (state.session == null && state.event != AuthChangeEvent.signedOut) {
@@ -60,9 +82,8 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
 /// Synchronous owner seed used only until the auth stream publishes its first
 /// value. This prevents an AsyncLoading -> AsyncData transition for the same
 /// signed-in member from looking like an account change to access providers.
-final verifiedEntitlementOwnerSeedProvider = Provider<String?>((_) {
-  if (!AppEnvironment.supabaseRuntimeReady) return null;
-  return Supabase.instance.client.auth.currentUser?.id;
+final verifiedEntitlementOwnerSeedProvider = Provider<String?>((ref) {
+  return ref.watch(verifiedEntitlementAuthClientProvider)?.currentUser?.id;
 });
 
 /// Stable scalar owner identity. Once the stream has emitted, including an
@@ -351,6 +372,9 @@ final verifiedSubscriptionAccessProvider =
             entitlements: FreePlan.entitlements,
             authority: state.authority,
             lifecycle: SubscriptionLifecycle.expired,
+            storeRenewalObservation: state.storeRenewalObservation,
+            storeRenewalDefinitivelyInactive:
+                state.storeRenewalDefinitivelyInactive,
             provider: state.provider,
             isPurchasable: false,
             canRestorePurchases: state.canRestorePurchases,
@@ -456,6 +480,10 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
 final class AiCoachAccessSnapshotStore {
   bool? verifiedAccess;
+  String? verifiedUsagePlan;
+  DateTime? usageRequestedAt;
+  DateTime? usageObservedAt;
+  bool usageResponseFresh = false;
   int generation = 0;
 }
 
@@ -475,6 +503,7 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   ref.watch(aiCoachUsageRefreshProvider);
   if (ownerId == null) return false;
   final generation = ++snapshot.generation;
+  snapshot.usageResponseFresh = false;
   var active = true;
   ref.onDispose(() => active = false);
   bool current() => active && generation == snapshot.generation;
@@ -493,6 +522,9 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   // last verified positive result on transient failure; a previous zero is not
   // evidence of a fresh denial after a failed check.
   try {
+    // Freshness is bounded by when this request began, not when a delayed
+    // response arrived. Owner/generation checks still retire old requests.
+    final requestedAt = ref.read(verifiedEntitlementClockProvider)().toUtc();
     final value = await ref
         .read(aiCoachUsageStatusLoaderProvider)()
         .timeout(const Duration(seconds: 10));
@@ -500,6 +532,15 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
     final access = verifiedAiCoachAccessFromUsageStatus(value);
     if (access == null) throw StateError('ai_usage_status_unavailable');
     snapshot.verifiedAccess = access;
+    snapshot.verifiedUsagePlan =
+        value is Map && const {'free', 'ai_coach'}.contains(value['plan'])
+        ? value['plan'] as String
+        : null;
+    snapshot.usageRequestedAt = requestedAt;
+    snapshot.usageObservedAt = ref
+        .read(verifiedEntitlementClockProvider)()
+        .toUtc();
+    snapshot.usageResponseFresh = true;
     return access;
   } on Object {
     // A disposed/older load cannot borrow continuity from a later generation.

@@ -5,7 +5,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('schema 19 upgrades through 22 without losing existing data', () async {
+  test('schema 19 upgrades through 23 without losing existing data', () async {
     final directory = await Directory.systemTemp.createTemp('bil-v20-');
     addTearDown(() => directory.delete(recursive: true));
     final file = File('${directory.path}/bil.sqlite');
@@ -24,12 +24,15 @@ void main() {
     await database.customStatement(
       'ALTER TABLE foods DROP COLUMN food_evidence_json',
     );
+    await database.customStatement(
+      'ALTER TABLE daily_logs DROP COLUMN final_vision_nutrient_evidence_json',
+    );
     await database.customStatement('PRAGMA user_version = 19');
     await database.close();
 
     database = AppDatabase.forTesting(NativeDatabase(file));
     addTearDown(database.close);
-    expect(database.schemaVersion, 22);
+    expect(database.schemaVersion, 23);
     final tables = await database
         .customSelect(
           "SELECT name FROM sqlite_master WHERE type = 'table' "

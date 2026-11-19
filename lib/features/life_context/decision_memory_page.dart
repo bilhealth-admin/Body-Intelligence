@@ -12,16 +12,28 @@ import '../../shared/widgets/secondary_page_app_bar.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../profile/providers/user_profile_provider.dart';
+import 'providers/coach_memory_identity_provider.dart';
 import '../intelligence_center/services/coach_memory_repository.dart';
 import '../intelligence_center/services/coach_context_provider.dart';
 import 'providers/life_context_provider.dart';
 import 'coach_memory_sync_review_panel.dart';
 
-final explicitCoachMemoriesProvider = FutureProvider((ref) {
-  return CoachMemoryRepository(
-    preferences: ref.watch(preferencesRepositoryProvider),
-  ).readLocal();
-});
+final explicitCoachMemoriesProvider =
+    StreamProvider<List<Map<String, Object?>>>((ref) {
+      final preferences = ref.watch(preferencesRepositoryProvider);
+      // Watch the full identity lifetime, including A -> B -> A/session reload,
+      // rather than retaining a previous owner's cached list while DB switches.
+      final auth = ref.watch(coachMemoryIdentityProvider);
+      if (auth.isLoading) {
+        return const Stream<List<Map<String, Object?>>>.empty();
+      }
+      if (auth.hasError ||
+          auth.asData == null ||
+          auth.asData!.value.ownerId != preferences.localOwnerId) {
+        return Stream.error(StateError('coach_memory_owner_unavailable'));
+      }
+      return CoachMemoryRepository(preferences: preferences).watchLocal();
+    }, retry: (_, _) => null);
 
 class DecisionMemoryPage extends ConsumerStatefulWidget {
   const DecisionMemoryPage({super.key});
@@ -210,6 +222,8 @@ class _DecisionMemoryPageState extends ConsumerState<DecisionMemoryPage> {
             ),
             const SizedBox(height: 6),
             explicit.when(
+              skipLoadingOnRefresh: false,
+              skipLoadingOnReload: false,
               loading: () => const BilFeatureWelcomeStatus(),
               error: (_, _) => Text(t('Could not load Coach memories.')),
               data: (rows) => rows.isEmpty

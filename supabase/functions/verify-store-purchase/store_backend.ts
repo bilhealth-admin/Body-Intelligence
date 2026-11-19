@@ -1,3 +1,4 @@
+import { refreshOwnSubscription } from "./own_subscription_refresh.ts";
 import {
   boostCreditOutcome,
   deliveryReceipt,
@@ -509,7 +510,7 @@ export type StoreBackendHandlerDependencies = {
   readEnvironment?: EnvironmentReader;
 };
 
-async function googleAccessToken() {
+async function googleAccessToken(signal?: AbortSignal) {
   const raw = googlePlayServiceAccountJson();
   const account = JSON.parse(raw);
   const key = await importPKCS8(account.private_key, "RS256");
@@ -521,6 +522,7 @@ async function googleAccessToken() {
     .setIssuedAt().setExpirationTime("5m").sign(key);
   const response = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
+    signal,
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
@@ -534,16 +536,18 @@ async function googleAccessToken() {
 async function verifyGoogle(
   packageName: string,
   purchaseToken: string,
+  signal?: AbortSignal,
 ): Promise<VerifiedPurchase> {
   if (packageName !== env("GOOGLE_PLAY_PACKAGE_NAME")) {
     throw new Error("wrong_package");
   }
-  const token = await googleAccessToken();
+  const token = await googleAccessToken(signal);
   const endpoint =
     `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${
       encodeURIComponent(packageName)
     }/purchases/subscriptionsv2/tokens/${encodeURIComponent(purchaseToken)}`;
   const response = await fetch(endpoint, {
+    signal,
     headers: { authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error("google_verification_failed");
@@ -774,9 +778,9 @@ async function consumeGoogleConsumable(
   }
 }
 
-async function googleVoidedPurchases(): Promise<GoogleVoidedPurchase[]> {
+async function googleVoidedPurchases(signal?: AbortSignal): Promise<GoogleVoidedPurchase[]> {
   const packageName = env("GOOGLE_PLAY_PACKAGE_NAME");
-  const token = await googleAccessToken();
+  const token = await googleAccessToken(signal);
   const purchases: GoogleVoidedPurchase[] = [];
   let pageToken = "";
   do {
@@ -790,6 +794,7 @@ async function googleVoidedPurchases(): Promise<GoogleVoidedPurchase[]> {
     endpoint.searchParams.set("type", "1");
     if (pageToken) endpoint.searchParams.set("token", pageToken);
     const response = await fetch(endpoint, {
+      signal,
       headers: { authorization: `Bearer ${token}` },
     });
     if (!response.ok) throw new Error("google_voided_purchase_query_failed");
@@ -979,13 +984,14 @@ export function appleServerApiFailureCode(status: number) {
 async function reconcileApple(
   originalTransactionId: string,
   environment: StoreEnvironment,
+  signal?: AbortSignal,
 ) {
   const host = appleServerHost(environment);
   const response = await fetch(
     `https://${host}/inApps/v1/subscriptions/${
       encodeURIComponent(originalTransactionId)
     }`,
-    { headers: { authorization: `Bearer ${await appleServerToken()}` } },
+    { headers: { authorization: `Bearer ${await appleServerToken()}` }, signal },
   );
   if (!response.ok) {
     throw new Error(appleServerApiFailureCode(response.status));
@@ -1161,6 +1167,7 @@ export async function persistVerified(
     latestTransactionId: string;
     environment: string;
     revision: number;
+    refreshLease?: string;
   } | null = null,
 ): Promise<{
   active: boolean;
@@ -1216,7 +1223,9 @@ export async function persistVerified(
       : null,
   };
   const { data: persisted, error } = await admin.rpc(
-    reconciliationSnapshot
+    reconciliationSnapshot?.refreshLease
+      ? "bil_persist_refreshed_store_purchase"
+      : reconciliationSnapshot
       ? "bil_persist_reconciled_store_purchase"
       : "bil_persist_verified_store_purchase",
     reconciliationSnapshot
@@ -1229,6 +1238,9 @@ export async function persistVerified(
           reconciliationSnapshot.latestTransactionId,
         p_expected_environment: reconciliationSnapshot.environment,
         p_expected_revision: reconciliationSnapshot.revision,
+        ...(reconciliationSnapshot.refreshLease
+          ? { p_refresh_lease: reconciliationSnapshot.refreshLease }
+          : {}),
       }
       : purchaseArgs,
   );
@@ -1281,6 +1293,58 @@ async function authenticatedUser(
   const { data, error } = await auth.auth.getUser();
   if (error || !data.user) throw new Error("invalid_session");
   return { user: data.user, auth, admin };
+}
+
+async function refreshOwnSubscriptionRequest(
+  request: Request,
+  body: Record<string, unknown>,
+  dependencies: StoreBackendHandlerDependencies,
+) {
+  try {
+  const { user, admin } = await authenticatedUser(
+    request, dependencies.clients ?? clients,
+  );
+  if (Object.keys(body).some((key) => key !== "action" && key !== "_integrity")) {
+    return json({ refresh_status: "unavailable", error: "invalid_refresh_payload" }, 400);
+  }
+  await (dependencies.requireIntegrity ?? requireMobileIntegrityGrant)({
+    admin: admin as never,
+    ownerId: user.id,
+    action: "store.refresh_subscription",
+    body,
+  });
+  return json(await refreshOwnSubscription(user.id, {
+    rpc: async (name, args) => await admin.rpc(name, args),
+    readStore: async (snapshot, signal) => {
+      if (snapshot.provider === "apple") {
+        return await (dependencies.reconcileApple ?? reconcileApple)(
+          snapshot.originalTransactionId,
+          verifiedStoreEnvironment(snapshot.environment), signal,
+        );
+      }
+      const [purchase, voided] = await Promise.all([
+        (dependencies.verifyGoogle ?? verifyGoogle)(
+          snapshot.packageOrBundleId, snapshot.latestTransactionId, signal,
+        ),
+        (dependencies.googleVoidedPurchases ?? googleVoidedPurchases)(signal),
+      ]);
+      if (purchase.storeOrderId && voided.some((item) =>
+        item.purchaseToken === purchase.transactionId &&
+        item.orderId === purchase.storeOrderId)) purchase.lifecycle = "revoked";
+      return purchase;
+    },
+    persist: (purchase, snapshot) => persistVerified(
+      admin, user.id, purchase, [], snapshot,
+    ),
+  }));
+  } catch (error) {
+    const code = error instanceof MobileIntegrityFailure ? error.code
+      : error instanceof Error && ["authentication_required", "invalid_session"].includes(error.message)
+      ? error.message : "subscription_refresh_unavailable";
+    return json({ refresh_status: "unavailable", error: code },
+      error instanceof MobileIntegrityFailure ? error.status
+        : code === "authentication_required" || code === "invalid_session" ? 401 : 503);
+  }
 }
 
 async function verifyPurchase(
@@ -2206,6 +2270,9 @@ export async function handler(
   let route: "verify_purchase" | "verify_ai_boost" | "unknown" = "unknown";
   try {
     const body = await request.json() as Record<string, unknown>;
+    if (body.action === "refresh_subscription") {
+      return await refreshOwnSubscriptionRequest(request, body, dependencies);
+    }
     if (body.action === "reconcile") {
       return await reconcile(request, body, dependencies);
     }

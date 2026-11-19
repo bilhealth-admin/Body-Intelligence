@@ -425,6 +425,7 @@ final class AppDatabaseCloudInboxApplier {
   }
 
   Future<void> _restoreProfilePreferences(Map<String, Object?> payload) async {
+    final country = _nullableString(payload, 'countryRegion')?.trim();
     final values = <String, String>{
       if ((_nullableString(payload, 'profileDateOfBirth') ?? '')
           .trim()
@@ -433,8 +434,7 @@ final class AppDatabaseCloudInboxApplier {
           payload,
           'profileDateOfBirth',
         )!.trim(),
-      if ((_nullableString(payload, 'countryRegion') ?? '').trim().isNotEmpty)
-        'countryRegion': _nullableString(payload, 'countryRegion')!.trim(),
+      if (country != null && country.isNotEmpty) 'countryRegion': country,
       if ((_nullableString(payload, 'onboardingGoalPriorities') ?? '')
           .trim()
           .isNotEmpty)
@@ -443,6 +443,13 @@ final class AppDatabaseCloudInboxApplier {
           'onboardingGoalPriorities',
         )!.trim(),
     };
+    // An explicit optional-country clear is different from an older envelope
+    // that never contained the key. Keep this in the profile apply transaction.
+    if (payload.containsKey('countryRegion') && (country ?? '').isEmpty) {
+      await (_database.delete(
+        _database.preferences,
+      )..where((row) => row.key.equals('countryRegion'))).go();
+    }
     if (values.isEmpty) return;
     final updatedAt = DateTime.now();
     for (final entry in values.entries) {
@@ -501,8 +508,11 @@ final class AppDatabaseCloudInboxApplier {
         'countryRegion',
         'onboardingGoalPriorities',
       }.contains(entry.key)) {
-        // The profile restorer already trims these optional preferences and
-        // does not write empty strings. A replay must use the same semantics.
+        // A legacy envelope without country does not replace that preference.
+        // Explicit null/empty country is a clear and compares as absence.
+        if (entry.key == 'countryRegion' && !incoming.containsKey(entry.key)) {
+          return true;
+        }
         return _profilePreference(entry.value) == _profilePreference(value);
       }
       // Older envelopes predate this explicit default; the applier has always

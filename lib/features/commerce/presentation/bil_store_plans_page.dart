@@ -114,6 +114,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
               'purchase_status_unknown',
               'verification_failed',
               'store_finish_pending',
+              'license_unlicensed',
+              'play_license_recovered_pending',
             }.contains(boost.errorCode)) &&
         store?.messageCode != 'purchase_owned_by_another_account') {
       _onBoostChanged();
@@ -130,13 +132,19 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     if (!boost.hasUserInitiatedFeedback &&
         !_purchaseRequestInFlight &&
         boost.errorCode != 'purchase_inactive' &&
+        boost.errorCode != 'license_unlicensed' &&
+        boost.errorCode != 'play_license_recovered_pending' &&
         !(boost.errorCode == 'store_finish_pending' &&
             boost.lastDelivery?.active == false)) {
       return;
     }
     setState(() {
-      _purchaseFeedbackKey = switch (boost.errorCode) {
+      _purchaseFeedbackKey = switch (boost.presentationErrorCode) {
         'purchase_status_unknown' => 'purchase_confirmation_pending',
+        'license_unlicensed' => 'license_unlicensed',
+        'play_license_recovered' => 'play_license_recovered',
+        'play_license_recovered_pending' => 'play_license_recovered_pending',
+        'play_readiness_unavailable' => 'play_readiness_unavailable',
         'verification_failed' => 'purchase_verification_unavailable',
         'store_catalog_changed' => 'purchase_catalog_changed',
         'purchase_inactive' => 'purchase_inactive',
@@ -251,73 +259,6 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       _purchaseFeedbackKey = null;
       _purchaseFeedbackIsError = false;
     });
-  }
-
-  (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
-    final code = store.messageCode;
-    // A background StoreKit replay is not a purchase made on this screen.
-    // Keep its failure in the service (including the checkout safety block),
-    // and explain it only after an explicit Restore/verification action.
-    if (code == 'reconciliation_pending' ||
-        code == 'reconciliation_verification_failed') {
-      return (null, false);
-    }
-    // A verified receipt can arrive while AppStore.sync is still pending.
-    // Preserve the valid benefit, but never call the Restore operation done
-    // until its own lifecycle settles.
-    if (store.isRecoveringSubscription ||
-        (store.isRestoring && store.state != VerifiedStoreState.failed)) {
-      return ('restore_checking', false);
-    }
-    if (!store.lastDeliveryIsUserPurchase &&
-        !store.isRestoring &&
-        (code == 'subscription_verified' ||
-            code == 'ai_boost_verified' ||
-            (code == 'store_finish_pending' &&
-                store.verifiedInactiveAt == null))) {
-      return (null, false);
-    }
-    final key = switch (code) {
-      'purchase_pending' => 'purchase_awaiting_approval',
-      'restore_pending' => 'restore_checking',
-      'restore_cancelled' => 'restore_cancelled',
-      'restore_unconfirmed' => 'restore_unconfirmed',
-      'reconciliation_pending' => 'purchase_reconciliation_pending',
-      // Cancelling the native sheet is an intentional choice, not an error.
-      // Keep the catalog actionable so another term can be selected at once.
-      'purchase_cancelled' => null,
-      'purchase_not_started' => 'purchase_error',
-      'store_catalog_changed' => 'purchase_catalog_changed',
-      'store_catalog_refresh_failed' => 'purchase_error',
-      'purchase_unavailable' || 'authentication_required' => 'purchase_error',
-      'purchase_status_unknown' => 'purchase_confirmation_pending',
-      'verification_failed' => 'purchase_verification_unavailable',
-      'store_finish_pending' =>
-        store.verifiedInactiveAt != null
-            ? 'purchase_inactive'
-            : 'purchase_verified',
-      'restore_verification_failed' => 'restore_verification_failed',
-      'purchase_owned_by_another_account' =>
-        'purchase_owned_by_another_account',
-      'reconciliation_verification_failed' => 'purchase_reconciliation_failed',
-      'purchase_failed' || 'store_stream_failed' => 'purchase_error',
-      'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
-      _ => switch (store.state) {
-        VerifiedStoreState.purchasePending => 'purchase_in_progress',
-        VerifiedStoreState.cancelled => null,
-        VerifiedStoreState.failed => 'purchase_error',
-        _ => null,
-      },
-    };
-    final isError =
-        const {
-          'purchase_error',
-          'purchase_owned_by_another_account',
-          'restore_verification_failed',
-          'purchase_reconciliation_failed',
-        }.contains(key) ||
-        code == 'verification_failed';
-    return (key, isError);
   }
 
   bool get _purchaseInProgress =>
@@ -638,7 +579,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                             authoritativePlan != null) &&
                         (store?.canStartPurchase ?? true),
               onContinueVerification:
-                  (_sharedBoost?.canRetry == true ||
+                  (_sharedBoost?.canRecoverPlayLicense == true ||
+                      _sharedBoost?.canRetry == true ||
                       (store != null &&
                           !store.busy &&
                           (store.hasPendingVerifiedFinish ||
@@ -647,7 +589,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                                 'store_finish_pending',
                               }.contains(store.messageCode))))
                   ? () async {
-                      if (_sharedBoost?.canRetry == true) {
+                      if (_sharedBoost?.canRecoverPlayLicense == true) {
+                        await _sharedBoost!.recoverPlayLicense();
+                      } else if (_sharedBoost?.canRetry == true) {
                         await _sharedBoost!.retryPendingTransaction();
                       } else {
                         await store!.continueVerification();
@@ -656,7 +600,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                   : null,
               continueVerificationLabel: BilStoreCopy.text(
                 locale,
-                'continue_verification',
+                _sharedBoost?.canRecoverPlayLicense == true
+                    ? 'fix_play_license'
+                    : 'continue_verification',
               ),
               blockedPurchaseKinds: blockedPurchaseKinds,
               blockedPurchaseMessage: BilStoreCopy.text(

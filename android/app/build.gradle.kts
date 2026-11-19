@@ -116,6 +116,7 @@ flutter {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     constraints {
         // Secure-storage migration can initialize Tink. Keep its wire format
         // while requiring the upstream constant-time verification repair.

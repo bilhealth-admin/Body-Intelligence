@@ -29,6 +29,7 @@ extension _CommunityChatOwnerScope on _CommunityChatPageState {
   }
 
   void _retire() {
+    _stopMessageVisibilityPoll();
     _ownerCancelled = true;
     final cancelDeletionDialog = _cancelMessageDeletionDialog;
     _cancelMessageDeletionDialog = null;

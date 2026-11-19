@@ -10,6 +10,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../app/environment/app_environment.dart';
+import '../auth/services/local_account_sign_out.dart';
 
 import '../../app/localization/bil_locale_policy.dart';
 import '../../core/units/measurement_units.dart';
@@ -36,6 +40,7 @@ import '../visual_2026/bil_calm_visual_scope.dart';
 part 'onboarding_core_steps.dart';
 part 'onboarding_detail_steps.dart';
 part 'onboarding_components.dart';
+part 'onboarding_account_exit.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key, this.reviewMode = false});
@@ -73,6 +78,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   String? _inlineError;
   String? _aiStatusMessage;
   Future<void> _draftWrites = Future<void>.value();
+  OnboardingDraftRepository? _loadedDraftRepository;
 
   List<String> get _steps => <String>[
     'goals',
@@ -125,6 +131,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _load() async {
     try {
       final draftRepository = ref.read(onboardingDraftRepositoryProvider);
+      _loadedDraftRepository = draftRepository;
       final savedDraft = await draftRepository.load();
       var value = widget.reviewMode
           ? await _loadCanonicalDraft(
@@ -323,9 +330,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _queueDraftSave([OnboardingDraft? snapshot]) {
     if (widget.reviewMode) return Future<void>.value();
     final value = snapshot ?? _draft;
+    final OnboardingDraftRepository repository =
+        _loadedDraftRepository ?? ref.read(onboardingDraftRepositoryProvider);
     _draftWrites = _draftWrites
         .catchError((Object _) {})
-        .then((_) => ref.read(onboardingDraftRepositoryProvider).save(value));
+        .then((_) => repository.save(value));
     return _draftWrites;
   }
 
@@ -365,6 +374,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   Future<void> _goBack() async {
     if (_busy || _transitionBusy || _permissionBusy) return;
+    if (_index == 0 && !widget.reviewMode) return _leaveSetup();
     setState(() => _transitionBusy = true);
     try {
       if (_index == 0) {
@@ -372,10 +382,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           if (mounted) context.go('/settings');
           return;
         }
-        final savedDraft = _draft.copyWith(stepId: 'goals');
-        await _queueDraftSave(savedDraft);
-        if (mounted) context.go('/account-gateway');
-        return;
       }
       final previous = _steps[_index - 1];
       final nextDraft = _draft.copyWith(stepId: previous);
@@ -425,9 +431,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         if (_draft.birthDate == null ||
             !BilAdultEligibility.isEligibleBirthDate(_draft.birthDate!)) {
           return t('BIL is available only to adults aged 18 or older.');
-        }
-        if (_draft.countryRegion.trim().length < 2) {
-          return t('Enter your country or region.');
         }
       case 'height':
         if (_draft.heightCm == null ||
@@ -610,14 +613,14 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               key: ValueKey(_stepId),
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (!widget.reviewMode) _accountExitAction(),
                 view.body,
-                if (_inlineError case final error?) ...[
-                  const SizedBox(height: 16),
-                  _ErrorBanner(message: error),
-                ],
               ],
             ),
           ),
+          validationFeedback: _inlineError == null
+              ? null
+              : _ErrorBanner(message: _inlineError!),
           onBack: () => unawaited(_goBack()),
           onNext: () => unawaited(_goNext()),
           onSkip: view.skip,

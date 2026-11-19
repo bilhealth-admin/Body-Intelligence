@@ -1,3 +1,5 @@
+import 'store_renewal_observation.dart';
+import 'google_renewal_observation.dart';
 import 'commerce_entitlement.dart';
 import 'commerce_plan.dart';
 import 'paid_plan_catalog.dart';
@@ -31,7 +33,16 @@ final class SubscriptionState {
     this.serverRevision,
     this.storeOriginalTransactionId,
     this.verifiedNextPeriod,
-  }) : entitlements = Set.unmodifiable(entitlements) {
+    StoreRenewalObservation? storeRenewalObservation,
+    bool? storeRenewalDefinitivelyInactive,
+    GoogleRenewalObservation? googleRenewalObservation,
+    bool googleRenewalDefinitivelyInactive = false,
+  }) : storeRenewalObservation =
+           storeRenewalObservation ?? googleRenewalObservation,
+       storeRenewalDefinitivelyInactive =
+           storeRenewalDefinitivelyInactive ??
+           googleRenewalDefinitivelyInactive,
+       entitlements = Set.unmodifiable(entitlements) {
     if (authority == EntitlementAuthority.localDefault &&
         (isPurchasable || canRestorePurchases)) {
       throw ArgumentError(
@@ -61,6 +72,15 @@ final class SubscriptionState {
   /// this period and may only be used at or after its own [startedAt]. This is
   /// session memory only; encrypted continuity never persists future rights.
   final SubscriptionState? verifiedNextPeriod;
+
+  /// Session/display metadata only; never persisted as paid continuity proof.
+  final StoreRenewalObservation? storeRenewalObservation;
+  final bool storeRenewalDefinitivelyInactive;
+
+  GoogleRenewalObservation? get googleRenewalObservation =>
+      GoogleRenewalObservation.fromObservation(storeRenewalObservation);
+  bool get googleRenewalDefinitivelyInactive =>
+      storeRenewalDefinitivelyInactive;
   final bool isPurchasable;
   final bool canRestorePurchases;
 
@@ -93,6 +113,8 @@ final class SubscriptionState {
       serverRevision: serverRevision,
       storeOriginalTransactionId: storeOriginalTransactionId,
       verifiedNextPeriod: next,
+      storeRenewalObservation: storeRenewalObservation,
+      storeRenewalDefinitivelyInactive: storeRenewalDefinitivelyInactive,
       isPurchasable: isPurchasable,
       canRestorePurchases: canRestorePurchases,
     );

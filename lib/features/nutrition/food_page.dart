@@ -103,6 +103,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   }
 
   final search = TextEditingController();
+  // Hero, keyboard-safe header, and compact taskbar can reparent this field.
+  // Keep the editing state and focus owned by this catalog visit.
+  final _searchFieldAnchor = GlobalKey(debugLabel: 'food-catalog-search');
   List<Food>? results;
   Timer? debounce;
   StreamSubscription<FoodRuntimeSearchResult>? _progressiveSearch;
@@ -331,43 +334,48 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                       const SizedBox(height: 10),
                     ],
                     _NutritionTaskBar(
-                      searchField: SearchBar(
-                        key: const Key('food-primary-search'),
-                        controller: search,
-                        hintText: nutritionText(
-                          context,
-                          'Search foods',
-                          'البحث عن الأطعمة',
-                        ),
-                        leading: const Icon(Icons.search),
-                        elevation: const WidgetStatePropertyAll(0),
-                        backgroundColor: WidgetStatePropertyAll(
-                          Theme.of(context).colorScheme.surface,
-                        ),
-                        side: WidgetStatePropertyAll(
-                          BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
+                      searchField: KeyedSubtree(
+                        key: _searchFieldAnchor,
+                        child: SearchBar(
+                          key: const Key('food-primary-search'),
+                          controller: search,
+                          hintText: nutritionText(
+                            context,
+                            'Search foods',
+                            'البحث عن الأطعمة',
                           ),
-                        ),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                          leading: const Icon(Icons.search),
+                          elevation: const WidgetStatePropertyAll(0),
+                          backgroundColor: WidgetStatePropertyAll(
+                            Theme.of(context).colorScheme.surface,
                           ),
+                          side: WidgetStatePropertyAll(
+                            BorderSide(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.outlineVariant,
+                            ),
+                          ),
+                          shape: WidgetStatePropertyAll(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          trailing: search.text.trim().isEmpty
+                              ? const <Widget>[]
+                              : <Widget>[
+                                  IconButton(
+                                    key: const Key('food-search-clear'),
+                                    tooltip: t('Clear'),
+                                    onPressed: () {
+                                      search.clear();
+                                      _scheduleSearch('');
+                                    },
+                                    icon: const Icon(Icons.close_rounded),
+                                  ),
+                                ],
+                          onChanged: _scheduleSearch,
                         ),
-                        trailing: search.text.trim().isEmpty
-                            ? const <Widget>[]
-                            : <Widget>[
-                                IconButton(
-                                  key: const Key('food-search-clear'),
-                                  tooltip: t('Clear'),
-                                  onPressed: () {
-                                    search.clear();
-                                    _scheduleSearch('');
-                                  },
-                                  icon: const Icon(Icons.close_rounded),
-                                ),
-                              ],
-                        onChanged: _scheduleSearch,
                       ),
                       onAddFood: _showAddFoodActions,
                     ),

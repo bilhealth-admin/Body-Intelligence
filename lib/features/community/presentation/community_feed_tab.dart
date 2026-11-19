@@ -289,6 +289,7 @@ class _FeedTabState extends State<_FeedTab>
         messenger.hideCurrentSnackBar();
         messenger.showSnackBar(
           SnackBar(
+            persist: false,
             content: Text(
               communityText(
                 context,

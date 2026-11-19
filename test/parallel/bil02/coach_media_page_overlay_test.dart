@@ -304,8 +304,8 @@ Future<void> _unmount(WidgetTester tester) async {
   await _drain(tester);
 }
 
-// Premium Vision uses a Dialog rather than the legacy AlertDialog. Both
-// flows must retain an initially disabled action and a verified-food check.
+// Premium Vision keeps its action available to explain missing details.
+// An unselected source must show guidance without advancing or writing.
 Finder get _matchUse {
   final premium = find.byKey(const Key('premium-vision-use-food'));
   if (premium.evaluate().isNotEmpty) return premium;
@@ -315,12 +315,23 @@ Finder get _matchUse {
   );
 }
 
-Future<void> _chooseMatch(WidgetTester tester, String name) async {
+Future<void> _chooseMatch(
+  WidgetTester tester,
+  String name,
+  _PageFixture fixture,
+) async {
   // Premium repeats the recognized name in its heading. Select the actual
   // catalog row, not a text matcher that also sees the recognition heading.
   final row = find.widgetWithText(ListTile, name);
   await _until(tester, row);
-  expect(tester.widget<FilledButton>(_matchUse).onPressed, isNull);
+  expect(tester.widget<FilledButton>(_matchUse).onPressed, isNotNull);
+  await tester.tap(_matchUse);
+  await _drain(tester);
+  expect(find.byKey(const Key('vision-required-details')), findsOneWidget);
+  expect(find.byKey(const Key('bil02-media-grams')), findsNothing);
+  await _expectNoMeal(tester, fixture);
+  await tester.tap(find.byKey(const Key('vision-required-cancel')));
+  await _drain(tester);
   await tester.tap(row);
   await tester.pump();
   expect(tester.widget<FilledButton>(_matchUse).onPressed, isNotNull);
@@ -373,27 +384,31 @@ final class _SyntheticPicker extends ImagePicker {
 }
 
 final class _SyntheticAnalysis extends MealImageAnalysisService {
-  _SyntheticAnalysis(String locale) : super(requestedLocale: locale);
+  _SyntheticAnalysis(String locale, {this.onAnalyze})
+    : super(requestedLocale: locale);
+  final VoidCallback? onAnalyze;
 
   @override
-  Future<MealImageAnalysis> analyze(XFile image) async =>
-      const MealImageAnalysis(
-        requestId: 'synthetic-provider-request',
-        notice: 'Synthetic analysis: review the identity and amount.',
-        candidates: [
-          MealImageCandidate(
-            name: 'Synthetic media food 1',
-            confidence: .87,
-            evidence: 'Synthetic shape evidence.',
-            identificationProvider: 'synthetic-test-provider',
-            modelRevision: 'synthetic-revision-1',
-            nutritionResolution: MealNutritionResolution.verifiedFoodRecord,
-            verifiedFoodRecordId: 'model-claimed-USDA-999999',
-            amount: 100,
-            unit: 'g',
-          ),
-        ],
-      );
+  Future<MealImageAnalysis> analyze(XFile image) async {
+    onAnalyze?.call();
+    return const MealImageAnalysis(
+      requestId: 'synthetic-provider-request',
+      notice: 'Synthetic analysis: review the identity and amount.',
+      candidates: [
+        MealImageCandidate(
+          name: 'Synthetic media food 1',
+          confidence: .87,
+          evidence: 'Synthetic shape evidence.',
+          identificationProvider: 'synthetic-test-provider',
+          modelRevision: 'synthetic-revision-1',
+          nutritionResolution: MealNutritionResolution.verifiedFoodRecord,
+          verifiedFoodRecordId: 'model-claimed-USDA-999999',
+          amount: 100,
+          unit: 'g',
+        ),
+      ],
+    );
+  }
 }
 
 final class _CountingPhotoAnalysis extends MealImageAnalysisService {
@@ -535,7 +550,7 @@ void main() {
           arabic: arabic,
           textScale: arabic ? 1.5 : 1,
         );
-        await _chooseMatch(tester, fixture.rows.single.name);
+        await _chooseMatch(tester, fixture.rows.single.name, fixture);
         await _expectNoMeal(tester, fixture);
         final review = await _enterGrams(tester, grams: arabic ? '١٥٠' : '150');
         expect(review.day, _day);
@@ -698,7 +713,7 @@ void main() {
       fixture,
       permission: CoachActionPermissionMode.readOnly,
     );
-    await _chooseMatch(tester, fixture.rows.single.name);
+    await _chooseMatch(tester, fixture.rows.single.name, fixture);
     final review = await _enterGrams(tester);
     final confirm = find.byKey(CoachFoodCardKeys.confirm(review.operationId));
     await tester.ensureVisible(confirm);
@@ -715,7 +730,7 @@ void main() {
     (tester) async {
       final fixture = await _fixture(tester);
       await _mount(tester, fixture);
-      await _chooseMatch(tester, fixture.rows.single.name);
+      await _chooseMatch(tester, fixture.rows.single.name, fixture);
       final review = await _enterGrams(tester);
       final container = ProviderScope.containerOf(
         tester.element(find.byType(IntelligenceCenterPage)),
@@ -799,9 +814,9 @@ void main() {
       await _mount(tester, fixture);
       await _until(tester, find.text(fixture.rows.first.name));
       expect(find.text(fixture.rows.last.name), findsOneWidget);
-      expect(tester.widget<FilledButton>(_matchUse).onPressed, isNull);
+      expect(tester.widget<FilledButton>(_matchUse).onPressed, isNotNull);
       await _expectNoMeal(tester, fixture);
-      await _chooseMatch(tester, fixture.rows.last.name);
+      await _chooseMatch(tester, fixture.rows.last.name, fixture);
       final review = await _enterGrams(tester);
       expect(review.review.items, hasLength(1));
       expect(
@@ -856,7 +871,7 @@ void main() {
       expect(tester.widget<FilledButton>(next).onPressed, isNotNull);
       await tester.tap(next);
       await _drain(tester);
-      await _chooseMatch(tester, fixture.rows.single.name);
+      await _chooseMatch(tester, fixture.rows.single.name, fixture);
       await _until(tester, find.byType(CoachFoodReviewCard));
       final review = tester.widget<CoachFoodReviewCard>(
         find.byType(CoachFoodReviewCard),
@@ -910,8 +925,14 @@ void main() {
       await tester.tap(find.byKey(const Key('ai-coach-image-source-gallery')));
       await _selectPhotoDraft(tester, amount: '100');
       await _until(tester, find.byKey(const Key('premium-vision-use-food')));
-      expect(tester.widget<FilledButton>(_matchUse).onPressed, isNull);
+      expect(tester.widget<FilledButton>(_matchUse).onPressed, isNotNull);
+      await tester.tap(_matchUse);
+      await _drain(tester);
+      expect(find.byKey(const Key('vision-required-details')), findsOneWidget);
+      expect(find.byType(CoachFoodReviewCard), findsNothing);
       await _expectNoMeal(tester, fixture);
+      await tester.tap(find.byKey(const Key('vision-required-cancel')));
+      await _drain(tester);
       final candidate = find
           .byWidgetPredicate(
             (widget) =>
@@ -1042,7 +1063,7 @@ void main() {
       expect(tester.widget<FilledButton>(retry).onPressed, isNotNull);
       await tester.tap(retry);
       await _drain(tester);
-      await _chooseMatch(tester, fixture.rows.single.name);
+      await _chooseMatch(tester, fixture.rows.single.name, fixture);
       await _until(tester, find.byType(CoachFoodReviewCard));
       expect(lookedUp, ['Unmatched red apple', fixture.rows.single.name]);
       expect(analysis.calls, 1);
@@ -1335,10 +1356,10 @@ void main() {
             tester,
             fixture,
             barcode: null,
-            analysis: (locale) {
-              analyses++;
-              return _SyntheticAnalysis(locale);
-            },
+            // Service construction selects the schema before admission; only
+            // an actual analyze invocation would send a photo/request.
+            analysis: (locale) =>
+                _SyntheticAnalysis(locale, onAnalyze: () => analyses++),
             runtimePermission: revokedAfterGrant
                 ? (requested) async {
                     expect(requested, BilRuntimeCapability.camera);

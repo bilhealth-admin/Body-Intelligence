@@ -17,6 +17,10 @@ extension VerifiedStorePurchasePending on VerifiedStorePurchaseService {
   }
 
   Future<void> _continueVerification() async {
+    if (hasAndroidCheckoutFailure) {
+      await _recoverUnscopedAndroidCheckout();
+      return;
+    }
     if (_pendingVerifiedFinishes.isEmpty) {
       final uncertain = messageCode == 'purchase_status_unknown';
       final visit = _storeVisit.capture();

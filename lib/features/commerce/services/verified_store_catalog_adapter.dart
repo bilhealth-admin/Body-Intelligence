@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
@@ -354,7 +355,12 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
       // service already filters its map, but injected/restored catalog state
       // must not be able to surface a forbidden Premium trial or malformed
       // recurring term if it bypasses that first layer.
-      if (!releaseEligibleStoreProduct(product) ||
+      final unknownAndroidSubscription =
+          defaultTargetPlatform == TargetPlatform.android &&
+          country == null &&
+          product.id != StoreCatalogConfiguration.aiBoost;
+      if (unknownAndroidSubscription ||
+          !releaseEligibleStoreProduct(product) ||
           !StorefrontMarketPolicy.allowsProduct(product.id, country)) {
         continue;
       }

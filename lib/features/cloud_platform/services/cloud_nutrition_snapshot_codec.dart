@@ -1,3 +1,7 @@
+import '../../../data/database/final_vision_nutrition.dart';
+import '../../../data/database/vision_estimate_evidence.dart';
+import '../../../data/database/nutrient_evidence.dart';
+import '../../nutrition/domain/unified_food.dart';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
@@ -17,6 +21,7 @@ import 'local_data_account_boundary.dart';
 
 part 'cloud_nutrition_snapshot_rows.dart';
 part 'cloud_nutrition_snapshot_collections.dart';
+part 'cloud_nutrition_vision_day.dart';
 
 /// A logical cloud identity never contains a device-local SQLite row number.
 final class CloudNutritionSnapshot {
@@ -168,6 +173,8 @@ final class CloudNutritionSnapshotCodec {
           foodQuery.where(
             (food) =>
                 food.isCustom.equals(true) |
+                (food.source.equals(VisionFoodEvidence.source) &
+                    food.foodEvidenceJson.isNotNull()) |
                 food.id.isInQuery(
                   database.selectOnly(database.mealItems)
                     ..addColumns([database.mealItems.foodId]),
@@ -182,6 +189,8 @@ final class CloudNutritionSnapshotCodec {
             (food) =>
                 food.uuid.equals(recordId!) &
                 (food.isCustom.equals(true) |
+                    (food.source.equals(VisionFoodEvidence.source) &
+                        food.foodEvidenceJson.isNotNull()) |
                     food.id.isInQuery(
                       database.selectOnly(database.mealItems)
                         ..addColumns([database.mealItems.foodId]),
@@ -215,9 +224,40 @@ final class CloudNutritionSnapshotCodec {
         for (final item in items) {
           (byMeal[item.mealId] ??= <MealItem>[]).add(item);
         }
+        final retainedVisionFoodIds = <int>{
+          for (final food in foods)
+            if (food.source == VisionFoodEvidence.source &&
+                food.foodEvidenceJson != null &&
+                FoodBasisEvidence.read(food, ownerKey: _ownerKey).vision !=
+                    null)
+              food.id,
+        };
+        // A selected food query has at most one UUID. Retain its old eligibility
+        // for custom/dependent/recipe rows even if their evidence is invalid;
+        // existing validation must still reject them instead of hiding damage.
+        final selectedDependency = recordType == 'food' && foods.isNotEmpty
+            ? await (database.selectOnly(database.mealItems)
+                    ..addColumns([database.mealItems.foodId])
+                    ..where(
+                      database.mealItems.foodId.isIn(
+                        foods.map((food) => food.id),
+                      ),
+                    )
+                    ..limit(1))
+                  .get()
+            : const [];
         final includedFoods = <String>{
-          for (final food in foods.where((row) => row.isCustom)) food.uuid,
-          if (recordType == 'food') ...foods.map((row) => row.uuid),
+          for (final food in foods.where(
+            (row) => row.isCustom || retainedVisionFoodIds.contains(row.id),
+          ))
+            food.uuid,
+          if (recordType == 'food')
+            for (final food in foods)
+              if (food.isCustom ||
+                  retainedVisionFoodIds.contains(food.id) ||
+                  selectedDependency.isNotEmpty ||
+                  recipeFoodIds.contains(food.uuid))
+                food.uuid,
         };
         for (final meal in meals) {
           final children = [...?byMeal[meal.id]]
@@ -231,6 +271,7 @@ final class CloudNutritionSnapshotCodec {
             dependencies[food.uuid] = food;
             includedFoods.add(food.uuid);
           }
+          final lifecycle = await _captureVisionDayLifecycle(meal.dayKey);
           output.add(
             CloudNutritionSnapshot(
               scope: 'nutrition',
@@ -241,10 +282,15 @@ final class CloudNutritionSnapshotCodec {
                   ? {
                       ..._header,
                       'deletedAt': meal.deletedAt!.toUtc().toIso8601String(),
+                      if (lifecycle != null) ...{
+                        'meal': _wireRow(meal.toJson()),
+                        'visionDayLifecycle': lifecycle,
+                      },
                     }
                   : {
                       ..._header,
                       'meal': _wireRow(meal.toJson()),
+                      'visionDayLifecycle': ?lifecycle,
                       'items': [
                         for (final item in children)
                           {
@@ -367,7 +413,7 @@ final class CloudNutritionSnapshotCodec {
 
   Future<void> apply(CloudNutritionSnapshot snapshot) async {
     await _checkOwner();
-    _validateSnapshot(snapshot);
+    validateIncomingSnapshot(snapshot);
     await database.transaction(() async {
       await _checkOwner();
       switch ((snapshot.scope, snapshot.type)) {
@@ -384,6 +430,18 @@ final class CloudNutritionSnapshotCodec {
       }
       await _checkOwner();
     });
+  }
+
+  /// Validate authenticated wire structure before journal equality shortcuts.
+  /// This performs no local reads/writes and grants no conflict authority.
+  void validateIncomingSnapshot(CloudNutritionSnapshot snapshot) {
+    _validateSnapshot(snapshot);
+    if (snapshot.scope == 'nutrition' &&
+        snapshot.type == 'meal' &&
+        snapshot.deleted &&
+        snapshot.data.containsKey('visionDayLifecycle')) {
+      _decodeDeletedVisionMeal(snapshot);
+    }
   }
 
   void _validateSnapshot(CloudNutritionSnapshot snapshot) {

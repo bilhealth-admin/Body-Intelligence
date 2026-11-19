@@ -305,15 +305,19 @@ extension _CoachHealthFlow on _IntelligenceCenterPageState {
       _scrollToLatest();
       unawaited(_saveConversation());
       return true;
-    } on CoachHealthContextUnavailable {
+    } on CoachHealthContextUnavailable catch (error) {
       if (mounted && owner.scope.isCurrent) {
-        _appendToolReceipt(
-          tr(
-            'This category is disabled in Coach context settings. Enable it there before asking Coach to read these records.',
-            'هذه الفئة معطلة في إعدادات سياق المدرب. فعّلها هناك قبل طلب قراءة هذه السجلات.',
-          ),
-          verifiedResult: false,
-        );
+        if (error.disabledFocus case final focus?) {
+          _offerCoachSettingsGuidance(focus: focus);
+        } else {
+          _appendToolReceipt(
+            tr(
+              'The action was not completed. Your data stayed unchanged; review the value and try again.',
+              'لم يكتمل الإجراء. بقيت بياناتك دون تغيير؛ راجع القيمة وحاول مجددًا.',
+            ),
+            verifiedResult: false,
+          );
+        }
       }
       return false;
     } finally {

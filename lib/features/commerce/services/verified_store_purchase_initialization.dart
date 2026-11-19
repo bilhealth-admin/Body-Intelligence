@@ -1,6 +1,24 @@
 part of 'verified_store_purchase_service.dart';
 
 extension _VerifiedStorePurchaseInitialization on VerifiedStorePurchaseService {
+  bool _restoreCatalogAfterSettledInactiveReceipt() {
+    final settled = _settledInactiveCatalogRecovery;
+    if (settled == null ||
+        _disposed ||
+        products.isEmpty ||
+        state != VerifiedStoreState.unavailable ||
+        messageCode != 'no_restorable_purchases' ||
+        hasPendingVerifiedFinish ||
+        settled.generation != _purchaseEventGeneration ||
+        settled.benefitRevision != verifiedBenefitRevision ||
+        !_storeVisit.isCurrent(settled.visit)) {
+      return false;
+    }
+    _settledInactiveCatalogRecovery = null;
+    state = VerifiedStoreState.ready;
+    return true;
+  }
+
   Future<void> _initialize() async {
     final purchaseGeneration = _purchaseEventGeneration;
     final catalogVisit = _storeVisit.capture();

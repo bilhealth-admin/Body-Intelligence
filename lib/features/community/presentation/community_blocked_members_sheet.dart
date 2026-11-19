@@ -246,51 +246,20 @@ class _CommunityBlockedMembersSheetState
                       ),
                     );
                   }
-                  return ListView(
-                    shrinkWrap: true,
-                    children: [
-                      for (final member in snapshot.requireData)
-                        BilPearlMaterialCard(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  member.name ??
-                                      '${communityText(context, 'BIL member', 'عضو BIL')} · ${member.id.substring(30)}',
-                                ),
-                                Text(
-                                  MaterialLocalizations.of(
-                                    context,
-                                  ).formatShortDate(member.createdAt.toLocal()),
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                const SizedBox(height: 8),
-                                Align(
-                                  alignment: AlignmentDirectional.centerStart,
-                                  child: OutlinedButton.icon(
-                                    key: Key('community-unblock-${member.id}'),
-                                    onPressed: _busy == null
-                                        ? () => _unblock(member)
-                                        : null,
-                                    icon: const Icon(
-                                      Icons.person_add_alt_1_outlined,
-                                    ),
-                                    label: Text(
-                                      communityText(
-                                        context,
-                                        'Unblock',
-                                        'إلغاء الحظر',
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                    ],
+                  final members = snapshot.requireData;
+                  return ListView.builder(
+                    key: const Key('community-blocked-list'),
+                    itemCount: members.length,
+                    itemBuilder: (context, index) {
+                      final member = members[index];
+                      return _BlockedMemberRow(
+                        key: ValueKey('community-blocked-row-${member.id}'),
+                        member: member,
+                        onUnblock: _busy == null
+                            ? () => _unblock(member)
+                            : null,
+                      );
+                    },
                   );
                 },
               ),
@@ -303,4 +272,76 @@ class _CommunityBlockedMembersSheetState
       ),
     ),
   );
+}
+
+class _BlockedMemberRow extends StatelessWidget {
+  const _BlockedMemberRow({
+    required this.member,
+    required this.onUnblock,
+    super.key,
+  });
+
+  final CommunityBlockedMember member;
+  final VoidCallback? onUnblock;
+
+  @override
+  Widget build(BuildContext context) {
+    final name =
+        member.name ??
+        '${communityText(context, 'BIL member', 'عضو BIL')} · ${member.id.substring(30)}';
+    final unblockLabel = communityText(context, 'Unblock', 'إلغاء الحظر');
+    return BilPearlMaterialCard(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            const ExcludeSemantics(
+              child: CircleAvatar(
+                radius: 18,
+                child: Icon(Icons.person_outline_rounded, size: 20),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 4),
+                  Text(
+                    MaterialLocalizations.of(
+                      context,
+                    ).formatShortDate(member.createdAt.toLocal()),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 120),
+              child: OutlinedButton(
+                key: Key('community-unblock-${member.id}'),
+                onPressed: onUnblock,
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(44, 44),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                ),
+                child: Text(
+                  unblockLabel,
+                  semanticsLabel: '$unblockLabel, $name',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

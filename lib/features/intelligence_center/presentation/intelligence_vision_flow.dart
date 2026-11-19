@@ -357,6 +357,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     }
     questionFocus.unfocus();
     final request = _newCoachMediaRequest();
+    MealVisionEstimateVisit? estimateVisit;
     foodMediaRequest = request;
     _updateState(() => foodImageFlowOpening = true);
     if (listening || voiceCaptureStarting) {
@@ -364,9 +365,28 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
     }
     try {
       final copy = MealVisionUiCopy.ofLocale(Localizations.localeOf(context));
-      final consent = await ref.read(
-        intelligenceCoachMealVisionConsentProvider,
-      )(context);
+      final service = ref.read(intelligenceCoachImageAnalysisProvider)(
+        BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+      );
+      if (service.usesGeminiEstimates) {
+        estimateVisit = MealVisionEstimateVisit.capture(
+          database: request.owner.database,
+          isCurrentDatabase: () =>
+              mounted &&
+              request.attempt.isCurrent &&
+              identical(ref.read(databaseProvider), request.owner.database),
+        );
+        if (estimateVisit == null) return;
+      }
+      final consent = service.usesGeminiEstimates
+          ? await ensureMealVisionEstimateConsent(
+              context,
+              isCurrent: () =>
+                  mounted &&
+                  request.attempt.isCurrent &&
+                  estimateVisit?.current == true,
+            )
+          : await ref.read(intelligenceCoachMealVisionConsentProvider)(context);
       if (!consent || !await _mediaRequestCurrent(request) || !mounted) return;
       final source = await showBilPearlBottomSheet<ImageSource>(
         context: context,
@@ -436,13 +456,39 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
         return;
       }
       _updateState(() => analyzingFoodImage = true);
-      final analysis = await ref
-          .read(intelligenceCoachImageAnalysisProvider)(
-            BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
-          )
-          .analyze(image);
+      final analysis = service.usesGeminiEstimates
+          ? await service.analyzeForOwner(
+              image,
+              isCurrent: () => mounted && request.attempt.isCurrent,
+            )
+          : await service.analyze(image);
       if (!await _mediaRequestCurrent(request) || !mounted) return;
       _updateState(() => analyzingFoodImage = false);
+      if (analysis.schemaVersion == 2) {
+        final visit = estimateVisit;
+        if (visit == null || !visit.current) return;
+        final reviewed = await showGeminiVisionEstimateReview(
+          context,
+          analysis: analysis,
+          imagePath: image.path,
+          isCurrent: () =>
+              mounted && request.attempt.isCurrent && visit.current,
+          lifetime: visit.lifetime,
+        );
+        if (reviewed != null &&
+            reviewed.isNotEmpty &&
+            await _mediaRequestCurrent(request) &&
+            mounted &&
+            visit.current) {
+          await _handoffGeminiVisionEstimate(
+            request,
+            analysis.requestId,
+            reviewed,
+            visit,
+          );
+        }
+        return;
+      }
       final bridge = _foodMediaBridge(request);
       final mediaCopy = CoachMediaBridgeCopy(arabic: arabic);
       var ready = <CoachMediaFoodReady>[];
@@ -541,6 +587,7 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
         ),
       );
     } finally {
+      estimateVisit?.dispose();
       _finishFoodMediaRequest(request);
     }
   }

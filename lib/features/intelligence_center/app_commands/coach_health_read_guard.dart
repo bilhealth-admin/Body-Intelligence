@@ -4,7 +4,9 @@ import '../../../data/repositories/preferences_repository.dart';
 import '../domain/coach_context_preferences.dart';
 
 final class CoachHealthContextUnavailable implements Exception {
-  const CoachHealthContextUnavailable();
+  const CoachHealthContextUnavailable({this.disabledFocus});
+  // Set only after an observed category withdrawal, never on storage/stream error.
+  final CoachContextFocus? disabledFocus;
 }
 
 /// Local read permission belongs to one owner visit and one context category.
@@ -18,6 +20,7 @@ final class CoachHealthReadGuard {
   final void Function() checkOwner;
   StreamSubscription<String?>? _subscription;
   bool _revoked = false;
+  bool _categoryDisabled = false;
   bool _closed = false;
 
   static Future<CoachHealthReadGuard> capture({
@@ -34,6 +37,7 @@ final class CoachHealthReadGuard {
           .listen((raw) {
             if (!CoachContextPreferences.decode(raw).includes(focus)) {
               guard._revoked = true;
+              guard._categoryDisabled = true;
             }
           }, onError: (Object _, StackTrace _) => guard._revoked = true);
       await guard.verify();
@@ -48,7 +52,11 @@ final class CoachHealthReadGuard {
 
   void check() {
     checkOwner();
-    if (_closed || _revoked) throw const CoachHealthContextUnavailable();
+    if (_closed || _revoked) {
+      throw CoachHealthContextUnavailable(
+        disabledFocus: _categoryDisabled ? focus : null,
+      );
+    }
   }
 
   Future<void> verify() async {
@@ -58,6 +66,7 @@ final class CoachHealthReadGuard {
         final raw = await preferences.get(CoachContextPreferences.storageKey);
         if (!CoachContextPreferences.decode(raw).includes(focus!)) {
           _revoked = true;
+          _categoryDisabled = true;
         }
       }
     } finally {

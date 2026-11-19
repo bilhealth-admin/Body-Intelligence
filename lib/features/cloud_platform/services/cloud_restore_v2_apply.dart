@@ -44,7 +44,125 @@ extension _CloudRestoreApplication on CloudRestoreV2Engine {
         snapshot.deleted != record['deleted']) {
       throw const _RestoreFailure('cipher_binding_mismatch');
     }
+    codec.validateIncomingSnapshot(snapshot);
     return snapshot;
+  }
+
+  /// A day attachment is shared by its meals. A newly downloaded meal must
+  /// not overwrite a local reopen through a sibling whose own journal conflicts.
+  /// Reuse the existing acknowledged fingerprints/pending records; no clock or
+  /// second revision protocol can authorize a day transition.
+  Future<List<CloudNutritionSnapshot>?> _cleanVisionDaySiblings(
+    CloudNutritionSnapshot incoming, {
+    bool requireAllClean = true,
+  }) async {
+    if (incoming.type != 'meal' ||
+        incoming.data['visionDayLifecycle'] is! Map ||
+        incoming.data['meal'] is! Map) {
+      return const [];
+    }
+    final dayKey = (incoming.data['meal']! as Map)['dayKey'];
+    if (dayKey is! String) {
+      return const [];
+    } // The codec rejects invalid civil days.
+    final lifecycle = jsonEncode(
+      _canonical(incoming.data['visionDayLifecycle']),
+    );
+    final meals = await (database.select(
+      database.meals,
+    )..where((row) => row.dayKey.equals(dayKey))).get();
+    final clean = <CloudNutritionSnapshot>[];
+    for (final meal in meals.where((row) => row.uuid != incoming.id)) {
+      final snapshots = await codec.capture(
+        scopes: {'nutrition'},
+        recordType: 'meal',
+        recordId: meal.uuid,
+      );
+      final sibling = snapshots.single;
+      final sameLifecycle =
+          jsonEncode(_canonical(sibling.data['visionDayLifecycle'])) ==
+          lifecycle;
+      final entry = await journal.entry(sibling.key);
+      if (entry == null ||
+          entry.pending != null ||
+          entry.conflict != null ||
+          entry.baseline != snapshotFingerprint(sibling)) {
+        if (sameLifecycle) {
+          continue;
+        }
+        if (requireAllClean) {
+          return null;
+        }
+        // A reviewed explicit cloud choice may coexist with another conflict.
+        // That sibling's pending/recovery authority must never be rebased.
+        continue;
+      }
+      clean.add(sibling);
+    }
+    return clean;
+  }
+
+  /// A trusted day transition projects into every meal on that day. Rebase
+  /// only a sibling proven clean before apply and still byte-identical in all
+  /// wire content except that shared lifecycle. Keep its server revision and
+  /// any pending/conflict authority unchanged. The caller owns one SQL tx.
+  Future<void> _rebaseVisionDayProjection(
+    CloudNutritionSnapshot incoming,
+    List<CloudNutritionSnapshot> clean,
+  ) async {
+    Object? content(CloudNutritionSnapshot snapshot) {
+      final data = Map<String, Object?>.from(snapshot.data)
+        ..remove('visionDayLifecycle');
+      return _canonical({...snapshot.toJson(), 'data': data});
+    }
+
+    if (clean.isEmpty) {
+      return;
+    }
+    // Remote aggregates are not authoritative over independently accepted
+    // siblings. The codec has atomically frozen the actual accepted evidence;
+    // rebase only to that validated local lifecycle, never the source total.
+    final current = await codec.capture(
+      scopes: {incoming.scope},
+      recordType: incoming.type,
+      recordId: incoming.id,
+    );
+    if (current.length != 1) {
+      return;
+    }
+    final lifecycle = jsonEncode(
+      _canonical(current.single.data['visionDayLifecycle']),
+    );
+    for (final before in clean) {
+      final row = await journal.entry(before.key);
+      if (row == null ||
+          row.pending != null ||
+          row.conflict != null ||
+          row.baseline != snapshotFingerprint(before)) {
+        continue;
+      }
+      final captured = await codec.capture(
+        scopes: {before.scope},
+        recordType: before.type,
+        recordId: before.id,
+      );
+      if (captured.length != 1) {
+        continue;
+      }
+      final after = captured.single;
+      if (jsonEncode(content(before)) != jsonEncode(content(after)) ||
+          jsonEncode(_canonical(after.data['visionDayLifecycle'])) !=
+              lifecycle) {
+        continue;
+      }
+      final projected = snapshotFingerprint(after);
+      if (projected == row.baseline) {
+        continue;
+      }
+      _guard();
+      row.baseline = projected;
+      await journal.save(row);
+    }
   }
 
   Future<bool> _installRecord(Map<String, Object?> record, String scope) async {
@@ -57,7 +175,9 @@ extension _CloudRestoreApplication on CloudRestoreV2Engine {
           id: snapshot.id,
         );
     final revision = record['server_revision']! as int;
-    if (revision < row.revision) return false;
+    if (revision < row.revision) {
+      return false;
+    }
     final current = await codec.capture(
       scopes: {scope},
       recordType: snapshot.type,
@@ -101,7 +221,9 @@ extension _CloudRestoreApplication on CloudRestoreV2Engine {
       row.pendingSnapshot = null;
       row.conflict = null;
     }
-    if (row.pending != null ||
+    final cleanSiblings = await _cleanVisionDaySiblings(snapshot);
+    if (cleanSiblings == null ||
+        row.pending != null ||
         row.conflict != null ||
         (localFingerprint != row.baseline &&
             localFingerprint != incomingFingerprint &&
@@ -116,6 +238,7 @@ extension _CloudRestoreApplication on CloudRestoreV2Engine {
       // A tombstone without a local food row must still be persisted before
       // the next page can hydrate an older diary/recipe dependency.
       await codec.apply(snapshot);
+      await _rebaseVisionDayProjection(snapshot, cleanSiblings);
     }
     _guard();
     final after = await codec.capture(
@@ -142,7 +265,9 @@ extension CloudRestoreConflictResolution on CloudRestoreV2Engine {
     RestoreJournalEntry row,
   ) async {
     await _authorized(row.scope);
-    if (row.conflict == null) throw StateError('Conflict no longer exists');
+    if (row.conflict == null) {
+      throw StateError('Conflict no longer exists');
+    }
     return _decodeRecord(row.conflict!, row.scope);
   }
 
@@ -172,7 +297,9 @@ extension CloudRestoreConflictResolution on CloudRestoreV2Engine {
     await journal.initialize();
     final result = <RestoreJournalEntry>[];
     for (final scope in scopes) {
-      if (!allowedScopes.contains(scope)) continue;
+      if (!allowedScopes.contains(scope)) {
+        continue;
+      }
       result.addAll(
         (await journal.entries(scope)).where((row) => row.conflict != null),
       );
@@ -226,10 +353,14 @@ extension CloudRestoreConflictResolution on CloudRestoreV2Engine {
           refreshed = record;
         }
       }
-      if (refreshed != null || response['has_more'] == false) break;
+      if (refreshed != null || response['has_more'] == false) {
+        break;
+      }
       cursor = response['cursor']! as int;
     }
-    if (refreshed == null) throw StateError('Conflict record unavailable');
+    if (refreshed == null) {
+      throw StateError('Conflict record unavailable');
+    }
     if (refreshed['server_revision'] != row.conflict!['server_revision']) {
       row.conflict = refreshed;
       await journal.save(row);
@@ -263,11 +394,32 @@ extension CloudRestoreConflictResolution on CloudRestoreV2Engine {
       latest.pending = null;
       latest.pendingSnapshot = null;
       latest.conflict = null;
-      if (!keepLocal) await codec.apply(remote);
+      if (!keepLocal) {
+        final clean = await _cleanVisionDaySiblings(
+          remote,
+          requireAllClean: false,
+        );
+        await codec.apply(remote);
+        await _rebaseVisionDayProjection(remote, clean!);
+      }
       _guard();
-      latest.baseline = snapshotFingerprint(remote);
+      final after =
+          keepLocal ||
+              remote.type != 'meal' ||
+              remote.data['visionDayLifecycle'] is! Map
+          ? const <CloudNutritionSnapshot>[]
+          : await codec.capture(
+              scopes: {latest.scope},
+              recordType: latest.type,
+              recordId: latest.id,
+            );
+      latest.baseline = snapshotFingerprint(
+        after.isEmpty ? remote : after.single,
+      );
       await journal.save(latest);
     });
-    if (keepLocal) await _stage(row.scope);
+    if (keepLocal) {
+      await _stage(row.scope);
+    }
   }
 }

@@ -41,3 +41,122 @@ validateStoredGoalPreferences({
     startingDate: validDate,
   );
 }
+
+const _weeklyPaceByOption = <String, double>{
+  'Lose 0.2 kg per week': -.2,
+  'Lose 0.5 kg per week': -.5,
+  'Lose 0.8 kg per week': -.8,
+  'Lose 1 kg per week': -1,
+  'Maintain weight': 0,
+  'Gain 0.2 kg per week': .2,
+  'Gain 0.5 kg per week': .5,
+};
+
+@visibleForTesting
+({
+  String? weeklyGoal,
+  double? weeklyPaceKg,
+  double? startingWeight,
+  String? startingDate,
+})
+resolveReferenceGoalPreferences({
+  required String? weeklyGoal,
+  required String? startingWeight,
+  required String? startingDate,
+  required String? onboardingPlan,
+  required UserProfileData profile,
+  required WeightEntry? firstWeight,
+  required DateTime now,
+}) {
+  final manual = validateStoredGoalPreferences(
+    weeklyGoal: weeklyGoal,
+    startingWeight: startingWeight,
+    startingDate: startingDate,
+    now: now,
+  );
+  final fallbackWeight = firstWeight?.weight ?? profile.currentWeight;
+  final fallbackDate = firstWeight?.date ?? profile.createdAt;
+  final fallback = validateStoredGoalPreferences(
+    weeklyGoal: null,
+    startingWeight: '$fallbackWeight',
+    startingDate:
+        firstWeight?.dayKey ??
+        '${fallbackDate.year.toString().padLeft(4, '0')}-'
+            '${fallbackDate.month.toString().padLeft(2, '0')}-${fallbackDate.day.toString().padLeft(2, '0')}',
+    now: now,
+  );
+  final pace = weeklyGoal == null
+      ? NutritionPaceIntent.decode(onboardingPlan).weeklyPaceKg
+      : _weeklyPaceByOption[manual.weeklyGoal];
+  final option = weeklyGoal == null
+      ? _weeklyPaceByOption.entries
+            .where((entry) => entry.value == pace)
+            .firstOrNull
+            ?.key
+      : manual.weeklyGoal;
+  return (
+    weeklyGoal: option,
+    weeklyPaceKg: pace,
+    startingWeight: startingWeight == null
+        ? fallback.startingWeight
+        : manual.startingWeight,
+    startingDate: startingDate == null
+        ? fallback.startingDate
+        : manual.startingDate,
+  );
+}
+
+@visibleForTesting
+double? referenceGoalWeightInput(
+  String raw,
+  MeasurementSystem system, {
+  required double initialKg,
+  double minKg = 20,
+  double maxKg = 500,
+}) {
+  final value = double.tryParse(raw.trim().replaceAll(',', '.'));
+  if (value == null || !value.isFinite) {
+    return null;
+  }
+  final kg = UnitConverter.weightToKg(value, system);
+  if (!kg.isFinite || kg < minKg || kg > maxKg) {
+    return null;
+  }
+  // Opening and confirming the rounded display must not slowly alter the
+  // original canonical value on repeated metric/imperial visits.
+  final initialDisplay = double.parse(
+    UnitConverter.weightFromKg(initialKg, system).toStringAsFixed(1),
+  );
+  return value == initialDisplay && initialKg >= minKg && initialKg <= maxKg
+      ? initialKg
+      : kg;
+}
+
+@visibleForTesting
+String referenceGoalWeeklyIntent(String? existing, String option) {
+  final pace = _weeklyPaceByOption[option];
+  if (pace == null) {
+    throw const FormatException('Unsupported weekly goal');
+  }
+  final Map<String, dynamic> values;
+  if (existing == null) {
+    values = {'version': 1};
+  } else {
+    final decoded = jsonDecode(existing);
+    if (decoded is! Map<String, dynamic> || decoded['version'] != 1) {
+      throw const FormatException('Unsupported onboarding intent');
+    }
+    values = Map<String, dynamic>.from(decoded);
+  }
+  values['weeklyPaceKg'] = pace;
+  return jsonEncode(values);
+}
+
+List<String> _weeklyOptionsForDirection(String direction) => _weeklyOptions
+    .where((option) {
+      final pace = _weeklyPaceByOption[option]!;
+      return direction == 'lose' && pace < 0 ||
+          direction == 'gain' && pace > 0 ||
+          direction == 'maintain' && pace == 0;
+    })
+    .toList(growable: false);

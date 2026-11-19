@@ -8,7 +8,7 @@ import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/premium_surface.dart';
-import '../../../shared/widgets/bil_coach_identity.dart';
+import 'dashboard_header.dart';
 import '../../ads/presentation/safe_free_ad_anchor.dart';
 import '../providers/dashboard_preferences_provider.dart';
 import '../dashboard_five_locale_copy.dart';

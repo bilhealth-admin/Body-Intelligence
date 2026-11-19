@@ -1,3 +1,4 @@
+import '../commerce/providers/store_renewal_recheck_provider.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
@@ -47,6 +48,7 @@ class SettingsPage extends ConsumerWidget {
     final photo = ref.watch(profileAvatarStateProvider).bytes;
     final photoUrl = ref.watch(profileAvatarStateProvider).url;
     final subscription = ref.watch(verifiedSubscriptionPresentationProvider);
+    final renewalPending = ref.watch(storeRenewalPresentationPendingProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
     final name = displayName?.trim().isNotEmpty == true
         ? displayName!.trim()
@@ -122,7 +124,9 @@ class SettingsPage extends ConsumerWidget {
                           ref.invalidate(verifiedSubscriptionStateProvider),
                     )
                   : _PremiumMembershipLink(
-                      label: value.plan == CommercePlan.free
+                      label: renewalPending
+                          ? copy('Plans')
+                          : value.plan == CommercePlan.free
                           ? copy('Explore Premium')
                           : copy('Active'),
                       onTap: () => context.push('/plans'),

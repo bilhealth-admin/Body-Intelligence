@@ -3,6 +3,7 @@ import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_nutrition_goal_schedule.dart';
 import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_repository.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/features/settings/nutrition_goal_schedule_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -88,7 +89,10 @@ void main() {
       ) async {
         await tester.pumpWidget(
           ProviderScope(
-            overrides: [nutritionGoalScheduleProvider.overrideWithValue(value)],
+            overrides: [
+              nutritionGoalScheduleProvider.overrideWithValue(value),
+              defaultNutritionGoalTargetProvider.overrideWithValue(target),
+            ],
             child: MaterialApp(
               key: ValueKey('${locale.toLanguageTag()}-$value'),
               locale: locale,

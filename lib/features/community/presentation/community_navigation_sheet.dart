@@ -191,15 +191,9 @@ class _CommunityNavigationGlyph extends StatelessWidget {
   final String value;
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final iconKind = BilSemanticIcons.kindForRoute(value);
-    final child = BilFlatIcon(
-      kind: iconKind ?? BilSemanticIconKind.community,
-      size: 42,
-      iconSize: 22,
-      materialIcon: icon,
-      color: scheme.primary,
-    );
+    // These destinations have their own glyphs. Mapping them to the broad
+    // native community category replaced most actions with the people symbol.
+    final child = _communityActionGlyph(context, icon);
     final kind = switch (value) {
       '/community/messages' => CommunityAttentionKind.messages,
       '/community/connections' => CommunityAttentionKind.requests,
@@ -212,6 +206,21 @@ class _CommunityNavigationGlyph extends StatelessWidget {
   }
 }
 
+Widget _communityActionGlyph(
+  BuildContext context,
+  IconData icon, {
+  double size = 42,
+  double iconSize = 22,
+}) => BilFlatIcon(
+  kind: BilSemanticIconKind.community,
+  materialIcon: icon,
+  appleIcon: icon,
+  useNativeSymbol: false,
+  size: size,
+  iconSize: iconSize,
+  color: CommunitySapphire.actionBlue(context),
+);
+
 PopupMenuItem<String> _communityAction(
   BuildContext context,
   String route,
@@ -221,8 +230,15 @@ PopupMenuItem<String> _communityAction(
   value: route,
   child: Row(
     children: [
-      BilFlatIcon(
-        kind: BilSemanticIcons.kindForRoute(route)!,
+      _communityActionGlyph(
+        context,
+        switch (route) {
+          '/community/profile' => Icons.account_circle_outlined,
+          '/community/connections' => Icons.people_outline_rounded,
+          '/community/people' => Icons.person_search_outlined,
+          '/community/safety' => Icons.shield_outlined,
+          _ => Icons.more_horiz_rounded,
+        },
         size: 34,
         iconSize: 19,
       ),

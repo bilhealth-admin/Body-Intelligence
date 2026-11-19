@@ -145,6 +145,9 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
             for (final stage in const ['before', 'during', 'after'])
               ChoiceChip(
                 key: Key('premium-vision-stage-$stage'),
+                focusNode: stage == 'before'
+                    ? _requiredFields.node('stage')
+                    : null,
                 label: Text(switch (stage) {
                   'before' => _word(context, 'Before eating', 'قبل الأكل'),
                   'during' => _word(context, 'Partly eaten', 'أثناء الأكل'),
@@ -252,6 +255,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
               children: [
                 ChoiceChip(
                   key: Key('premium-vision-eaten-$index'),
+                  focusNode: _requiredFields.node('eaten-$index'),
                   label: Text(
                     _word(context, 'I ate this amount', 'أكلت هذه الكمية'),
                   ),
@@ -305,6 +309,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                 Expanded(
                   child: TextField(
                     key: Key('premium-vision-amount-$index'),
+                    focusNode: _requiredFields.node('amount-$index'),
                     controller: _amounts[index],
                     onChanged: (_) => _visualUpdate(() {}),
                     textAlign: TextAlign.center,
@@ -358,6 +363,7 @@ extension _PremiumVisionVisuals on _PremiumVisionReviewDialogState {
                   width: 103,
                   child: TextField(
                     key: Key('premium-vision-unit-$index'),
+                    focusNode: _requiredFields.node('unit-$index'),
                     controller: _units[index],
                     onChanged: (_) => _visualUpdate(() {}),
                     style: TextStyle(color: _foreground(context), fontSize: 12),

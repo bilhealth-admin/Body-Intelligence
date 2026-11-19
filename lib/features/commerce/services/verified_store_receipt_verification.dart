@@ -66,11 +66,13 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
         // The verification function persists first, but the read replica can
         // briefly lag. Retry the read a few times before reporting a false
         // verification failure to the native purchase queue.
+        var allReadsSuccessfullyEmpty = true;
         for (var attempt = 0; attempt < 3; attempt++) {
           if (!_isCurrentStoreOwner(ownerId)) {
             return _StoreReceiptVerificationResult.failed;
           }
-          await refreshEntitlement();
+          final read = await _refreshCanonicalEntitlement();
+          allReadsSuccessfullyEmpty &= read == _CanonicalEntitlementRead.empty;
           if (!_isCurrentStoreOwner(ownerId)) {
             return _StoreReceiptVerificationResult.failed;
           }
@@ -89,6 +91,8 @@ extension _VerifiedStoreReceiptVerification on VerifiedStorePurchaseService {
         // before BIL can prove the entitlement.
         return entitlement?.grantsPaidAccess == true
             ? _StoreReceiptVerificationResult.verifiedActive
+            : allReadsSuccessfullyEmpty
+            ? _StoreReceiptVerificationResult.awaitingCanonicalProof
             : _StoreReceiptVerificationResult.failed;
       }
       if (entitlementActive == false) {

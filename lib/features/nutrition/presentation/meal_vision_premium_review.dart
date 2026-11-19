@@ -4,7 +4,10 @@ import '../../../shared/widgets/bil_striped_progress.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import '../../../app/theme/bil_pearl_finish.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
+import 'dart:async';
 import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../app/environment/app_environment.dart';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -23,6 +26,7 @@ part 'meal_vision_premium_visuals.dart';
 part 'meal_vision_premium_glass.dart';
 part 'meal_vision_premium_reference.dart';
 part 'meal_vision_review_lifetime.dart';
+part 'meal_vision_required_fields.dart';
 
 /// Only identity and serving suggestions are returned from image analysis.
 /// Nutrient values MUST be resolved by the existing trusted-food match flow.
@@ -176,6 +180,7 @@ class _PremiumVisionReviewDialogState
   final Set<int> _selected = <int>{};
   final Set<int> _excluded = <int>{};
   final GlobalKey _ingredientsAnchor = GlobalKey();
+  final _requiredFields = _VisionRequiredFields();
   String? _photoStage;
   bool _adding = false;
   bool _confirming = false;
@@ -193,6 +198,7 @@ class _PremiumVisionReviewDialogState
 
   @override
   void dispose() {
+    _requiredFields.dispose();
     for (final controller in [..._amounts, ..._units, _newFood]) {
       controller.dispose();
     }
@@ -337,7 +343,10 @@ class _PremiumVisionReviewDialogState
   }
 
   bool get _canContinue {
-    if (_confirming || _closing || widget.lifetime?.isActive == false) {
+    if (_confirming ||
+        _closing ||
+        !_requiredFields.current ||
+        widget.lifetime?.isActive == false) {
       return false;
     }
     if (_photoStage == null) return false;
@@ -374,7 +383,12 @@ class _PremiumVisionReviewDialogState
   }
 
   Future<void> _confirm() async {
-    if (_confirming || _closing || widget.lifetime?.isActive == false) return;
+    if (_confirming ||
+        _closing ||
+        !_requiredFields.current ||
+        widget.lifetime?.isActive == false) {
+      return;
+    }
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
@@ -436,7 +450,11 @@ class _PremiumVisionReviewDialogState
     });
     try {
       final decision = await confirm(List.unmodifiable(results));
-      if (!mounted) return;
+      if (!mounted ||
+          !_requiredFields.current ||
+          widget.lifetime?.isActive == false) {
+        return;
+      }
       switch (decision.kind) {
         case MealVisionReviewDecisionKind.accepted:
           _closeOwnedReview(results);
@@ -469,6 +487,9 @@ class _PremiumVisionReviewDialogState
   @override
   Widget build(BuildContext context) {
     final count = _selected.difference(_excluded).length;
+    // Large-text actions stay reachable in the existing scroll area instead
+    // of competing with the header for a fixed-height footer.
+    final scrollActions = MediaQuery.textScalerOf(context).scale(12) > 18;
     final photographedAt = widget.photographedAt;
     final clock = photographedAt == null
         ? '—'
@@ -551,6 +572,7 @@ class _PremiumVisionReviewDialogState
                         children: [
                           for (final index in _excluded)
                             ActionChip(
+                              focusNode: _requiredFields.node('restore-$index'),
                               label: Text(
                                 '${_word(context, 'Restore ', 'استعادة ')}${_foods[index].name}',
                               ),
@@ -609,12 +631,13 @@ class _PremiumVisionReviewDialogState
                         ),
                       ),
                     ),
+                    if (scrollActions) _reviewActionBar(count),
                   ],
                 ),
               ),
             ),
           ),
-          _reviewActionBar(count),
+          if (!scrollActions) _reviewActionBar(count),
         ],
       ),
     );

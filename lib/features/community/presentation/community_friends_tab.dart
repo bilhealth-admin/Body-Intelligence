@@ -145,6 +145,11 @@ class _FriendsTabState extends State<_FriendsTab>
                             'Friend',
                             'صديق',
                           ),
+                          'declined' => communityText(
+                            context,
+                            'Declined',
+                            'مرفوض',
+                          ),
                           'pending' => communityText(
                             context,
                             'Request pending',
@@ -158,6 +163,8 @@ class _FriendsTabState extends State<_FriendsTab>
                         }),
                         trailing: accepted
                             ? const Icon(Icons.chat_bubble_outline_rounded)
+                            : row['status'] == 'declined'
+                            ? const Icon(Icons.cancel_outlined)
                             : const Icon(Icons.hourglass_top_rounded),
                         onTap: accepted
                             ? () => _open(

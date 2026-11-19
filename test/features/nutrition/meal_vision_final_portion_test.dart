@@ -144,7 +144,7 @@ void main() {
               find.byKey(const Key('premium-vision-use-food')),
             )
             .onPressed,
-        isNull,
+        isNotNull,
       );
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
@@ -309,12 +309,22 @@ void main() {
 
     FilledButton action() =>
         tester.widget(find.byKey(const Key('premium-vision-use-food')));
+    Future<void> expectRequiredReview() async {
+      expect(action().onPressed, isNotNull);
+      await tester.tap(find.byKey(const Key('premium-vision-use-food')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('vision-required-details')), findsOneWidget);
+      expect(result, isNull);
+      await tester.tap(find.byKey(const Key('vision-required-cancel')));
+      await tester.pumpAndSettle();
+    }
+
     for (final amount in ['0', '-1', 'NaN', 'Infinity', '']) {
       await edit(amount, 'g');
-      expect(action().onPressed, isNull);
+      await expectRequiredReview();
     }
     await edit('2', 'piece');
-    expect(action().onPressed, isNull); // No invented piece-to-gram conversion.
+    await expectRequiredReview(); // No invented piece-to-gram conversion.
     await edit('٠٫٠٨', 'kg');
     expect(action().onPressed, isNotNull);
     await tester.ensureVisible(

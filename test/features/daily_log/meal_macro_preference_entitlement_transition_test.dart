@@ -167,9 +167,11 @@ void main() {
           await tester.ensureVisible(summary);
           await tester.pump();
           final macroRow = find.byKey(const Key('daily-meal-detail-macros'));
-          final minerals = find.byKey(const Key('daily-meal-detail-minerals'));
+          final macroTotals = find.byKey(
+            const Key('daily-meal-detail-macro-totals'),
+          );
           final paidSummarySize = tester.getSize(summary);
-          final paidMineralSize = tester.getSize(minerals);
+          final paidMacroTotalsSize = tester.getSize(macroTotals);
 
           for (final state in <AsyncValue<SubscriptionState>>[
             AsyncData(paid),
@@ -186,10 +188,10 @@ void main() {
               saved == true,
             );
             expect(
-              tester.getSize(minerals),
-              paidMineralSize,
+              tester.getSize(macroTotals),
+              paidMacroTotalsSize,
               reason:
-                  'access never inserts an unwanted macro row or resizes minerals',
+                  'access never inserts an unwanted macro row or resizes macro totals',
             );
             if (state.value?.plan != CommercePlan.free) {
               expect(

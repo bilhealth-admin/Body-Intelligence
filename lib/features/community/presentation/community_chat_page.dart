@@ -27,6 +27,9 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
   int _binding = 0, _loadGeneration = 0, _composerRevision = 0;
   int? _emojiBinding;
   int _readRetry = 0;
+  Timer? _messageVisibilityPoll;
+  int _messageVisibilityPollEpoch = 0;
+  bool _messageVisibilityPollBusy = false;
   bool _hasOlder = false, _loadingOlder = false;
   List<CommunityMessage> _rows = const [];
   TextDirection? _composerDirection;
@@ -67,6 +70,7 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
 
   void _watchConversation() {
     final binding = _binding;
+    _startMessageVisibilityPoll(binding);
     try {
       _conversationChanges = _repository
           ?.watchConversationChanges(widget.userId)
@@ -91,9 +95,47 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
     final older = messages.length == 50 && messages.isNotEmpty
         ? _rows.where((row) => _compareMessages(row, messages.first) < 0)
         : const <CommunityMessage>[];
-    _rows = _mergeMessages([...older, ...messages]);
-    _observeMessagePresentation();
-    _hasOlder = older.isNotEmpty ? _hasOlder : messages.length == 50;
+    final olderRows = older.toList(growable: false);
+    final queriedOlderIds = olderRows.map((row) => row.id).toSet();
+    final visibleOlder = <String>{};
+    for (var offset = 0; offset < olderRows.length; offset += 200) {
+      final ids = olderRows
+          .skip(offset)
+          .take(200)
+          .map((row) => row.id)
+          .toList();
+      visibleOlder.addAll(
+        await _run(
+          binding,
+          () => repository.loadVisibleConversationMessageIds(peer, ids),
+        ),
+      );
+      _check(binding);
+      if (generation != _loadGeneration) return _rows;
+    }
+    // A successful older-page read can add rows while presence is pending.
+    // Only queried identities can be disproved; the fresh head still replaces
+    // the recent window, and this merge preserves newly loaded older rows.
+    final retainedOlder = messages.length == 50 && messages.isNotEmpty
+        ? _rows
+              .where(
+                (row) =>
+                    _compareMessages(row, messages.first) < 0 &&
+                    (!queriedOlderIds.contains(row.id) ||
+                        visibleOlder.contains(row.id)),
+              )
+              .toList(growable: false)
+        : const <CommunityMessage>[];
+    _setChatState(() {
+      _rows = _mergeMessages([...retainedOlder, ...messages]);
+      _observeMessagePresentation();
+      _hasOlder = olderRows.isNotEmpty || retainedOlder.isNotEmpty
+          ? _hasOlder
+          : messages.length == 50;
+      // _loadOlder may have replaced the observed Future while this awaited.
+      // Publish this still-current head result without retiring its generation.
+      _messages = Future.value(_rows);
+    });
     return _rows;
   }
 

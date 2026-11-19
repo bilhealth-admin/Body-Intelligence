@@ -1,3 +1,5 @@
+import '../database/final_vision_nutrition.dart';
+import '../../features/nutrition/domain/unified_food.dart';
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
@@ -7,6 +9,8 @@ import '../database/date_keys.dart';
 import '../database/database_scope.dart';
 import '../database/nutrient_evidence.dart';
 import '../database/meal_food_evidence.dart';
+
+part 'daily_log_vision_nutrition.dart';
 
 enum DayLifecycleState { notStarted, open, closed }
 
@@ -77,9 +81,20 @@ class DailyLogRepository {
     required String? expectedExerciseNotes,
     required String? notes,
     required String? exerciseNotes,
+    String? expectedRecordUuid,
+    bool Function()? isCurrent,
   }) => _database.transaction(() async {
+    void checkCurrent() {
+      if (isCurrent?.call() == false) throw StateError('diary_owner_changed');
+    }
+
+    checkCurrent();
     final key = dayKeyFor(date);
     final existing = await getForDay(date);
+    checkCurrent();
+    if (expectedRecordUuid != null && existing?.uuid != expectedRecordUuid) {
+      throw StateError('diary_record_changed');
+    }
     if (existing?.lifecycleState == 'closed') throw StateError('diary_closed');
     if (existing?.notes != expectedNotes ||
         existing?.exerciseNotes != expectedExerciseNotes) {
@@ -107,6 +122,7 @@ class DailyLogRepository {
         ),
       );
     }
+    checkCurrent();
   });
 
   /// Atomically records only the sleep duration for [date]. Existing notes,
@@ -231,21 +247,62 @@ class DailyLogRepository {
   ///
   /// This deliberately avoids [save], whose full-day contract writes the
   /// optional sleep, steps, and exercise fields supplied by its caller.
-  Future<void> saveBodyContext({required DateTime date, String? notes}) async {
-    final key = dayKeyFor(date);
-    final existing = await (_database.select(
-      _database.dailyLogs,
-    )..where((row) => row.dayKey.equals(key))).getSingleOrNull();
-    if (existing == null) {
-      await save(date: date, notes: notes);
-      return;
+  Future<void> saveBodyContext({
+    required DateTime date,
+    String? notes,
+    DailyLog? expectedRecord,
+    bool expectAbsent = false,
+    bool Function()? isCurrent,
+  }) => _database.transaction(() async {
+    void checkCurrent() {
+      if (isCurrent?.call() == false) {
+        throw StateError('body_context_owner_changed');
+      }
     }
-    await (_database.update(
-      _database.dailyLogs,
-    )..where((row) => row.id.equals(existing.id))).write(
-      DailyLogsCompanion(notes: Value(notes), updatedAt: Value(DateTime.now())),
-    );
-  }
+
+    final key = dayKeyFor(date);
+    if (expectedRecord != null &&
+        (expectAbsent || expectedRecord.dayKey != key)) {
+      throw ArgumentError('Body context expected record does not match date');
+    }
+    checkCurrent();
+    final existing = await getForDay(date);
+    checkCurrent();
+    if ((expectAbsent && existing != null) ||
+        (expectedRecord != null &&
+            (existing?.uuid != expectedRecord.uuid ||
+                existing?.notes != expectedRecord.notes))) {
+      throw StateError('body_context_changed_concurrently');
+    }
+    if (existing == null) {
+      // Stay narrow on first creation too; never re-enter broad save(), which
+      // could overwrite sleep/steps/exercise written by a competing creator.
+      await _database
+          .into(_database.dailyLogs)
+          .insert(
+            DailyLogsCompanion.insert(
+              date: date,
+              dayKey: key,
+              notes: Value(notes),
+            ),
+          );
+    } else {
+      final count =
+          await (_database.update(_database.dailyLogs)..where(
+                (row) =>
+                    row.id.equals(existing.id) & row.uuid.equals(existing.uuid),
+              ))
+              .write(
+                DailyLogsCompanion(
+                  notes: Value(notes),
+                  updatedAt: Value(DateTime.now()),
+                ),
+              );
+      if (count != 1) throw StateError('body_context_record_changed');
+    }
+    // Retiring during real SQL must abort and roll back the transaction.
+    checkCurrent();
+  });
 
   Future<void> startDay(DateTime date) => save(date: date);
 
@@ -263,6 +320,7 @@ class DailyLogRepository {
     )..where((row) => row.id.equals(existing.id))).write(
       DailyLogsCompanion(
         lifecycleState: const Value('closed'),
+        finalVisionNutrientEvidenceJson: const Value(null),
         closedAt: Value(DateTime.now()),
         calories: Value(ledger.calories?.round()),
         protein: Value(ledger.protein?.round()),
@@ -276,6 +334,10 @@ class DailyLogRepository {
         ),
         updatedAt: Value(DateTime.now()),
       ),
+    );
+    await _freezeVisionNutrition(
+      date,
+      previousRaw: existing.finalVisionNutrientEvidenceJson,
     );
   });
 
@@ -303,8 +365,17 @@ class DailyLogRepository {
               ..where((row) => row.dayKey.equals(key) & row.deletedAt.isNull()))
             .getSingleOrNull();
     if (log?.lifecycleState == 'closed') {
+      final hasVisionSnapshot = log!.finalVisionNutrientEvidenceJson != null;
+      final vision = _finalVisionNutrition(log);
+      // A lost new envelope is unavailable; source metadata only detects that
+      // fact. It never reconstructs closed values from today's meal rows.
+      final missingVisionSnapshot =
+          !hasVisionSnapshot &&
+          FinalVisionNutrition.containsVision(await _visionDayRows(key));
+      double? frozen(FoodNutrient n, double? legacy) =>
+          hasVisionSnapshot ? vision?.nutrients[n] : legacy;
       final fiberKnown = NutrientEvidenceMask.contains(
-        log!.finalNutrientEvidenceMask ?? 0,
+        log.finalNutrientEvidenceMask ?? 0,
         TrackedNutrient.fiber,
       );
       final carbs = log.carbs?.toDouble();
@@ -313,15 +384,23 @@ class DailyLogRepository {
         date: date,
         state: DayLifecycleState.closed,
         weightKg: weight?.weight,
-        calories: log.calories?.toDouble(),
-        protein: log.protein?.toDouble(),
-        carbohydrates: carbs,
-        fat: log.fats?.toDouble(),
-        fiber: fiber,
-        netCarbohydrates: carbs != null && fiber != null
+        calories: frozen(FoodNutrient.calories, log.calories?.toDouble()),
+        protein: frozen(FoodNutrient.protein, log.protein?.toDouble()),
+        carbohydrates: frozen(FoodNutrient.carbohydrates, carbs),
+        fat: frozen(FoodNutrient.fat, log.fats?.toDouble()),
+        fiber: frozen(FoodNutrient.fiber, fiber),
+        netCarbohydrates: hasVisionSnapshot
+            ? vision?.directNetCarbohydrates
+            : missingVisionSnapshot
+            ? null
+            : carbs != null && fiber != null
             ? (carbs - fiber).clamp(0, double.infinity)
             : null,
-        evidenceCompleteness: log.calories == null ? 0 : 1,
+        evidenceCompleteness: hasVisionSnapshot && vision == null
+            ? 0
+            : log.calories == null
+            ? 0
+            : 1,
       );
     }
     final meals = await (_database.select(
@@ -361,7 +440,9 @@ class DailyLogRepository {
       carbohydrates: carbs,
       fat: total(TrackedNutrient.fat),
       fiber: fiber,
-      netCarbohydrates: carbs != null && fiber != null
+      netCarbohydrates: FinalVisionNutrition.containsVision(evidence)
+          ? FinalVisionNutrition.netForRows(evidence)
+          : carbs != null && fiber != null
           ? (carbs - fiber).clamp(0, double.infinity)
           : null,
       evidenceCompleteness: items.isEmpty

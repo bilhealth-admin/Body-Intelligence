@@ -3,6 +3,7 @@ import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -83,6 +84,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
   }
 
   Future<void> _submit() async {
+    if (_submitting) return;
     final copy = _AccountDeletionCopy.of(context);
     final supabase = Supabase.instance;
     if (!AppEnvironment.cloudConfigured ||
@@ -182,7 +184,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
 
       if (!mounted) return;
       _confirmation.clear();
-      await showDialog<void>(
+      final acknowledged = await showDialog<bool>(
         context: context,
         builder: (context) => BilPearlMaterialAlertDialog(
           title: Text(copy.requestReceived),
@@ -244,12 +246,17 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(context, true),
               child: Text(copy.close),
             ),
           ],
         ),
       );
+      // Acknowledge the durable receipt before replacing the public help
+      // route. A replacement signed-in account owns its current navigation.
+      if (acknowledged == true && mounted && client.auth.currentUser == null) {
+        context.go('/login');
+      }
     } on Object {
       if (mounted) {
         ScaffoldMessenger.of(

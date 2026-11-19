@@ -44,8 +44,11 @@ class BilCrystalArrow extends StatelessWidget {
       Color(0xFF14243A), // Existing Coach/Community Pearl composer ink.
     ].contains(explicitInk?.withValues(alpha: 1));
     final dark = theme.brightness == Brightness.dark && !pearlInk;
-    final solid =
-        media?.highContrast == true ||
+    // Contrast changes static colors. Navigation/motion preferences only omit
+    // the raster filter; they do not request a different resting arrow style.
+    final highContrast = media?.highContrast == true;
+    final omitBlur =
+        highContrast ||
         media?.accessibleNavigation == true ||
         media?.disableAnimations == true;
     final background = dark ? const Color(0xFF15283C) : const Color(0xFFE4F2FC);
@@ -82,21 +85,27 @@ class BilCrystalArrow extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: dark
               ? [
-                  const Color(0xFF243A50).withValues(alpha: solid ? 1 : .86),
-                  const Color(0xFF15283C).withValues(alpha: solid ? 1 : .74),
+                  const Color(
+                    0xFF243A50,
+                  ).withValues(alpha: highContrast ? 1 : .86),
+                  const Color(
+                    0xFF15283C,
+                  ).withValues(alpha: highContrast ? 1 : .74),
                 ]
               : [
-                  Colors.white.withValues(alpha: solid ? 1 : .88),
-                  const Color(0xFFE4F2FC).withValues(alpha: solid ? 1 : .74),
+                  Colors.white.withValues(alpha: highContrast ? 1 : .88),
+                  const Color(
+                    0xFFE4F2FC,
+                  ).withValues(alpha: highContrast ? 1 : .74),
                 ],
         ),
         border: Border.all(
-          color: solid
+          color: highContrast
               ? theme.colorScheme.onSurface
               : dark
               ? Colors.white.withValues(alpha: .24)
               : Colors.white.withValues(alpha: .94),
-          width: solid ? 1.5 : .9,
+          width: highContrast ? 1.5 : .9,
         ),
       ),
       child: const SizedBox.expand(),
@@ -107,7 +116,7 @@ class BilCrystalArrow extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          boxShadow: solid
+          boxShadow: highContrast
               ? const []
               : [
                   BoxShadow(
@@ -118,7 +127,7 @@ class BilCrystalArrow extends StatelessWidget {
                 ],
         ),
         child: ClipOval(
-          child: solid
+          child: omitBlur
               ? fill
               : BackdropFilter(
                   filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),

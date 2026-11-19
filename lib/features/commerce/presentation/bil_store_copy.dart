@@ -1,5 +1,7 @@
+import 'bil_store_photo_features_copy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import 'bil_store_recovery_copy.dart';
+import 'bil_play_license_copy.dart';
 import 'bil_store_terminal_copy.dart';
 
 abstract final class BilStoreCopy {
@@ -641,6 +643,8 @@ abstract final class BilStoreCopy {
   };
 
   static String text(String locale, String key) {
+    final photoFeature = BilStorePhotoFeaturesCopy.text(locale, key);
+    if (photoFeature != null) return photoFeature;
     if (key == 'premium_ai_coach') return 'Premium AI Coach';
     final normalized = locale.replaceAll('_', '-').toLowerCase();
     final language = normalized.split('-').first;
@@ -657,6 +661,7 @@ abstract final class BilStoreCopy {
           english;
     }
     return BilStoreTerminalCopy.text(normalized, key) ??
+        BilPlayLicenseCopy.text(normalized, key) ??
         BilStoreRecoveryCopy.text(normalized, key) ??
         catalogs[language]?[key] ??
         _extendedTrialRenewalCopy[key]?[normalized] ??

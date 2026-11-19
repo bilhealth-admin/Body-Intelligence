@@ -39,6 +39,10 @@ class DailyLogs extends Table {
 
   RealColumn get finalFiber => real().nullable()();
 
+  /// Typed, owner/day/closedAt-bound nullable photo nutrition snapshot.
+  /// Null historical rows keep their existing legacy ledger interpretation.
+  TextColumn get finalVisionNutrientEvidenceJson => text().nullable()();
+
   IntColumn get finalNutrientEvidenceMask => integer().nullable()();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

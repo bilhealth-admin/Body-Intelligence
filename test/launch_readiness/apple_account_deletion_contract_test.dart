@@ -37,7 +37,7 @@ void main() {
     );
     expect(
       page.indexOf('await invalidateMatchingLocalSession('),
-      lessThan(page.indexOf('await showDialog<void>(')),
+      lessThan(page.indexOf('await showDialog<bool>(')),
       reason:
           'accepted pending/completed deletions must clear local auth before UI',
     );

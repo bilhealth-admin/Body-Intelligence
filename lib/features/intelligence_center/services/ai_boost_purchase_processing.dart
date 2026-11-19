@@ -5,6 +5,12 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
     final owner = _catalogOwner;
     final visit = _accountVisit.capture();
     if (_disposed || owner == null || _owner() != owner) return;
+    if (purchases.any(isAndroidReceiptObservation)) {
+      _androidReceiptObservationEpoch++;
+    }
+    for (final purchase in purchases) {
+      _observeUnscopedAndroidCheckout(purchase);
+    }
     final boosts = purchases
         .where(
           (item) =>
@@ -121,9 +127,14 @@ extension _AiBoostPurchaseProcessing on AiBoostPurchaseService {
           verifiedCreditsRevision++;
         }
       }
-    } on Object {
+    } on Object catch (error) {
       if (current()) {
-        _publish(AiBoostPurchaseState.failed, 'verification_failed');
+        _publish(
+          AiBoostPurchaseState.failed,
+          error is BilIntegrityException && error.code == 'license_unlicensed'
+              ? 'license_unlicensed'
+              : 'verification_failed',
+        );
       }
       return;
     }

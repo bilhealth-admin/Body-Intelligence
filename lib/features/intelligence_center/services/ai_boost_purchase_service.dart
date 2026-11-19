@@ -10,16 +10,21 @@ import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/security/bil_mobile_integrity_service.dart';
+import '../../../app/security/bil_integrity_exception.dart';
+import '../../commerce/services/android_store_purchase_readiness.dart';
 import '../../commerce/domain/store_catalog_configuration.dart';
 import '../../commerce/domain/store_benefit_delivery.dart';
 import '../../commerce/services/store_purchase_trace.dart';
 import '../../commerce/services/verified_store_catalog_adapter.dart';
 import '../../commerce/services/verified_store_purchase_service.dart';
 import '../../commerce/services/store_account_visit.dart';
+import '../../commerce/services/android_checkout_failure_recovery.dart';
 import '../../commerce/services/store_verification_request_policy.dart';
 import '../../community/services/community_owner_operation.dart';
 
 part 'ai_boost_purchase_processing.dart';
+part 'ai_boost_android_checkout_recovery.dart';
+part 'ai_boost_play_readiness.dart';
 
 enum AiBoostPurchaseState {
   loading,
@@ -35,6 +40,7 @@ enum AiBoostPurchaseState {
 final class AiBoostPurchaseService extends ChangeNotifier {
   AiBoostPurchaseService({
     InAppPurchase? purchase,
+    AndroidStorePurchaseReadiness? androidReadiness,
     String? Function()? owner,
     Future<bool> Function(PurchaseDetails, String)? verify,
     Future<StoreVerificationOutcome> Function(PurchaseDetails, String)?
@@ -45,7 +51,9 @@ final class AiBoostPurchaseService extends ChangeNotifier {
     this._reconcile,
     this.launchTimeout = const Duration(seconds: 12),
     this.pendingTimeout = const Duration(seconds: 90),
-  }) : _purchase = purchase ?? InAppPurchase.instance,
+    this._androidCheckoutRecovery = const AndroidCheckoutFailureRecovery(),
+  }) : _androidReadiness = androidReadiness ?? AndroidStorePurchaseReadiness(),
+       _purchase = purchase ?? InAppPurchase.instance,
        _owner = owner ?? _currentOwner,
        _verify =
            verifyDelivery ??
@@ -61,6 +69,10 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   // Dispatch UI listeners outside a temporary authenticated-operation fence.
   final Zone _notificationZone = Zone.current;
   final InAppPurchase _purchase;
+  final AndroidStorePurchaseReadiness _androidReadiness;
+  final AndroidCheckoutFailureRecovery _androidCheckoutRecovery;
+  AndroidCheckoutFailureAttempt? _androidCheckoutAttempt;
+  int _androidReceiptObservationEpoch = 0;
   final String? Function() _owner;
   final Future<StoreVerificationOutcome> Function(PurchaseDetails, String)
   _verify;
@@ -107,6 +119,9 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   int _generation = 0;
   int _queued = 0;
   bool _reconciling = false;
+  bool _licenseRepairInFlight = false;
+  Object? _checkoutFlight;
+  bool get _checkoutInFlight => _checkoutFlight != null;
   bool _disposed = false;
   ProductDetails? product;
   String? displayPrice;
@@ -127,21 +142,28 @@ final class AiBoostPurchaseService extends ChangeNotifier {
       !StoreVerificationRequestPolicy.shared.isBackedOff(_owner()) &&
       _queued == 0 &&
       !_reconciling &&
+      !_licenseRepairInFlight &&
+      !_checkoutInFlight &&
       _unresolved == null &&
       product != null &&
       _owner() == _catalogOwner &&
       (state == AiBoostPurchaseState.ready ||
           state == AiBoostPurchaseState.verified);
   bool get canRetry =>
+      errorCode != 'license_unlicensed' &&
       !_disposed &&
       _queued == 0 &&
       !_reconciling &&
+      !_licenseRepairInFlight &&
+      !_checkoutInFlight &&
       state != AiBoostPurchaseState.pending &&
       _owner() == _catalogOwner &&
       (_unresolved != null || errorCode == 'purchase_status_unknown');
 
   Future<void> initialize() {
     if (_disposed ||
+        _checkoutInFlight ||
+        _licenseRepairInFlight ||
         _queued > 0 ||
         _reconciling ||
         (state == AiBoostPurchaseState.pending && _owner() == _catalogOwner)) {
@@ -191,7 +213,10 @@ final class AiBoostPurchaseService extends ChangeNotifier {
       final response = await _purchase
           .queryProductDetails({productId})
           .timeout(launchTimeout);
-      if (!_current(owner, generation) || !_accountVisit.isCurrent(visit)) {
+      if (!_current(owner, generation) ||
+          !_accountVisit.isCurrent(visit) ||
+          _checkoutInFlight ||
+          _licenseRepairInFlight) {
         return;
       }
       product = response.productDetails
@@ -221,63 +246,117 @@ final class AiBoostPurchaseService extends ChangeNotifier {
     String? expectedOfferToken,
   }) async {
     if (!canPurchase) return;
-    checkoutTrace = StorePurchaseTrace();
-    _userInitiatedProduct = productId;
-    if ((expectedPrice != null && expectedPrice != displayPrice) ||
-        (expectedCurrency != null &&
-            expectedCurrency != product!.currencyCode) ||
-        (expectedOfferToken != null &&
-            expectedOfferToken != _purchaseOfferToken)) {
-      _publish(AiBoostPurchaseState.ready, 'store_catalog_changed');
-      return;
-    }
-    final owner = _owner()!;
-    final selected = product!;
-    final generation = _generation;
-    _publish(AiBoostPurchaseState.pending, null);
-    _watchdog?.cancel();
-    _watchdog = Timer(pendingTimeout, () {
-      if (_current(owner, generation) &&
-          state == AiBoostPurchaseState.pending) {
-        _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
-      }
-    });
+    final flight = Object();
+    _checkoutFlight = flight;
     try {
-      checkoutTrace?.mark(StorePurchaseStage.nativeLaunch);
-      final started = await _purchase
-          .buyConsumable(
-            purchaseParam: verifiedBoostPurchaseParam(
-              product: selected,
-              accountHash: storeAccountIdentifier(
-                ownerId: owner,
-                platform: defaultTargetPlatform,
-              ),
-              platform: defaultTargetPlatform,
-              offerToken: _purchaseOfferToken,
-            ),
-            autoConsume: false,
-          )
-          // Apple authentication belongs to the purchase lifecycle, which
-          // can outlast a catalog/network lookup. The pending deadline still
-          // bounds the UI and keeps an unknown outcome from being recharged.
-          .timeout(pendingTimeout);
-      checkoutTrace?.mark(StorePurchaseStage.nativeLaunchReturned);
-      if (!_current(owner, generation) || started) return;
+      checkoutTrace = StorePurchaseTrace();
+      _userInitiatedProduct = productId;
+      if ((expectedPrice != null && expectedPrice != displayPrice) ||
+          (expectedCurrency != null &&
+              expectedCurrency != product!.currencyCode) ||
+          (expectedOfferToken != null &&
+              expectedOfferToken != _purchaseOfferToken)) {
+        _publish(AiBoostPurchaseState.ready, 'store_catalog_changed');
+        return;
+      }
+      final owner = _owner()!;
+      var selected = product!;
+      final generation = _generation;
+      final visit = _accountVisit.capture();
+      bool currentCheckout() =>
+          identical(_checkoutFlight, flight) &&
+          _current(owner, generation) &&
+          _accountVisit.isCurrent(visit) &&
+          _unresolved == null &&
+          _queued == 0 &&
+          !StoreVerificationRequestPolicy.shared.isBackedOff(owner);
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        _publish(AiBoostPurchaseState.loading, null);
+        final readiness = await _androidReadiness.check(
+          ownerId: owner,
+          productId: selected.id,
+          isCurrent: currentCheckout,
+        );
+        if (!currentCheckout()) return;
+        if (readiness != AndroidPurchaseReadiness.ready) {
+          _publish(
+            AiBoostPurchaseState.ready,
+            readiness.messageCode ?? 'play_readiness_unavailable',
+          );
+          return;
+        }
+      }
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final fresh = await _freshBoostQuote(
+          selected,
+          owner,
+          generation,
+          visit,
+        );
+        if (fresh == null || !currentCheckout()) return;
+        selected = fresh;
+      }
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        _androidCheckoutAttempt = AndroidCheckoutFailureAttempt(
+          _accountVisit.capture(),
+          generation,
+          productId,
+        );
+      }
+      _publish(AiBoostPurchaseState.pending, null);
+      if (!currentCheckout()) return;
       _watchdog?.cancel();
-      _publish(AiBoostPurchaseState.ready, 'purchase_not_started');
-    } on TimeoutException {
-      if (_current(owner, generation)) {
-        _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
+      _watchdog = Timer(pendingTimeout, () {
+        if (_current(owner, generation) &&
+            state == AiBoostPurchaseState.pending) {
+          _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
+        }
+      });
+      try {
+        if (!currentCheckout()) return;
+        checkoutTrace?.mark(StorePurchaseStage.nativeLaunch);
+        final started = await _purchase
+            .buyConsumable(
+              purchaseParam: verifiedBoostPurchaseParam(
+                product: selected,
+                accountHash: storeAccountIdentifier(
+                  ownerId: owner,
+                  platform: defaultTargetPlatform,
+                ),
+                platform: defaultTargetPlatform,
+                offerToken: _purchaseOfferToken,
+              ),
+              autoConsume: false,
+            )
+            // Apple authentication belongs to the purchase lifecycle, which
+            // can outlast a catalog/network lookup. The pending deadline still
+            // bounds the UI and keeps an unknown outcome from being recharged.
+            .timeout(pendingTimeout);
+        checkoutTrace?.mark(StorePurchaseStage.nativeLaunchReturned);
+        if (!currentCheckout() || started) return;
+        _watchdog?.cancel();
+        _publish(AiBoostPurchaseState.ready, 'purchase_not_started');
+      } on TimeoutException {
+        if (_current(owner, generation)) {
+          _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
+        }
+      } on Object {
+        if (_current(owner, generation)) {
+          _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
+        }
       }
-    } on Object {
-      if (_current(owner, generation)) {
-        _publish(AiBoostPurchaseState.failed, 'purchase_status_unknown');
-      }
+    } finally {
+      if (identical(_checkoutFlight, flight)) _checkoutFlight = null;
+      if (!_disposed) notifyListeners();
     }
   }
 
   Future<void> retryPendingTransaction() async {
     if (!canRetry) return;
+    if (hasAndroidCheckoutFailure) {
+      await _recoverUnscopedAndroidCheckout();
+      return;
+    }
     final owner = _catalogOwner!;
     final visit = _accountVisit.capture();
     _reconciling = true;
@@ -326,6 +405,8 @@ final class AiBoostPurchaseService extends ChangeNotifier {
       !_disposed && _owner() == owner && generation == _generation;
 
   void _retireAccount() {
+    _checkoutFlight = null;
+    _androidCheckoutAttempt = null;
     lastDelivery = null;
     _deliveries.clear();
     _receiptDeliveries.clear();

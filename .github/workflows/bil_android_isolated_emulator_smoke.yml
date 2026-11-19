@@ -9,6 +9,7 @@ on:
       - codex/bil45-android37-inactive-catalog-20261115
       - codex/bil46-android38-reviewer-fixes-20261116
       - codex/bil47-android39-subscription-stability-20261116
+      - codex/bil48-android40-passive-reconciliation-20261117
       - bil39/integration-20261025
       - codex/bil40-device-fixes-20261028
       - codex/bil41-android33-release-20261106
@@ -76,6 +77,49 @@ jobs:
           --dart-define=BIL_ADS_ENABLED=false
           --dart-define=BIL_COMMUNITY_ENABLED=false
           --dart-define=BIL_PUSH_ENABLED=false
+
+      - name: Execute all eight real Android integrity lease unit tests once
+        if: matrix.api-level == 26
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd android
+            ./gradlew :app:testDebugUnitTest --tests com.bilhealth.bodyintelligencelog.BILIntegrityTokenLeaseTest --no-daemon --console=plain
+          )
+          python3 - <<'PY_INTEGRITY_LEASE_RESULTS'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          path = Path('build/app/test-results/testDebugUnitTest/TEST-com.bilhealth.bodyintelligencelog.BILIntegrityTokenLeaseTest.xml')
+          suite = ET.parse(path).getroot()
+          expected = {
+              'exactObjectAndSingleUse', 'wrongHandleCannotConsumeCurrent',
+              'expiresAtExactMonotonicDeadline', 'validUntilDeadline',
+              'newestTokenSupersedesOldExactResponse', 'releasingStaleLeaseCannotRetireNewToken',
+              'currentReleaseAndDisposeClearExactResponse',
+              'unrelatedNonremediationResponseCannotOverwriteRecoveryResponse',
+          }
+          cases = suite.findall('testcase')
+          if (suite.tag != 'testsuite' or suite.get('name') != 'com.bilhealth.bodyintelligencelog.BILIntegrityTokenLeaseTest'
+                  or len(cases) != 8 or {row.get('name') for row in cases} != expected
+                  or any(row.get('classname') != suite.get('name') for row in cases)
+                  or suite.get('tests') != '8'
+                  or any(int(suite.get(key, '-1')) != 0 for key in ('failures', 'errors', 'skipped'))
+                  or any(row.find(kind) is not None for row in cases for kind in ('failure', 'error', 'skipped'))):
+              raise ValueError('Exactly eight successful, unskipped Android integrity lease unit tests are required')
+          print('ANDROID_INTEGRITY_LEASE_JUNIT: 8 PASS, 0 FAIL, 0 ERROR, 0 SKIP')
+          PY_INTEGRITY_LEASE_RESULTS
+
+      - name: Preserve actual Android integrity lease unit reports
+        if: always() && matrix.api-level == 26
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: bil48-android-integrity-lease-unit-${{ github.sha }}
+          path: |
+            build/app/test-results/testDebugUnitTest
+            build/app/reports/tests/testDebugUnitTest
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Enable KVM for the isolated emulator
         shell: bash

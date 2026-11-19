@@ -24,6 +24,7 @@ import '../commerce/providers/commerce_providers.dart';
 import '../global_platform/fitness_devices/ble_fitness_device_platform.dart';
 import '../global_platform/fitness_devices/fitness_ble_release_policy.dart';
 import 'connected_health_model.dart';
+import 'connected_health_display_scope.dart';
 import 'connected_health_copy.dart';
 import 'device_compatibility.dart';
 import 'providers/connected_health_provider.dart';
@@ -430,7 +431,12 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                 ],
                               ),
                             ),
-                            if (snapshot.signals.isNotEmpty) ...[
+                            if (snapshot.signals.any(
+                              (signal) =>
+                                  connectedHealthDeviceSignalIsSupported(
+                                    signal.key,
+                                  ),
+                            )) ...[
                               const SizedBox(
                                 height: PremiumDesignTokens.spaceMd,
                               ),
@@ -453,7 +459,12 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                     const SizedBox(
                                       height: PremiumDesignTokens.spaceSm,
                                     ),
-                                    for (final signal in snapshot.signals)
+                                    for (final signal in snapshot.signals.where(
+                                      (signal) =>
+                                          connectedHealthDeviceSignalIsSupported(
+                                            signal.key,
+                                          ),
+                                    ))
                                       _ConnectedSignalRow(
                                         contentPadding: EdgeInsets.zero,
                                         leading: BilFlatIcon(

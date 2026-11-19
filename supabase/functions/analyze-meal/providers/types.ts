@@ -11,6 +11,7 @@ export type MealVisionInput = {
   imageBase64: string;
   mimeType: "image/jpeg" | "image/png" | "image/webp";
   requestedLocale: string;
+  schemaVersion?: 1 | 2;
 };
 
 export type ProviderRequest = {

@@ -69,6 +69,25 @@ void main() {
     phaseHook: hook,
   );
 
+  test(
+    'optional country completes and round trips without inventing a region',
+    () async {
+      final value = draft().copyWith(countryRegion: '');
+      final now = DateTime(2026, 8, 30, 9);
+      await drafts.save(value);
+      expect((await drafts.load())!.countryRegion, isEmpty);
+      await service().commit(draft: value, now: now);
+      expect(await preferences.get('countryRegion'), isEmpty);
+      expect(
+        (await UserProfileRepository(database).getProfile())!.currentWeight,
+        80,
+      );
+      expect((await WeightRepository(database).getAll()).single.weight, 80);
+      expect((await GoalRepository(database).getActive())!.type, 'lose');
+      expect(await drafts.load(), isNull);
+    },
+  );
+
   test('full finish stores one coherent snapshot and clears draft', () async {
     final value = draft();
     final now = DateTime(2026, 8, 30, 9);

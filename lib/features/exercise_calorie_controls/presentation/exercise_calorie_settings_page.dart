@@ -3,6 +3,7 @@ import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/runtime_copy.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
@@ -175,11 +176,33 @@ class _ExerciseCaloriePreferencesBodyState
                 ? copy.unavailableBody
                 : copy.evidence(energy.kcal.round(), energy.source),
           ),
+          if (energy == null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const Key('exercise-calories-connect-health'),
+              onPressed: () => context.push('/connected-health'),
+              style: OutlinedButton.styleFrom(minimumSize: const Size(44, 48)),
+              icon: const Icon(Icons.link_rounded),
+              label: Text(
+                _connectedHealthLabel(Localizations.localeOf(context)),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
+
+String _connectedHealthLabel(Locale locale) => switch (locale.languageCode) {
+  'ar' => 'الصحة المتصلة',
+  'fr' => 'Santé connectée',
+  'es' => 'Salud conectada',
+  'tr' => 'Bağlı sağlık',
+  _ =>
+    RuntimeCopy.resolve('Connected health', locale.toLanguageTag()) ??
+        'Connected health',
+};
 
 String _retryLabel(Locale locale) => switch (locale.languageCode) {
   'ar' => 'إعادة المحاولة',

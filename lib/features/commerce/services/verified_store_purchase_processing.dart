@@ -12,13 +12,6 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
         const Duration(seconds: 8),
       );
       if (response.error == null) {
-        for (final purchase in response.pastPurchases) {
-          if (StoreCatalogConfiguration.bindingForProduct(purchase.productID) !=
-              null) {
-            _activeGooglePurchase = purchase;
-            break;
-          }
-        }
         await _enqueuePurchaseUpdates(response.pastPurchases);
       }
     } on Object {
@@ -130,9 +123,6 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       final verifiedReceipt =
           verification == _StoreReceiptVerificationResult.verifiedActive ||
           verification == _StoreReceiptVerificationResult.verifiedInactive;
-      if (!boost && verifiedActive && purchase is GooglePlayPurchaseDetails) {
-        _activeGooglePurchase = purchase;
-      }
       // A durable, owner-checked benefit is ready before native finish. Finish
       // is an acknowledgement lane, not an entitlement or credit authority.
       if (verifiedActive) {
@@ -168,10 +158,20 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
       switch (verification) {
         case _StoreReceiptVerificationResult.ownershipConflict:
-          ownershipConflictProductId = purchase.productID;
+          final preserveExplicitConflict =
+              origin == _StorePurchaseEventOrigin.reconciliation &&
+              messageCode == 'purchase_owned_by_another_account';
+          if (!preserveExplicitConflict) {
+            ownershipConflictProductId = purchase.productID;
+            // A replay has no user checkout/Restore intent. Keep its exact
+            // receipt unresolved and checkout blocked without accusing the
+            // member in Plans. A prior explicit rejection keeps its own SKU.
+            messageCode = origin == _StorePurchaseEventOrigin.reconciliation
+                ? 'reconciliation_verification_failed'
+                : 'purchase_owned_by_another_account';
+          }
           if (_restoring) _restoreOwnershipConflict = true;
           state = VerifiedStoreState.failed;
-          messageCode = 'purchase_owned_by_another_account';
         case _StoreReceiptVerificationResult.verifiedActive:
           lastVerifiedProductId = purchase.productID;
           state = VerifiedStoreState.verified;
@@ -185,6 +185,14 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
               ? VerifiedStoreState.unavailable
               : VerifiedStoreState.ready;
           messageCode = 'no_restorable_purchases';
+        case _StoreReceiptVerificationResult.awaitingCanonicalProof:
+          // A trusted active verification with three successful empty reads
+          // is unresolved canonical proof, not a backend rejection or benefit.
+          // Keep this exact receipt and checkout block; never finish it here.
+          state = VerifiedStoreState.failed;
+          messageCode = origin == _StorePurchaseEventOrigin.reconciliation
+              ? 'reconciliation_pending'
+              : 'purchase_status_unknown';
         case _StoreReceiptVerificationResult.failed:
           state = VerifiedStoreState.failed;
           messageCode = switch (origin) {
@@ -264,10 +272,14 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
 
   Future<void> _enqueuePurchaseUpdates(List<PurchaseDetails> purchases) {
     if (_disposed || purchases.isEmpty) return Future<void>.value();
+    if (purchases.any(isAndroidReceiptObservation)) {
+      _androidReceiptObservationEpoch++;
+    }
     final updates = <_QueuedStorePurchaseUpdate>[];
     var cooledDownReplaySuppressed = false;
     var verifiedFinishReplay = false;
     for (final purchase in purchases) {
+      if (_observeUnscopedAndroidCheckout(purchase)) continue;
       if ((!handlesBoost &&
               purchase.productID == StoreCatalogConfiguration.aiBoost) ||
           (StoreCatalogConfiguration.bindingForProduct(purchase.productID) ==
@@ -601,6 +613,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
   }
 
   void _clearPurchaseInitiation() {
+    _androidCheckoutAttempt = null;
     _purchaseWatchdog?.cancel();
     _purchaseWatchdog = null;
     _purchaseInitiatedByThisService = false;
@@ -628,6 +641,7 @@ enum _StorePurchaseEventOrigin { purchase, restore, reconciliation }
 
 enum _StoreReceiptVerificationResult {
   failed,
+  awaitingCanonicalProof,
   ownershipConflict,
   verifiedInactive,
   verifiedActive,

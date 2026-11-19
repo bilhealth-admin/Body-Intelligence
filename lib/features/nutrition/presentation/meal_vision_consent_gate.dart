@@ -59,17 +59,31 @@ Future<bool?> showMealVisionConsentDisclosure(
       ),
     ),
     actions: [
-      OutlinedButton(
-        key: const Key('meal-vision-consent-decline'),
-        style: OutlinedButton.styleFrom(minimumSize: const Size(136, 48)),
-        onPressed: () => Navigator.pop(dialogContext, false),
-        child: Text(mealVisionConsentText(dialogContext, "Don't Allow")),
-      ),
-      FilledButton(
-        key: const Key('meal-vision-consent-accept'),
-        style: FilledButton.styleFrom(minimumSize: const Size(136, 48)),
-        onPressed: () => Navigator.pop(dialogContext, true),
-        child: Text(mealVisionConsentText(dialogContext, 'Allow & Continue')),
+      BilDialogDecisionActions(
+        secondaryAction: OutlinedButton(
+          key: const Key('meal-vision-consent-decline'),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(0, 48),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(
+            mealVisionConsentText(dialogContext, "Don't Allow"),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        primaryAction: FilledButton(
+          key: const Key('meal-vision-consent-accept'),
+          style: FilledButton.styleFrom(
+            minimumSize: const Size(0, 48),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(
+            mealVisionConsentText(dialogContext, 'Allow & Continue'),
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     ],
   ),

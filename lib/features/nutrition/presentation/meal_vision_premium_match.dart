@@ -34,6 +34,8 @@ class _PremiumTrustedMatchDialog extends StatefulWidget {
 class _PremiumTrustedMatchDialogState
     extends State<_PremiumTrustedMatchDialog> {
   Food? _selected;
+  final _requiredFields = _VisionRequiredFields();
+  bool _usingFood = false;
   bool _full = false;
   late final TextEditingController _amount;
   late final TextEditingController _unit;
@@ -47,6 +49,7 @@ class _PremiumTrustedMatchDialogState
 
   @override
   void dispose() {
+    _requiredFields.dispose();
     _amount.dispose();
     _unit.dispose();
     super.dispose();
@@ -190,11 +193,15 @@ class _PremiumTrustedMatchDialogState
                       child: Material(
                         type: MaterialType.transparency,
                         child: ListTile(
+                          focusNode: _requiredFields.node(
+                            'source-${food.uuid}',
+                          ),
                           onTap:
-                              mealVisionFoodCanBeUsed(
-                                food,
-                                evidenceOwnerKey: widget.evidenceOwnerKey,
-                              )
+                              _requiredFields.current &&
+                                  mealVisionFoodCanBeUsed(
+                                    food,
+                                    evidenceOwnerKey: widget.evidenceOwnerKey,
+                                  )
                               ? () => setState(() => _selected = food)
                               : null,
                           leading: Icon(
@@ -344,28 +351,9 @@ class _PremiumTrustedMatchDialogState
               constraints: const BoxConstraints(minHeight: 54),
               child: FilledButton(
                 key: const Key('premium-vision-use-food'),
-                onPressed:
-                    _selected == null ||
-                        !mealVisionFoodCanBeUsed(
-                          _selected!,
-                          evidenceOwnerKey: widget.evidenceOwnerKey,
-                        ) ||
-                        !_validPortion
+                onPressed: _usingFood || !_requiredFields.current
                     ? null
-                    : () {
-                        if (widget.editable) {
-                          Navigator.pop(
-                            context,
-                            TrustedVisionFoodSelection(
-                              food: _selected!,
-                              amount: _currentAmount!,
-                              unit: _currentUnit,
-                            ),
-                          );
-                        } else {
-                          Navigator.pop(context, _selected);
-                        }
-                      },
+                    : _attemptRequiredFood,
                 style: _visionActionStyle(context),
                 child: Text(
                   _word(

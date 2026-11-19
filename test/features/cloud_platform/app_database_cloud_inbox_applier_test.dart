@@ -26,6 +26,195 @@ void main() {
 
     tearDown(() => database.close());
 
+    test(
+      'explicit empty or null country clears only country and replays idempotently',
+      () async {
+        final at = DateTime.utc(2026, 11, 17, 12);
+        final base = _profileRecord(at, includeOnboardingIdentity: true);
+        await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [base],
+        );
+        final identityBefore = {
+          for (final row in await database.select(database.preferences).get())
+            if (row.key != 'countryRegion') row.key: row.value,
+        };
+        for (final (index, value) in <Object?>['', null, '  '].indexed) {
+          await database
+              .into(database.preferences)
+              .insertOnConflictUpdate(
+                PreferencesCompanion.insert(
+                  key: 'countryRegion',
+                  value: 'Egypt',
+                ),
+              );
+          final clear = CloudRecordEnvelope(
+            entityKind: base.entityKind,
+            recordId: base.recordId,
+            ownerId: base.ownerId,
+            revision: CloudRevision(deviceId: 'device-b', sequence: index + 2),
+            updatedAt: at.add(Duration(minutes: index + 1)),
+            payload: {...base.payload, 'countryRegion': value},
+          );
+          final report = await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [clear],
+          );
+          expect(report.applied, 1, reason: 'value=$value');
+          final preferences = await database.select(database.preferences).get();
+          expect(
+            preferences.where((row) => row.key == 'countryRegion'),
+            isEmpty,
+          );
+          expect({
+            for (final row in preferences) row.key: row.value,
+          }, identityBefore);
+          final repeated = await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [clear],
+          );
+          expect(repeated.acknowledged, 1);
+          expect(repeated.applied, 0);
+          expect(repeated.conflicts, 0);
+          expect({
+            for (final row in await database.select(database.preferences).get())
+              row.key: row.value,
+          }, identityBefore);
+          final profile = await database
+              .select(database.userProfile)
+              .getSingle();
+          expect(profile.uuid, base.recordId);
+          expect(profile.revision, index + 2);
+          expect(profile.age, 34);
+          expect(profile.currentWeight, 79.2);
+        }
+      },
+    );
+
+    test(
+      'absent legacy country preserves the selected country and replays',
+      () async {
+        final at = DateTime.utc(2026, 11, 17, 12);
+        final base = _profileRecord(at, includeOnboardingIdentity: true);
+        await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [base],
+        );
+        final before = {
+          for (final row in await database.select(database.preferences).get())
+            row.key: row.value,
+        };
+        final payload = {...base.payload}..remove('countryRegion');
+        final legacy = CloudRecordEnvelope(
+          entityKind: base.entityKind,
+          recordId: base.recordId,
+          ownerId: base.ownerId,
+          revision: CloudRevision(deviceId: 'device-b', sequence: 2),
+          updatedAt: at.add(const Duration(minutes: 1)),
+          payload: payload,
+        );
+        final report = await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [legacy],
+        );
+        expect(report.applied, 1);
+        expect({
+          for (final row in await database.select(database.preferences).get())
+            row.key: row.value,
+        }, before);
+        final repeated = await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [legacy],
+        );
+        expect(repeated.acknowledged, 1);
+        expect(repeated.applied, 0);
+        expect(repeated.conflicts, 0);
+        expect({
+          for (final row in await database.select(database.preferences).get())
+            row.key: row.value,
+        }, before);
+      },
+    );
+
+    test(
+      'country clear cannot bypass owner, ordering, conflict or payload validation',
+      () async {
+        final at = DateTime.utc(2026, 11, 17, 12);
+        final base = _profileRecord(at, includeOnboardingIdentity: true);
+        await applier.apply(
+          ownerId: 'owner-a',
+          localDeviceId: 'device-a',
+          records: [base],
+        );
+        CloudRecordEnvelope clear({
+          String owner = 'owner-a',
+          int minutes = 0,
+          int sequence = 1,
+          Object? value,
+        }) => CloudRecordEnvelope(
+          entityKind: base.entityKind,
+          recordId: base.recordId,
+          ownerId: owner,
+          revision: CloudRevision(deviceId: 'device-b', sequence: sequence),
+          updatedAt: at.add(Duration(minutes: minutes)),
+          payload: {...base.payload, 'countryRegion': value},
+        );
+        final before = {
+          for (final row in await database.select(database.preferences).get())
+            row.key: row.value,
+        };
+        await expectLater(
+          applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [clear(owner: 'owner-b', minutes: 1, sequence: 2)],
+          ),
+          throwsStateError,
+        );
+        expect(
+          (await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [clear(minutes: -1, sequence: 2)],
+          )).localWins,
+          1,
+        );
+        expect(
+          (await applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [clear()],
+          )).conflicts,
+          1,
+        );
+        await expectLater(
+          applier.apply(
+            ownerId: 'owner-a',
+            localDeviceId: 'device-a',
+            records: [clear(minutes: 1, sequence: 2, value: 42)],
+          ),
+          throwsFormatException,
+        );
+        expect({
+          for (final row in await database.select(database.preferences).get())
+            row.key: row.value,
+        }, before);
+        final profile = await database.select(database.userProfile).getSingle();
+        expect(
+          profile.revision,
+          1,
+          reason: 'Malformed payload must roll back profile updates too.',
+        );
+        expect(profile.syncStatus, 'synced');
+      },
+    );
+
     for (final legacyEmptyBirth in ['', '  ']) {
       test(
         'legacy empty profile birth preference is an idempotent absence [$legacyEmptyBirth]',

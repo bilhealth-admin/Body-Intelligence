@@ -112,6 +112,7 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
             Expanded(
               child: TextField(
                 key: const Key('premium-vision-final-amount'),
+                focusNode: _requiredFields.node('final-amount'),
                 controller: _amount,
                 textDirection: TextDirection.ltr,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -137,6 +138,7 @@ extension _TrustedVisionPortionEditor on _PremiumTrustedMatchDialogState {
         ),
         TextField(
           key: const Key('premium-vision-final-unit'),
+          focusNode: _requiredFields.node('final-unit'),
           controller: _unit,
           style: TextStyle(color: _foreground(context)),
           decoration: InputDecoration(

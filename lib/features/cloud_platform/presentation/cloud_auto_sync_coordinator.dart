@@ -109,6 +109,27 @@ class _CloudAutoSyncCoordinatorState
     _watch(database.select(database.foods).watch());
     _watch(database.select(database.meals).watch());
     _watch(database.select(database.mealItems).watch());
+    // Only the nutrition lifecycle projection can schedule this new trigger.
+    // Private daily fields and historical days without Vision stay excluded.
+    _watch(
+      database
+          .select(database.dailyLogs)
+          .watch()
+          .map(
+            (rows) => {
+              for (final row in rows.where(
+                (row) => row.finalVisionNutrientEvidenceJson != null,
+              ))
+                row.dayKey: (
+                  row.uuid,
+                  row.lifecycleState,
+                  row.closedAt,
+                  row.finalVisionNutrientEvidenceJson,
+                ),
+            },
+          )
+          .distinct(mapEquals),
+    );
     // Distinct content avoids a restore/status preference writing a perpetual
     // sync loop. New scopes remain gated by explicit consent in the service.
     _watch(

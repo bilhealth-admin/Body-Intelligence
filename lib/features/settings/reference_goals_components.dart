@@ -133,11 +133,13 @@ class _ChoicePage extends StatefulWidget {
     required this.options,
     required this.selected,
     required this.translate,
+    this.header,
   });
   final String title;
   final List<String> options;
   final String selected;
   final String Function(String) translate;
+  final Widget? header;
   @override
   State<_ChoicePage> createState() => _ChoicePageState();
 }
@@ -161,21 +163,22 @@ class _ChoicePageState extends State<_ChoicePage> {
       ],
     ),
     body: ListView(
-      children: widget.options
-          .map(
-            (option) => ListTile(
-              minTileHeight: 66,
-              title: Text(widget.translate(option)),
-              trailing: option == selected
-                  ? Icon(
-                      Icons.check_rounded,
-                      color: Theme.of(context).colorScheme.primary,
-                    )
-                  : null,
-              onTap: () => setState(() => selected = option),
-            ),
-          )
-          .toList(),
+      children: [
+        if (widget.header != null) widget.header!,
+        ...widget.options.map(
+          (option) => ListTile(
+            minTileHeight: 66,
+            title: Text(widget.translate(option)),
+            trailing: option == selected
+                ? Icon(
+                    Icons.check_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : null,
+            onTap: () => setState(() => selected = option),
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -381,6 +384,7 @@ const _copy = <String, Map<String, String>>{
     'tr': 'Kilogram',
   },
   'kg': {'ar': 'كجم', 'fr': 'kg', 'es': 'kg', 'tr': 'kg'},
+  'lb': {'ar': 'رطل', 'fr': 'lb', 'es': 'lb', 'tr': 'lb'},
   'Are You Sure?': {
     'ar': 'هل أنت متأكد؟',
     'fr': 'Êtes-vous sûr ?',

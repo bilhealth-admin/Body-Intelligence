@@ -20,6 +20,14 @@ final dailyLogRepositoryProvider = Provider<DailyLogRepository>((ref) {
   return DailyLogRepository(database);
 });
 
+/// Retire a pending exercise confirmation after an owner/day visit changes,
+/// including A -> B -> A. This token does not convey authorization.
+final dailyLogExerciseVisitProvider = Provider<Object>((ref) {
+  ref.watch(dailyLogRepositoryProvider);
+  ref.watch(selectedLogDateProvider);
+  return Object();
+});
+
 final latestDailyLogProvider = StreamProvider<DailyLog?>((ref) {
   final repository = ref.watch(dailyLogRepositoryProvider);
   return repository.watchLatest();

@@ -52,6 +52,7 @@ final class DailyLogNutritionEvidence {
   }
 
   static double? netCarbohydrates(MealFoodEvidence row) {
+    if (row.vision != null) return row.directNetCarbohydrates;
     final carbs = row.value(TrackedNutrient.carbohydrates);
     final fiber = row.value(TrackedNutrient.fiber);
     if (carbs == null || fiber == null) return null;

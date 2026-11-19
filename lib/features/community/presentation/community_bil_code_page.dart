@@ -16,12 +16,14 @@ import '../data/community_public_code_failure.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_copy.dart';
+import 'community_code_privacy_copy.dart';
 import 'community_account_visit.dart';
 import 'community_return_button.dart';
 import 'community_member_share.dart';
 import '../../notifications/domain/community_deep_link.dart';
 
 part 'community_code_failure_widgets.dart';
+part 'community_code_privacy_guidance.dart';
 
 CommunityRepository? _productionCodeRepository() {
   if (!AppEnvironment.communityConfigured) return null;
@@ -288,15 +290,6 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
               return ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
-                  Text(
-                    communityText(
-                      context,
-                      'Let a friend scan this code. It only identifies your public Community profile; it cannot sign anyone in.',
-                      'دع صديقًا يمسح هذا الرمز. فهو يعرّف بملفك العام في المجتمع فقط ولا يمكنه تسجيل دخول أي شخص.',
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
                   Center(
                     child: RepaintBoundary(
                       key: const Key('community-bil-code-qr'),
@@ -321,6 +314,12 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
                     textAlign: TextAlign.center,
                     textDirection: TextDirection.ltr,
                     style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 24),
+                  _OwnCodePrivacyGuidance(
+                    key: ValueKey((_visit?.epoch, displayedCodeFuture)),
+                    repository: _repository!,
+                    ticket: displayedTicket,
                   ),
                   const SizedBox(height: 24),
                   Builder(
@@ -757,40 +756,4 @@ class _MemberRelationshipAction extends StatelessWidget {
       label: Text(communityText(context, 'This is you', 'هذا أنت')),
     ),
   };
-}
-
-class _BilQrPainter extends CustomPainter {
-  _BilQrPainter(this.data)
-    : image = QrImage(
-        QrCode.fromData(data: data, errorCorrectLevel: QrErrorCorrectLevel.M),
-      );
-
-  final String data;
-  final QrImage image;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = Colors.white);
-    final quietModules = image.moduleCount + 8;
-    final cell = size.shortestSide / quietModules;
-    final paint = Paint()..color = const Color(0xFF101828);
-    for (var row = 0; row < image.moduleCount; row++) {
-      for (var column = 0; column < image.moduleCount; column++) {
-        if (!image.isDark(row, column)) continue;
-        canvas.drawRect(
-          Rect.fromLTWH(
-            (column + 4) * cell,
-            (row + 4) * cell,
-            cell + .1,
-            cell + .1,
-          ),
-          paint,
-        );
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _BilQrPainter oldDelegate) =>
-      oldDelegate.data != data;
 }

@@ -20,6 +20,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
   bool loading = true;
   bool busy = false;
   Object? loadError;
+  int _loadGeneration = 0;
 
   void _updateState(VoidCallback update) {
     if (mounted) setState(update);
@@ -41,6 +42,14 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
   }
 
   Future<void> _load() async {
+    final generation = ++_loadGeneration;
+    final prefs = ref.read(preferencesRepositoryProvider);
+    final visit = ref.read(fastingHistoryOwnerVisitProvider);
+    bool current() =>
+        mounted &&
+        generation == _loadGeneration &&
+        identical(visit, ref.read(fastingHistoryOwnerVisitProvider)) &&
+        identical(prefs, ref.read(preferencesRepositoryProvider));
     if (mounted) {
       setState(() {
         loading = true;
@@ -48,7 +57,6 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
       });
     }
     try {
-      final prefs = ref.read(preferencesRepositoryProvider);
       final values = await Future.wait([
         prefs.get('wellness_fasting_session_v2'),
         prefs.get('wellness_fasting_started_at'),
@@ -73,7 +81,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
           restored = FastingSession(startedAt: parsed, targetHours: hours);
         }
       }
-      if (!mounted) return;
+      if (!current()) return;
       setState(() {
         session = restored;
         final savedTarget = int.tryParse(target ?? '');
@@ -89,7 +97,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
       await _refreshNotificationTruth();
       await _restoreActiveNotificationState();
     } catch (error) {
-      if (!mounted) return;
+      if (!current()) return;
       setState(() {
         loading = false;
         loadError = error;
@@ -167,6 +175,11 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
 
   @override
   Widget build(BuildContext context) {
+    final completed = ref.watch(fastingHistorySnapshotProvider);
+    ref.listen(fastingHistoryOwnerVisitProvider, (_, next) {
+      _updateState(() => busy = false);
+      unawaited(_load());
+    });
     final active = session != null;
     final progress = session?.progressAt(DateTime.now()) ?? 0.0;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
@@ -490,33 +503,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                         ),
                       ),
                     ),
-                    if (history.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        tr(
-                          'Intermittent fasting history',
-                          'سجل الصيام المتقطع',
-                        ),
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      for (final entry in history.take(10))
-                        ListTile(
-                          leading: Icon(
-                            entry.reachedTarget
-                                ? Icons.check_circle_outline_rounded
-                                : Icons.history_rounded,
-                          ),
-                          title: Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: Text(clock(entry.duration)),
-                          ),
-                          subtitle: Text(
-                            '${MaterialLocalizations.of(context).formatMediumDate(entry.startedAt.toLocal())} · '
-                            '${tr('Target', 'الهدف')} ${entry.targetHours}h · '
-                            '${entry.reachedTarget ? tr('Reached', 'تم بلوغه') : tr('Ended early', 'انتهى مبكرًا')}',
-                          ),
-                        ),
-                    ],
+                    ..._completedHistory(completed),
                     const SizedBox(height: 12),
                     _SafetyNote(
                       text: tr(

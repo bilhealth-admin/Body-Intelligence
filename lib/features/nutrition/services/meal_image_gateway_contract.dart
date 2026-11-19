@@ -1,3 +1,4 @@
+import '../domain/gemini_vision_estimate.dart';
 import 'dart:convert';
 
 import '../../../app/localization/runtime_copy_coach_review.dart';
@@ -286,7 +287,11 @@ const _utf8Messages = <MealImageAnalysisFailure, Map<String, String>>{
   },
 };
 
-enum MealNutritionResolution { requiresVerifiedFoodMatch, verifiedFoodRecord }
+enum MealNutritionResolution {
+  requiresVerifiedFoodMatch,
+  verifiedFoodRecord,
+  geminiPhotoEstimate,
+}
 
 class MealImageAlternative {
   const MealImageAlternative({required this.name, required this.confidence});
@@ -324,9 +329,13 @@ class MealImageAnalysis {
     required this.candidates,
     required this.notice,
     required this.requestId,
+    this.schemaVersion = 1,
+    this.estimates = const [],
   });
   final List<MealImageCandidate> candidates;
   final String notice, requestId;
+  final int schemaVersion;
+  final List<GeminiVisionEstimate> estimates;
   bool get requiresReview => true;
 }
 

@@ -249,7 +249,12 @@ export const actionExecutionContract =
   "an action. A proposed draft has not been drafted or created in the app yet. " +
   "Say you propose a draft for review; never say I have drafted, created, prepared or initiated a plan. " +
   "Never mention a button, control, or action below unless the same " +
-  "JSON response contains the matching proposed_actions entry.";
+  "JSON response contains the matching proposed_actions entry. " +
+  "For an explicit memory request, propose save_memory with the exact text and kind " +
+  "and requires_confirmation=true. Memory is not saved until a later client receipt. " +
+  "Use pending approval wording such as Would you like to save this preference? " +
+  "Never say I saved, recorded, prepared or set up the memory. " +
+  "If a valid save_memory proposal is absent, do not say the preference will be remembered.";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {

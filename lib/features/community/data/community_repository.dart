@@ -79,6 +79,16 @@ class CommunityRepository
   @override
   SupabaseClient get communitySocialClient => _client;
 
+  /// Sender-owned erasure and bounded RLS presence use the same owner fences
+  /// as the existing message repository operations.
+  Future<void> deleteMessageForEveryone(CommunityMessage message) =>
+      _deleteMessageForEveryoneOwned(message);
+
+  Future<Set<String>> loadVisibleConversationMessageIds(
+    String peer,
+    List<String> messageIds,
+  ) => _loadVisibleConversationMessageIds(peer, messageIds);
+
   /// Server-authorized review enrichment; overridable by synthetic QA
   /// repositories without changing production moderator permissions.
   @override

@@ -504,7 +504,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('accessible navigation keeps a solid permanent crystal', (
+  testWidgets('accessible navigation keeps a permanent no-filter crystal', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -528,7 +528,9 @@ void main() {
     await tester.pumpAndSettle();
     final surface = tester.widget<DecoratedBox>(find.byKey(_bubble));
     final decoration = surface.decoration as BoxDecoration;
-    expect(decoration.border!.top.width, 1.5);
+    expect(decoration.border!.top.width, .9);
+    expect(decoration.border!.top.color, Colors.white.withValues(alpha: .94));
+    expect(find.byType(BackdropFilter), findsNothing);
     expect(find.byKey(_bubble), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

@@ -10,6 +10,35 @@ extension _MealFoodPortionWrites on MealRepository {
     if (!basis.isValid) {
       throw const CoachMealConflict(CoachMealConflictReason.invalidEvidence);
     }
+    if (basis.vision case final vision?) {
+      if (quantityInGrams != (vision.basisUnit == 'g')) {
+        throw const FormatException(
+          'Photo portion requires its own source basis.',
+        );
+      }
+      final portion = VisionMealEvidence(food: vision, quantity: quantity);
+      double v(FoodNutrient n) => portion.value(n) ?? 0;
+      return MealItemsCompanion(
+        quantity: Value(quantity),
+        calories: Value(v(FoodNutrient.calories)),
+        protein: Value(v(FoodNutrient.protein)),
+        carbs: Value(v(FoodNutrient.carbohydrates)),
+        fats: Value(v(FoodNutrient.fat)),
+        fiber: Value(v(FoodNutrient.fiber)),
+        sugar: Value(v(FoodNutrient.sugar)),
+        sodium: Value(v(FoodNutrient.sodium)),
+        potassium: Value(v(FoodNutrient.potassium)),
+        calcium: Value(v(FoodNutrient.calcium)),
+        magnesium: Value(v(FoodNutrient.magnesium)),
+        phosphorus: Value(v(FoodNutrient.phosphorus)),
+        nutrientEvidenceMask: Value(portion.mask),
+        foodSourceSnapshot: const Value(VisionFoodEvidence.source),
+        foodVerifiedSnapshot: const Value(false),
+        servingSizeSnapshot: Value(vision.basisQuantity),
+        servingUnitSnapshot: Value(vision.basisUnit),
+        foodEvidenceJson: Value(portion.encode()),
+      );
+    }
     if (basis.catalog != null && basis.snapshot == null) {
       if (quantityInGrams) {
         throw StateError(

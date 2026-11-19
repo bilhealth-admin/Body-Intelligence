@@ -589,6 +589,7 @@ class BilSemanticIconBadge extends StatelessWidget {
     this.appleIconOverride,
     this.platformOverride,
     this.colorOverride,
+    this.useNativeSymbol = true,
   });
 
   final BilSemanticIconKind kind;
@@ -600,6 +601,9 @@ class BilSemanticIconBadge extends StatelessWidget {
   final IconData? appleIconOverride;
   final TargetPlatform? platformOverride;
   final Color? colorOverride;
+
+  /// Explicit action glyphs can retain this badge without native category remapping.
+  final bool useNativeSymbol;
 
   @override
   Widget build(BuildContext context) {
@@ -616,13 +620,19 @@ class BilSemanticIconBadge extends StatelessWidget {
         width: size,
         height: size,
         alignment: Alignment.center,
-        child: BilNativeSymbolGlyph(
-          symbol: BilSemanticIcons.nativeSymbol(kind),
-          fallback: resolvedIcon,
-          size: iconSize,
-          color: colorOverride ?? theme.colorScheme.onSurfaceVariant,
-          platformOverride: platformOverride,
-        ),
+        child: useNativeSymbol
+            ? BilNativeSymbolGlyph(
+                symbol: BilSemanticIcons.nativeSymbol(kind),
+                fallback: resolvedIcon,
+                size: iconSize,
+                color: colorOverride ?? theme.colorScheme.onSurfaceVariant,
+                platformOverride: platformOverride,
+              )
+            : Icon(
+                resolvedIcon,
+                size: iconSize,
+                color: colorOverride ?? theme.colorScheme.onSurfaceVariant,
+              ),
       ),
     );
     final label = semanticLabel?.trim();

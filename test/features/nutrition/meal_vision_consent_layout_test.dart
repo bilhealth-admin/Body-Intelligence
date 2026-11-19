@@ -17,12 +17,16 @@ void main() {
   setUpAll(loadVisualEvidenceFont);
   for (final language in ['en', 'ar']) {
     for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
-      for (final scale in [1.0, 2.5]) {
+      for (final scale in [1.0, 1.3, 2.5]) {
         testWidgets('meal-photo consent $language ${platform.name} ${scale}x '
             'keeps both decisions visible without nesting cards', (
           tester,
         ) async {
-          final size = scale == 1 ? const Size(430, 932) : const Size(320, 568);
+          final size = scale == 1
+              ? const Size(360, 800)
+              : scale == 1.3
+              ? const Size(390, 844)
+              : const Size(320, 568);
           tester.view.physicalSize = size;
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.resetPhysicalSize);
@@ -95,6 +99,16 @@ void main() {
               expect(rect.top, greaterThanOrEqualTo(24));
               expect(rect.bottom, lessThanOrEqualTo(size.height - 24));
             }
+            final allowRect = tester.getRect(allow);
+            final declineRect = tester.getRect(decline);
+            expect(
+              allowRect.center.dy,
+              closeTo(declineRect.center.dy, .5),
+              reason:
+                  'Both decisions remain side by side at the device text scale.',
+            );
+            expect(allowRect.width, closeTo(declineRect.width, .5));
+            expect(allowRect.overlaps(declineRect), isFalse);
             expect(tester.takeException(), isNull);
             if (!decision &&
                 scale == 1 &&

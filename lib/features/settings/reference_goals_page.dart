@@ -1,3 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+import 'package:drift/drift.dart' show OrderingTerm;
+import '../../core/units/measurement_units.dart';
+import '../../data/repositories/preferences_repository.dart';
+import '../nutrition/domain/nutrition_pace_intent.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
@@ -24,6 +30,8 @@ import '../weight/domain/weight_goal_progress.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 part 'reference_goals_components.dart';
 part 'reference_goals_validation.dart';
+part 'reference_goals_owner_visit.dart';
+part 'reference_goals_weight_editors.dart';
 
 @visibleForTesting
 String premiumGoalDestination(String featureRoute) => featureRoute;
@@ -37,6 +45,9 @@ class ReferenceGoalsPage extends ConsumerStatefulWidget {
 
 class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
   String? weeklyGoal;
+  double? weeklyPaceKg;
+  int _goalOwnerEpoch = 0;
+  String? _goalResolvedProfileUuid;
   String? activity;
   double? startingWeight;
   String? startingDate;
@@ -45,6 +56,9 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
   Object? hydrateError;
   bool saving = false;
   bool _numberEditorOpen = false;
+
+  // Extensions notify through this State instance; owner checks stay at call sites.
+  void _setGoalState(VoidCallback update) => setState(update);
 
   String c(String key) {
     final locale = Localizations.localeOf(context);
@@ -55,300 +69,76 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
         key;
   }
 
-  Future<void> hydrate(String profileActivity) async {
-    if (hydrated || hydrating) return;
-    setState(() {
-      hydrating = true;
-      hydrateError = null;
-    });
-    final repo = ref.read(preferencesRepositoryProvider);
-    try {
-      final values = await Future.wait([
-        repo.get('goals.weeklyRate'),
-        repo.get('goals.startingWeight'),
-        repo.get('goals.startingDate'),
-      ]);
-      if (!mounted) return;
-      final validated = validateStoredGoalPreferences(
-        weeklyGoal: values[0],
-        startingWeight: values[1],
-        startingDate: values[2],
-        now: DateTime.now(),
-      );
-      setState(() {
-        weeklyGoal = validated.weeklyGoal;
-        startingWeight = validated.startingWeight;
-        startingDate = validated.startingDate;
-        activity = profileActivity;
-        hydrated = true;
-      });
-    } catch (error) {
-      if (mounted) setState(() => hydrateError = error);
-    } finally {
-      if (mounted) setState(() => hydrating = false);
-    }
-  }
-
-  Future<bool> _write(Future<void> Function() operation) async {
-    if (saving) return false;
-    setState(() => saving = true);
-    try {
-      await operation();
-      return true;
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(c('Could not save changes.'))));
-      }
-      return false;
-    } finally {
-      if (mounted) setState(() => saving = false);
-    }
-  }
-
-  Future<double?> numberEditor(
-    String title,
-    double initial,
-    double min,
-    double max,
-  ) async {
-    if (_numberEditorOpen) return null;
-    _numberEditorOpen = true;
-    final controller = TextEditingController(text: initial.toStringAsFixed(1));
-    double? result;
-    try {
-      result = await showBilPearlBottomSheet<double>(
-        context: context,
-        useSafeArea: true,
-        isScrollControlled: true,
-        builder: (sheetContext) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            8,
-            20,
-            MediaQuery.viewInsetsOf(sheetContext).bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(sheetContext),
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-                  Expanded(
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      final value = double.tryParse(
-                        controller.text.replaceAll(',', '.'),
-                      );
-                      if (value != null && value >= min && value <= max) {
-                        Navigator.pop(sheetContext, value);
-                      }
-                    },
-                    icon: const Icon(Icons.check_rounded),
-                  ),
-                ],
-              ),
-              const Divider(height: 1),
-              const SizedBox(height: 18),
-              TextField(
-                controller: controller,
-                autofocus: false,
-                textAlign: TextAlign.center,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  labelText: c('Kilograms'),
-                  suffixText: c('kg'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    } finally {
-      // The modal's editable subtree can remain attached through its reverse
-      // transition. Disposing the controller before that subtree is removed
-      // can make the next route reuse a child that is still being detached.
-      await WidgetsBinding.instance.endOfFrame;
-      await Future<void>.delayed(const Duration(milliseconds: 350));
-      controller.dispose();
-      _numberEditorOpen = false;
-    }
-    return result;
-  }
-
-  Future<({double weight, DateTime date})?> startingWeightEditor(
-    double initial,
-  ) async {
-    if (_numberEditorOpen) return null;
-    _numberEditorOpen = true;
-    final controller = TextEditingController(text: initial.toStringAsFixed(1));
-    var date = DateTime.tryParse(startingDate ?? '') ?? DateTime.now();
-    ({double weight, DateTime date})? result;
-    try {
-      result = await showBilPearlBottomSheet<({double weight, DateTime date})>(
-        context: context,
-        useSafeArea: true,
-        isScrollControlled: true,
-        builder: (sheetContext) => StatefulBuilder(
-          builder: (context, setSheetState) => Padding(
-            padding: EdgeInsets.fromLTRB(
-              20,
-              8,
-              20,
-              MediaQuery.viewInsetsOf(sheetContext).bottom + 20,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(sheetContext),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                    Expanded(
-                      child: Text(
-                        c('Starting Weight'),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        final weight = double.tryParse(
-                          controller.text.replaceAll(',', '.'),
-                        );
-                        if (weight != null && weight >= 20 && weight <= 500) {
-                          Navigator.pop(sheetContext, (
-                            weight: weight,
-                            date: date,
-                          ));
-                        }
-                      },
-                      icon: const Icon(Icons.check_rounded),
-                    ),
-                  ],
-                ),
-                const Divider(height: 1),
-                const SizedBox(height: 18),
-                TextField(
-                  key: const Key('goals-starting-weight-input'),
-                  controller: controller,
-                  textAlign: TextAlign.center,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: c('Kilograms'),
-                    suffixText: c('kg'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ListTile(
-                  key: const Key('goals-starting-date'),
-                  contentPadding: EdgeInsets.zero,
-                  leading: const BilSemanticIconBadge(
-                    kind: BilSemanticIconKind.calendar,
-                  ),
-                  title: Text(c('Starting Date')),
-                  subtitle: Text(
-                    MaterialLocalizations.of(context).formatMediumDate(date),
-                  ),
-                  onTap: () async {
-                    final selected = await showBilCrystalDatePicker(
-                      context: sheetContext,
-                      initialDate: date,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now(),
-                    );
-                    if (selected != null) setSheetState(() => date = selected);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    } finally {
-      await WidgetsBinding.instance.endOfFrame;
-      await Future<void>.delayed(const Duration(milliseconds: 350));
-      controller.dispose();
-      _numberEditorOpen = false;
-    }
-    return result;
+  @override
+  void initState() {
+    super.initState();
+    _watchGoalOwner();
   }
 
   Future<void> updateProfileWeight(
-    UserProfileData profile, {
+    UserProfileData profile,
+    _ReferenceGoalVisit visit, {
     double? current,
     double? target,
     String? activityValue,
   }) async {
-    final resolvedCurrent =
-        current ??
-        ref.read(effectiveCurrentWeightProvider) ??
-        profile.currentWeight;
-    final resolvedTarget = target ?? profile.targetWeight;
-    // Read the durable row directly instead of relying on AsyncValue.value.
-    // This page can be opened before activeGoalProvider has emitted, and using
-    // a transient null there would create a duplicate goal rather than update
-    // the existing Health Goal.
-    final goalRepository = ref.read(goalRepositoryProvider);
-    final activeGoal = target == null ? null : await goalRepository.getActive();
-    await ref.read(databaseProvider).transaction(() async {
-      await ref
-          .read(userProfileRepositoryProvider)
-          .save(
-            gender: profile.gender,
-            age: profile.age,
-            height: profile.height,
-            currentWeight: resolvedCurrent,
-            targetWeight: resolvedTarget,
-            activityLevel: activityValue ?? activity ?? profile.activityLevel,
-            exercises: profile.exercises,
-            medicalConditions: profile.medicalConditions,
-            waist: profile.waist,
-            neck: profile.neck,
-            chest: profile.chest,
-            arm: profile.arm,
-            thigh: profile.thigh,
-          );
-      if (current != null) {
-        await ref
-            .read(weightRepositoryProvider)
-            .addWeight(
-              current,
-              date: DateTime.now(),
-              measurementContext: 'unspecified',
-            );
-      }
-      if (target != null) {
-        await goalRepository.save(
-          uuid: activeGoal?.uuid,
-          profileUuid: profile.uuid,
-          type: goalTypeForUpdate(
-            currentWeightKg: resolvedCurrent,
-            targetWeightKg: resolvedTarget,
-            storedGoalType: activeGoal?.type,
-            storedTargetWeightKg: activeGoal?.targetWeight,
-          ),
-          targetWeight: resolvedTarget,
-          targetDate: activeGoal?.targetDate,
-        );
-      }
-    });
+    visit.check();
+    // Capture repositories before awaiting; never resolve a later owner's
+    // provider inside the write transaction with this owner's profile.
+    final profiles = ref.read(userProfileRepositoryProvider);
+    final goals = ref.read(goalRepositoryProvider);
+    final weights = ref.read(weightRepositoryProvider);
+    final latest = await profiles.getProfile();
+    visit.check();
+    if (latest == null || latest.uuid != profile.uuid) {
+      throw StateError('reference_goals_profile_changed');
+    }
+    final resolvedCurrent = current ?? _currentWeightForGoals(latest);
+    final resolvedTarget = target ?? latest.targetWeight;
+    final activeGoal = target == null ? null : await goals.getActive();
+    visit.check();
+    await profiles.save(
+      gender: latest.gender,
+      age: latest.age,
+      height: latest.height,
+      currentWeight: resolvedCurrent,
+      targetWeight: resolvedTarget,
+      activityLevel: activityValue ?? latest.activityLevel,
+      exercises: latest.exercises,
+      medicalConditions: latest.medicalConditions,
+      waist: latest.waist,
+      neck: latest.neck,
+      chest: latest.chest,
+      arm: latest.arm,
+      thigh: latest.thigh,
+    );
+    visit.check();
+    if (current != null) {
+      await weights.addWeight(
+        current,
+        date: DateTime.now(),
+        measurementContext: 'unspecified',
+      );
+      visit.check();
+    }
+    if (target != null) {
+      await goals.save(
+        uuid: activeGoal?.uuid,
+        profileUuid: latest.uuid,
+        type: goalTypeForUpdate(
+          currentWeightKg: resolvedCurrent,
+          targetWeightKg: resolvedTarget,
+          storedGoalType: activeGoal?.type,
+          storedTargetWeightKg: activeGoal?.targetWeight,
+        ),
+        targetWeight: resolvedTarget,
+        targetDate: activeGoal?.targetDate,
+      );
+      visit.check();
+    }
+  }
+
+  void _refreshGoalInputs() {
     ref.invalidate(userProfileProvider);
     ref.invalidate(activeGoalProvider);
     ref.invalidate(latestWeightProvider);
@@ -356,30 +146,119 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
     ref.invalidate(weightHistoryProvider);
   }
 
-  Future<void> chooseWeeklyGoal() async {
+  Future<void> _editGoalWeight(
+    UserProfileData profile,
+    MeasurementSystem system,
+    _ReferenceGoalVisit visit,
+  ) async {
+    final value = await numberEditor(
+      c('Goal Weight'),
+      profile.targetWeight,
+      20,
+      500,
+      system,
+      visit,
+    );
+    if (value == null || !visit.current) {
+      return;
+    }
+    final saved = await _writeGoal(
+      visit,
+      () => updateProfileWeight(profile, visit, target: value),
+    );
+    if (saved && visit.current) {
+      _refreshGoalInputs();
+    }
+  }
+
+  Future<void> chooseWeeklyGoal(
+    UserProfileData profile,
+    MeasurementSystem system,
+    _ReferenceGoalVisit visit,
+  ) async {
+    if (!visit.current || saving) {
+      return;
+    }
+    final goals = ref.read(goalRepositoryProvider);
+    Goal? active;
+    try {
+      active = await goals.getActive();
+      visit.check();
+    } catch (_) {
+      if (mounted && visit.current) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(c('Could not save changes.')),
+            action: SnackBarAction(
+              label: c('Retry'),
+              onPressed: () => chooseWeeklyGoal(profile, system, visit),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    if (!mounted || !visit.current) {
+      return;
+    }
+    final direction = active?.type ?? 'maintain';
+    final options = _weeklyOptionsForDirection(direction);
+    if (options.isEmpty) {
+      if (mounted && visit.current) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(c('Goal Weight')),
+            action: SnackBarAction(
+              label: c('Goal Weight'),
+              onPressed: () => _editGoalWeight(profile, system, visit),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+    final directionLabel = direction == 'lose'
+        ? 'Lose weight'
+        : direction == 'gain'
+        ? 'Gain weight'
+        : 'Maintain weight';
     final selected = await Navigator.push<String>(
       context,
       MaterialPageRoute(
-        builder: (_) => _ChoicePage(
+        builder: (choiceContext) => _ChoicePage(
           title: c('Weekly Goal'),
-          options: _weeklyOptions,
-          selected: weeklyGoal ?? '',
-          translate: c,
+          options: options,
+          // An incompatible manual legacy choice is displayed on the main page,
+          // never forced into a new selector or silently replaced by its first row.
+          selected: options.contains(weeklyGoal) ? weeklyGoal! : '',
+          translate: (option) =>
+              _goalWeeklyText(_weeklyPaceByOption[option], system),
+          header: ListTile(
+            title: Text(c(directionLabel)),
+            trailing: TextButton(
+              key: const Key('goals-weekly-edit-weight-goal'),
+              onPressed: () => Navigator.pop(choiceContext, 'edit-weight-goal'),
+              child: Text(c('Goal Weight')),
+            ),
+          ),
         ),
       ),
     );
-    if (selected == null || selected == weeklyGoal || !mounted || saving) {
+    if (!mounted || !visit.current || selected == null) {
+      return;
+    }
+    if (selected == 'edit-weight-goal') {
+      await _editGoalWeight(profile, system, visit);
+      return;
+    }
+    if (!options.contains(selected)) {
       return;
     }
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => BilPearlMaterialAlertDialog(
         title: Text(c('Are You Sure?')),
-        content: Text(
-          c(
-            'Updating your weekly goal will remove any custom goals. Would you like to continue?',
-          ),
-        ),
+        content: Text(_goalWeeklyText(_weeklyPaceByOption[selected], system)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -392,19 +271,40 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
         ],
       ),
     );
-    if (confirmed != true) return;
-    final saved = await _write(
-      () => ref
-          .read(preferencesRepositoryProvider)
-          .set('goals.weeklyRate', selected),
-    );
-    if (saved && mounted) setState(() => weeklyGoal = selected);
+    if (confirmed != true || !visit.current) {
+      return;
+    }
+    final saved = await _writeGoal(visit, () async {
+      final latestGoal = await goals.getActive();
+      visit.check();
+      if ((latestGoal?.type ?? 'maintain') != direction) {
+        throw StateError('reference_goals_direction_changed');
+      }
+      final raw = await visit.preferences.get(NutritionPaceIntent.storageKey);
+      visit.check();
+      await visit.preferences.setManyInCurrentTransaction({
+        'goals.weeklyRate': selected,
+        NutritionPaceIntent.storageKey: referenceGoalWeeklyIntent(
+          raw,
+          selected,
+        ),
+      });
+    }, retry: () => chooseWeeklyGoal(profile, system, visit));
+    if (saved && visit.current) {
+      setState(() {
+        weeklyGoal = selected;
+        weeklyPaceKg = _weeklyPaceByOption[selected];
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final database = ref.watch(databaseProvider);
+    final authState = ref.watch(profileAuthIdentityProvider);
+    final systemState = ref.watch(measurementSystemProvider);
     final profileState = ref.watch(userProfileProvider);
-    final effectiveCurrentWeight = ref.watch(effectiveCurrentWeightProvider);
+    final latestWeightState = ref.watch(latestWeightProvider);
     return BilCalmVisualScope(
       builder: (context) => PopScope(
         canPop: !saving,
@@ -420,6 +320,8 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
             title: Text(c('Goals')),
           ),
           body: profileState.when(
+            skipLoadingOnRefresh: false,
+            skipLoadingOnReload: false,
             loading: () => const Center(child: BilFeatureWelcomeStatus()),
             error: (_, _) => Center(
               child: FilledButton(
@@ -431,11 +333,28 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
               if (profile == null) {
                 return Center(child: Text(c('Complete your profile first.')));
               }
-              final currentWeight =
-                  effectiveCurrentWeight ?? profile.currentWeight;
+              final system = systemState.isLoading
+                  ? null
+                  : systemState.asData?.value;
+              if (systemState.hasError) {
+                return Center(
+                  child: FilledButton(
+                    onPressed: () => ref.invalidate(measurementSystemProvider),
+                    child: Text(c('Retry')),
+                  ),
+                );
+              }
+              final visit = _goalVisit(profile, database, authState);
+              if (system == null || visit == null) {
+                return const Center(child: BilFeatureWelcomeStatus());
+              }
+              final currentWeight = _currentWeightForGoals(
+                profile,
+                latestState: latestWeightState,
+              );
               if (!hydrated && !hydrating && hydrateError == null) {
                 WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => hydrate(profile.activityLevel),
+                  (_) => _hydrateGoals(profile, visit),
                 );
               }
               if (hydrating || (!hydrated && hydrateError == null)) {
@@ -444,7 +363,7 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
               if (hydrateError != null) {
                 return Center(
                   child: FilledButton(
-                    onPressed: () => hydrate(profile.activityLevel),
+                    onPressed: () => _hydrateGoals(profile, visit),
                     child: Text(c('Retry')),
                   ),
                 );
@@ -462,84 +381,87 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                             label: c('Starting Weight'),
                             value: startingWeight == null
                                 ? '—'
-                                : '${startingWeight!.toStringAsFixed(1)} ${c('kg')}${startingDate == null ? '' : ' · $startingDate'}',
+                                : '${_goalWeightText(startingWeight!, system)}${startingDate == null ? '' : ' · $startingDate'}',
                             onTap: () async {
                               final value = await startingWeightEditor(
                                 startingWeight ?? profile.currentWeight,
+                                system,
+                                visit,
                               );
-                              if (value == null) return;
+                              if (value == null || !visit.current) {
+                                return;
+                              }
                               final date = value.date
-                                  .toIso8601String()
+                                  ?.toIso8601String()
                                   .split('T')
                                   .first;
-                              final repo = ref.read(
-                                preferencesRepositoryProvider,
-                              );
-                              final saved = await _write(
-                                () => repo.setMany({
+                              final repo = visit.preferences;
+                              final saved = await _writeGoal(
+                                visit,
+                                () => repo.setManyInCurrentTransaction({
                                   'goals.startingWeight': '${value.weight}',
-                                  'goals.startingDate': date,
+                                  'goals.startingDate': ?date,
                                 }),
                               );
-                              if (saved && mounted) {
+                              if (saved && visit.current) {
                                 setState(() {
                                   startingWeight = value.weight;
-                                  startingDate = date;
+                                  if (date != null) {
+                                    startingDate = date;
+                                  }
                                 });
                               }
                             },
                           ),
                           _GoalRow(
                             label: c('Current Weight'),
-                            value:
-                                '${currentWeight.toStringAsFixed(1)} ${c('kg')}',
+                            value: _goalWeightText(currentWeight, system),
                             onTap: () async {
                               final value = await numberEditor(
                                 c('Current Weight'),
                                 currentWeight,
                                 20,
                                 500,
+                                system,
+                                visit,
                               );
                               if (value != null) {
-                                await _write(
+                                final saved = await _writeGoal(
+                                  visit,
                                   () => updateProfileWeight(
                                     profile,
+                                    visit,
                                     current: value,
                                   ),
                                 );
+                                if (saved && visit.current) {
+                                  _refreshGoalInputs();
+                                }
                               }
                             },
                           ),
                           _GoalRow(
                             label: c('Goal Weight'),
-                            value:
-                                '${profile.targetWeight.toStringAsFixed(1)} ${c('kg')}',
-                            onTap: () async {
-                              final value = await numberEditor(
-                                c('Goal Weight'),
-                                profile.targetWeight,
-                                20,
-                                500,
-                              );
-                              if (value != null) {
-                                await _write(
-                                  () => updateProfileWeight(
-                                    profile,
-                                    target: value,
-                                  ),
-                                );
-                              }
-                            },
+                            value: _goalWeightText(
+                              profile.targetWeight,
+                              system,
+                            ),
+                            onTap: () =>
+                                _editGoalWeight(profile, system, visit),
                           ),
                           _GoalRow(
                             label: c('Weekly Goal'),
-                            value: weeklyGoal == null ? '—' : c(weeklyGoal!),
-                            onTap: chooseWeeklyGoal,
+                            value: _goalWeeklyText(weeklyPaceKg, system),
+                            onTap: () =>
+                                chooseWeeklyGoal(profile, system, visit),
                           ),
                           _GoalRow(
                             label: c('Activity Level'),
                             value: c(_activityLabels[activity] ?? '—'),
                             onTap: () async {
+                              if (!visit.current) {
+                                return;
+                              }
                               final selected = await Navigator.push<String>(
                                 context,
                                 MaterialPageRoute(
@@ -552,15 +474,20 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
                                   ),
                                 ),
                               );
-                              if (selected == null) return;
-                              final saved = await _write(
+                              if (selected == null || !visit.current) {
+                                return;
+                              }
+                              final saved = await _writeGoal(
+                                visit,
                                 () => updateProfileWeight(
                                   profile,
+                                  visit,
                                   activityValue: selected,
                                 ),
                               );
-                              if (saved && mounted) {
+                              if (saved && visit.current) {
                                 setState(() => activity = selected);
+                                _refreshGoalInputs();
                               }
                             },
                           ),

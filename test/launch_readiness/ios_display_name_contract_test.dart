@@ -35,37 +35,40 @@ void main() {
     },
   );
 
-  test('Android launcher name uses the approved public name and trademark', () {
-    final manifest = File(
-      'android/app/src/main/AndroidManifest.xml',
-    ).readAsStringSync();
-    final defaultStrings = File(
-      'android/app/src/main/res/values/strings.xml',
-    ).readAsStringSync();
-    final localizedStrings = Directory('android/app/src/main/res')
-        .listSync(recursive: true)
-        .whereType<File>()
-        .where((file) => file.path.endsWith('strings.xml'))
-        .where((file) => file.readAsStringSync().contains('name="app_name"'))
-        .toList(growable: false);
+  test(
+    'Android launcher name uses the same unmodified public brand in every locale',
+    () {
+      final manifest = File(
+        'android/app/src/main/AndroidManifest.xml',
+      ).readAsStringSync();
+      final defaultStrings = File(
+        'android/app/src/main/res/values/strings.xml',
+      ).readAsStringSync();
+      final localizedStrings = Directory('android/app/src/main/res')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('strings.xml'))
+          .where((file) => file.readAsStringSync().contains('name="app_name"'))
+          .toList(growable: false);
 
-    expect(manifest, contains('android:label="@string/app_name"'));
-    expect(
-      defaultStrings,
-      contains('<string name="app_name">Body Intelligence Log™</string>'),
-    );
-    expect(localizedStrings, hasLength(25));
-    for (final file in localizedStrings) {
-      final appName = RegExp(
-        r'<string name="app_name">([^<]+)</string>',
-      ).firstMatch(file.readAsStringSync())?.group(1);
-      expect(appName, isNotNull, reason: file.path);
-      expect(appName!.trim(), isNotEmpty, reason: file.path);
+      expect(manifest, contains('android:label="@string/app_name"'));
       expect(
-        appName,
-        isNot(matches(RegExp(r'^\s*BIL\s*(?:-|–|—)\s*'))),
-        reason: file.path,
+        defaultStrings,
+        contains('<string name="app_name">Body Intelligence Log</string>'),
       );
-    }
-  });
+      expect(localizedStrings, hasLength(25));
+      for (final file in localizedStrings) {
+        final appName = RegExp(
+          r'<string name="app_name">([^<]+)</string>',
+        ).firstMatch(file.readAsStringSync())?.group(1);
+        expect(appName, isNotNull, reason: file.path);
+        expect(appName, 'Body Intelligence Log', reason: file.path);
+        expect(
+          appName,
+          isNot(matches(RegExp(r'^\s*BIL\s*(?:-|–|—)\s*'))),
+          reason: file.path,
+        );
+      }
+    },
+  );
 }

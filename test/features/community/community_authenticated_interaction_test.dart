@@ -47,6 +47,7 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   static const otherId = '22222222-2222-4222-8222-222222222222';
   static const friendshipId = '33333333-3333-4333-8333-333333333333';
   String friendshipStatus = 'pending';
+  bool hasFriendship = true;
   int responseCalls = 0;
   int profileSaves = 0;
   int profilePrivacySaves = 0;
@@ -116,6 +117,7 @@ final class _CommunityInteractionRepository extends CommunityRepository {
 
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async {
+    if (!hasFriendship) return [];
     if (updatesFailuresRemaining > 0) {
       updatesFailuresRemaining--;
       throw StateError('injected updates failure');
@@ -648,7 +650,7 @@ void main() {
   testWidgets('Free member search dispatches one friend request', (
     tester,
   ) async {
-    final repository = _CommunityInteractionRepository();
+    final repository = _CommunityInteractionRepository()..hasFriendship = false;
     await tester.pumpWidget(_app(CommunityPeoplePage(repository: repository)));
     await tester.pumpAndSettle();
     await tester.enterText(

@@ -143,6 +143,7 @@ extension _SmartPlanCoachFlow on _IntelligenceCenterPageState {
     final preferences = ref.read(preferencesRepositoryProvider);
     void check() {
       if (!mounted ||
+          coachMessageVisitCancelled ||
           epoch != conversationPersistenceEpoch ||
           owner == null ||
           owner != _smartPlanOwnerId() ||
@@ -259,8 +260,30 @@ extension _SmartPlanCoachFlow on _IntelligenceCenterPageState {
     if (receipt?.verified != true || receipt?.entityType != 'smart_plan') {
       return false;
     }
-    final saved = await plans.readFor(owner);
+    var saved = await plans.readFor(owner);
     check();
+    if (action.toolId == 'create_smart_plan_draft' &&
+        receipt!.toolId == action.toolId &&
+        saved != null &&
+        (saved.id != receipt.entityId ||
+            saved.revision != receipt.after['revision'])) {
+      // A reviewed replacement remains a pending draft; it must not replace
+      // the approved schedule merely to verify the committed creation receipt.
+      final pending = await plans.readDraft(owner);
+      check();
+      if (pending?.ownerId == owner &&
+          pending?.status == BilPlanStatus.draft &&
+          pending?.id == receipt.entityId &&
+          pending?.revision == receipt.after['revision']) {
+        final dietary = await ref
+            .read(dietaryPreferencesRepositoryProvider)
+            .read();
+        check();
+        await const BilSmartPlanCatalog().validate(pending!, dietary);
+        check();
+        saved = pending;
+      }
+    }
     if (receipt!.toolId != action.toolId ||
         saved?.id != receipt.entityId ||
         saved?.revision != receipt.after['revision'] ||

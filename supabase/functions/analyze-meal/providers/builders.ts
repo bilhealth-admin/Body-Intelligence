@@ -1,11 +1,17 @@
 import { mealVisionPrompt } from "./prompt.ts";
+import { mealVisionEstimatePrompt } from "./prompt_v2.ts";
 import { MealVisionInput, ProviderConfig, ProviderRequest } from "./types.ts";
 
 export function buildProviderRequest(
   config: ProviderConfig,
   input: MealVisionInput,
 ): ProviderRequest {
-  const prompt = mealVisionPrompt(input.requestedLocale);
+  if (input.schemaVersion === 2 && config.provider !== "gemini") {
+    throw new Error("Gemini is required for photo nutrition estimates");
+  }
+  const prompt = input.schemaVersion === 2
+    ? mealVisionEstimatePrompt(input.requestedLocale)
+    : mealVisionPrompt(input.requestedLocale);
   const dataUrl = `data:${input.mimeType};base64,${input.imageBase64}`;
   if (config.provider === "openai") {
     return {

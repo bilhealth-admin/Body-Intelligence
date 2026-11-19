@@ -1,3 +1,4 @@
+import 'meal_image_estimate_contract.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,6 +15,8 @@ export 'meal_image_gateway_contract.dart';
 class MealImageAnalysisService {
   MealImageAnalysisService({
     String? endpoint,
+    this.schemaVersion =
+        const bool.fromEnvironment('BIL_GEMINI_PHOTO_ESTIMATES_V2') ? 2 : 1,
     MealImageGatewayPost? gatewayPost,
     MealImageAccessToken? accessToken,
     MealVisionImagePreprocessor? imagePreprocessor,
@@ -30,6 +33,8 @@ class MealImageAnalysisService {
   static const configuredEndpoint = AppEnvironment.mealVisionEndpoint;
 
   final String _endpoint;
+  final int schemaVersion;
+  bool get usesGeminiEstimates => schemaVersion == 2;
   final MealImageGatewayPost _gatewayPost;
   final MealImageAccessToken _accessToken;
   final MealVisionImagePreprocessor _imagePreprocessor;
@@ -40,9 +45,33 @@ class MealImageAnalysisService {
 
   bool get configured => _endpoint.trim().isNotEmpty;
 
-  Future<MealImageAnalysis> analyze(XFile image) async {
+  Future<MealImageAnalysis> analyze(XFile image) => _analyze(image);
+
+  /// The schema2 caller captures its authenticated visit before any picker or
+  /// consent await. A stale selected photo never uploads under a later visit.
+  Future<MealImageAnalysis> analyzeForOwner(
+    XFile image, {
+    required bool Function() isCurrent,
+  }) => _analyze(image, isCurrent: isCurrent);
+
+  Future<MealImageAnalysis> _analyze(
+    XFile image, {
+    bool Function()? isCurrent,
+  }) async {
+    void checkVisit() {
+      if (usesGeminiEstimates && isCurrent?.call() != true) {
+        throw const MealImageAnalysisException(
+          MealImageAnalysisFailure.authenticationRequired,
+        );
+      }
+    }
+
+    checkVisit();
     final uri = Uri.tryParse(_endpoint.trim());
-    if (!configured || uri == null || uri.scheme != 'https') {
+    if (!const {1, 2}.contains(schemaVersion) ||
+        !configured ||
+        uri == null ||
+        uri.scheme != 'https') {
       throw const MealImageAnalysisException(
         MealImageAnalysisFailure.notConfigured,
       );
@@ -54,6 +83,7 @@ class MealImageAnalysisService {
       );
     }
     final bytes = await image.readAsBytes();
+    checkVisit();
     final mimeType = image.mimeType ?? _mimeType(image.path);
     if (bytes.isEmpty ||
         bytes.length > maximumMealImageBytes ||
@@ -68,6 +98,7 @@ class MealImageAnalysisService {
       mimeType: mimeType,
     );
 
+    checkVisit();
     final idempotencyKey = const Uuid().v4();
     MealImageGatewayResponse? response;
     final operation = Stopwatch()..start();
@@ -76,6 +107,7 @@ class MealImageAnalysisService {
       final remaining = operationTimeout - operation.elapsed;
       final timeout = remaining < requestTimeout ? remaining : requestTimeout;
       try {
+        checkVisit();
         response =
             await _gatewayPost(
               uri: uri,
@@ -86,7 +118,7 @@ class MealImageAnalysisService {
                 'accept': ContentType.json.mimeType,
               },
               body: jsonEncode({
-                'schema_version': 1,
+                'schema_version': schemaVersion,
                 'mime_type': prepared.mimeType,
                 'image_base64': base64Encode(prepared.bytes),
                 'image_sha256': prepared.sha256,
@@ -110,6 +142,7 @@ class MealImageAnalysisService {
         }
         continue;
       }
+      checkVisit();
       if (_isSameRequestInProgress(response)) {
         if (operation.elapsed + inProgressPollDelay >= operationTimeout) break;
         await Future<void>.delayed(inProgressPollDelay);
@@ -123,6 +156,7 @@ class MealImageAnalysisService {
       if (transientAttempts++ >= 1) break;
       response = null;
     }
+    checkVisit();
     if (response == null) {
       throw const MealImageAnalysisException(
         MealImageAnalysisFailure.serviceUnavailable,
@@ -161,6 +195,12 @@ class MealImageAnalysisService {
     if (utf8.encode(response.body).length > maximumMealImageResponseBytes) {
       throw const MealImageAnalysisException(
         MealImageAnalysisFailure.invalidResponse,
+      );
+    }
+    if (usesGeminiEstimates) {
+      return parseGeminiMealImageResponse(
+        response.body,
+        languageCode: _localeTag(requestedLocale ?? Platform.localeName),
       );
     }
     return parseMealImageResponse(

@@ -73,6 +73,9 @@ void main() {
       await database.customStatement(
         'ALTER TABLE foods DROP COLUMN food_evidence_json',
       );
+      await database.customStatement(
+        'ALTER TABLE daily_logs DROP COLUMN final_vision_nutrient_evidence_json',
+      );
       await database.customStatement('PRAGMA user_version = 21');
       await database.close();
 
@@ -80,7 +83,7 @@ void main() {
       addTearDown(database.close);
       final after = await database.select(database.mealItems).getSingle();
       final foodAfter = await database.select(database.foods).getSingle();
-      expect(database.schemaVersion, 22);
+      expect(database.schemaVersion, 23);
       expect(after, before);
       expect(foodAfter, foodBefore);
       expect(

@@ -134,6 +134,32 @@ abstract final class BilPlanSafety {
         }
       }
     }
+    if (request.focus != BilPlanFocus.nutrition &&
+        request.workoutCatalog.isNotEmpty &&
+        request.phases.isNotEmpty) {
+      final requiredMonths = switch (request.horizon) {
+        BilPlanHorizon.week || BilPlanHorizon.month => 1,
+        BilPlanHorizon.threeMonths => 3,
+        BilPlanHorizon.sixMonths => 6,
+      };
+      // A source phase cannot silently drop a movement that exceeds the
+      // confirmed time budget. Reject before generation, preserving all doses.
+      for (final phase in request.phases.where(
+        (phase) => phase.month >= 1 && phase.month <= requiredMonths,
+      )) {
+        if (phase.sessionIds.isEmpty ||
+            phase.sessionIds.any(
+              (id) =>
+                  request.workoutCatalog
+                      .where((workout) => workout.id == id)
+                      .length !=
+                  1,
+            )) {
+          reasons.add('no_verified_workout');
+          break;
+        }
+      }
+    }
     if (reasons.isNotEmpty) {
       return BilPlanSafetyAssessment(BilPlanSafetyResult.invalid, reasons);
     }

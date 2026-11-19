@@ -12,6 +12,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
     "Your plan is saved, but its supporting information could not be checked. Retry before editing it.",
     "Your previous plan is shown read-only until its data can be verified. Retry to restore full access.",
     "Your saved plan could not be read from this device. Retry; an existing plan has not been overwritten.",
+    "Resume this paused plan? Meals remain suggestions; nothing is logged automatically.",
+    "Resume plan",
   ];
   static const rows = <String, List<String>>{
     "ar": <String>[
@@ -21,6 +23,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "خطتك محفوظة، لكن تعذّر التحقق من بياناتها المساندة. أعد المحاولة قبل تعديلها.",
       "تظهر خطتك السابقة للقراءة فقط حتى التحقق من بياناتها. أعد المحاولة لاستعادة الوصول الكامل.",
       "تعذّرت قراءة خطتك المحفوظة من هذا الجهاز. أعد المحاولة؛ لم تُستبدل الخطة الموجودة.",
+      "استئناف هذه الخطة المتوقفة مؤقتًا؟ تبقى الوجبات مقترحات فقط ولن يُسجّل أي شيء تلقائيًا.",
+      "استئناف الخطة",
     ],
     "en": <String>[
       "Sign in to access your saved plan. No plan data has been deleted.",
@@ -29,6 +33,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Your plan is saved, but its supporting information could not be checked. Retry before editing it.",
       "Your previous plan is shown read-only until its data can be verified. Retry to restore full access.",
       "Your saved plan could not be read from this device. Retry; an existing plan has not been overwritten.",
+      "Resume this paused plan? Meals remain suggestions; nothing is logged automatically.",
+      "Resume plan",
     ],
     "fr": <String>[
       "Connectez-vous pour accéder à votre plan enregistré. Aucune donnée du plan n’a été supprimée.",
@@ -37,6 +43,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Votre plan est enregistré, mais ses données complémentaires n’ont pas pu être vérifiées. Réessayez avant de le modifier.",
       "Votre ancien plan est en lecture seule jusqu’à vérification de ses données. Réessayez pour retrouver l’accès complet.",
       "Impossible de lire votre plan enregistré sur cet appareil. Réessayez ; aucun plan existant n’a été remplacé.",
+      "Reprendre ce plan en pause ? Les repas restent des suggestions ; rien n’est enregistré automatiquement.",
+      "Reprendre le plan",
     ],
     "es": <String>[
       "Inicia sesión para acceder a tu plan guardado. No se ha eliminado ningún dato del plan.",
@@ -45,6 +53,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Tu plan está guardado, pero no se pudo verificar su información de apoyo. Vuelve a intentarlo antes de editarlo.",
       "Tu plan anterior se muestra en modo de solo lectura hasta verificar sus datos. Reinténtalo para recuperar el acceso completo.",
       "No se pudo leer tu plan guardado en este dispositivo. Vuelve a intentarlo; no se ha reemplazado ningún plan existente.",
+      "¿Reanudar este plan en pausa? Las comidas siguen siendo sugerencias; no se registra nada automáticamente.",
+      "Reanudar plan",
     ],
     "tr": <String>[
       "Kayıtlı planınıza erişmek için giriş yapın. Hiçbir plan verisi silinmedi.",
@@ -53,6 +63,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Planınız kayıtlı, ancak destekleyici bilgiler doğrulanamadı. Düzenlemeden önce yeniden deneyin.",
       "Önceki planınız, verileri doğrulanana kadar salt okunur gösterilir. Tam erişim için yeniden deneyin.",
       "Kayıtlı planınız bu cihazdan okunamadı. Yeniden deneyin; mevcut planın üzerine yazılmadı.",
+      "Duraklatılan bu plan sürdürülsün mü? Yemekler öneri olarak kalır; hiçbir şey otomatik kaydedilmez.",
+      "Planı sürdür",
     ],
     "de": <String>[
       "Melden Sie sich an, um auf Ihren gespeicherten Plan zuzugreifen. Es wurden keine Plandaten gelöscht.",
@@ -61,6 +73,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Ihr Plan ist gespeichert, aber die zugehörigen Informationen konnten nicht geprüft werden. Versuchen Sie es vor der Bearbeitung erneut.",
       "Ihr vorheriger Plan wird bis zur Datenprüfung schreibgeschützt angezeigt. Versuchen Sie es erneut, um vollen Zugriff zu erhalten.",
       "Ihr gespeicherter Plan konnte auf diesem Gerät nicht gelesen werden. Versuchen Sie es erneut; ein bestehender Plan wurde nicht überschrieben.",
+      "Diesen pausierten Plan fortsetzen? Mahlzeiten bleiben Vorschläge; nichts wird automatisch protokolliert.",
+      "Plan fortsetzen",
     ],
     "it": <String>[
       "Accedi per visualizzare il piano salvato. Nessun dato del piano è stato eliminato.",
@@ -69,6 +83,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Il piano è salvato, ma non è stato possibile verificare le informazioni di supporto. Riprova prima di modificarlo.",
       "Il piano precedente è disponibile in sola lettura finché i dati non saranno verificati. Riprova per ripristinare l'accesso completo.",
       "Impossibile leggere il piano salvato su questo dispositivo. Riprova; nessun piano esistente è stato sovrascritto.",
+      "Riprendere questo piano in pausa? I pasti restano suggerimenti; nulla viene registrato automaticamente.",
+      "Riprendi piano",
     ],
     "pt-BR": <String>[
       "Entre na sua conta para acessar seu plano salvo. Nenhum dado do plano foi excluído.",
@@ -77,6 +93,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Seu plano está salvo, mas não foi possível verificar as informações de apoio. Tente novamente antes de editá-lo.",
       "Seu plano anterior aparece somente para leitura até que os dados sejam verificados. Tente novamente para recuperar o acesso completo.",
       "Não foi possível ler seu plano salvo neste dispositivo. Tente novamente; nenhum plano existente foi substituído.",
+      "Retomar este plano pausado? As refeições continuam sendo sugestões; nada é registrado automaticamente.",
+      "Retomar plano",
     ],
     "pt-PT": <String>[
       "Inicie sessão para aceder ao seu plano guardado. Não foram eliminados dados do plano.",
@@ -85,6 +103,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "O plano está guardado, mas não foi possível verificar as informações de apoio. Tente novamente antes de o editar.",
       "O plano anterior é apresentado apenas para leitura até os dados serem verificados. Tente novamente para recuperar o acesso total.",
       "Não foi possível ler o plano guardado neste dispositivo. Tente novamente; nenhum plano existente foi substituído.",
+      "Retomar este plano em pausa? As refeições continuam a ser sugestões; nada é registado automaticamente.",
+      "Retomar plano",
     ],
     "ur": <String>[
       "محفوظ شدہ پلان دیکھنے کے لیے سائن اِن کریں۔ پلان کا کوئی ڈیٹا حذف نہیں ہوا۔",
@@ -93,6 +113,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "آپ کا پلان محفوظ ہے، مگر متعلقہ معلومات کی تصدیق نہیں ہو سکی۔ ترمیم سے پہلے دوبارہ کوشش کریں۔",
       "پچھلا پلان ڈیٹا کی تصدیق تک صرف پڑھنے کے لیے دکھایا جاتا ہے۔ مکمل رسائی کے لیے دوبارہ کوشش کریں۔",
       "اس ڈیوائس پر محفوظ پلان پڑھا نہیں جا سکا۔ دوبارہ کوشش کریں؛ موجودہ پلان تبدیل نہیں کیا گیا۔",
+      "کیا یہ موقوف منصوبہ دوبارہ جاری کرنا ہے؟ کھانے صرف تجاویز ہیں؛ کچھ بھی خودکار طور پر درج نہیں ہوتا۔",
+      "منصوبہ دوبارہ جاری کریں",
     ],
     "fa": <String>[
       "برای دسترسی به برنامه ذخیره‌شده وارد شوید. هیچ داده‌ای از برنامه حذف نشده است.",
@@ -101,6 +123,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "برنامه شما ذخیره شده، اما اطلاعات پشتیبان آن بررسی نشد. پیش از ویرایش دوباره تلاش کنید.",
       "برنامه قبلی تا زمان تأیید داده‌ها فقط خواندنی نمایش داده می‌شود. برای دسترسی کامل دوباره تلاش کنید.",
       "برنامه ذخیره‌شده روی این دستگاه خوانده نشد. دوباره تلاش کنید؛ برنامه موجود بازنویسی نشده است.",
+      "این برنامه متوقف‌شده ادامه یابد؟ وعده‌ها همچنان پیشنهاد هستند؛ چیزی خودکار ثبت نمی‌شود.",
+      "ادامه برنامه",
     ],
     "hi": <String>[
       "सहेजी गई योजना देखने के लिए साइन इन करें। योजना का कोई डेटा मिटाया नहीं गया है।",
@@ -109,6 +133,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "आपकी योजना सहेजी गई है, लेकिन सहायक जानकारी की जाँच नहीं हो सकी। बदलाव से पहले फिर प्रयास करें।",
       "डेटा सत्यापित होने तक पिछली योजना केवल पढ़ने के लिए दिखाई जाएगी। पूरी पहुँच पाने के लिए फिर प्रयास करें।",
       "इस डिवाइस पर सहेजी गई योजना पढ़ी नहीं जा सकी। फिर प्रयास करें; मौजूदा योजना बदली नहीं गई है।",
+      "क्या इस रुकी हुई योजना को फिर शुरू करना है? भोजन सुझाव ही रहेंगे; कुछ भी अपने-आप दर्ज नहीं होगा।",
+      "योजना फिर शुरू करें",
     ],
     "id": <String>[
       "Masuk untuk mengakses rencana tersimpan. Tidak ada data rencana yang dihapus.",
@@ -117,6 +143,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Rencana Anda tersimpan, tetapi informasi pendukungnya tidak dapat diperiksa. Coba lagi sebelum mengedit.",
       "Rencana sebelumnya ditampilkan hanya untuk dibaca hingga datanya terverifikasi. Coba lagi untuk memulihkan akses penuh.",
       "Rencana tersimpan tidak dapat dibaca dari perangkat ini. Coba lagi; rencana yang ada tidak ditimpa.",
+      "Lanjutkan rencana yang dijeda ini? Makanan tetap berupa saran; tidak ada yang dicatat otomatis.",
+      "Lanjutkan rencana",
     ],
     "ms": <String>[
       "Log masuk untuk mengakses pelan tersimpan. Tiada data pelan dipadamkan.",
@@ -125,6 +153,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Pelan anda telah disimpan, tetapi maklumat sokongannya tidak dapat disahkan. Cuba lagi sebelum mengedit.",
       "Pelan terdahulu dipaparkan sebagai baca sahaja sehingga datanya disahkan. Cuba lagi untuk pulihkan akses penuh.",
       "Pelan tersimpan tidak dapat dibaca pada peranti ini. Cuba lagi; pelan sedia ada tidak ditulis ganti.",
+      "Sambung semula pelan yang dijeda ini? Hidangan kekal sebagai cadangan; tiada apa direkod secara automatik.",
+      "Sambung semula pelan",
     ],
     "ja": <String>[
       "保存したプランを表示するにはサインインしてください。プランのデータは削除されていません。",
@@ -133,6 +163,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "プランは保存されていますが、関連情報を確認できませんでした。編集する前に再試行してください。",
       "データが確認されるまで、以前のプランは読み取り専用で表示されます。再試行するとすべての操作を利用できます。",
       "この端末で保存済みプランを読み取れませんでした。再試行してください。既存のプランは上書きされていません。",
+      "一時停止中のこのプランを再開しますか？食事は提案のままで、自動では記録されません。",
+      "プランを再開",
     ],
     "ko": <String>[
       "저장된 계획을 보려면 로그인하세요. 계획 데이터는 삭제되지 않았습니다.",
@@ -141,6 +173,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "계획은 저장되었지만 관련 정보를 확인하지 못했습니다. 수정하기 전에 다시 시도하세요.",
       "데이터가 검증될 때까지 이전 계획은 읽기 전용으로 표시됩니다. 전체 접근 권한을 복구하려면 다시 시도하세요.",
       "이 기기에서 저장된 계획을 읽지 못했습니다. 다시 시도하세요. 기존 계획은 덮어쓰지 않았습니다.",
+      "일시 중지된 이 계획을 재개할까요? 식사는 제안이며 자동으로 기록되지 않습니다.",
+      "계획 재개",
     ],
     "zh-Hans": <String>[
       "请登录以访问已保存的计划。没有删除任何计划数据。",
@@ -149,6 +183,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "计划已保存，但无法验证相关支持信息。编辑前请重试。",
       "数据验证完成前，之前的计划将以只读方式显示。请重试以恢复完整访问权限。",
       "无法从此设备读取已保存的计划。请重试；现有计划未被覆盖。",
+      "恢复这个已暂停的计划吗？餐食仍为建议，不会自动记录任何内容。",
+      "恢复计划",
     ],
     "zh-Hant": <String>[
       "請登入以存取已儲存的計畫。沒有刪除任何計畫資料。",
@@ -157,6 +193,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "計畫已儲存，但無法驗證相關支援資訊。編輯前請重試。",
       "資料驗證完成前，先前的計畫會以唯讀模式顯示。請重試以恢復完整存取權限。",
       "無法從此裝置讀取已儲存的計畫。請重試；現有計畫並未被覆寫。",
+      "恢復這個已暫停的計畫嗎？餐食仍為建議，不會自動記錄任何內容。",
+      "恢復計畫",
     ],
     "ru": <String>[
       "Войдите, чтобы открыть сохранённый план. Данные плана не удалены.",
@@ -165,6 +203,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "План сохранён, но не удалось проверить дополнительные данные. Повторите попытку перед редактированием.",
       "Предыдущий план доступен только для чтения до проверки его данных. Повторите попытку, чтобы вернуть полный доступ.",
       "Не удалось прочитать сохранённый план на этом устройстве. Повторите попытку; существующий план не перезаписан.",
+      "Возобновить этот приостановленный план? Приёмы пищи остаются рекомендациями; ничего не записывается автоматически.",
+      "Возобновить план",
     ],
     "bn": <String>[
       "সংরক্ষিত পরিকল্পনা দেখতে সাইন ইন করুন। পরিকল্পনার কোনো তথ্য মুছে ফেলা হয়নি।",
@@ -173,6 +213,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "আপনার পরিকল্পনা সংরক্ষিত আছে, তবে সহায়ক তথ্য যাচাই করা যায়নি। সম্পাদনার আগে আবার চেষ্টা করুন।",
       "তথ্য যাচাই না হওয়া পর্যন্ত আগের পরিকল্পনা শুধু পড়ার জন্য দেখানো হবে। পূর্ণ প্রবেশাধিকার ফিরে পেতে আবার চেষ্টা করুন।",
       "এই ডিভাইসে সংরক্ষিত পরিকল্পনা পড়া যায়নি। আবার চেষ্টা করুন; বিদ্যমান পরিকল্পনা বদলে দেওয়া হয়নি।",
+      "এই বিরতিতে থাকা পরিকল্পনা আবার চালু করবেন? খাবার শুধু পরামর্শ থাকবে; কিছুই স্বয়ংক্রিয়ভাবে লেখা হবে না।",
+      "পরিকল্পনা আবার চালু করুন",
     ],
     "vi": <String>[
       "Đăng nhập để xem kế hoạch đã lưu. Không có dữ liệu kế hoạch nào bị xóa.",
@@ -181,6 +223,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Kế hoạch đã được lưu nhưng không thể xác minh thông tin hỗ trợ. Hãy thử lại trước khi chỉnh sửa.",
       "Kế hoạch trước đó chỉ được hiển thị để đọc cho đến khi dữ liệu được xác minh. Thử lại để khôi phục quyền truy cập đầy đủ.",
       "Không thể đọc kế hoạch đã lưu trên thiết bị này. Hãy thử lại; kế hoạch hiện có chưa bị ghi đè.",
+      "Tiếp tục kế hoạch đang tạm dừng này? Bữa ăn vẫn là gợi ý; không có gì được ghi tự động.",
+      "Tiếp tục kế hoạch",
     ],
     "th": <String>[
       "ลงชื่อเข้าใช้เพื่อดูแผนที่บันทึกไว้ ไม่มีข้อมูลแผนถูกลบ",
@@ -189,6 +233,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "แผนของคุณถูกบันทึกแล้ว แต่ไม่สามารถตรวจสอบข้อมูลประกอบได้ ลองอีกครั้งก่อนแก้ไข",
       "แผนก่อนหน้าจะแสดงแบบอ่านอย่างเดียวจนกว่าจะยืนยันข้อมูลได้ ลองอีกครั้งเพื่อคืนสิทธิ์เข้าถึงทั้งหมด",
       "ไม่สามารถอ่านแผนที่บันทึกไว้จากอุปกรณ์นี้ได้ ลองอีกครั้ง แผนเดิมไม่ได้ถูกเขียนทับ",
+      "ดำเนินแผนที่หยุดชั่วคราวนี้ต่อหรือไม่? มื้ออาหารยังเป็นเพียงคำแนะนำ ไม่มีการบันทึกอัตโนมัติ",
+      "ดำเนินแผนต่อ",
     ],
     "pl": <String>[
       "Zaloguj się, aby uzyskać dostęp do zapisanego planu. Żadne dane planu nie zostały usunięte.",
@@ -197,6 +243,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Plan został zapisany, ale nie można było zweryfikować danych pomocniczych. Spróbuj ponownie przed edycją.",
       "Poprzedni plan jest tylko do odczytu do czasu weryfikacji danych. Spróbuj ponownie, aby przywrócić pełny dostęp.",
       "Nie udało się odczytać zapisanego planu na tym urządzeniu. Spróbuj ponownie; istniejący plan nie został nadpisany.",
+      "Wznowić ten wstrzymany plan? Posiłki pozostają sugestiami; nic nie jest zapisywane automatycznie.",
+      "Wznów plan",
     ],
     "nl": <String>[
       "Meld u aan om uw opgeslagen plan te bekijken. Er zijn geen plangegevens verwijderd.",
@@ -205,6 +253,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Uw plan is opgeslagen, maar de bijbehorende informatie kon niet worden gecontroleerd. Probeer het opnieuw voordat u iets wijzigt.",
       "Uw vorige plan wordt alleen-lezen weergegeven totdat de gegevens zijn gecontroleerd. Probeer opnieuw voor volledige toegang.",
       "Uw opgeslagen plan kon niet op dit apparaat worden gelezen. Probeer opnieuw; een bestaand plan is niet overschreven.",
+      "Dit gepauzeerde plan hervatten? Maaltijden blijven suggesties; er wordt niets automatisch vastgelegd.",
+      "Plan hervatten",
     ],
     "uk": <String>[
       "Увійдіть, щоб переглянути збережений план. Дані плану не видалено.",
@@ -213,6 +263,8 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "План збережено, але не вдалося перевірити допоміжні відомості. Повторіть спробу перед редагуванням.",
       "Попередній план доступний лише для читання, доки дані не перевірено. Повторіть спробу, щоб відновити повний доступ.",
       "Не вдалося прочитати збережений план на цьому пристрої. Повторіть спробу; наявний план не перезаписано.",
+      "Відновити цей призупинений план? Страви залишаються пропозиціями; нічого не записується автоматично.",
+      "Відновити план",
     ],
   };
 

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../auth/retryable_auth_session.dart';
+
 class CommunityOwnerOperationCancelled extends AuthException {
   const CommunityOwnerOperationCancelled()
     : super('Community operation owner changed');
@@ -18,8 +20,15 @@ class CommunityOwnerOperation {
     this._isCurrentOwner,
     this._beforeDataSend,
     this._parent,
+    this._retainSessionOnRetryableAuthReadError,
   ) {
-    if (_parent != null) return;
+    // A strict child of an opted-in read installs its own strict observer.
+    // An opted-in child can never relax its strict parent's cancellation.
+    if (_parent != null &&
+        (!_parent._retainSessionOnRetryableAuthReadError ||
+            _retainSessionOnRetryableAuthReadError)) {
+      return;
+    }
     var deliveredOwner = client.auth.currentUser?.id;
     _auth = client.auth.onAuthStateChange.listen(
       (state) {
@@ -29,7 +38,17 @@ class CommunityOwnerOperation {
         }
         deliveredOwner = next;
       },
-      onError: (Object _, StackTrace _) {
+      onError: (Object error, StackTrace _) {
+        if (_retainSessionOnRetryableAuthReadError &&
+            deliveredOwner == ownerId &&
+            isCurrent &&
+            isSameOwnerRetryableAuthReadFailure(
+              error,
+              auth: client.auth,
+              previousOwnerId: ownerId,
+            )) {
+          return;
+        }
         _cancelled = true;
       },
     );
@@ -41,6 +60,7 @@ class CommunityOwnerOperation {
   final bool Function()? _isCurrentOwner;
   final Future<void> Function()? _beforeDataSend;
   final CommunityOwnerOperation? _parent;
+  final bool _retainSessionOnRetryableAuthReadError;
   StreamSubscription<AuthState>? _auth;
   bool _cancelled = false;
   static final Object _zoneKey = Object();
@@ -126,6 +146,8 @@ class CommunityOwnerOperation {
     String? Function()? readOwner,
     bool Function()? isCurrentOwner,
     Future<void> Function()? beforeDataSend,
+    // Metadata reads only. The default remains strict for every other caller.
+    bool retainSessionOnRetryableAuthReadError = false,
   }) {
     final parent = Zone.current[_zoneKey] as CommunityOwnerOperation?;
     if (parent != null) {
@@ -144,6 +166,7 @@ class CommunityOwnerOperation {
       isCurrentOwner,
       beforeDataSend,
       parent,
+      retainSessionOnRetryableAuthReadError,
     );
     return runZoned(() async {
       try {

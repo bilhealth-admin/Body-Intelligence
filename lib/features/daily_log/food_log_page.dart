@@ -1,3 +1,5 @@
+import '../../data/database/database_provider.dart';
+import '../nutrition/presentation/gemini_vision_capture.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
@@ -45,6 +47,7 @@ import 'presentation/quick_macro_entry_dialog.dart';
 import 'providers/daily_log_provider.dart';
 
 part 'food_log_actions.dart';
+part 'food_log_photo_actions.dart';
 part 'food_log_tile_widgets.dart';
 part 'food_log_action_tile.dart';
 

@@ -2,9 +2,11 @@ import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../connected_health_model.dart';
+import '../connected_health_display_scope.dart';
 import '../connected_health_copy.dart';
 
 part 'live_health_watch_painter.dart';
@@ -73,7 +75,10 @@ bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
 }
 
 bool liveHealthWatchSignalIsActual(ConnectedHealthSignalView signal) =>
-    _watchMetricKeys.contains(signal.key) &&
+    (_watchMetricKeys.contains(signal.key) ||
+        (defaultTargetPlatform == TargetPlatform.android &&
+            signal.key == 'distance')) &&
+    connectedHealthDeviceSignalIsSupported(signal.key) &&
     signal.value.isFinite &&
     signal.source.trim().isNotEmpty &&
     signal.confidence > 0;
@@ -174,7 +179,8 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
       }
       final observed = signal.observedAt.toLocal();
       final observedDay = DateTime(observed.year, observed.month, observed.day);
-      if ((key == 'steps' || key == 'activeEnergy') && observedDay != today) {
+      if ((key == 'steps' || key == 'distance' || key == 'activeEnergy') &&
+          observedDay != today) {
         continue;
       }
       if ((key == 'heartRate' || key == 'restingHeartRate') &&
@@ -210,6 +216,9 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
     final minute = _now.minute;
     final second = _now.second;
     final steps = _signal('steps');
+    final distance = defaultTargetPlatform == TargetPlatform.android
+        ? _signal('distance')
+        : null;
     final heart = _signal('heartRate') ?? _signal('restingHeartRate');
     final activeEnergy = _signal('activeEnergy');
     final sleep = _signal('sleep');
@@ -217,6 +226,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
         widget.showMetrics &&
         <ConnectedHealthSignalView?>[
           steps,
+          distance,
           heart,
           activeEnergy,
           sleep,
@@ -373,6 +383,31 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
                                                     context,
                                                     'Steps',
                                                     'الخطوات',
+                                                  ),
+                                            ),
+                                          ),
+                                        ),
+                                      if (distance != null)
+                                        Expanded(
+                                          child: _WatchMetricButton(
+                                            key: const Key(
+                                              'watch-metric-distance',
+                                            ),
+                                            child: _WatchMetric(
+                                              icon: Icons.route_outlined,
+                                              color: const Color(0xFF8DD2F5),
+                                              value: _value(distance),
+                                              compact: widget.compact,
+                                              scale: layoutScale,
+                                              label: connectedHealthText(
+                                                context,
+                                                'm',
+                                                'م',
+                                              ),
+                                              semanticLabel:
+                                                  connectedHealthDataTypeText(
+                                                    context,
+                                                    'distance',
                                                   ),
                                             ),
                                           ),

@@ -1,6 +1,76 @@
 part of 'bil_store_plans_page.dart';
 
 extension _BilStorePlansPresentation on _BilStorePlansPageState {
+  (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
+    final code = store.presentationMessageCode;
+    // A background StoreKit replay is not a purchase made on this screen.
+    // Keep its failure in the service (including the checkout safety block),
+    // and explain it only after an explicit Restore/verification action.
+    if (code == 'reconciliation_pending' ||
+        code == 'reconciliation_verification_failed') {
+      return (null, false);
+    }
+    // A verified receipt can arrive while AppStore.sync is still pending.
+    // Preserve the valid benefit, but never call the Restore operation done
+    // until its own lifecycle settles.
+    if (store.isRecoveringSubscription ||
+        (store.isRestoring && store.state != VerifiedStoreState.failed)) {
+      return ('restore_checking', false);
+    }
+    if (!store.lastDeliveryIsUserPurchase &&
+        !store.isRestoring &&
+        (code == 'subscription_verified' ||
+            code == 'ai_boost_verified' ||
+            (code == 'store_finish_pending' &&
+                store.verifiedInactiveAt == null))) {
+      return (null, false);
+    }
+    final key = switch (code) {
+      'purchase_pending' => 'purchase_awaiting_approval',
+      'restore_pending' => 'restore_checking',
+      'restore_cancelled' => 'restore_cancelled',
+      'restore_unconfirmed' => 'restore_unconfirmed',
+      'reconciliation_pending' => 'purchase_reconciliation_pending',
+      // Cancelling the native sheet is an intentional choice, not an error.
+      // Keep the catalog actionable so another term can be selected at once.
+      'purchase_cancelled' => null,
+      'purchase_not_started' => 'purchase_error',
+      'store_catalog_changed' => 'purchase_catalog_changed',
+      'store_catalog_refresh_failed' => 'purchase_error',
+      'purchase_unavailable' || 'authentication_required' => 'purchase_error',
+      'purchase_status_unknown' => 'purchase_confirmation_pending',
+      'license_unlicensed' => 'license_unlicensed',
+      'play_license_recovered' => 'play_license_recovered',
+      'play_readiness_unavailable' => 'play_readiness_unavailable',
+      'verification_failed' => 'purchase_verification_unavailable',
+      'store_finish_pending' =>
+        store.verifiedInactiveAt != null
+            ? 'purchase_inactive'
+            : 'purchase_verified',
+      'restore_verification_failed' => 'restore_verification_failed',
+      'purchase_owned_by_another_account' =>
+        'purchase_owned_by_another_account',
+      'reconciliation_verification_failed' => 'purchase_reconciliation_failed',
+      'purchase_failed' || 'store_stream_failed' => 'purchase_error',
+      'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
+      _ => switch (store.state) {
+        VerifiedStoreState.purchasePending => 'purchase_in_progress',
+        VerifiedStoreState.cancelled => null,
+        VerifiedStoreState.failed => 'purchase_error',
+        _ => null,
+      },
+    };
+    final isError =
+        const {
+          'purchase_error',
+          'purchase_owned_by_another_account',
+          'restore_verification_failed',
+          'purchase_reconciliation_failed',
+        }.contains(key) ||
+        code == 'verification_failed';
+    return (key, isError);
+  }
+
   String _purchaseFeedbackText(String locale, String key) {
     final text = BilStoreCopy.text(locale, key);
     final code = key == 'restore_failed'

@@ -1,3 +1,4 @@
+import 'vision_estimate_evidence.dart';
 import 'unit_food_evidence.dart';
 import 'recipe_serving_evidence.dart';
 
@@ -16,12 +17,14 @@ final class MealFoodEvidence {
     this.portion, [
     this.recipe,
     this.unit,
+    this.vision,
   ]) : _nutrients = portion?.nutrients;
 
   factory MealFoodEvidence.read(MealItem item, {String? ownerKey}) {
     final raw = item.foodEvidenceJson;
     if (raw == null) {
-      if (item.foodSourceSnapshot.startsWith('coach_food_v2:') ||
+      if (item.foodSourceSnapshot == VisionFoodEvidence.source ||
+          item.foodSourceSnapshot.startsWith('coach_food_v2:') ||
           item.foodSourceSnapshot.startsWith(UnitFoodEvidence.sourcePrefix) ||
           item.foodSourceSnapshot.startsWith(
             RecipeServingEvidence.sourcePrefix,
@@ -31,6 +34,18 @@ final class MealFoodEvidence {
       return MealFoodEvidence._(item, MealFoodEvidenceState.legacy, null);
     }
     try {
+      if (item.foodSourceSnapshot == VisionFoodEvidence.source) {
+        final vision = VisionMealEvidence.decode(raw);
+        final valid = vision.matchesMeal(item, expectedOwner: ownerKey);
+        return MealFoodEvidence._(
+          item,
+          valid ? MealFoodEvidenceState.valid : MealFoodEvidenceState.invalid,
+          null,
+          null,
+          null,
+          valid ? vision : null,
+        );
+      }
       if (item.foodSourceSnapshot.startsWith(UnitFoodEvidence.sourcePrefix)) {
         final unit = UnitFoodEvidence.decode(raw);
         final expectedMask = TrackedNutrient.values.fold<int>(
@@ -133,7 +148,13 @@ final class MealFoodEvidence {
   final CoachFoodPortion? portion;
   final RecipeServingEvidence? recipe;
   final UnitFoodEvidence? unit;
-  String? get foodName => portion?.food.name ?? recipe?.name ?? unit?.name;
+  final VisionMealEvidence? vision;
+  double? get directNetCarbohydrates => vision?.netCarbohydrates;
+  String? get foodName =>
+      vision?.food.estimate.name ??
+      portion?.food.name ??
+      recipe?.name ??
+      unit?.name;
   final CoachFoodNutrients? _nutrients;
 
   bool get isModern => state != MealFoodEvidenceState.legacy;
@@ -141,6 +162,7 @@ final class MealFoodEvidence {
 
   double? value(TrackedNutrient nutrient) {
     if (state == MealFoodEvidenceState.invalid) return null;
+    if (vision != null) return vision!.value(foodNutrient(nutrient));
     if (recipe != null) return recipe!.value(foodNutrient(nutrient));
     if (unit != null) return unit!.value(foodNutrient(nutrient));
     final modern = portion;
@@ -160,6 +182,7 @@ final class MealFoodEvidence {
 
   double? fullValue(FoodNutrient nutrient) {
     if (state == MealFoodEvidenceState.invalid) return null;
+    if (vision != null) return vision!.value(nutrient);
     if (recipe != null) return recipe!.value(nutrient);
     if (unit != null) return unit!.value(nutrient);
     if (portion != null) return _nutrients![nutrient];

@@ -345,8 +345,14 @@ class HistoryPage extends ConsumerWidget {
               );
             }
             final chronological = rows.reversed.toList();
-            final trend = WeightAnalysis.calculateWeeklyTrend(
-              chronological.map((row) => row.weight).toList(),
+            final trend = WeightAnalysis.calculateSevenDayChange(
+              samples: chronological
+                  .map(
+                    (row) =>
+                        ProgressSample(date: row.date, weightKg: row.weight),
+                  )
+                  .toList(),
+              endingOn: DateTime.now(),
             );
             final analysis = ProgressAnalysis.evaluate(
               samples: chronological
