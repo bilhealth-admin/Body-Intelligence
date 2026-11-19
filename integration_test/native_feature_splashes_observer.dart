@@ -443,6 +443,69 @@ Map<String, Object?> _nativeCapsuleReadFrame(WidgetTester tester) => {
   'transient_callback_count': tester.binding.transientCallbackCount,
 };
 
+// Synchronous, bounded state at the existing image-scene call. This neither
+// repaints the boundary nor changes the captured bytes or acceptance checks.
+Map<String, Object?> _nativeCapsuleSceneBoundary(
+  WidgetTester tester,
+  RenderRepaintBoundary boundary,
+) {
+  try {
+    Map<String, double> rect(Rect value) => {
+      'left': value.left,
+      'top': value.top,
+      'right': value.right,
+      'bottom': value.bottom,
+    };
+    final layer = boundary.debugLayer;
+    final nodes = <Map<String, Object?>>[];
+    var truncated = false;
+    void visit(Layer node, int depth) {
+      nodes.add({
+        'depth': depth,
+        'type': node.runtimeType.toString(),
+        'identity': identityHashCode(node),
+        if (node is OffsetLayer)
+          'offset': {'dx': node.offset.dx, 'dy': node.offset.dy},
+        if (node is PictureLayer) 'canvas_bounds': rect(node.canvasBounds),
+      });
+      if (node is ContainerLayer) {
+        var child = node.firstChild;
+        if (depth >= 3) {
+          truncated = child != null || truncated;
+          return;
+        }
+        while (child != null) {
+          if (nodes.length >= 8) {
+            truncated = true;
+            break;
+          }
+          visit(child, depth + 1);
+          child = child.nextSibling;
+        }
+      }
+    }
+
+    if (layer != null) visit(layer, 0);
+    final origin = boundary.localToGlobal(Offset.zero);
+    return {
+      'observed_utc': DateTime.now().toUtc().toIso8601String(),
+      'frame': _nativeCapsuleReadFrame(tester),
+      'boundary_attached': boundary.attached,
+      'boundary_has_size': boundary.hasSize,
+      'boundary_global_origin': {'dx': origin.dx, 'dy': origin.dy},
+      'boundary_paint_bounds': rect(boundary.paintBounds),
+      'boundary_debug_needs_paint': boundary.debugNeedsPaint,
+      'boundary_debug_needs_layout': boundary.debugNeedsLayout,
+      'layer_nodes': nodes,
+      'layer_nodes_truncated': truncated,
+      'layer_node_limit': 8,
+      'layer_depth_limit': 3,
+    };
+  } on Object catch (error) {
+    return {'diagnostic_state_error_type': error.runtimeType.toString()};
+  }
+}
+
 Future<_NativeCapsulePaint> _readNativeCapsulePaint(
   WidgetTester tester,
   Finder capsule,
@@ -475,6 +538,7 @@ Future<_NativeCapsulePaint> _readNativeCapsulePaint(
     'request_frame': _nativeCapsuleReadFrame(tester),
   };
   final snapshot = await tester.runAsync(() async {
+    final sceneBoundary = _nativeCapsuleSceneBoundary(tester, renderBoundary);
     final image = await renderBoundary.toImage(pixelRatio: 1);
     try {
       expect(image.width, size.width.ceil());
@@ -488,6 +552,7 @@ Future<_NativeCapsulePaint> _readNativeCapsulePaint(
         reduced: widget.reducedMotion,
         readDetails: {
           ...readDetails,
+          'scene_boundary_at_to_image_call': sceneBoundary,
           'read_completed_utc': DateTime.now().toUtc().toIso8601String(),
           'completion_frame': _nativeCapsuleReadFrame(tester),
           'boundary_still_attached': renderBoundary.attached,

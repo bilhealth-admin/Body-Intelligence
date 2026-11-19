@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>FLTUseFlutterMetalLayer</key>
-	<false/>
 	<key>GADApplicationIdentifier</key>
 	<string>$(BIL_ADMOB_IOS_APP_ID)</string>
 	<!-- Google iOS quick-start SKAdNetwork list, verified 2026-09-06.

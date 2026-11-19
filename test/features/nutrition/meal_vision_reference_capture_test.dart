@@ -14,7 +14,23 @@ void main() {
     'reference composition: review, edit control and trusted full facts',
     (tester) async {
       await setVisionV2Viewport(tester, const Size(430, 932));
-      await openVisionV2Review(tester);
+      var confirmations = 0;
+      final results = <List<PremiumVisionSelection>?>[];
+      await openVisionV2Review(
+        tester,
+        onConfirm: (_) async {
+          confirmations++;
+          return const MealVisionReviewDecision.accepted();
+        },
+        onResult: results.add,
+      );
+      Future<void> tapVisible(Finder target) async {
+        await tester.ensureVisible(target);
+        await tester.pumpAndSettle();
+        await tester.tap(target);
+        await tester.pumpAndSettle();
+      }
+
       await captureVisionV2(tester, 'reference_review_430_ar_dark');
       await tester.ensureVisible(
         find.byKey(const Key('premium-vision-unverified-nutrition')),
@@ -44,7 +60,7 @@ void main() {
               find.byKey(const Key('premium-vision-continue')),
             )
             .onPressed,
-        isNull,
+        isNotNull,
       );
       final primaryText = find.descendant(
         of: find.byKey(const Key('premium-vision-continue')),
@@ -59,8 +75,62 @@ void main() {
         'NotoArabicEvidence',
       );
       await captureVisionV2(tester, 'reference_edit_scroll_430_ar_dark');
-      await tester.tap(find.byKey(const Key('premium-vision-close')));
-      await tester.pumpAndSettle();
+
+      // Keep the reference captures unchanged, then exercise incomplete input:
+      // the enabled action must guide the user without returning or confirming.
+      final continueButton = find.byKey(const Key('premium-vision-continue'));
+      await tapVisible(continueButton);
+      expect(find.byKey(const Key('vision-required-details')), findsOneWidget);
+      expect(find.byKey(const Key('vision-missing-stage')), findsOneWidget);
+      expect(
+        find.byKey(const Key('vision-missing-selection-0')),
+        findsOneWidget,
+      );
+      expect(confirmations, 0);
+      expect(results, isEmpty);
+      await tapVisible(find.byKey(const Key('vision-required-cancel')));
+      expect(find.byKey(const Key('vision-required-details')), findsNothing);
+      expect(
+        tester
+            .widget<Checkbox>(find.byKey(const Key('premium-vision-select-0')))
+            .value,
+        isFalse,
+      );
+      expect(
+        tester
+            .widget<ChoiceChip>(
+              find.byKey(const Key('premium-vision-stage-before')),
+            )
+            .selected,
+        isFalse,
+      );
+      expect(confirmations, 0);
+      expect(results, isEmpty);
+
+      // Choosing a missing field restores focus, never chooses its answer.
+      await tapVisible(continueButton);
+      await tapVisible(find.byKey(const Key('vision-missing-selection-0')));
+      expect(find.byKey(const Key('vision-required-details')), findsNothing);
+      final selection = tester.widget<Checkbox>(
+        find.byKey(const Key('premium-vision-select-0')),
+      );
+      expect(selection.focusNode!.hasFocus, isTrue);
+      expect(selection.value, isFalse);
+      expect(
+        tester
+            .widget<ChoiceChip>(
+              find.byKey(const Key('premium-vision-stage-before')),
+            )
+            .selected,
+        isFalse,
+      );
+      expect(confirmations, 0);
+      expect(results, isEmpty);
+      expect(tester.takeException(), isNull);
+      await tapVisible(find.byKey(const Key('premium-vision-close')));
+      expect(results, hasLength(1));
+      expect(results.single, isNull);
+      expect(confirmations, 0);
 
       final food = visionV2Food(serving: 60);
       await tester.pumpWidget(

@@ -31,7 +31,7 @@ PACKAGE = 'com.bilhealth.bodyintelligencelog'
 REPOSITORY = 'bilhealth-admin/Body-Intelligence'
 WORKFLOW = '.github/workflows/bil_codeql_security_extended.yml'
 SELF = '.github/scripts/bil_android_direct_vm_attach.py'
-PUB_LOCK = 'bc3c559586313d4323233c0b5d66dde56441e0f03d7be45d00bae61efb4fa7ac'
+PUB_LOCK = 'fb3df7a93ef5d14b2ac8f394012ed749f3138b05570926c483a3e9071de1dad7'
 SCOPES = {
     'system-crypto': ('integration_test/system_crypto_bridge_integration_test.dart', None),
     'native-settings': ('integration_test/native_settings_polish_test.dart', 'test_driver/native_settings_capture_driver.dart'),

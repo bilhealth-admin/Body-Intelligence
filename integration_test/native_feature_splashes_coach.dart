@@ -659,12 +659,13 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
               isFalse,
             );
             expect(_head.isNotEmpty && _fingerprint.isNotEmpty, isTrue);
-            if (history) {
-              debugPrint(
-                'BIL_NATIVE_HISTORY_STAGE output_directory_before $scene',
-              );
-            }
+            debugPrint(
+              'BIL_NATIVE_HISTORY_STAGE output_directory_before $mode $scene',
+            );
             final output = await _output();
+            debugPrint(
+              'BIL_NATIVE_HISTORY_STAGE output_directory_after $mode $scene',
+            );
             final db = AppDatabase.forTesting(
               NativeDatabase.memory(),
               localOwnerId: _owner,
@@ -696,19 +697,15 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
               'capture_windows': <Object?>[],
               'completed': false,
             };
-            final stageTrace = history
-                ? _NativeHistoryStageTrace(
-                    metadata,
-                    File(
-                      '${output.path}/coach-history-$scene-diagnostic-stages.json',
-                    ),
-                  )
-                : null;
-            stageTrace?.mark('case_setup_ready');
+            final stageTrace = _NativeHistoryStageTrace(
+              metadata,
+              File('${output.path}/coach-$mode-$scene-diagnostic-stages.json'),
+            );
+            stageTrace.mark('case_setup_ready');
             GoRouter? router;
             _NativeReplyFrameTrace? trace;
             try {
-              stageTrace?.mark('mount_before');
+              stageTrace.mark('mount_before');
               router = await _mountNativeCoach(
                 tester,
                 db,
@@ -716,30 +713,30 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                 language: language,
                 reduced: reduced,
                 history: history,
-                onStage: stageTrace?.mark,
+                onStage: stageTrace.mark,
               );
-              stageTrace?.mark('mount_after');
-              stageTrace?.mark('send_before');
+              stageTrace.mark('mount_after');
+              stageTrace.mark('send_before');
               await _sendNativeCoach(
                 tester,
                 gateway,
                 language,
-                onStage: stageTrace?.mark,
+                onStage: stageTrace.mark,
               );
-              stageTrace?.mark('send_after');
+              stageTrace.mark('send_after');
               Finder? anchor;
               double? anchorBefore, offsetBefore;
               if (history) {
                 final viewport = find.byType(ChatHistoryViewport);
                 // Drag until a real older row is visible on this viewport/font,
                 // rather than assuming 220 px always clears the newest turn.
-                stageTrace?.mark('anchor_before');
+                stageTrace.mark('anchor_before');
                 anchor = await nativeQaEnterOlderHistory(
                   tester,
                   language: language,
                   metadata: metadata,
                 );
-                stageTrace?.mark('anchor_after');
+                stageTrace.mark('anchor_after');
                 final controller = tester
                     .widget<ChatHistoryViewport>(viewport)
                     .controller;
@@ -760,7 +757,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
               trace = _NativeReplyFrameTrace(tester, reply, anchor: anchor)
                 ..start();
               if (history) {
-                stageTrace?.mark('capture_reading_before');
+                stageTrace.mark('capture_reading_before');
                 await _captureReply(
                   binding,
                   tester,
@@ -769,15 +766,15 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   trace,
                   metadata,
                 );
-                stageTrace?.mark('capture_reading_after');
+                stageTrace.mark('capture_reading_after');
               }
               final replyReleasedAt = trace.watch.elapsedMilliseconds;
               metadata['held_reply_released_at_ms'] = replyReleasedAt;
-              stageTrace?.mark('reply_release_before');
+              stageTrace.mark('reply_release_before');
               gateway.finish(reply);
-              stageTrace?.mark('reply_release_after');
+              stageTrace.mark('reply_release_after');
               if (history) {
-                stageTrace?.mark('history_reply_frames_before');
+                stageTrace.mark('history_reply_frames_before');
                 for (var i = 0; i < 25; i++) {
                   await tester.pump(const Duration(milliseconds: 16));
                   expect(
@@ -791,8 +788,8 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                       .controller;
                   expect(controller.offset, closeTo(offsetBefore!, .5));
                 }
-                stageTrace?.mark('history_reply_frames_after');
-                stageTrace?.mark('capture_mid_before');
+                stageTrace.mark('history_reply_frames_after');
+                stageTrace.mark('capture_mid_before');
                 await _captureReply(
                   binding,
                   tester,
@@ -801,14 +798,16 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   trace,
                   metadata,
                 );
-                stageTrace?.mark('capture_mid_after');
+                stageTrace.mark('capture_mid_after');
               } else {
+                stageTrace.mark('reveal_first_visible_wait_before');
                 while (!trace.samples.any(
                       (sample) => (sample['reply_opacity'] as num? ?? 0) > 0,
                     ) &&
                     trace.watch.elapsedMilliseconds < 1500) {
                   await tester.pump(const Duration(milliseconds: 16));
                 }
+                stageTrace.mark('reveal_first_visible_wait_after');
                 final nonempty = trace.samples
                     .where(
                       (sample) => (sample['reply_opacity'] as num? ?? 0) > 0,
@@ -849,6 +848,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                     'complete-reply opacity/position, 320ms';
                 metadata['capture_limit'] =
                     'PNG driver IPC can outlast the entrance; frame trace records actual opacity.';
+                stageTrace.mark('reveal_capture_first_before');
                 await _captureReply(
                   binding,
                   tester,
@@ -857,9 +857,12 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   trace,
                   metadata,
                 );
+                stageTrace.mark('reveal_capture_first_after');
+                stageTrace.mark('reveal_mid_wait_before');
                 while (trace.watch.elapsedMilliseconds < 1100) {
                   await tester.pump(const Duration(milliseconds: 16));
                 }
+                stageTrace.mark('reveal_mid_wait_after');
                 final mid = nativeQaReplyGeometry(tester, reply, trace.watch);
                 expect(mid['visible_graphemes'], reply.characters.length);
                 expect(mid['reply_opacity'], 1.0);
@@ -898,6 +901,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   // this 26-paragraph/2x stress fixture. Preserve that limit;
                   // geometry completion is not a smoothness certification.
                 }
+                stageTrace.mark('reveal_capture_mid_before');
                 await _captureReply(
                   binding,
                   tester,
@@ -906,12 +910,13 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   trace,
                   metadata,
                 );
+                stageTrace.mark('reveal_capture_mid_after');
               }
-              stageTrace?.mark('observation_tail_before');
+              stageTrace.mark('observation_tail_before');
               while (trace.watch.elapsedMilliseconds - replyReleasedAt < 2800) {
                 await tester.pump(const Duration(milliseconds: 16));
               }
-              stageTrace?.mark('observation_tail_after');
+              stageTrace.mark('observation_tail_after');
               if (history) {
                 expect(
                   tester.getTopLeft(anchor!).dy,
@@ -923,7 +928,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                     )
                     .controller;
                 expect(controller.offset, closeTo(offsetBefore!, .5));
-                stageTrace?.mark('capture_end_before');
+                stageTrace.mark('capture_end_before');
                 await _captureReply(
                   binding,
                   tester,
@@ -932,7 +937,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   trace,
                   metadata,
                 );
-                stageTrace?.mark('capture_end_after');
+                stageTrace.mark('capture_end_after');
               } else {
                 final row = _replyRow(reply);
                 if (Platform.isIOS) {
@@ -972,6 +977,7 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                         'Complete reply typography stays reserved throughout the soft entrance.',
                   );
                 }
+                stageTrace.mark('reveal_capture_end_before');
                 await _captureReply(
                   binding,
                   tester,
@@ -980,13 +986,14 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   trace,
                   metadata,
                 );
+                stageTrace.mark('reveal_capture_end_after');
               }
               expect(gateway.calls, 1);
               expect(tester.takeException(), isNull);
               expect(_dartNetworkDeny.blockedClientCreations, 0);
               metadata['completed'] = true;
             } finally {
-              stageTrace?.mark('cleanup_before');
+              stageTrace.mark('cleanup_before');
               trace?.stop();
               gateway.cancelPending();
               metadata['geometry_native_frames'] =
@@ -1000,29 +1007,29 @@ void _registerNativeCoachReveal(IntegrationTestWidgetsFlutterBinding binding) {
                   _dartNetworkDeny.blockedClientCreations;
               metadata['real_model_calls'] = 0;
               metadata['real_credits_spent'] = 0;
-              stageTrace?.mark('metadata_write_before');
+              stageTrace.mark('metadata_write_before');
               await File(
                 '${output.path}/coach-$mode-$scene-metadata.json',
               ).writeAsString(
                 const JsonEncoder.withIndent('  ').convert(metadata),
                 flush: true,
               );
-              stageTrace?.mark('metadata_write_after');
+              stageTrace.mark('metadata_write_after');
               binding.reportData ??= <String, dynamic>{};
               final reports =
                   (binding.reportData!['native_coach_$mode'] ??= <dynamic>[])
                       as List<dynamic>;
               reports.add(metadata);
-              stageTrace?.mark('cleanup_unmount_before');
+              stageTrace.mark('cleanup_unmount_before');
               await tester.pumpWidget(const SizedBox.shrink());
-              stageTrace?.mark('cleanup_unmount_after');
+              stageTrace.mark('cleanup_unmount_after');
               await tester.pump();
-              stageTrace?.mark('cleanup_pump_after');
+              stageTrace.mark('cleanup_pump_after');
               router?.dispose();
-              stageTrace?.mark('cleanup_db_close_before');
+              stageTrace.mark('cleanup_db_close_before');
               await db.close();
-              stageTrace?.mark('cleanup_db_close_after');
-              if (stageTrace != null) await stageTrace.flush();
+              stageTrace.mark('cleanup_db_close_after');
+              await stageTrace.flush();
             }
           },
           timeout: const Timeout(Duration(seconds: 90)),

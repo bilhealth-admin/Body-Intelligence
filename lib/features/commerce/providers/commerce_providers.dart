@@ -509,7 +509,8 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   bool current() => active && generation == snapshot.generation;
   // Freshness is bounded by when this request began, not when a delayed
   // response arrived. Owner/generation checks still retire old requests.
-  final requestedAt = ref.read(verifiedEntitlementClockProvider)().toUtc();
+  final clock = ref.read(verifiedEntitlementClockProvider);
+  final requestedAt = clock().toUtc();
   final loaded = _observedAuthorityReload(
     ref,
     () {
@@ -521,7 +522,7 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
     // an in-flight owner/permission refresh.
     resumeReload: ref.invalidateSelf,
     refreshDelay: () {
-      final now = ref.read(verifiedEntitlementClockProvider)().toUtc();
+      final now = clock().toUtc();
       final remaining =
           VerifiedPrepaidAiCredit.maximumAge - now.difference(requestedAt);
       if (remaining > VerifiedPrepaidAiCredit.maximumAge) {

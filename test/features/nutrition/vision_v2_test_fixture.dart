@@ -150,6 +150,8 @@ Future<void> openVisionV2Review(
   double scale = 1,
   bool photo = true,
   void Function(List<PremiumVisionSelection>?)? onResult,
+  Future<MealVisionReviewDecision> Function(List<PremiumVisionSelection>)?
+  onConfirm,
 }) async {
   await tester.pumpWidget(
     visionV2App(
@@ -161,6 +163,7 @@ Future<void> openVisionV2Review(
             imagePath: photo ? visionV2PhotoPath : null,
             mealType: 'breakfast',
             photographedAt: DateTime(2026, 10, 10, 11, 30),
+            onConfirm: onConfirm,
           ).then((value) => onResult?.call(value)),
           child: const Text('OPEN TEST REVIEW'),
         ),

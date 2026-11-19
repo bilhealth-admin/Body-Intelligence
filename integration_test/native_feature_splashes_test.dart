@@ -682,21 +682,93 @@ void main() {
             final captureObserver = holdObservers[kind]!;
             final captureWatch = captureObserver.watch;
             expect(_welcome(kind), findsOneWidget);
-            final capsulePaint = await _verifyNativeCapsulePaint(
-              tester,
-              find.descendant(
-                of: _welcome(kind),
-                matching: find.byType(BilSplashCapsuleProgress),
-              ),
-              reduced: scene.reduced,
-              onEvidence: (evidence) {
-                final diagnostics =
-                    (source['capsule_paint_diagnostics'] ??=
-                            <String, Object?>{})
-                        as Map<String, Object?>;
-                diagnostics[kind] = evidence;
-              },
-            );
+            late final Map<String, Object?> capsulePaint;
+            try {
+              capsulePaint = await _verifyNativeCapsulePaint(
+                tester,
+                find.descendant(
+                  of: _welcome(kind),
+                  matching: find.byType(BilSplashCapsuleProgress),
+                ),
+                reduced: scene.reduced,
+                onEvidence: (evidence) {
+                  final diagnostics =
+                      (source['capsule_paint_diagnostics'] ??=
+                              <String, Object?>{})
+                          as Map<String, Object?>;
+                  diagnostics[kind] = evidence;
+                },
+              );
+            } on Object catch (originalError) {
+              final requested = DateTime.now().toUtc();
+              final diagnosticName =
+                  'diagnostic-only-capsule-$kind-$name-${requested.microsecondsSinceEpoch}';
+              final diagnostic = <String, Object?>{
+                'qualification':
+                    'POST_FAILURE_DIAGNOSTIC_ONLY_NOT_PASS_OR_SAMPLE',
+                'original_error_type': originalError.runtimeType.toString(),
+                'requested_utc': requested.toIso8601String(),
+                'kind': kind,
+                'scene': name,
+                'file_name': '$diagnosticName.png',
+                'dart_driver_capture_manifest_registration': false,
+                'native_plugin_may_cache_named_screenshot': true,
+                'native_timeout_ms': 2000,
+                'file_write_timeout_ms': 1000,
+                'timeout_cancels_underlying_operation': false,
+              };
+              source['capsule_post_failure_native_png'] = diagnostic;
+              try {
+                final present = _welcome(kind).evaluate().isNotEmpty;
+                diagnostic['welcome_present_at_request'] = present;
+                if (present) {
+                  // Existing native screenshot callback, without adding a normal
+                  // SDK screenshot/manifest entry. One call, no pump or retry.
+                  final captured = await binding.callbackManager
+                      .takeScreenshot(diagnosticName)
+                      .timeout(const Duration(seconds: 2));
+                  diagnostic['native_returned_utc'] = DateTime.now()
+                      .toUtc()
+                      .toIso8601String();
+                  diagnostic['welcome_present_at_native_return'] = _welcome(
+                    kind,
+                  ).evaluate().isNotEmpty;
+                  final bytes = captured['bytes'];
+                  if (captured['screenshotName'] != diagnosticName ||
+                      bytes is! List<int> ||
+                      bytes.length > 16 * 1024 * 1024) {
+                    throw StateError('Invalid diagnostic native PNG response');
+                  }
+                  final png = inspectNativeCapturePng(bytes);
+                  await File('${output.path}/$diagnosticName.png')
+                      .writeAsBytes(bytes, flush: true)
+                      .timeout(const Duration(seconds: 1));
+                  diagnostic.addAll({
+                    'outcome': 'SAVED_POST_FAILURE_NATIVE_PNG',
+                    'byte_count': bytes.length,
+                    'width_pixels': png.width,
+                    'height_pixels': png.height,
+                    'completed_utc': DateTime.now().toUtc().toIso8601String(),
+                    'welcome_present_after_persist': _welcome(
+                      kind,
+                    ).evaluate().isNotEmpty,
+                  });
+                } else {
+                  diagnostic['outcome'] = 'SKIPPED_WELCOME_NO_LONGER_PRESENT';
+                }
+              } on Object catch (diagnosticError) {
+                diagnostic['outcome'] = 'DIAGNOSTIC_FAILED_OR_TIMED_OUT';
+                diagnostic['diagnostic_error_type'] = diagnosticError
+                    .runtimeType
+                    .toString();
+              }
+              diagnostic['diagnostic_finished_utc'] = DateTime.now()
+                  .toUtc()
+                  .toIso8601String();
+              // A diagnostic failure must never replace the strict original
+              // exception or its stack. This case remains failed unconditionally.
+              rethrow;
+            }
             final captureAt = captureWatch.elapsedMilliseconds;
             expect(captureAt, lessThan(1900));
             await _capture(binding, '$kind-$name-welcome', output);

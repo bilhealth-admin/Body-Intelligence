@@ -1,5 +1,7 @@
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/foundation.dart';
+import 'package:body_intelligence_log/features/connected_health/connected_health_display_scope.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
@@ -11,12 +13,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final class _ReadableHealthGateway implements ConnectedHealthGateway {
-  const _ReadableHealthGateway();
+  const _ReadableHealthGateway(this.platform);
 
-  static final snapshot = ConnectedHealthSnapshot(
+  final TargetPlatform platform;
+
+  ConnectedHealthSnapshot get snapshot =>
+      platform == TargetPlatform.android ? _androidSnapshot : _appleSnapshot;
+
+  static final _appleSnapshot = ConnectedHealthSnapshot(
     status: ConnectedHealthStatus.synchronized,
-    platformSource: 'Health Connect',
-    availableSources: const ['Health Connect'],
+    platformSource: 'Apple Health',
+    availableSources: const ['Apple Health'],
     signals: [
       for (final signal in const [
         ('steps', 6842.0, 'steps'),
@@ -34,6 +41,33 @@ final class _ReadableHealthGateway implements ConnectedHealthGateway {
         ),
     ],
     importedCount: 4,
+    lastSyncAt: DateTime(2026, 8, 21, 10, 19),
+    failureCode: null,
+    deviceVerified: true,
+  );
+
+  // Keep unsupported imported readings in the Android input deliberately:
+  // the real presentation filter must hide them rather than the fixture.
+  static final _androidSnapshot = ConnectedHealthSnapshot(
+    status: ConnectedHealthStatus.synchronized,
+    platformSource: 'Health Connect',
+    availableSources: const ['Health Connect'],
+    signals: [
+      ..._appleSnapshot.signals,
+      for (final signal in const [
+        ('distance', 4500.0, 'm'),
+        ('activeEnergy', 320.0, 'kcal'),
+      ])
+        ConnectedHealthSignalView(
+          key: signal.$1,
+          value: signal.$2,
+          unit: signal.$3,
+          source: 'QA watch',
+          observedAt: DateTime(2026, 8, 21, 10, 19),
+          confidence: .98,
+        ),
+    ],
+    importedCount: 6,
     lastSyncAt: DateTime(2026, 8, 21, 10, 19),
     failureCode: null,
     deviceVerified: true,
@@ -96,7 +130,9 @@ Widget _subject({
   return ProviderScope(
     overrides: [
       connectedHealthGatewayProvider.overrideWithValue(
-        empty ? const _EmptyHealthGateway() : const _ReadableHealthGateway(),
+        empty
+            ? const _EmptyHealthGateway()
+            : _ReadableHealthGateway(defaultTargetPlatform),
       ),
       liveHealthNowProvider.overrideWithValue(
         () => DateTime(2026, 8, 21, 10, 19, 42),
@@ -140,6 +176,54 @@ Future<void> _loadReadableHealthSnapshot(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+void _expectAndroidDeviceScope(WidgetTester tester, {String? reason}) {
+  expect(defaultTargetPlatform, TargetPlatform.android, reason: reason);
+  final container = ProviderScope.containerOf(
+    tester.element(find.byType(MaterialApp)),
+  );
+  final snapshot = container.read(connectedHealthProvider).asData!.value;
+  expect(snapshot.platformSource, 'Health Connect', reason: reason);
+  expect(
+    snapshot.signals.map((signal) => signal.key),
+    containsAll([
+      'steps',
+      'distance',
+      'activeEnergy',
+      'heartRate',
+      'sleep',
+      'weight',
+    ]),
+    reason: reason,
+  );
+  for (final key in ['steps', 'distance', 'activeEnergy']) {
+    expect(connectedHealthDeviceSignalIsSupported(key), isTrue, reason: reason);
+  }
+  for (final key in ['heartRate', 'sleep', 'weight']) {
+    expect(
+      connectedHealthDeviceSignalIsSupported(key),
+      isFalse,
+      reason: reason,
+    );
+  }
+  for (final key in ['steps', 'distance', 'active-energy']) {
+    expect(
+      find.byKey(Key('watch-metric-$key')),
+      findsOneWidget,
+      reason: reason,
+    );
+  }
+  expect(
+    find.byKey(const Key('watch-metric-heart-rate')),
+    findsNothing,
+    reason: reason,
+  );
+  expect(
+    find.byKey(const Key('watch-metric-sleep')),
+    findsNothing,
+    reason: reason,
+  );
+}
+
 double _labelContrast(Color foreground, Color background) {
   final ink = Color.alphaBlend(foreground, background).computeLuminance();
   final paper = background.computeLuminance();
@@ -149,6 +233,10 @@ double _labelContrast(Color foreground, Color background) {
 }
 
 void main() {
+  final mobilePlatforms = TargetPlatformVariant({
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+  });
   for (final dark in [false, true]) {
     for (final textScale in [1.0, 2.0]) {
       testWidgets('real Dashboard Last sync contrast dark=$dark scale=$textScale', (
@@ -245,47 +333,63 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 
+      expect(AppLocalizations.supportedLocales, hasLength(25));
       for (final locale in AppLocalizations.supportedLocales) {
-        await tester.pumpWidget(_subject(locale: locale, textScale: 1.6));
-        await _loadReadableHealthSnapshot(tester);
-        expect(
-          find.byKey(const Key('dashboard-live-fitness-watch-slot')),
-          findsOneWidget,
-          reason: locale.toLanguageTag(),
-        );
-        expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
+        try {
+          await tester.pumpWidget(_subject(locale: locale, textScale: 1.6));
+          await _loadReadableHealthSnapshot(tester);
+          expect(
+            find.byKey(const Key('dashboard-live-fitness-watch-slot')),
+            findsOneWidget,
+            reason: locale.toLanguageTag(),
+          );
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: locale.toLanguageTag(),
+          );
 
-        expect(
-          find.byKey(const Key('dashboard-compact-health-hub')),
-          findsOneWidget,
-          reason: locale.toLanguageTag(),
-        );
-        expect(
-          find.byKey(const Key('watch-metric-steps')),
-          findsOneWidget,
-          reason: locale.toLanguageTag(),
-        );
-        expect(
-          find.byKey(const Key('watch-metric-heart-rate')),
-          findsOneWidget,
-          reason: locale.toLanguageTag(),
-        );
-        expect(
-          find.byKey(const Key('watch-metric-sleep')),
-          findsOneWidget,
-          reason: locale.toLanguageTag(),
-        );
-        expect(
-          find.byKey(const Key('watch-metric-active-energy')),
-          findsNothing,
-          reason: locale.toLanguageTag(),
-        );
-        expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
-
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
+          expect(
+            find.byKey(const Key('dashboard-compact-health-hub')),
+            findsOneWidget,
+            reason: locale.toLanguageTag(),
+          );
+          expect(
+            find.byKey(const Key('watch-metric-steps')),
+            findsOneWidget,
+            reason: locale.toLanguageTag(),
+          );
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            _expectAndroidDeviceScope(tester, reason: locale.toLanguageTag());
+          } else {
+            expect(
+              find.byKey(const Key('watch-metric-heart-rate')),
+              findsOneWidget,
+              reason: locale.toLanguageTag(),
+            );
+            expect(
+              find.byKey(const Key('watch-metric-sleep')),
+              findsOneWidget,
+              reason: locale.toLanguageTag(),
+            );
+            expect(
+              find.byKey(const Key('watch-metric-active-energy')),
+              findsNothing,
+              reason: locale.toLanguageTag(),
+            );
+          }
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: locale.toLanguageTag(),
+          );
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
+        }
       }
     },
+    variant: mobilePlatforms,
   );
 
   for (final configuration in const [
@@ -299,70 +403,77 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.reset);
 
-        await tester.pumpWidget(
-          _subject(
-            locale: configuration.locale,
-            textScale: configuration.scale,
-          ),
-        );
-        await _loadReadableHealthSnapshot(tester);
+        try {
+          await tester.pumpWidget(
+            _subject(
+              locale: configuration.locale,
+              textScale: configuration.scale,
+            ),
+          );
+          await _loadReadableHealthSnapshot(tester);
 
-        final watchSlot = find.byKey(
-          const Key('dashboard-live-fitness-watch-slot'),
-        );
-        expect(watchSlot, findsOneWidget);
-        final artwork = find.byKey(const Key('bil-live-health-watch'));
-        expect(artwork, findsOneWidget);
-        final size = tester.getSize(artwork);
-        final expectedSide =
-            224 + ((configuration.scale.clamp(1.0, 2.0) - 1) * 112);
-        expect(size.width, closeTo(expectedSide, .1));
-        expect(size.height, closeTo(expectedSide, .1));
-        expect(
-          Directionality.of(tester.element(watchSlot)),
-          configuration.locale.languageCode == 'ar'
-              ? TextDirection.rtl
-              : TextDirection.ltr,
-        );
-        // Keep the user's accessibility scale intact. The preview itself grows
-        // with the scale, so the watch copy does not need to be artificially
-        // capped to fit.
-        expect(
-          MediaQuery.textScalerOf(
-            tester.element(find.byKey(const Key('bil-live-health-watch'))),
-          ).scale(1),
-          closeTo(configuration.scale, .01),
-        );
-        expect(tester.takeException(), isNull);
-        expect(
-          find.byKey(const Key('dashboard-fitness-last-sync')),
-          findsOneWidget,
-        );
-        expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
-        expect(
-          find.byKey(const Key('watch-metric-heart-rate')),
-          findsOneWidget,
-        );
-        expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
-        expect(
-          find.byKey(const Key('dashboard-compact-health-hub')),
-          findsOneWidget,
-        );
-        expect(find.text('Connected'), findsNothing);
-        expect(
-          find.text(
+          final watchSlot = find.byKey(
+            const Key('dashboard-live-fitness-watch-slot'),
+          );
+          expect(watchSlot, findsOneWidget);
+          final artwork = find.byKey(const Key('bil-live-health-watch'));
+          expect(artwork, findsOneWidget);
+          final size = tester.getSize(artwork);
+          final expectedSide =
+              224 + ((configuration.scale.clamp(1.0, 2.0) - 1) * 112);
+          expect(size.width, closeTo(expectedSide, .1));
+          expect(size.height, closeTo(expectedSide, .1));
+          expect(
+            Directionality.of(tester.element(watchSlot)),
             configuration.locale.languageCode == 'ar'
-                ? 'غير متصل'
-                : 'Not connected',
-          ),
-          findsNothing,
-        );
-        expect(find.byType(PageView), findsNothing);
-        expect(tester.takeException(), isNull);
-
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+          );
+          // Keep the user's accessibility scale intact. The preview itself grows
+          // with the scale, so the watch copy does not need to be artificially
+          // capped to fit.
+          expect(
+            MediaQuery.textScalerOf(
+              tester.element(find.byKey(const Key('bil-live-health-watch'))),
+            ).scale(1),
+            closeTo(configuration.scale, .01),
+          );
+          expect(tester.takeException(), isNull);
+          expect(
+            find.byKey(const Key('dashboard-fitness-last-sync')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+          if (defaultTargetPlatform == TargetPlatform.android) {
+            _expectAndroidDeviceScope(tester);
+          } else {
+            expect(
+              find.byKey(const Key('watch-metric-heart-rate')),
+              findsOneWidget,
+            );
+            expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
+          }
+          expect(
+            find.byKey(const Key('dashboard-compact-health-hub')),
+            findsOneWidget,
+          );
+          expect(find.text('Connected'), findsNothing);
+          expect(
+            find.text(
+              configuration.locale.languageCode == 'ar'
+                  ? 'غير متصل'
+                  : 'Not connected',
+            ),
+            findsNothing,
+          );
+          expect(find.byType(PageView), findsNothing);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pump();
+        }
       },
+      variant: mobilePlatforms,
     );
   }
 }
