@@ -1,22 +1,21 @@
+# STANDALONE DIAGNOSTIC ONLY. Historical release gates remain unchanged.
+# Run F1 tests independently; this controller cannot certify F2 or any release.
 name: verify
+run-name: Standalone F1 diagnostic, not release (${{ inputs.expected_source_sha }})
 
 on:
-  push:
-    branches:
-      - phase-3-product-excellence
-      - codex/bil43-android35-verified-20261108
-      - codex/bil44-android36-verified-20261115
-      - codex/bil45-android37-inactive-catalog-20261115
-      - codex/bil46-android38-reviewer-fixes-20261116
-      - codex/bil47-android39-subscription-stability-20261116
-      - codex/bil48-android40-passive-reconciliation-20261117
-      - fix/admob-clean-production-2026-10-02
-      - bil39/integration-20261025
-      - codex/bil40-device-fixes-20261028
-      - codex/bil41-android33-release-20261106
-      - codex/bil-full-fix-batch-20261106
-  pull_request:
   workflow_dispatch:
+    inputs:
+      expected_source_sha:
+        description: Exact immutable F1 source to test; must match the controller pin
+        required: true
+        type: string
+        default: 6f10400b09f709048491f413ab8a3caf4135ab29
+      approve_independent_full_tests:
+        description: Run all diagnostic test jobs in parallel; never qualifies release
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -25,11 +24,15 @@ concurrency:
   group: verify-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  BIL_DIAGNOSTIC_SOURCE_SHA: 6f10400b09f709048491f413ab8a3caf4135ab29
+
 jobs:
   source:
     name: source-checks
     runs-on: windows-latest
     timeout-minutes: 30
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/bil48-independent-full-tests-20261119' && inputs.approve_independent_full_tests == true && inputs.expected_source_sha == '6f10400b09f709048491f413ab8a3caf4135ab29' }}
     steps:
       - name: Configure Git LF checkout
         shell: pwsh
@@ -41,6 +44,41 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: 6f10400b09f709048491f413ab8a3caf4135ab29
+      - name: Guard manual diagnostic request and regular exact F1 source
+        shell: python
+        env:
+          BIL_DIAGNOSTIC_EVENT: ${{ github.event_name }}
+          BIL_DIAGNOSTIC_REF: ${{ github.ref }}
+          BIL_DIAGNOSTIC_CONTROLLER_SHA: ${{ github.sha }}
+          BIL_DIAGNOSTIC_EXPECTED_SOURCE: ${{ inputs.expected_source_sha }}
+          BIL_DIAGNOSTIC_APPROVED: ${{ inputs.approve_independent_full_tests }}
+        run: |
+          import json, os, stat, subprocess
+          from pathlib import Path
+          PIN = "6f10400b09f709048491f413ab8a3caf4135ab29"
+          REF = "refs/heads/codex/bil48-independent-full-tests-20261119"
+          def require(value, message):
+              if not value:
+                  raise SystemExit(message)
+          require(os.environ["BIL_DIAGNOSTIC_EVENT"] == "workflow_dispatch", "Manual diagnostic event required")
+          require(os.environ["BIL_DIAGNOSTIC_REF"] == REF, "Exact diagnostic controller branch required")
+          require(os.environ["BIL_DIAGNOSTIC_APPROVED"] == "true", "Explicit diagnostic approval required")
+          require(os.environ["BIL_DIAGNOSTIC_EXPECTED_SOURCE"] == PIN, "Expected source input differs from frozen F1")
+          require(os.environ["BIL_DIAGNOSTIC_SOURCE_SHA"] == PIN, "Diagnostic source binding changed")
+          root = Path.cwd().resolve(strict=True)
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          require(head == PIN, "Checked-out source differs from immutable F1")
+          require(not subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"], text=True).strip(), "Diagnostic source checkout is not clean before execution")
+          expected = {'.github/workflows/verify.yml': 'ec7285828ba6ba895f443921f9c132cc10b12d03', 'lib/features/commerce/presentation/bil_dynamic_store_components.dart': 'da3c7dde8a1f9807345eb03e58c148874cfa8deb', 'lib/shared/widgets/bil_glass_press_feedback.dart': '653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          for relative, blob in expected.items():
+              path = root / relative
+              info = path.stat(follow_symlinks=False)
+              require(stat.S_ISREG(info.st_mode) and not path.is_symlink() and not (getattr(info, "st_file_attributes", 0) & 0x400), "Protected source must be a regular non-reparse file")
+              require(path.resolve(strict=True).is_relative_to(root), "Protected source escaped checkout")
+              observed = subprocess.check_output(["git", "hash-object", "--", relative], text=True).strip()
+              require(observed == blob, "Protected F1 source preimage differs: " + relative)
+          print(json.dumps({"scope":"STANDALONE_DIAGNOSTIC_NOT_RELEASE", "tested_source_sha":head,"controller_sha":os.environ["BIL_DIAGNOSTIC_CONTROLLER_SHA"],"controller_ref":REF,"release_qualified":False}))
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -49,6 +87,7 @@ jobs:
           cache: true
 
       - name: Resolve packages
+        id: diagnostic_dependencies
         run: flutter pub get
 
       - name: Check formatting
@@ -85,7 +124,7 @@ jobs:
           }
 
       - name: Diagnose exact formatter diff on failure
-        if: failure()
+        if: ${{ failure() && steps.diagnostic_dependencies.outcome == 'success' }}
         shell: pwsh
         run: |
           # Diagnostic only; source-checks remains FAILED on formatting errors.
@@ -139,13 +178,15 @@ jobs:
       - name: Analyze complete source
         # Report analyzer failures in the *same* run if formatting is red.
         # The source job still fails; this never bypasses any required gate.
-        if: ${{ always() && !cancelled() }}
+        if: ${{ always() && !cancelled() && steps.diagnostic_dependencies.outcome == 'success' }}
         run: flutter analyze --no-pub
 
       - name: Prove pinned calendar date logic is unchanged
+        if: ${{ always() && !cancelled() && steps.diagnostic_dependencies.outcome == 'success' }}
         run: dart run tool/verify_bil39_pinned_calendar.dart
 
       - name: Verify native observation, IME and capture negative controls
+        if: ${{ always() && !cancelled() && steps.diagnostic_dependencies.outcome == 'success' }}
         shell: pwsh
         run: |
           # Live cloud cycles retain their explicit isolated runner and credentials.
@@ -156,7 +197,7 @@ jobs:
           flutter test --no-pub --concurrency=1 @bilNativeQaFiles
 
       - name: Verify first-food commits, optional Skip and reviewer entitlement
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.diagnostic_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub --timeout=2m
@@ -168,7 +209,7 @@ jobs:
           test/features/commerce/reviewer_subscription_mirror_fallback_test.dart
 
       - name: Verify cold and warm notification Back navigation
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.diagnostic_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub --timeout=2m
@@ -178,7 +219,7 @@ jobs:
           test/features/community/community_deep_link_test.dart
 
       - name: Verify More UI behavior before Golden captures
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.diagnostic_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub
@@ -188,7 +229,7 @@ jobs:
           test/features/settings/more_premium_polish_contract_test.dart
 
       - name: Verify Meal Planner recovery and Review & log
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.diagnostic_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub --timeout=2m
@@ -197,10 +238,8 @@ jobs:
           test/features/meal_planner/meal_planner_recovery_widget_test.dart
 
   p0:
-    # The critical data/journal and Vision/architecture suites must pass
-    # before running expensive visual suites or the eight complete shards.
+    # Diagnostic P0 runs independently; every original assertion remains active.
     name: p0-regressions (${{ matrix.suite }})
-    needs: source
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -224,10 +263,46 @@ jobs:
             path: test/features/intelligence_center/coach_image_source_regression_test.dart
           - suite: arabic-meal-image-review
             path: test/features/nutrition/meal_image_language_regression_test.dart
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/bil48-independent-full-tests-20261119' && inputs.approve_independent_full_tests == true && inputs.expected_source_sha == '6f10400b09f709048491f413ab8a3caf4135ab29' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: 6f10400b09f709048491f413ab8a3caf4135ab29
+      - name: Guard manual diagnostic request and regular exact F1 source
+        shell: python
+        env:
+          BIL_DIAGNOSTIC_EVENT: ${{ github.event_name }}
+          BIL_DIAGNOSTIC_REF: ${{ github.ref }}
+          BIL_DIAGNOSTIC_CONTROLLER_SHA: ${{ github.sha }}
+          BIL_DIAGNOSTIC_EXPECTED_SOURCE: ${{ inputs.expected_source_sha }}
+          BIL_DIAGNOSTIC_APPROVED: ${{ inputs.approve_independent_full_tests }}
+        run: |
+          import json, os, stat, subprocess
+          from pathlib import Path
+          PIN = "6f10400b09f709048491f413ab8a3caf4135ab29"
+          REF = "refs/heads/codex/bil48-independent-full-tests-20261119"
+          def require(value, message):
+              if not value:
+                  raise SystemExit(message)
+          require(os.environ["BIL_DIAGNOSTIC_EVENT"] == "workflow_dispatch", "Manual diagnostic event required")
+          require(os.environ["BIL_DIAGNOSTIC_REF"] == REF, "Exact diagnostic controller branch required")
+          require(os.environ["BIL_DIAGNOSTIC_APPROVED"] == "true", "Explicit diagnostic approval required")
+          require(os.environ["BIL_DIAGNOSTIC_EXPECTED_SOURCE"] == PIN, "Expected source input differs from frozen F1")
+          require(os.environ["BIL_DIAGNOSTIC_SOURCE_SHA"] == PIN, "Diagnostic source binding changed")
+          root = Path.cwd().resolve(strict=True)
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          require(head == PIN, "Checked-out source differs from immutable F1")
+          require(not subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"], text=True).strip(), "Diagnostic source checkout is not clean before execution")
+          expected = {'.github/workflows/verify.yml': 'ec7285828ba6ba895f443921f9c132cc10b12d03', 'lib/features/commerce/presentation/bil_dynamic_store_components.dart': 'da3c7dde8a1f9807345eb03e58c148874cfa8deb', 'lib/shared/widgets/bil_glass_press_feedback.dart': '653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          for relative, blob in expected.items():
+              path = root / relative
+              info = path.stat(follow_symlinks=False)
+              require(stat.S_ISREG(info.st_mode) and not path.is_symlink() and not (getattr(info, "st_file_attributes", 0) & 0x400), "Protected source must be a regular non-reparse file")
+              require(path.resolve(strict=True).is_relative_to(root), "Protected source escaped checkout")
+              observed = subprocess.check_output(["git", "hash-object", "--", relative], text=True).strip()
+              require(observed == blob, "Protected F1 source preimage differs: " + relative)
+          print(json.dumps({"scope":"STANDALONE_DIAGNOSTIC_NOT_RELEASE", "tested_source_sha":head,"controller_sha":os.environ["BIL_DIAGNOSTIC_CONTROLLER_SHA"],"controller_ref":REF,"release_qualified":False}))
       - name: Verify POSIX StoreKit restore overlay isolation and reentry
         if: ${{ matrix.suite == 'architecture' }}
         run: python3 -B -m unittest discover -s tool/release -p 'test_prepare_ios_storekit_restore_codec_overlay*.py' -v
@@ -248,12 +323,8 @@ jobs:
           retention-days: 7
 
   focused:
-    # Fast, mandatory failure gate. All current Golden suites and the
-    # transaction queue are exercised before the expensive complete suite.
-    # Nothing is skipped or accepted here: a red focused check keeps the
-    # aggregate required check red, while the full eight shards wait for green.
+    # Diagnostic focused suites run independently; failures still fail this job.
     name: focused-regressions (${{ matrix.suite }})
-    needs: [source, p0]
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -271,6 +342,7 @@ jobs:
             path: test/premium_splash_experience_test.dart
           - suite: transaction-queue
             path: test/features/commerce/store_transaction_queue_test.dart
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/bil48-independent-full-tests-20261119' && inputs.approve_independent_full_tests == true && inputs.expected_source_sha == '6f10400b09f709048491f413ab8a3caf4135ab29' }}
     steps:
       - name: Configure Git LF checkout
         shell: pwsh
@@ -282,6 +354,41 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: 6f10400b09f709048491f413ab8a3caf4135ab29
+      - name: Guard manual diagnostic request and regular exact F1 source
+        shell: python
+        env:
+          BIL_DIAGNOSTIC_EVENT: ${{ github.event_name }}
+          BIL_DIAGNOSTIC_REF: ${{ github.ref }}
+          BIL_DIAGNOSTIC_CONTROLLER_SHA: ${{ github.sha }}
+          BIL_DIAGNOSTIC_EXPECTED_SOURCE: ${{ inputs.expected_source_sha }}
+          BIL_DIAGNOSTIC_APPROVED: ${{ inputs.approve_independent_full_tests }}
+        run: |
+          import json, os, stat, subprocess
+          from pathlib import Path
+          PIN = "6f10400b09f709048491f413ab8a3caf4135ab29"
+          REF = "refs/heads/codex/bil48-independent-full-tests-20261119"
+          def require(value, message):
+              if not value:
+                  raise SystemExit(message)
+          require(os.environ["BIL_DIAGNOSTIC_EVENT"] == "workflow_dispatch", "Manual diagnostic event required")
+          require(os.environ["BIL_DIAGNOSTIC_REF"] == REF, "Exact diagnostic controller branch required")
+          require(os.environ["BIL_DIAGNOSTIC_APPROVED"] == "true", "Explicit diagnostic approval required")
+          require(os.environ["BIL_DIAGNOSTIC_EXPECTED_SOURCE"] == PIN, "Expected source input differs from frozen F1")
+          require(os.environ["BIL_DIAGNOSTIC_SOURCE_SHA"] == PIN, "Diagnostic source binding changed")
+          root = Path.cwd().resolve(strict=True)
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          require(head == PIN, "Checked-out source differs from immutable F1")
+          require(not subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"], text=True).strip(), "Diagnostic source checkout is not clean before execution")
+          expected = {'.github/workflows/verify.yml': 'ec7285828ba6ba895f443921f9c132cc10b12d03', 'lib/features/commerce/presentation/bil_dynamic_store_components.dart': 'da3c7dde8a1f9807345eb03e58c148874cfa8deb', 'lib/shared/widgets/bil_glass_press_feedback.dart': '653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          for relative, blob in expected.items():
+              path = root / relative
+              info = path.stat(follow_symlinks=False)
+              require(stat.S_ISREG(info.st_mode) and not path.is_symlink() and not (getattr(info, "st_file_attributes", 0) & 0x400), "Protected source must be a regular non-reparse file")
+              require(path.resolve(strict=True).is_relative_to(root), "Protected source escaped checkout")
+              observed = subprocess.check_output(["git", "hash-object", "--", relative], text=True).strip()
+              require(observed == blob, "Protected F1 source preimage differs: " + relative)
+          print(json.dumps({"scope":"STANDALONE_DIAGNOSTIC_NOT_RELEASE", "tested_source_sha":head,"controller_sha":os.environ["BIL_DIAGNOSTIC_CONTROLLER_SHA"],"controller_ref":REF,"release_qualified":False}))
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -395,7 +502,6 @@ jobs:
     # Run every historically failing full-suite file in smaller domain groups.
     # The final aggregate requires these focused regressions and all full shards.
     name: broad-regressions (${{ matrix.suite }})
-    needs: [source, p0, focused]
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -421,6 +527,7 @@ jobs:
           - suite: community-cold-back
             files: >-
               test/features/community/community_chat_auth_session_test.dart
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/bil48-independent-full-tests-20261119' && inputs.approve_independent_full_tests == true && inputs.expected_source_sha == '6f10400b09f709048491f413ab8a3caf4135ab29' }}
     steps:
       - name: Configure Git LF checkout
         shell: pwsh
@@ -430,6 +537,41 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: 6f10400b09f709048491f413ab8a3caf4135ab29
+      - name: Guard manual diagnostic request and regular exact F1 source
+        shell: python
+        env:
+          BIL_DIAGNOSTIC_EVENT: ${{ github.event_name }}
+          BIL_DIAGNOSTIC_REF: ${{ github.ref }}
+          BIL_DIAGNOSTIC_CONTROLLER_SHA: ${{ github.sha }}
+          BIL_DIAGNOSTIC_EXPECTED_SOURCE: ${{ inputs.expected_source_sha }}
+          BIL_DIAGNOSTIC_APPROVED: ${{ inputs.approve_independent_full_tests }}
+        run: |
+          import json, os, stat, subprocess
+          from pathlib import Path
+          PIN = "6f10400b09f709048491f413ab8a3caf4135ab29"
+          REF = "refs/heads/codex/bil48-independent-full-tests-20261119"
+          def require(value, message):
+              if not value:
+                  raise SystemExit(message)
+          require(os.environ["BIL_DIAGNOSTIC_EVENT"] == "workflow_dispatch", "Manual diagnostic event required")
+          require(os.environ["BIL_DIAGNOSTIC_REF"] == REF, "Exact diagnostic controller branch required")
+          require(os.environ["BIL_DIAGNOSTIC_APPROVED"] == "true", "Explicit diagnostic approval required")
+          require(os.environ["BIL_DIAGNOSTIC_EXPECTED_SOURCE"] == PIN, "Expected source input differs from frozen F1")
+          require(os.environ["BIL_DIAGNOSTIC_SOURCE_SHA"] == PIN, "Diagnostic source binding changed")
+          root = Path.cwd().resolve(strict=True)
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          require(head == PIN, "Checked-out source differs from immutable F1")
+          require(not subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"], text=True).strip(), "Diagnostic source checkout is not clean before execution")
+          expected = {'.github/workflows/verify.yml': 'ec7285828ba6ba895f443921f9c132cc10b12d03', 'lib/features/commerce/presentation/bil_dynamic_store_components.dart': 'da3c7dde8a1f9807345eb03e58c148874cfa8deb', 'lib/shared/widgets/bil_glass_press_feedback.dart': '653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          for relative, blob in expected.items():
+              path = root / relative
+              info = path.stat(follow_symlinks=False)
+              require(stat.S_ISREG(info.st_mode) and not path.is_symlink() and not (getattr(info, "st_file_attributes", 0) & 0x400), "Protected source must be a regular non-reparse file")
+              require(path.resolve(strict=True).is_relative_to(root), "Protected source escaped checkout")
+              observed = subprocess.check_output(["git", "hash-object", "--", relative], text=True).strip()
+              require(observed == blob, "Protected F1 source preimage differs: " + relative)
+          print(json.dumps({"scope":"STANDALONE_DIAGNOSTIC_NOT_RELEASE", "tested_source_sha":head,"controller_sha":os.environ["BIL_DIAGNOSTIC_CONTROLLER_SHA"],"controller_ref":REF,"release_qualified":False}))
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -452,7 +594,6 @@ jobs:
 
   shards:
     name: flutter-tests (shard ${{ matrix.shard }} of 8)
-    needs: source
     runs-on: windows-latest
     timeout-minutes: 60
     strategy:
@@ -460,6 +601,7 @@ jobs:
       max-parallel: 8
       matrix:
         shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/bil48-independent-full-tests-20261119' && inputs.approve_independent_full_tests == true && inputs.expected_source_sha == '6f10400b09f709048491f413ab8a3caf4135ab29' }}
     steps:
       - name: Configure Git LF checkout
         shell: pwsh
@@ -471,6 +613,41 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: 6f10400b09f709048491f413ab8a3caf4135ab29
+      - name: Guard manual diagnostic request and regular exact F1 source
+        shell: python
+        env:
+          BIL_DIAGNOSTIC_EVENT: ${{ github.event_name }}
+          BIL_DIAGNOSTIC_REF: ${{ github.ref }}
+          BIL_DIAGNOSTIC_CONTROLLER_SHA: ${{ github.sha }}
+          BIL_DIAGNOSTIC_EXPECTED_SOURCE: ${{ inputs.expected_source_sha }}
+          BIL_DIAGNOSTIC_APPROVED: ${{ inputs.approve_independent_full_tests }}
+        run: |
+          import json, os, stat, subprocess
+          from pathlib import Path
+          PIN = "6f10400b09f709048491f413ab8a3caf4135ab29"
+          REF = "refs/heads/codex/bil48-independent-full-tests-20261119"
+          def require(value, message):
+              if not value:
+                  raise SystemExit(message)
+          require(os.environ["BIL_DIAGNOSTIC_EVENT"] == "workflow_dispatch", "Manual diagnostic event required")
+          require(os.environ["BIL_DIAGNOSTIC_REF"] == REF, "Exact diagnostic controller branch required")
+          require(os.environ["BIL_DIAGNOSTIC_APPROVED"] == "true", "Explicit diagnostic approval required")
+          require(os.environ["BIL_DIAGNOSTIC_EXPECTED_SOURCE"] == PIN, "Expected source input differs from frozen F1")
+          require(os.environ["BIL_DIAGNOSTIC_SOURCE_SHA"] == PIN, "Diagnostic source binding changed")
+          root = Path.cwd().resolve(strict=True)
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          require(head == PIN, "Checked-out source differs from immutable F1")
+          require(not subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"], text=True).strip(), "Diagnostic source checkout is not clean before execution")
+          expected = {'.github/workflows/verify.yml': 'ec7285828ba6ba895f443921f9c132cc10b12d03', 'lib/features/commerce/presentation/bil_dynamic_store_components.dart': 'da3c7dde8a1f9807345eb03e58c148874cfa8deb', 'lib/shared/widgets/bil_glass_press_feedback.dart': '653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          for relative, blob in expected.items():
+              path = root / relative
+              info = path.stat(follow_symlinks=False)
+              require(stat.S_ISREG(info.st_mode) and not path.is_symlink() and not (getattr(info, "st_file_attributes", 0) & 0x400), "Protected source must be a regular non-reparse file")
+              require(path.resolve(strict=True).is_relative_to(root), "Protected source escaped checkout")
+              observed = subprocess.check_output(["git", "hash-object", "--", relative], text=True).strip()
+              require(observed == blob, "Protected F1 source preimage differs: " + relative)
+          print(json.dumps({"scope":"STANDALONE_DIAGNOSTIC_NOT_RELEASE", "tested_source_sha":head,"controller_sha":os.environ["BIL_DIAGNOSTIC_CONTROLLER_SHA"],"controller_ref":REF,"release_qualified":False}))
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -506,7 +683,7 @@ jobs:
         run: |
           $bilEvidence=Join-Path $env:RUNNER_TEMP 'bil39-full-shard-${{ matrix.shard }}'
           New-Item -ItemType Directory -Path $bilEvidence -Force | Out-Null
-          python tools/qa/bil39_full_suite_files.py --source-sha $env:GITHUB_SHA --index ${{ matrix.shard }} --total 8 --output (Join-Path $bilEvidence 'plan.json')
+          python tools/qa/bil39_full_suite_files.py --source-sha $env:BIL_DIAGNOSTIC_SOURCE_SHA --index ${{ matrix.shard }} --total 8 --output (Join-Path $bilEvidence 'plan.json')
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $bilTestFiles = @((Get-Content -LiteralPath (Join-Path $bilEvidence 'plan.json') -Raw | ConvertFrom-Json).files)
           if ($bilTestFiles.Count -eq 0) { throw 'An empty complete-suite partition cannot pass' }
@@ -519,7 +696,7 @@ jobs:
             --concurrency=1 `
             @bilTestFiles 2>&1 | Tee-Object -FilePath (Join-Path $bilEvidence 'events.jsonl')
           $bilFlutterExit=$LASTEXITCODE
-          python tools/qa/bil39_flutter_event_receipt.py --log (Join-Path $bilEvidence 'events.jsonl') --source-sha $env:GITHUB_SHA --test-exit $bilFlutterExit --output (Join-Path $bilEvidence 'receipt.json')
+          python tools/qa/bil39_flutter_event_receipt.py --log (Join-Path $bilEvidence 'events.jsonl') --source-sha $env:BIL_DIAGNOSTIC_SOURCE_SHA --test-exit $bilFlutterExit --output (Join-Path $bilEvidence 'receipt.json')
           exit $LASTEXITCODE
 
       - name: Preserve exact-source complete test outcomes even on failure
@@ -543,11 +720,11 @@ jobs:
 
   integration-tools:
     name: Exact-source QA receipt and orchestration regression tests
-    needs: source
     runs-on: windows-latest
     timeout-minutes: 20
     env:
       PYTHONUTF8: '1'
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/bil48-independent-full-tests-20261119' && inputs.approve_independent_full_tests == true && inputs.expected_source_sha == '6f10400b09f709048491f413ab8a3caf4135ab29' }}
     steps:
       - name: Configure Git LF checkout
         shell: pwsh
@@ -557,6 +734,41 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+          ref: 6f10400b09f709048491f413ab8a3caf4135ab29
+      - name: Guard manual diagnostic request and regular exact F1 source
+        shell: python
+        env:
+          BIL_DIAGNOSTIC_EVENT: ${{ github.event_name }}
+          BIL_DIAGNOSTIC_REF: ${{ github.ref }}
+          BIL_DIAGNOSTIC_CONTROLLER_SHA: ${{ github.sha }}
+          BIL_DIAGNOSTIC_EXPECTED_SOURCE: ${{ inputs.expected_source_sha }}
+          BIL_DIAGNOSTIC_APPROVED: ${{ inputs.approve_independent_full_tests }}
+        run: |
+          import json, os, stat, subprocess
+          from pathlib import Path
+          PIN = "6f10400b09f709048491f413ab8a3caf4135ab29"
+          REF = "refs/heads/codex/bil48-independent-full-tests-20261119"
+          def require(value, message):
+              if not value:
+                  raise SystemExit(message)
+          require(os.environ["BIL_DIAGNOSTIC_EVENT"] == "workflow_dispatch", "Manual diagnostic event required")
+          require(os.environ["BIL_DIAGNOSTIC_REF"] == REF, "Exact diagnostic controller branch required")
+          require(os.environ["BIL_DIAGNOSTIC_APPROVED"] == "true", "Explicit diagnostic approval required")
+          require(os.environ["BIL_DIAGNOSTIC_EXPECTED_SOURCE"] == PIN, "Expected source input differs from frozen F1")
+          require(os.environ["BIL_DIAGNOSTIC_SOURCE_SHA"] == PIN, "Diagnostic source binding changed")
+          root = Path.cwd().resolve(strict=True)
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          require(head == PIN, "Checked-out source differs from immutable F1")
+          require(not subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"], text=True).strip(), "Diagnostic source checkout is not clean before execution")
+          expected = {'.github/workflows/verify.yml': 'ec7285828ba6ba895f443921f9c132cc10b12d03', 'lib/features/commerce/presentation/bil_dynamic_store_components.dart': 'da3c7dde8a1f9807345eb03e58c148874cfa8deb', 'lib/shared/widgets/bil_glass_press_feedback.dart': '653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          for relative, blob in expected.items():
+              path = root / relative
+              info = path.stat(follow_symlinks=False)
+              require(stat.S_ISREG(info.st_mode) and not path.is_symlink() and not (getattr(info, "st_file_attributes", 0) & 0x400), "Protected source must be a regular non-reparse file")
+              require(path.resolve(strict=True).is_relative_to(root), "Protected source escaped checkout")
+              observed = subprocess.check_output(["git", "hash-object", "--", relative], text=True).strip()
+              require(observed == blob, "Protected F1 source preimage differs: " + relative)
+          print(json.dumps({"scope":"STANDALONE_DIAGNOSTIC_NOT_RELEASE", "tested_source_sha":head,"controller_sha":os.environ["BIL_DIAGNOSTIC_CONTROLLER_SHA"],"controller_ref":REF,"release_qualified":False}))
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0, Node24
         with:
           python-version: '3.14'
@@ -575,6 +787,46 @@ jobs:
       contents: read
       actions: read
     steps:
+      - name: Checkout exact sources for complete file-coverage verification
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          ref: 6f10400b09f709048491f413ab8a3caf4135ab29
+      - name: Guard manual diagnostic request and regular exact F1 source
+        shell: python
+        env:
+          BIL_DIAGNOSTIC_EVENT: ${{ github.event_name }}
+          BIL_DIAGNOSTIC_REF: ${{ github.ref }}
+          BIL_DIAGNOSTIC_CONTROLLER_SHA: ${{ github.sha }}
+          BIL_DIAGNOSTIC_EXPECTED_SOURCE: ${{ inputs.expected_source_sha }}
+          BIL_DIAGNOSTIC_APPROVED: ${{ inputs.approve_independent_full_tests }}
+        run: |
+          import json, os, stat, subprocess
+          from pathlib import Path
+          PIN = "6f10400b09f709048491f413ab8a3caf4135ab29"
+          REF = "refs/heads/codex/bil48-independent-full-tests-20261119"
+          def require(value, message):
+              if not value:
+                  raise SystemExit(message)
+          require(os.environ["BIL_DIAGNOSTIC_EVENT"] == "workflow_dispatch", "Manual diagnostic event required")
+          require(os.environ["BIL_DIAGNOSTIC_REF"] == REF, "Exact diagnostic controller branch required")
+          require(os.environ["BIL_DIAGNOSTIC_APPROVED"] == "true", "Explicit diagnostic approval required")
+          require(os.environ["BIL_DIAGNOSTIC_EXPECTED_SOURCE"] == PIN, "Expected source input differs from frozen F1")
+          require(os.environ["BIL_DIAGNOSTIC_SOURCE_SHA"] == PIN, "Diagnostic source binding changed")
+          root = Path.cwd().resolve(strict=True)
+          head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          require(head == PIN, "Checked-out source differs from immutable F1")
+          require(not subprocess.check_output(["git", "status", "--porcelain=v1", "--untracked-files=all"], text=True).strip(), "Diagnostic source checkout is not clean before execution")
+          expected = {'.github/workflows/verify.yml': 'ec7285828ba6ba895f443921f9c132cc10b12d03', 'lib/features/commerce/presentation/bil_dynamic_store_components.dart': 'da3c7dde8a1f9807345eb03e58c148874cfa8deb', 'lib/shared/widgets/bil_glass_press_feedback.dart': '653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          for relative, blob in expected.items():
+              path = root / relative
+              info = path.stat(follow_symlinks=False)
+              require(stat.S_ISREG(info.st_mode) and not path.is_symlink() and not (getattr(info, "st_file_attributes", 0) & 0x400), "Protected source must be a regular non-reparse file")
+              require(path.resolve(strict=True).is_relative_to(root), "Protected source escaped checkout")
+              observed = subprocess.check_output(["git", "hash-object", "--", relative], text=True).strip()
+              require(observed == blob, "Protected F1 source preimage differs: " + relative)
+          print(json.dumps({"scope":"STANDALONE_DIAGNOSTIC_NOT_RELEASE", "tested_source_sha":head,"controller_sha":os.environ["BIL_DIAGNOSTIC_CONTROLLER_SHA"],"controller_ref":REF,"release_qualified":False}))
+
       - name: Require analysis, formatting and all eight shards to pass
         shell: bash
         env:
@@ -596,11 +848,6 @@ jobs:
             exit 1
           fi
           echo "All quality gates passed."
-
-      - name: Checkout exact sources for complete file-coverage verification
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
 
       - name: Prove all complete-suite files ran exactly once
         shell: bash
