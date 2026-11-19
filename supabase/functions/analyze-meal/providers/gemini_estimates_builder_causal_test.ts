@@ -55,8 +55,8 @@ Deno.test("V2 wire schema fixes object types, nullable unknown nutrients and exa
     assertContract(field.properties.unit.type === "STRING" && JSON.stringify(field.properties.unit.enum) === JSON.stringify([canonical]), "Canonical unit changed");
     assertContract(!("default" in field.properties.value), "Schema must not fill missing values");
   }
-  assertContract(schema.properties.candidates.maxItems === 6 && candidate.properties.alternatives.maxItems === 3
-    && candidate.properties.warnings.maxItems === 5 && candidate.properties.visible_components.maxItems === 12, "Existing output caps drifted");
+  assertContract(!JSON.stringify(schema).includes('"maxItems":'),
+    "Nested array bounds belong to server validation, not provider grammar");
 });
 
 Deno.test("V2 provider schema uses only documented subset and matching property order for both locales", () => {
@@ -181,4 +181,27 @@ Deno.test("simplified request schema does not replace server null or known-zero 
   assertContract(Object.entries(normalized).every(([key, value]) =>
     key === "calories" || key === "protein" ? value === 0 : value === null),
     "Unknown values were synthesized while simplifying provider grammar");
+});
+
+Deno.test("provider array simplification retains bounded normalized optional arrays", () => {
+  const normalized = normalizeGeminiEstimateResponse(numericRangeEnvelope((food) => {
+    food.alternatives = Array.from({ length: 4 }, (_, i) => ({ name: `Alternative ${i}`, confidence: .5 }));
+    food.warnings = Array.from({ length: 6 }, (_, i) => `Warning ${i}`);
+    food.visible_components = Array.from({ length: 13 }, (_, i) => ({
+      name: `Apple ${i}`, confidence: .98, evidence: "Visible apple",
+    }));
+  }), syntheticGemini, "en").candidates[0];
+  assertContract(normalized.alternatives.length === 3 && normalized.warnings.length === 5
+    && normalized.visible_components.length === 12, "Server array caps changed");
+});
+
+Deno.test("provider array simplification still rejects oversized candidate lists", () => {
+  const envelope = numericRangeEnvelope(() => {});
+  const text = JSON.parse(envelope.candidates[0].content.parts[0].text);
+  text.candidates = Array.from({ length: 9 }, () => text.candidates[0]);
+  envelope.candidates[0].content.parts[0].text = JSON.stringify(text);
+  let rejected = false;
+  try { normalizeGeminiEstimateResponse(envelope, syntheticGemini, "en"); }
+  catch (error) { rejected = error instanceof VisionProviderError && error.code === "malformed_response"; }
+  assertContract(rejected, "Server candidate cap changed");
 });

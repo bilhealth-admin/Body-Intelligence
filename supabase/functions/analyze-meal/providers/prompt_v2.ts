@@ -1,7 +1,7 @@
 import { mealVisionPrompt } from "./prompt.ts";
 import { geminiNutrientUnits } from "./nutrients_v2.ts";
 
-export const geminiVisionEstimateRevision = "gemini-photo-estimate-v2-schema-server-ranges-20261119";
+export const geminiVisionEstimateRevision = "gemini-photo-estimate-v2-schema-server-array-caps-20261119";
 
 export function mealVisionEstimatePrompt(locale: string): string {
   const legacy = mealVisionPrompt(locale);
@@ -31,8 +31,8 @@ export function mealVisionEstimateResponseSchema(locale: string): VisionOutputSc
     type: "OBJECT", properties, required: Object.keys(properties),
     propertyOrdering: Object.keys(properties), ...(nullable ? { nullable: true } : {}),
   });
-  const array = (items: VisionOutputSchema, maxItems: number): VisionOutputSchema => ({
-    type: "ARRAY", items, maxItems,
+  const array = (items: VisionOutputSchema): VisionOutputSchema => ({
+    type: "ARRAY", items,
   });
   const unit = (): VisionOutputSchema => ({ type: "STRING", enum: ["g", "ml", "piece"] });
   const namedConfidence = (): VisionOutputSchema => object({ name: text(), confidence: number() });
@@ -48,12 +48,12 @@ export function mealVisionEstimateResponseSchema(locale: string): VisionOutputSc
       name: text(), confidence: number(), evidence: text(),
       amount: { ...number(true), description: "Positive estimated pictured portion, or null if unsupported." },
       unit: { ...unit(), nullable: true },
-      alternatives: array(namedConfidence(), 3), uncertainty: text(true),
-      warnings: array(text(), 5),
+      alternatives: array(namedConfidence()), uncertainty: text(true),
+      warnings: array(text()),
       dish_identity: object({
-        name: text(), confidence: number(), alternatives: array(namedConfidence(), 3),
+        name: text(), confidence: number(), alternatives: array(namedConfidence()),
       }, true),
-      visible_components: array(object({ name: text(), confidence: number(), evidence: text() }), 12),
+      visible_components: array(object({ name: text(), confidence: number(), evidence: text() })),
       estimate: object({
         basis: object({
           quantity: { ...number(), description: "Strictly positive explicit nutrient basis quantity; use a null basis if unsupported." },
@@ -61,6 +61,6 @@ export function mealVisionEstimateResponseSchema(locale: string): VisionOutputSc
         }, true),
         nutrients: object(nutrients), uncertainty: text(true),
       }),
-    }), 6),
+    })),
   });
 }
