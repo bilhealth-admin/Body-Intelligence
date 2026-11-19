@@ -37,7 +37,8 @@ function estimate(raw: unknown): GeminiVisionEstimate {
     const rawBasis = object(row.basis, ["quantity", "unit"], "basis");
     if (typeof rawBasis.quantity !== "number" || !Number.isFinite(rawBasis.quantity) ||
         rawBasis.quantity <= 0 || rawBasis.quantity > 100000 ||
-        !["g", "ml", "piece"].includes(String(rawBasis.unit))) invalid("basis");
+        typeof rawBasis.unit !== "string" ||
+        !["g", "ml", "piece"].includes(rawBasis.unit)) invalid("basis");
     basis = { quantity: rawBasis.quantity, unit: rawBasis.unit as "g" | "ml" | "piece" };
   }
   const uncertainty = row.uncertainty == null ? null

@@ -1,5 +1,5 @@
 import { mealVisionPrompt } from "./prompt.ts";
-import { mealVisionEstimatePrompt } from "./prompt_v2.ts";
+import { mealVisionEstimatePrompt, mealVisionEstimateResponseSchema } from "./prompt_v2.ts";
 import { MealVisionInput, ProviderConfig, ProviderRequest } from "./types.ts";
 
 export function buildProviderRequest(
@@ -55,7 +55,9 @@ export function buildProviderRequest(
             },
           ],
         }],
-        generationConfig: { responseMimeType: "application/json" },
+        generationConfig: input.schemaVersion === 2
+          ? { responseMimeType: "application/json", responseSchema: mealVisionEstimateResponseSchema(input.requestedLocale) }
+          : { responseMimeType: "application/json" },
       }),
     };
   }
