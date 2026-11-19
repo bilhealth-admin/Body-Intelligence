@@ -119,7 +119,13 @@ Future<Food?> showTrustedVisionFoodMatchDialog(
                         evidenceOwnerKey: evidenceOwnerKey,
                       )
                   ? null
-                  : () => Navigator.pop(dialogContext, selected),
+                  : () {
+                      if (!dialogContext.mounted ||
+                          lifetime?.isActive == false) {
+                        return;
+                      }
+                      Navigator.pop(dialogContext, selected);
+                    },
               child: Text(copy.useFood),
             ),
           ],

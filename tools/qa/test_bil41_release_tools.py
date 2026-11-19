@@ -39,6 +39,30 @@ def receipt(platform='ios'):
                    for index, (name, jobs) in enumerate(gate.WORKFLOWS.items(), 1)]}
 
 
+def synthetic_cloud_source(root):
+    """Isolate gate behavior from later edits to the historical deployed graph.
+
+    These offline fixtures are not a new readback of deployment 134. The real
+    historical receipt and production gate stay unchanged. Each fixture binds
+    its own exact bytes, while the negative tests still mutate them separately.
+    """
+    record = json.loads((ROOT / gate.CLOUD_RECEIPT).read_bytes())
+    data = {}
+    for row in record['files'] + record['deployed_configuration']:
+        contents = ('// Synthetic offline cloud fixture: ' + row['path'] + '\n').encode()
+        path = root / row['path']
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(contents)
+        row['sha256'] = hashlib.sha256(contents).hexdigest()
+        if row in record['files']:
+            row['bytes'] = len(contents)
+        data[row['path']] = contents
+    receipt_path = root / gate.CLOUD_RECEIPT
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_bytes(json.dumps(record).encode())
+    return record, data
+
+
 class ExactSource41GateTest(unittest.TestCase):
     def setUp(self):
         self.workflow = 'verify.yml'
@@ -100,14 +124,7 @@ class RecordedCloudParityTest(unittest.TestCase):
         folder = tempfile.TemporaryDirectory(prefix='bil41-parity-')
         self.addCleanup(folder.cleanup)
         self.root = Path(folder.name)
-        self.record = json.loads((ROOT / gate.CLOUD_RECEIPT).read_bytes())
-        self.data = {}
-        for row in self.record['files'] + self.record['deployed_configuration']:
-            data = (ROOT / row['path']).read_bytes()
-            path = self.root / row['path']
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(data)
-            self.data[row['path']] = data
+        self.record, self.data = synthetic_cloud_source(self.root)
 
     def check(self):
         return gate.cloud_parity(self.root, self.record, source_bytes=self.data.__getitem__)
@@ -164,6 +181,8 @@ class RecordedCloudParityTest(unittest.TestCase):
 class PreSigning41OrchestrationTest(unittest.TestCase):
     def execute(self, folder, platform, *, fail_latest=False, dirty=False):
         output = folder / (platform + '.json')
+        root = folder / (platform + '-synthetic-source')
+        synthetic_cloud_source(root)
         workflows = list(gate.WORKFLOWS)
         calls = []
 
@@ -175,7 +194,7 @@ class PreSigning41OrchestrationTest(unittest.TestCase):
             if command[1] == 'hash-object':
                 return gate.PROTECTED[command[2]]
             if command[1] == 'show':
-                return (ROOT / command[2].split(':', 1)[1]).read_bytes()
+                return (root / command[2].split(':', 1)[1]).read_bytes()
             raise AssertionError('Unexpected local command')
 
         def api(path):
@@ -203,7 +222,7 @@ class PreSigning41OrchestrationTest(unittest.TestCase):
 
         with patch('sys.argv', ['gate', '--sha', SHA, '--branch', gate.BRANCH,
                    '--platform', platform, '--output', str(output)]), \
-                patch.object(gate.Path, 'cwd', return_value=ROOT), \
+                patch.object(gate.Path, 'cwd', return_value=root), \
                 patch.object(gate.subprocess, 'check_output', side_effect=git), \
                 patch.object(gate.subprocess, 'run') as ancestry, \
                 patch.object(gate, 'api', side_effect=api), \

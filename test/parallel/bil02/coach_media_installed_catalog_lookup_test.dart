@@ -23,6 +23,13 @@ const _owner = 'photo-catalog-owner';
 final _ownerKey = LocalDatabaseScope.keyForOwner(_owner);
 const _asset = 'assets/catalogs/bil_food_core.sqlite';
 
+Future<void> _tapReviewControl(WidgetTester tester, Finder target) async {
+  await tester.ensureVisible(target);
+  await tester.pumpAndSettle();
+  await tester.tap(target);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   late UnifiedFood apple;
   setUpAll(() async {
@@ -306,44 +313,164 @@ void main() {
         final lifetime = MealVisionReviewLifetime();
         Food? result;
         var returned = false;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Builder(
-              builder: (context) => Scaffold(
-                body: TextButton(
-                  onPressed: () async {
-                    result = await showTrustedVisionFoodMatchDialog(
-                      context,
-                      recognizedName: 'APPLE',
-                      foods: entries.map((entry) => entry.row).toList(),
-                      evidenceOwnerKey: _ownerKey,
-                      lifetime: lifetime,
-                    );
-                    returned = true;
-                  },
-                  child: const Text('Open catalog review'),
+        try {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Builder(
+                builder: (context) => Scaffold(
+                  body: TextButton(
+                    onPressed: () async {
+                      result = await showTrustedVisionFoodMatchDialog(
+                        context,
+                        recognizedName: 'APPLE',
+                        foods: entries.map((entry) => entry.row).toList(),
+                        evidenceOwnerKey: _ownerKey,
+                        lifetime: lifetime,
+                      );
+                      returned = true;
+                    },
+                    child: const Text('Open catalog review'),
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-        await tester.tap(find.text('Open catalog review'));
-        await tester.pumpAndSettle();
-        final use = find.byKey(const Key('premium-vision-use-food'));
-        expect(tester.widget<FilledButton>(use).onPressed, isNull);
-        await tester.tap(find.widgetWithText(ListTile, apple.name));
-        await tester.pumpAndSettle();
-        expect(tester.widget<FilledButton>(use).onPressed, isNotNull);
-        if (retire) {
+          );
+          await tester.tap(find.text('Open catalog review'));
+          await tester.pumpAndSettle();
+          final use = find.byKey(const Key('premium-vision-use-food'));
+          expect(tester.widget<FilledButton>(use).onPressed, isNotNull);
+          await _tapReviewControl(tester, use);
+          final required = find.byKey(const Key('vision-required-details'));
+          final missingSource = find.byKey(
+            ValueKey('vision-missing-source-${entries.first.row.uuid}'),
+          );
+          expect(required, findsOneWidget);
+          expect(missingSource, findsOneWidget);
+          expect(returned, isFalse);
+          expect(result, isNull);
+          expect(source.closed, isTrue);
+          await _tapReviewControl(
+            tester,
+            find.byKey(const Key('vision-required-cancel')),
+          );
+          expect(returned, isFalse);
+          expect(result, isNull);
+          // Source guidance recovers focus without selecting or returning food.
+          await _tapReviewControl(tester, use);
+          await _tapReviewControl(tester, missingSource);
+          expect(required, findsNothing);
+          expect(
+            tester
+                .widget<ListTile>(find.widgetWithText(ListTile, apple.name))
+                .focusNode!
+                .hasFocus,
+            isTrue,
+          );
+          expect(returned, isFalse);
+          expect(result, isNull);
+          await _tapReviewControl(tester, use);
+          expect(required, findsOneWidget);
+          await _tapReviewControl(
+            tester,
+            find.byKey(const Key('vision-required-cancel')),
+          );
+          await tester.tap(find.widgetWithText(ListTile, apple.name));
+          await tester.pumpAndSettle();
+          expect(tester.widget<FilledButton>(use).onPressed, isNotNull);
+          if (retire) {
+            lifetime.retire();
+            await tester.pump();
+          } else {
+            await tester.tap(find.byIcon(Icons.close));
+          }
+          await tester.pumpAndSettle();
+          expect(returned, isTrue);
+          expect(result, isNull);
+          expect(tester.takeException(), isNull);
+        } finally {
           lifetime.retire();
-          await tester.pump();
-        } else {
-          await tester.tap(find.byIcon(Icons.close));
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
         }
-        await tester.pumpAndSettle();
-        expect(returned, isTrue);
-        expect(result, isNull);
-        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+  for (final width in <double>[319, 390]) {
+    testWidgets(
+      'valid catalog selection cannot pop or escape same-turn retirement at $width',
+      (tester) async {
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = Size(width, 844);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetPhysicalSize);
+        final source = _Catalog(apple);
+        final lookup = CoachMediaInstalledCatalogLookup(
+          ownerKey: _ownerKey,
+          openCatalog: () async => source,
+        );
+        final entries = await lookup.lookup('APPLE', _State().begin());
+        final lifetime = MealVisionReviewLifetime();
+        final observer = _RetirementDialogObserver();
+        Food? result;
+        var returned = false;
+        var returnedSelections = 0;
+        try {
+          await tester.pumpWidget(
+            MaterialApp(
+              navigatorObservers: [observer],
+              home: Builder(
+                builder: (context) => Scaffold(
+                  body: TextButton(
+                    onPressed: () async {
+                      result = await showTrustedVisionFoodMatchDialog(
+                        context,
+                        recognizedName: 'APPLE',
+                        foods: entries.map((entry) => entry.row).toList(),
+                        evidenceOwnerKey: _ownerKey,
+                        lifetime: lifetime,
+                      );
+                      returned = true;
+                      if (result != null) returnedSelections++;
+                    },
+                    child: const Text('Open same-turn catalog review'),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.tap(find.text('Open same-turn catalog review'));
+          await tester.pumpAndSettle();
+          await _tapReviewControl(
+            tester,
+            find.widgetWithText(ListTile, apple.name),
+          );
+          final use = width < 320
+              ? find.byType(FilledButton)
+              : find.byKey(const Key('premium-vision-use-food'));
+          expect(use, findsOneWidget);
+          final selectedCallback = tester.widget<FilledButton>(use).onPressed;
+          expect(selectedCallback, isNotNull);
+          expect(returned, isFalse);
+          expect(source.closed, isTrue);
+          lifetime.retire();
+          // Deliberately no pump or await between retirement and captured use.
+          selectedCallback!();
+          expect(
+            observer.dialogPops,
+            0,
+            reason:
+                'A retired selection must not pop a food result before its owned removal frame.',
+          );
+          await tester.pumpAndSettle();
+          expect(returned, isTrue);
+          expect(result, isNull);
+          expect(returnedSelections, 0);
+          expect(tester.takeException(), isNull);
+        } finally {
+          lifetime.retire();
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        }
       },
     );
   }
@@ -439,3 +566,14 @@ UnifiedFood _changed(UnifiedFood food, String change) => UnifiedFood(
       FoodNutrient.calories: const NutrientAmount.known(999),
   },
 );
+
+// didRemove is the legitimate lifetime-guard path; didPop would return the
+// selected food synchronously before that scheduled owned route removal.
+class _RetirementDialogObserver extends NavigatorObserver {
+  int dialogPops = 0;
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    if (route is PopupRoute<dynamic>) dialogPops++;
+  }
+}

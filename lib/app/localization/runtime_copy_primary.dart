@@ -2,6 +2,15 @@
 /// architecture source-size ceiling.
 abstract final class RuntimeCopyPrimary {
   static const values = <String, Map<String, String>>{
+    "Could not sign out. Check your connection and retry.": {
+      "ar": "تعذر تسجيل الخروج. تحقق من اتصالك وحاول مجددًا.",
+      "en": "Could not sign out. Check your connection and retry.",
+      "fr":
+          "Impossible de se déconnecter. Vérifiez votre connexion et réessayez.",
+      "es":
+          "No se pudo cerrar sesión. Comprueba tu conexión e inténtalo de nuevo.",
+      "tr": "Oturum kapatılamadı. Bağlantınızı kontrol edip yeniden deneyin.",
+    },
     "Subscription check unavailable": {
       "ar": "تعذر التحقق من الاشتراك",
       "en": "Subscription check unavailable",

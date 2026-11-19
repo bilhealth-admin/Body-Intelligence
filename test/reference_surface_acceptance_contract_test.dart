@@ -274,7 +274,16 @@ void main() {
         'lib/features/commerce/presentation/premium_route_glass_gate_card.dart',
       );
       expect(card, contains("part of 'premium_route_glass_gate.dart';"));
+      expect(root, contains("part 'premium_route_ai_credit_surface.dart';"));
+      final retainedCoach = source(
+        'lib/features/commerce/presentation/premium_route_ai_credit_surface.dart',
+      );
+      expect(
+        retainedCoach,
+        contains("part of 'premium_route_glass_gate.dart';"),
+      );
       final glass =
+          retainedCoach +
           root +
           source(
             'lib/features/commerce/presentation/premium_route_glass_gate_components.dart',
@@ -286,16 +295,27 @@ void main() {
       expect(glass, contains('ImageFilter.blur(sigmaX: 8, sigmaY: 8)'));
       expect(glass, contains('PremiumCrownEmblem('));
       expect(glass, contains("ValueKey('premium-route-upgrade-cta')"));
-      final retainedStart = glass.indexOf('class _RetainedAiCoachSurfaceState');
-      final gateStart = glass.indexOf('class _PremiumRouteGateContents');
-      expect(retainedStart, greaterThanOrEqualTo(0));
-      expect(gateStart, greaterThan(retainedStart));
-      final retainedCoach = glass.substring(retainedStart, gateStart);
-      final upgradeGate = glass.substring(gateStart);
+      expect(retainedCoach, contains('class _RetainedAiCoachSurfaceState'));
+      final gateStart = root.indexOf('class _PremiumRouteGateContents');
+      expect(gateStart, greaterThanOrEqualTo(0));
+      final upgradeGate = root.substring(gateStart);
       expect(retainedCoach, contains('AbsorbPointer('));
       expect(retainedCoach, contains('absorbing: !allowed'));
       expect(retainedCoach, contains('Opacity('));
-      expect(retainedCoach, contains('opacity: allowed ? 1 : 0'));
+      expect(retainedCoach, contains('opacity: allowed || readOnly ? 1 : 0'));
+      expect(retainedCoach, contains('excluding: !allowed'));
+      expect(retainedCoach, contains('blockUserActions: !allowed'));
+      expect(retainedCoach, contains('visible: allowed'));
+      expect(retainedCoach, contains('if (allowed) _contentMounted = true;'));
+      expect(
+        retainedCoach,
+        contains(
+          RegExp(
+            r'final readOnly\s*=\s*_contentMounted\s*&&\s*'
+            r'\(renewalAmbiguous\s*\|\|\s*credits\.isLoading\s*\|\|\s*credits\.hasError\);',
+          ),
+        ),
+      );
       expect(upgradeGate, isNot(contains('Opacity(')));
       expect(upgradeGate, isNot(contains('ImageFiltered(')));
     });

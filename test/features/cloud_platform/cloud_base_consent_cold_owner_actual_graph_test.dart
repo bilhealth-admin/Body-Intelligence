@@ -84,12 +84,12 @@ void main() {
         await f.hideConsumer(tester);
         await f.container.pump();
         expect(
-          f.container.exists(cloudSyncConsentStateProvider),
+          f.container.read(cloudSyncConsentStateProvider.exists),
           isFalse,
           reason:
               'Do not retain a hidden test subscription across autoDispose.',
         );
-        expect(f.container.exists(cloudAuthOwnerIdProvider), isFalse);
+        expect(f.container.read(cloudAuthOwnerIdProvider.exists), isFalse);
         await f.mount(tester, withPrivacyPage: false);
         f.expectAvailable(tester, _ownerA, withPrivacyPage: false);
         expect(f.baseReads.length, greaterThan(previousReads));

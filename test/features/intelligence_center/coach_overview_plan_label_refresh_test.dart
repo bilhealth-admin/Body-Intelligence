@@ -705,10 +705,24 @@ void main() {
         fixture.emitOwner(_ownerA);
         await tester.pump();
         await tester.pump();
-        // The real scalar projection and mounted gate have three bounded
-        // invocations across these two delivered visits. No queue reuses old.
-        _expectDistinctOwnerReads(fixture, 5);
-        await _completeOnlyCurrentOwnerRead(tester, fixture, 5);
+        // Initial A, its explicit refresh, B, then the returned A are four
+        // independent producers. The scalar and visit dependency changes for
+        // one delivered owner event must not require a duplicate cloud read.
+        expect(
+          fixture.subscriptionReads.map(
+            (read) =>
+                (read.rawOwner, read.scalarOwner, read.visit, read.generation),
+          ),
+          orderedEquals(const [
+            (_ownerA, _ownerA, 0, 1),
+            (_ownerA, _ownerA, 0, 2),
+            (_ownerB, _ownerB, 1, 3),
+            (_ownerA, _ownerA, 2, 4),
+          ]),
+          reason: 'Each read belongs to its actual owner visit.',
+        );
+        _expectDistinctOwnerReads(fixture, 4);
+        await _completeOnlyCurrentOwnerRead(tester, fixture, 4);
       } finally {
         await fixture.close(tester);
       }

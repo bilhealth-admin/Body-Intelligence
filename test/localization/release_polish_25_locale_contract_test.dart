@@ -266,10 +266,30 @@ void main() {
     final partner = File(
       'lib/features/connected_health/partner_capabilities_page.dart',
     ).readAsStringSync();
-    final dailySummary = [
+    final dailySummary = readDartLibrarySource(
       'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-      'lib/features/daily_log/presentation/daily_log_meal_summary.dart',
-    ].map((path) => File(path).readAsStringSync()).join('\n');
+    );
+    final dashboardGrid = File(
+      'lib/features/dashboard/widgets/dashboard_grid.dart',
+    ).readAsStringSync();
+    final dashboardNutrients = File(
+      'lib/features/dashboard/widgets/dashboard_nutrient_goal_cards.dart',
+    ).readAsStringSync();
+    expect(
+      dashboardGrid,
+      contains("part 'dashboard_nutrient_goal_cards.dart';"),
+    );
+    expect(
+      dashboardGrid,
+      contains("part 'dashboard_nutrient_goal_section.dart';"),
+    );
+    expect(dashboardGrid, contains('_dashboardNutrientGoalSection('));
+    final dashboardSection = File(
+      'lib/features/dashboard/widgets/dashboard_nutrient_goal_section.dart',
+    ).readAsStringSync();
+    expect(dashboardSection, contains("part of 'dashboard_grid.dart';"));
+    expect(dashboardSection, contains('_DashboardNutrientGoalCards('));
+    expect(dashboardNutrients, contains("part of 'dashboard_grid.dart';"));
     final quickMacro = File(
       'lib/features/daily_log/presentation/quick_macro_entry_dialog.dart',
     ).readAsStringSync();
@@ -344,8 +364,21 @@ void main() {
     );
     expect(partner, contains('PartnerCapabilitiesCopy.of(context).text(key)'));
     expect(partner, isNot(contains('const _copy =')));
+    // The approved meal header now shows macros, not its former mineral row.
+    for (final key in const ['proteinShort', 'carbs', 'fat']) {
+      expect(dailySummary, contains("_summaryText(context, '$key')"));
+    }
+    expect(dailySummary, contains('RuntimeCopy.resolve(english,'));
+    for (final nutrient in const ['Sodium', 'Potassium']) {
+      expect(
+        dashboardNutrients,
+        contains(
+          RegExp("context\\.strings\\.text\\(\\s*'$nutrient'\\s*,?\\s*\\)"),
+        ),
+      );
+    }
     for (final nutrient in const ['Sodium', 'Potassium', 'Magnesium']) {
-      expect(dailySummary, contains("context.strings.text('$nutrient')"));
+      expect(dailySummary, isNot(contains("'$nutrient'")));
       for (final locale in AppLocalizations.supportedLocales) {
         final tag = BilLocalePolicy.canonicalTag(locale);
         expect(

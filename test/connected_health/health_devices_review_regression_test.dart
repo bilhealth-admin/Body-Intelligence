@@ -267,7 +267,26 @@ void main() {
           await tester.pumpAndSettle();
           expect(gateway.syncs, 0);
           expect(find.text('4321'), findsOneWidget);
-          expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
+          // Keep both platform matrices: Android intentionally presents only
+          // its declared Health Connect activity types, even if a historical
+          // fixture contains Apple-only readings.
+          final isIos = platform == TargetPlatform.iOS;
+          for (final key in ['heart-rate', 'sleep']) {
+            expect(
+              find.byKey(Key('watch-metric-$key')),
+              isIos ? findsOneWidget : findsNothing,
+              reason: '$key follows the declared ${platform.name} scope',
+            );
+          }
+          expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+          expect(
+            find.byKey(const Key('watch-metric-active-energy')),
+            findsOneWidget,
+          );
+          expect(
+            find.byKey(const Key('watch-metric-distance')),
+            isIos ? findsNothing : findsOneWidget,
+          );
           expect(find.byIcon(Icons.arrow_forward_rounded), findsNothing);
           await _captureSurface(
             tester,

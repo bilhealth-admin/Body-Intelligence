@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/dashboard/providers/dashboard_preferences_provider.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_header.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/premium_dashboard_benchmark.dart';
@@ -35,7 +36,10 @@ void main() {
           expect(surface, findsOneWidget);
           final size = tester.getSize(surface);
           expect(size.width, oldSize.width);
-          expect(size.height, 140);
+          expect(size.height, 143.6);
+          if (locale.languageCode == 'en') {
+            expect((size.height - oldSize.height).abs(), lessThanOrEqualTo(.5));
+          }
           expect((size.height - oldSize.height).abs(), lessThanOrEqualTo(16));
           expect(_portraitDecoration(tester).image, original.image);
           expect(_portraitDecoration(tester).gradient, original.gradient);
@@ -272,7 +276,8 @@ class _Harness {
           AppLocalizations.delegate,
           ...GlobalMaterialLocalizations.delegates,
         ],
-        theme: ThemeData(
+        theme: visualEvidenceTheme(
+          BilFlagshipTheme.light(isArabic: locale.languageCode == 'ar'),
           fontFamily: locale.languageCode == 'ar'
               ? 'NotoArabicEvidence'
               : 'RobotoEvidence',

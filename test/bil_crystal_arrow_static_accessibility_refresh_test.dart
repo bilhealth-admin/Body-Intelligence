@@ -233,7 +233,9 @@ void main() {
             return true;
           });
           if (cleanupCompleted != true) {
-            throw StateError('Real QA teardown failed; see component milestone.');
+            throw StateError(
+              'Real QA teardown failed; see component milestone.',
+            );
           }
           debugPrint('ARROW_FIXTURE ${entry.key}: teardown-complete');
         });

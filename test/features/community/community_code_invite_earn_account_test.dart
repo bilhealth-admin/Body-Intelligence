@@ -226,6 +226,34 @@ CommunityInviteAcceptance _acceptance() => const CommunityInviteAcceptance(
   displayName: 'Other Member',
 );
 
+// Lazy ListView children must be built before ensureVisible or callback reads.
+// Search only this page's list, with a fixed bound and a real hit-test check.
+Future<void> _revealOwnCodeItem(WidgetTester tester, Finder target) async {
+  final list = find.descendant(
+    of: find.byType(CommunityBilCodePage),
+    matching: find.byType(ListView),
+  );
+  expect(list, findsOneWidget);
+  // The ListView's own Scrollable precedes descendant SelectableText
+  // scrollers in framework preorder; only the outer one reveals lazy rows.
+  final scrollable = find
+      .descendant(of: list, matching: find.byType(Scrollable))
+      .first;
+  expect(scrollable, findsOneWidget);
+  final position = tester.state<ScrollableState>(scrollable).position;
+  // Start above the target even after a prior action scrolled farther down.
+  position.jumpTo(position.minScrollExtent);
+  await tester.pump();
+  await tester.scrollUntilVisible(
+    target,
+    160,
+    scrollable: scrollable,
+    maxScrolls: 12,
+  );
+  await tester.pumpAndSettle();
+  expect(target.hitTestable(), findsOneWidget);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late _Accounts accounts;
@@ -432,7 +460,7 @@ void main() {
       expect(find.text('@member_a'), findsNothing);
       expect(find.text('@member_b'), findsOneWidget);
       final share = find.byKey(const Key('community-bil-code-share'));
-      await tester.ensureVisible(share);
+      await _revealOwnCodeItem(tester, share);
       await tester.tap(share);
       await tester.pumpAndSettle();
       expect(calls, hasLength(1));
@@ -515,7 +543,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('@member_a'), findsOneWidget);
       final rotate = find.byKey(const Key('community-bil-code-rotate'));
-      await tester.ensureVisible(rotate);
+      await _revealOwnCodeItem(tester, rotate);
       expect(rotate.hitTestable(), findsOneWidget);
       await tester.tap(rotate);
       await tester.pumpAndSettle();
@@ -539,9 +567,10 @@ void main() {
         findsNothing,
       );
       expect(bilWaitingIndicators(), findsNothing);
+      await _revealOwnCodeItem(tester, rotate);
       expect(tester.widget<OutlinedButton>(rotate).onPressed, isNotNull);
       final share = find.byKey(const Key('community-bil-code-share'));
-      await tester.ensureVisible(share);
+      await _revealOwnCodeItem(tester, share);
       await tester.tap(share);
       await tester.pumpAndSettle();
       expect(shares, hasLength(1));
@@ -571,9 +600,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('@member_a'), findsOneWidget);
       final share = find.byKey(const Key('community-bil-code-share'));
+      await _revealOwnCodeItem(tester, share);
       final oldShare = tester.widget<FilledButton>(share).onPressed!;
       final rotate = find.byKey(const Key('community-bil-code-rotate'));
-      await tester.ensureVisible(rotate);
+      await _revealOwnCodeItem(tester, rotate);
       await tester.tap(rotate);
       await tester.pumpAndSettle();
       await tester.tap(find.widgetWithText(FilledButton, 'Replace code'));
@@ -602,7 +632,7 @@ void main() {
         findsNothing,
       );
       expect(lost.rotations, [_a]);
-      await tester.ensureVisible(share);
+      await _revealOwnCodeItem(tester, share);
       await tester.tap(share);
       await tester.pumpAndSettle();
       expect(shares, hasLength(1));
@@ -676,7 +706,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final share = find.byKey(const Key('community-bil-code-share'));
-      await tester.ensureVisible(share);
+      await _revealOwnCodeItem(tester, share);
       await tester.tap(share);
       await tester.tap(share);
       await tester.pump();
@@ -702,7 +732,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final rotate = find.byKey(const Key('community-bil-code-rotate'));
-      await tester.ensureVisible(rotate);
+      await _revealOwnCodeItem(tester, rotate);
       await tester.tap(rotate);
       await tester.pumpAndSettle();
       await accounts.recover(_b);
@@ -737,7 +767,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         final rotate = find.byKey(const Key('community-bil-code-rotate'));
-        await tester.ensureVisible(rotate);
+        await _revealOwnCodeItem(tester, rotate);
         await tester.tap(rotate);
         await tester.pumpAndSettle();
         await tester.tap(find.widgetWithText(FilledButton, 'Replace code'));
@@ -753,6 +783,7 @@ void main() {
           find.text(returnToA ? '@member_a' : '@member_b'),
           findsOneWidget,
         );
+        await _revealOwnCodeItem(tester, rotate);
         expect(tester.widget<OutlinedButton>(rotate).onPressed, isNotNull);
         old.complete(repository.codeFor(_a));
         await tester.pumpAndSettle();
@@ -779,11 +810,9 @@ void main() {
         MaterialApp(home: CommunityBilCodePage(repository: repository)),
       );
       await tester.pumpAndSettle();
-      final share = tester
-          .widget<FilledButton>(
-            find.byKey(const Key('community-bil-code-share')),
-          )
-          .onPressed!;
+      final shareButton = find.byKey(const Key('community-bil-code-share'));
+      await _revealOwnCodeItem(tester, shareButton);
+      final share = tester.widget<FilledButton>(shareButton).onPressed!;
       await accounts.recover(_b);
       share();
       await tester.pumpAndSettle();

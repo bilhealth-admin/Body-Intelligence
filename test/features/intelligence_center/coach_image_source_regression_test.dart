@@ -43,13 +43,38 @@ class RecordingPicker extends ImagePicker {
 }
 
 class RecordingAnalysis extends MealImageAnalysisService {
-  RecordingAnalysis(String locale) : super(requestedLocale: locale);
+  RecordingAnalysis(String locale, {this.onAnalyze})
+    : super(requestedLocale: locale);
+  final VoidCallback? onAnalyze;
   XFile? received;
   int calls = 0;
-  @override
-  Future<MealImageAnalysis> analyze(XFile image) async {
+  void _recordAnalysis(XFile image) {
     calls++;
     received = image;
+    onAnalyze?.call();
+  }
+
+  @override
+  Future<MealImageAnalysis> analyze(XFile image) async {
+    _recordAnalysis(image);
+    return _fixtureResponse();
+  }
+
+  @override
+  Future<MealImageAnalysis> analyzeForOwner(
+    XFile image, {
+    required bool Function() isCurrent,
+  }) async {
+    _recordAnalysis(image);
+    if (!isCurrent()) {
+      throw const MealImageAnalysisException(
+        MealImageAnalysisFailure.authenticationRequired,
+      );
+    }
+    return _fixtureResponse();
+  }
+
+  MealImageAnalysis _fixtureResponse() {
     return parseMealImageResponse(
       jsonEncode({
         'schema_version': 1,
@@ -75,6 +100,16 @@ class RecordingAnalysis extends MealImageAnalysisService {
       languageCode: requestedLocale!,
     );
   }
+}
+
+// Finish only this fixture's outstanding picker before disposing its scope.
+// Errors still propagate; cleanup never restarts an action or swallows failure.
+Future<void> unmountImageHarness(
+  WidgetTester tester,
+  RecordingPicker picker,
+) async {
+  if (!picker.result.isCompleted) picker.result.complete(null);
+  await harness.unmount(tester);
 }
 
 final cameraButton = find.byKey(const Key('ai-coach-food-image-button'));
@@ -123,38 +158,41 @@ void main() {
       final db = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(db.close);
       final picker = RecordingPicker();
-      final prefs = PreferencesRepository(db);
-      await harness.seed(prefs);
-      await harness.mount(
-        tester,
-        db,
-        gateway: harness.Gateway(),
-        imagePicker: picker,
-      );
-      final field = find.byKey(const Key('ai-coach-question-field'));
-      await tester.enterText(field, 'My unsent draft');
-      await tester.tap(cameraButton);
-      await tester.pumpAndSettle();
-      expect(galleryOption, findsOneWidget);
-      expect(
-        find.byKey(const Key('ai-coach-image-source-camera')),
-        findsOneWidget,
-      );
-      await tester.tap(find.byKey(const Key('ai-coach-image-source-cancel')));
-      await tester.pumpAndSettle();
-      expect(picker.calls, 0);
-      expect(
-        tester.widget<TextField>(field).controller!.text,
-        'My unsent draft',
-      );
-      expect(await prefs.get(harness.activeKey), 'current');
-      await tester.tap(cameraButton);
-      await tester.pumpAndSettle();
-      expect(galleryOption, findsOneWidget);
-      await tester.tap(find.byKey(const Key('ai-coach-image-source-cancel')));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      await harness.unmount(tester);
+      try {
+        final prefs = PreferencesRepository(db);
+        await harness.seed(prefs);
+        await harness.mount(
+          tester,
+          db,
+          gateway: harness.Gateway(),
+          imagePicker: picker,
+        );
+        final field = find.byKey(const Key('ai-coach-question-field'));
+        await tester.enterText(field, 'My unsent draft');
+        await tester.tap(cameraButton);
+        await tester.pumpAndSettle();
+        expect(galleryOption, findsOneWidget);
+        expect(
+          find.byKey(const Key('ai-coach-image-source-camera')),
+          findsOneWidget,
+        );
+        await tester.tap(find.byKey(const Key('ai-coach-image-source-cancel')));
+        await tester.pumpAndSettle();
+        expect(picker.calls, 0);
+        expect(
+          tester.widget<TextField>(field).controller!.text,
+          'My unsent draft',
+        );
+        expect(await prefs.get(harness.activeKey), 'current');
+        await tester.tap(cameraButton);
+        await tester.pumpAndSettle();
+        expect(galleryOption, findsOneWidget);
+        await tester.tap(find.byKey(const Key('ai-coach-image-source-cancel')));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      } finally {
+        await unmountImageHarness(tester, picker);
+      }
     },
   );
 
@@ -165,61 +203,60 @@ void main() {
         final db = AppDatabase.forTesting(NativeDatabase.memory());
         addTearDown(db.close);
         final picker = RecordingPicker();
-        var analyses = 0;
-        var permissionCalls = 0;
-        const permissions = MethodChannel(
-          'flutter.baseflow.com/permissions/methods',
-        );
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          permissions,
-          (call) async {
-            permissionCalls++;
-            return 0; // Gallery must work even when camera access is denied.
-          },
-        );
-        addTearDown(
-          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        try {
+          var analyses = 0;
+          var permissionCalls = 0;
+          const permissions = MethodChannel(
+            'flutter.baseflow.com/permissions/methods',
+          );
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
             permissions,
-            null,
-          ),
-        );
-        final router = await harness.mount(
-          tester,
-          db,
-          gateway: harness.Gateway(),
-          imagePicker: picker,
-          imageAnalysis: (locale) {
-            analyses++;
-            return RecordingAnalysis(locale);
-          },
-        );
-        await tester.tap(cameraButton);
-        await tester.pumpAndSettle();
-        await tester.tap(galleryOption);
-        await tester.pumpAndSettle();
-        await tester.tap(cameraButton);
-        await tester.pumpAndSettle();
-        expect(picker.calls, 1);
-        expect(permissionCalls, 0);
-        if (leave) {
-          router.go('/dashboard');
-          await tester.pumpAndSettle();
-        }
-        picker.result.complete(leave ? XFile('late-result.jpg') : null);
-        await tester.pumpAndSettle();
-        expect(analyses, 0);
-        expect(find.bySubtype<AlertDialog>(), findsNothing);
-        if (!leave) {
+            (call) async {
+              permissionCalls++;
+              return 0; // Gallery must work even when camera access is denied.
+            },
+          );
+          addTearDown(
+            () => tester.binding.defaultBinaryMessenger
+                .setMockMethodCallHandler(permissions, null),
+          );
+          final router = await harness.mount(
+            tester,
+            db,
+            gateway: harness.Gateway(),
+            imagePicker: picker,
+            imageAnalysis: (locale) =>
+                RecordingAnalysis(locale, onAnalyze: () => analyses++),
+          );
           await tester.tap(cameraButton);
           await tester.pumpAndSettle();
-          expect(galleryOption, findsOneWidget);
-          await tester.tap(
-            find.byKey(const Key('ai-coach-image-source-cancel')),
-          );
+          await tester.tap(galleryOption);
           await tester.pumpAndSettle();
+          await tester.tap(cameraButton);
+          await tester.pumpAndSettle();
+          expect(picker.calls, 1);
+          expect(permissionCalls, 0);
+          if (leave) {
+            router.go('/dashboard');
+            await tester.pumpAndSettle();
+          }
+          picker.result.complete(leave ? XFile('late-result.jpg') : null);
+          await tester.pumpAndSettle();
+          expect(analyses, 0);
+          expect(find.bySubtype<AlertDialog>(), findsNothing);
+          if (!leave) {
+            await tester.tap(cameraButton);
+            await tester.pumpAndSettle();
+            expect(galleryOption, findsOneWidget);
+            await tester.tap(
+              find.byKey(const Key('ai-coach-image-source-cancel')),
+            );
+            await tester.pumpAndSettle();
+          }
+          expect(tester.takeException(), isNull);
+        } finally {
+          await unmountImageHarness(tester, picker);
         }
-        expect(tester.takeException(), isNull);
-        await harness.unmount(tester);
       },
     );
   }
@@ -231,63 +268,67 @@ void main() {
         final db = AppDatabase.forTesting(NativeDatabase.memory());
         addTearDown(db.close);
         final picker = RecordingPicker();
-        final folder = await tester.runAsync(
-          () => Directory.systemTemp.createTemp('bil-coach-review-photo-'),
-        );
-        final file = File('${folder!.path}/selected-local-photo.png');
-        await tester.runAsync(
-          () => file.writeAsBytes(validMealVisionPngBytes()),
-        );
-        addTearDown(() async {
-          await harness.unmount(tester);
-          if (await file.exists()) await file.delete();
-          if (await folder.exists()) await folder.delete();
-        });
-        final image = XFile(file.path);
-        picker.result.complete(image);
-        RecordingAnalysis? service;
-        await harness.mount(
-          tester,
-          db,
-          gateway: harness.Gateway(),
-          arabic: arabic,
-          imagePicker: picker,
-          imageAnalysis: (locale) => service = RecordingAnalysis(locale),
-        );
-        addTearDown(() => harness.unmount(tester));
-        await tester.tap(cameraButton);
-        await tester.pumpAndSettle();
-        await tester.tap(galleryOption);
-        await tester.pumpAndSettle();
-        expect(service!.received, same(image));
-        expect(service!.calls, 1);
-        expect(service!.requestedLocale, arabic ? 'ar' : 'en');
-        // A regular Dialog hosts the premium review at phone widths.
-        expect(
-          find.byKey(const Key('premium-vision-render-surface')),
-          findsOneWidget,
-        );
-        final originalPhoto = find.byKey(const Key('premium-vision-photo'));
-        expect(originalPhoto, findsOneWidget);
-        final preview = tester.widget<Image>(
-          find.descendant(of: originalPhoto, matching: find.byType(Image)),
-        );
-        expect(preview.image, isA<FileImage>());
-        expect((preview.image as FileImage).file.path, image.path);
-        expect(
-          find
-              .descendant(
-                of: find.byKey(const Key('premium-vision-food-0')),
-                matching: find.text(arabic ? 'طماطم' : 'Tomato'),
-              )
-              .first,
-          findsOneWidget,
-        );
-        await tester.tap(find.byTooltip(arabic ? 'إلغاء' : 'Cancel'));
-        await tester.pumpAndSettle();
-        expect(await PreferencesRepository(db).get(harness.activeKey), isNull);
-        expect(tester.takeException(), isNull);
-        await harness.unmount(tester);
+        try {
+          final folder = await tester.runAsync(
+            () => Directory.systemTemp.createTemp('bil-coach-review-photo-'),
+          );
+          final file = File('${folder!.path}/selected-local-photo.png');
+          addTearDown(() async {
+            if (await file.exists()) await file.delete();
+            if (await folder.exists()) await folder.delete();
+          });
+          await tester.runAsync(
+            () => file.writeAsBytes(validMealVisionPngBytes()),
+          );
+          final image = XFile(file.path);
+          picker.result.complete(image);
+          RecordingAnalysis? service;
+          await harness.mount(
+            tester,
+            db,
+            gateway: harness.Gateway(),
+            arabic: arabic,
+            imagePicker: picker,
+            imageAnalysis: (locale) => service = RecordingAnalysis(locale),
+          );
+          await tester.tap(cameraButton);
+          await tester.pumpAndSettle();
+          await tester.tap(galleryOption);
+          await tester.pumpAndSettle();
+          expect(service!.received, same(image));
+          expect(service!.calls, 1);
+          expect(service!.requestedLocale, arabic ? 'ar' : 'en');
+          // A regular Dialog hosts the premium review at phone widths.
+          expect(
+            find.byKey(const Key('premium-vision-render-surface')),
+            findsOneWidget,
+          );
+          final originalPhoto = find.byKey(const Key('premium-vision-photo'));
+          expect(originalPhoto, findsOneWidget);
+          final preview = tester.widget<Image>(
+            find.descendant(of: originalPhoto, matching: find.byType(Image)),
+          );
+          expect(preview.image, isA<FileImage>());
+          expect((preview.image as FileImage).file.path, image.path);
+          expect(
+            find
+                .descendant(
+                  of: find.byKey(const Key('premium-vision-food-0')),
+                  matching: find.text(arabic ? 'طماطم' : 'Tomato'),
+                )
+                .first,
+            findsOneWidget,
+          );
+          await tester.tap(find.byTooltip(arabic ? 'إلغاء' : 'Cancel'));
+          await tester.pumpAndSettle();
+          expect(
+            await PreferencesRepository(db).get(harness.activeKey),
+            isNull,
+          );
+          expect(tester.takeException(), isNull);
+        } finally {
+          await unmountImageHarness(tester, picker);
+        }
       },
     );
   }
@@ -298,38 +339,41 @@ void main() {
       final db = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(db.close);
       final picker = RecordingPicker();
-      await harness.mount(
-        tester,
-        db,
-        gateway: harness.Gateway(),
-        arabic: true,
-        imagePicker: picker,
-      );
-      await tester.tap(cameraButton);
-      await tester.pumpAndSettle();
-      await tester.tap(galleryOption);
-      await tester.pumpAndSettle();
-      picker.result.completeError(
-        PlatformException(
-          code: 'photo_access_denied',
-          message: 'sensitive-native-detail',
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.textContaining('sensitive-native-detail'), findsNothing);
-      expect(
-        find.text('فشل تحليل صورة الطعام. لم يُسجّل شيء.'),
-        findsOneWidget,
-      );
-      await tester.pump(const Duration(seconds: 5));
-      await tester.pumpAndSettle();
-      await tester.tap(cameraButton);
-      await tester.pumpAndSettle();
-      expect(galleryOption, findsOneWidget);
-      await tester.tap(find.byKey(const Key('ai-coach-image-source-cancel')));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      await harness.unmount(tester);
+      try {
+        await harness.mount(
+          tester,
+          db,
+          gateway: harness.Gateway(),
+          arabic: true,
+          imagePicker: picker,
+        );
+        await tester.tap(cameraButton);
+        await tester.pumpAndSettle();
+        await tester.tap(galleryOption);
+        await tester.pumpAndSettle();
+        picker.result.completeError(
+          PlatformException(
+            code: 'photo_access_denied',
+            message: 'sensitive-native-detail',
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.textContaining('sensitive-native-detail'), findsNothing);
+        expect(
+          find.text('فشل تحليل صورة الطعام. لم يُسجّل شيء.'),
+          findsOneWidget,
+        );
+        await tester.pump(const Duration(seconds: 5));
+        await tester.pumpAndSettle();
+        await tester.tap(cameraButton);
+        await tester.pumpAndSettle();
+        expect(galleryOption, findsOneWidget);
+        await tester.tap(find.byKey(const Key('ai-coach-image-source-cancel')));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+      } finally {
+        await unmountImageHarness(tester, picker);
+      }
     },
   );
 }

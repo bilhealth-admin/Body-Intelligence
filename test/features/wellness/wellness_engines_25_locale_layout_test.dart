@@ -13,6 +13,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../qa_next/feature_splashes_test_support.dart'
+    show closeFeatureSplashDatabase;
+
 void main() {
   test('sleep and fasting engine copy is complete beyond the core locales', () {
     expect(wellnessEngineExtendedCopyIsComplete, isTrue);
@@ -81,75 +84,78 @@ void main() {
         addTearDown(tester.view.reset);
         SharedPreferences.setMockInitialValues(const {});
         final database = AppDatabase.forTesting(NativeDatabase.memory());
-        addTearDown(database.close);
-
-        Future<void> pump(Widget page) async {
-          await tester.pumpWidget(
-            ProviderScope(
-              overrides: [
-                databaseProvider.overrideWithValue(database),
-                exerciseCaloriePreferencesProvider.overrideWithValue(
-                  const AsyncData(ExerciseCaloriePreferences()),
-                ),
-                todayAuthoritativeExerciseEnergyProvider.overrideWithValue(
-                  const AsyncData(null),
-                ),
-              ],
-              child: MaterialApp(
-                locale: locale,
-                supportedLocales: AppLocalizations.supportedLocales,
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
+        try {
+          Future<void> pump(Widget page) async {
+            await tester.pumpWidget(
+              ProviderScope(
+                overrides: [
+                  databaseProvider.overrideWithValue(database),
+                  exerciseCaloriePreferencesProvider.overrideWithValue(
+                    const AsyncData(ExerciseCaloriePreferences()),
+                  ),
+                  todayAuthoritativeExerciseEnergyProvider.overrideWithValue(
+                    const AsyncData(null),
+                  ),
                 ],
-                builder: (context, child) => MediaQuery(
-                  data: MediaQuery.of(
-                    context,
-                  ).copyWith(textScaler: const TextScaler.linear(1.6)),
-                  child: child ?? const SizedBox.shrink(),
+                child: MaterialApp(
+                  locale: locale,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                  builder: (context, child) => MediaQuery(
+                    data: MediaQuery.of(
+                      context,
+                    ).copyWith(textScaler: const TextScaler.linear(1.6)),
+                    child: child ?? const SizedBox.shrink(),
+                  ),
+                  home: page,
                 ),
-                home: page,
               ),
+            );
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 600));
+            expect(tester.takeException(), isNull);
+          }
+
+          await pump(const ExerciseCalorieSettingsPage());
+          await tester.scrollUntilVisible(
+            find.byKey(
+              const Key('exercise-energy-evidence-state'),
+              skipOffstage: false,
             ),
+            240,
+            scrollable: find.byType(Scrollable).last,
           );
           await tester.pump();
-          await tester.pump(const Duration(milliseconds: 600));
+          expect(
+            find.byKey(const Key('exercise-energy-evidence-state')),
+            findsOneWidget,
+          );
+
+          await pump(const SleepTrackerPage());
+          expect(find.byKey(const Key('sleep-log-tab')), findsOneWidget);
+          await tester.scrollUntilVisible(
+            find.byKey(const Key('sleep-schedule-card')),
+            300,
+            scrollable: find.byType(Scrollable).last,
+          );
+          await tester.pump();
           expect(tester.takeException(), isNull);
+
+          await pump(const FastingTimerPage());
+          expect(find.byType(FastingTimerPage), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        } finally {
+          await tester.pumpWidget(const SizedBox.shrink());
+          // Disposal can enqueue Drift's Timer.run cache cleanup. A pump with
+          // no duration drains microtasks only; explicit zero runs due timers.
+          await tester.pump(Duration.zero);
+          await closeFeatureSplashDatabase(tester, database);
         }
-
-        await pump(const ExerciseCalorieSettingsPage());
-        await tester.scrollUntilVisible(
-          find.byKey(
-            const Key('exercise-energy-evidence-state'),
-            skipOffstage: false,
-          ),
-          240,
-          scrollable: find.byType(Scrollable).last,
-        );
-        await tester.pump();
-        expect(
-          find.byKey(const Key('exercise-energy-evidence-state')),
-          findsOneWidget,
-        );
-
-        await pump(const SleepTrackerPage());
-        expect(find.byKey(const Key('sleep-log-tab')), findsOneWidget);
-        await tester.scrollUntilVisible(
-          find.byKey(const Key('sleep-schedule-card')),
-          300,
-          scrollable: find.byType(Scrollable).last,
-        );
-        await tester.pump();
-        expect(tester.takeException(), isNull);
-
-        await pump(const FastingTimerPage());
-        expect(find.byType(FastingTimerPage), findsOneWidget);
-        expect(tester.takeException(), isNull);
-
-        await tester.pumpWidget(const SizedBox.shrink());
-        await tester.pump();
       },
     );
   }

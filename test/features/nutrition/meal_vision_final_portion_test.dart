@@ -360,11 +360,14 @@ void main() {
   test(
     'both diary entry points commit final values and route-scoped original photo',
     () {
-      for (final name in [
-        'daily_log_capture_actions.dart',
-        'food_log_actions.dart',
+      for (final (library, name) in [
+        ('daily_log_page.dart', 'daily_log_capture_actions.dart'),
+        ('food_log_page.dart', 'food_log_photo_actions.dart'),
       ]) {
+        final root = File('lib/features/daily_log/$library').readAsStringSync();
+        expect(root, contains("part '$name';"));
         final source = File('lib/features/daily_log/$name').readAsStringSync();
+        expect(source, contains("part of '$library';"));
         expect(source, contains('showReviewedVisionFoodMatchDialog('));
         expect(source, contains('imagePath: image.path,'));
         expect(source, contains('amount: reviewed.amount,'));

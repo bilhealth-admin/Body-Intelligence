@@ -13,6 +13,8 @@ class _RetainedAiCoachSurface extends ConsumerStatefulWidget {
 class _RetainedAiCoachSurfaceState
     extends ConsumerState<_RetainedAiCoachSurface> {
   bool _contentMounted = false;
+  bool _observingStoreRenewal = false;
+  final Listenable _idleRenewal = Listenable.merge(const <Listenable>[]);
   bool? _lastVerifiedAccess;
   DateTime? _pendingQuotaBoundary;
   DateTime? _quotaCheckStartedAt;
@@ -91,13 +93,34 @@ class _RetainedAiCoachSurfaceState
       _lastVerifiedAccess = freshAccess;
     }
 
-    // Observe only its exact-boundary timer. A paid plan never grants AI
-    // credit; the reserved-aware quota RPC remains the sole Send authority.
-    ref.watch(verifiedSubscriptionAccessProvider);
-    final source = ref.watch(verifiedSubscriptionStateProvider);
-    final hint = ref.watch(storeRenewalObservationProvider);
     final quota = ref.watch(aiCoachAccessSnapshotStoreProvider);
     final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
+    final prepaid =
+        !ownerSnapshot.hasError &&
+        quota.hasFreshPrepaid(
+          ownerId: ref.watch(verifiedEntitlementOwnerIdProvider),
+          ownerVisit: ref.watch(verifiedEntitlementOwnerVisitProvider),
+          now: now,
+        );
+    // First establish current quota provenance. Pending credit never grants
+    // access; a pure Boost balance must not start a subscription poll merely
+    // because the first asynchronous quota response has not arrived yet.
+    final observeRenewal =
+        !prepaid && (!credits.isLoading || _observingStoreRenewal);
+    _observingStoreRenewal = observeRenewal;
+    if (observeRenewal) ref.watch(verifiedSubscriptionAccessProvider);
+    final source = observeRenewal
+        ? ref.watch(verifiedSubscriptionStateProvider)
+        : const AsyncValue<SubscriptionState>.loading();
+    final hint = observeRenewal
+        ? ref.watch(storeRenewalObservationProvider)
+        : null;
+    if (prepaid) {
+      _pendingQuotaBoundary = null;
+      _pendingQuotaObservation = null;
+      _quotaCheckStartedAt = null;
+      _quotaCheckPeriodKey = null;
+    }
     final definitive =
         !source.isLoading &&
         !source.hasError &&
@@ -151,16 +174,18 @@ class _RetainedAiCoachSurfaceState
     final checking =
         credits.isLoading && _lastVerifiedAccess == null && !unavailable;
     if (allowed) _contentMounted = true;
-    final burst = ref.watch(storeRenewalRecheckProvider);
-    if (renewalAmbiguous && hint != null) burst.begin(hint);
+    final burst = observeRenewal
+        ? ref.watch(storeRenewalRecheckProvider)
+        : null;
+    if (renewalAmbiguous && hint != null) burst?.begin(hint);
     return ListenableBuilder(
-      listenable: burst,
+      listenable: burst ?? _idleRenewal,
       builder: (context, _) {
         // The canonical row can advance while quota is still unavailable.
         // Its new period has no pending burst: keep the original deadline.
         final pendingQuota = _pendingQuotaObservation;
         final quotaTimedOut =
-            pendingQuota != null && burst.timedOut(pendingQuota);
+            pendingQuota != null && burst?.timedOut(pendingQuota) == true;
         final retry = readOnly && (credits.hasError || quotaTimedOut);
         if (renewalAmbiguous && !_contentMounted) {
           if (quotaTimedOut) {
@@ -172,7 +197,7 @@ class _RetainedAiCoachSurfaceState
                 ref.invalidate(aiCoachCreditAccessProvider);
                 // Fresh canonical proof needs only quota recovery. Never
                 // requery the old store period solely to refresh AI credits.
-                if (hint != null && hint.pendingAt(now)) burst.retry(hint);
+                if (hint != null && hint.pendingAt(now)) burst?.retry(hint);
               },
               child: const SizedBox.shrink(),
             );
@@ -242,7 +267,7 @@ class _RetainedAiCoachSurfaceState
                       onPressed: () {
                         ref.invalidate(aiCoachCreditAccessProvider);
                         if (hint != null && hint.pendingAt(now)) {
-                          burst.retry(hint);
+                          burst?.retry(hint);
                         }
                       },
                       child: Text(context.strings.text('Try again')),

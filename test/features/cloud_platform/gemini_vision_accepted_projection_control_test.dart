@@ -145,6 +145,16 @@ final class _PartialCas {
     expect((await f.transfer()).completed, isTrue);
     await DailyLogRepository(c).reopenDay(day);
     if (known && calories == 0) {
+      // Adding a zero member can leave every old parent payload unchanged,
+      // including a same-second close. Make this a genuine competing local
+      // edit through the normal repository, not a timestamp-dependent conflict.
+      final staleOrdinary = await f.ordinaryItem(c);
+      expect(staleOrdinary.quantity, 1);
+      final competingQuantity = updatedQuantity + 1;
+      await MealRepository(
+        c,
+      ).updateMealItem(id: staleOrdinary.id, quantity: competingQuantity);
+      expect((await f.ordinaryItem(c)).quantity, competingQuantity);
       // Zero calories is a real positive portion with known-zero nutrition,
       // not an all-zero Quick Macro request that production rejects.
       const request = 'accepted-zero-seasoning';
@@ -222,6 +232,29 @@ final class _PartialCas {
         .where((meal) => meal.type != 'breakfast')
         .map((m) => m.uuid)
         .toSet();
+    final dirtyParents = (await ec.codec.capture(scopes: {'nutrition'}))
+        .where(
+          (snapshot) =>
+              snapshot.type == 'meal' && oldParents.contains(snapshot.id),
+        )
+        .toList();
+    expect(dirtyParents, hasLength(2));
+    for (final snapshot in dirtyParents) {
+      final baseline = (await ec.journal.entry(snapshot.key))!;
+      expect(baseline.revision, 1);
+      expect(baseline.baseline, isNotNull);
+      expect(baseline.pending, isNull);
+      expect(baseline.conflict, isNull);
+      expect(
+        snapshotFingerprint(snapshot),
+        isNot(baseline.baseline),
+        reason: 'A competing parent must be actually dirty before CAS.',
+      );
+      expect(
+        f.server.records['nutrition:meal:${snapshot.id}']!['server_revision'],
+        2,
+      );
+    }
     final seen = f.server.seen.length;
     final report = await ec.run({'nutrition'});
     expect(report.conflicts, 2, reason: _describe(report));

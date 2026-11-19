@@ -129,7 +129,9 @@ void main() {
     expect(find.text('Export your own data'), findsOneWidget);
     expect(find.text('Watch and health sync'), findsOneWidget);
     expect(find.text('300+ workout videos'), findsNothing);
-    expect(find.text('View all features (17)'), findsOneWidget);
+    // Personal plan is now an explicit Premium benefit, raising the approved
+    // inventory to18; absence of store metadata must still invent no price.
+    expect(find.text('View all features (18)'), findsOneWidget);
     final freeCard = find.byKey(const ValueKey('store-free-tier-card'));
     final premiumCard = find.byKey(
       const ValueKey('store-tier-premiumSubscription'),
@@ -160,6 +162,7 @@ void main() {
     for (final benefit in <String>[
       '300+ workout videos',
       'Personal weekly meal plan',
+      'Personal plan',
       'Goal-based nutrition pathways',
       'Weekly trends and comparisons',
       'Live fasting timer',

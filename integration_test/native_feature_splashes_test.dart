@@ -689,6 +689,13 @@ void main() {
                 matching: find.byType(BilSplashCapsuleProgress),
               ),
               reduced: scene.reduced,
+              onEvidence: (evidence) {
+                final diagnostics =
+                    (source['capsule_paint_diagnostics'] ??=
+                            <String, Object?>{})
+                        as Map<String, Object?>;
+                diagnostics[kind] = evidence;
+              },
             );
             final captureAt = captureWatch.elapsedMilliseconds;
             expect(captureAt, lessThan(1900));

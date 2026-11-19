@@ -414,12 +414,34 @@ class _NativeCapsulePaint {
     required this.phase,
     required this.reduced,
     required this.rgba,
+    required this.readDetails,
   });
   final Size size;
   final double phase;
   final bool reduced;
   final List<int> rgba;
+  final Map<String, Object?> readDetails;
+
+  Map<String, Object?> toDiagnosticJson() => {
+    'logical_width': size.width,
+    'logical_height': size.height,
+    'phase': phase,
+    'reduced_motion': reduced,
+    ...readDetails,
+    'raw_rgba_bytes': rgba,
+  };
 }
+
+Map<String, Object?> _nativeCapsuleReadFrame(WidgetTester tester) => {
+  'current_frame_timestamp_us': tester.binding.schedulerPhase.name == 'idle'
+      ? null
+      : tester.binding.currentFrameTimeStamp.inMicroseconds,
+  'last_system_frame_timestamp_us':
+      tester.binding.currentSystemFrameTimeStamp.inMicroseconds,
+  'scheduler_phase': tester.binding.schedulerPhase.name,
+  'has_scheduled_frame': tester.binding.hasScheduledFrame,
+  'transient_callback_count': tester.binding.transientCallbackCount,
+};
 
 Future<_NativeCapsulePaint> _readNativeCapsulePaint(
   WidgetTester tester,
@@ -435,8 +457,25 @@ Future<_NativeCapsulePaint> _readNativeCapsulePaint(
   final boundary = element
       .findAncestorRenderObjectOfType<RenderRepaintBoundary>();
   expect(boundary, isNotNull);
+  final renderBoundary = boundary!;
+  final colorArgb = widget.color.toARGB32();
+  final readDetails = <String, Object?>{
+    'color_argb': colorArgb,
+    'color_argb_hex': colorArgb.toRadixString(16).padLeft(8, '0'),
+    'boundary_identity': identityHashCode(renderBoundary),
+    'boundary_type': renderBoundary.runtimeType.toString(),
+    'boundary_attached': renderBoundary.attached,
+    'boundary_width': renderBoundary.size.width,
+    'boundary_height': renderBoundary.size.height,
+    'layer_identity': renderBoundary.debugLayer == null
+        ? null
+        : identityHashCode(renderBoundary.debugLayer),
+    'layer_type': renderBoundary.debugLayer?.runtimeType.toString(),
+    'read_requested_utc': DateTime.now().toUtc().toIso8601String(),
+    'request_frame': _nativeCapsuleReadFrame(tester),
+  };
   final snapshot = await tester.runAsync(() async {
-    final image = await boundary!.toImage(pixelRatio: 1);
+    final image = await renderBoundary.toImage(pixelRatio: 1);
     try {
       expect(image.width, size.width.ceil());
       expect(image.height, 7);
@@ -447,6 +486,12 @@ Future<_NativeCapsulePaint> _readNativeCapsulePaint(
         size: size,
         phase: widget.progress,
         reduced: widget.reducedMotion,
+        readDetails: {
+          ...readDetails,
+          'read_completed_utc': DateTime.now().toUtc().toIso8601String(),
+          'completion_frame': _nativeCapsuleReadFrame(tester),
+          'boundary_still_attached': renderBoundary.attached,
+        },
         rgba: bytes.buffer
             .asUint8List(bytes.offsetInBytes, bytes.lengthInBytes)
             .toList(growable: false),
@@ -463,12 +508,27 @@ Future<Map<String, Object?>> _verifyNativeCapsulePaint(
   WidgetTester tester,
   Finder capsule, {
   required bool reduced,
+  void Function(Map<String, Object?>)? onEvidence,
 }) async {
   final first = await _readNativeCapsulePaint(tester, capsule);
+  onEvidence?.call({
+    'schema': 'bil.native.capsule-pair-diagnostics.v1',
+    'qualification': 'DIAGNOSTIC_ONLY_NOT_TEST_PASS',
+    'complete_pair': false,
+    'first': first.toDiagnosticJson(),
+  });
   // This is a visual sampling interval within the existing separate visit,
   // not a change to any welcome, operation or test timeout.
   await tester.pump(const Duration(milliseconds: 320));
   final second = await _readNativeCapsulePaint(tester, capsule);
+  final pairEvidence = <String, Object?>{
+    'schema': 'bil.native.capsule-pair-diagnostics.v1',
+    'qualification': 'DIAGNOSTIC_ONLY_NOT_TEST_PASS',
+    'complete_pair': true,
+    'first': first.toDiagnosticJson(),
+    'second': second.toDiagnosticJson(),
+  };
+  onEvidence?.call(pairEvidence);
   expect(second.size, first.size);
   expect(first.reduced, reduced);
   expect(second.reduced, reduced);
@@ -491,6 +551,12 @@ Future<Map<String, Object?>> _verifyNativeCapsulePaint(
       changedPixels++;
     }
   }
+  onEvidence?.call({
+    ...pairEvidence,
+    'changed_rgba_pixel_count': changedPixels,
+    'painted_pixel_count': paintedPixels,
+    'distinct_rgba_colors': colors.length,
+  });
   expect(paintedPixels, greaterThan(0), reason: 'The real capsule must paint.');
   expect(
     colors.length,

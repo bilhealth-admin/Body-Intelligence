@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../auth/retryable_auth_session.dart';
 import '../domain/commerce_plan.dart';
+import '../domain/ai_coach_access_snapshot.dart';
 import 'verified_purchase_handoff.dart';
 import '../domain/free_plan.dart';
 import '../domain/market_offer_policy.dart';
@@ -19,6 +20,8 @@ import '../domain/subscription_state.dart';
 import '../repositories/entitlement_repository.dart';
 import '../repositories/local_entitlement_repository.dart';
 import '../repositories/server_entitlement_repository.dart';
+
+export '../domain/ai_coach_access_snapshot.dart';
 
 part 'commerce_presentation_providers.dart';
 
@@ -195,6 +198,7 @@ void Function() _observedAuthorityReload(
   Ref ref,
   void Function() reload, {
   void Function()? resumeReload,
+  Duration Function()? refreshDelay,
 }) {
   Timer? refresh;
   var disposed = false;
@@ -231,7 +235,10 @@ void Function() _observedAuthorityReload(
   });
   void schedule() {
     refresh?.cancel();
-    refresh = Timer(const Duration(seconds: 30), reload);
+    refresh = Timer(
+      refreshDelay?.call() ?? const Duration(seconds: 30),
+      reload,
+    );
   }
 
   ref.onCancel(() {
@@ -478,15 +485,6 @@ final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
 /// opens only after Supabase reports a positive reserved-aware total from an
 /// AI subscription allowance and/or verified Boost balance. An active plan at
 /// zero does not bypass quota, and a consumed/forged callback grants nothing.
-final class AiCoachAccessSnapshotStore {
-  bool? verifiedAccess;
-  String? verifiedUsagePlan;
-  DateTime? usageRequestedAt;
-  DateTime? usageObservedAt;
-  bool usageResponseFresh = false;
-  int generation = 0;
-}
-
 /// A new store for every owner transition, including sign-out. Pending work
 /// from an earlier session cannot populate the new session's continuity cache.
 final aiCoachAccessSnapshotStoreProvider = Provider<AiCoachAccessSnapshotStore>(
@@ -499,14 +497,19 @@ final aiCoachAccessSnapshotStoreProvider = Provider<AiCoachAccessSnapshotStore>(
 
 final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
   final ownerId = ref.watch(verifiedEntitlementOwnerIdProvider);
+  final ownerVisit = ref.watch(verifiedEntitlementOwnerVisitProvider);
   final snapshot = ref.watch(aiCoachAccessSnapshotStoreProvider);
   ref.watch(aiCoachUsageRefreshProvider);
   if (ownerId == null) return false;
   final generation = ++snapshot.generation;
   snapshot.usageResponseFresh = false;
+  snapshot.prepaidProof = null;
   var active = true;
   ref.onDispose(() => active = false);
   bool current() => active && generation == snapshot.generation;
+  // Freshness is bounded by when this request began, not when a delayed
+  // response arrived. Owner/generation checks still retire old requests.
+  final requestedAt = ref.read(verifiedEntitlementClockProvider)().toUtc();
   final loaded = _observedAuthorityReload(
     ref,
     () {
@@ -517,14 +520,20 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
     // relying on a broadcast signal whose notification can be coalesced with
     // an in-flight owner/permission refresh.
     resumeReload: ref.invalidateSelf,
+    refreshDelay: () {
+      final now = ref.read(verifiedEntitlementClockProvider)().toUtc();
+      final remaining =
+          VerifiedPrepaidAiCredit.maximumAge - now.difference(requestedAt);
+      if (remaining > VerifiedPrepaidAiCredit.maximumAge) {
+        return VerifiedPrepaidAiCredit.maximumAge;
+      }
+      return remaining.isNegative ? Duration.zero : remaining;
+    },
   );
   // Only a successful server response creates access. Retain the same owner's
   // last verified positive result on transient failure; a previous zero is not
   // evidence of a fresh denial after a failed check.
   try {
-    // Freshness is bounded by when this request began, not when a delayed
-    // response arrived. Owner/generation checks still retire old requests.
-    final requestedAt = ref.read(verifiedEntitlementClockProvider)().toUtc();
     final value = await ref
         .read(aiCoachUsageStatusLoaderProvider)()
         .timeout(const Duration(seconds: 10));
@@ -532,6 +541,13 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
     final access = verifiedAiCoachAccessFromUsageStatus(value);
     if (access == null) throw StateError('ai_usage_status_unavailable');
     snapshot.verifiedAccess = access;
+    snapshot.prepaidProof = VerifiedPrepaidAiCredit.fromUsageStatus(
+      value,
+      ownerId: ownerId,
+      ownerVisit: ownerVisit,
+      generation: generation,
+      requestedAt: requestedAt,
+    );
     snapshot.verifiedUsagePlan =
         value is Map && const {'free', 'ai_coach'}.contains(value['plan'])
         ? value['plan'] as String

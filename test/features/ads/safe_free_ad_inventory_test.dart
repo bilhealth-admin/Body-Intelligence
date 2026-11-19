@@ -132,11 +132,27 @@ void main() {
           ),
         ),
       );
+      // A canonical Free result retains its store-terminal evidence, while
+      // inactive/expired observations also retain renewal metadata. Neither
+      // adds a paid entitlement or turns offline fallback into verified Free.
       expect(
         repository,
         contains(
           RegExp(
-            r'_remember\(\s*user\.id,\s*_verifiedFree\(verifiedAt: verifiedAt\),\s*now,\s*\)',
+            r'_remember\(\s*user\.id,\s*_verifiedFree\(\s*'
+            r'verifiedAt:\s*verifiedAt,\s*storeDefinitive:\s*'
+            r"providerValue\s*==\s*'google'\s*\|\|\s*"
+            r"providerValue\s*==\s*'apple',\s*\),\s*now,\s*\)",
+          ),
+        ),
+      );
+      expect(
+        repository,
+        contains(
+          RegExp(
+            r'_remember\(\s*user\.id,\s*_verifiedFree\(\s*'
+            r'verifiedAt:\s*verifiedAt,\s*storeRenewal:\s*storeRenewal,\s*'
+            r'storeDefinitive:\s*storeDefinitive,\s*\),\s*now,\s*\)',
           ),
         ),
       );
@@ -153,6 +169,14 @@ void main() {
         constructorEnd,
       );
       expect(verifiedFreeConstructor, contains('plan: CommercePlan.free'));
+      expect(
+        verifiedFreeConstructor,
+        contains('storeRenewalObservation: storeRenewal'),
+      );
+      expect(
+        verifiedFreeConstructor,
+        contains('storeRenewalDefinitivelyInactive: storeDefinitive'),
+      );
       expect(
         verifiedFreeConstructor,
         contains('entitlements: FreePlan.entitlements'),

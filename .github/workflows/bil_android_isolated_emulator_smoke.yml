@@ -67,6 +67,7 @@ jobs:
       - name: Build un-signed local-only Android debug APK
         shell: bash
         run: >-
+          python3 tool/release/retry_android_maven429_build.py --
           flutter build apk --debug --no-pub --build-number 33
           --dart-define=BIL_ENVIRONMENT=testing
           --dart-define=BIL_USE_SUPABASE=false

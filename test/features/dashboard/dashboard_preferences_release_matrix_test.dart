@@ -576,12 +576,12 @@ bool _providersHydrated(WidgetTester tester) {
   // Inspect only providers actually created by the real page. Do not eagerly
   // prime off-screen providers or replace the repository's loading behavior.
   final states = [
-    if (container.exists(dashboardSelectedPresetProvider))
+    if (container.read(dashboardSelectedPresetProvider.exists))
       container.read(dashboardSelectedPresetProvider),
-    if (container.exists(dashboardNutrientGoalCardsProvider))
+    if (container.read(dashboardNutrientGoalCardsProvider.exists))
       container.read(dashboardNutrientGoalCardsProvider),
     for (final section in DashboardSectionIds.all)
-      if (container.exists(dashboardSectionVisibleProvider(section)))
+      if (container.read(dashboardSectionVisibleProvider(section).exists))
         container.read(dashboardSectionVisibleProvider(section)),
   ];
   return states.every(

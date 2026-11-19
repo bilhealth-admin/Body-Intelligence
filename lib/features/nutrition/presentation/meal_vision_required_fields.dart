@@ -203,7 +203,12 @@ extension _VisionReviewRequiredFields on _PremiumVisionReviewDialogState {
 
 extension _VisionMatchRequiredFields on _PremiumTrustedMatchDialogState {
   Future<void> _attemptRequiredFood() async {
-    if (_usingFood || !_requiredFields.current || !mounted) return;
+    if (_usingFood ||
+        !_requiredFields.current ||
+        !mounted ||
+        widget.lifetime?.isActive == false) {
+      return;
+    }
     final food = _selected;
     final sourceValid =
         food != null &&
@@ -268,7 +273,7 @@ extension _VisionMatchRequiredFields on _PremiumTrustedMatchDialogState {
     await _requiredFields.review(
       context,
       missing,
-      alive: () => mounted && !_usingFood,
+      alive: () => mounted && !_usingFood && widget.lifetime?.isActive != false,
     );
   }
 }

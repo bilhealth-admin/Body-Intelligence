@@ -321,7 +321,11 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
             key: const Key('onboarding-health-permission'),
             icon: Icons.favorite_outline_rounded,
             title: healthName,
-            body: supported
+            body: isAndroid
+                ? t(
+                    'Import steps, distance and active energy from Health Connect when available.',
+                  )
+                : isIos
                 ? t(
                     'Import supported activity, steps, sleep and weight evidence you approve. Only compatible fitness watches and scales can feed this system source.',
                   )

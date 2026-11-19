@@ -297,6 +297,21 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           },
                           onRetry: widget.onRetry,
                         ),
+                        if (kind == BilStoreProductKind.aiBoostConsumable)
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                              16,
+                              12,
+                              16,
+                              0,
+                            ),
+                            child: Text(
+                              _copy('ai_benefit_vision'),
+                              key: const Key('store-boost-vision-disclosure'),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          ),
                         const SizedBox(height: 14),
                       ],
                       _FreeTierCard(
@@ -478,7 +493,6 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
     ],
     BilStoreProductKind.aiBoostConsumable => const [
       'boost_benefit_1',
-      'ai_benefit_vision',
       'boost_benefit_2',
       'boost_benefit_3',
       'boost_benefit_4',

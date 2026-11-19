@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/app/localization/runtime_copy_coach_recovery.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_current_release.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_next_batch_closure.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_integration_gap.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_closure_access.dart';
@@ -134,6 +136,8 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     File('lib/features/auth/auth_five_locale_copy.dart').readAsString(),
   ])).join('\n');
   final catalogKeys = <String>{
+    ...CoachRecoveryRuntimeCopy.sources,
+    ...CurrentReleaseRuntimeCopy.sources,
     ...NextBatchClosureRuntimeCopy.sources,
     ...SmartPlanVisualRuntimeCopy.sources,
     ...ClosureAccessRuntimeCopy.sources,
@@ -476,14 +480,13 @@ Future<List<String>> _auditAndroidResources() async {
       'health_permissions_privacy_policy_action',
     ]) {
       final localizedValue = _androidStringValue(source, key);
-      if (localizedValue == null || localizedValue.trim().isEmpty) {
-        failures.add('$tag:$key');
-        continue;
-      }
-      final englishValue = _androidStringValue(english, key);
-      if (englishValue != null &&
-          localizedValue.trim() == englishValue.trim()) {
-        failures.add('$tag:$key:english_fallback');
+      final issue = androidResourceValueIssue(
+        key,
+        localizedValue,
+        _androidStringValue(english, key),
+      );
+      if (issue != null) {
+        failures.add(issue == 'missing' ? '$tag:$key' : '$tag:$key:$issue');
       }
     }
     if (source == english) failures.add('$tag:english_resource');
@@ -492,6 +495,25 @@ Future<List<String>> _auditAndroidResources() async {
     }
   }
   return failures;
+}
+
+/// Only the canonical product brand may intentionally remain English.
+/// All other resource keys retain the existing translation requirement.
+String? androidResourceValueIssue(
+  String key,
+  String? localizedValue,
+  String? englishValue,
+) {
+  if (localizedValue == null || localizedValue.trim().isEmpty) return 'missing';
+  if (key == 'app_name') {
+    return localizedValue == 'Body Intelligence Log'
+        ? null
+        : 'canonical_brand_mismatch';
+  }
+  if (englishValue != null && localizedValue.trim() == englishValue.trim()) {
+    return 'english_fallback';
+  }
+  return null;
 }
 
 String? _androidStringValue(String xml, String key) => RegExp(

@@ -16,6 +16,7 @@ class _PremiumTrustedMatchDialog extends StatefulWidget {
     this.reviewedUnit,
     this.evidenceOwnerKey,
     this.imagePath,
+    this.lifetime,
     this.editable = false,
   });
   final String recognizedName;
@@ -24,6 +25,7 @@ class _PremiumTrustedMatchDialog extends StatefulWidget {
   final String? reviewedUnit;
   final String? evidenceOwnerKey;
   final String? imagePath;
+  final MealVisionReviewLifetime? lifetime;
   final bool editable;
 
   @override

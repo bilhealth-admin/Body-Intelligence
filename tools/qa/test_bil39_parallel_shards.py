@@ -35,9 +35,13 @@ class ParallelShardGateTest(unittest.TestCase):
                               input=self.script, text=True, env=environment,
                               capture_output=True, timeout=10)
 
-    def test_parallel_shards_still_wait_for_source_and_final_gate_waits_for_every_phase(self):
+    def test_five_test_families_run_independently_but_final_gate_waits_for_every_phase(self):
+        for name in ('p0', 'focused', 'broad', 'shards', 'integration-tools'):
+            job = self.source.split('\n  ' + name + ':\n', 1)[1]
+            job = re.split(r'(?m)^  [a-z][a-z-]*:\s*$', job, maxsplit=1)[0]
+            with self.subTest(family=name):
+                self.assertNotRegex(job, r'(?m)^    needs:')
         shards = self.source.split('\n  shards:\n', 1)[1].split('\n  integration-tools:', 1)[0]
-        self.assertRegex(shards, r'(?m)^    needs: source$')
         self.assertIn('shard: [0, 1, 2, 3, 4, 5, 6, 7]', shards)
         needs = re.search(r'(?m)^    needs: \[([^]]+)\]$', self.final)
         self.assertIsNotNone(needs)

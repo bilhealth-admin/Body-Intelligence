@@ -70,7 +70,9 @@ class _CoachConversationEntry extends StatelessWidget {
           borderRadius: BorderRadius.circular(compact ? 18 : 26),
           child: Container(
             key: const Key('dashboard-coach-card-surface'),
-            constraints: BoxConstraints(minHeight: compact ? 140 : 154),
+            // Retain the measured approved compact footprint. Larger text
+            // still grows naturally instead of clipping the new description.
+            constraints: BoxConstraints(minHeight: compact ? 143.6 : 154),
             padding: EdgeInsets.all(compact ? 14 : 26),
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(

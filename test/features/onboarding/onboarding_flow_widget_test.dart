@@ -863,6 +863,17 @@ void main() {
     await pump(tester, valid(step: 'integrations'));
     expect(find.text('Health Connect'), findsOneWidget);
     expect(find.text('Apple Health'), findsNothing);
+    expect(
+      find.text(
+        'Import steps, distance and active energy from Health Connect when available.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('sleep and weight evidence'), findsNothing);
+    expect(
+      (await drafts.load())!.healthPermission,
+      OnboardingPermissionStatus.notRequested,
+    );
     debugDefaultTargetPlatformOverride = null;
   });
 

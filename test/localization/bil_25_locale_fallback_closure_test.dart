@@ -1,3 +1,5 @@
+import 'package:body_intelligence_log/app/localization/runtime_copy_coach_recovery.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_current_release.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/intelligence_center/intelligence_locale_copy.dart';
 import 'dart:convert';
@@ -16,6 +18,114 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../tool/localization/locale_fallback_closure.dart';
 
 void main() {
+  test('current release labels and existing recovery copy cover all 25 locales', () {
+    expect(CurrentReleaseRuntimeCopy.balanced, isTrue);
+    expect(CurrentReleaseRuntimeCopy.sources, const [
+      'Allow friend requests',
+      'Who can see my profile',
+      'Your reviewed estimates were saved.',
+      'Import steps, distance and active energy from Health Connect when available.',
+    ]);
+    expect(
+      CurrentReleaseRuntimeCopy.supported,
+      BilLocalePolicy.productionTags.toSet(),
+    );
+    const recoverySources = [
+      'Coach actions are set to Read only. Review permissions in Coach settings. Nothing was changed.',
+      'Nutrition and meals',
+      'Progress analytics',
+      'Retry request',
+      'Sleep, fasting and habits',
+      'The previous request was refunded without using credits. Tap Retry request to send it again.',
+      'This request needs access to {category}. Review this category in Coach settings. Nothing was changed.',
+      'Training and activity',
+    ];
+    final placeholders = RegExp(r'\{[^}]+\}');
+    for (final tag in BilLocalePolicy.productionTags) {
+      for (final source in [
+        ...CurrentReleaseRuntimeCopy.sources,
+        ...recoverySources,
+      ]) {
+        final translated = RuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        if (tag != 'en') {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+        expect(
+          placeholders.allMatches(translated).map((match) => match[0]).toSet(),
+          placeholders.allMatches(source).map((match) => match[0]).toSet(),
+          reason: '$tag preserves placeholders: $source',
+        );
+        if (recoverySources.contains(source)) {
+          expect(translated, CoachRecoveryRuntimeCopy.resolve(source, tag));
+        } else {
+          expect(translated, CurrentReleaseRuntimeCopy.resolve(source, tag));
+        }
+      }
+    }
+    expect(
+      CurrentReleaseRuntimeCopy.resolve('Not a catalog source', 'ar'),
+      isNull,
+    );
+    expect(
+      CurrentReleaseRuntimeCopy.resolve(
+        CurrentReleaseRuntimeCopy.sources.first,
+        'zz',
+      ),
+      isNull,
+    );
+  });
+
+  test(
+    'Android brand exception applies only to the exact canonical app name',
+    () {
+      expect(
+        androidResourceValueIssue(
+          'app_name',
+          'Body Intelligence Log',
+          'Body Intelligence Log',
+        ),
+        isNull,
+      );
+      for (final invalidBrand in [
+        'BIL',
+        'Body Intelligence Log ',
+        'سجل ذكاء الجسم',
+      ]) {
+        expect(
+          androidResourceValueIssue(
+            'app_name',
+            invalidBrand,
+            'Body Intelligence Log',
+          ),
+          'canonical_brand_mismatch',
+        );
+      }
+      for (final key in [
+        'health_permissions_rationale_title',
+        'health_permissions_rationale_body',
+        'health_permissions_privacy_policy_action',
+        'any_other_key',
+      ]) {
+        expect(
+          androidResourceValueIssue(key, 'English copy', 'English copy'),
+          'english_fallback',
+        );
+        expect(
+          androidResourceValueIssue(key, ' نص مترجم ', 'English copy'),
+          isNull,
+        );
+        expect(androidResourceValueIssue(key, null, 'English copy'), 'missing');
+        expect(androidResourceValueIssue(key, '  ', 'English copy'), 'missing');
+      }
+      expect(
+        androidResourceValueIssue('app_name', null, 'Body Intelligence Log'),
+        'missing',
+      );
+    },
+  );
+
   test('Coach waiting, copy, recovery and feed labels cover every locale', () {
     const sources = [
       'Preparing your reply…',

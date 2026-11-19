@@ -35,7 +35,16 @@ void main() {
     expect(vision, contains("Key('meal-vision-consent-decline')"));
     expect(vision, contains("Key('meal-vision-consent-accept')"));
     expect(privacy, contains('BilPremiumConsentToggle('));
-    expect(privacy, contains("Key('meal-vision-ai-consent')"));
+    expect(
+      privacy,
+      contains(
+        RegExp(
+          r"controlKey:\s*Key\(\s*widget\.estimates\s*\?\s*"
+          r"'gemini-nutrition-estimates-consent'\s*:\s*"
+          r"'meal-vision-ai-consent',?\s*\)",
+        ),
+      ),
+    );
     expect(settings, contains('_ConsentTile('));
     expect(settings, contains("value: data['remote_ai_consent'] == true"));
     expect(settings, contains('onChanged: _setRemoteAiConsent'));

@@ -174,6 +174,7 @@ final class _VisualCommunityRepository extends CommunityRepository {
   _VisualCommunityRepository({
     this.friendshipStatus = 'accepted',
     this.emptyUpdates = false,
+    this.hasFriendship = true,
   }) : super(
          SupabaseClient(
            'https://visual.invalid',
@@ -190,6 +191,7 @@ final class _VisualCommunityRepository extends CommunityRepository {
 
   String friendshipStatus;
   final bool emptyUpdates;
+  final bool hasFriendship;
   CommunityProfile profile = const CommunityProfile(
     userId: currentId,
     displayName: 'BIL QA Member',
@@ -267,7 +269,7 @@ final class _VisualCommunityRepository extends CommunityRepository {
 
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async =>
-      emptyUpdates
+      emptyUpdates || !hasFriendship
       ? const []
       : [
           {
@@ -922,7 +924,9 @@ void main() {
     await capture(
       tester,
       page: _VisualRouteStack(
-        child: CommunityPeoplePage(repository: _VisualCommunityRepository()),
+        child: CommunityPeoplePage(
+          repository: _VisualCommunityRepository(hasFriendship: false),
+        ),
       ),
       name: 'community_people_search_authenticated_phone',
       captureOverlay: true,

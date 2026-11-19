@@ -127,6 +127,7 @@ Future<Food?> showPremiumTrustedVisionFoodMatchDialog(
         reviewedAmount: reviewedAmount,
         reviewedUnit: reviewedUnit,
         evidenceOwnerKey: evidenceOwnerKey,
+        lifetime: lifetime,
       ),
     ),
   );

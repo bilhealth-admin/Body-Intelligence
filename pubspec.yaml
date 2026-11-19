@@ -34,7 +34,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_riverpod: ^3.3.2
+  flutter_riverpod: 3.5.0
   go_router: 17.3.0
   drift: ^2.34.2
   sqlite3: ^3.4.0
@@ -92,6 +92,9 @@ dev_dependencies:
   analyzer: 12.1.0
   flutter_test:
     sdk: flutter
+  # The two pure Dart workout repository suites import package:test directly.
+  # Keep their previously resolved version explicit after Riverpod drops it.
+  test: 1.31.0
   integration_test:
     sdk: flutter
   path_provider_platform_interface: ^2.0.0

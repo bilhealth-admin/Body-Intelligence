@@ -360,6 +360,11 @@ jobs:
         run: |
           set -euo pipefail
           supabase init
+          python3 tool/release/prepare_local_supabase_ci_stack.py \
+            --config supabase/config.toml --github-env "$GITHUB_ENV" \
+            --evidence-dir "$RUNNER_TEMP/bil-supabase-port-preflight"
+          BIL_LOCAL_DB_CONTAINER="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["exact_database_container"])' "$RUNNER_TEMP/bil-supabase-port-preflight/OWNED_LOCAL_STACK_CONFIG.json")"
+          export BIL_LOCAL_DB_CONTAINER
           # Checked-in migrations require the operational owner, a legacy
           # review moderator, and a reviewer identity referenced by an older
           # migration. These disposable CI-only rows have no password and are
@@ -445,10 +450,11 @@ jobs:
             echo "ANON_KEY=$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
             echo "BIL_LOCAL_SERVICE_ROLE_KEY=$LOCAL_SERVICE_KEY"
           } >> "$GITHUB_ENV"
-          echo "BIL_LOCAL_DB_CONTAINER=$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)" >> "$GITHUB_ENV"
+          # Never select a different project merely because it is listed first.
+          docker ps --format '{{.Names}}' | grep -Fx -- "$BIL_LOCAL_DB_CONTAINER"
           test -n "$(grep '^API_URL=' "$RUNNER_TEMP/bil-supabase-local.env")"
           test -n "$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env")"
-          test -n "$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
+          test -n "$BIL_LOCAL_DB_CONTAINER"
 
       - name: Apply checked-in migrations and verify local authority preconditions
         id: checked_in_migrations
@@ -633,7 +639,9 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: bil-supabase-sqlite-cycle-${{ github.sha }}
-          path: artifacts/qa/text18/supabase-sqlite-cycle
+          path: |
+            artifacts/qa/text18/supabase-sqlite-cycle
+            ${{ runner.temp }}/bil-supabase-port-preflight
           if-no-files-found: warn
           retention-days: 14
 

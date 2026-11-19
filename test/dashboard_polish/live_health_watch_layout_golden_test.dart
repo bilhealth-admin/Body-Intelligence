@@ -20,57 +20,58 @@ ConnectedHealthSignalView _signal(String key, double value, String unit) =>
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
-  testWidgets('compact watch keeps all four readings below the clock', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(220, 220));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets(
+    'compact watch keeps all four readings below the clock',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(220, 220));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          liveHealthNowProvider.overrideWithValue(
-            () => DateTime.utc(2026, 8, 31, 14, 22, 8),
-          ),
-        ],
-        child: MaterialApp(
-          theme: visualEvidenceTheme(ThemeData()),
-          builder: (context, child) => visualEvidenceTextSurface(child),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            liveHealthNowProvider.overrideWithValue(
+              () => DateTime.utc(2026, 8, 31, 14, 22, 8),
+            ),
           ],
-          home: Scaffold(
-            backgroundColor: Color(0xFFF5F6F8),
-            body: RepaintBoundary(
-              key: const Key('live-health-watch-golden-boundary'),
-              child: ColoredBox(
-                color: const Color(0xFFF5F6F8),
-                child: Center(
-                  child: SizedBox.square(
-                    dimension: 176,
-                    child: LiveHealthWatch(
-                      compact: true,
-                      languageCode: 'en',
-                      snapshot: ConnectedHealthSnapshot(
-                        status: ConnectedHealthStatus.synchronized,
-                        platformSource: 'Apple Health',
-                        availableSources: const ['Apple Health'],
-                        signals: [
-                          _signal('heartRate', 80, 'bpm'),
-                          _signal('activeEnergy', 300, 'kcal'),
-                          _signal('sleep', 4.8, 'h'),
-                        ],
-                        stepHistory: [_signal('steps', 2198, 'count')],
-                        importedCount: 4,
-                        lastSyncAt: DateTime.utc(2026, 8, 31, 12),
-                        failureCode: null,
-                        deviceVerified: true,
+          child: MaterialApp(
+            theme: visualEvidenceTheme(ThemeData()),
+            builder: (context, child) => visualEvidenceTextSurface(child),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: Scaffold(
+              backgroundColor: Color(0xFFF5F6F8),
+              body: RepaintBoundary(
+                key: const Key('live-health-watch-golden-boundary'),
+                child: ColoredBox(
+                  color: const Color(0xFFF5F6F8),
+                  child: Center(
+                    child: SizedBox.square(
+                      dimension: 176,
+                      child: LiveHealthWatch(
+                        compact: true,
+                        languageCode: 'en',
+                        snapshot: ConnectedHealthSnapshot(
+                          status: ConnectedHealthStatus.synchronized,
+                          platformSource: 'Apple Health',
+                          availableSources: const ['Apple Health'],
+                          signals: [
+                            _signal('heartRate', 80, 'bpm'),
+                            _signal('activeEnergy', 300, 'kcal'),
+                            _signal('sleep', 4.8, 'h'),
+                          ],
+                          stepHistory: [_signal('steps', 2198, 'count')],
+                          importedCount: 4,
+                          lastSyncAt: DateTime.utc(2026, 8, 31, 12),
+                          failureCode: null,
+                          deviceVerified: true,
+                        ),
+                        showConnectControl: false,
                       ),
-                      showConnectControl: false,
                     ),
                   ),
                 ),
@@ -78,13 +79,14 @@ void main() {
             ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    await expectLater(
-      find.byKey(const Key('live-health-watch-golden-boundary')),
-      matchesGoldenFile('goldens/live_health_watch_compact_all_metrics.png'),
-    );
-  });
+      await expectLater(
+        find.byKey(const Key('live-health-watch-golden-boundary')),
+        matchesGoldenFile('goldens/live_health_watch_compact_all_metrics.png'),
+      );
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }

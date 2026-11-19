@@ -141,50 +141,58 @@ void main() {
     });
   }
 
-  testWidgets('connected watch renders only actual supported readings', (
-    tester,
-  ) async {
-    final semantics = tester.ensureSemantics();
-    await tester.pumpWidget(
-      _subject(
-        _snapshot(
-          status: ConnectedHealthStatus.synchronized,
-          verified: true,
-          signals: [
-            _signal('steps', 4321, 'steps'),
-            _signal('heartRate', 71, 'bpm'),
-            _signal('activeEnergy', 415, 'kcal'),
-            _signal('sleep', 7.5, 'h'),
-            _signal('weight', 80, 'kg'),
-          ],
+  testWidgets(
+    'iOS connected watch renders actual supported readings',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _subject(
+          _snapshot(
+            status: ConnectedHealthStatus.synchronized,
+            verified: true,
+            signals: [
+              _signal('steps', 4321, 'steps'),
+              _signal('heartRate', 71, 'bpm'),
+              _signal('activeEnergy', 415, 'kcal'),
+              _signal('sleep', 7.5, 'h'),
+              _signal('weight', 80, 'kg'),
+            ],
+          ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
 
-    expect(find.byKey(const Key('watch-date-line')), findsOneWidget);
-    expect(find.byKey(const Key('watch-digital-time')), findsOneWidget);
-    expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
-    expect(find.byKey(const Key('watch-metric-heart-rate')), findsOneWidget);
-    expect(find.byKey(const Key('watch-metric-active-energy')), findsOneWidget);
-    expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
-    expect(find.text('4321'), findsOneWidget);
-    expect(find.text('71'), findsOneWidget);
-    expect(find.text('415'), findsOneWidget);
-    expect(find.text('7.5'), findsOneWidget);
-    expect(find.byKey(const Key('watch-no-recent-readings')), findsNothing);
-    expect(find.text('—'), findsNothing);
-    expect(find.byIcon(Icons.directions_run_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.local_fire_department_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.nightlight_round), findsOneWidget);
-    expect(find.bySemanticsLabel(RegExp(r'Steps, 4321 steps')), findsOneWidget);
-    expect(
-      find.bySemanticsLabel(RegExp(r'Heart rate, 71 bpm')),
-      findsOneWidget,
-    );
-    semantics.dispose();
-  });
+      expect(find.byKey(const Key('watch-date-line')), findsOneWidget);
+      expect(find.byKey(const Key('watch-digital-time')), findsOneWidget);
+      expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+      expect(find.byKey(const Key('watch-metric-heart-rate')), findsOneWidget);
+      expect(
+        find.byKey(const Key('watch-metric-active-energy')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
+      expect(find.text('4321'), findsOneWidget);
+      expect(find.text('71'), findsOneWidget);
+      expect(find.text('415'), findsOneWidget);
+      expect(find.text('7.5'), findsOneWidget);
+      expect(find.byKey(const Key('watch-no-recent-readings')), findsNothing);
+      expect(find.text('—'), findsNothing);
+      expect(find.byIcon(Icons.directions_run_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.local_fire_department_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.nightlight_round), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(r'Steps, 4321 steps')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp(r'Heart rate, 71 bpm')),
+        findsOneWidget,
+      );
+      semantics.dispose();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets(
     'Apple Health uses its selected phone step total with verified watch data',
@@ -568,7 +576,7 @@ void main() {
   });
 
   testWidgets(
-    'connected BLE heart rate is shown inside watch without body metrics',
+    'iOS connected BLE heart rate is shown without body metrics',
     (tester) async {
       final merged = dashboardWatchSnapshot(
         _snapshot(
@@ -614,6 +622,7 @@ void main() {
       expect(find.text('78'), findsNothing);
       expect(find.text('20'), findsNothing);
     },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   test('connected BLE with no packet is a source but invents no reading', () {

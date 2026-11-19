@@ -440,6 +440,13 @@ Future<void> verifyAndroidDiscoverBackNavigation(WidgetTester tester) async {
       tester.element(find.byType(PremiumRouteGlassGate)),
     )!;
     await driveTransition(route, reverse: false);
+    expect(
+      tester.takeException(),
+      isNull,
+      reason:
+          'Mounting a cold or invalidated entitlement graph must not '
+          'schedule a scope rebuild from the paid-route child build.',
+    );
     debugPrint(
       'DISCOVER_BACK openSleep transition done route=${currentRoute()}',
     );

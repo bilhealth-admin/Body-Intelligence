@@ -191,10 +191,17 @@ void main() {
         h.container.invalidate(aiCoachCreditAccessProvider);
         await renewalFlush(tester);
         expect(h.usageFailures, greaterThan(0));
-        expect(h.container.read(aiCoachAccessSnapshotStoreProvider).usageResponseFresh, isFalse);
+        expect(
+          h.container
+              .read(aiCoachAccessSnapshotStoreProvider)
+              .usageResponseFresh,
+          isFalse,
+        );
         await tester.pump(Duration.zero);
         await renewalFlush(tester);
-        final oldObservation = h.container.read(storeRenewalObservationProvider)!;
+        final oldObservation = h.container.read(
+          storeRenewalObservationProvider,
+        )!;
         final oldKey = oldObservation.periodKey;
         final originatingBurst = h.container.read(storeRenewalRecheckProvider);
         expect(
@@ -233,10 +240,19 @@ void main() {
           isFalse,
         );
         await h.tick(tester, const Duration(seconds: 17));
-        expect(identical(h.container.read(storeRenewalRecheckProvider), originatingBurst), isTrue,
-          reason: 'Canonical renewal keeps the original read scheduler alive.');
-        expect(originatingBurst.timedOut(oldObservation), isTrue,
-          reason: 'The original read burst actually reached its deadline.');
+        expect(
+          identical(
+            h.container.read(storeRenewalRecheckProvider),
+            originatingBurst,
+          ),
+          isTrue,
+          reason: 'Canonical renewal keeps the original read scheduler alive.',
+        );
+        expect(
+          originatingBurst.timedOut(oldObservation),
+          isTrue,
+          reason: 'The original read burst actually reached its deadline.',
+        );
         expect(h.mounts, 1);
         expect(h.unmounts, 0);
         expect(find.text('Existing owned plan'), findsOneWidget);

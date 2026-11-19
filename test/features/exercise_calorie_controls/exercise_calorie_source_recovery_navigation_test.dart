@@ -140,7 +140,11 @@ void main() {
       await tester.pumpWidget(_app(router, compactArabic: true));
       await tester.pumpAndSettle();
       final action = find.byKey(const Key('exercise-calories-connect-health'));
-      await tester.scrollUntilVisible(action, 180, scrollable: find.byType(Scrollable).first);
+      await tester.scrollUntilVisible(
+        action,
+        180,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(action, findsOneWidget);
       await tester.ensureVisible(action);
       await tester.pumpAndSettle();

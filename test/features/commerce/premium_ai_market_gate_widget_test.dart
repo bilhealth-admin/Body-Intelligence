@@ -16,6 +16,144 @@ import 'package:go_router/go_router.dart';
 
 import '../../visual_closure/visual_evidence_font.dart';
 
+const _prepaidOwnerA = 'prepaid-owner-a';
+const _prepaidOwnerB = 'prepaid-owner-b';
+const _prepaidAction = Key('actual-prepaid-protected-action');
+
+Map<String, Object?> _prepaidUsage({
+  Object? paid = 2500,
+  Object? included = 0,
+  Object? total = 2500,
+}) => {
+  'plan': 'free',
+  'credits': {
+    'paid_remaining': paid,
+    'included_remaining': included,
+    'total_remaining': total,
+  },
+};
+
+final class _PendingPrepaidUsage {
+  _PendingPrepaidUsage(this.owner, this.visit);
+  final String? owner;
+  final int visit;
+  final result = Completer<Object?>();
+}
+
+// Only I/O loaders are replaced: owner visits, quota parsing, snapshot lifetime,
+// subscription observation and route access all use the production providers.
+final class _PrepaidGateFixture {
+  _PrepaidGateFixture(this.response) {
+    container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        verifiedEntitlementOwnerSeedProvider.overrideWithValue(_prepaidOwnerA),
+        verifiedEntitlementOwnerProvider.overrideWith((_) => owners.stream),
+        verifiedEntitlementClockProvider.overrideWithValue(() => now),
+        verifiedEntitlementLoaderProvider.overrideWithValue(() async {
+          subscriptionLoads++;
+          return SubscriptionState(
+            plan: CommercePlan.free,
+            entitlements: FreePlan.entitlements,
+            authority: EntitlementAuthority.verifiedServer,
+            isPurchasable: false,
+            canRestorePurchases: false,
+          );
+        }),
+        storefrontTargetPlanProvider.overrideWith(
+          (_) async => CommercePlan.premiumAiCoach,
+        ),
+        aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
+          usageLoads++;
+          if (failUsage) throw StateError('synthetic quota unavailable');
+          if (delayUsage) {
+            final request = _PendingPrepaidUsage(
+              container.read(verifiedEntitlementOwnerIdProvider),
+              container.read(verifiedEntitlementOwnerVisitProvider),
+            );
+            pending.add(request);
+            return request.result.future;
+          }
+          return response;
+        }),
+      ],
+    );
+  }
+
+  final owners = StreamController<String?>.broadcast(sync: true);
+  late final ProviderContainer container;
+  DateTime now = DateTime.utc(2026, 11, 19, 8);
+  Object? response;
+  bool delayUsage = false;
+  bool failUsage = false;
+  int usageLoads = 0;
+  int subscriptionLoads = 0;
+  int protectedTaps = 0;
+  final pending = <_PendingPrepaidUsage>[];
+
+  AiCoachAccessSnapshotStore get snapshot =>
+      container.read(aiCoachAccessSnapshotStoreProvider);
+  bool get freshPrepaid => snapshot.hasFreshPrepaid(
+    ownerId: container.read(verifiedEntitlementOwnerIdProvider),
+    ownerVisit: container.read(verifiedEntitlementOwnerVisitProvider),
+    now: now,
+  );
+
+  Future<void> mount(WidgetTester tester, {bool settle = true}) async {
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: PremiumRouteGlassGate(
+            feature: PremiumGateFeature.aiCoach,
+            child: Scaffold(
+              body: Center(
+                child: FilledButton(
+                  key: _prepaidAction,
+                  onPressed: () => protectedTaps++,
+                  child: const Text('Verified prepaid Coach action'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    if (settle) await tester.pumpAndSettle();
+  }
+
+  Future<void> emitOwner(WidgetTester tester, String? owner) async {
+    owners.add(owner);
+    await tester.pump();
+    await tester.pump();
+  }
+
+  void refreshUsage() => container
+      .read(aiCoachUsageRefreshProvider.notifier)
+      .requestAuthoritativeReload();
+
+  Future<void> close(WidgetTester tester) async {
+    for (final request in pending) {
+      if (!request.result.isCompleted) {
+        request.result.complete(_prepaidUsage(paid: 0, total: 0));
+      }
+    }
+    await tester.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    await tester.pump();
+    await owners.close();
+  }
+}
+
 void main() {
   setUpAll(loadVisualEvidenceFont);
 
@@ -436,57 +574,64 @@ void main() {
   testWidgets('verified Boost does not depend on a subscription lookup', (
     tester,
   ) async {
-    var subscriptionLookupAttempts = 0;
-    await tester.pumpWidget(
-      ProviderScope(
-        retry: (_, _) => null,
-        overrides: [
-          verifiedEntitlementOwnerIdProvider.overrideWithValue(
-            "golden-gate-synthetic-member",
-          ),
-          verifiedSubscriptionStateProvider.overrideWith((_) async {
-            subscriptionLookupAttempts += 1;
-            throw StateError('subscription unavailable');
-          }),
-          storefrontTargetPlanProvider.overrideWith((_) async {
-            throw StateError('storefront unavailable');
-          }),
-          aiCoachCreditAccessProvider.overrideWith((_) async => true),
-        ],
-        child: const MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
+    try {
+      var subscriptionLookupAttempts = 0;
+      await tester.pumpWidget(
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              "golden-gate-synthetic-member",
+            ),
+            verifiedSubscriptionStateProvider.overrideWith((_) async {
+              subscriptionLookupAttempts += 1;
+              throw StateError('subscription unavailable');
+            }),
+            storefrontTargetPlanProvider.overrideWith((_) async {
+              throw StateError('storefront unavailable');
+            }),
+            aiCoachUsageStatusLoaderProvider.overrideWithValue(
+              () async => _prepaidUsage(),
+            ),
           ],
-          home: PremiumRouteGlassGate(
-            feature: PremiumGateFeature.aiCoach,
-            child: ColoredBox(
-              key: ValueKey('subscription-error-protected-content'),
-              color: Colors.white,
+          child: const MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: PremiumRouteGlassGate(
+              feature: PremiumGateFeature.aiCoach,
+              child: ColoredBox(
+                key: ValueKey('subscription-error-protected-content'),
+                color: Colors.white,
+              ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(subscriptionLookupAttempts, 0);
-    expect(
-      find.byKey(const ValueKey('subscription-error-protected-content')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('premium-route-access-unavailable')),
-      findsNothing,
-    );
-    expect(
-      find.byKey(const ValueKey('premium-route-upgrade-cta')),
-      findsNothing,
-    );
-    expect(find.text('Get AI Boost'), findsNothing);
+      expect(subscriptionLookupAttempts, 0);
+      expect(
+        find.byKey(const ValueKey('subscription-error-protected-content')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-access-unavailable')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
+        findsNothing,
+      );
+      expect(find.text('Get AI Boost'), findsNothing);
+    } finally {
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
   });
 
   testWidgets('no tokens offers Boost without requiring any subscription', (
@@ -911,6 +1056,348 @@ void main() {
       semantics.dispose();
       await tester.pump();
       expect(protectedTaps, 0);
+    },
+  );
+
+  test(
+    'prepaid provenance accepts only an exact reserved-aware paid-only wire',
+    () {
+      final requestedAt = DateTime.utc(2026, 11, 19, 8);
+      VerifiedPrepaidAiCredit? proof(
+        Object? value, {
+        String owner = _prepaidOwnerA,
+        int visit = 2,
+        int generation = 7,
+      }) => VerifiedPrepaidAiCredit.fromUsageStatus(
+        value,
+        ownerId: owner,
+        ownerVisit: visit,
+        generation: generation,
+        requestedAt: requestedAt,
+      );
+      for (final wire in [
+        _prepaidUsage(),
+        _prepaidUsage(paid: 1.5, total: 1.5),
+      ]) {
+        final accepted = proof(wire);
+        expect(accepted, isNotNull);
+        expect(accepted!.ownerId, _prepaidOwnerA);
+        expect(accepted.ownerVisit, 2);
+        expect(accepted.generation, 7);
+        expect(accepted.requestedAt, requestedAt);
+        expect(
+          accepted.expiresAt,
+          requestedAt.add(const Duration(seconds: 30)),
+        );
+      }
+      final rejected = <String, Object?>{
+        'missing body': null,
+        'non-map body': [],
+        'missing credits': {},
+        'non-map credits': {'credits': []},
+        'missing paid breakdown': {
+          'credits': {'total_remaining': 2500},
+        },
+        'missing included breakdown': {
+          'credits': {'paid_remaining': 2500, 'total_remaining': 2500},
+        },
+        'missing total': {
+          'credits': {'paid_remaining': 2500, 'included_remaining': 0},
+        },
+        'string paid': _prepaidUsage(paid: '2500'),
+        'boolean included': _prepaidUsage(included: false),
+        'string total': _prepaidUsage(total: '2500'),
+        'zero': _prepaidUsage(paid: 0, total: 0),
+        'negative': _prepaidUsage(paid: -1, total: -1),
+        'nonfinite paid': _prepaidUsage(paid: double.nan, total: double.nan),
+        'infinite paid': _prepaidUsage(
+          paid: double.infinity,
+          total: double.infinity,
+        ),
+        'nonfinite included': _prepaidUsage(included: double.nan),
+        'nonfinite total': _prepaidUsage(total: double.infinity),
+        'included only': _prepaidUsage(paid: 0, included: 2500),
+        'mixed included and paid': _prepaidUsage(paid: 2000, included: 500),
+        'negative included': _prepaidUsage(included: -1),
+        'reserved-aware total differs': _prepaidUsage(total: 2499),
+      };
+      for (final entry in rejected.entries) {
+        expect(proof(entry.value), isNull, reason: entry.key);
+      }
+      expect(proof(_prepaidUsage(), owner: '  '), isNull);
+      expect(proof(_prepaidUsage(), visit: -1), isNull);
+      expect(proof(_prepaidUsage(), generation: 0), isNull);
+    },
+  );
+
+  test(
+    'prepaid shortcut requires current authority, visit, generation and request-time freshness',
+    () {
+      final requestedAt = DateTime.utc(2026, 11, 19, 8);
+      final proof = VerifiedPrepaidAiCredit.fromUsageStatus(
+        _prepaidUsage(),
+        ownerId: _prepaidOwnerA,
+        ownerVisit: 2,
+        generation: 7,
+        requestedAt: requestedAt,
+      )!;
+      AiCoachAccessSnapshotStore fresh() => AiCoachAccessSnapshotStore()
+        ..verifiedAccess = true
+        ..usageResponseFresh = true
+        ..generation = 7
+        ..usageRequestedAt = requestedAt
+        ..prepaidProof = proof;
+      bool current(
+        AiCoachAccessSnapshotStore value, {
+        String? owner = _prepaidOwnerA,
+        int visit = 2,
+        DateTime? at,
+      }) => value.hasFreshPrepaid(
+        ownerId: owner,
+        ownerVisit: visit,
+        now: at ?? requestedAt,
+      );
+      expect(current(fresh()), isTrue);
+      expect(
+        current(
+          fresh(),
+          at: proof.expiresAt.subtract(const Duration(microseconds: 1)),
+        ),
+        isTrue,
+      );
+      expect(
+        current(
+          fresh(),
+          at: requestedAt.subtract(const Duration(microseconds: 1)),
+        ),
+        isFalse,
+      );
+      expect(current(fresh(), at: proof.expiresAt), isFalse);
+      expect(
+        current(fresh(), at: proof.expiresAt.add(const Duration(seconds: 1))),
+        isFalse,
+      );
+      expect(current(fresh(), owner: null), isFalse);
+      expect(current(fresh(), owner: _prepaidOwnerB), isFalse);
+      expect(current(fresh(), visit: 3), isFalse);
+      for (final invalid in [
+        fresh()..verifiedAccess = false,
+        fresh()..verifiedAccess = null,
+        fresh()..usageResponseFresh = false,
+        fresh()..generation = 8,
+        fresh()..usageRequestedAt = null,
+        fresh()
+          ..usageRequestedAt = requestedAt.add(const Duration(microseconds: 1)),
+        fresh()..prepaidProof = null,
+      ]) {
+        expect(current(invalid), isFalse);
+      }
+    },
+  );
+
+  testWidgets(
+    'initial pending quota and owned prepaid expiry refresh never observe subscriptions',
+    (tester) async {
+      final fixture = _PrepaidGateFixture(_prepaidUsage())..delayUsage = true;
+      try {
+        await fixture.mount(tester, settle: false);
+        expect(fixture.pending, hasLength(1));
+        expect(fixture.subscriptionLoads, 0);
+        expect(find.byKey(_prepaidAction), findsNothing);
+        expect(
+          find.byKey(const Key('ai-coach-access-checking-surface')),
+          findsOneWidget,
+        );
+        fixture.pending.single.result.complete(_prepaidUsage());
+        await tester.pumpAndSettle();
+        expect(fixture.freshPrepaid, isTrue);
+        expect(fixture.subscriptionLoads, 0);
+        await tester.tap(find.byKey(_prepaidAction));
+        expect(fixture.protectedTaps, 1);
+        final oldProof = fixture.snapshot.prepaidProof!;
+        fixture.now = oldProof.expiresAt;
+        await tester.pump(const Duration(seconds: 30));
+        await tester.pump();
+        expect(fixture.usageLoads, 2);
+        expect(fixture.pending, hasLength(2));
+        expect(fixture.snapshot.prepaidProof, isNull);
+        expect(fixture.snapshot.usageResponseFresh, isFalse);
+        expect(fixture.subscriptionLoads, 0);
+        expect(find.byKey(_prepaidAction).hitTestable(), findsNothing);
+        fixture.pending.last.result.complete(_prepaidUsage());
+        await tester.pumpAndSettle();
+        expect(fixture.freshPrepaid, isTrue);
+        expect(
+          fixture.snapshot.prepaidProof!.generation,
+          oldProof.generation + 1,
+        );
+        expect(fixture.snapshot.prepaidProof!.requestedAt, oldProof.expiresAt);
+        expect(fixture.subscriptionLoads, 0);
+        expect(find.byKey(_prepaidAction).hitTestable(), findsOneWidget);
+        fixture.now = fixture.now.add(const Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
+        expect(fixture.usageLoads, 2);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await fixture.close(tester);
+      }
+    },
+  );
+
+  for (final entry in <String, Object?>{
+    'included allowance': _prepaidUsage(paid: 0, included: 2500),
+    'mixed allowance and prepaid': _prepaidUsage(paid: 2000, included: 500),
+    'positive total without paid provenance': {
+      'credits': {'total_remaining': 2500},
+    },
+  }.entries) {
+    testWidgets('${entry.key} retains the actual subscription observer', (
+      tester,
+    ) async {
+      final fixture = _PrepaidGateFixture(entry.value);
+      try {
+        await fixture.mount(tester);
+        expect(fixture.snapshot.verifiedAccess, isTrue);
+        expect(fixture.snapshot.prepaidProof, isNull);
+        expect(fixture.freshPrepaid, isFalse);
+        expect(fixture.subscriptionLoads, greaterThan(0));
+        expect(tester.takeException(), isNull);
+      } finally {
+        await fixture.close(tester);
+      }
+    });
+  }
+
+  testWidgets(
+    'fresh prepaid cannot cross real owner ABA visits or accept retired B quota',
+    (tester) async {
+      final fixture = _PrepaidGateFixture(_prepaidUsage());
+      try {
+        await fixture.mount(tester);
+        final firstA = fixture.snapshot;
+        expect(fixture.freshPrepaid, isTrue);
+        expect(fixture.subscriptionLoads, 0);
+        fixture.delayUsage = true;
+        await fixture.emitOwner(tester, _prepaidOwnerB);
+        expect(fixture.pending, hasLength(1));
+        expect(
+          (fixture.pending.single.owner, fixture.pending.single.visit),
+          (_prepaidOwnerB, 1),
+        );
+        // This owned B future will deliberately fail its superseded-read guard.
+        fixture.container.read(aiCoachCreditAccessProvider.future).ignore();
+        expect(find.byKey(_prepaidAction), findsNothing);
+        await fixture.emitOwner(tester, _prepaidOwnerA);
+        expect(fixture.pending, hasLength(2));
+        expect(
+          (fixture.pending.last.owner, fixture.pending.last.visit),
+          (_prepaidOwnerA, 2),
+        );
+        expect(identical(fixture.snapshot, firstA), isFalse);
+        expect(
+          firstA.hasFreshPrepaid(
+            ownerId: _prepaidOwnerA,
+            ownerVisit: 2,
+            now: fixture.now,
+          ),
+          isFalse,
+        );
+        fixture.pending.first.result.complete(_prepaidUsage());
+        await tester.pump();
+        await tester.pump();
+        expect(fixture.snapshot.prepaidProof, isNull);
+        expect(fixture.freshPrepaid, isFalse);
+        expect(find.byKey(_prepaidAction), findsNothing);
+        fixture.pending.last.result.complete(_prepaidUsage());
+        await tester.pumpAndSettle();
+        expect(fixture.freshPrepaid, isTrue);
+        expect(fixture.snapshot.prepaidProof!.ownerId, _prepaidOwnerA);
+        expect(fixture.snapshot.prepaidProof!.ownerVisit, 2);
+        expect(fixture.subscriptionLoads, 0);
+        expect(find.byKey(_prepaidAction).hitTestable(), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await fixture.close(tester);
+      }
+    },
+  );
+
+  testWidgets('logout retires prepaid proof and its owned refresh timer', (
+    tester,
+  ) async {
+    final fixture = _PrepaidGateFixture(_prepaidUsage());
+    try {
+      await fixture.mount(tester);
+      expect(fixture.freshPrepaid, isTrue);
+      await fixture.emitOwner(tester, null);
+      await tester.pumpAndSettle();
+      expect(fixture.snapshot.prepaidProof, isNull);
+      expect(fixture.freshPrepaid, isFalse);
+      expect(find.byKey(_prepaidAction), findsNothing);
+      fixture.now = fixture.now.add(const Duration(seconds: 31));
+      await tester.pump(const Duration(seconds: 31));
+      expect(fixture.usageLoads, 1);
+      expect(fixture.subscriptionLoads, 0);
+      expect(tester.takeException(), isNull);
+    } finally {
+      await fixture.close(tester);
+    }
+  });
+
+  testWidgets(
+    'refund refresh clears prepaid proof before response and zero blocks the action',
+    (tester) async {
+      final fixture = _PrepaidGateFixture(_prepaidUsage());
+      try {
+        await fixture.mount(tester);
+        expect(fixture.freshPrepaid, isTrue);
+        fixture.delayUsage = true;
+        fixture.refreshUsage();
+        await tester.pump();
+        await tester.pump();
+        expect(fixture.pending, hasLength(1));
+        expect(fixture.snapshot.prepaidProof, isNull);
+        expect(fixture.snapshot.usageResponseFresh, isFalse);
+        expect(find.byKey(_prepaidAction).hitTestable(), findsNothing);
+        fixture.pending.single.result.complete(
+          _prepaidUsage(paid: 0, total: 0),
+        );
+        await tester.pumpAndSettle();
+        expect(fixture.snapshot.verifiedAccess, isFalse);
+        expect(fixture.snapshot.prepaidProof, isNull);
+        expect(fixture.freshPrepaid, isFalse);
+        expect(find.byKey(_prepaidAction).hitTestable(), findsNothing);
+        expect(
+          find.byKey(const Key('premium-route-upgrade-cta')),
+          findsOneWidget,
+        );
+        expect(fixture.subscriptionLoads, greaterThan(0));
+        expect(fixture.protectedTaps, 0);
+        expect(tester.takeException(), isNull);
+      } finally {
+        await fixture.close(tester);
+      }
+    },
+  );
+
+  testWidgets(
+    'failed same-owner refresh retains no prepaid optimization proof',
+    (tester) async {
+      final fixture = _PrepaidGateFixture(_prepaidUsage());
+      try {
+        await fixture.mount(tester);
+        expect(fixture.freshPrepaid, isTrue);
+        fixture.failUsage = true;
+        fixture.refreshUsage();
+        await tester.pumpAndSettle();
+        expect(fixture.snapshot.prepaidProof, isNull);
+        expect(fixture.snapshot.usageResponseFresh, isFalse);
+        expect(fixture.freshPrepaid, isFalse);
+        expect(fixture.subscriptionLoads, greaterThan(0));
+        expect(tester.takeException(), isNull);
+      } finally {
+        await fixture.close(tester);
+      }
     },
   );
 

@@ -132,13 +132,16 @@ void main() {
       'lib/features/daily_log/daily_log_meal_search.dart',
     ).readAsStringSync();
 
+    expect(page, contains("part 'daily_log_meal_entry.dart';"));
+    expect(entry, contains("part of 'daily_log_page.dart';"));
+    expect(entry, contains("Key('daily-log-meal-type-field')"));
     for (final mealType in const <String>[
       'breakfast',
       'lunch',
       'dinner',
       'snack',
     ]) {
-      expect(page, contains("'$mealType'"), reason: mealType);
+      expect(entry, contains("'$mealType'"), reason: mealType);
     }
     expect(RegExp(r'\bSearchAnchor\(').allMatches(entry), hasLength(1));
     expect(entry, contains('_mealQuerySuggestions(controller, query, locale)'));

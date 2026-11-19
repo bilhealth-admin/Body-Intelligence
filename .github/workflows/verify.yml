@@ -49,6 +49,7 @@ jobs:
           cache: true
 
       - name: Resolve packages
+        id: source_dependencies
         run: flutter pub get
 
       - name: Check formatting
@@ -85,7 +86,7 @@ jobs:
           }
 
       - name: Diagnose exact formatter diff on failure
-        if: failure()
+        if: ${{ failure() && steps.source_dependencies.outcome == 'success' }}
         shell: pwsh
         run: |
           # Diagnostic only; source-checks remains FAILED on formatting errors.
@@ -139,13 +140,19 @@ jobs:
       - name: Analyze complete source
         # Report analyzer failures in the *same* run if formatting is red.
         # The source job still fails; this never bypasses any required gate.
-        if: ${{ always() && !cancelled() }}
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
         run: flutter analyze --no-pub
 
+      - name: Verify adaptive calendar presentation negative controls
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
+        run: dart run tool/test_verify_bil39_pinned_calendar.dart
+
       - name: Prove pinned calendar date logic is unchanged
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
         run: dart run tool/verify_bil39_pinned_calendar.dart
 
       - name: Verify native observation, IME and capture negative controls
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
         shell: pwsh
         run: |
           # Live cloud cycles retain their explicit isolated runner and credentials.
@@ -156,7 +163,7 @@ jobs:
           flutter test --no-pub --concurrency=1 @bilNativeQaFiles
 
       - name: Verify first-food commits, optional Skip and reviewer entitlement
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub --timeout=2m
@@ -168,7 +175,7 @@ jobs:
           test/features/commerce/reviewer_subscription_mirror_fallback_test.dart
 
       - name: Verify cold and warm notification Back navigation
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub --timeout=2m
@@ -178,7 +185,7 @@ jobs:
           test/features/community/community_deep_link_test.dart
 
       - name: Verify More UI behavior before Golden captures
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub
@@ -188,7 +195,7 @@ jobs:
           test/features/settings/more_premium_polish_contract_test.dart
 
       - name: Verify Meal Planner recovery and Review & log
-        if: ${{ success() }}
+        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
         shell: pwsh
         run: >
           flutter test --no-pub --timeout=2m
@@ -197,10 +204,9 @@ jobs:
           test/features/meal_planner/meal_planner_recovery_widget_test.dart
 
   p0:
-    # The critical data/journal and Vision/architecture suites must pass
-    # before running expensive visual suites or the eight complete shards.
+    # Collect critical regressions independently. The final aggregate still
+    # requires these tests and every other quality gate to pass before release.
     name: p0-regressions (${{ matrix.suite }})
-    needs: source
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -248,12 +254,9 @@ jobs:
           retention-days: 7
 
   focused:
-    # Fast, mandatory failure gate. All current Golden suites and the
-    # transaction queue are exercised before the expensive complete suite.
-    # Nothing is skipped or accepted here: a red focused check keeps the
-    # aggregate required check red, while the full eight shards wait for green.
+    # A source or other-suite failure must not hide remaining test failures.
+    # These independent results remain mandatory in the final aggregate.
     name: focused-regressions (${{ matrix.suite }})
-    needs: [source, p0]
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -395,7 +398,6 @@ jobs:
     # Run every historically failing full-suite file in smaller domain groups.
     # The final aggregate requires these focused regressions and all full shards.
     name: broad-regressions (${{ matrix.suite }})
-    needs: [source, p0, focused]
     runs-on: windows-latest
     timeout-minutes: 45
     strategy:
@@ -452,7 +454,6 @@ jobs:
 
   shards:
     name: flutter-tests (shard ${{ matrix.shard }} of 8)
-    needs: source
     runs-on: windows-latest
     timeout-minutes: 60
     strategy:
@@ -543,7 +544,6 @@ jobs:
 
   integration-tools:
     name: Exact-source QA receipt and orchestration regression tests
-    needs: source
     runs-on: windows-latest
     timeout-minutes: 20
     env:
@@ -564,6 +564,12 @@ jobs:
         run: python -m unittest discover -s tools/qa -p 'test_*.py' -v
       - name: Verify StoreKit restore overlay isolation and reentry
         run: python -B -m unittest discover -s tool/release -p 'test_prepare_ios_storekit_restore_codec_overlay*.py' -v
+      - name: Verify bounded Maven HTTP429 recovery and failure propagation
+        run: python -B -m unittest discover -s tool/release -p test_retry_android_maven429_build.py -v
+      - name: Verify CI-owned Supabase ports and exact database identity
+        run: python -B -m unittest discover -s tool/release -p test_prepare_local_supabase_ci_stack.py -v
+      - name: Verify Android startup workflow retains its offline integrity controls
+        run: python -B -m unittest discover -s tool/release -p test_android_startup_workflow.py -v
 
   flutter:
     name: flutter

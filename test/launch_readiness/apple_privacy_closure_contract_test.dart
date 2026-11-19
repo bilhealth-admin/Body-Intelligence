@@ -319,9 +319,19 @@ void main() {
 
   test('public and in-app policies contain the reconciled privacy wording', () {
     final publicPolicy = File('public_site/app.js').readAsStringSync();
-    final inAppPolicy = File(
+    final inAppPolicy = _librarySource(
+      'lib/features/settings/legal_document_page.dart',
+    );
+    final inAppEntrypoint = File(
       'lib/features/settings/legal_document_page.dart',
     ).readAsStringSync();
+    expect(inAppEntrypoint, contains("part 'legal_document_ai_privacy.dart';"));
+    expect(
+      inAppEntrypoint,
+      contains(
+        "('3. Images, voice, and connected services', _combinedAiPrivacyDisclosure)",
+      ),
+    );
     final legacyCopy = File(
       'lib/app/localization/runtime_copy_extended.dart',
     ).readAsStringSync();
