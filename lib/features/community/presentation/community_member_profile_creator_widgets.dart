@@ -45,125 +45,126 @@ class _CommunityCreatorPanel extends StatelessWidget {
         showDragHandle: true,
         isScrollControlled: true,
         builder: (sheetContext) => visit.guard(
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  communityText(
-                    sheetContext,
-                    'Community badges',
-                    'شارات المجتمع',
-                  ),
-                  style: Theme.of(
-                    sheetContext,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          BilPinnedHeaderBody(
+            shrinkWrap: true,
+            header: Padding(
+              key: const Key("community-badges-pinned-heading"),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              child: Text(
+                communityText(
+                  sheetContext,
+                  'Community badges',
+                  'شارات المجتمع',
                 ),
-                const SizedBox(height: 12),
-                for (final badge in creator.badges)
-                  ListTile(
-                    key: Key('community-creator-badge-${badge.badgeKey}'),
-                    contentPadding: EdgeInsets.zero,
-                    leading: CircleAvatar(
-                      child: Icon(
+                style: bilPageHeadingStyle(sheetContext),
+              ),
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final badge in creator.badges)
+                    ListTile(
+                      key: Key('community-creator-badge-${badge.badgeKey}'),
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        child: Icon(
+                          badge.earned
+                              ? Icons.verified_rounded
+                              : Icons.lock_outline_rounded,
+                        ),
+                      ),
+                      title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
+                      trailing: Text(
                         badge.earned
-                            ? Icons.verified_rounded
-                            : Icons.lock_outline_rounded,
+                            ? communityText(sheetContext, 'Earned', 'مكتسبة')
+                            : communityText(sheetContext, 'Locked', 'مقفلة'),
                       ),
                     ),
-                    title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
-                    trailing: Text(
-                      badge.earned
-                          ? communityText(sheetContext, 'Earned', 'مكتسبة')
-                          : communityText(sheetContext, 'Locked', 'مقفلة'),
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       );
 
-  Future<void> _openCreatorCenter(BuildContext context) =>
-      showBilPearlBottomSheet<void>(
-        context: context,
-        useSafeArea: true,
-        showDragHandle: true,
-        isScrollControlled: true,
-        builder: (sheetContext) => visit.guard(
-          SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  communityText(
-                    sheetContext,
-                    'Creator Center',
-                    'مركز صانع المحتوى',
-                  ),
-                  style: Theme.of(
-                    sheetContext,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-                ),
-                const SizedBox(height: 14),
-                if (creator.postsVisible && creator.approvedPosts != null)
-                  _CreatorMetricRow(
-                    icon: Icons.article_outlined,
-                    label: communityText(
-                      sheetContext,
-                      'Approved moments',
-                      'اللحظات المعتمدة',
-                    ),
-                    value: creator.approvedPosts.toString(),
-                  ),
-                if (creator.followersVisible && creator.followers != null)
-                  _CreatorMetricRow(
-                    icon: Icons.people_outline_rounded,
-                    label: communityText(
-                      sheetContext,
-                      'Followers',
-                      'المتابعون',
-                    ),
-                    value: creator.followers.toString(),
-                  ),
-                if (creator.postsVisible && creator.likesReceived != null)
-                  _CreatorMetricRow(
-                    icon: Icons.favorite_border_rounded,
-                    label: communityText(
-                      sheetContext,
-                      'Likes received',
-                      'الإعجابات المستلمة',
-                    ),
-                    value: creator.likesReceived.toString(),
-                  ),
-                if (creator.postsVisible && creator.commentsReceived != null)
-                  _CreatorMetricRow(
-                    icon: Icons.mode_comment_outlined,
-                    label: communityText(
-                      sheetContext,
-                      'Comments received',
-                      'التعليقات المستلمة',
-                    ),
-                    value: creator.commentsReceived.toString(),
-                  ),
-                _CreatorMetricRow(
-                  icon: Icons.group_add_outlined,
-                  label: communityText(
-                    sheetContext,
-                    'Qualified referrals',
-                    'الدعوات المؤهلة',
-                  ),
-                  value: creator.qualifiedReferrals.toString(),
-                ),
-              ],
-            ),
+  Future<void> _openCreatorCenter(
+    BuildContext context,
+  ) => showBilPearlBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    isScrollControlled: true,
+    builder: (sheetContext) => visit.guard(
+      BilPinnedHeaderBody(
+        shrinkWrap: true,
+        header: Padding(
+          key: const Key("community-creator-pinned-heading"),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+          child: Text(
+            communityText(sheetContext, 'Creator Center', 'مركز صانع المحتوى'),
+            style: bilPageHeadingStyle(sheetContext),
           ),
         ),
-      );
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (creator.postsVisible && creator.approvedPosts != null)
+                _CreatorMetricRow(
+                  icon: Icons.article_outlined,
+                  label: communityText(
+                    sheetContext,
+                    'Approved moments',
+                    'اللحظات المعتمدة',
+                  ),
+                  value: creator.approvedPosts.toString(),
+                ),
+              if (creator.followersVisible && creator.followers != null)
+                _CreatorMetricRow(
+                  icon: Icons.people_outline_rounded,
+                  label: communityText(sheetContext, 'Followers', 'المتابعون'),
+                  value: creator.followers.toString(),
+                ),
+              if (creator.postsVisible && creator.likesReceived != null)
+                _CreatorMetricRow(
+                  icon: Icons.favorite_border_rounded,
+                  label: communityText(
+                    sheetContext,
+                    'Likes received',
+                    'الإعجابات المستلمة',
+                  ),
+                  value: creator.likesReceived.toString(),
+                ),
+              if (creator.postsVisible && creator.commentsReceived != null)
+                _CreatorMetricRow(
+                  icon: Icons.mode_comment_outlined,
+                  label: communityText(
+                    sheetContext,
+                    'Comments received',
+                    'التعليقات المستلمة',
+                  ),
+                  value: creator.commentsReceived.toString(),
+                ),
+              _CreatorMetricRow(
+                icon: Icons.group_add_outlined,
+                label: communityText(
+                  sheetContext,
+                  'Qualified referrals',
+                  'الدعوات المؤهلة',
+                ),
+                value: creator.qualifiedReferrals.toString(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 
   Future<void> _openCertification(BuildContext context) async {
     if (!visit.isCurrent()) return;

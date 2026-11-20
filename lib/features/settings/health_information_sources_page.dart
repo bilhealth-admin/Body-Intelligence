@@ -1,5 +1,7 @@
+import '../../shared/widgets/bil_page_heading.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -42,42 +44,45 @@ class HealthInformationSourcesPage extends StatelessWidget {
             copy('Health sources & methodology', 'مصادر ومنهجية الصحة'),
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-          children: [
-            Text(
+        body: BilPinnedHeaderBody(
+          header: Padding(
+            key: const Key('health-sources-pinned-header'),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 10),
+            child: Text(
               copy('Sources & methodology', 'المصادر والمنهجية'),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+              style: bilPageHeadingStyle(context),
             ),
-            const SizedBox(height: 10),
-            BilClinicalNote(
-              title: copy('Your data, clearly separated', 'بياناتك، بوضوح'),
-              text: copy(
-                'BIL distinguishes your recorded or measured data from calculated estimates and general population references. BIL does not diagnose medical conditions, and estimates are not a treatment prescription. Check with a doctor or qualified health professional before decisions involving pregnancy, supplements, medicines, or medical conditions.',
-                'يميز BIL بين بياناتك المسجلة أو المقاسة، والتقديرات المحسوبة، والمراجع السكانية العامة. لا يشخّص BIL الحالات الطبية، وليست التقديرات وصفة علاجية. استشر طبيبًا أو مختصًا صحيًا مؤهلًا قبل قرارات الحمل أو المكملات أو الأدوية أو الحالات الطبية.',
-              ),
-            ),
-            const SizedBox(height: 18),
-            if (featured.isNotEmpty) ...[
-              Text(
-                copy(
-                  'References for this information',
-                  'المراجع المرتبطة بهذه المعلومة',
+          ),
+          body: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+            children: [
+              BilClinicalNote(
+                title: copy('Your data, clearly separated', 'بياناتك، بوضوح'),
+                text: copy(
+                  'BIL distinguishes your recorded or measured data from calculated estimates and general population references. BIL does not diagnose medical conditions, and estimates are not a treatment prescription. Check with a doctor or qualified health professional before decisions involving pregnancy, supplements, medicines, or medical conditions.',
+                  'يميز BIL بين بياناتك المسجلة أو المقاسة، والتقديرات المحسوبة، والمراجع السكانية العامة. لا يشخّص BIL الحالات الطبية، وليست التقديرات وصفة علاجية. استشر طبيبًا أو مختصًا صحيًا مؤهلًا قبل قرارات الحمل أو المكملات أو الأدوية أو الحالات الطبية.',
                 ),
-                key: const Key('health-sources-featured-heading'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 18),
+              if (featured.isNotEmpty) ...[
+                Text(
+                  copy(
+                    'References for this information',
+                    'المراجع المرتبطة بهذه المعلومة',
+                  ),
+                  key: const Key('health-sources-featured-heading'),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              for (final source in visibleSources) ...[
+                _SourceCard(source: source, arabic: arabic),
+                const SizedBox(height: 8),
+              ],
             ],
-            for (final source in visibleSources) ...[
-              _SourceCard(source: source, arabic: arabic),
-              const SizedBox(height: 8),
-            ],
-          ],
+          ),
         ),
       ),
     );

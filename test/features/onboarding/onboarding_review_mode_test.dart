@@ -22,6 +22,7 @@ import 'package:body_intelligence_log/features/onboarding/models/onboarding_draf
 import 'package:body_intelligence_log/features/onboarding/onboarding_page.dart';
 import 'package:body_intelligence_log/features/onboarding/services/onboarding_permission_gateways.dart';
 import 'package:body_intelligence_log/features/nutrition/repositories/dietary_preferences_repository.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_pinned_header_body.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -212,10 +213,17 @@ void main() {
   }
 
   Future<void> revealAiButton(WidgetTester tester, Key key) async {
+    final pageScroll = find.ancestor(
+      of: find.byKey(const Key('onboarding-step-input-content')),
+      matching: find.byType(SingleChildScrollView),
+    );
     await tester.scrollUntilVisible(
       find.byKey(key),
       400,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: find.descendant(
+        of: pageScroll,
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.pump();
   }
@@ -280,10 +288,7 @@ void main() {
               language == 'ar' ? TextDirection.rtl : TextDirection.ltr,
             );
             final disclosure = find
-                .ancestor(
-                  of: allow,
-                  matching: find.byType(SingleChildScrollView),
-                )
+                .ancestor(of: allow, matching: find.byType(BilPinnedHeaderBody))
                 .first;
             expect(
               find.descendant(

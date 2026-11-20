@@ -3,6 +3,8 @@ import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_p
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
+import '../../shared/widgets/bil_page_heading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/services/local_data_lifecycle_service.dart';
@@ -113,103 +115,122 @@ class _LocalExportRangePageState extends ConsumerState<LocalExportRangePage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: Text(_copy(context, 'Export local data'))),
-    body: ListView(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        16 + MediaQuery.paddingOf(context).bottom,
-      ),
-      children: [
-        Text(
-          _copy(context, 'Choose an inclusive date range'),
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _copy(
-            context,
-            'Only authoritative data stored on this device is exported.',
-          ),
-        ),
-        const SizedBox(height: 16),
-        _dateTile('Start date', from, (value) => _changeScope(from: value)),
-        _dateTile('End date', to, (value) => _changeScope(to: value)),
-        TextButton(
-          onPressed: preparing || sharing
-              ? null
-              : () => _changeScope(clearDates: true),
-          child: Text(_copy(context, 'All dates')),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          _copy(context, 'Data included'),
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        for (final dataset in _allDatasets)
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            value: datasets.contains(dataset),
-            title: Text(_copy(context, _datasetLabel(dataset))),
-            onChanged: preparing || sharing
-                ? null
-                : (selected) => _toggleDataset(dataset, selected == true),
-          ),
-        const SizedBox(height: 12),
-        FilledButton.icon(
-          onPressed: !_identityReady || preparing || sharing || datasets.isEmpty
-              ? null
-              : _prepare,
-          icon: preparing
-              ? const SizedBox.square(
-                  dimension: 18,
-                  child: BilFeatureWelcomeStatus(),
-                )
-              : const BilNavigationFeedback(
-                  child: Icon(Icons.file_download_outlined),
-                ),
-          label: Text(_copy(context, 'Create CSV export')),
-        ),
-        if (prepared case final ready?) ...[
-          const SizedBox(height: 16),
-          BilPearlMaterialCard(
+    body: LayoutBuilder(
+      builder: (context, constraints) => BilPinnedHeaderBody(
+        header: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: constraints.maxHeight / 2),
+          child: SingleChildScrollView(
+            primary: false,
             child: Padding(
+              key: const Key('local-export-pinned-header'),
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    _copy(context, 'Export files are ready'),
-                    style: Theme.of(context).textTheme.titleMedium,
+                    _copy(context, 'Choose an inclusive date range'),
+                    style: bilPageHeadingStyle(context),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
                     _copy(
                       context,
-                      'Prepared locally. Nothing has been shared yet.',
+                      'Only authoritative data stored on this device is exported.',
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  for (final name in ready.files.keys) Text('• $name'),
-                  const SizedBox(height: 12),
-                  FilledButton.tonalIcon(
-                    onPressed: !_identityReady || sharing
-                        ? null
-                        : _sharePrepared,
-                    icon: sharing
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: BilFeatureWelcomeStatus(),
-                          )
-                        : const Icon(Icons.ios_share_rounded),
-                    label: Text(_copy(context, 'Share prepared export')),
                   ),
                 ],
               ),
             ),
           ),
-        ],
-      ],
+        ),
+        body: ListView(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            16 + MediaQuery.paddingOf(context).bottom,
+          ),
+          children: [
+            _dateTile('Start date', from, (value) => _changeScope(from: value)),
+            _dateTile('End date', to, (value) => _changeScope(to: value)),
+            TextButton(
+              onPressed: preparing || sharing
+                  ? null
+                  : () => _changeScope(clearDates: true),
+              child: Text(_copy(context, 'All dates')),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              _copy(context, 'Data included'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            for (final dataset in _allDatasets)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: datasets.contains(dataset),
+                title: Text(_copy(context, _datasetLabel(dataset))),
+                onChanged: preparing || sharing
+                    ? null
+                    : (selected) => _toggleDataset(dataset, selected == true),
+              ),
+            const SizedBox(height: 12),
+            FilledButton.icon(
+              onPressed:
+                  !_identityReady || preparing || sharing || datasets.isEmpty
+                  ? null
+                  : _prepare,
+              icon: preparing
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: BilFeatureWelcomeStatus(),
+                    )
+                  : const BilNavigationFeedback(
+                      child: Icon(Icons.file_download_outlined),
+                    ),
+              label: Text(_copy(context, 'Create CSV export')),
+            ),
+            if (prepared case final ready?) ...[
+              const SizedBox(height: 16),
+              BilPearlMaterialCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _copy(context, 'Export files are ready'),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _copy(
+                          context,
+                          'Prepared locally. Nothing has been shared yet.',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      for (final name in ready.files.keys) Text('• $name'),
+                      const SizedBox(height: 12),
+                      FilledButton.tonalIcon(
+                        onPressed: !_identityReady || sharing
+                            ? null
+                            : _sharePrepared,
+                        icon: sharing
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: BilFeatureWelcomeStatus(),
+                              )
+                            : const Icon(Icons.ios_share_rounded),
+                        label: Text(_copy(context, 'Share prepared export')),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     ),
   );
 

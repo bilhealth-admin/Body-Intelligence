@@ -69,7 +69,9 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
         // Legacy provider-null storage does not identify an independent grant.
         // Confirm that source again rather than turning it into fresh proof.
         if (persistedSubscription != null &&
-            persistedSubscription.provider != null) {
+            persistedSubscription.provider != null &&
+            _storeProofSurvivesDenial(ownerId, persistedSubscription) &&
+            _storeObservationIsCurrent(ownerId, persistedSubscription)) {
           _rememberRestoredStoreVersion(ownerId, persistedSubscription);
           ServerEntitlementRepository._sessionCache.remember(
             ownerId: ownerId,

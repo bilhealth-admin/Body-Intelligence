@@ -5,8 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('BIL-09 recovery copy covers all 25 locales', () {
-    expect(SmartPlanRecoveryRuntimeCopy.sources, hasLength(8));
+    expect(SmartPlanRecoveryRuntimeCopy.sources, hasLength(9));
     expect(SmartPlanRecoveryRuntimeCopy.balanced, isTrue);
+    expect(SmartPlanRecoveryRuntimeCopy.sources, contains('Checking recipes'));
     expect(
       SmartPlanRecoveryRuntimeCopy.resolve('Resume plan', 'ar'),
       'استئناف الخطة',

@@ -1,7 +1,9 @@
+import '../../../shared/widgets/bil_page_heading.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:flutter/services.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
@@ -98,131 +100,139 @@ class BilMealVoiceCaptureDialog extends StatelessWidget {
                         48)
                     .clamp(160, double.infinity),
           ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: FocusTraversalGroup(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Semantics(
-                    liveRegion: true,
-                    child: Row(
-                      children: [
-                        if (preparing &&
-                            !MediaQuery.disableAnimationsOf(context))
-                          const SizedBox.square(
-                            dimension: 20,
-                            child: BilFeatureWelcomeStatus(),
-                          )
-                        else
-                          Icon(
-                            listening
-                                ? Icons.mic_rounded
-                                : Icons.mic_off_outlined,
-                            size: 22,
-                            color: listening
-                                ? scheme.primary
-                                : scheme.onSurfaceVariant,
-                          ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            status,
-                            key: const Key('meal-voice-status'),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: scheme.onSurfaceVariant,
+          child: FocusTraversalGroup(
+            child: BilPinnedHeaderBody(
+              shrinkWrap: true,
+              header: Padding(
+                key: const Key('meal-voice-pinned-header'),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(title, style: bilPageHeadingStyle(context)),
+                    const SizedBox(height: 12),
+                    Semantics(
+                      liveRegion: true,
+                      child: Row(
+                        children: [
+                          if (preparing &&
+                              !MediaQuery.disableAnimationsOf(context))
+                            const SizedBox.square(
+                              dimension: 20,
+                              child: BilFeatureWelcomeStatus(),
+                            )
+                          else
+                            Icon(
+                              listening
+                                  ? Icons.mic_rounded
+                                  : Icons.mic_off_outlined,
+                              size: 22,
+                              color: listening
+                                  ? scheme.primary
+                                  : scheme.onSurfaceVariant,
+                            ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              status,
+                              key: const Key('meal-voice-status'),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      key: textFieldKey,
+                      controller: editor,
+                      minLines: 2,
+                      maxLines: 5,
+                      keyboardType: keyboardType,
+                      maxLength: maxLength,
+                      maxLengthEnforcement: MaxLengthEnforcement.none,
+                      buildCounter: buildCounter,
+                      onTap: onEdit,
+                      onChanged: onTextChanged ?? (_) => onEdit(),
+                      decoration: InputDecoration(
+                        hintText:
+                            reviewLabel ??
+                            MealVoiceRuntimeCopy.resolve(
+                              MealVoiceCopyKey.reviewLabel,
+                              locale,
+                            ),
+                        suffixText: unitLabel,
+                        border: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(14)),
                         ),
+                      ),
+                    ),
+                    if (error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            error!,
+                            style: TextStyle(color: scheme.error),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    Text(
+                      instructions,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        TextButton(
+                          key: const Key('cancel-voice-food-candidate'),
+                          onPressed: onCancel,
+                          child: Text(cancelLabel),
+                        ),
+                        if (onRetry != null && !listening && !preparing)
+                          OutlinedButton(
+                            key: const Key('retry-voice-food-candidate'),
+                            onPressed: onRetry,
+                            child: Text(statusCopy(VoiceStatusCopyKey.retry)),
+                          ),
+                        if (listening)
+                          FilledButton.icon(
+                            key: const Key('stop-voice-food-candidate'),
+                            onPressed: onStop,
+                            icon: const Icon(Icons.stop_rounded),
+                            label: Text(statusCopy(VoiceStatusCopyKey.stop)),
+                          )
+                        else
+                          FilledButton.icon(
+                            key: useKey,
+                            onPressed: preparing ? null : onUse,
+                            icon: BilNavigationFeedback(child: Icon(useIcon)),
+                            label: Text(useLabel),
+                          ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    key: textFieldKey,
-                    controller: editor,
-                    minLines: 2,
-                    maxLines: 5,
-                    keyboardType: keyboardType,
-                    maxLength: maxLength,
-                    maxLengthEnforcement: MaxLengthEnforcement.none,
-                    buildCounter: buildCounter,
-                    onTap: onEdit,
-                    onChanged: onTextChanged ?? (_) => onEdit(),
-                    decoration: InputDecoration(
-                      hintText:
-                          reviewLabel ??
-                          MealVoiceRuntimeCopy.resolve(
-                            MealVoiceCopyKey.reviewLabel,
-                            locale,
-                          ),
-                      suffixText: unitLabel,
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(14)),
-                      ),
-                    ),
-                  ),
-                  if (error != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          error!,
-                          style: TextStyle(color: scheme.error),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 10),
-                  Text(
-                    instructions,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    alignment: WrapAlignment.end,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      TextButton(
-                        key: const Key('cancel-voice-food-candidate'),
-                        onPressed: onCancel,
-                        child: Text(cancelLabel),
-                      ),
-                      if (onRetry != null && !listening && !preparing)
-                        OutlinedButton(
-                          key: const Key('retry-voice-food-candidate'),
-                          onPressed: onRetry,
-                          child: Text(statusCopy(VoiceStatusCopyKey.retry)),
-                        ),
-                      if (listening)
-                        FilledButton.icon(
-                          key: const Key('stop-voice-food-candidate'),
-                          onPressed: onStop,
-                          icon: const Icon(Icons.stop_rounded),
-                          label: Text(statusCopy(VoiceStatusCopyKey.stop)),
-                        )
-                      else
-                        FilledButton.icon(
-                          key: useKey,
-                          onPressed: preparing ? null : onUse,
-                          icon: BilNavigationFeedback(child: Icon(useIcon)),
-                          label: Text(useLabel),
-                        ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

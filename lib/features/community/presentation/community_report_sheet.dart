@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/bil_modal_bottom_sheet.dart';
@@ -140,138 +142,152 @@ Future<CommunityReportDraft?> showCommunityReportSheet(
                   ),
                 ),
               ),
-              child: SingleChildScrollView(
-                padding: EdgeInsetsDirectional.fromSTEB(
-                  20,
-                  10,
-                  20,
-                  24 + MediaQuery.viewInsetsOf(context).bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                scheme.surfaceContainerHighest.withValues(
-                                  alpha: .9,
+              child: BilPinnedHeaderBody(
+                shrinkWrap: true,
+                header: Padding(
+                  key: const Key("community-report-pinned-heading"),
+                  padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  scheme.surfaceContainerHighest.withValues(
+                                    alpha: .9,
+                                  ),
+                                  scheme.surfaceContainerLow.withValues(
+                                    alpha: .7,
+                                  ),
+                                ],
+                              ),
+                              border: Border.all(
+                                color: scheme.outlineVariant.withValues(
+                                  alpha: .56,
                                 ),
-                                scheme.surfaceContainerLow.withValues(
-                                  alpha: .7,
-                                ),
-                              ],
-                            ),
-                            border: Border.all(
-                              color: scheme.outlineVariant.withValues(
-                                alpha: .56,
                               ),
                             ),
+                            child: Icon(
+                              Icons.outlined_flag_rounded,
+                              color: scheme.onSurfaceVariant,
+                              size: 20,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.outlined_flag_rounded,
-                            color: scheme.onSurfaceVariant,
-                            size: 20,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: bilPageHeadingStyle(context),
+                            ),
                           ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    20,
+                    0,
+                    20,
+                    24 + MediaQuery.viewInsetsOf(context).bottom,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (final option in options) ...[
+                        BilReportReasonOption(
+                          key: Key('community-report-reason-${option.$1}'),
+                          tapKey: Key(
+                            'community-report-reason-tap-${option.$1}',
+                          ),
+                          value: option.$1,
+                          title: CommunityChannelsCopy.text(context, option.$2),
+                          icon: option.$3,
+                          selected: category == option.$1,
+                          onTap: () => update(() => category = option.$1),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w700),
-                          ),
-                        ),
+                        const SizedBox(height: 8),
                       ],
-                    ),
-                    const SizedBox(height: 16),
-                    for (final option in options) ...[
-                      BilReportReasonOption(
-                        key: Key('community-report-reason-${option.$1}'),
-                        tapKey: Key('community-report-reason-tap-${option.$1}'),
-                        value: option.$1,
-                        title: CommunityChannelsCopy.text(context, option.$2),
-                        icon: option.$3,
-                        selected: category == option.$1,
-                        onTap: () => update(() => category = option.$1),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    if (allowNote) ...[
-                      TextField(
-                        key: const Key('community-report-note'),
-                        controller: note,
-                        minLines: 1,
-                        maxLines: 3,
-                        maxLength: 400,
-                        onChanged: (_) => update(() {}),
-                        decoration: InputDecoration(
-                          labelText: communityText(
-                            context,
-                            'Optional note for moderators',
-                            'ملاحظة اختيارية للمشرفين',
-                          ),
-                          errorText: noteValid
-                              ? null
-                              : communityText(
-                                  context,
-                                  'Keep the note within 400 characters.',
-                                  'اجعل الملاحظة في حدود ٤٠٠ حرف.',
-                                ),
-                          filled: true,
-                          fillColor: scheme.surface.withValues(alpha: .62),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
+                      if (allowNote) ...[
+                        TextField(
+                          key: const Key('community-report-note'),
+                          controller: note,
+                          minLines: 1,
+                          maxLines: 3,
+                          maxLength: 400,
+                          onChanged: (_) => update(() {}),
+                          decoration: InputDecoration(
+                            labelText: communityText(
+                              context,
+                              'Optional note for moderators',
+                              'ملاحظة اختيارية للمشرفين',
+                            ),
+                            errorText: noteValid
+                                ? null
+                                : communityText(
+                                    context,
+                                    'Keep the note within 400 characters.',
+                                    'اجعل الملاحظة في حدود ٤٠٠ حرف.',
+                                  ),
+                            filled: true,
+                            fillColor: scheme.surface.withValues(alpha: .62),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    Text(
-                      communityText(
-                        context,
-                        'The reported content and your reason will be reviewed by moderators. Reporting does not block this member.',
-                        'سيراجع المشرفون المحتوى المبلّغ عنه وسبب البلاغ. إرسال البلاغ لا يحظر العضو.',
-                      ),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 16),
-                    FilledButton.icon(
-                      key: const Key('community-report-submit'),
-                      onPressed: category == null || !noteValid || confirmed
-                          ? null
-                          : () {
-                              if (confirmed) return;
-                              confirmed = true;
-                              Navigator.of(sheetContext).pop(
-                                CommunityReportDraft(
-                                  category!,
-                                  allowNote ? note.text.trim() : '',
-                                ),
-                              );
-                            },
-                      icon: const Icon(Icons.outlined_flag_rounded),
-                      label: Text(
-                        communityText(context, 'Send report', 'إرسال البلاغ'),
-                      ),
-                    ),
-                    TextButton(
-                      key: const Key('community-report-cancel'),
-                      onPressed: () => Navigator.of(sheetContext).pop(),
-                      child: Text(
-                        CommunityChannelsCopy.text(
+                        const SizedBox(height: 8),
+                      ],
+                      Text(
+                        communityText(
                           context,
-                          CommunityChannelsCopyKey.cancel,
+                          'The reported content and your reason will be reviewed by moderators. Reporting does not block this member.',
+                          'سيراجع المشرفون المحتوى المبلّغ عنه وسبب البلاغ. إرسال البلاغ لا يحظر العضو.',
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        key: const Key('community-report-submit'),
+                        onPressed: category == null || !noteValid || confirmed
+                            ? null
+                            : () {
+                                if (confirmed) return;
+                                confirmed = true;
+                                Navigator.of(sheetContext).pop(
+                                  CommunityReportDraft(
+                                    category!,
+                                    allowNote ? note.text.trim() : '',
+                                  ),
+                                );
+                              },
+                        icon: const Icon(Icons.outlined_flag_rounded),
+                        label: Text(
+                          communityText(context, 'Send report', 'إرسال البلاغ'),
                         ),
                       ),
-                    ),
-                  ],
+                      TextButton(
+                        key: const Key('community-report-cancel'),
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        child: Text(
+                          CommunityChannelsCopy.text(
+                            context,
+                            CommunityChannelsCopyKey.cancel,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );

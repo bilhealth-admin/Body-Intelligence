@@ -64,7 +64,7 @@ class _RetainedAiCoachSurfaceState
     if (ownerKnown || ownerSnapshot.hasValue || ownerSnapshot.hasError) {
       _ownerResolutionTimer?.cancel();
     }
-    if (!ownerKnown) {
+    if (ownerSnapshot.hasError || !ownerKnown) {
       // A settled signed-out owner is not an in-flight credit request. No
       // entitlement is granted here, and no Coach child or paid offer mounts.
       if (ownerSnapshot.hasError ||

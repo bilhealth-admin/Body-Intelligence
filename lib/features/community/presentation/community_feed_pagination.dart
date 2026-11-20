@@ -1,5 +1,11 @@
 part of 'community_hub_page.dart';
 
+typedef _CommunityReferenceSnapshot = ({
+  int read,
+  Map<String, CommunityPost> posts,
+  List<CommunityPostReferenceMetadata> values,
+});
+
 mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   bool get _loadingMore;
   set _loadingMore(bool value);
@@ -30,6 +36,51 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     CommunityFeedMode mode,
   );
 
+  int _presentationRead = 0;
+  Future<List<CommunityPost>>? _pendingPresentation;
+  List<CommunityPost> _presentedPosts = const [];
+  CommunityFeedMode? _presentedMode;
+  int _referenceRead = 0;
+  final _referenceReads = <String, int>{};
+  final _referenceRevisions = <String, CommunityPost>{};
+  Map<String, CommunityPost> _referenceTargets = const {};
+  int _referenceTargetGeneration = -1;
+  int? _pendingFirstRead;
+
+  void _rememberPresentedPosts(
+    List<CommunityPost> posts,
+    CommunityFeedMode mode,
+  ) {
+    _presentedPosts = posts;
+    _presentedMode = mode;
+    if (_referenceTargetGeneration != _feedGeneration ||
+        _pendingFirstRead == null) {
+      _referenceTargets = {for (final post in posts) post.id: post};
+      _referenceTargetGeneration = _feedGeneration;
+      _pendingFirstRead = null;
+    }
+  }
+
+  bool _matchesReferenceTarget(CommunityPost post) {
+    final target = _referenceTargetGeneration == _feedGeneration
+        ? _referenceTargets[post.id]
+        : _presentedPosts.where((value) => value.id == post.id).firstOrNull;
+    return target == null || _sameCommunityPostRevision(target, post);
+  }
+
+  CommunityPostReferenceMetadata? _referenceForPost(CommunityPost post) {
+    final revision = _referenceRevisions[post.id];
+    return revision != null && _sameCommunityPostRevision(revision, post)
+        ? _referenceByPost[post.id]
+        : null;
+  }
+
+  bool _referencesMatchPage(List<CommunityPost> posts) => !posts.any((post) {
+    final revision = _referenceRevisions[post.id];
+    return !_matchesReferenceTarget(post) ||
+        (revision != null && !_sameCommunityPostRevision(revision, post));
+  });
+
   Future<List<CommunityPost>> _loadFirst({
     bool keepRefreshNotice = false,
   }) async {
@@ -44,6 +95,8 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
     final presentationZone = Zone.current;
     repository.invalidateCommunityModeratorStatus();
     final generation = ++_feedGeneration;
+    final initialRead = ++_presentationRead;
+    _pendingPresentation = null;
     final mode = _selectedFeedMode;
     final locale = Localizations.localeOf(context).toLanguageTag();
     _feedRefreshing = true;
@@ -73,25 +126,17 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
                           generation != _feedGeneration) {
                         return;
                       }
-                      setState(() {
-                        _cacheRefreshing = false;
-                        _cacheRefreshFailed = false;
-                        (this as _FeedTabState)._rememberModePage(
+                      final read = ++_presentationRead;
+                      _pendingPresentation = presentationZone.run(
+                        () => _presentFirstPage(
+                          visit,
+                          generation,
+                          read,
                           mode,
                           updated,
-                        );
-                        _feed = Future.value(_tagPosts(updated.posts, mode));
-                        _hasMore = updated.hasMore;
-                        _feedCursorPriority = updated.nextPriority;
-                        _feedCursorCreatedAt = updated.nextBefore;
-                        _feedCursorPostId = updated.nextBeforeId;
-                      });
-                      unawaited(
-                        presentationZone.run(
-                          () =>
-                              _loadFeedExtras(visit, generation, updated.posts),
                         ),
                       );
+                      unawaited(_pendingPresentation);
                     },
                     onRefreshing: () {
                       if (mounted &&
@@ -118,28 +163,30 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         if (keepRefreshNotice && !_cacheRefreshing) _cacheRefreshFailed = false;
         visit.check();
         if (generation != _feedGeneration) return;
-        _referenceByPost.clear();
-        _viewCountByPost.clear();
-        _commentPreviewByPost.clear();
-        _membershipTierByAuthor.clear();
-        (this as _FeedTabState)._authorIdentities.clear();
-        (this as _FeedTabState)._authorIdentityReads.clear();
-        unawaited(
-          presentationZone.run(
-            () => _loadFeedExtras(visit, generation, page.posts),
-          ),
-        );
-        _hasMore = page.hasMore;
-        _feedCursorPriority = page.nextPriority;
-        _feedCursorCreatedAt = page.nextBefore;
-        _feedCursorPostId = page.nextBeforeId;
+        if (initialRead == _presentationRead) {
+          _pendingPresentation = presentationZone.run(
+            () => _presentFirstPage(
+              visit,
+              generation,
+              initialRead,
+              mode,
+              page,
+              completeRefresh: !_cacheRefreshing,
+            ),
+          );
+        }
       });
       visit.check();
-      if (generation == _feedGeneration) {
-        (this as _FeedTabState)._rememberModePage(mode, page);
-        (this as _FeedTabState)._warmOtherMode(visit, mode);
+      // A cached-refresh callback may have already superseded the cached page.
+      // Await that exact presentation instead of publishing the older snapshot.
+      while (mounted && visit.isCurrent() && generation == _feedGeneration) {
+        final pending = _pendingPresentation;
+        if (pending == null) return const <CommunityPost>[];
+        final posts = await pending;
+        visit.check();
+        if (identical(pending, _pendingPresentation)) return posts;
       }
-      return _tagPosts(page.posts, mode);
+      return const <CommunityPost>[];
     } on CommunityOwnerOperationCancelled {
       return const <CommunityPost>[];
     } finally {
@@ -152,8 +199,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   Future<void> _loadFeedExtras(
     _CommunityFeedVisit visit,
     int generation,
-    List<CommunityPost> posts,
-  ) async {
+    List<CommunityPost> posts, {
+    bool includeReferences = true,
+  }) async {
     final repository = visit.repository;
     if (!repository.useServerCommunityReferenceParity || posts.isEmpty) return;
     final ids = posts.map((post) => post.id).toList(growable: false);
@@ -180,12 +228,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
 
     await Future.wait([
       (this as _FeedTabState)._loadAuthorIdentities(visit, generation, posts),
-      apply(
-        () => repository.loadCommunityPostReferenceMetadata(ids),
-        (values) => _referenceByPost.addEntries(
-          values.map((value) => MapEntry(value.postId, value)),
-        ),
-      ),
+      if (includeReferences) _refreshReferences(visit, generation, posts),
       apply(
         () => repository.loadCommunityPostViewCounts(ids),
         _viewCountByPost.addAll,
@@ -199,6 +242,164 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         _membershipTierByAuthor.addAll,
       ),
     ]);
+  }
+
+  Future<List<CommunityPost>> _presentFirstPage(
+    _CommunityFeedVisit visit,
+    int generation,
+    int read,
+    CommunityFeedMode mode,
+    CommunityFeedModeBatch page, {
+    bool completeRefresh = true,
+  }) async {
+    bool current() =>
+        mounted &&
+        visit.isCurrent() &&
+        generation == _feedGeneration &&
+        read == _presentationRead &&
+        mode == _selectedFeedMode;
+    if (!current()) return const [];
+    final previous = _presentedMode == mode
+        ? _presentedPosts
+        : const <CommunityPost>[];
+    final incoming = {for (final post in page.posts) post.id: post};
+    _referenceTargets = incoming;
+    _referenceTargetGeneration = generation;
+    _pendingFirstRead = read;
+    final retained = previous
+        .where((post) {
+          final next = incoming[post.id];
+          return next != null && _sameCommunityPostRevision(post, next);
+        })
+        .toList(growable: false);
+    final retainedIds = retained.map((post) => post.id).toSet();
+    // Fresh feed authorization takes effect immediately. Continuity never keeps
+    // a removed post or pairs a changed body/author/media revision with old chips.
+    if (retained.length != previous.length) {
+      setState(() {
+        for (final post in previous) {
+          if (!retainedIds.contains(post.id)) {
+            _referenceByPost.remove(post.id);
+            _referenceReads.remove(post.id);
+            _referenceRevisions.remove(post.id);
+            _viewCountByPost.remove(post.id);
+            _commentPreviewByPost.remove(post.id);
+          }
+        }
+        _feed = SynchronousFuture(_tagPosts(retained, mode));
+      });
+    }
+    // A mode cache can revisit an ID with a changed body/media revision. Never
+    // let metadata from that other revision become a fallback after a failed read.
+    for (final post in page.posts) {
+      final revision = _referenceRevisions[post.id];
+      if (revision != null && !_sameCommunityPostRevision(revision, post)) {
+        _referenceByPost.remove(post.id);
+        _referenceRevisions.remove(post.id);
+      }
+    }
+    final references = await _readReferences(visit, generation, page.posts);
+    if (!current()) return const [];
+    late List<CommunityPost> published;
+    setState(() {
+      if (references != null) _replaceReferences(references);
+      // Other optional enrichment retains its original fresh-read semantics;
+      // never extend an old identity, tier or preview past a replacement page.
+      _viewCountByPost.clear();
+      _commentPreviewByPost.clear();
+      _membershipTierByAuthor.clear();
+      (this as _FeedTabState)._authorIdentities.clear();
+      (this as _FeedTabState)._authorIdentityReads.clear();
+      if (completeRefresh) {
+        _cacheRefreshing = false;
+        _cacheRefreshFailed = false;
+      }
+      _hasMore = page.hasMore;
+      _feedCursorPriority = page.nextPriority;
+      _feedCursorCreatedAt = page.nextBefore;
+      _feedCursorPostId = page.nextBeforeId;
+      _pendingFirstRead = null;
+      published = _tagPosts(page.posts, mode);
+      _feed = SynchronousFuture(published);
+      (this as _FeedTabState)._rememberModePage(mode, page);
+    });
+    (this as _FeedTabState)._warmOtherMode(visit, mode);
+    unawaited(
+      _loadFeedExtras(visit, generation, page.posts, includeReferences: false),
+    );
+    return published;
+  }
+
+  Future<_CommunityReferenceSnapshot?> _readReferences(
+    _CommunityFeedVisit visit,
+    int generation,
+    List<CommunityPost> posts,
+  ) async {
+    if (!visit.repository.useServerCommunityReferenceParity) return null;
+    final requested = {
+      for (final post in posts)
+        if (_matchesReferenceTarget(post)) post.id: post,
+    };
+    final ids = requested.keys;
+    final read = ++_referenceRead;
+    for (final id in ids) {
+      _referenceReads[id] = read;
+    }
+    if (ids.isEmpty) {
+      return (
+        read: read,
+        posts: requested,
+        values: const <CommunityPostReferenceMetadata>[],
+      );
+    }
+    try {
+      final values = await visit.run(
+        () => visit.repository
+            .loadCommunityPostReferenceMetadata(ids.toList(growable: false))
+            .timeout(const Duration(seconds: 10)),
+      );
+      visit.check();
+      if (!mounted || generation != _feedGeneration) return null;
+      return (read: read, posts: requested, values: values);
+    } on Object {
+      // A failed optional read is not an authoritative empty result. Existing
+      // matching, authorized presentation remains until a successful retry.
+      return null;
+    }
+  }
+
+  void _replaceReferences(_CommunityReferenceSnapshot snapshot) {
+    final accepted = snapshot.posts.keys
+        .where(
+          (id) =>
+              _referenceReads[id] == snapshot.read &&
+              _matchesReferenceTarget(snapshot.posts[id]!),
+        )
+        .toSet();
+    // Omissions are authoritative: removed titles/tags must not survive addAll.
+    for (final id in accepted) {
+      _referenceByPost.remove(id);
+      _referenceRevisions[id] = snapshot.posts[id]!;
+    }
+    for (final value in snapshot.values) {
+      if (accepted.contains(value.postId)) {
+        _referenceByPost[value.postId] = value;
+      }
+    }
+  }
+
+  Future<void> _refreshReferences(
+    _CommunityFeedVisit visit,
+    int generation,
+    List<CommunityPost> posts,
+  ) async {
+    final snapshot = await _readReferences(visit, generation, posts);
+    if (snapshot != null &&
+        mounted &&
+        visit.isCurrent() &&
+        generation == _feedGeneration) {
+      setState(() => _replaceReferences(snapshot));
+    }
   }
 
   Future<void> _loadMore(List<CommunityPost> visiblePosts) async {
@@ -229,19 +430,28 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
           limit: _FeedTabState._pageSize,
         );
         visit.check();
-        unawaited(
-          presentationZone.run(
-            () => _loadFeedExtras(visit, generation, page.posts),
-          ),
+        final references = await presentationZone.run(
+          () => _readReferences(visit, generation, page.posts),
         );
         visit.check();
         if (generation != _feedGeneration) return;
+        unawaited(
+          presentationZone.run(
+            () => _loadFeedExtras(
+              visit,
+              generation,
+              page.posts,
+              includeReferences: false,
+            ),
+          ),
+        );
         final known = visiblePosts.map((post) => post.id).toSet();
         final combined = [
           ...visiblePosts,
           ...page.posts.where((post) => known.add(post.id)),
         ];
         setState(() {
+          if (references != null) _replaceReferences(references);
           (this as _FeedTabState)._rememberModePage(
             mode,
             CommunityFeedModeBatch(
@@ -253,7 +463,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
               nextBeforeId: page.nextBeforeId,
             ),
           );
-          _feed = Future.value(_tagPosts(combined, mode));
+          _feed = SynchronousFuture(_tagPosts(combined, mode));
           _hasMore = page.hasMore;
           _feedCursorPriority = page.nextPriority;
           _feedCursorCreatedAt = page.nextBefore;
@@ -325,4 +535,53 @@ extension _CommunityFeedScrollRestore on _FeedTabState {
       }
     });
   }
+}
+
+// Content revision excludes volatile counts, reactions and renewed signed URLs.
+// No server edit-version is exposed by CommunityPost, so compare every visible
+// content identity field before retaining the old complete presentation.
+bool _sameCommunityPostRevision(CommunityPost a, CommunityPost b) {
+  if ((
+        a.id,
+        a.authorId,
+        a.body,
+        a.createdAt,
+        a.reviewedAt,
+        a.moderationStatus,
+        a.moderationVisibility,
+        a.locationLabel,
+      ) !=
+      (
+        b.id,
+        b.authorId,
+        b.body,
+        b.createdAt,
+        b.reviewedAt,
+        b.moderationStatus,
+        b.moderationVisibility,
+        b.locationLabel,
+      )) {
+    return false;
+  }
+  final am = a.mediaItems, bm = b.mediaItems;
+  if (am.length != bm.length) return false;
+  for (var i = 0; i < am.length; i++) {
+    final x = am[i], y = bm[i];
+    if ((x.position, x.objectPath, x.mimeType, x.bytes, x.width, x.height) !=
+        (y.position, y.objectPath, y.mimeType, y.bytes, y.width, y.height)) {
+      return false;
+    }
+  }
+  final ap = a.poll, bp = b.poll;
+  if (ap == null || bp == null) return ap == null && bp == null;
+  if ((ap.postId, ap.question, ap.allowMultiple, ap.closesAt, ap.closed) !=
+          (bp.postId, bp.question, bp.allowMultiple, bp.closesAt, bp.closed) ||
+      ap.options.length != bp.options.length) {
+    return false;
+  }
+  for (var i = 0; i < ap.options.length; i++) {
+    final x = ap.options[i], y = bp.options[i];
+    if ((x.id, x.position, x.text) != (y.id, y.position, y.text)) return false;
+  }
+  return true;
 }

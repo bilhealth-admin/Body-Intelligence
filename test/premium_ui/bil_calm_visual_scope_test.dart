@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:body_intelligence_log/shared/widgets/bil_page_heading.dart';
 
 import 'package:body_intelligence_log/features/visual_2026/bil_calm_visual_scope.dart';
 import 'package:flutter/material.dart';
@@ -161,6 +162,74 @@ void main() {
     expect(value.style?.fontSize, inherited.textTheme.titleLarge?.fontSize);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'actual inherited AppBar matches active canonical heading without resizing body typography',
+    (tester) async {
+      for (final locale in [const Locale('en'), const Locale('ar')]) {
+        for (final scale in [1.0, 2.0]) {
+          await tester.pumpWidget(
+            MaterialApp(
+              locale: locale,
+              supportedLocales: const [Locale('en'), Locale('ar')],
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
+              theme: ThemeData.light(useMaterial3: true),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: TextScaler.linear(scale)),
+                child: child!,
+              ),
+              home: BilCalmVisualScope(
+                builder: (inside) => Scaffold(
+                  appBar: AppBar(
+                    title: Text(
+                      locale.languageCode == 'ar' ? 'عنوان' : 'Title',
+                      key: const Key('canonical-inherited-appbar'),
+                    ),
+                  ),
+                  body: Text(
+                    'Explicit heading',
+                    key: const Key('canonical-explicit-heading'),
+                    style: bilPageHeadingStyle(inside),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final bar = find.byKey(const Key('canonical-inherited-appbar'));
+          final explicit = find.byKey(const Key('canonical-explicit-heading'));
+          final barStyle = DefaultTextStyle.of(tester.element(bar)).style;
+          final explicitStyle = tester.widget<Text>(explicit).style!;
+          expect(barStyle.fontWeight, FontWeight.w800);
+          expect(barStyle.fontSize, explicitStyle.fontSize);
+          expect(barStyle.fontFamily, explicitStyle.fontFamily);
+          expect(barStyle.height, explicitStyle.height);
+          expect(
+            Theme.of(tester.element(explicit)).textTheme.titleLarge!.fontWeight,
+            FontWeight.w600,
+            reason:
+                'Only page chrome is standardized; existing card/body typography is preserved.',
+          );
+          // Flutter's native AppBar title applies its existing internal scale
+          // cap. The visual scope must preserve the OS scaler before that
+          // framework boundary and for normal page/sheet heading content.
+          expect(
+            MediaQuery.textScalerOf(
+              tester.element(find.byType(AppBar)),
+            ).scale(10),
+            closeTo(scale * 10, .001),
+          );
+          expect(
+            MediaQuery.textScalerOf(tester.element(explicit)).scale(10),
+            closeTo(scale * 10, .001),
+          );
+          expect(tester.takeException(), isNull);
+        }
+      }
+    },
+  );
 
   test('protected Flutter feature trees never import the visual scope', () {
     for (final path in <String>[

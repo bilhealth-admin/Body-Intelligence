@@ -1,3 +1,5 @@
+import 'bil_page_heading.dart';
+import 'bil_pinned_header_body.dart';
 import 'bil_pearl_feature_welcome.dart';
 import 'bil_pearl_material.dart';
 import 'bil_navigation_feedback.dart';
@@ -320,153 +322,205 @@ class _BilPremiumAiConsentSheet extends StatelessWidget {
     final dark = theme.brightness == Brightness.dark;
     final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
     final horizontal = textScale >= 1.7 ? 12.0 : 18.0;
+    // At 3x, the natural Arabic allow label is 288 px tall. Keep a usable body
+    // viewport for that untruncated control while the long header can scroll.
+    final headerFraction = textScale > 2.5 ? .4 : .5;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        8,
-        0,
-        8,
-        8 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: DecoratedBox(
-            decoration: BilPearlFinish.panel(
-              context,
-              radius: BorderRadius.circular(34),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(1.4),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(32.6),
-                clipBehavior: Clip.antiAlias,
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(horizontal, 10, horizontal, 18),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: scheme.onSurfaceVariant.withValues(alpha: .24),
-                          borderRadius: BorderRadius.circular(99),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          8,
+          0,
+          8,
+          8 + MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: DecoratedBox(
+              decoration: BilPearlFinish.panel(
+                context,
+                radius: BorderRadius.circular(34),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(1.4),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(32.6),
+                  clipBehavior: Clip.antiAlias,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => BilPinnedHeaderBody(
+                      bodyReserve: 192,
+                      shrinkWrap: true,
+                      header: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: constraints.hasBoundedHeight
+                              ? constraints.maxHeight * headerFraction
+                              : double.infinity,
+                        ),
+                        child: SingleChildScrollView(
+                          primary: false,
+                          child: Padding(
+                            key: const Key("premium-ai-consent-pinned-heading"),
+                            padding: EdgeInsets.fromLTRB(
+                              horizontal,
+                              10,
+                              horizontal,
+                              0,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Center(
+                                  child: Container(
+                                    width: 42,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: scheme.onSurfaceVariant.withValues(
+                                        alpha: .24,
+                                      ),
+                                      borderRadius: BorderRadius.circular(99),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  title,
+                                  textAlign: TextAlign.center,
+                                  style: bilPageHeadingStyle(
+                                    context,
+                                    color: dark
+                                        ? Colors.white
+                                        : scheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  intro,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: dark
+                                        ? const Color(0xFFC5D2E3)
+                                        : scheme.onSurfaceVariant,
+                                    height: 1.48,
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Container(
-                        width: 78,
-                        height: 78,
-                        padding: const EdgeInsets.all(2.4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [_splashCyan, _splashViolet],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: _splashCyan.withValues(alpha: .28),
-                              blurRadius: 28,
-                              spreadRadius: -7,
+                      body: SingleChildScrollView(
+                        key: const Key('premium-ai-consent-body-scroll'),
+                        padding: EdgeInsets.fromLTRB(
+                          horizontal,
+                          0,
+                          horizontal,
+                          18,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 78,
+                              height: 78,
+                              padding: const EdgeInsets.all(2.4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [_splashCyan, _splashViolet],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _splashCyan.withValues(alpha: .28),
+                                    blurRadius: 28,
+                                    spreadRadius: -7,
+                                  ),
+                                ],
+                              ),
+                              child: const ClipOval(
+                                child: BilCoachPortrait(
+                                  fit: BoxFit.cover,
+                                  filterQuality: FilterQuality.medium,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            for (
+                              var index = 0;
+                              index < points.length;
+                              index++
+                            ) ...[
+                              _BilPremiumAiConsentRow(
+                                point: points[index],
+                                dark: dark,
+                              ),
+                              if (index != points.length - 1)
+                                const SizedBox(height: 10),
+                            ],
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                key: allowKey,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1677FF),
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size.fromHeight(56),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  textStyle: theme.textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w800),
+                                ),
+                                onPressed: () => Navigator.pop(context, true),
+                                child: Text(
+                                  allowLabel,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                key: declineKey,
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: dark
+                                      ? Colors.white
+                                      : scheme.onSurface,
+                                  backgroundColor: dark
+                                      ? Colors.white.withValues(alpha: .055)
+                                      : scheme.surfaceContainerLow,
+                                  minimumSize: const Size.fromHeight(54),
+                                  side: BorderSide(
+                                    color: dark
+                                        ? Colors.white.withValues(alpha: .12)
+                                        : scheme.outlineVariant,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  textStyle: theme.textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                ),
+                                onPressed: () => Navigator.pop(context, false),
+                                child: Text(
+                                  declineLabel,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        child: const ClipOval(
-                          child: BilCoachPortrait(
-                            fit: BoxFit.cover,
-                            filterQuality: FilterQuality.medium,
-                          ),
-                        ),
                       ),
-                      const SizedBox(height: 18),
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          color: dark ? Colors.white : scheme.onSurface,
-                          fontWeight: FontWeight.w900,
-                          height: 1.18,
-                          letterSpacing: -.2,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        intro,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: dark
-                              ? const Color(0xFFC5D2E3)
-                              : scheme.onSurfaceVariant,
-                          height: 1.48,
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      for (var index = 0; index < points.length; index++) ...[
-                        _BilPremiumAiConsentRow(
-                          point: points[index],
-                          dark: dark,
-                        ),
-                        if (index != points.length - 1)
-                          const SizedBox(height: 10),
-                      ],
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          key: allowKey,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF1677FF),
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(56),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            textStyle: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          onPressed: () => Navigator.pop(context, true),
-                          child: Text(allowLabel, textAlign: TextAlign.center),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          key: declineKey,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: dark
-                                ? Colors.white
-                                : scheme.onSurface,
-                            backgroundColor: dark
-                                ? Colors.white.withValues(alpha: .055)
-                                : scheme.surfaceContainerLow,
-                            minimumSize: const Size.fromHeight(54),
-                            side: BorderSide(
-                              color: dark
-                                  ? Colors.white.withValues(alpha: .12)
-                                  : scheme.outlineVariant,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            textStyle: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text(
-                            declineLabel,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),

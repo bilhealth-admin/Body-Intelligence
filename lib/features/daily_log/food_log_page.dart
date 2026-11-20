@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_page_heading.dart';
 import '../../data/database/database_provider.dart';
 import '../nutrition/presentation/gemini_vision_capture.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
@@ -302,10 +303,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                   icon: const BilNavigationFeedback(
                     child: Icon(Icons.arrow_drop_down_rounded),
                   ),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: scheme.primary,
-                    fontWeight: FontWeight.w900,
-                  ),
+                  style: bilPageHeadingStyle(context, color: scheme.primary),
                   onChanged: (value) {
                     if (value == null || value == mealType) return;
                     setState(() => mealType = value);

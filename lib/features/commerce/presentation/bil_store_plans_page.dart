@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_page_heading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -544,10 +545,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         centerTitle: true,
         title: Text(
           BilStoreCopy.text(locale, 'plans'),
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: pageForeground,
-            fontWeight: FontWeight.w700,
-          ),
+          style: bilPageHeadingStyle(context, color: pageForeground),
         ),
       ),
       body: Column(

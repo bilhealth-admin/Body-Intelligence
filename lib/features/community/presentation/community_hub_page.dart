@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../app/router/bil_primary_navigation.dart';
@@ -111,6 +113,7 @@ part 'community_post_composer_toolbar.dart';
 part 'community_post_composer_switch_row.dart';
 part 'community_post_composer_image_preview.dart';
 part 'community_post_detail_page.dart';
+part 'community_post_detail_notification_focus.dart';
 part 'community_notification_content_page.dart';
 part 'community_post_detail_reference_actions.dart';
 part 'community_post_detail_rendering.dart';
@@ -273,10 +276,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     final visit = repository == null ? null : _captureHomeVisit(repository);
     final back = Navigator.of(context).canPop();
     final title = communityText(context, 'BIL Community', 'مجتمع BIL');
-    final titleStyle = Theme.of(context).textTheme.titleMedium!.copyWith(
-      fontSize: 21,
-      fontWeight: FontWeight.w900,
-    );
+    final titleStyle = bilPageHeadingStyle(context)!;
     final titleMeasure = TextPainter(
       text: TextSpan(text: title, style: titleStyle),
       textDirection: Directionality.of(context),

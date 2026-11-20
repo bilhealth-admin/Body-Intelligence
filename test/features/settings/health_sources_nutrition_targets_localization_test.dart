@@ -57,9 +57,9 @@ Future<void> _assertSourceCopy(
   GlobalKey? capture,
   String? capturePrefix,
 }) async {
-  final vertical = find.byWidgetPredicate(
-    (widget) =>
-        widget is Scrollable && widget.axisDirection == AxisDirection.down,
+  final vertical = find.descendant(
+    of: find.byType(ListView),
+    matching: find.byType(Scrollable),
   );
   for (final source in _targetSources) {
     final card = find.byKey(ValueKey('health-source-${source.id}'));

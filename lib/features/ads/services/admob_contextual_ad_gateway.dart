@@ -9,6 +9,7 @@ import '../domain/ad_policy.dart';
 import 'admob_configuration.dart';
 import 'admob_ump_consent_gate.dart';
 import 'contextual_ad_gateway.dart';
+import 'ios_no_idfa_ad_sdk_boundary.dart';
 
 final class AdMobContextualAdGateway extends ChangeNotifier
     implements ContextualBannerGateway, ContextualAdPrivacyBoundary {
@@ -18,6 +19,7 @@ final class AdMobContextualAdGateway extends ChangeNotifier
     bool Function()? adultConfirmed,
     String? Function()? accountKey,
     this.configuredOverride,
+    this.adSdkPrivacy = const NoIdfaIosAdSdkBoundary(),
     this.sdkOperationTimeout = const Duration(seconds: 45),
     this.bannerLoadTimeout = const Duration(seconds: 65),
   }) : _umpConsent = umpConsent ?? AdMobUmpConsentGate.instance,
@@ -28,6 +30,7 @@ final class AdMobContextualAdGateway extends ChangeNotifier
   }
 
   final bool useTestUnits;
+  final AdSdkPrivacyBoundary adSdkPrivacy;
   final UmpConsentCoordinator _umpConsent;
   final bool Function() _adultConfirmed;
   final String? Function() _accountKey;
@@ -84,12 +87,18 @@ final class AdMobContextualAdGateway extends ChangeNotifier
   }
 
   Future<InitializationStatus> _initializeWithoutPublisherId() async {
+    if (!await adSdkPrivacy.permitsSdkRequests()) {
+      throw StateError('iOS ad privacy is unavailable.');
+    }
     // iOS enables publisher first-party ID by default. BIL's contextual-only
     // contract does not use it (this SDK call is a no-op on Android).
     await MobileAds.instance
         .setSameAppKeyEnabled(false)
         .timeout(sdkOperationTimeout);
     if (_disposed) throw StateError('The advertising gateway was disposed.');
+    if (!await adSdkPrivacy.permitsSdkRequests()) {
+      throw StateError('iOS ad privacy is unavailable.');
+    }
     return MobileAds.instance.initialize().timeout(sdkOperationTimeout);
   }
 
@@ -117,6 +126,9 @@ final class AdMobContextualAdGateway extends ChangeNotifier
         _adultConfirmed();
     // Both platforms require the same live adult Free account and Google's
     // consent. Neither an iOS build nor a reviewer identity bypasses this gate.
+    if (!stillEligible() || !await adSdkPrivacy.permitsSdkRequests()) {
+      return null;
+    }
     if (!stillEligible()) return null;
     final ump = await _umpConsent.verifyCanRequestAds();
     if (!ump.canRequestAds || !stillEligible()) return null;
@@ -126,6 +138,16 @@ final class AdMobContextualAdGateway extends ChangeNotifier
       return null;
     }
     if (!stillEligible() || !_umpConsent.snapshot.canRequestAds) return null;
+    if (platform == BilAdPlatform.ios) {
+      // Initialization can await native work; re-check the iOS boundary.
+      final currentConsent = await _umpConsent.verifyCanRequestAds();
+      if (!currentConsent.canRequestAds ||
+          !stillEligible() ||
+          !await adSdkPrivacy.permitsSdkRequests()) {
+        return null;
+      }
+      if (!stillEligible()) return null;
+    }
     final completer = Completer<ContextualBannerHandle?>();
     late final BannerAd ad;
     ad = BannerAd(

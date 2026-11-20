@@ -137,6 +137,11 @@ void main() {
               expect(rect.right, lessThanOrEqualTo(320));
               expect(rect.top, greaterThanOrEqualTo(24));
               expect(rect.bottom, lessThanOrEqualTo(544));
+              final viewport = tester.getRect(
+                find.byKey(const Key('premium-ai-consent-body-scroll')),
+              );
+              expect(rect.top, greaterThanOrEqualTo(viewport.top - .01));
+              expect(rect.bottom, lessThanOrEqualTo(viewport.bottom + .01));
               expect(tester.takeException(), isNull);
               await tester.tap(action);
               await tester.pumpAndSettle();

@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_page_heading.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'presentation/food_translation_attribution.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
@@ -5,6 +6,7 @@ import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
 import '../../app/theme/bil_pearl_finish.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

@@ -479,6 +479,7 @@ class _CommunityMemberProfilePageState
     appBar: AppBar(
       leading: const CommunityReturnButton(),
       toolbarHeight: 48,
+      title: Text(communityText(context, 'Community profile', 'ملف المجتمع')),
       actions: [
         FutureBuilder<void>(
           future: _loading,

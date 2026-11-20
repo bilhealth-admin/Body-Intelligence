@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_pinned_header_body.dart';
+import '../../../shared/widgets/bil_page_heading.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
@@ -161,18 +163,47 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
     );
   }
 
+  Widget _pinnedPlannerList(
+    _PlannerCopy copy, {
+    required String title,
+    String? description,
+    required List<Widget> children,
+  }) => LayoutBuilder(
+    builder: (context, constraints) => BilPinnedHeaderBody(
+      header: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: constraints.maxHeight / 2),
+        child: SingleChildScrollView(
+          primary: false,
+          child: Padding(
+            key: ValueKey('meal-planner-$title-pinned-header'),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(copy.text(title), style: bilPageHeadingStyle(context)),
+                if (description != null) ...[
+                  const SizedBox(height: 10),
+                  Text(copy.text(description)),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        children: children,
+      ),
+    ),
+  );
+
   Widget _week(_PlannerCopy copy) {
     final plan = _plan;
-    return ListView(
-      padding: const EdgeInsets.all(20),
+    return _pinnedPlannerList(
+      copy,
+      title: 'hero',
+      description: 'heroBody',
       children: [
-        Text(
-          copy.text('hero'),
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(copy.text('heroBody')),
-        const SizedBox(height: 12),
         BilPearlMaterialCard(
           child: Padding(
             padding: const EdgeInsets.all(14),
@@ -281,16 +312,11 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
     if (plan == null) return Center(child: Text(copy.text('generateFirst')));
     final items = _engine.groceryList(plan, _planPreferences).entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
-    return ListView(
-      padding: const EdgeInsets.all(20),
+    return _pinnedPlannerList(
+      copy,
+      title: 'groceryTitle',
+      description: 'groceryBody',
       children: [
-        Text(
-          copy.text('groceryTitle'),
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(copy.text('groceryBody')),
-        const SizedBox(height: 12),
         OutlinedButton.icon(
           key: const Key('share-meal-plan-grocery-list'),
           // Do not export optimistic or stale checks before the owner-guarded
@@ -353,16 +379,11 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   Widget _prep(_PlannerCopy copy) {
     final plan = _plan;
     if (plan == null) return Center(child: Text(copy.text('generateFirst')));
-    return ListView(
-      padding: const EdgeInsets.all(20),
+    return _pinnedPlannerList(
+      copy,
+      title: 'prepTitle',
+      description: 'prepBody',
       children: [
-        Text(
-          copy.text('prepTitle'),
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 8),
-        Text(copy.text('prepBody')),
-        const SizedBox(height: 12),
         ...plan.meals.map((meal) {
           final recipe = recipeById(meal.recipeId);
           final details = recipe == null
@@ -403,14 +424,10 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   }
 
   Widget _preferencesView(_PlannerCopy copy) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
+    return _pinnedPlannerList(
+      copy,
+      title: 'preferencesTitle',
       children: [
-        Text(
-          copy.text('preferencesTitle'),
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 16),
         DropdownButtonFormField<MealPlanDiet>(
           key: ValueKey<MealPlanDiet>(_preferences.diet),
           initialValue: _preferences.diet,
@@ -546,74 +563,81 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
             constraints: BoxConstraints(
               maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.8,
             ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    recipe.title,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 12),
-                  ...recipe.ingredients.entries.map(
-                    (item) => Text(
-                      '• ${item.key}: ${_amount(item.value * _planPreferences.servings)}',
-                    ),
-                  ),
-                  if (details != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      '${copy.text('prep')}: ${details.prepMinutes} ${copy.text('minutes')} • '
-                      '${copy.text('cook')}: ${recipe.minutes} ${copy.text('minutes')}',
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      '${details.calories.toStringAsFixed(0)} kcal • '
-                      'P ${details.protein.toStringAsFixed(0)} g • '
-                      'C ${details.carbs.toStringAsFixed(0)} g • '
-                      'F ${details.fat.toStringAsFixed(0)} g',
-                    ),
-                    Text(
-                      '${copy.text('fiber')} ${details.fiber.toStringAsFixed(0)} g • '
-                      '${copy.text('sugar')} ${details.sugar.toStringAsFixed(0)} g • '
-                      '${copy.text('sodium')} ${details.sodium.toStringAsFixed(0)} mg • '
-                      '${copy.text('potassium')} ${details.potassium.toStringAsFixed(0)} mg',
-                    ),
-                    const SizedBox(height: 12),
-                    ...details.steps.indexed.map(
-                      (step) => Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Text('${step.$1 + 1}. ${step.$2}'),
+            child: BilPinnedHeaderBody(
+              shrinkWrap: true,
+              header: Padding(
+                key: const Key('meal-planner-recipe-pinned-header'),
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+                child: Text(
+                  recipe.title,
+                  style: bilPageHeadingStyle(sheetContext),
+                ),
+              ),
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ...recipe.ingredients.entries.map(
+                      (item) => Text(
+                        '• ${item.key}: ${_amount(item.value * _planPreferences.servings)}',
                       ),
+                    ),
+                    if (details != null) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        '${copy.text('prep')}: ${details.prepMinutes} ${copy.text('minutes')} • '
+                        '${copy.text('cook')}: ${recipe.minutes} ${copy.text('minutes')}',
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '${details.calories.toStringAsFixed(0)} kcal • '
+                        'P ${details.protein.toStringAsFixed(0)} g • '
+                        'C ${details.carbs.toStringAsFixed(0)} g • '
+                        'F ${details.fat.toStringAsFixed(0)} g',
+                      ),
+                      Text(
+                        '${copy.text('fiber')} ${details.fiber.toStringAsFixed(0)} g • '
+                        '${copy.text('sugar')} ${details.sugar.toStringAsFixed(0)} g • '
+                        '${copy.text('sodium')} ${details.sodium.toStringAsFixed(0)} mg • '
+                        '${copy.text('potassium')} ${details.potassium.toStringAsFixed(0)} mg',
+                      ),
+                      const SizedBox(height: 12),
+                      ...details.steps.indexed.map(
+                        (step) => Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text('${step.$1 + 1}. ${step.$2}'),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        copy.text('estimateNotice'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () {
+                        // A callback already queued by the previous frame must not
+                        // pop another route or start a second diary journey.
+                        if (reviewRequested ||
+                            !_isActiveRepository(repository)) {
+                          return;
+                        }
+                        reviewRequested = true;
+                        Navigator.of(sheetContext).pop(true);
+                      },
+                      child: Text(copy.text('reviewLog')),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      copy.text('estimateNotice'),
+                      copy.text('logNotice'),
+                      textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () {
-                      // A callback already queued by the previous frame must not
-                      // pop another route or start a second diary journey.
-                      if (reviewRequested || !_isActiveRepository(repository)) {
-                        return;
-                      }
-                      reviewRequested = true;
-                      Navigator.of(sheetContext).pop(true);
-                    },
-                    child: Text(copy.text('reviewLog')),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    copy.text('logNotice'),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
+                ),
               ),
             ),
           ),

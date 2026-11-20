@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:async';
 import 'package:uuid/uuid.dart';
@@ -152,35 +154,48 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (context) => SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              translationCopy(context, 6),
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            Text(translationCopy(context, 7)),
-            if (_result?.engine == 'google') ...[
+      builder: (context) => BilPinnedHeaderBody(
+        shrinkWrap: true,
+        header: Padding(
+          key: const Key("community-translation-pinned-heading"),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                translationCopy(context, 6),
+                style: bilPageHeadingStyle(context),
+              ),
               const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => unawaited(
-                  launchUrl(
-                    Uri.parse('https://cloud.google.com/translate'),
-                    mode: LaunchMode.externalApplication,
-                  ),
-                ),
-                child: const Text('Google Translate'),
-              ),
-              // Required Google translation warranty notice; not medical advice.
-              const Text(
-                'THIS SERVICE MAY CONTAIN TRANSLATIONS POWERED BY GOOGLE. GOOGLE DISCLAIMS ALL WARRANTIES RELATED TO THE TRANSLATIONS, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTIES OF ACCURACY, RELIABILITY, AND ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.',
-                textDirection: TextDirection.ltr,
-              ),
+              Text(translationCopy(context, 7)),
             ],
-          ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_result?.engine == 'google') ...[
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => unawaited(
+                    launchUrl(
+                      Uri.parse('https://cloud.google.com/translate'),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                  ),
+                  child: const Text('Google Translate'),
+                ),
+                // Required Google translation warranty notice; not medical advice.
+                const Text(
+                  'THIS SERVICE MAY CONTAIN TRANSLATIONS POWERED BY GOOGLE. GOOGLE DISCLAIMS ALL WARRANTIES RELATED TO THE TRANSLATIONS, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTIES OF ACCURACY, RELIABILITY, AND ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

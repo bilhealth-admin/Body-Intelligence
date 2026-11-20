@@ -1,7 +1,9 @@
+import '../../../shared/widgets/bil_page_heading.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/repositories/meal_repository.dart';
@@ -144,94 +146,106 @@ class _RecipeDiaryConfirmationPageState
       canPop: !_saving,
       child: Scaffold(
         appBar: AppBar(title: Text(t('Log recipe', 'تسجيل الوصفة'))),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Text(
-              widget.saved.recipe.name,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              t(
-                'Nutrition below is for the selected servings, not the entire recipe. Review the destination before confirming.',
-                'القيم التالية للحصص المختارة، وليست لكل الوصفة. راجع وجهة التسجيل قبل التأكيد.',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _servings,
-              enabled: enabled,
-              onChanged: (_) => setState(() {}),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: t('Number of servings', 'عدد الحصص'),
-              ),
-            ),
-            if (valid)
-              BilPearlMaterialCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Text(
-                        '${(nutrition.caloriesKcal * servings).toStringAsFixed(1)} ${t('kcal', 'سعرة')}',
-                      ),
-                      Text(
-                        '${t('Protein', 'بروتين')}: ${(nutrition.proteinG * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
-                      ),
-                      Text(
-                        '${t('Carbohydrates', 'كربوهيدرات')}: ${(nutrition.carbohydrateG * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
-                      ),
-                      Text(
-                        '${t('Fat', 'دهون')}: ${(nutrition.fatG * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
-                      ),
-                      if (nutrition.fiberG != null)
-                        Text(
-                          '${t('Fiber', 'ألياف')}: ${(nutrition.fiberG! * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
-                        ),
-                    ],
+        body: BilPinnedHeaderBody(
+          header: Padding(
+            key: const Key('recipe-diary-pinned-header'),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  widget.saved.recipe.name,
+                  style: bilPageHeadingStyle(context),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  t(
+                    'Nutrition below is for the selected servings, not the entire recipe. Review the destination before confirming.',
+                    'القيم التالية للحصص المختارة، وليست لكل الوصفة. راجع وجهة التسجيل قبل التأكيد.',
                   ),
                 ),
-              ),
-            nutritionDestinationFields(
-              context,
-              date: _date,
-              type: _type,
-              enabled: enabled,
-              onDate: (date) {
-                if (mounted) setState(() => _date = date);
-              },
-              onType: (type) => setState(() => _type = type),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              t(
-                'Existing diary food is kept. Saving this recipe again later intentionally adds another portion.',
-                'تبقى أطعمة اليوميات القائمة. تسجيل الوصفة لاحقًا مرة أخرى يضيف حصة أخرى عمدًا.',
-              ),
-            ),
-            if (_error != null)
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Text(
-                  _error!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            children: [
+              TextField(
+                controller: _servings,
+                enabled: enabled,
+                onChanged: (_) => setState(() {}),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: t('Number of servings', 'عدد الحصص'),
                 ),
               ),
-            FilledButton.icon(
-              key: const Key('confirm-recipe-diary-serving'),
-              onPressed: enabled && valid ? _save : null,
-              icon: const Icon(Icons.check),
-              label: Text(
-                _saving
-                    ? t('Saving…', 'جارٍ الحفظ…')
-                    : t('Confirm and log', 'تأكيد التسجيل'),
+              if (valid)
+                BilPearlMaterialCard(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          '${(nutrition.caloriesKcal * servings).toStringAsFixed(1)} ${t('kcal', 'سعرة')}',
+                        ),
+                        Text(
+                          '${t('Protein', 'بروتين')}: ${(nutrition.proteinG * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
+                        ),
+                        Text(
+                          '${t('Carbohydrates', 'كربوهيدرات')}: ${(nutrition.carbohydrateG * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
+                        ),
+                        Text(
+                          '${t('Fat', 'دهون')}: ${(nutrition.fatG * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
+                        ),
+                        if (nutrition.fiberG != null)
+                          Text(
+                            '${t('Fiber', 'ألياف')}: ${(nutrition.fiberG! * servings).toStringAsFixed(1)} ${t('g', 'جم')}',
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              nutritionDestinationFields(
+                context,
+                date: _date,
+                type: _type,
+                enabled: enabled,
+                onDate: (date) {
+                  if (mounted) setState(() => _date = date);
+                },
+                onType: (type) => setState(() => _type = type),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                t(
+                  'Existing diary food is kept. Saving this recipe again later intentionally adds another portion.',
+                  'تبقى أطعمة اليوميات القائمة. تسجيل الوصفة لاحقًا مرة أخرى يضيف حصة أخرى عمدًا.',
+                ),
+              ),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    _error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+              FilledButton.icon(
+                key: const Key('confirm-recipe-diary-serving'),
+                onPressed: enabled && valid ? _save : null,
+                icon: const Icon(Icons.check),
+                label: Text(
+                  _saving
+                      ? t('Saving…', 'جارٍ الحفظ…')
+                      : t('Confirm and log', 'تأكيد التسجيل'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

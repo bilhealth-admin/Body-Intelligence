@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_page_heading.dart';
 import '../../nutrition/presentation/gemini_vision_capture.dart';
 import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import '../../../app/router/bil_primary_navigation.dart';
@@ -52,6 +53,7 @@ import '../../../app/services/app_settings_provider.dart';
 import '../../../app/services/app_settings_service.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import '../../../shared/widgets/bil_permission_recovery_dialog.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../app/services/recoverable_image_picker.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_meal_voice.dart';

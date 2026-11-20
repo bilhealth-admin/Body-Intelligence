@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_page_heading.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/calendar/bil_crystal_date_picker.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
@@ -441,140 +443,160 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                 20,
                 20 + MediaQuery.viewInsetsOf(sheetContext).bottom,
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      copy.addMeasurement(copy.metricLabel(metric)),
-                      style: Theme.of(sheetContext).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    OutlinedButton.icon(
-                      key: const Key('measurement-entry-date'),
-                      onPressed: saving
-                          ? null
-                          : () async {
-                              final picked = await showBilCrystalDatePicker(
-                                context: sheetContext,
-                                initialDate: selectedDate,
-                                firstDate: DateTime(2000),
-                                lastDate: DateUtils.dateOnly(
-                                  ref.read(progressClockProvider)(),
-                                ),
-                              );
-                              if (picked == null) return;
-                              selectedDate = DateUtils.dateOnly(picked);
-                              await loadDay();
-                              setSheetState(() => error = null);
-                            },
-                      icon: const Icon(Icons.calendar_month_outlined),
-                      label: Text(
-                        MaterialLocalizations.of(
-                          sheetContext,
-                        ).formatFullDate(selectedDate),
+              child: BilPinnedHeaderBody(
+                shrinkWrap: true,
+                header: Padding(
+                  key: const Key("progress-measurement-pinned-heading"),
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        copy.addMeasurement(copy.metricLabel(metric)),
+                        style: bilPageHeadingStyle(sheetContext),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      key: const Key('measurement-entry-value'),
-                      controller: controller,
-                      autofocus: false,
-                      enabled: !saving,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: copy.metricLabel(metric),
-                        suffixText: unit,
-                        errorText: error,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    FilledButton.icon(
-                      key: const Key('measurement-entry-save'),
-                      onPressed: saving
-                          ? null
-                          : () async {
-                              final displayValue = double.tryParse(
-                                controller.text.trim().replaceAll(',', '.'),
-                              );
-                              final centimeters = displayValue == null
-                                  ? null
-                                  : UnitConverter.heightToCm(
-                                      displayValue,
-                                      system,
-                                    );
-                              if (centimeters == null ||
-                                  !centimeters.isFinite ||
-                                  centimeters < 20 ||
-                                  centimeters > 300) {
-                                setSheetState(
-                                  () => error = copy.invalidMeasurement,
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      OutlinedButton.icon(
+                        key: const Key('measurement-entry-date'),
+                        onPressed: saving
+                            ? null
+                            : () async {
+                                final picked = await showBilCrystalDatePicker(
+                                  context: sheetContext,
+                                  initialDate: selectedDate,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateUtils.dateOnly(
+                                    ref.read(progressClockProvider)(),
+                                  ),
                                 );
-                                return;
-                              }
-                              setSheetState(() {
-                                saving = true;
-                                error = null;
-                              });
-                              try {
-                                await switch (metric) {
-                                  ProgressMetric.neck => repository.saveForDay(
-                                    date: selectedDate,
-                                    neckCm: centimeters,
-                                    preserveExistingValues: true,
-                                  ),
-                                  ProgressMetric.waist => repository.saveForDay(
-                                    date: selectedDate,
-                                    waistCm: centimeters,
-                                    preserveExistingValues: true,
-                                  ),
-                                  ProgressMetric.hips => repository.saveForDay(
-                                    date: selectedDate,
-                                    hipsCm: centimeters,
-                                    preserveExistingValues: true,
-                                  ),
-                                  ProgressMetric.chest => repository.saveForDay(
-                                    date: selectedDate,
-                                    chestCm: centimeters,
-                                    preserveExistingValues: true,
-                                  ),
-                                  ProgressMetric.arm => repository.saveForDay(
-                                    date: selectedDate,
-                                    armCm: centimeters,
-                                    preserveExistingValues: true,
-                                  ),
-                                  ProgressMetric.thigh => repository.saveForDay(
-                                    date: selectedDate,
-                                    thighCm: centimeters,
-                                    preserveExistingValues: true,
-                                  ),
-                                  _ => Future<void>.value(),
-                                };
-                                ref.invalidate(bodyMeasurementHistoryProvider);
-                                if (sheetContext.mounted) {
-                                  Navigator.pop(sheetContext);
+                                if (picked == null) return;
+                                selectedDate = DateUtils.dateOnly(picked);
+                                await loadDay();
+                                setSheetState(() => error = null);
+                              },
+                        icon: const Icon(Icons.calendar_month_outlined),
+                        label: Text(
+                          MaterialLocalizations.of(
+                            sheetContext,
+                          ).formatFullDate(selectedDate),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('measurement-entry-value'),
+                        controller: controller,
+                        autofocus: false,
+                        enabled: !saving,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: copy.metricLabel(metric),
+                          suffixText: unit,
+                          errorText: error,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      FilledButton.icon(
+                        key: const Key('measurement-entry-save'),
+                        onPressed: saving
+                            ? null
+                            : () async {
+                                final displayValue = double.tryParse(
+                                  controller.text.trim().replaceAll(',', '.'),
+                                );
+                                final centimeters = displayValue == null
+                                    ? null
+                                    : UnitConverter.heightToCm(
+                                        displayValue,
+                                        system,
+                                      );
+                                if (centimeters == null ||
+                                    !centimeters.isFinite ||
+                                    centimeters < 20 ||
+                                    centimeters > 300) {
+                                  setSheetState(
+                                    () => error = copy.invalidMeasurement,
+                                  );
+                                  return;
                                 }
-                              } on Object {
-                                if (sheetContext.mounted) {
-                                  setSheetState(() {
-                                    saving = false;
-                                    error = copy.saveFailed;
-                                  });
+                                setSheetState(() {
+                                  saving = true;
+                                  error = null;
+                                });
+                                try {
+                                  await switch (metric) {
+                                    ProgressMetric.neck =>
+                                      repository.saveForDay(
+                                        date: selectedDate,
+                                        neckCm: centimeters,
+                                        preserveExistingValues: true,
+                                      ),
+                                    ProgressMetric.waist =>
+                                      repository.saveForDay(
+                                        date: selectedDate,
+                                        waistCm: centimeters,
+                                        preserveExistingValues: true,
+                                      ),
+                                    ProgressMetric.hips =>
+                                      repository.saveForDay(
+                                        date: selectedDate,
+                                        hipsCm: centimeters,
+                                        preserveExistingValues: true,
+                                      ),
+                                    ProgressMetric.chest =>
+                                      repository.saveForDay(
+                                        date: selectedDate,
+                                        chestCm: centimeters,
+                                        preserveExistingValues: true,
+                                      ),
+                                    ProgressMetric.arm => repository.saveForDay(
+                                      date: selectedDate,
+                                      armCm: centimeters,
+                                      preserveExistingValues: true,
+                                    ),
+                                    ProgressMetric.thigh =>
+                                      repository.saveForDay(
+                                        date: selectedDate,
+                                        thighCm: centimeters,
+                                        preserveExistingValues: true,
+                                      ),
+                                    _ => Future<void>.value(),
+                                  };
+                                  ref.invalidate(
+                                    bodyMeasurementHistoryProvider,
+                                  );
+                                  if (sheetContext.mounted) {
+                                    Navigator.pop(sheetContext);
+                                  }
+                                } on Object {
+                                  if (sheetContext.mounted) {
+                                    setSheetState(() {
+                                      saving = false;
+                                      error = copy.saveFailed;
+                                    });
+                                  }
                                 }
-                              }
-                            },
-                      icon: saving
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: BilFeatureWelcomeStatus(),
-                            )
-                          : const Icon(Icons.check_rounded),
-                      label: Text(copy.saveMeasurement),
-                    ),
-                  ],
+                              },
+                        icon: saving
+                            ? const SizedBox.square(
+                                dimension: 18,
+                                child: BilFeatureWelcomeStatus(),
+                              )
+                            : const Icon(Icons.check_rounded),
+                        label: Text(copy.saveMeasurement),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -1,5 +1,4 @@
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
-import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -17,6 +16,7 @@ import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
 import 'auth_input_validation.dart';
 import 'premium_login_status_panel.dart';
+import 'auth_page_top_bar.dart';
 import 'supabase_auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -202,12 +202,14 @@ class _LoginPageState extends State<LoginPage> {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
     final pageBackground = dark ? scheme.surface : Colors.white;
+    final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: pageBackground,
       body: SafeArea(
         child: Column(
           children: [
             _AuthTopBar(
+              mediaQuery: mediaQuery,
               title: authEntryText(context, AuthEntryCopyKey.signIn),
               backKey: const Key('login-back'),
               onBack: () => context.canPop()
@@ -633,71 +635,21 @@ class _AuthTopBar extends StatelessWidget {
     required this.title,
     required this.backKey,
     required this.onBack,
+    required this.mediaQuery,
   });
 
   final String title;
   final Key backKey;
   final VoidCallback onBack;
+  final MediaQueryData mediaQuery;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final dark = scheme.brightness == Brightness.dark;
-    return Container(
-      height: 72,
-      decoration: BoxDecoration(
-        color: dark ? scheme.surfaceContainerLow : const Color(0xFFFAFAFC),
-        border: Border(
-          bottom: BorderSide(color: scheme.outlineVariant, width: 1),
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(start: 16),
-              child: Material(
-                color: dark ? scheme.surfaceContainerHighest : Colors.white,
-                shape: const CircleBorder(),
-                elevation: 4,
-                shadowColor: const Color(0x1F000000),
-                child: IconButton(
-                  key: backKey,
-                  tooltip: authEntryText(context, AuthEntryCopyKey.back),
-                  onPressed: onBack,
-                  icon: BilNavigationFeedback(
-                    child: Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.arrow_forward_ios_rounded
-                          : Icons.arrow_back_ios_new_rounded,
-                      size: 19,
-                    ),
-                  ),
-                  color: scheme.onSurface,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 74),
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: scheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -.25,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AuthPageTopBar(
+    title: title,
+    backKey: backKey,
+    onBack: onBack,
+    mediaQuery: mediaQuery,
+  );
 }
 
 class _OrDivider extends StatelessWidget {

@@ -22,6 +22,7 @@ import 'verified_entitlement_session_cache.dart';
 export 'verified_entitlement_session_cache.dart';
 
 part 'server_entitlement_grant_continuity.dart';
+part 'server_entitlement_store_continuity.dart';
 part 'server_entitlement_row_decoding.dart';
 part 'server_entitlement_checkout_recovery.dart';
 
@@ -82,6 +83,10 @@ final class ServerEntitlementRepository {
     ({DateTime verifiedAt, int? revision, String? provider, String? lineage})
   >
   _latestStoreVersions = {};
+  // A known store denial survives failed optional secure cleanup and A-B-A.
+  // Only a strictly newer verified store receipt can cross its version floor.
+  static final Map<String, ({DateTime verifiedAt, int? revision})>
+  _storeDenials = {};
 
   Future<SubscriptionState> current() => _current();
 
@@ -242,10 +247,18 @@ final class ServerEntitlementRepository {
       DateTime verifiedAt,
       int? revision,
       String? provider,
-      String? lineage,
-    ) {
+      String? lineage, {
+      bool denied = false,
+    }) {
       if (explicitCheckoutRead == null) {
-        _recordStoreVersion(ownerId, verifiedAt, revision, provider, lineage);
+        _recordStoreVersion(
+          ownerId,
+          verifiedAt,
+          revision,
+          provider,
+          lineage,
+          denied: denied,
+        );
       }
     }
 
@@ -481,12 +494,20 @@ final class ServerEntitlementRepository {
         if (explicitCheckoutRead != null) {
           explicitCheckoutRead.storeReadComplete = true;
         }
-        recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
+        recordVersion(
+          user.id,
+          verifiedAt!,
+          revision,
+          providerValue,
+          lineage,
+          denied: true,
+        );
         final denied = explicitCheckoutRead == null
             ? await _remember(
                 user.id,
                 _verifiedFree(
                   verifiedAt: verifiedAt,
+                  serverRevision: revision,
                   storeDefinitive:
                       providerValue == 'google' || providerValue == 'apple',
                 ),
@@ -494,6 +515,7 @@ final class ServerEntitlementRepository {
               )
             : _verifiedFree(
                 verifiedAt: verifiedAt,
+                serverRevision: revision,
                 storeDefinitive:
                     providerValue == 'google' || providerValue == 'apple',
               );
@@ -508,8 +530,19 @@ final class ServerEntitlementRepository {
       if (!lifecycle.mayGrantPaidAccess) {
         // A verified terminal response always retires scheduled activation,
         // including when an independent grant cannot currently be read.
-        recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
-        await remember(user.id, _verifiedFree(verifiedAt: verifiedAt), now);
+        recordVersion(
+          user.id,
+          verifiedAt!,
+          revision,
+          providerValue,
+          lineage,
+          denied: true,
+        );
+        await remember(
+          user.id,
+          _verifiedFree(verifiedAt: verifiedAt, serverRevision: revision),
+          now,
+        );
       }
       final expiresAt = DateTime.tryParse('${row['expires_at']}')?.toUtc();
       final gracePeriodEndsAt = DateTime.tryParse(
@@ -552,12 +585,20 @@ final class ServerEntitlementRepository {
         }
         // An expired store receipt does not prove that an unreadable separate
         // closed-test grant is revoked. Keep verification unresolved.
-        recordVersion(user.id, verifiedAt!, revision, providerValue, lineage);
+        recordVersion(
+          user.id,
+          verifiedAt!,
+          revision,
+          providerValue,
+          lineage,
+          denied: true,
+        );
         final denied = explicitCheckoutRead == null
             ? await _remember(
                 user.id,
                 _verifiedFree(
                   verifiedAt: verifiedAt,
+                  serverRevision: revision,
                   storeRenewal: storeRenewal,
                   storeDefinitive: storeDefinitive,
                 ),
@@ -565,6 +606,7 @@ final class ServerEntitlementRepository {
               )
             : _verifiedFree(
                 verifiedAt: verifiedAt,
+                serverRevision: revision,
                 storeRenewal: storeRenewal,
                 storeDefinitive: storeDefinitive,
               );
@@ -653,98 +695,4 @@ final class ServerEntitlementRepository {
       return await fallback(user.id, _now());
     }
   }
-
-  void _recordStoreVersion(
-    String ownerId,
-    DateTime verifiedAt,
-    int? revision,
-    String? provider,
-    String? lineage,
-  ) {
-    final previous = _latestStoreVersions[ownerId];
-    if (previous?.revision != null &&
-        (revision == null || previous!.revision! > revision)) {
-      return;
-    }
-    _latestStoreVersions[ownerId] = (
-      verifiedAt: verifiedAt,
-      revision: revision,
-      provider: provider,
-      lineage: lineage,
-    );
-  }
-
-  void _rememberRestoredStoreVersion(String ownerId, SubscriptionState state) {
-    final verifiedAt = state.verifiedAt;
-    if (verifiedAt == null || state.provider == null) return;
-    _recordStoreVersion(
-      ownerId,
-      verifiedAt,
-      state.serverRevision,
-      state.provider!.name,
-      state.storeOriginalTransactionId,
-    );
-  }
-
-  SubscriptionState _withAdminContinuity(
-    SubscriptionState store,
-    SubscriptionState admin,
-  ) {
-    final boundary = verifiedSubscriptionBoundary(store);
-    if (store.authority == EntitlementAuthority.verifiedServer &&
-        store.plan != CommercePlan.free &&
-        boundary != null &&
-        !(store.startedAt?.isAfter(_now()) ?? false) &&
-        boundary.isAfter(_now()) &&
-        PaidPlanCatalog.entryFor(store.plan).rank >=
-            PaidPlanCatalog.entryFor(admin.plan).rank) {
-      return store;
-    }
-    return admin;
-  }
-
-  Future<SubscriptionState> _remember(
-    String ownerId,
-    SubscriptionState state,
-    DateTime now,
-  ) async {
-    CommunityOwnerOperation.checkCurrent();
-    _sessionCache.remember(ownerId: ownerId, state: state, now: now);
-    try {
-      await _subscriptionStore.remember(
-        ownerId: ownerId,
-        state: state,
-        now: now,
-      );
-    } on Object {
-      // Secure continuity is an optimization. The verified in-memory result
-      // remains authoritative for this process when secure storage is absent.
-    }
-    return state;
-  }
-
-  CommercePlan? _planOrNull(String value) => switch (value.trim()) {
-    'premium' => CommercePlan.premium,
-    'premium_ai_coach' => CommercePlan.premiumAiCoach,
-    // Read-only compatibility for receipts verified before the canonical
-    // consumer tier migration. New registry rows cannot use these IDs.
-    'pro' => CommercePlan.premium,
-    'plus' || 'legacy_plus' => CommercePlan.plus,
-    'free' => CommercePlan.free,
-    _ => null,
-  };
-}
-
-/// `bil_subscriptions` is a protected server mirror, so an active row remains
-/// authoritative until its lifecycle boundary. `verified_at` must exist and
-/// must not be implausibly in the future, but it is not a 72-hour lease: store
-/// renewals can legitimately leave a still-active period unchanged for days.
-bool isAcceptableServerVerificationTimestamp({
-  required DateTime? verifiedAt,
-  required DateTime now,
-}) {
-  if (verifiedAt == null) return false;
-  return !verifiedAt.toUtc().isAfter(
-    now.toUtc().add(const Duration(minutes: 5)),
-  );
 }

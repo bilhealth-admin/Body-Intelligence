@@ -302,310 +302,81 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(20),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                t('Create a reviewable plan', 'إنشاء خطة للمراجعة'),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 18),
-              _anchor(
-                'horizon',
-                DropdownButtonFormField<BilPlanHorizon>(
-                  focusNode: _focusNodes['horizon'],
-                  decoration: InputDecoration(
-                    labelText: t('Duration', 'المدة'),
-                  ),
-                  itemHeight: null,
-                  isExpanded: true,
-                  initialValue: horizon,
-                  items: [
-                    for (final item in BilPlanHorizon.values)
-                      DropdownMenuItem(
-                        value: item,
-                        child: Text(switch (item) {
-                          BilPlanHorizon.week => t('One week', 'أسبوع'),
-                          BilPlanHorizon.month => t('One month', 'شهر'),
-                          BilPlanHorizon.threeMonths => t(
-                            'Three months',
-                            '3 أشهر',
-                          ),
-                          BilPlanHorizon.sixMonths => t('Six months', '6 أشهر'),
-                        }),
-                      ),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => horizon = value ?? horizon),
-
-                  icon: const BilCrystalArrow(
-                    extent: 36,
-                    child: Icon(Icons.keyboard_arrow_down_rounded),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _anchor(
-                'focus',
-                DropdownButtonFormField<BilPlanFocus>(
-                  focusNode: _focusNodes['focus'],
-                  decoration: InputDecoration(
-                    labelText: t('Plan focus', 'تركيز الخطة'),
-                  ),
-                  itemHeight: null,
-                  isExpanded: true,
-                  initialValue: focus,
-                  items: [
-                    DropdownMenuItem(
-                      value: BilPlanFocus.combined,
-                      child: Text(t('Training and nutrition', 'تدريب وتغذية')),
-                    ),
-                    DropdownMenuItem(
-                      value: BilPlanFocus.training,
-                      child: Text(t('Training only', 'تدريب فقط')),
-                    ),
-                    DropdownMenuItem(
-                      value: BilPlanFocus.nutrition,
-                      child: Text(t('Nutrition only', 'تغذية فقط')),
-                    ),
-                  ],
-                  onChanged: (value) => setState(() {
-                    focus = value ?? focus;
-                    _recipeIssue = null;
-                  }),
-
-                  icon: const BilCrystalArrow(
-                    extent: 36,
-                    child: Icon(Icons.keyboard_arrow_down_rounded),
-                  ),
-                ),
-              ),
-              if (focus != BilPlanFocus.nutrition) ...[
-                const SizedBox(height: 16),
+        child: BilPinnedHeaderBody(
+          shrinkWrap: true,
+          header: const _SmartPlanCreationHeading(
+            key: Key("smart-plan-creation-pinned-heading"),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 _anchor(
-                  'environment',
-                  DropdownButtonFormField<BilPlanEnvironment>(
-                    focusNode: _focusNodes['environment'],
-                    initialValue: environment,
-                    isExpanded: true,
+                  'horizon',
+                  DropdownButtonFormField<BilPlanHorizon>(
+                    focusNode: _focusNodes['horizon'],
                     decoration: InputDecoration(
-                      labelText: t('Training environment', 'مكان التدريب'),
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: BilPlanEnvironment.gym,
-                        child: Text(t('Gym', 'النادي')),
-                      ),
-                      DropdownMenuItem(
-                        value: BilPlanEnvironment.home,
-                        child: Text(t('Home', 'المنزل')),
-                      ),
-                    ],
-                    onChanged: (value) => setState(() {
-                      environment = value ?? environment;
-                      if (environment == BilPlanEnvironment.home &&
-                          (sessions ?? 0) > 3) {
-                        sessions = null;
-                      }
-                    }),
-
-                    icon: const BilCrystalArrow(
-                      extent: 36,
-                      child: Icon(Icons.keyboard_arrow_down_rounded),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _anchor(
-                  'experience',
-                  DropdownButtonFormField<BilPlanExperience>(
-                    focusNode: _focusNodes['experience'],
-                    initialValue: experience,
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      labelText: t('Training experience', 'الخبرة التدريبية'),
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: BilPlanExperience.beginner,
-                        child: Text(t('Beginner', 'مبتدئ')),
-                      ),
-                      DropdownMenuItem(
-                        value: BilPlanExperience.regular,
-                        child: Text(t('Regular practice', 'ممارسة منتظمة')),
-                      ),
-                      DropdownMenuItem(
-                        value: BilPlanExperience.experienced,
-                        child: Text(t('Experienced', 'متمرس')),
-                      ),
-                    ],
-                    onChanged: (value) => setState(() => experience = value),
-
-                    icon: const BilCrystalArrow(
-                      extent: 36,
-                      child: Icon(Icons.keyboard_arrow_down_rounded),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                _anchor(
-                  'minutes',
-                  DropdownButtonFormField<int>(
-                    focusNode: _focusNodes['minutes'],
-                    isExpanded: true,
-                    initialValue: minutes,
-                    decoration: InputDecoration(
-                      labelText: t(
-                        'Your session time budget: ',
-                        'الوقت المتاح للجلسة: ',
-                      ).trim(),
-                    ),
-                    items: [
-                      for (final value in (<int>{
-                        for (var n = 10; n <= 90; n += 5) n,
-                        ?minutes,
-                      }.toList()..sort()))
-                        DropdownMenuItem(
-                          value: value,
-                          child: Text('$value${t(' min', ' دقيقة')}'),
-                        ),
-                    ],
-                    onChanged: (value) => setState(() => minutes = value),
-                    icon: const BilCrystalArrow(
-                      extent: 36,
-                      child: Icon(Icons.keyboard_arrow_down_rounded),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  initialValue: preferredTime,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    labelText: t(
-                      'Preferred time (optional)',
-                      'الوقت المفضل (اختياري)',
-                    ),
-                  ),
-                  items: [
-                    for (final time in preferredTimes)
-                      DropdownMenuItem(value: time, child: Text(time)),
-                  ],
-                  onChanged: (value) => setState(() => preferredTime = value),
-
-                  icon: const BilCrystalArrow(
-                    extent: 36,
-                    child: Icon(Icons.keyboard_arrow_down_rounded),
-                  ),
-                ),
-                if (environment == BilPlanEnvironment.home) ...[
-                  const SizedBox(height: 16),
-                  _anchor(
-                    'equipment',
-                    Focus(
-                      focusNode: _focusNodes['equipment'],
-                      child: Text(t('Available equipment', 'المعدات المتاحة')),
-                    ),
-                  ),
-                  for (final item in [
-                    ('none', t('No equipment', 'بدون معدات')),
-                    ('exercise mat', t('Exercise mat', 'بساط تمرين')),
-                    ('dumbbell pair', t('Dumbbells', 'أوزان يدوية')),
-                    (
-                      'long resistance band',
-                      t('Resistance band', 'حبل مقاومة'),
-                    ),
-                    ('kettlebell single', t('Kettlebell', 'كرة حديدية')),
-                  ])
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(item.$2),
-                      value: equipment.contains(item.$1),
-                      onChanged: (value) => setState(() {
-                        if (value == true) {
-                          if (item.$1 == 'none') {
-                            equipment.clear();
-                          } else {
-                            equipment.remove('none');
-                          }
-                          equipment.add(item.$1);
-                          if (item.$1 == 'dumbbell pair') {
-                            equipment.add('dumbbell single');
-                          }
-                        } else {
-                          equipment.remove(item.$1);
-                          if (item.$1 == 'dumbbell pair') {
-                            equipment.remove('dumbbell single');
-                          }
-                        }
-                      }),
-                    ),
-                ],
-                const SizedBox(height: 16),
-                _anchor(
-                  'sessions',
-                  DropdownButtonFormField<int>(
-                    key: ValueKey(('sessions', environment)),
-                    focusNode: _focusNodes['sessions'],
-                    isExpanded: true,
-                    initialValue: sessions,
-                    decoration: InputDecoration(
-                      labelText: t(
-                        'Sessions per week: ',
-                        'جلسات التدريب أسبوعيًا: ',
-                      ).trim(),
-                    ),
-                    items: [
-                      for (
-                        var value = 1;
-                        value <=
-                            (environment == BilPlanEnvironment.home ? 3 : 6);
-                        value++
-                      )
-                        DropdownMenuItem(value: value, child: Text('$value')),
-                    ],
-                    onChanged: (value) => setState(() => sessions = value),
-                    icon: const BilCrystalArrow(
-                      extent: 36,
-                      child: Icon(Icons.keyboard_arrow_down_rounded),
-                    ),
-                  ),
-                ),
-                if (environment != null)
-                  Text(
-                    environment == BilPlanEnvironment.home
-                        ? t(
-                            'Source-backed Home strength sessions include warm-up, sets, repetitions and rest. Up to 3 sessions per week leave recovery days. Use stable furniture where required, a clear safe floor, and comfortable resistance. Your chosen time is availability, not a finish deadline.',
-                            'جلسات القوة المنزلية موثقة بالإحماء والمجموعات والتكرارات والراحة. حتى 3 جلسات أسبوعيًا مع أيام للتعافي. استخدم أثاثًا ثابتًا عند الحاجة وأرضية آمنة ومقاومة مريحة. الوقت المختار وقت متاح وليس مهلة للإكمال.',
-                          )
-                        : t(
-                            'Uses the released BIL Gym plan with its source warm-up, sets, repetitions and rest. Review the draft before activating it.',
-                            'يستخدم خطة النادي المعتمدة في BIL مع الإحماء والمجموعات والتكرارات والراحة من مصدرها. راجع المسودة قبل تفعيلها.',
-                          ),
-                  ),
-                const SizedBox(height: 16),
-              ],
-              if (focus != BilPlanFocus.training)
-                _anchor(
-                  'diet',
-                  DropdownButtonFormField<MealPlanDiet>(
-                    focusNode: _focusNodes['diet'],
-                    decoration: InputDecoration(
-                      labelText: t('Recipe style', 'نمط الوجبات'),
+                      labelText: t('Duration', 'المدة'),
                     ),
                     itemHeight: null,
                     isExpanded: true,
-                    initialValue: diet,
+                    initialValue: horizon,
                     items: [
-                      for (final style in MealPlanDiet.values)
+                      for (final item in BilPlanHorizon.values)
                         DropdownMenuItem(
-                          value: style,
-                          child: Text(_planStyleLabel(context, style)),
+                          value: item,
+                          child: Text(switch (item) {
+                            BilPlanHorizon.week => t('One week', 'أسبوع'),
+                            BilPlanHorizon.month => t('One month', 'شهر'),
+                            BilPlanHorizon.threeMonths => t(
+                              'Three months',
+                              '3 أشهر',
+                            ),
+                            BilPlanHorizon.sixMonths => t(
+                              'Six months',
+                              '6 أشهر',
+                            ),
+                          }),
                         ),
                     ],
+                    onChanged: (value) =>
+                        setState(() => horizon = value ?? horizon),
+
+                    icon: const BilCrystalArrow(
+                      extent: 36,
+                      child: Icon(Icons.keyboard_arrow_down_rounded),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _anchor(
+                  'focus',
+                  DropdownButtonFormField<BilPlanFocus>(
+                    focusNode: _focusNodes['focus'],
+                    decoration: InputDecoration(
+                      labelText: t('Plan focus', 'تركيز الخطة'),
+                    ),
+                    itemHeight: null,
+                    isExpanded: true,
+                    initialValue: focus,
+                    items: [
+                      DropdownMenuItem(
+                        value: BilPlanFocus.combined,
+                        child: Text(
+                          t('Training and nutrition', 'تدريب وتغذية'),
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: BilPlanFocus.training,
+                        child: Text(t('Training only', 'تدريب فقط')),
+                      ),
+                      DropdownMenuItem(
+                        value: BilPlanFocus.nutrition,
+                        child: Text(t('Nutrition only', 'تغذية فقط')),
+                      ),
+                    ],
                     onChanged: (value) => setState(() {
-                      diet = value ?? diet;
+                      focus = value ?? focus;
                       _recipeIssue = null;
                     }),
 
@@ -615,74 +386,311 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                     ),
                   ),
                 ),
-              if (focus != BilPlanFocus.training && _recipeIssue != null)
-                _planRecipeGuidance(context, _recipeIssue!, (style) {
-                  setState(() {
-                    if (style == null) {
-                      focus = BilPlanFocus.training;
-                    } else {
-                      diet = style;
-                    }
-                    _recipeIssue = null;
-                  });
-                }),
-              _anchor(
-                'confirmation',
-                CheckboxListTile(
-                  focusNode: _focusNodes['confirmation'],
-                  value: confirmedPreferences,
-                  onChanged: (value) =>
-                      setState(() => confirmedPreferences = value ?? false),
-                  title: Text(
-                    t(
-                      'I am 18 or older and reviewed my allergies, dietary restrictions and training availability.',
-                      'عمري 18 عامًا أو أكثر وراجعت قيود الطعام والحساسية وتوفر التدريب.',
+                if (focus != BilPlanFocus.nutrition) ...[
+                  const SizedBox(height: 16),
+                  _anchor(
+                    'environment',
+                    DropdownButtonFormField<BilPlanEnvironment>(
+                      focusNode: _focusNodes['environment'],
+                      initialValue: environment,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: t('Training environment', 'مكان التدريب'),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: BilPlanEnvironment.gym,
+                          child: Text(t('Gym', 'النادي')),
+                        ),
+                        DropdownMenuItem(
+                          value: BilPlanEnvironment.home,
+                          child: Text(t('Home', 'المنزل')),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() {
+                        environment = value ?? environment;
+                        if (environment == BilPlanEnvironment.home &&
+                            (sessions ?? 0) > 3) {
+                          sessions = null;
+                        }
+                      }),
+
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _anchor(
+                    'experience',
+                    DropdownButtonFormField<BilPlanExperience>(
+                      focusNode: _focusNodes['experience'],
+                      initialValue: experience,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: t('Training experience', 'الخبرة التدريبية'),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: BilPlanExperience.beginner,
+                          child: Text(t('Beginner', 'مبتدئ')),
+                        ),
+                        DropdownMenuItem(
+                          value: BilPlanExperience.regular,
+                          child: Text(t('Regular practice', 'ممارسة منتظمة')),
+                        ),
+                        DropdownMenuItem(
+                          value: BilPlanExperience.experienced,
+                          child: Text(t('Experienced', 'متمرس')),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() => experience = value),
+
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _anchor(
+                    'minutes',
+                    DropdownButtonFormField<int>(
+                      focusNode: _focusNodes['minutes'],
+                      isExpanded: true,
+                      initialValue: minutes,
+                      decoration: InputDecoration(
+                        labelText: t(
+                          'Your session time budget: ',
+                          'الوقت المتاح للجلسة: ',
+                        ).trim(),
+                      ),
+                      items: [
+                        for (final value in (<int>{
+                          for (var n = 10; n <= 90; n += 5) n,
+                          ?minutes,
+                        }.toList()..sort()))
+                          DropdownMenuItem(
+                            value: value,
+                            child: Text('$value${t(' min', ' دقيقة')}'),
+                          ),
+                      ],
+                      onChanged: (value) => setState(() => minutes = value),
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: preferredTime,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: t(
+                        'Preferred time (optional)',
+                        'الوقت المفضل (اختياري)',
+                      ),
+                    ),
+                    items: [
+                      for (final time in preferredTimes)
+                        DropdownMenuItem(value: time, child: Text(time)),
+                    ],
+                    onChanged: (value) => setState(() => preferredTime = value),
+
+                    icon: const BilCrystalArrow(
+                      extent: 36,
+                      child: Icon(Icons.keyboard_arrow_down_rounded),
+                    ),
+                  ),
+                  if (environment == BilPlanEnvironment.home) ...[
+                    const SizedBox(height: 16),
+                    _anchor(
+                      'equipment',
+                      Focus(
+                        focusNode: _focusNodes['equipment'],
+                        child: Text(
+                          t('Available equipment', 'المعدات المتاحة'),
+                        ),
+                      ),
+                    ),
+                    for (final item in [
+                      ('none', t('No equipment', 'بدون معدات')),
+                      ('exercise mat', t('Exercise mat', 'بساط تمرين')),
+                      ('dumbbell pair', t('Dumbbells', 'أوزان يدوية')),
+                      (
+                        'long resistance band',
+                        t('Resistance band', 'حبل مقاومة'),
+                      ),
+                      ('kettlebell single', t('Kettlebell', 'كرة حديدية')),
+                    ])
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(item.$2),
+                        value: equipment.contains(item.$1),
+                        onChanged: (value) => setState(() {
+                          if (value == true) {
+                            if (item.$1 == 'none') {
+                              equipment.clear();
+                            } else {
+                              equipment.remove('none');
+                            }
+                            equipment.add(item.$1);
+                            if (item.$1 == 'dumbbell pair') {
+                              equipment.add('dumbbell single');
+                            }
+                          } else {
+                            equipment.remove(item.$1);
+                            if (item.$1 == 'dumbbell pair') {
+                              equipment.remove('dumbbell single');
+                            }
+                          }
+                        }),
+                      ),
+                  ],
+                  const SizedBox(height: 16),
+                  _anchor(
+                    'sessions',
+                    DropdownButtonFormField<int>(
+                      key: ValueKey(('sessions', environment)),
+                      focusNode: _focusNodes['sessions'],
+                      isExpanded: true,
+                      initialValue: sessions,
+                      decoration: InputDecoration(
+                        labelText: t(
+                          'Sessions per week: ',
+                          'جلسات التدريب أسبوعيًا: ',
+                        ).trim(),
+                      ),
+                      items: [
+                        for (
+                          var value = 1;
+                          value <=
+                              (environment == BilPlanEnvironment.home ? 3 : 6);
+                          value++
+                        )
+                          DropdownMenuItem(value: value, child: Text('$value')),
+                      ],
+                      onChanged: (value) => setState(() => sessions = value),
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
+                    ),
+                  ),
+                  if (environment != null)
+                    Text(
+                      environment == BilPlanEnvironment.home
+                          ? t(
+                              'Source-backed Home strength sessions include warm-up, sets, repetitions and rest. Up to 3 sessions per week leave recovery days. Use stable furniture where required, a clear safe floor, and comfortable resistance. Your chosen time is availability, not a finish deadline.',
+                              'جلسات القوة المنزلية موثقة بالإحماء والمجموعات والتكرارات والراحة. حتى 3 جلسات أسبوعيًا مع أيام للتعافي. استخدم أثاثًا ثابتًا عند الحاجة وأرضية آمنة ومقاومة مريحة. الوقت المختار وقت متاح وليس مهلة للإكمال.',
+                            )
+                          : t(
+                              'Uses the released BIL Gym plan with its source warm-up, sets, repetitions and rest. Review the draft before activating it.',
+                              'يستخدم خطة النادي المعتمدة في BIL مع الإحماء والمجموعات والتكرارات والراحة من مصدرها. راجع المسودة قبل تفعيلها.',
+                            ),
+                    ),
+                  const SizedBox(height: 16),
+                ],
+                if (focus != BilPlanFocus.training)
+                  _anchor(
+                    'diet',
+                    DropdownButtonFormField<MealPlanDiet>(
+                      focusNode: _focusNodes['diet'],
+                      decoration: InputDecoration(
+                        labelText: t('Recipe style', 'نمط الوجبات'),
+                      ),
+                      itemHeight: null,
+                      isExpanded: true,
+                      initialValue: diet,
+                      items: [
+                        for (final style in MealPlanDiet.values)
+                          DropdownMenuItem(
+                            value: style,
+                            child: Text(_planStyleLabel(context, style)),
+                          ),
+                      ],
+                      onChanged: (value) => setState(() {
+                        diet = value ?? diet;
+                        _recipeIssue = null;
+                      }),
+
+                      icon: const BilCrystalArrow(
+                        extent: 36,
+                        child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
+                    ),
+                  ),
+                if (focus != BilPlanFocus.training && _recipeIssue != null)
+                  _planRecipeGuidance(context, _recipeIssue!, (style) {
+                    setState(() {
+                      if (style == null) {
+                        focus = BilPlanFocus.training;
+                      } else {
+                        diet = style;
+                      }
+                      _recipeIssue = null;
+                    });
+                  }),
+                _anchor(
+                  'confirmation',
+                  CheckboxListTile(
+                    focusNode: _focusNodes['confirmation'],
+                    value: confirmedPreferences,
+                    onChanged: (value) =>
+                        setState(() => confirmedPreferences = value ?? false),
+                    title: Text(
+                      t(
+                        'I am 18 or older and reviewed my allergies, dietary restrictions and training availability.',
+                        'عمري 18 عامًا أو أكثر وراجعت قيود الطعام والحساسية وتوفر التدريب.',
+                      ),
                     ),
                   ),
                 ),
-              ),
-              _medicalChoice(
-                'symptoms',
-                riskSymptoms,
-                (value) => setState(() => riskSymptoms = value),
-                t(
-                  'I have concerning symptoms or an injury affecting exercise.',
-                  'لدي أعراض مقلقة أو إصابة تؤثر على التمرين.',
-                ),
-              ),
-              _medicalChoice(
-                'medical',
-                medicalReview,
-                (value) => setState(() => medicalReview = value),
-                t(
-                  'I am pregnant, postpartum, or my diet or training requires clinician supervision.',
-                  'أنا حامل أو بعد الولادة، أو يحتاج غذائي أو تدريبي متابعة طبية.',
-                ),
-              ),
-              if (riskSymptoms == true || medicalReview == true)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    t(
-                      'A qualified professional should review your needs before a personal plan is prepared.',
-                      'راجع مختصًا لتقييم احتياجاتك قبل إعداد خطة شخصية.',
-                    ),
+                _medicalChoice(
+                  'symptoms',
+                  riskSymptoms,
+                  (value) => setState(() => riskSymptoms = value),
+                  t(
+                    'I have concerning symptoms or an injury affecting exercise.',
+                    'لدي أعراض مقلقة أو إصابة تؤثر على التمرين.',
                   ),
                 ),
-              const SizedBox(height: 12),
-              FilledButton(
-                key: const ValueKey('bil-smart-plan-review-draft'),
-                onPressed: _checkingRecipes ? null : _validateAndSubmit,
-                child: _planPrepareLabel(context, checking: _checkingRecipes),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                t(
-                  'No HealthKit writes, food logging, or AI submission occurs when preparing a draft.',
-                  'إنشاء المسودة لا يكتب في HealthKit أو سجل الطعام ولا يرسل بيانات إلى الذكاء الاصطناعي.',
+                _medicalChoice(
+                  'medical',
+                  medicalReview,
+                  (value) => setState(() => medicalReview = value),
+                  t(
+                    'I am pregnant, postpartum, or my diet or training requires clinician supervision.',
+                    'أنا حامل أو بعد الولادة، أو يحتاج غذائي أو تدريبي متابعة طبية.',
+                  ),
                 ),
-              ),
-            ],
+                if (riskSymptoms == true || medicalReview == true)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      t(
+                        'A qualified professional should review your needs before a personal plan is prepared.',
+                        'راجع مختصًا لتقييم احتياجاتك قبل إعداد خطة شخصية.',
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  key: const ValueKey('bil-smart-plan-review-draft'),
+                  onPressed: _checkingRecipes ? null : _validateAndSubmit,
+                  child: _planPrepareLabel(context, checking: _checkingRecipes),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  t(
+                    'No HealthKit writes, food logging, or AI submission occurs when preparing a draft.',
+                    'إنشاء المسودة لا يكتب في HealthKit أو سجل الطعام ولا يرسل بيانات إلى الذكاء الاصطناعي.',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

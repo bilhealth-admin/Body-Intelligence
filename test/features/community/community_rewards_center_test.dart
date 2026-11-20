@@ -147,6 +147,11 @@ void main() {
             builder: (_, _) => CommunityRewardsPage(repository: repository),
           ),
           GoRoute(
+            path: '/settings/ai-coach',
+            builder: (_, _) =>
+                const Scaffold(body: Text('Coach balance fixture')),
+          ),
+          GoRoute(
             path: '/community/compose',
             builder: (_, state) {
               composerVisits++;
@@ -165,6 +170,14 @@ void main() {
       expect(find.byKey(const Key('community-gold-balance')), findsOneWidget);
       expect(find.text('50'), findsOneWidget);
       expect(find.text('History'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('community-gold-open-ai-tokens')));
+      await tester.pumpAndSettle();
+      expect(find.text('Coach balance fixture'), findsOneWidget);
+      expect(repository.balance, 50);
+      expect(repository.claimCalls, 0);
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('50'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.byKey(const Key('community-ai-reward-notice')),
         250,

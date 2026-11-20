@@ -643,7 +643,7 @@ void main() {
       expect(source, contains('token.sensitive_preview_allowed'));
       expect(
         source,
-        contains('"You have a new private update."'),
+        contains('privacySafePushBody(event.category, event.copy_key)'),
         reason: path,
       );
     }

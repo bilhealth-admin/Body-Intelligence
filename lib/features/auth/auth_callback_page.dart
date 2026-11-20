@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../shared/widgets/bil_wordmark.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
 import 'auth_five_locale_copy.dart';
 
 /// Completes a native OAuth callback without racing Supabase's PKCE exchange.
@@ -147,54 +148,71 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
             padding: const EdgeInsets.all(28),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const BilFullWordmark(height: 48),
-                  const SizedBox(height: 28),
-                  if (!_failed) ...[
-                    const BilFeatureWelcomeStatus(),
-                    const SizedBox(height: 20),
-                    Text(
-                      tr(
-                        'Finishing secure sign-in…',
-                        'جارٍ إكمال تسجيل الدخول الآمن…',
+              child: BilPinnedHeaderBody(
+                shrinkWrap: true,
+                header: Column(
+                  children: [
+                    const BilFullWordmark(height: 48),
+                    const SizedBox(height: 28),
+                    if (!_failed) ...[
+                      const BilFeatureWelcomeStatus(),
+                      const SizedBox(height: 20),
+                      Text(
+                        tr(
+                          'Finishing secure sign-in…',
+                          'جارٍ إكمال تسجيل الدخول الآمن…',
+                        ),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                        ),
                       ),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white, fontSize: 17),
-                    ),
-                  ] else ...[
-                    const Icon(
-                      Icons.lock_clock_outlined,
-                      color: Colors.white,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      tr(
-                        'Secure sign-in did not finish in time. Your local data was not changed.',
-                        'لم يكتمل تسجيل الدخول الآمن في الوقت المحدد. لم تتغير بياناتك المحلية.',
+                    ] else ...[
+                      const Icon(
+                        Icons.lock_clock_outlined,
+                        color: Colors.white,
+                        size: 48,
                       ),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white, height: 1.4),
-                    ),
-                    const SizedBox(height: 20),
-                    FilledButton.icon(
-                      key: const Key('auth-callback-retry'),
-                      onPressed: _retrying ? null : _retry,
-                      icon: const BilNavigationFeedback(
-                        child: Icon(Icons.refresh_rounded),
+                      const SizedBox(height: 18),
+                      Text(
+                        tr(
+                          'Secure sign-in did not finish in time. Your local data was not changed.',
+                          'لم يكتمل تسجيل الدخول الآمن في الوقت المحدد. لم تتغير بياناتك المحلية.',
+                        ),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          height: 1.4,
+                        ),
                       ),
-                      label: Text(tr('Try again', 'حاول مرة أخرى')),
-                    ),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: Text(
-                        tr('Back to sign in', 'العودة لتسجيل الدخول'),
-                      ),
-                    ),
+                      const SizedBox(height: 20),
+                    ],
                   ],
-                ],
+                ),
+                body: SingleChildScrollView(
+                  key: const Key('auth-callback-body-scroll'),
+                  child: Column(
+                    children: [
+                      if (_failed) ...[
+                        FilledButton.icon(
+                          key: const Key('auth-callback-retry'),
+                          onPressed: _retrying ? null : _retry,
+                          icon: const BilNavigationFeedback(
+                            child: Icon(Icons.refresh_rounded),
+                          ),
+                          label: Text(tr('Try again', 'حاول مرة أخرى')),
+                        ),
+                        TextButton(
+                          onPressed: () => context.go('/login'),
+                          child: Text(
+                            tr('Back to sign in', 'العودة لتسجيل الدخول'),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

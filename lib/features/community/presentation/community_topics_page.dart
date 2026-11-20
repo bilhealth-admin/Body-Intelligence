@@ -644,100 +644,104 @@ class _CommunityTopicPageState extends State<_CommunityTopicPage> {
                     ),
                   );
                 }
-                return BilRefreshIndicator(
-                  onRefresh: () => _refresh(visit),
-                  child: CustomScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    slivers: [
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '#${widget.topic.slug}',
-                                textDirection: TextDirection.ltr,
-                                style: Theme.of(context).textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.w900),
-                              ),
-                              if (description.isNotEmpty) ...[
-                                const SizedBox(height: 6),
-                                Text(description),
-                              ],
-                            ],
+                return BilPinnedHeaderBody(
+                  header: KeyedSubtree(
+                    key: const Key('community-topic-pinned-heading'),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '#${widget.topic.slug}',
+                            textDirection: TextDirection.ltr,
+                            style: bilPageHeadingStyle(context),
                           ),
-                        ),
+                          if (description.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Text(description),
+                          ],
+                        ],
                       ),
-                      if (_posts.isEmpty)
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32),
-                              child: Text(
-                                communityText(
-                                  context,
-                                  'No approved posts in this topic yet.',
-                                  'لا توجد منشورات معتمدة في هذا الموضوع بعد.',
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                          sliver: SliverGrid(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 10,
-                                  mainAxisSpacing: 10,
-                                  childAspectRatio: .82,
-                                ),
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) => _postTileForTopic(
-                                context,
-                                visit,
-                                _posts[index],
-                                _viewCounts[_posts[index].id],
-                              ),
-                              childCount: _posts.length,
-                            ),
-                          ),
-                        ),
-                      if (_hasMore)
-                        SliverToBoxAdapter(
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: TextButton.icon(
-                                onPressed: _loadingMore
-                                    ? null
-                                    : () => _loadMore(visit),
-                                icon: _loadingMore
-                                    ? const SizedBox.square(
-                                        dimension: 16,
-                                        child: BilFeatureWelcomeStatus(),
-                                      )
-                                    : const BilNavigationFeedback(
-                                        child: Icon(Icons.expand_more_rounded),
-                                      ),
-                                label: Text(
+                    ),
+                  ),
+                  body: BilRefreshIndicator(
+                    onRefresh: () => _refresh(visit),
+                    child: CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        if (_posts.isEmpty)
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(32),
+                                child: Text(
                                   communityText(
                                     context,
-                                    'Load more',
-                                    'تحميل المزيد',
+                                    'No approved posts in this topic yet.',
+                                    'لا توجد منشورات معتمدة في هذا الموضوع بعد.',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                            sliver: SliverGrid(
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                    childAspectRatio: .82,
+                                  ),
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) => _postTileForTopic(
+                                  context,
+                                  visit,
+                                  _posts[index],
+                                  _viewCounts[_posts[index].id],
+                                ),
+                                childCount: _posts.length,
+                              ),
+                            ),
+                          ),
+                        if (_hasMore)
+                          SliverToBoxAdapter(
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: TextButton.icon(
+                                  onPressed: _loadingMore
+                                      ? null
+                                      : () => _loadMore(visit),
+                                  icon: _loadingMore
+                                      ? const SizedBox.square(
+                                          dimension: 16,
+                                          child: BilFeatureWelcomeStatus(),
+                                        )
+                                      : const BilNavigationFeedback(
+                                          child: Icon(
+                                            Icons.expand_more_rounded,
+                                          ),
+                                        ),
+                                  label: Text(
+                                    communityText(
+                                      context,
+                                      'Load more',
+                                      'تحميل المزيد',
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 96)),
-                    ],
+                        const SliverToBoxAdapter(child: SizedBox(height: 96)),
+                      ],
+                    ),
                   ),
                 );
               },

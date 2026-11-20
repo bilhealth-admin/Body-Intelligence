@@ -1,6 +1,6 @@
 import 'bil_locale_policy.dart';
 
-/// Owner-safe My Plan recovery guidance for all 25 production locales.
+/// My Plan status and owner-safe recovery guidance for all 25 production locales.
 ///
 /// Keep recovery semantics intact: an unverified retained plan is read-only;
 /// do not imply a fresh successful read or that an account switch is safe.
@@ -14,6 +14,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
     "Your saved plan could not be read from this device. Retry; an existing plan has not been overwritten.",
     "Resume this paused plan? Meals remain suggestions; nothing is logged automatically.",
     "Resume plan",
+    "Checking recipes",
   ];
   static const rows = <String, List<String>>{
     "ar": <String>[
@@ -25,6 +26,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "تعذّرت قراءة خطتك المحفوظة من هذا الجهاز. أعد المحاولة؛ لم تُستبدل الخطة الموجودة.",
       "استئناف هذه الخطة المتوقفة مؤقتًا؟ تبقى الوجبات مقترحات فقط ولن يُسجّل أي شيء تلقائيًا.",
       "استئناف الخطة",
+      "جارٍ التحقق من الوصفات",
     ],
     "en": <String>[
       "Sign in to access your saved plan. No plan data has been deleted.",
@@ -35,6 +37,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Your saved plan could not be read from this device. Retry; an existing plan has not been overwritten.",
       "Resume this paused plan? Meals remain suggestions; nothing is logged automatically.",
       "Resume plan",
+      "Checking recipes",
     ],
     "fr": <String>[
       "Connectez-vous pour accéder à votre plan enregistré. Aucune donnée du plan n’a été supprimée.",
@@ -45,6 +48,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Impossible de lire votre plan enregistré sur cet appareil. Réessayez ; aucun plan existant n’a été remplacé.",
       "Reprendre ce plan en pause ? Les repas restent des suggestions ; rien n’est enregistré automatiquement.",
       "Reprendre le plan",
+      "Vérification des recettes",
     ],
     "es": <String>[
       "Inicia sesión para acceder a tu plan guardado. No se ha eliminado ningún dato del plan.",
@@ -55,6 +59,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "No se pudo leer tu plan guardado en este dispositivo. Vuelve a intentarlo; no se ha reemplazado ningún plan existente.",
       "¿Reanudar este plan en pausa? Las comidas siguen siendo sugerencias; no se registra nada automáticamente.",
       "Reanudar plan",
+      "Comprobando recetas",
     ],
     "tr": <String>[
       "Kayıtlı planınıza erişmek için giriş yapın. Hiçbir plan verisi silinmedi.",
@@ -65,6 +70,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Kayıtlı planınız bu cihazdan okunamadı. Yeniden deneyin; mevcut planın üzerine yazılmadı.",
       "Duraklatılan bu plan sürdürülsün mü? Yemekler öneri olarak kalır; hiçbir şey otomatik kaydedilmez.",
       "Planı sürdür",
+      "Tarifler kontrol ediliyor",
     ],
     "de": <String>[
       "Melden Sie sich an, um auf Ihren gespeicherten Plan zuzugreifen. Es wurden keine Plandaten gelöscht.",
@@ -75,6 +81,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Ihr gespeicherter Plan konnte auf diesem Gerät nicht gelesen werden. Versuchen Sie es erneut; ein bestehender Plan wurde nicht überschrieben.",
       "Diesen pausierten Plan fortsetzen? Mahlzeiten bleiben Vorschläge; nichts wird automatisch protokolliert.",
       "Plan fortsetzen",
+      "Rezepte werden geprüft",
     ],
     "it": <String>[
       "Accedi per visualizzare il piano salvato. Nessun dato del piano è stato eliminato.",
@@ -85,6 +92,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Impossibile leggere il piano salvato su questo dispositivo. Riprova; nessun piano esistente è stato sovrascritto.",
       "Riprendere questo piano in pausa? I pasti restano suggerimenti; nulla viene registrato automaticamente.",
       "Riprendi piano",
+      "Verifica delle ricette",
     ],
     "pt-BR": <String>[
       "Entre na sua conta para acessar seu plano salvo. Nenhum dado do plano foi excluído.",
@@ -95,6 +103,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Não foi possível ler seu plano salvo neste dispositivo. Tente novamente; nenhum plano existente foi substituído.",
       "Retomar este plano pausado? As refeições continuam sendo sugestões; nada é registrado automaticamente.",
       "Retomar plano",
+      "Verificando receitas",
     ],
     "pt-PT": <String>[
       "Inicie sessão para aceder ao seu plano guardado. Não foram eliminados dados do plano.",
@@ -105,6 +114,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Não foi possível ler o plano guardado neste dispositivo. Tente novamente; nenhum plano existente foi substituído.",
       "Retomar este plano em pausa? As refeições continuam a ser sugestões; nada é registado automaticamente.",
       "Retomar plano",
+      "A verificar receitas",
     ],
     "ur": <String>[
       "محفوظ شدہ پلان دیکھنے کے لیے سائن اِن کریں۔ پلان کا کوئی ڈیٹا حذف نہیں ہوا۔",
@@ -115,6 +125,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "اس ڈیوائس پر محفوظ پلان پڑھا نہیں جا سکا۔ دوبارہ کوشش کریں؛ موجودہ پلان تبدیل نہیں کیا گیا۔",
       "کیا یہ موقوف منصوبہ دوبارہ جاری کرنا ہے؟ کھانے صرف تجاویز ہیں؛ کچھ بھی خودکار طور پر درج نہیں ہوتا۔",
       "منصوبہ دوبارہ جاری کریں",
+      "تراکیب کی جانچ ہو رہی ہے",
     ],
     "fa": <String>[
       "برای دسترسی به برنامه ذخیره‌شده وارد شوید. هیچ داده‌ای از برنامه حذف نشده است.",
@@ -125,6 +136,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "برنامه ذخیره‌شده روی این دستگاه خوانده نشد. دوباره تلاش کنید؛ برنامه موجود بازنویسی نشده است.",
       "این برنامه متوقف‌شده ادامه یابد؟ وعده‌ها همچنان پیشنهاد هستند؛ چیزی خودکار ثبت نمی‌شود.",
       "ادامه برنامه",
+      "در حال بررسی دستورهای غذایی",
     ],
     "hi": <String>[
       "सहेजी गई योजना देखने के लिए साइन इन करें। योजना का कोई डेटा मिटाया नहीं गया है।",
@@ -135,6 +147,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "इस डिवाइस पर सहेजी गई योजना पढ़ी नहीं जा सकी। फिर प्रयास करें; मौजूदा योजना बदली नहीं गई है।",
       "क्या इस रुकी हुई योजना को फिर शुरू करना है? भोजन सुझाव ही रहेंगे; कुछ भी अपने-आप दर्ज नहीं होगा।",
       "योजना फिर शुरू करें",
+      "व्यंजनों की जाँच की जा रही है",
     ],
     "id": <String>[
       "Masuk untuk mengakses rencana tersimpan. Tidak ada data rencana yang dihapus.",
@@ -145,6 +158,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Rencana tersimpan tidak dapat dibaca dari perangkat ini. Coba lagi; rencana yang ada tidak ditimpa.",
       "Lanjutkan rencana yang dijeda ini? Makanan tetap berupa saran; tidak ada yang dicatat otomatis.",
       "Lanjutkan rencana",
+      "Memeriksa resep",
     ],
     "ms": <String>[
       "Log masuk untuk mengakses pelan tersimpan. Tiada data pelan dipadamkan.",
@@ -155,6 +169,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Pelan tersimpan tidak dapat dibaca pada peranti ini. Cuba lagi; pelan sedia ada tidak ditulis ganti.",
       "Sambung semula pelan yang dijeda ini? Hidangan kekal sebagai cadangan; tiada apa direkod secara automatik.",
       "Sambung semula pelan",
+      "Menyemak resipi",
     ],
     "ja": <String>[
       "保存したプランを表示するにはサインインしてください。プランのデータは削除されていません。",
@@ -165,6 +180,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "この端末で保存済みプランを読み取れませんでした。再試行してください。既存のプランは上書きされていません。",
       "一時停止中のこのプランを再開しますか？食事は提案のままで、自動では記録されません。",
       "プランを再開",
+      "レシピを確認中",
     ],
     "ko": <String>[
       "저장된 계획을 보려면 로그인하세요. 계획 데이터는 삭제되지 않았습니다.",
@@ -175,6 +191,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "이 기기에서 저장된 계획을 읽지 못했습니다. 다시 시도하세요. 기존 계획은 덮어쓰지 않았습니다.",
       "일시 중지된 이 계획을 재개할까요? 식사는 제안이며 자동으로 기록되지 않습니다.",
       "계획 재개",
+      "레시피 확인 중",
     ],
     "zh-Hans": <String>[
       "请登录以访问已保存的计划。没有删除任何计划数据。",
@@ -185,6 +202,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "无法从此设备读取已保存的计划。请重试；现有计划未被覆盖。",
       "恢复这个已暂停的计划吗？餐食仍为建议，不会自动记录任何内容。",
       "恢复计划",
+      "正在检查食谱",
     ],
     "zh-Hant": <String>[
       "請登入以存取已儲存的計畫。沒有刪除任何計畫資料。",
@@ -195,6 +213,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "無法從此裝置讀取已儲存的計畫。請重試；現有計畫並未被覆寫。",
       "恢復這個已暫停的計畫嗎？餐食仍為建議，不會自動記錄任何內容。",
       "恢復計畫",
+      "正在檢查食譜",
     ],
     "ru": <String>[
       "Войдите, чтобы открыть сохранённый план. Данные плана не удалены.",
@@ -205,6 +224,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Не удалось прочитать сохранённый план на этом устройстве. Повторите попытку; существующий план не перезаписан.",
       "Возобновить этот приостановленный план? Приёмы пищи остаются рекомендациями; ничего не записывается автоматически.",
       "Возобновить план",
+      "Проверка рецептов",
     ],
     "bn": <String>[
       "সংরক্ষিত পরিকল্পনা দেখতে সাইন ইন করুন। পরিকল্পনার কোনো তথ্য মুছে ফেলা হয়নি।",
@@ -215,6 +235,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "এই ডিভাইসে সংরক্ষিত পরিকল্পনা পড়া যায়নি। আবার চেষ্টা করুন; বিদ্যমান পরিকল্পনা বদলে দেওয়া হয়নি।",
       "এই বিরতিতে থাকা পরিকল্পনা আবার চালু করবেন? খাবার শুধু পরামর্শ থাকবে; কিছুই স্বয়ংক্রিয়ভাবে লেখা হবে না।",
       "পরিকল্পনা আবার চালু করুন",
+      "রেসিপি যাচাই করা হচ্ছে",
     ],
     "vi": <String>[
       "Đăng nhập để xem kế hoạch đã lưu. Không có dữ liệu kế hoạch nào bị xóa.",
@@ -225,6 +246,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Không thể đọc kế hoạch đã lưu trên thiết bị này. Hãy thử lại; kế hoạch hiện có chưa bị ghi đè.",
       "Tiếp tục kế hoạch đang tạm dừng này? Bữa ăn vẫn là gợi ý; không có gì được ghi tự động.",
       "Tiếp tục kế hoạch",
+      "Đang kiểm tra công thức",
     ],
     "th": <String>[
       "ลงชื่อเข้าใช้เพื่อดูแผนที่บันทึกไว้ ไม่มีข้อมูลแผนถูกลบ",
@@ -235,6 +257,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "ไม่สามารถอ่านแผนที่บันทึกไว้จากอุปกรณ์นี้ได้ ลองอีกครั้ง แผนเดิมไม่ได้ถูกเขียนทับ",
       "ดำเนินแผนที่หยุดชั่วคราวนี้ต่อหรือไม่? มื้ออาหารยังเป็นเพียงคำแนะนำ ไม่มีการบันทึกอัตโนมัติ",
       "ดำเนินแผนต่อ",
+      "กำลังตรวจสอบสูตรอาหาร",
     ],
     "pl": <String>[
       "Zaloguj się, aby uzyskać dostęp do zapisanego planu. Żadne dane planu nie zostały usunięte.",
@@ -245,6 +268,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Nie udało się odczytać zapisanego planu na tym urządzeniu. Spróbuj ponownie; istniejący plan nie został nadpisany.",
       "Wznowić ten wstrzymany plan? Posiłki pozostają sugestiami; nic nie jest zapisywane automatycznie.",
       "Wznów plan",
+      "Sprawdzanie przepisów",
     ],
     "nl": <String>[
       "Meld u aan om uw opgeslagen plan te bekijken. Er zijn geen plangegevens verwijderd.",
@@ -255,6 +279,7 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Uw opgeslagen plan kon niet op dit apparaat worden gelezen. Probeer opnieuw; een bestaand plan is niet overschreven.",
       "Dit gepauzeerde plan hervatten? Maaltijden blijven suggesties; er wordt niets automatisch vastgelegd.",
       "Plan hervatten",
+      "Recepten controleren",
     ],
     "uk": <String>[
       "Увійдіть, щоб переглянути збережений план. Дані плану не видалено.",
@@ -265,12 +290,24 @@ abstract final class SmartPlanRecoveryRuntimeCopy {
       "Не вдалося прочитати збережений план на цьому пристрої. Повторіть спробу; наявний план не перезаписано.",
       "Відновити цей призупинений план? Страви залишаються пропозиціями; нічого не записується автоматично.",
       "Відновити план",
+      "Перевірка рецептів",
     ],
+  };
+
+  // The extended catalogue already supplies this label for the other twenty
+  // locales. Complete the base five without replacing their existing copy.
+  static const _recipeEmptyBaseCopy = <String, String>{
+    'ar': 'لا توجد وصفات مطابقة.',
+    'en': 'No matching recipes.',
+    'fr': 'Aucune recette correspondante.',
+    'es': 'No hay recetas coincidentes.',
+    'tr': 'Eşleşen tarif bulunamadı.',
   };
 
   static String? resolve(String english, String localeTag) {
     final tag = BilLocalePolicy.canonicalSupportedTag(localeTag);
     if (tag == null) return null;
+    if (english == 'No matching recipes.') return _recipeEmptyBaseCopy[tag];
     final index = sources.indexOf(english);
     if (index < 0) return null;
     return rows[tag]?[index];

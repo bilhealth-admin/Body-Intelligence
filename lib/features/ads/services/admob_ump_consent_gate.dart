@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import 'ios_no_idfa_ad_sdk_boundary.dart';
+
 enum UmpConsentPhase { uninitialized, updating, ready, blocked, notApplicable }
 
 enum UmpPrivacyOptionsRequirement { unknown, required, notRequired }
@@ -334,14 +336,23 @@ final class UmpPlatformFailure implements Exception {
 final class GoogleMobileAdsUmpPlatformBridge implements UmpPlatformBridge {
   const GoogleMobileAdsUmpPlatformBridge({
     required this.tagForUnderAgeOfConsent,
+    this.adSdkPrivacy = const NoIdfaIosAdSdkBoundary(),
   });
 
   /// BIL invokes this bridge only for an eligible registered adult Free
   /// account. There is no separate advertising-age preference.
   final bool tagForUnderAgeOfConsent;
+  final AdSdkPrivacyBoundary adSdkPrivacy;
+
+  Future<void> _requireNativePrivacy(String operation) async {
+    if (!await adSdkPrivacy.permitsSdkRequests()) {
+      throw UmpPlatformFailure(operation, -1, 'iOS ad privacy is unavailable.');
+    }
+  }
 
   @override
-  Future<void> requestConsentInfoUpdate() {
+  Future<void> requestConsentInfoUpdate() async {
+    await _requireNativePrivacy('requestConsentInfoUpdate');
     final completer = Completer<void>();
     ConsentInformation.instance.requestConsentInfoUpdate(
       ConsentRequestParameters(
@@ -360,7 +371,8 @@ final class GoogleMobileAdsUmpPlatformBridge implements UmpPlatformBridge {
   }
 
   @override
-  Future<void> loadAndShowConsentFormIfRequired() {
+  Future<void> loadAndShowConsentFormIfRequired() async {
+    await _requireNativePrivacy('loadAndShowConsentFormIfRequired');
     final completer = Completer<void>();
     ConsentForm.loadAndShowConsentFormIfRequired((error) {
       if (error == null) {
@@ -379,10 +391,16 @@ final class GoogleMobileAdsUmpPlatformBridge implements UmpPlatformBridge {
   }
 
   @override
-  Future<bool> canRequestAds() => ConsentInformation.instance.canRequestAds();
+  Future<bool> canRequestAds() async {
+    if (!await adSdkPrivacy.permitsSdkRequests()) return false;
+    return ConsentInformation.instance.canRequestAds();
+  }
 
   @override
   Future<UmpPrivacyOptionsRequirement> getPrivacyOptionsRequirement() async {
+    if (!await adSdkPrivacy.permitsSdkRequests()) {
+      return UmpPrivacyOptionsRequirement.unknown;
+    }
     final status = await ConsentInformation.instance
         .getPrivacyOptionsRequirementStatus();
     return switch (status) {
@@ -396,7 +414,8 @@ final class GoogleMobileAdsUmpPlatformBridge implements UmpPlatformBridge {
   }
 
   @override
-  Future<void> showPrivacyOptionsForm() {
+  Future<void> showPrivacyOptionsForm() async {
+    await _requireNativePrivacy('showPrivacyOptionsForm');
     final completer = Completer<void>();
     ConsentForm.showPrivacyOptionsForm((error) {
       if (error == null) {

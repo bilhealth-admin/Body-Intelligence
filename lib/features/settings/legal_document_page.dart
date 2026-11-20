@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_page_heading.dart';
 import '../nutrition/presentation/gemini_vision_copy.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ import 'food_search_privacy_disclosure.dart';
 import '../community/presentation/community_translation_copy.dart'
     show cloudTranslationDisclosure, translationCopy;
 import '../../app/router/bil_safe_return_button.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';
 
 part 'legal_document_ai_privacy.dart';
@@ -26,9 +28,8 @@ class LegalDocumentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(
-      context,
-    ).toLanguageTag().toLowerCase();
+    final tag = Localizations.localeOf(context).toLanguageTag();
+    final locale = tag.toLowerCase();
     final copy = _legalPageCopy[locale] ?? _extendedLegalCopy(locale);
     final title = copy.titles[document]!;
     final heading = copy.headings[document]!;
@@ -48,9 +49,8 @@ class LegalDocumentPage extends StatelessWidget {
           foodSearchPrivacyDisclosure(context),
         ),
     ];
-    // The legal entity is rendered from the immutable metadata line below.
-    // Translation services must never localize or rename it.
-    final effectiveStatus = copy.effective.split(' • ').take(2).join(' • ');
+    // Immutable legal entity metadata must never be translated or renamed.
+    final effective = copy.effective.split(' • ').take(2).join(' • ');
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
         appBar: AppBar(
@@ -58,41 +58,43 @@ class LegalDocumentPage extends StatelessWidget {
           title: Text(title),
         ),
         body: SelectionArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(24, 18, 24, 48),
-            children: [
-              Text(
-                heading,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                effectiveStatus,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '$bilLegalPolicyId • $bilLegalPolicyRevision • $bilLegalEntity',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 22),
-              for (final section in sections) ...[
-                Text(
-                  section.$1,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+          child: BilPinnedHeaderBody(
+            header: Padding(
+              key: const Key('legal-document-pinned-header'),
+              padding: const EdgeInsets.fromLTRB(24, 18, 24, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(heading, style: bilPageHeadingStyle(context)),
+                  const SizedBox(height: 8),
+                  Text(effective, style: Theme.of(context).textTheme.bodySmall),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$bilLegalPolicyId • $bilLegalPolicyRevision • $bilLegalEntity',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(section.$2, style: const TextStyle(height: 1.45)),
-                const SizedBox(height: 20),
+                ],
+              ),
+            ),
+            body: ListView(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
+              children: [
+                for (final section in sections) ...[
+                  Text(
+                    section.$1,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(section.$2, style: const TextStyle(height: 1.45)),
+                  const SizedBox(height: 20),
+                ],
+                const Divider(),
+                const SizedBox(height: 12),
+                Text(copy.contact),
               ],
-              const Divider(),
-              const SizedBox(height: 12),
-              Text(copy.contact),
-            ],
+            ),
           ),
         ),
       ),

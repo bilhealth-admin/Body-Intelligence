@@ -60,12 +60,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      final heading = find.byKey(const Key('local-export-pinned-header'));
+      final headingBefore = tester.getRect(heading);
+      final title = tester.widget<Text>(
+        find.text('Choose an inclusive date range'),
+      );
+      expect(title.style?.fontWeight, FontWeight.w800);
       final create = _button('Create CSV export');
       await tester.scrollUntilVisible(
         create,
         300,
         scrollable: find.descendant(
-          of: find.byType(LocalExportRangePage),
+          of: find.byType(ListView),
           matching: find.byType(Scrollable),
         ),
       );
@@ -80,6 +86,7 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
       await _reachActualBottom(tester);
+      expect(tester.getRect(heading).topLeft, headingBefore.topLeft);
 
       final button = _button('Share prepared export');
       expect(button, findsOneWidget);
@@ -129,7 +136,7 @@ Finder _button(String label) => find.ancestor(
 
 Future<void> _reachActualBottom(WidgetTester tester) async {
   final scrollable = find.descendant(
-    of: find.byType(LocalExportRangePage),
+    of: find.byType(ListView),
     matching: find.byType(Scrollable),
   );
   expect(scrollable, findsOneWidget);

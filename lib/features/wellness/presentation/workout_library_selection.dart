@@ -204,119 +204,133 @@ extension _WorkoutLibrarySelection on _WorkoutLibraryPageState {
       showDragHandle: true,
       builder: (sheetContext) => StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(
-              24,
-              4,
-              24,
-              24 + MediaQuery.viewInsetsOf(context).bottom,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      child: BilNavigationFeedback(child: Icon(workout.icon)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            wellnessCopy(context, workout.en, workout.ar),
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                          Text(
-                            wellnessCopy(
-                              context,
-                              workout.categoryEn,
-                              workout.categoryAr,
+          child: BilPinnedHeaderBody(
+            shrinkWrap: true,
+            header: Padding(
+              key: const Key("workout-selection-pinned-heading"),
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        child: BilNavigationFeedback(child: Icon(workout.icon)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              wellnessCopy(context, workout.en, workout.ar),
+                              style: bilPageHeadingStyle(context),
                             ),
-                          ),
-                        ],
+                            Text(
+                              wellnessCopy(
+                                context,
+                                workout.categoryEn,
+                                workout.categoryAr,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                ],
+              ),
+            ),
+            body: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                24,
+                0,
+                24,
+                24 + MediaQuery.viewInsetsOf(context).bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    tr(
+                      'Duration: ${minutes.round()} min',
+                      'المدة: ${minutes.round()} دقيقة',
                     ),
-                  ],
-                ),
-                const SizedBox(height: 22),
-                Text(
-                  tr(
-                    'Duration: ${minutes.round()} min',
-                    'المدة: ${minutes.round()} دقيقة',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Slider(
-                  value: minutes,
-                  min: 5,
-                  max: 120,
-                  divisions: 23,
-                  label: '${minutes.round()}',
-                  onChanged: (value) {
-                    _updateState(() => minutes = value);
-                    setSheetState(() {});
-                  },
-                ),
-                Builder(
-                  builder: (context) {
-                    final estimate = _manualEnergyEstimate(
-                      workout,
-                      minutes.round(),
-                    );
-                    if (estimate == null) return const SizedBox.shrink();
-                    return ListTile(
-                      key: const Key('manual-exercise-calorie-estimate'),
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.local_fire_department_outlined),
-                      title: Text(
-                        '${estimate.kcal.round()} ${tr('kcal estimated', 'سعرة تقديرية')}',
-                      ),
-                      subtitle: Text(
-                        tr(
-                          'MET estimate · does not change today’s calorie allowance',
-                          'تقدير MET · لا يغيّر ميزانية سعرات اليوم',
-                        ),
-                      ),
-                      trailing: IconButton(
-                        key: const Key('exercise-met-health-sources'),
-                        tooltip: tr(
-                          'MET sources & methodology',
-                          'مصادر ومنهجية MET',
-                        ),
-                        onPressed: () => context.push(
-                          '/health-information-sources?topic=exercise-met',
-                        ),
-                        icon: const Icon(Icons.menu_book_outlined),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
-                _SafetyNote(
-                  text: tr(
-                    'Only the activity and duration you confirm are saved. BIL does not invent calorie burn.',
-                    'يُحفظ النشاط والمدة اللذان تؤكدهما فقط. لا يخترع BIL سعرات محروقة.',
+                  Slider(
+                    value: minutes,
+                    min: 5,
+                    max: 120,
+                    divisions: 23,
+                    label: '${minutes.round()}',
+                    onChanged: (value) {
+                      _updateState(() => minutes = value);
+                      setSheetState(() {});
+                    },
                   ),
-                ),
-                const SizedBox(height: 14),
-                FilledButton.icon(
-                  onPressed: saving
-                      ? null
-                      : () async {
-                          final saved = await _saveWorkout();
-                          if (saved && sheetContext.mounted) {
-                            Navigator.of(sheetContext).pop();
-                          }
-                        },
-                  icon: const Icon(Icons.check_rounded),
-                  label: Text(tr('Log workout', 'تسجيل التمرين')),
-                ),
-              ],
+                  Builder(
+                    builder: (context) {
+                      final estimate = _manualEnergyEstimate(
+                        workout,
+                        minutes.round(),
+                      );
+                      if (estimate == null) return const SizedBox.shrink();
+                      return ListTile(
+                        key: const Key('manual-exercise-calorie-estimate'),
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(
+                          Icons.local_fire_department_outlined,
+                        ),
+                        title: Text(
+                          '${estimate.kcal.round()} ${tr('kcal estimated', 'سعرة تقديرية')}',
+                        ),
+                        subtitle: Text(
+                          tr(
+                            'MET estimate · does not change today’s calorie allowance',
+                            'تقدير MET · لا يغيّر ميزانية سعرات اليوم',
+                          ),
+                        ),
+                        trailing: IconButton(
+                          key: const Key('exercise-met-health-sources'),
+                          tooltip: tr(
+                            'MET sources & methodology',
+                            'مصادر ومنهجية MET',
+                          ),
+                          onPressed: () => context.push(
+                            '/health-information-sources?topic=exercise-met',
+                          ),
+                          icon: const Icon(Icons.menu_book_outlined),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  _SafetyNote(
+                    text: tr(
+                      'Only the activity and duration you confirm are saved. BIL does not invent calorie burn.',
+                      'يُحفظ النشاط والمدة اللذان تؤكدهما فقط. لا يخترع BIL سعرات محروقة.',
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  FilledButton.icon(
+                    onPressed: saving
+                        ? null
+                        : () async {
+                            final saved = await _saveWorkout();
+                            if (saved && sheetContext.mounted) {
+                              Navigator.of(sheetContext).pop();
+                            }
+                          },
+                    icon: const Icon(Icons.check_rounded),
+                    label: Text(tr('Log workout', 'تسجيل التمرين')),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

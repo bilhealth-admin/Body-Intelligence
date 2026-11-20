@@ -233,7 +233,10 @@ abstract final class BilFlagshipTheme {
             : BilFlagshipTokens.surfaceLight,
         foregroundColor: scheme.onSurface,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          color: scheme.onSurface,
+          fontWeight: FontWeight.w800,
+        ),
       ),
       cardTheme: CardThemeData(
         elevation: highContrast ? PremiumDesignTokens.elevationNone : 1,

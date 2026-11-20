@@ -9,6 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/environment/app_environment.dart';
 import '../../shared/widgets/bil_account_surface.dart';
 import '../../shared/widgets/bil_wordmark.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
+import '../../shared/widgets/bil_page_heading.dart';
 import 'auth_language_selector.dart';
 import 'auth_error_localizer.dart';
 import 'supabase_auth_service.dart';
@@ -87,122 +89,170 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     final configured = AppEnvironment.cloudConfigured;
     final theme = Theme.of(context);
+    final keyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
     return BilAccountSurface(
       title: tr('Create account', 'إنشاء حساب'),
       onBack: () =>
           context.canPop() ? context.pop() : context.go('/account-gateway'),
       languageSelector: const AuthLanguageSelector(),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, keyboardVisible ? 8 : 32),
         child: BilPearlMaterialCard(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 18, 24, 26),
+            padding: EdgeInsets.fromLTRB(
+              keyboardVisible ? 20 : 24,
+              keyboardVisible ? 12 : 18,
+              keyboardVisible ? 20 : 24,
+              keyboardVisible ? 12 : 26,
+            ),
             child: Form(
               key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Center(child: BilFullWordmark(height: 44)),
-                  Text(
-                    tr('Create your private account', 'أنشئ حسابك الخاص'),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: theme.colorScheme.onSurface,
+              child: LayoutBuilder(
+                builder: (context, constraints) => BilPinnedHeaderBody(
+                  shrinkWrap: true,
+                  // Consent must remain reachable with a keyboard and enlarged
+                  // copy. The title keeps its own stationary scroll region.
+                  header: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight:
+                          constraints.maxHeight * (keyboardVisible ? .25 : .5),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    tr(
-                      'Your health data remains under your control.',
-                      'تبقى بياناتك الصحية تحت سيطرتك.',
-                    ),
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  _field(
-                    name,
-                    tr('Display name (optional)', 'الاسم المعروض (اختياري)'),
-                    Icons.person_outline,
-                    validator: (_) => null,
-                  ),
-                  const SizedBox(height: 12),
-                  _field(
-                    email,
-                    tr('Email', 'البريد الإلكتروني'),
-                    Icons.email_outlined,
-                    keyboard: TextInputType.emailAddress,
-                    validator: (value) =>
-                        AuthInputValidation.isValidEmail(value)
-                        ? null
-                        : tr('Enter a valid email.', 'أدخل بريدًا صحيحًا.'),
-                  ),
-                  const SizedBox(height: 12),
-                  _passwordField(
-                    password,
-                    tr('Password', 'كلمة المرور'),
-                    obscurePassword,
-                    () => setState(() => obscurePassword = !obscurePassword),
-                    validator: (value) => _passwordError(value ?? ''),
-                  ),
-                  const SizedBox(height: 8),
-                  _PasswordStrength(value: password.text, arabic: arabic),
-                  const SizedBox(height: 12),
-                  _passwordField(
-                    confirmation,
-                    tr('Confirm password', 'تأكيد كلمة المرور'),
-                    obscureConfirmation,
-                    () => setState(
-                      () => obscureConfirmation = !obscureConfirmation,
-                    ),
-                    validator: (value) => value == password.text
-                        ? null
-                        : tr(
-                            'Passwords do not match.',
-                            'كلمتا المرور غير متطابقتين.',
+                    child: SingleChildScrollView(
+                      primary: false,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Center(child: BilFullWordmark(height: 44)),
+                          Text(
+                            tr(
+                              'Create your private account',
+                              'أنشئ حسابك الخاص',
+                            ),
+                            key: const Key('register-page-heading'),
+                            textAlign: TextAlign.center,
+                            style: bilPageHeadingStyle(
+                              context,
+                              color: theme.colorScheme.onSurface,
+                            ),
                           ),
-                  ),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: accepted,
-                    onChanged: loading
-                        ? null
-                        : (value) => setState(() => accepted = value == true),
-                    title: Text(
-                      tr(
-                        'I agree to the Terms and Privacy Policy.',
-                        'أوافق على شروط الاستخدام وسياسة الخصوصية.',
+                          const SizedBox(height: 6),
+                          Text(
+                            tr(
+                              'Your health data remains under your control.',
+                              'تبقى بياناتك الصحية تحت سيطرتك.',
+                            ),
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                        ],
                       ),
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  if (status != null)
-                    Text(
-                      status!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: theme.colorScheme.error),
-                    ),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    key: const Key('register-submit'),
-                    onPressed: configured && accepted && !loading
-                        ? submit
-                        : null,
-                    icon: loading
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: BilFeatureWelcomeStatus(),
-                          )
-                        : const Icon(Icons.person_add_alt_1_rounded),
-                    label: Text(tr('Create account', 'إنشاء الحساب')),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(56),
                     ),
                   ),
-                ],
+                  body: SingleChildScrollView(
+                    key: const Key('register-body-scroll'),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _field(
+                          name,
+                          tr(
+                            'Display name (optional)',
+                            'الاسم المعروض (اختياري)',
+                          ),
+                          Icons.person_outline,
+                          validator: (_) => null,
+                        ),
+                        const SizedBox(height: 12),
+                        _field(
+                          email,
+                          tr('Email', 'البريد الإلكتروني'),
+                          Icons.email_outlined,
+                          keyboard: TextInputType.emailAddress,
+                          validator: (value) =>
+                              AuthInputValidation.isValidEmail(value)
+                              ? null
+                              : tr(
+                                  'Enter a valid email.',
+                                  'أدخل بريدًا صحيحًا.',
+                                ),
+                        ),
+                        const SizedBox(height: 12),
+                        _passwordField(
+                          password,
+                          tr('Password', 'كلمة المرور'),
+                          obscurePassword,
+                          () => setState(
+                            () => obscurePassword = !obscurePassword,
+                          ),
+                          validator: (value) => _passwordError(value ?? ''),
+                        ),
+                        const SizedBox(height: 8),
+                        _PasswordStrength(value: password.text, arabic: arabic),
+                        const SizedBox(height: 12),
+                        _passwordField(
+                          confirmation,
+                          tr('Confirm password', 'تأكيد كلمة المرور'),
+                          obscureConfirmation,
+                          () => setState(
+                            () => obscureConfirmation = !obscureConfirmation,
+                          ),
+                          validator: (value) => value == password.text
+                              ? null
+                              : tr(
+                                  'Passwords do not match.',
+                                  'كلمتا المرور غير متطابقتين.',
+                                ),
+                        ),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          titleAlignment: ListTileTitleAlignment.top,
+                          materialTapTargetSize: MaterialTapTargetSize.padded,
+                          value: accepted,
+                          onChanged: loading
+                              ? null
+                              : (value) =>
+                                    setState(() => accepted = value == true),
+                          title: Text(
+                            tr(
+                              'I agree to the Terms and Privacy Policy.',
+                              'أوافق على شروط الاستخدام وسياسة الخصوصية.',
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          controlAffinity: ListTileControlAffinity.leading,
+                        ),
+                        if (status != null)
+                          Text(
+                            status!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: theme.colorScheme.error),
+                          ),
+                        const SizedBox(height: 12),
+                        FilledButton.icon(
+                          key: const Key('register-submit'),
+                          onPressed: configured && accepted && !loading
+                              ? submit
+                              : null,
+                          icon: loading
+                              ? const SizedBox.square(
+                                  dimension: 18,
+                                  child: BilFeatureWelcomeStatus(),
+                                )
+                              : const Icon(Icons.person_add_alt_1_rounded),
+                          label: Text(tr('Create account', 'إنشاء الحساب')),
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(56),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

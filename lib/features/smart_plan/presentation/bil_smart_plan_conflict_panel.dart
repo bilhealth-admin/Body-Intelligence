@@ -73,93 +73,108 @@ class BilSmartPlanConflictReviewPanel extends ConsumerWidget {
     }
 
     return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              t('Review conflicting plans', 'مراجعة تعارض الخطط'),
-              style: Theme.of(sheet).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              t(
-                'Choose the version to continue with. Both reviewed versions stay in your private local export history. Actual diary entries will not change.',
-                'اختر الإصدار الذي تريد المتابعة به. يبقى الإصداران اللذان راجعتهما في سجل التصدير المحلي الخاص. لا تتغير سجلات دفتر الأنشطة الفعلية.',
+      child: BilPinnedHeaderBody(
+        shrinkWrap: true,
+        header: Padding(
+          key: const Key("smart-plan-conflict-pinned-heading"),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                t('Review conflicting plans', 'مراجعة تعارض الخطط'),
+                style: bilPageHeadingStyle(sheet),
               ),
-            ),
-            const SizedBox(height: 16),
-            BilSmartPlanPanel(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t('On this device', 'على هذا الجهاز'),
-                      style: Theme.of(sheet).textTheme.titleMedium,
-                    ),
-                    Text(summary(reviewed.localPlan)),
-                  ],
+              const SizedBox(height: 12),
+              Text(
+                t(
+                  'Choose the version to continue with. Both reviewed versions stay in your private local export history. Actual diary entries will not change.',
+                  'اختر الإصدار الذي تريد المتابعة به. يبقى الإصداران اللذان راجعتهما في سجل التصدير المحلي الخاص. لا تتغير سجلات دفتر الأنشطة الفعلية.',
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            BilSmartPlanPanel(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t('In cloud backup', 'في النسخة السحابية'),
-                      style: Theme.of(sheet).textTheme.titleMedium,
-                    ),
-                    Text(summary(reviewed.cloud.plan)),
-                  ],
-                ),
-              ),
-            ),
-            ExpansionTile(
-              title: Text(t('Compare changed days', 'مقارنة الأيام المتغيرة')),
-
-              trailing: const BilCrystalExpansionIndicator(),
-              children: [
-                for (final date in dates)
-                  if (jsonEncode(dayFor(device, date)?.toJson()) !=
-                      jsonEncode(dayFor(cloud, date)?.toJson()))
-                    ListTile(
-                      title: Text(date),
-                      subtitle: Text(
-                        '${t('On this device', 'على هذا الجهاز')}: ${daySummary(dayFor(device, date))}\n\n'
-                        '${t('In cloud backup', 'في النسخة السحابية')}: ${daySummary(dayFor(cloud, date))}',
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              BilSmartPlanPanel(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t('On this device', 'على هذا الجهاز'),
+                        style: Theme.of(sheet).textTheme.titleMedium,
                       ),
-                    ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: () => finish(true),
-              child: Text(t('Use device version', 'استخدام إصدار الجهاز')),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: _smartPlanActionInk(context),
+                      Text(summary(reviewed.localPlan)),
+                    ],
+                  ),
+                ),
               ),
-              onPressed: () => finish(false),
-              child: Text(t('Use cloud version', 'استخدام الإصدار السحابي')),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: _smartPlanActionInk(context),
+              const SizedBox(height: 12),
+              BilSmartPlanPanel(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t('In cloud backup', 'في النسخة السحابية'),
+                        style: Theme.of(sheet).textTheme.titleMedium,
+                      ),
+                      Text(summary(reviewed.cloud.plan)),
+                    ],
+                  ),
+                ),
               ),
-              onPressed: () => finish(null),
-              child: Text(t('Cancel', 'إلغاء')),
-            ),
-          ],
+              ExpansionTile(
+                title: Text(
+                  t('Compare changed days', 'مقارنة الأيام المتغيرة'),
+                ),
+
+                trailing: const BilCrystalExpansionIndicator(),
+                children: [
+                  for (final date in dates)
+                    if (jsonEncode(dayFor(device, date)?.toJson()) !=
+                        jsonEncode(dayFor(cloud, date)?.toJson()))
+                      ListTile(
+                        title: Text(date),
+                        subtitle: Text(
+                          '${t('On this device', 'على هذا الجهاز')}: ${daySummary(dayFor(device, date))}\n\n'
+                          '${t('In cloud backup', 'في النسخة السحابية')}: ${daySummary(dayFor(cloud, date))}',
+                        ),
+                      ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () => finish(true),
+                child: Text(t('Use device version', 'استخدام إصدار الجهاز')),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _smartPlanActionInk(context),
+                ),
+                onPressed: () => finish(false),
+                child: Text(t('Use cloud version', 'استخدام الإصدار السحابي')),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: _smartPlanActionInk(context),
+                ),
+                onPressed: () => finish(null),
+                child: Text(t('Cancel', 'إلغاء')),
+              ),
+            ],
+          ),
         ),
       ),
     );

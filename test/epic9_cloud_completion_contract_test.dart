@@ -177,7 +177,10 @@ void main() {
       expect(service, contains('FlutterTimezone.getLocalTimezone'));
       expect(settings, contains("Key('community-cloud-push')"));
       expect(settings, contains("Key('sensitive-lock-screen-preview')"));
-      expect(dispatch, contains('You have a new private update.'));
+      expect(
+        dispatch,
+        contains('privacySafePushBody(event.category, event.copy_key)'),
+      );
       expect(dispatch, contains('sensitive_preview_allowed'));
       expect(dispatch, contains('deep_link'));
       expect(dispatch, contains('data: {'));

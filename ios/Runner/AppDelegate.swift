@@ -1,4 +1,5 @@
 import Flutter
+import AppTrackingTransparency
 import ContactsUI
 import UIKit
 import UserNotifications
@@ -14,6 +15,7 @@ import UserNotifications
   private var storeSubscriptionBlockerRecoveryBridge: BILStoreSubscriptionBlockerRecoveryBridge?
   private var facebookOAuthBridge: BILFacebookOAuthBridge?
   private var healthStoragePrivacyChannel: FlutterMethodChannel?
+  private var adPrivacyStatusChannel: FlutterMethodChannel?
   private var pushResult: FlutterResult?
   private var pushToken: String?
   private var pushChannel: FlutterMethodChannel?
@@ -39,6 +41,26 @@ import UserNotifications
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    // This channel reports local authorization state only; no ATT request.
+    let adPrivacyRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILAdPrivacyStatus")!
+    let adPrivacyChannel = FlutterMethodChannel(name: "bil/ads_privacy", binaryMessenger: adPrivacyRegistrar.messenger())
+    adPrivacyStatusChannel = adPrivacyChannel
+    adPrivacyChannel.setMethodCallHandler { call, result in
+      guard call.method == "iosAdPrivacyStatus" else {
+        result(FlutterMethodNotImplemented); return
+      }
+      var status = "unsupported"
+      if #available(iOS 14.0, *) {
+        switch ATTrackingManager.trackingAuthorizationStatus {
+        case .notDetermined: status = "notDetermined"
+        case .authorized: status = "authorized"
+        case .denied: status = "denied"
+        case .restricted: status = "restricted"
+        @unknown default: status = "unknown"
+        }
+      }
+      result(["trackingAuthorizationStatus": status])
+    }
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     let privacyRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILHealthStoragePrivacy")!
     let privacyChannel = FlutterMethodChannel(name: "bil/health_storage_privacy", binaryMessenger: privacyRegistrar.messenger())

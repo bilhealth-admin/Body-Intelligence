@@ -59,7 +59,10 @@ extension _CommunityFeedModeContinuity on _FeedTabState {
 
   bool _useReadyMode(CommunityFeedMode mode) {
     final cached = _modePages[mode];
-    if (cached == null || !cached.fresh || _captureFeedVisit() == null) {
+    if (cached == null ||
+        !cached.fresh ||
+        _captureFeedVisit() == null ||
+        !_referencesMatchPage(cached.page.posts)) {
       return false;
     }
     final page = cached.page;

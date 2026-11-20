@@ -317,13 +317,18 @@ void main() {
           for (var round = 0; round < rounds; round++) {
             final recipe = find.text('Bean and salad wrap');
             if (largeText) {
-              final plannerScroll = find.descendant(
+              final plannerBodies = find.descendant(
                 of: find.byType(MealPlannerPage),
-                matching: find.byWidgetPredicate(
-                  (widget) =>
-                      widget is Scrollable &&
-                      widget.axisDirection == AxisDirection.down,
-                ),
+                matching: find.byType(ListView),
+              );
+              await _until(
+                tester,
+                () => plannerBodies.evaluate().isNotEmpty,
+                'Loaded Meal Planner body list',
+              );
+              final plannerScroll = find.descendant(
+                of: plannerBodies.first,
+                matching: find.byType(Scrollable),
               );
               await _until(
                 tester,

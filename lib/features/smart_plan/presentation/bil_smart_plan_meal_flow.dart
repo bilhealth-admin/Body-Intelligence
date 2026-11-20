@@ -44,138 +44,167 @@ extension _BilSmartPlanMeals on _BilSmartPlanPageState {
           isScrollControlled: true,
           builder: (sheet) => StatefulBuilder(
             builder: (sheet, update) => SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            catalog.recipeTitle(meal.recipeId, locale: locale),
-                            style: Theme.of(sheet).textTheme.headlineSmall,
-                          ),
-                        ),
-                        if (detail != null)
-                          BilSmartPlanBookButton(
-                            key: const ValueKey('bil-smart-plan-meal-sources'),
-                            label: _t('Recipe and sources', 'الوصفة والمصادر'),
-                            onPressed: () =>
-                                Navigator.pop(sheet, '__open_recipe__'),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text('${day.date} · ${_mealSlot(meal.slot)}'),
-                    const SizedBox(height: 12),
-                    Text(
-                      _t(
-                        'Planned meal only. Nothing here records food as eaten.',
-                        'وجبة مخططة فقط. لا يُسجّل الطعام كمأكول من هنا.',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (target != null) ...[
-                      Text(
-                        _t(
-                          'Saved daily nutrition goal',
-                          'الهدف الغذائي اليومي المحفوظ',
-                        ),
-                        style: Theme.of(sheet).textTheme.titleMedium,
-                      ),
-                      Text('${target.values['kcal']!.round()} kcal'),
-                      Text(
-                        _t(
-                          'This is your saved goal, not food consumed or a new recommendation. Recipes show one source serving; review portions in the recipe.',
-                          'هذا هدفك المحفوظ، وليس طعامًا مستهلكًا أو توصية جديدة. تعرض الوصفات حصة من المصدر؛ راجع الحصص في الوصفة.',
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    if (facts != null) ...[
-                      Text(
-                        _t(
-                          'Source-calculated values per serving',
-                          'قيم محسوبة من المصدر لكل حصة',
-                        ),
-                        style: Theme.of(sheet).textTheme.titleMedium,
-                      ),
-                      Text(
-                        '${facts['kcal']!.round()} kcal · ${facts['proteinG']!.toStringAsFixed(1)} ${_t('g protein', 'غ بروتين')} · '
-                        '${facts['carbohydrateG']!.toStringAsFixed(1)} ${_t('g carbs', 'غ كربوهيدرات')} · ${facts['fatG']!.toStringAsFixed(1)} ${_t('g fat', 'غ دهون')}',
-                      ),
-                    ] else
-                      Text(
-                        _t(
-                          'Verified nutrition values are unavailable for this suggestion.',
-                          'لا تتوفر قيم غذائية موثقة لهذا الاقتراح.',
-                        ),
-                      ),
-                    if (current.status == BilPlanStatus.active &&
-                        day.date.compareTo(
-                              BilPlanDate.iso(
-                                ref.read(bilSmartPlanClockProvider)(),
+              child: BilPinnedHeaderBody(
+                shrinkWrap: true,
+                header: Padding(
+                  key: const Key("smart-plan-meal-pinned-heading"),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              catalog.recipeTitle(
+                                meal.recipeId,
+                                locale: locale,
                               ),
-                            ) >=
-                            0)
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: _smartPlanActionInk(context),
-                        ),
-                        key: const ValueKey('bil-smart-plan-meal-schedule'),
-                        onPressed: () => Navigator.pop(sheet, '__reschedule__'),
-                        icon: const Icon(Icons.swap_horiz_rounded),
-                        label: Text(_t('Swap meal dates', 'تبديل موعد الوجبة')),
-                      ),
-                    if (current.status == BilPlanStatus.active &&
-                        day.date.compareTo(
-                              BilPlanDate.iso(
-                                ref.read(bilSmartPlanClockProvider)(),
-                              ),
-                            ) >=
-                            0 &&
-                        choices.isNotEmpty) ...[
-                      const SizedBox(height: 18),
-                      DropdownButtonFormField<String>(
-                        key: const ValueKey('bil-smart-plan-meal-replacement'),
-                        itemHeight: null,
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                          labelText: _t(
-                            'Compatible replacement',
-                            'بديل متوافق',
+                              style: bilPageHeadingStyle(sheet),
+                            ),
                           ),
-                        ),
-                        items: [
-                          for (final choice in choices)
-                            DropdownMenuItem(
-                              value: choice.id,
-                              child: Text(
-                                catalog.recipeTitle(choice.id, locale: locale),
+                          if (detail != null)
+                            BilSmartPlanBookButton(
+                              key: const ValueKey(
+                                'bil-smart-plan-meal-sources',
                               ),
+                              label: _t(
+                                'Recipe and sources',
+                                'الوصفة والمصادر',
+                              ),
+                              onPressed: () =>
+                                  Navigator.pop(sheet, '__open_recipe__'),
                             ),
                         ],
-                        onChanged: (value) => update(() => selected = value),
-
-                        icon: const BilCrystalArrow(
-                          extent: 36,
-                          child: Icon(Icons.keyboard_arrow_down_rounded),
+                      ),
+                      const SizedBox(height: 12),
+                      Text('${day.date} · ${_mealSlot(meal.slot)}'),
+                      const SizedBox(height: 12),
+                      Text(
+                        _t(
+                          'Planned meal only. Nothing here records food as eaten.',
+                          'وجبة مخططة فقط. لا يُسجّل الطعام كمأكول من هنا.',
                         ),
                       ),
                       const SizedBox(height: 16),
-                      FilledButton(
-                        onPressed: selected == null
-                            ? null
-                            : () => Navigator.pop(sheet, selected),
-                        child: Text(
-                          _t('Preview replacement', 'معاينة الاستبدال'),
-                        ),
-                      ),
                     ],
-                  ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (target != null) ...[
+                        Text(
+                          _t(
+                            'Saved daily nutrition goal',
+                            'الهدف الغذائي اليومي المحفوظ',
+                          ),
+                          style: Theme.of(sheet).textTheme.titleMedium,
+                        ),
+                        Text('${target.values['kcal']!.round()} kcal'),
+                        Text(
+                          _t(
+                            'This is your saved goal, not food consumed or a new recommendation. Recipes show one source serving; review portions in the recipe.',
+                            'هذا هدفك المحفوظ، وليس طعامًا مستهلكًا أو توصية جديدة. تعرض الوصفات حصة من المصدر؛ راجع الحصص في الوصفة.',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (facts != null) ...[
+                        Text(
+                          _t(
+                            'Source-calculated values per serving',
+                            'قيم محسوبة من المصدر لكل حصة',
+                          ),
+                          style: Theme.of(sheet).textTheme.titleMedium,
+                        ),
+                        Text(
+                          '${facts['kcal']!.round()} kcal · ${facts['proteinG']!.toStringAsFixed(1)} ${_t('g protein', 'غ بروتين')} · '
+                          '${facts['carbohydrateG']!.toStringAsFixed(1)} ${_t('g carbs', 'غ كربوهيدرات')} · ${facts['fatG']!.toStringAsFixed(1)} ${_t('g fat', 'غ دهون')}',
+                        ),
+                      ] else
+                        Text(
+                          _t(
+                            'Verified nutrition values are unavailable for this suggestion.',
+                            'لا تتوفر قيم غذائية موثقة لهذا الاقتراح.',
+                          ),
+                        ),
+                      if (current.status == BilPlanStatus.active &&
+                          day.date.compareTo(
+                                BilPlanDate.iso(
+                                  ref.read(bilSmartPlanClockProvider)(),
+                                ),
+                              ) >=
+                              0)
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: _smartPlanActionInk(context),
+                          ),
+                          key: const ValueKey('bil-smart-plan-meal-schedule'),
+                          onPressed: () =>
+                              Navigator.pop(sheet, '__reschedule__'),
+                          icon: const Icon(Icons.swap_horiz_rounded),
+                          label: Text(
+                            _t('Swap meal dates', 'تبديل موعد الوجبة'),
+                          ),
+                        ),
+                      if (current.status == BilPlanStatus.active &&
+                          day.date.compareTo(
+                                BilPlanDate.iso(
+                                  ref.read(bilSmartPlanClockProvider)(),
+                                ),
+                              ) >=
+                              0 &&
+                          choices.isNotEmpty) ...[
+                        const SizedBox(height: 18),
+                        DropdownButtonFormField<String>(
+                          key: const ValueKey(
+                            'bil-smart-plan-meal-replacement',
+                          ),
+                          itemHeight: null,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            labelText: _t(
+                              'Compatible replacement',
+                              'بديل متوافق',
+                            ),
+                          ),
+                          items: [
+                            for (final choice in choices)
+                              DropdownMenuItem(
+                                value: choice.id,
+                                child: Text(
+                                  catalog.recipeTitle(
+                                    choice.id,
+                                    locale: locale,
+                                  ),
+                                ),
+                              ),
+                          ],
+                          onChanged: (value) => update(() => selected = value),
+
+                          icon: const BilCrystalArrow(
+                            extent: 36,
+                            child: Icon(Icons.keyboard_arrow_down_rounded),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: selected == null
+                              ? null
+                              : () => Navigator.pop(sheet, selected),
+                          child: Text(
+                            _t('Preview replacement', 'معاينة الاستبدال'),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
             ),

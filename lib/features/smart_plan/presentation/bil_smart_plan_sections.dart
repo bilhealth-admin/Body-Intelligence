@@ -1,5 +1,19 @@
 part of 'bil_smart_plan_page.dart';
 
+/// Stationary creation chrome, separate from the stateful options form.
+class _SmartPlanCreationHeading extends StatelessWidget {
+  const _SmartPlanCreationHeading({super.key});
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 18),
+    child: Text(
+      _smartPlanText(context, 'Create a reviewable plan', 'إنشاء خطة للمراجعة'),
+      style: bilPageHeadingStyle(context),
+    ),
+  );
+}
+
 extension _BilSmartPlanSections on _BilSmartPlanPageState {
   Widget _loadingPanel() => Semantics(
     liveRegion: true,

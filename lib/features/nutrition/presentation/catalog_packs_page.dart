@@ -3,6 +3,7 @@ import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'nutrition_copy.dart';
 
@@ -97,58 +98,68 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
       appBar: AppBar(
         title: Text(nutritionText(context, 'Food libraries', 'مكتبات الغذاء')),
       ),
-      body: BilRefreshIndicator(
-        onRefresh: _load,
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            if (_manager.downloadsConfigured) ...[
-              Text(
-                nutritionText(
-                  context,
-                  'Download verified libraries when needed and search them offline.',
-                  'نزّل مكتبات موثقة عند الحاجة، وابحث فيها دون إنترنت.',
+      body: BilPinnedHeaderBody(
+        header: _manager.downloadsConfigured
+            ? Padding(
+                key: const Key('catalog-packs-pinned-header'),
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  nutritionText(
+                    context,
+                    'Download verified libraries when needed and search them offline.',
+                    'نزّل مكتبات موثقة عند الحاجة، وابحث فيها دون إنترنت.',
+                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 20),
-            ],
-            ListTile(
-              key: const Key('catalog-core-installed'),
-              leading: const Icon(Icons.verified_rounded),
-              title: Text(
-                nutritionText(context, 'BIL Food Core', 'أساس BIL الغذائي'),
-              ),
-              subtitle: Text(
-                nutritionText(
-                  context,
-                  'Installed and offline-ready',
-                  'مثبّت وجاهز دون إنترنت',
-                ),
-              ),
-              trailing: const Icon(Icons.check_circle_rounded),
+              )
+            : const SizedBox.shrink(),
+        body: BilRefreshIndicator(
+          onRefresh: _load,
+          child: ListView(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              _manager.downloadsConfigured ? 0 : 20,
+              20,
+              20,
             ),
-            for (final pack in _available) _availableTile(pack),
-            if (_manager.downloadsConfigured &&
-                _available.isEmpty &&
-                _error == null)
-              _notice(
-                nutritionText(
-                  context,
-                  'No packs are currently published.',
-                  'لا توجد حزم منشورة حاليًا.',
+            children: [
+              ListTile(
+                key: const Key('catalog-core-installed'),
+                leading: const Icon(Icons.verified_rounded),
+                title: Text(
+                  nutritionText(context, 'BIL Food Core', 'أساس BIL الغذائي'),
                 ),
-              ),
-            if (_error != null)
-              _notice(
-                nutritionText(
-                  context,
-                  'The pack list could not be refreshed. Your local library still works.',
-                  'تعذّر تحديث قائمة الحزم. المكتبة المحلية ما زالت تعمل.',
+                subtitle: Text(
+                  nutritionText(
+                    context,
+                    'Installed and offline-ready',
+                    'مثبّت وجاهز دون إنترنت',
+                  ),
                 ),
-                error: true,
+                trailing: const Icon(Icons.check_circle_rounded),
               ),
-          ],
+              for (final pack in _available) _availableTile(pack),
+              if (_manager.downloadsConfigured &&
+                  _available.isEmpty &&
+                  _error == null)
+                _notice(
+                  nutritionText(
+                    context,
+                    'No packs are currently published.',
+                    'لا توجد حزم منشورة حاليًا.',
+                  ),
+                ),
+              if (_error != null)
+                _notice(
+                  nutritionText(
+                    context,
+                    'The pack list could not be refreshed. Your local library still works.',
+                    'تعذّر تحديث قائمة الحزم. المكتبة المحلية ما زالت تعمل.',
+                  ),
+                  error: true,
+                ),
+            ],
+          ),
         ),
       ),
     );

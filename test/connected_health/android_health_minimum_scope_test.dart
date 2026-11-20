@@ -111,6 +111,18 @@ void main() {
         ],
         'importedCount': 4,
       });
+      final beforeConsent = await gateway.load();
+      expect(beforeConsent.signals, isEmpty);
+      expect(beforeConsent.deviceVerified, isFalse);
+      expect(await store.get('health_signals', 'retained-sleep'), sleep);
+      await gateway.requestPermissions();
+      expect(
+        (await store.get(
+          'connected_health_consent',
+          'Health Connect',
+        ))?['readRequested'],
+        isTrue,
+      );
       final loaded = await gateway.load();
       expect(loaded.signals.map((signal) => signal.key), ['steps']);
       expect(loaded.importedCount, 1);

@@ -26,6 +26,7 @@ import 'package:body_intelligence_log/features/wellness/repositories/workout_dis
 import 'package:body_intelligence_log/features/wellness/presentation/workout_video_group_copy.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -95,13 +96,88 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final title = tester.widget<Text>(
-      find.byKey(const ValueKey('workout-videos-routines-title')),
+    final titleFinder = find.byKey(
+      const ValueKey('workout-videos-routines-title'),
     );
+    final title = tester.widget<Text>(titleFinder);
     expect(title.data, 'Workout Videos & Routines');
-    expect(title.maxLines, 2);
     expect(title.overflow, TextOverflow.visible);
     expect(title.style?.fontSize, greaterThanOrEqualTo(16));
+    final canonicalStyle = Theme.of(
+      tester.element(find.byType(BilWorkoutRoutinesPage)),
+    ).textTheme.titleLarge;
+    expect(title.style?.fontSize, canonicalStyle?.fontSize);
+    expect(title.style?.fontFamily, canonicalStyle?.fontFamily);
+    expect(title.style?.fontWeight, FontWeight.w800);
+
+    final richTitle = find.descendant(
+      of: titleFinder,
+      matching: find.byType(RichText),
+    );
+    expect(richTitle, findsOneWidget);
+    final paragraph = tester.renderObject<RenderParagraph>(richTitle);
+    const fullTitle = 'Workout Videos & Routines';
+    expect(paragraph.text.toPlainText(), fullTitle);
+    expect(paragraph.didExceedMaxLines, isFalse);
+    final titleBounds = tester.getRect(richTitle);
+    final appBarBounds = tester.getRect(find.byType(AppBar));
+    final viewport = Offset.zero & const Size(320, 720);
+    void expectInside(Rect bounds, Rect outer) {
+      expect(bounds.left, greaterThanOrEqualTo(outer.left));
+      expect(bounds.top, greaterThanOrEqualTo(outer.top));
+      expect(bounds.right, lessThanOrEqualTo(outer.right));
+      expect(bounds.bottom, lessThanOrEqualTo(outer.bottom));
+    }
+
+    for (final outer in [appBarBounds, viewport]) {
+      expectInside(titleBounds, outer);
+    }
+    final lines = paragraph.getBoxesForSelection(
+      TextSelection(baseOffset: 0, extentOffset: fullTitle.length),
+    );
+    expect(lines, isNotEmpty);
+    Rect globalBox(TextBox box) => Rect.fromPoints(
+      paragraph.localToGlobal(box.toRect().topLeft),
+      paragraph.localToGlobal(box.toRect().bottomRight),
+    );
+    for (final line in lines) {
+      for (final outer in [appBarBounds, viewport]) {
+        expectInside(globalBox(line), outer);
+      }
+    }
+    final actionBounds = [
+      for (final key in ['workout-programs-action', 'workout-packs-action'])
+        tester.getRect(find.byKey(ValueKey(key))),
+    ];
+    // The wrapped trailing space at offset14 has logical selection width
+    // beyond the paragraph but paints nothing. Check every visible glyph
+    // against the actual AppBar/viewport and the action hit rectangles.
+    for (var offset = 0; offset < fullTitle.length; offset++) {
+      if (fullTitle[offset].trim().isEmpty) continue;
+      final glyphs = paragraph.getBoxesForSelection(
+        TextSelection(baseOffset: offset, extentOffset: offset + 1),
+      );
+      expect(glyphs, isNotEmpty);
+      for (final glyph in glyphs) {
+        final bounds = globalBox(glyph);
+        for (final outer in [appBarBounds, viewport]) {
+          expectInside(bounds, outer);
+        }
+        for (final action in actionBounds) {
+          expect(bounds.overlaps(action), isFalse);
+        }
+      }
+    }
+    expect(titleFinder.hitTestable(), findsOneWidget);
+    for (final key in ['workout-programs-action', 'workout-packs-action']) {
+      final action = find.byKey(ValueKey(key));
+      expect(action.hitTestable(), findsOneWidget);
+      final bounds = tester.getRect(action);
+      expect(bounds.width, greaterThanOrEqualTo(48));
+      expect(bounds.height, greaterThanOrEqualTo(48));
+      expectInside(bounds, viewport);
+      expect(titleBounds.overlaps(bounds), isFalse);
+    }
     expect(tester.takeException(), isNull);
   });
 
@@ -727,6 +803,27 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+
+        final card = find.byKey(ValueKey('workout-card-${item.stableId}'));
+        // Materialize the actual lazy card through its page-body viewport.
+        final bodyScrollable = find
+            .descendant(
+              of: find.byKey(const ValueKey('workout-library-tab-0')),
+              matching: find.byWidgetPredicate(
+                (widget) =>
+                    widget is Scrollable &&
+                    widget.axisDirection == AxisDirection.down,
+              ),
+            )
+            .first;
+        await tester.scrollUntilVisible(
+          card,
+          200,
+          scrollable: bodyScrollable,
+          maxScrolls: 20,
+        );
+        await tester.pumpAndSettle();
+        expect(card.hitTestable(), findsOneWidget);
 
         expect(
           find.byWidgetPredicate(

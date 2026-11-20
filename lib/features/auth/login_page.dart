@@ -1,6 +1,8 @@
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
+import '../../shared/widgets/bil_page_heading.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -85,13 +87,8 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
           const PremiumSplashBackdrop(),
           SafeArea(
             child: Center(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  20,
-                  20,
-                  20 + MediaQuery.viewInsetsOf(context).bottom,
-                ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 480),
                   child: BilPearlMaterialCard(
@@ -106,190 +103,207 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                       child: Form(
                         key: formKey,
                         child: AutofillGroup(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                key: const Key('reviewer-login-header-actions'),
-                                children: [
-                                  IconButton(
-                                    key: const Key('reviewer-login-back'),
-                                    tooltip: authEntryText(
-                                      context,
-                                      AuthEntryCopyKey.back,
-                                    ),
-                                    onPressed: () => context.go('/login'),
-                                    icon: const BilNavigationFeedback(
-                                      child: Icon(
-                                        Icons.arrow_back_rounded,
-                                        color: Colors.white,
+                          child: BilPinnedHeaderBody(
+                            shrinkWrap: true,
+                            header: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  key: const Key(
+                                    'reviewer-login-header-actions',
+                                  ),
+                                  children: [
+                                    IconButton(
+                                      key: const Key('reviewer-login-back'),
+                                      tooltip: authEntryText(
+                                        context,
+                                        AuthEntryCopyKey.back,
                                       ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Expanded(
-                                    child: Align(
-                                      alignment: AlignmentDirectional.centerEnd,
-                                      child: AuthLanguageSelector(),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                tr(
-                                  'Store reviewer access',
-                                  'دخول مراجع المتجر',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                tr(
-                                  'Use only the dedicated credentials supplied in the store review notes.',
-                                  'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFFB9C8D3),
-                                ),
-                              ),
-                              const SizedBox(height: 26),
-                              TextFormField(
-                                key: const Key('login-email'),
-                                controller: email,
-                                enabled: configured && !loading,
-                                keyboardType: TextInputType.emailAddress,
-                                textDirection: TextDirection.ltr,
-                                textAlign: TextAlign.start,
-                                textInputAction: TextInputAction.next,
-                                autocorrect: false,
-                                enableSuggestions: false,
-                                autofillHints: const [AutofillHints.email],
-                                onFieldSubmitted: (_) =>
-                                    FocusScope.of(context).nextFocus(),
-                                style: const TextStyle(color: Colors.white),
-                                decoration: _decoration(
-                                  authEntryText(
-                                    context,
-                                    AuthEntryCopyKey.emailAddress,
-                                  ),
-                                  Icons.email_outlined,
-                                ),
-                                validator: (value) {
-                                  if (!AuthInputValidation.isValidEmail(
-                                    value,
-                                  )) {
-                                    return authEntryText(
-                                      context,
-                                      AuthEntryCopyKey.invalidEmail,
-                                    );
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 14),
-                              TextFormField(
-                                key: const Key('login-password'),
-                                controller: password,
-                                enabled: configured && !loading,
-                                obscureText: obscure,
-                                autofillHints: const [AutofillHints.password],
-                                style: const TextStyle(color: Colors.white),
-                                decoration:
-                                    _decoration(
-                                      tr('Password', 'كلمة المرور'),
-                                      Icons.lock_outline_rounded,
-                                    ).copyWith(
-                                      suffixIcon: IconButton(
-                                        tooltip: obscure
-                                            ? tr(
-                                                'Show password',
-                                                'إظهار كلمة المرور',
-                                              )
-                                            : tr(
-                                                'Hide password',
-                                                'إخفاء كلمة المرور',
-                                              ),
-                                        onPressed: configured
-                                            ? () => setState(
-                                                () => obscure = !obscure,
-                                              )
-                                            : null,
-                                        icon: Icon(
-                                          obscure
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
-                                        ),
-                                      ),
-                                    ),
-                                validator: (value) => (value?.length ?? 0) >= 8
-                                    ? null
-                                    : tr(
-                                        'Use only the dedicated credentials supplied in the store review notes.',
-                                        'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
-                                      ),
-                                onFieldSubmitted: (_) => submit(),
-                              ),
-                              if (status != null) ...[
-                                const SizedBox(height: 12),
-                                Text(
-                                  status!,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Color(0xFFFF9E9E),
-                                  ),
-                                ),
-                              ],
-                              const SizedBox(height: 22),
-                              FilledButton.icon(
-                                key: const Key('login-submit'),
-                                onPressed: configured && !loading
-                                    ? submit
-                                    : null,
-                                icon: loading
-                                    ? const SizedBox.square(
-                                        dimension: 18,
-                                        child: BilFeatureWelcomeStatus(),
-                                      )
-                                    : const BilNavigationFeedback(
+                                      onPressed: () => context.go('/login'),
+                                      icon: const BilNavigationFeedback(
                                         child: Icon(
-                                          Icons.arrow_forward_rounded,
+                                          Icons.arrow_back_rounded,
+                                          color: Colors.white,
                                         ),
                                       ),
-                                label: Text(
-                                  authEntryText(
-                                    context,
-                                    AuthEntryCopyKey.signIn,
-                                  ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Expanded(
+                                      child: Align(
+                                        alignment:
+                                            AlignmentDirectional.centerEnd,
+                                        child: AuthLanguageSelector(),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(56),
-                                  backgroundColor: const Color(0xFF0BB7D1),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                ),
-                              ),
-                              if (!configured)
+                                const SizedBox(height: 16),
                                 Text(
-                                  authEntryText(
+                                  tr(
+                                    'Store reviewer access',
+                                    'دخول مراجع المتجر',
+                                  ),
+                                  key: const Key('reviewer-login-page-heading'),
+                                  textAlign: TextAlign.center,
+                                  style: bilPageHeadingStyle(
                                     context,
-                                    AuthEntryCopyKey.cloudNotEnabled,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  tr(
+                                    'Use only the dedicated credentials supplied in the store review notes.',
+                                    'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
                                   ),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     color: Color(0xFFB9C8D3),
                                   ),
                                 ),
-                            ],
+                                const SizedBox(height: 26),
+                              ],
+                            ),
+                            body: SingleChildScrollView(
+                              key: const Key('reviewer-login-body-scroll'),
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  TextFormField(
+                                    key: const Key('login-email'),
+                                    controller: email,
+                                    enabled: configured && !loading,
+                                    keyboardType: TextInputType.emailAddress,
+                                    textDirection: TextDirection.ltr,
+                                    textAlign: TextAlign.start,
+                                    textInputAction: TextInputAction.next,
+                                    autocorrect: false,
+                                    enableSuggestions: false,
+                                    autofillHints: const [AutofillHints.email],
+                                    onFieldSubmitted: (_) =>
+                                        FocusScope.of(context).nextFocus(),
+                                    style: const TextStyle(color: Colors.white),
+                                    decoration: _decoration(
+                                      authEntryText(
+                                        context,
+                                        AuthEntryCopyKey.emailAddress,
+                                      ),
+                                      Icons.email_outlined,
+                                    ),
+                                    validator: (value) {
+                                      if (!AuthInputValidation.isValidEmail(
+                                        value,
+                                      )) {
+                                        return authEntryText(
+                                          context,
+                                          AuthEntryCopyKey.invalidEmail,
+                                        );
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 14),
+                                  TextFormField(
+                                    key: const Key('login-password'),
+                                    controller: password,
+                                    enabled: configured && !loading,
+                                    obscureText: obscure,
+                                    autofillHints: const [
+                                      AutofillHints.password,
+                                    ],
+                                    style: const TextStyle(color: Colors.white),
+                                    decoration:
+                                        _decoration(
+                                          tr('Password', 'كلمة المرور'),
+                                          Icons.lock_outline_rounded,
+                                        ).copyWith(
+                                          suffixIcon: IconButton(
+                                            tooltip: obscure
+                                                ? tr(
+                                                    'Show password',
+                                                    'إظهار كلمة المرور',
+                                                  )
+                                                : tr(
+                                                    'Hide password',
+                                                    'إخفاء كلمة المرور',
+                                                  ),
+                                            onPressed: configured
+                                                ? () => setState(
+                                                    () => obscure = !obscure,
+                                                  )
+                                                : null,
+                                            icon: Icon(
+                                              obscure
+                                                  ? Icons.visibility
+                                                  : Icons.visibility_off,
+                                            ),
+                                          ),
+                                        ),
+                                    validator: (value) =>
+                                        (value?.length ?? 0) >= 8
+                                        ? null
+                                        : tr(
+                                            'Use only the dedicated credentials supplied in the store review notes.',
+                                            'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
+                                          ),
+                                    onFieldSubmitted: (_) => submit(),
+                                  ),
+                                  if (status != null) ...[
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      status!,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Color(0xFFFF9E9E),
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 22),
+                                  FilledButton.icon(
+                                    key: const Key('login-submit'),
+                                    onPressed: configured && !loading
+                                        ? submit
+                                        : null,
+                                    icon: loading
+                                        ? const SizedBox.square(
+                                            dimension: 18,
+                                            child: BilFeatureWelcomeStatus(),
+                                          )
+                                        : const BilNavigationFeedback(
+                                            child: Icon(
+                                              Icons.arrow_forward_rounded,
+                                            ),
+                                          ),
+                                    label: Text(
+                                      authEntryText(
+                                        context,
+                                        AuthEntryCopyKey.signIn,
+                                      ),
+                                    ),
+                                    style: FilledButton.styleFrom(
+                                      minimumSize: const Size.fromHeight(56),
+                                      backgroundColor: const Color(0xFF0BB7D1),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18),
+                                      ),
+                                    ),
+                                  ),
+                                  if (!configured)
+                                    Text(
+                                      authEntryText(
+                                        context,
+                                        AuthEntryCopyKey.cloudNotEnabled,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Color(0xFFB9C8D3),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),

@@ -177,16 +177,8 @@ void main() {
   setUpAll(loadVisualEvidenceFont);
 
   for (final variant in [
-    (
-      name: 'steady host with actual owner scalar',
-      unobserved: false,
-      expectedReads: 4,
-    ),
-    (
-      name: 'steady host with unobserved actual owner scalar',
-      unobserved: true,
-      expectedReads: 5,
-    ),
+    (name: 'steady host with actual owner scalar', unobserved: false),
+    (name: 'steady host with unobserved actual owner scalar', unobserved: true),
   ]) {
     testWidgets(variant.name, (tester) async {
       final fixture = _RebindFixture();
@@ -233,18 +225,21 @@ void main() {
           fixture.container.read(verifiedEntitlementOwnerVisitProvider),
           2,
         );
-        expect(fixture.reads, hasLength(variant.expectedReads));
+        // The seeded visit, its pending reload and the returned owner visit
+        // each have a distinct read. A -> B -> A retires the middle one even
+        // when Riverpod coalesces its notifications into one frame.
+        expect(fixture.reads, hasLength(3));
         expect(
           fixture.reads.map((read) => read.result.future).toSet(),
-          hasLength(variant.expectedReads),
+          hasLength(3),
         );
         expect(
           fixture.reads.map((read) => read.generation),
-          orderedEquals(
-            List.generate(variant.expectedReads, (index) => index + 1),
-          ),
+          orderedEquals([1, 2, 3]),
         );
         expect(fixture.reads.first.rawOwner, _ownerA);
+        expect(fixture.reads[1].rawOwner, _ownerA);
+        expect(fixture.reads[1].visit, fixture.reads.first.visit);
         expect(fixture.reads.last.rawOwner, _ownerA);
         expect(fixture.reads.last.visit, 2);
         expect(fixture.reads.last.result.isCompleted, isFalse);
@@ -256,13 +251,13 @@ void main() {
           retired.result.complete(fixture.paid());
           await tester.pump();
           await tester.pump();
-          expect(fixture.reads, hasLength(variant.expectedReads));
+          expect(fixture.reads, hasLength(3));
           expect(find.byKey(_label), findsNothing);
           expect(find.byKey(_authorized, skipOffstage: false), findsNothing);
         }
         current.result.complete(fixture.paid(plan: CommercePlan.premium));
         await tester.pumpAndSettle();
-        expect(fixture.reads, hasLength(variant.expectedReads));
+        expect(fixture.reads, hasLength(3));
         expect(tester.takeException(), isNull);
         expect(tester.widget<Text>(find.byKey(_label)).data, 'Premium');
         expect(find.byKey(_authorized, skipOffstage: false), findsOneWidget);

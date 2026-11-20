@@ -1,3 +1,4 @@
+import '../community/presentation/community_copy.dart';
 import '../nutrition/presentation/meal_vision_estimate_consent.dart';
 import '../nutrition/presentation/gemini_vision_copy.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
@@ -336,7 +337,9 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
               leading: const BilSemanticIconBadge(
                 kind: BilSemanticIconKind.profile,
               ),
-              title: Text(context.strings.text('Community profile')),
+              title: Text(
+                communityText(context, 'Community profile', 'ملف المجتمع'),
+              ),
               subtitle: Text(_privacyText(context, 'Profile visibility')),
               trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),
@@ -347,7 +350,13 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
               leading: const BilSemanticIconBadge(
                 kind: BilSemanticIconKind.friends,
               ),
-              title: Text(context.strings.text('Friends and requests')),
+              title: Text(
+                communityText(
+                  context,
+                  'Friends and requests',
+                  'الأصدقاء والطلبات',
+                ),
+              ),
               subtitle: Text(_privacyText(context, 'Allow people to find me')),
               trailing: const BilNavigationFeedback(
                 child: Icon(Icons.chevron_right_rounded),

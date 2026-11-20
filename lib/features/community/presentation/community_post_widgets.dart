@@ -400,9 +400,7 @@ class _CommunityPhotoPage extends StatelessWidget {
       leading: const CommunityReturnButton(),
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
-      titleTextStyle: Theme.of(
-        context,
-      ).textTheme.titleMedium?.copyWith(color: Colors.white),
+      titleTextStyle: bilPageHeadingStyle(context, color: Colors.white),
       title: Text(communityText(context, 'Post photo', 'صورة المنشور')),
     ),
     body: SafeArea(

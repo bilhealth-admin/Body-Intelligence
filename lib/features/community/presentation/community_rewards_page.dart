@@ -446,6 +446,17 @@ class _CommunityRewardsPageState extends State<CommunityRewardsPage>
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
         children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: const Key('community-gold-open-ai-tokens'),
+              onPressed: () => context.push('/settings/ai-coach'),
+              icon: const Icon(Icons.auto_awesome_rounded, size: 18),
+              label: Text(
+                communityText(context, 'AI token reward', 'مكافأة توكنات AI'),
+              ),
+            ),
+          ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(

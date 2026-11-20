@@ -124,6 +124,37 @@ void _expectReachableChoices(WidgetTester tester, Size size) {
   );
 }
 
+Future<void> _readDetailsWithoutMovingChrome(
+  WidgetTester tester,
+  Size size,
+) async {
+  final heading = find.byKey(const Key('cloud-sync-consent-pinned-heading'));
+  final headingBefore = tester.getRect(heading);
+  final keep = find.byKey(const Key('cloud-sync-keep-local'));
+  final keepBefore = tester.getRect(keep);
+  final manage = find.byKey(const Key('cloud-sync-manage-categories'));
+  await tester.ensureVisible(manage);
+  await tester.pumpAndSettle();
+  expect(manage.hitTestable(), findsOneWidget);
+  final body = tester.getRect(
+    find.byKey(const Key('cloud-sync-consent-details-scroll')),
+  );
+  final link = tester.getRect(manage);
+  expect(link.top, greaterThanOrEqualTo(body.top - .01));
+  expect(link.bottom, lessThanOrEqualTo(body.bottom + .01));
+  expect(
+    tester.getRect(heading),
+    headingBefore,
+    reason: 'The primary title stays fixed while the disclosure body scrolls.',
+  );
+  expect(
+    tester.getRect(keep),
+    keepBefore,
+    reason: 'Reading the disclosure cannot move either privacy choice.',
+  );
+  _expectReachableChoices(tester, size);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(loadVisualEvidenceFont);
@@ -146,20 +177,7 @@ void main() {
             expect(harness.syncCalls, 0);
             _expectReachableChoices(tester, size);
             final keep = find.byKey(const Key('cloud-sync-keep-local'));
-            final before = tester.getRect(keep);
-            final manage = find.byKey(
-              const Key('cloud-sync-manage-categories'),
-            );
-            await tester.ensureVisible(manage);
-            await tester.pumpAndSettle();
-            expect(manage.hitTestable(), findsOneWidget);
-            _expectReachableChoices(tester, size);
-            expect(
-              tester.getRect(keep),
-              before,
-              reason:
-                  'Reading all explanations must not move the privacy choices.',
-            );
+            await _readDetailsWithoutMovingChrome(tester, size);
             final context = tester.element(keep);
             final localText = context.strings.text(
               CloudSyncConsentCopy.localAction,
@@ -193,6 +211,81 @@ void main() {
             await tester.pumpAndSettle();
           },
         );
+
+        if (scale > 1) {
+          for (final action in ['enable', 'manage']) {
+            testWidgets(
+              'compact Progress $action acts after reading details $name',
+              (tester) async {
+                final harness = await _mountCompactNotice(
+                  tester,
+                  size: size,
+                  locale: locale,
+                  scale: scale,
+                );
+                _expectReachableChoices(tester, size);
+                expect(harness.fixture.writes, isEmpty);
+                expect(harness.syncCalls, 0);
+                await _readDetailsWithoutMovingChrome(tester, size);
+                final selected = find.byKey(
+                  Key(
+                    action == 'enable'
+                        ? 'cloud-sync-enable-backup'
+                        : 'cloud-sync-manage-categories',
+                  ),
+                );
+                await tester.tap(selected);
+                await tester.pumpAndSettle();
+                if (action == 'enable') {
+                  expect(harness.fixture.writes, [(_ownerA, true)]);
+                  expect(harness.syncCalls, 1);
+                  expect(harness.privacyOwners, isEmpty);
+                  expect(
+                    find.byKey(const Key('cloud-sync-enable-backup')),
+                    findsNothing,
+                  );
+                } else {
+                  expect(
+                    harness
+                        .router
+                        .routerDelegate
+                        .currentConfiguration
+                        .last
+                        .matchedLocation,
+                    '/settings/sharing-privacy',
+                  );
+                  expect(
+                    find.byType(SharingPrivacySettingsPage),
+                    findsOneWidget,
+                  );
+                  expect(harness.privacyOwners, [_ownerA]);
+                  expect(harness.fixture.writes, isEmpty);
+                  expect(harness.syncCalls, 0);
+                  harness.router.pop();
+                  await tester.pumpAndSettle();
+                  expect(
+                    harness
+                        .router
+                        .routerDelegate
+                        .currentConfiguration
+                        .last
+                        .matchedLocation,
+                    '/dashboard',
+                  );
+                  expect(
+                    find.byKey(const Key('cloud-sync-manage-categories')),
+                    findsNothing,
+                  );
+                  expect(harness.fixture.writes, isEmpty);
+                  expect(harness.syncCalls, 0);
+                }
+                expect(tester.takeException(), isNull);
+                await tester.pumpWidget(const SizedBox.shrink());
+                await tester.pumpAndSettle();
+              },
+            );
+          }
+        }
 
         testWidgets('new compact Progress consent golden $name', (
           tester,

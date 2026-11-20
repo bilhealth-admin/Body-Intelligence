@@ -1,3 +1,5 @@
+import '../../shared/widgets/bil_page_heading.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
@@ -268,97 +270,109 @@ class _ExperimentsPageState extends ConsumerState<ExperimentsPage> {
                 22,
                 MediaQuery.viewInsetsOf(context).bottom + 24,
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t('Design one clear experiment'),
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: hypothesis,
-                      enabled: !saving,
-                      decoration: InputDecoration(
-                        labelText: t('What do you want to learn?'),
-                        hintText: t(
-                          'Example: Does an earlier dinner improve my sleep?',
+              child: BilPinnedHeaderBody(
+                shrinkWrap: true,
+                header: Padding(
+                  key: const Key("experiment-create-pinned-heading"),
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        t('Design one clear experiment'),
+                        style: bilPageHeadingStyle(context),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: hypothesis,
+                        enabled: !saving,
+                        decoration: InputDecoration(
+                          labelText: t('What do you want to learn?'),
+                          hintText: t(
+                            'Example: Does an earlier dinner improve my sleep?',
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: variable,
-                      enabled: !saving,
-                      decoration: InputDecoration(
-                        labelText: t('The one change you will make'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: data,
-                      enabled: !saving,
-                      decoration: InputDecoration(
-                        labelText: t('What should BIL watch?'),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _DurationPicker(
-                      value: duration,
-                      onChanged: (value) {
-                        if (!saving) setState(() => duration = value);
-                      },
-                    ),
-                    if (error != null) ...[
                       const SizedBox(height: 12),
-                      Text(
-                        error!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
+                      TextField(
+                        controller: variable,
+                        enabled: !saving,
+                        decoration: InputDecoration(
+                          labelText: t('The one change you will make'),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: data,
+                        enabled: !saving,
+                        decoration: InputDecoration(
+                          labelText: t('What should BIL watch?'),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _DurationPicker(
+                        value: duration,
+                        onChanged: (value) {
+                          if (!saving) setState(() => duration = value);
+                        },
+                      ),
+                      if (error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: saving
+                              ? null
+                              : () async {
+                                  if (saving) return;
+                                  setState(() {
+                                    saving = true;
+                                    error = null;
+                                  });
+                                  final failure = await _create(
+                                    context,
+                                    ref,
+                                    hypothesis: hypothesis.text,
+                                    changedVariable: variable.text,
+                                    controlledFactors: t(
+                                      'Keep the rest of the routine as consistent as practical',
+                                    ),
+                                    requiredData: data.text,
+                                    durationDays: duration,
+                                    reportFailure: false,
+                                  );
+                                  if (!sheetContext.mounted) return;
+                                  if (failure == null) {
+                                    _dismissSavedSheet(sheetRoute);
+                                  } else {
+                                    setState(() => error = failure);
+                                  }
+                                  if (sheetContext.mounted) {
+                                    setState(() => saving = false);
+                                  }
+                                },
+                          child: Text(t('Start my experiment')),
                         ),
                       ),
                     ],
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: saving
-                            ? null
-                            : () async {
-                                if (saving) return;
-                                setState(() {
-                                  saving = true;
-                                  error = null;
-                                });
-                                final failure = await _create(
-                                  context,
-                                  ref,
-                                  hypothesis: hypothesis.text,
-                                  changedVariable: variable.text,
-                                  controlledFactors: t(
-                                    'Keep the rest of the routine as consistent as practical',
-                                  ),
-                                  requiredData: data.text,
-                                  durationDays: duration,
-                                  reportFailure: false,
-                                );
-                                if (!sheetContext.mounted) return;
-                                if (failure == null) {
-                                  _dismissSavedSheet(sheetRoute);
-                                } else {
-                                  setState(() => error = failure);
-                                }
-                                if (sheetContext.mounted) {
-                                  setState(() => saving = false);
-                                }
-                              },
-                        child: Text(t('Start my experiment')),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -448,134 +462,146 @@ class _ExperimentsPageState extends ConsumerState<ExperimentsPage> {
                 22,
                 MediaQuery.viewInsetsOf(context).bottom + 24,
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t('What did your body show?'),
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(height: 14),
-                    TextField(
-                      controller: result,
-                      enabled: !saving,
-                      minLines: 2,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        labelText: t('Your observation'),
-                        hintText: t(
-                          'What improved, stayed the same, or became harder?',
+              child: BilPinnedHeaderBody(
+                shrinkWrap: true,
+                header: Padding(
+                  key: const Key("experiment-review-pinned-heading"),
+                  padding: EdgeInsets.zero,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        t('What did your body show?'),
+                        style: bilPageHeadingStyle(context),
+                      ),
+                      const SizedBox(height: 14),
+                    ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: result,
+                        enabled: !saving,
+                        minLines: 2,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          labelText: t('Your observation'),
+                          hintText: t(
+                            'What improved, stayed the same, or became harder?',
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      '${t('How closely did you follow it?')} ${adherence.round()}%',
-                    ),
-                    Slider(
-                      value: adherence,
-                      max: 100,
-                      divisions: 10,
-                      label: '${adherence.round()}%',
-                      onChanged: saving
-                          ? null
-                          : (value) => setState(() => adherence = value),
-                    ),
-                    DropdownButtonFormField<String>(
-                      initialValue: confidence,
-                      decoration: InputDecoration(
-                        labelText: t('How clear was the pattern?'),
+                      const SizedBox(height: 14),
+                      Text(
+                        '${t('How closely did you follow it?')} ${adherence.round()}%',
                       ),
-                      items: [
-                        DropdownMenuItem(
-                          value: 'insufficient',
-                          child: Text(t('Not clear yet')),
+                      Slider(
+                        value: adherence,
+                        max: 100,
+                        divisions: 10,
+                        label: '${adherence.round()}%',
+                        onChanged: saving
+                            ? null
+                            : (value) => setState(() => adherence = value),
+                      ),
+                      DropdownButtonFormField<String>(
+                        initialValue: confidence,
+                        decoration: InputDecoration(
+                          labelText: t('How clear was the pattern?'),
                         ),
-                        DropdownMenuItem(
-                          value: 'low',
-                          child: Text(t('A weak signal')),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'insufficient',
+                            child: Text(t('Not clear yet')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'low',
+                            child: Text(t('A weak signal')),
+                          ),
+                          DropdownMenuItem(
+                            value: 'moderate',
+                            child: Text(t('A repeatable signal')),
+                          ),
+                        ],
+                        onChanged: saving
+                            ? null
+                            : (value) => setState(
+                                () => confidence = value ?? confidence,
+                              ),
+
+                        icon: const BilCrystalArrow(
+                          extent: 36,
+                          child: Icon(Icons.keyboard_arrow_down_rounded),
                         ),
-                        DropdownMenuItem(
-                          value: 'moderate',
-                          child: Text(t('A repeatable signal')),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: limitations,
+                        enabled: !saving,
+                        decoration: InputDecoration(
+                          labelText: t('Anything that affected the result?'),
+                        ),
+                      ),
+                      if (error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          error!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
                         ),
                       ],
-                      onChanged: saving
-                          ? null
-                          : (value) => setState(
-                              () => confidence = value ?? confidence,
-                            ),
-
-                      icon: const BilCrystalArrow(
-                        extent: 36,
-                        child: Icon(Icons.keyboard_arrow_down_rounded),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: limitations,
-                      enabled: !saving,
-                      decoration: InputDecoration(
-                        labelText: t('Anything that affected the result?'),
-                      ),
-                    ),
-                    if (error != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        error!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
+                      const SizedBox(height: 18),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: saving
+                              ? null
+                              : () async {
+                                  if (saving) return;
+                                  setState(() {
+                                    saving = true;
+                                    error = null;
+                                  });
+                                  try {
+                                    await _write(
+                                      () => repository.complete(
+                                        id: id,
+                                        adherence: adherence,
+                                        result: result.text.trim().isEmpty
+                                            ? t('No clear change observed')
+                                            : result.text,
+                                        limitations: limitations.text,
+                                        confidence: confidence,
+                                      ),
+                                    );
+                                    if (sheetContext.mounted) {
+                                      _dismissSavedSheet(sheetRoute);
+                                    }
+                                  } on Object {
+                                    if (sheetContext.mounted) {
+                                      setState(
+                                        () => error = t(
+                                          'Your saved data was not changed. Try again.',
+                                        ),
+                                      );
+                                    }
+                                  } finally {
+                                    if (sheetContext.mounted) {
+                                      setState(() => saving = false);
+                                    }
+                                  }
+                                },
+                          child: Text(t('Save what BIL learned')),
                         ),
                       ),
                     ],
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: saving
-                            ? null
-                            : () async {
-                                if (saving) return;
-                                setState(() {
-                                  saving = true;
-                                  error = null;
-                                });
-                                try {
-                                  await _write(
-                                    () => repository.complete(
-                                      id: id,
-                                      adherence: adherence,
-                                      result: result.text.trim().isEmpty
-                                          ? t('No clear change observed')
-                                          : result.text,
-                                      limitations: limitations.text,
-                                      confidence: confidence,
-                                    ),
-                                  );
-                                  if (sheetContext.mounted) {
-                                    _dismissSavedSheet(sheetRoute);
-                                  }
-                                } on Object {
-                                  if (sheetContext.mounted) {
-                                    setState(
-                                      () => error = t(
-                                        'Your saved data was not changed. Try again.',
-                                      ),
-                                    );
-                                  }
-                                } finally {
-                                  if (sheetContext.mounted) {
-                                    setState(() => saving = false);
-                                  }
-                                }
-                              },
-                        child: Text(t('Save what BIL learned')),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import '../domain/commerce_plan.dart';
@@ -18,6 +19,25 @@ final class VerifiedEntitlementContinuityStore {
     : _secureStore = secureStore ?? FlutterAdminEntitlementSecureStore();
 
   static const _prefix = 'bil.verified-entitlement.v1.';
+  // All instances share the same encrypted owner slot. Serialize its existing
+  // operations so an old held write/cleanup cannot overwrite a newer receipt.
+  static final Map<String, Future<void>> _pending = {};
+
+  Future<T> _serialized<T>(String ownerId, Future<T> Function() action) {
+    final previous = _pending[ownerId] ?? Future<void>.value();
+    final result = previous.then((_) => action());
+    final settled = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    _pending[ownerId] = settled;
+    unawaited(
+      settled.then((_) {
+        if (identical(_pending[ownerId], settled)) _pending.remove(ownerId);
+      }),
+    );
+    return result;
+  }
 
   final AdminEntitlementSecureStore _secureStore;
 
@@ -25,14 +45,33 @@ final class VerifiedEntitlementContinuityStore {
     required String ownerId,
     required SubscriptionState state,
     required DateTime now,
-  }) async {
+  }) => _serialized(ownerId, () => _remember(ownerId, state, now));
+
+  Future<void> _remember(
+    String ownerId,
+    SubscriptionState state,
+    DateTime now,
+  ) async {
     final boundary = verifiedSubscriptionPriorBoundary(state);
     if (state.authority != EntitlementAuthority.verifiedServer ||
         state.plan == CommercePlan.free ||
         !state.lifecycle.mayGrantPaidAccess ||
         boundary == null ||
         !boundary.toUtc().isAfter(now.toUtc())) {
-      await clear(ownerId);
+      try {
+        await _clear(ownerId);
+      } on Object {
+        if (state.authority != EntitlementAuthority.verifiedServer ||
+            state.plan != CommercePlan.free) {
+          rethrow;
+        }
+        // If delete is unavailable but writes still work, retire the old paid
+        // payload in its existing encrypted slot for the next process too.
+        await _secureStore.write(
+          '$_prefix$ownerId',
+          jsonEncode({'owner_id': ownerId, 'retired_paid_proof': true}),
+        );
+      }
       return;
     }
 
@@ -56,23 +95,27 @@ final class VerifiedEntitlementContinuityStore {
   Future<SubscriptionState?> read({
     required String ownerId,
     required DateTime now,
-  }) async {
+  }) => _serialized(ownerId, () => _read(ownerId, now));
+
+  Future<SubscriptionState?> _read(String ownerId, DateTime now) async {
     final encoded = await _secureStore.read('$_prefix$ownerId');
     if (encoded == null) return null;
 
     try {
       final value = jsonDecode(encoded);
       if (value is! Map || value['owner_id'] != ownerId) {
-        await clear(ownerId);
+        await _clear(ownerId);
         return null;
       }
+
+      if (value['retired_paid_proof'] == true) return null;
 
       final rawProvider = value['provider'];
       if (rawProvider != null &&
           rawProvider != 'apple' &&
           rawProvider != 'google' &&
           rawProvider != 'web') {
-        await clear(ownerId);
+        await _clear(ownerId);
         return null;
       }
 
@@ -97,7 +140,7 @@ final class VerifiedEntitlementContinuityStore {
           !accessUntil.isAfter(utcNow) ||
           (startedAt?.isAfter(utcNow.add(const Duration(minutes: 1))) ??
               false)) {
-        await clear(ownerId);
+        await _clear(ownerId);
         return null;
       }
 
@@ -130,12 +173,16 @@ final class VerifiedEntitlementContinuityStore {
         canRestorePurchases: provider != null,
       );
     } on Object {
-      await clear(ownerId);
+      await _clear(ownerId);
       return null;
     }
   }
 
-  Future<void> clear(String ownerId) => _secureStore.delete('$_prefix$ownerId');
+  Future<void> clear(String ownerId) =>
+      _serialized(ownerId, () => _clear(ownerId));
+
+  Future<void> _clear(String ownerId) =>
+      _secureStore.delete('$_prefix$ownerId');
 
   String _lifecycleId(SubscriptionLifecycle lifecycle) => switch (lifecycle) {
     SubscriptionLifecycle.trial => 'trial',

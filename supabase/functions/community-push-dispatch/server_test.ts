@@ -54,7 +54,9 @@ function fakeRuntime(options: {
             order: () => ({
               limit: () =>
                 Promise.resolve({
-                  data: options.outboxError ? null : [{ ...event, ...options.event }],
+                  data: options.outboxError
+                    ? null
+                    : [{ ...event, ...options.event }],
                   error: options.outboxError ? { message: "offline" } : null,
                 }),
             }),
@@ -63,15 +65,21 @@ function fakeRuntime(options: {
       }),
       rpc: (name: string, args?: Record<string, unknown>) => {
         calls.push({ name, args });
-        const fail =
-          (name === "bil_suppress_web_only_mobile_push_v1" && options.policyError) ||
+        const fail = (name === "bil_suppress_web_only_mobile_push_v1" &&
+          options.policyError) ||
           (name === "bil_claim_push_deliveries" && options.claimError) ||
           (name === "bil_record_push_delivery_result" && options.resultError);
         return Promise.resolve({
           data: name === "bil_claim_push_deliveries"
-            ? [{ ...token, sensitive_preview_allowed: options.sensitivePreviewAllowed ?? false }]
+            ? [{
+              ...token,
+              sensitive_preview_allowed: options.sensitivePreviewAllowed ??
+                false,
+            }]
             : name === "bil_suppress_web_only_mobile_push_v1"
-            ? (Object.hasOwn(options, "policyResult") ? options.policyResult : false)
+            ? (Object.hasOwn(options, "policyResult")
+              ? options.policyResult
+              : false)
             : null,
           error: fail ? { message: "offline" } : null,
         });
@@ -126,7 +134,7 @@ Deno.test("private push previews stay generic and every delivery is recorded onc
   });
   assertEquals(fake.payloads.length, 1);
   assertEquals(fake.payloads[0].title, "BIL");
-  assertEquals(fake.payloads[0].body, "You have a new private update.");
+  assertEquals(fake.payloads[0].body, "Your coach has an update.");
   assertEquals(fake.payloads[0].idempotency_key, token.delivery_key);
   assertEquals(fake.calls.map((c) => c.name), [
     "bil_quarantine_stale_push_outbox",
@@ -179,7 +187,6 @@ Deno.test("outbox, claim, and result failures cannot masquerade as delivery", as
   });
 });
 
-
 Deno.test("disabled sensitive previews mask health and identity in both visible fields", async () => {
   const fake = fakeRuntime({
     event: {
@@ -189,7 +196,7 @@ Deno.test("disabled sensitive previews mask health and identity in both visible 
   });
   assertEquals((await handler(request(), fake.dependencies)).status, 200);
   assertEquals(fake.payloads[0].title, "BIL");
-  assertEquals(fake.payloads[0].body, "You have a new private update.");
+  assertEquals(fake.payloads[0].body, "Your coach has an update.");
   const delivered = JSON.stringify(fake.payloads[0]);
   assertEquals(delivered.includes("glucose"), false);
   assertEquals(delivered.includes("Confidential"), false);
@@ -210,7 +217,7 @@ Deno.test("event locale never grants authority to expose or replace private copy
     });
     await handler(request(), fake.dependencies);
     assertEquals(fake.payloads[0].title, "BIL");
-    assertEquals(fake.payloads[0].body, "You have a new private update.");
+    assertEquals(fake.payloads[0].body, "Your coach has an update.");
   }
 });
 
@@ -262,11 +269,13 @@ Deno.test("web-only policy closes moderation delivery before any phone claim", a
 });
 
 Deno.test("policy unavailable or malformed never authorizes a phone claim", async () => {
-  for (const options of [
-    { policyError: true },
-    { policyResult: null },
-    { policyResult: "false" },
-  ]) {
+  for (
+    const options of [
+      { policyError: true },
+      { policyResult: null },
+      { policyResult: "false" },
+    ]
+  ) {
     const fake = fakeRuntime(options);
     assertEquals(await (await handler(request(), fake.dependencies)).json(), {
       processed: 1,
@@ -275,16 +284,39 @@ Deno.test("policy unavailable or malformed never authorizes a phone claim", asyn
       suppressed: 0,
     });
     assertEquals(fake.payloads, []);
-    assertEquals(fake.calls.some((call) => call.name === "bil_claim_push_deliveries"), false);
+    assertEquals(
+      fake.calls.some((call) => call.name === "bil_claim_push_deliveries"),
+      false,
+    );
   }
 });
 
-for (const social of [
-  { category: "friend_request", deep_link: "bil://community/connections" },
-  { category: "message", deep_link: "bil://community/chat/25110000-0000-4000-8000-000000000002" },
-  { category: "community", copy_key: "friend_accepted_v1", deep_link: "bil://community/notifications" },
-  { category: "community", source_key: "post-event:post_submitted:owned-post:owner", deep_link: "bil://community" },
-]) {
+for (
+  const { expectedBody, ...social } of [
+    {
+      category: "friend_request",
+      expectedBody: "You have a new friend request.",
+      deep_link: "bil://community/connections",
+    },
+    {
+      category: "message",
+      expectedBody: "You have a new message.",
+      deep_link: "bil://community/chat/25110000-0000-4000-8000-000000000002",
+    },
+    {
+      category: "community",
+      copy_key: "friend_accepted_v1",
+      expectedBody: "Your friend request was accepted.",
+      deep_link: "bil://community/notifications",
+    },
+    {
+      category: "community",
+      source_key: "post-event:post_submitted:owned-post:owner",
+      expectedBody: "There is an update in your community.",
+      deep_link: "bil://community",
+    },
+  ]
+) {
   Deno.test(`mobile policy keeps ${social.category}/${social.deep_link} deliverable with private preview`, async () => {
     const fake = fakeRuntime({ event: social });
     assertEquals(await (await handler(request(), fake.dependencies)).json(), {
@@ -296,9 +328,45 @@ for (const social of [
     assertEquals(fake.payloads.length, 1);
     assertEquals(fake.payloads[0].deep_link, social.deep_link);
     assertEquals(fake.payloads[0].title, "BIL");
-    assertEquals(fake.payloads[0].body, "You have a new private update.");
+    assertEquals(fake.payloads[0].body, expectedBody);
     assertEquals(fake.calls[1].name, "bil_suppress_web_only_mobile_push_v1");
     assertEquals(fake.calls[2].name, "bil_claim_push_deliveries");
     assertEquals(fake.calls[3].args?.p_delivered, true);
   });
 }
+
+Deno.test("hidden previews describe only allowlisted event states without personal copy", async () => {
+  for (
+    const [category, copy_key, expected] of [
+      ["community", "post_approved_ai_tokens_v1", "Your post was approved."],
+      ["community", "post_approved_no_ai_tokens_v1", "Your post was approved."],
+      ["community", "post_rejected_v1", "Your post needs changes."],
+      [
+        "community",
+        "community_post_ai_reward_v1",
+        "You received an AI token reward.",
+      ],
+      ["community", "constructor", "There is an update in your community."],
+      ["unknown", "post_approved_ai_tokens_v1", "You have a new update."],
+      [null, null, "You have a new update."],
+    ]
+  ) {
+    const fake = fakeRuntime({
+      event: {
+        category,
+        copy_key,
+        title: "Sensitive sender name",
+        body: "Confidential meal and health value 123",
+        private_preview_body: "Spoofed event state",
+        recipient_locale: "ar",
+      },
+    });
+    await handler(request(), fake.dependencies);
+    assertEquals(fake.payloads[0].title, "BIL");
+    assertEquals(fake.payloads[0].body, expected);
+    const visible = `${fake.payloads[0].title} ${fake.payloads[0].body}`;
+    for (const hidden of ["Sensitive", "Confidential", "123", "Spoofed"]) {
+      assertEquals(visible.includes(hidden), false);
+    }
+  }
+});

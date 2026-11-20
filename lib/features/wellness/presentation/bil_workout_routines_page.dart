@@ -1,3 +1,4 @@
+import '../../../shared/widgets/bil_page_heading.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
@@ -376,12 +377,33 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     // library immediately if the verified server snapshot changes.
     ref.watch(verifiedSubscriptionAccessProvider);
     final future = _items;
-    final compactHeader = MediaQuery.sizeOf(context).width < 520;
+    final pageTitle = wellnessWorkoutVideosAndRoutinesTitle(context);
+    final titleStyle = bilPageHeadingStyle(context);
+    final titleMeasure =
+        TextPainter(
+          text: TextSpan(text: pageTitle, style: titleStyle),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          locale: Localizations.localeOf(context),
+        )..layout(
+          maxWidth:
+              (MediaQuery.sizeOf(context).width -
+                      MediaQuery.paddingOf(context).horizontal -
+                      56 -
+                      96 -
+                      32)
+                  .clamp(1.0, double.infinity),
+        );
+    final toolbarHeight = (titleMeasure.height + 16).clamp(
+      kToolbarHeight,
+      double.infinity,
+    );
+    titleMeasure.dispose();
     return BilCalmVisualScope(
       builder: (context) => Scaffold(
         appBar: AppBar(
-          toolbarHeight: compactHeader ? 72 : null,
-          titleSpacing: compactHeader ? 0 : null,
+          toolbarHeight: toolbarHeight,
+          titleSpacing: 16,
           leading: IconButton(
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onPressed: () => context.canPop()
@@ -390,18 +412,12 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
             icon: const BilCrystalArrow(child: BackButtonIcon()),
           ),
           title: Text(
-            wellnessWorkoutVideosAndRoutinesTitle(context),
+            pageTitle,
             key: const ValueKey('workout-videos-routines-title'),
-            maxLines: compactHeader ? 2 : 1,
-            overflow: compactHeader
-                ? TextOverflow.visible
-                : TextOverflow.ellipsis,
-            style: compactHeader
-                ? Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    height: 1.08,
-                  )
-                : null,
+            maxLines: 10,
+            softWrap: true,
+            overflow: TextOverflow.visible,
+            style: titleStyle,
           ),
           actions: [
             IconButton(

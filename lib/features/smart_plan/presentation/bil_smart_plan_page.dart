@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_expansion_indicator.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';

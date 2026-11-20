@@ -76,6 +76,10 @@ void main() {
           find.text(notice),
           200,
           maxScrolls: 200,
+          scrollable: find.descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          ),
         );
         expect(find.text(notice), findsOneWidget);
         final disclosure = cloudTranslationDisclosure(context);
@@ -91,6 +95,10 @@ void main() {
           find.text(disclosure),
           200,
           maxScrolls: 200,
+          scrollable: find.descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          ),
         );
         expect(find.text(disclosure), findsOneWidget);
         final foodDisclosure = foodSearchPrivacyDisclosure(context);
@@ -98,6 +106,10 @@ void main() {
           find.text(foodDisclosure),
           200,
           maxScrolls: 200,
+          scrollable: find.descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          ),
         );
         expect(find.text(foodDisclosure), findsOneWidget);
         expect(tester.takeException(), isNull);

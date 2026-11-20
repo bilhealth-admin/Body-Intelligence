@@ -18,10 +18,18 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
   setUp(() {
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('bil/ads_privacy'),
+      (_) async => {'trackingAuthorizationStatus': 'notDetermined'},
+    );
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     instanceManager = AdInstanceManager('plugins.flutter.io/google_mobile_ads');
   });
   tearDown(() {
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('bil/ads_privacy'),
+      null,
+    );
     messenger.setMockMethodCallHandler(instanceManager.channel, null);
     debugDefaultTargetPlatformOverride = null;
   });

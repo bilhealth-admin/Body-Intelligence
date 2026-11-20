@@ -17,10 +17,18 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
   setUp(() {
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('bil/ads_privacy'),
+      (_) async => {'trackingAuthorizationStatus': 'notDetermined'},
+    );
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     instanceManager = AdInstanceManager('plugins.flutter.io/google_mobile_ads');
   });
   tearDown(() {
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('bil/ads_privacy'),
+      null,
+    );
     messenger.setMockMethodCallHandler(instanceManager.channel, null);
     debugDefaultTargetPlatformOverride = null;
   });
@@ -53,7 +61,7 @@ void main() {
       try {
         final handle = await gateway.loadBanner(AdPlacement.generalDiscovery);
         expect(handle, isNotNull);
-        expect(gate.verifications, 1);
+        expect(gate.verifications, 2);
         // The SDK singleton registers its channel once per isolate. Randomized
         // test ordering may have registered it already; a cold registration may
         // only precede this exact privacy configuration/SDK-init/load sequence.

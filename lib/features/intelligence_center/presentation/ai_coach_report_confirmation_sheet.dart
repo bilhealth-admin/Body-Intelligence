@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_report_reason_option.dart';
 import 'package:flutter/material.dart';
@@ -80,162 +82,251 @@ Future<void> showAiCoachAnswerReportSheet(
                 ),
               ),
             ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              scheme.surfaceContainerHighest.withValues(
-                                alpha: .9,
-                              ),
-                              scheme.surfaceContainerLow.withValues(alpha: .7),
-                            ],
-                          ),
-                          border: Border.all(
-                            color: scheme.outlineVariant.withValues(alpha: .56),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.outlined_flag_rounded,
-                          color: scheme.onSurfaceVariant,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          intelligenceText(
-                            context,
-                            subject == AiCoachReportSubject.smartPlan
-                                ? 'Report this plan'
-                                : 'Report this AI response',
-                            subject == AiCoachReportSubject.smartPlan
-                                ? 'الإبلاغ عن هذه الخطة'
-                                : 'الإبلاغ عن إجابة AI Coach',
-                          ),
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 54),
-                    child: Text(
-                      intelligenceText(
-                        context,
-                        'Choose one reason. A note is optional.',
-                        'اختر سببًا واحدًا. الملاحظة اختيارية.',
-                      ),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                        height: 1.35,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  for (final option in options) ...[
-                    BilReportReasonOption(
-                      key: Key('ai-coach-report-reason-${option.$1}'),
-                      tapKey: Key('ai-coach-report-reason-tap-${option.$1}'),
-                      value: option.$1,
-                      title: english ? option.$2 : option.$3,
-                      icon: option.$4,
-                      selected: reason == option.$1,
-                      onTap: () => setSheetState(() => reason = option.$1),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  if (reason == 'other') ...[
-                    const SizedBox(height: 2),
-                    TextField(
-                      key: const Key('ai-coach-report-optional-note'),
-                      controller: noteController,
-                      maxLength: 1000,
-                      maxLines: 3,
-                      minLines: 2,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: InputDecoration(
-                        labelText: intelligenceText(
-                          context,
-                          'Optional note for moderators',
-                          'ملاحظة اختيارية للمشرفين',
-                        ),
-                        alignLabelWithHint: true,
-                        filled: true,
-                        fillColor: scheme.surface.withValues(alpha: .62),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide(
-                            color: scheme.outlineVariant.withValues(alpha: .48),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide(
-                            color: scheme.outlineVariant.withValues(alpha: .48),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  Container(
-                    padding: const EdgeInsetsDirectional.fromSTEB(
-                      14,
-                      12,
-                      14,
-                      10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest.withValues(
-                        alpha: .34,
-                      ),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: scheme.outlineVariant.withValues(alpha: .48),
-                        width: .8,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+            child: BilPinnedHeaderBody(
+              shrinkWrap: true,
+              header: Padding(
+                key: const Key("coach-report-pinned-heading"),
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 10, 20, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsetsDirectional.only(top: 2),
-                              child: Icon(
-                                Icons.lock_outline_rounded,
-                                size: 18,
-                                color: scheme.onSurfaceVariant,
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                scheme.surfaceContainerHighest.withValues(
+                                  alpha: .9,
+                                ),
+                                scheme.surfaceContainerLow.withValues(
+                                  alpha: .7,
+                                ),
+                              ],
+                            ),
+                            border: Border.all(
+                              color: scheme.outlineVariant.withValues(
+                                alpha: .56,
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
+                          ),
+                          child: Icon(
+                            Icons.outlined_flag_rounded,
+                            color: scheme.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            intelligenceText(
+                              context,
+                              subject == AiCoachReportSubject.smartPlan
+                                  ? 'Report this plan'
+                                  : 'Report this AI response',
+                              subject == AiCoachReportSubject.smartPlan
+                                  ? 'الإبلاغ عن هذه الخطة'
+                                  : 'الإبلاغ عن إجابة AI Coach',
+                            ),
+                            style: bilPageHeadingStyle(context),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(start: 54),
+                      child: Text(
+                        intelligenceText(
+                          context,
+                          'Choose one reason. A note is optional.',
+                          'اختر سببًا واحدًا. الملاحظة اختيارية.',
+                        ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+              body: SingleChildScrollView(
+                padding: const EdgeInsetsDirectional.fromSTEB(20, 0, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final option in options) ...[
+                      BilReportReasonOption(
+                        key: Key('ai-coach-report-reason-${option.$1}'),
+                        tapKey: Key('ai-coach-report-reason-tap-${option.$1}'),
+                        value: option.$1,
+                        title: english ? option.$2 : option.$3,
+                        icon: option.$4,
+                        selected: reason == option.$1,
+                        onTap: () => setSheetState(() => reason = option.$1),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if (reason == 'other') ...[
+                      const SizedBox(height: 2),
+                      TextField(
+                        key: const Key('ai-coach-report-optional-note'),
+                        controller: noteController,
+                        maxLength: 1000,
+                        maxLines: 3,
+                        minLines: 2,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: InputDecoration(
+                          labelText: intelligenceText(
+                            context,
+                            'Optional note for moderators',
+                            'ملاحظة اختيارية للمشرفين',
+                          ),
+                          alignLabelWithHint: true,
+                          filled: true,
+                          fillColor: scheme.surface.withValues(alpha: .62),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(
+                              color: scheme.outlineVariant.withValues(
+                                alpha: .48,
+                              ),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(
+                              color: scheme.outlineVariant.withValues(
+                                alpha: .48,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                    Container(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        14,
+                        12,
+                        14,
+                        10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.surfaceContainerHighest.withValues(
+                          alpha: .34,
+                        ),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: scheme.outlineVariant.withValues(alpha: .48),
+                          width: .8,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  top: 2,
+                                ),
+                                child: Icon(
+                                  Icons.lock_outline_rounded,
+                                  size: 18,
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  intelligenceText(
+                                    context,
+                                    subject == AiCoachReportSubject.smartPlan
+                                        ? 'A summary of this plan and any note you add go to authorized BIL moderators. The summary may include health information.'
+                                        : 'Only your chosen answer and any note you add go to authorized BIL moderators. The answer may include health information.',
+                                    subject == AiCoachReportSubject.smartPlan
+                                        ? 'يُرسل ملخص لهذه الخطة وأي ملاحظة تضيفها إلى مشرفي BIL المخولين فقط. وقد يتضمن الملخص معلومات صحية.'
+                                        : 'تُرسل الإجابة التي تختارها وأي ملاحظة تضيفها إلى مشرفي BIL المخولين فقط. وقد تتضمن الإجابة معلومات صحية.',
+                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                        height: 1.4,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          TextButton(
+                            key: const Key('ai-coach-report-privacy-details'),
+                            onPressed: () => setSheetState(
+                              () => privacyDetailsExpanded =
+                                  !privacyDetailsExpanded,
+                            ),
+                            style: TextButton.styleFrom(
+                              alignment: AlignmentDirectional.centerStart,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                                vertical: 8,
+                              ),
+                              minimumSize: const Size(0, 40),
+                              tapTargetSize: MaterialTapTargetSize.padded,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  intelligenceText(
+                                    context,
+                                    'Details',
+                                    'التفاصيل',
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                AnimatedRotation(
+                                  turns: privacyDetailsExpanded ? .5 : 0,
+                                  duration: const Duration(milliseconds: 180),
+                                  child: const BilCrystalArrow(
+                                    extent: 36,
+                                    reserveSpace: true,
+                                    child: Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          AnimatedCrossFade(
+                            firstChild: const SizedBox.shrink(),
+                            secondChild: Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 28,
+                                bottom: 8,
+                              ),
                               child: Text(
                                 intelligenceText(
                                   context,
                                   subject == AiCoachReportSubject.smartPlan
-                                      ? 'A summary of this plan and any note you add go to authorized BIL moderators. The summary may include health information.'
-                                      : 'Only your chosen answer and any note you add go to authorized BIL moderators. The answer may include health information.',
+                                      ? 'Plan ID and revision, today’s suggested meals and workout status, reason, language, on-device runtime and any note are shared for safety review. Your conversation, full schedule and health profile are not included.'
+                                      : 'The selected answer, reason, language, AI runtime, and any optional note are shared only for safety review. Your question, other messages, and health profile are not included.',
                                   subject == AiCoachReportSubject.smartPlan
-                                      ? 'يُرسل ملخص لهذه الخطة وأي ملاحظة تضيفها إلى مشرفي BIL المخولين فقط. وقد يتضمن الملخص معلومات صحية.'
-                                      : 'تُرسل الإجابة التي تختارها وأي ملاحظة تضيفها إلى مشرفي BIL المخولين فقط. وقد تتضمن الإجابة معلومات صحية.',
+                                      ? 'يُشارك رقم الخطة وإصدارها ومقترحات وجبات اليوم وحالة التدريب والسبب واللغة والتشغيل المحلي والملاحظة لمراجعة السلامة. لا تُرسل المحادثة أو الجدول الكامل أو ملفك الصحي.'
+                                      : 'تُشارك الإجابة المختارة والسبب واللغة ونوع تشغيل الذكاء الاصطناعي وأي ملاحظة اختيارية لمراجعة السلامة فقط. لا يُرسل سؤالك أو بقية المحادثة أو ملفك الصحي.',
                                 ),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
@@ -244,179 +335,114 @@ Future<void> showAiCoachAnswerReportSheet(
                                     ),
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        TextButton(
-                          key: const Key('ai-coach-report-privacy-details'),
-                          onPressed: () => setSheetState(
-                            () => privacyDetailsExpanded =
-                                !privacyDetailsExpanded,
+                            crossFadeState: privacyDetailsExpanded
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                            duration: const Duration(milliseconds: 160),
                           ),
-                          style: TextButton.styleFrom(
-                            alignment: AlignmentDirectional.centerStart,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 2,
-                              vertical: 8,
-                            ),
-                            minimumSize: const Size(0, 40),
-                            tapTargetSize: MaterialTapTargetSize.padded,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          const SizedBox(height: 2),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                intelligenceText(
-                                  context,
-                                  'Details',
-                                  'التفاصيل',
+                              Checkbox(
+                                key: const Key('ai-coach-report-consent'),
+                                value: consentAccepted,
+                                onChanged: (value) => setSheetState(
+                                  () => consentAccepted = value ?? false,
                                 ),
+                                visualDensity: VisualDensity.compact,
                               ),
                               const SizedBox(width: 6),
-                              AnimatedRotation(
-                                turns: privacyDetailsExpanded ? .5 : 0,
-                                duration: const Duration(milliseconds: 180),
-                                child: const BilCrystalArrow(
-                                  extent: 36,
-                                  reserveSpace: true,
-                                  child: Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    size: 20,
+                              Expanded(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => setSheetState(
+                                    () => consentAccepted = !consentAccepted,
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
+                                    child: Text(
+                                      intelligenceText(
+                                        context,
+                                        subject ==
+                                                AiCoachReportSubject.smartPlan
+                                            ? 'I agree to send this plan summary for safety review.'
+                                            : 'I agree to send this answer for safety review.',
+                                        subject ==
+                                                AiCoachReportSubject.smartPlan
+                                            ? 'أوافق على إرسال ملخص هذه الخطة لمراجعة السلامة.'
+                                            : 'أوافق على إرسال هذه الإجابة لمراجعة السلامة.',
+                                      ),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: scheme.onSurface,
+                                            height: 1.3,
+                                          ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        AnimatedCrossFade(
-                          firstChild: const SizedBox.shrink(),
-                          secondChild: Padding(
-                            padding: const EdgeInsetsDirectional.only(
-                              start: 28,
-                              bottom: 8,
-                            ),
-                            child: Text(
-                              intelligenceText(
-                                context,
-                                subject == AiCoachReportSubject.smartPlan
-                                    ? 'Plan ID and revision, today’s suggested meals and workout status, reason, language, on-device runtime and any note are shared for safety review. Your conversation, full schedule and health profile are not included.'
-                                    : 'The selected answer, reason, language, AI runtime, and any optional note are shared only for safety review. Your question, other messages, and health profile are not included.',
-                                subject == AiCoachReportSubject.smartPlan
-                                    ? 'يُشارك رقم الخطة وإصدارها ومقترحات وجبات اليوم وحالة التدريب والسبب واللغة والتشغيل المحلي والملاحظة لمراجعة السلامة. لا تُرسل المحادثة أو الجدول الكامل أو ملفك الصحي.'
-                                    : 'تُشارك الإجابة المختارة والسبب واللغة ونوع تشغيل الذكاء الاصطناعي وأي ملاحظة اختيارية لمراجعة السلامة فقط. لا يُرسل سؤالك أو بقية المحادثة أو ملفك الصحي.',
-                              ),
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: scheme.onSurfaceVariant,
-                                    height: 1.4,
-                                  ),
-                            ),
-                          ),
-                          crossFadeState: privacyDetailsExpanded
-                              ? CrossFadeState.showSecond
-                              : CrossFadeState.showFirst,
-                          duration: const Duration(milliseconds: 160),
-                        ),
-                        const SizedBox(height: 2),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Checkbox(
-                              key: const Key('ai-coach-report-consent'),
-                              value: consentAccepted,
-                              onChanged: (value) => setSheetState(
-                                () => consentAccepted = value ?? false,
-                              ),
-                              visualDensity: VisualDensity.compact,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () => setSheetState(
-                                  () => consentAccepted = !consentAccepted,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                  ),
-                                  child: Text(
-                                    intelligenceText(
-                                      context,
-                                      subject == AiCoachReportSubject.smartPlan
-                                          ? 'I agree to send this plan summary for safety review.'
-                                          : 'I agree to send this answer for safety review.',
-                                      subject == AiCoachReportSubject.smartPlan
-                                          ? 'أوافق على إرسال ملخص هذه الخطة لمراجعة السلامة.'
-                                          : 'أوافق على إرسال هذه الإجابة لمراجعة السلامة.',
-                                    ),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyMedium
-                                        ?.copyWith(
-                                          color: scheme.onSurface,
-                                          height: 1.3,
-                                        ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    key: const Key('ai-coach-confirm-report'),
-                    onPressed: canSubmit
-                        ? () => Navigator.of(sheetContext).pop(
-                            AiCoachAnswerReportDraft(
-                              reason: reason!,
-                              explicitConsentAccepted: consentAccepted,
-                              optionalNote:
-                                  reason == 'other' &&
-                                      noteController.text.trim().isNotEmpty
-                                  ? noteController.text.trim()
-                                  : null,
-                            ),
-                          )
-                        : null,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: scheme.primary,
-                      foregroundColor: canSubmit
-                          ? Colors.white
-                          : scheme.onSurface,
-                      disabledBackgroundColor: scheme.surfaceContainerHighest,
-                      disabledForegroundColor: scheme.onSurface,
-                      minimumSize: const Size.fromHeight(52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
+                        ],
                       ),
                     ),
-                    icon: Icon(
-                      Icons.outlined_flag_rounded,
-                      color: canSubmit ? Colors.white : scheme.onSurface,
-                    ),
-                    label: Text(
-                      intelligenceText(
-                        context,
-                        'Submit Report',
-                        'إرسال البلاغ',
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      key: const Key('ai-coach-confirm-report'),
+                      onPressed: canSubmit
+                          ? () => Navigator.of(sheetContext).pop(
+                              AiCoachAnswerReportDraft(
+                                reason: reason!,
+                                explicitConsentAccepted: consentAccepted,
+                                optionalNote:
+                                    reason == 'other' &&
+                                        noteController.text.trim().isNotEmpty
+                                    ? noteController.text.trim()
+                                    : null,
+                              ),
+                            )
+                          : null,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: scheme.primary,
+                        foregroundColor: canSubmit
+                            ? Colors.white
+                            : scheme.onSurface,
+                        disabledBackgroundColor: scheme.surfaceContainerHighest,
+                        disabledForegroundColor: scheme.onSurface,
+                        minimumSize: const Size.fromHeight(52),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                        ),
                       ),
-                      style: TextStyle(
+                      icon: Icon(
+                        Icons.outlined_flag_rounded,
                         color: canSubmit ? Colors.white : scheme.onSurface,
                       ),
+                      label: Text(
+                        intelligenceText(
+                          context,
+                          'Submit Report',
+                          'إرسال البلاغ',
+                        ),
+                        style: TextStyle(
+                          color: canSubmit ? Colors.white : scheme.onSurface,
+                        ),
+                      ),
                     ),
-                  ),
-                  TextButton(
-                    key: const Key('ai-coach-cancel-report'),
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                    child: Text(
-                      MaterialLocalizations.of(context).cancelButtonLabel,
+                    TextButton(
+                      key: const Key('ai-coach-cancel-report'),
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      child: Text(
+                        MaterialLocalizations.of(context).cancelButtonLabel,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

@@ -1,3 +1,5 @@
+import '../../../../shared/widgets/bil_page_heading.dart';
+import '../../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../../shared/widgets/bil_striped_progress.dart';
 import '../../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
@@ -130,543 +132,375 @@ class CoachReferenceWorkspace extends ConsumerWidget {
       key: const Key('coach-reference-workspace'),
       body: BilPearlBackdrop(
         child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // The crystal paints a 48px surface around the glyph. Own
-                  // that space and a directional gutter in this header, so
-                  // wrapped greetings and access labels never sit under it.
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 12),
-                    child: SizedBox.square(
-                      dimension: 48,
-                      child: IconButton(
-                        key: const Key('coach-workspace-back-to-chat'),
-                        tooltip: t('Back', 'رجوع'),
-                        onPressed: onExit ?? onChat,
-                        icon: BilNavigationFeedback(
-                          child: Icon(
-                            ar
-                                ? Icons.chevron_right_rounded
-                                : Icons.chevron_left_rounded,
-                            color: muted,
+          child: BilPinnedHeaderBody(
+            shrinkWrap: true,
+            header: _CoachWorkspaceHeading(
+              now: now,
+              name: name,
+              paidLabel: paidLabel,
+              unlocked: unlocked,
+              paidPlan: paidPlan,
+              onExit: onExit,
+              onChat: onChat,
+              onTools: onTools,
+              onRoute: onRoute,
+            ),
+            body: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final columns =
+                        MediaQuery.textScalerOf(context).scale(1) > 1.3 ||
+                            constraints.maxWidth < 560
+                        ? 2
+                        : 4;
+                    final width =
+                        (constraints.maxWidth - (columns - 1) * 7) / columns;
+                    return Wrap(
+                      spacing: 7,
+                      runSpacing: 7,
+                      children: [
+                        for (final row in nutrientRows)
+                          SizedBox(
+                            width: width,
+                            child: _NutrientTile(
+                              label: row.$1,
+                              amount: row.$2,
+                              target: row.$3,
+                              accent: row.$4,
+                              progress: row.$5,
+                              locked: !unlocked,
+                              onTap: () => onRoute('/analytics/nutrition'),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
+                      ],
+                    );
+                  },
+                ),
+                const SizedBox(height: 13),
+                _WorkspaceCard(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          '${now.hour < 12 ? t('Good morning', 'صباح الخير') : t('Welcome back', 'أهلًا بعودتك')}${name == null || name.isEmpty ? '' : ', $name'}',
-                          key: const Key('coach-workspace-greeting'),
-                          style: TextStyle(
-                            color: scheme.onSurface,
-                            fontSize: 19,
-                            fontWeight: FontWeight.w700,
-                            height: 1.3,
-                          ),
+                        const Icon(
+                          Icons.track_changes_rounded,
+                          color: Color(0xFF31CE9A),
+                          size: 31,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          t("Let's make today count.", 'لنصنع فرقًا اليوم.'),
-                          key: const Key('coach-workspace-greeting-detail'),
-                          style: TextStyle(fontSize: 12, color: muted),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: _CoachAccessLabelSlot(
-                            visible: paidLabel || unlocked,
-                            labels: [
-                              BilStoreCopy.text(
-                                Localizations.localeOf(context).toLanguageTag(),
-                                'premium',
-                              ),
-                              BilStoreCopy.text(
-                                Localizations.localeOf(context).toLanguageTag(),
-                                'premium_ai_coach',
-                              ),
-                              t(
-                                'Verified AI Boost access',
-                                'وصول موثق عبر AI Boost',
-                              ),
-                            ],
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: scheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                paidLabel
-                                    ? BilStoreCopy.text(
-                                        Localizations.localeOf(
-                                          context,
-                                        ).toLanguageTag(),
-                                        paidPlan == CommercePlan.premiumAiCoach
-                                            ? 'premium_ai_coach'
-                                            : 'premium',
-                                      )
-                                    : t(
-                                        'Verified AI Boost access',
-                                        'وصول موثق عبر AI Boost',
-                                      ),
-                                key: const Key('coach-workspace-plan-label'),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t("Today's Focus", 'تركيز اليوم'),
                                 style: TextStyle(
-                                  color: scheme.onPrimaryContainer,
+                                  color: scheme.onSurface,
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 5),
+                              Text(
+                                t(
+                                  'One small action at a time. Your coach is here to help you log, reflect, and plan.',
+                                  'خطوة صغيرة في كل مرة. مدربك هنا ليساعدك على التسجيل والمراجعة والتخطيط.',
+                                ),
+                                style: TextStyle(
+                                  color: muted,
+                                  fontSize: 11,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 9),
-                  Container(
-                    width: 44,
-                    height: 44,
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF84BFF3),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: const ClipOval(
-                      child: BilCoachPortrait(width: 38, height: 38),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 15),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final item in <(String, String)>[
-                      (t('Coach', 'المدرب'), 'coach'),
-                      (t('Insights', 'تحليلات'), '/analytics'),
-                      (t('Plan', 'الخطة'), '/plan'),
-                      (t('Progress', 'التقدم'), '/history'),
-                      (t('Tools', 'الأدوات'), '/daily-log'),
-                      (t('My Plan', 'خطتي'), '/smart-plan'),
-                    ])
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(end: 5),
-                        child: MergeSemantics(
-                          child: Semantics(
-                            selected: item.$2 == 'coach',
-                            child: TextButton(
-                              key: Key('coach-workspace-tab-${item.$2}'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: CommunitySapphire.actionBlue(
-                                  context,
-                                ),
-                                disabledForegroundColor: scheme.onSurface
-                                    .withValues(alpha: .38),
-                                backgroundColor: Colors.transparent,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 17,
-                                  vertical: 10,
-                                ),
-                                minimumSize: const Size(48, 40),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(11),
-                                ),
-                              ),
-                              onPressed: item.$2 == 'coach'
-                                  ? onChat
-                                  : item.$2 == '/daily-log'
-                                  ? (onTools ?? () => onRoute('/daily-log'))
-                                  : () => onRoute(item.$2),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (item.$2 == 'coach') ...[
-                                    const Icon(
-                                      Icons.smart_toy_outlined,
-                                      size: 18,
-                                    ),
-                                    const SizedBox(width: 6),
-                                  ],
-                                  Text(
-                                    item.$1,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: item.$2 == 'coach'
-                                          ? FontWeight.w700
-                                          : FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
+                ),
+                const SizedBox(height: 12),
+                LayoutBuilder(
+                  builder: (context, constraints) => Wrap(
+                    spacing: 9,
+                    runSpacing: 9,
+                    children: [
+                      for (final tool
+                          in <(IconData, String, String, Color, VoidCallback)>[
+                            (
+                              Icons.photo_camera_outlined,
+                              t('Log a Meal', 'سجّل وجبة'),
+                              t('Take a photo', 'التقط صورة'),
+                              const Color(0xFF3CA7FF),
+                              onPhoto,
+                            ),
+                            (
+                              Icons.graphic_eq_rounded,
+                              t('Voice Log', 'تسجيل صوتي'),
+                              t('Just talk', 'تحدث فقط'),
+                              const Color(0xFF2FB88F),
+                              onVoice,
+                            ),
+                            (
+                              Icons.add_rounded,
+                              t('Quick Add', 'إضافة سريعة'),
+                              t('In seconds', 'خلال ثوانٍ'),
+                              const Color(0xFF31C5DD),
+                              onQuickAdd,
+                            ),
+                            (
+                              Icons.qr_code_scanner_rounded,
+                              t('Scan Product', 'مسح منتج'),
+                              t('Barcode / Label', 'باركود / ملصق'),
+                              const Color(0xFF9475DA),
+                              () => onRoute(
+                                '/daily-log?foodLog=1&action=barcode',
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final columns =
-                      MediaQuery.textScalerOf(context).scale(1) > 1.3 ||
-                          constraints.maxWidth < 560
-                      ? 2
-                      : 4;
-                  final width =
-                      (constraints.maxWidth - (columns - 1) * 7) / columns;
-                  return Wrap(
-                    spacing: 7,
-                    runSpacing: 7,
-                    children: [
-                      for (final row in nutrientRows)
+                          ])
                         SizedBox(
-                          width: width,
-                          child: _NutrientTile(
-                            label: row.$1,
-                            amount: row.$2,
-                            target: row.$3,
-                            accent: row.$4,
-                            progress: row.$5,
-                            locked: !unlocked,
-                            onTap: () => onRoute('/analytics/nutrition'),
-                          ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 13),
-              _WorkspaceCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.track_changes_rounded,
-                        color: Color(0xFF31CE9A),
-                        size: 31,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              t("Today's Focus", 'تركيز اليوم'),
-                              style: TextStyle(
-                                color: scheme.onSurface,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              t(
-                                'One small action at a time. Your coach is here to help you log, reflect, and plan.',
-                                'خطوة صغيرة في كل مرة. مدربك هنا ليساعدك على التسجيل والمراجعة والتخطيط.',
-                              ),
-                              style: TextStyle(
-                                color: muted,
-                                fontSize: 11,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              LayoutBuilder(
-                builder: (context, constraints) => Wrap(
-                  spacing: 9,
-                  runSpacing: 9,
-                  children: [
-                    for (final tool
-                        in <(IconData, String, String, Color, VoidCallback)>[
-                          (
-                            Icons.photo_camera_outlined,
-                            t('Log a Meal', 'سجّل وجبة'),
-                            t('Take a photo', 'التقط صورة'),
-                            const Color(0xFF3CA7FF),
-                            onPhoto,
-                          ),
-                          (
-                            Icons.graphic_eq_rounded,
-                            t('Voice Log', 'تسجيل صوتي'),
-                            t('Just talk', 'تحدث فقط'),
-                            const Color(0xFF2FB88F),
-                            onVoice,
-                          ),
-                          (
-                            Icons.add_rounded,
-                            t('Quick Add', 'إضافة سريعة'),
-                            t('In seconds', 'خلال ثوانٍ'),
-                            const Color(0xFF31C5DD),
-                            onQuickAdd,
-                          ),
-                          (
-                            Icons.qr_code_scanner_rounded,
-                            t('Scan Product', 'مسح منتج'),
-                            t('Barcode / Label', 'باركود / ملصق'),
-                            const Color(0xFF9475DA),
-                            () =>
-                                onRoute('/daily-log?foodLog=1&action=barcode'),
-                          ),
-                        ])
-                      SizedBox(
-                        width: (constraints.maxWidth - 9) / 2,
-                        child: _WorkspaceCard(
-                          child: InkWell(
-                            onTap: tool.$5,
-                            borderRadius: BorderRadius.circular(13),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 13,
-                              ),
-                              child: Row(
-                                children: [
-                                  BilNavigationFeedback(
-                                    child: Icon(
-                                      tool.$1,
-                                      color: _workspaceAccent(context, tool.$4),
-                                      size: 25,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          tool.$2,
-                                          style: TextStyle(
-                                            color: scheme.onSurface,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          tool.$3,
-                                          style: TextStyle(
-                                            color: muted,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 15),
-              _WorkspaceCard(
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Image.asset(
-                        'assets/images/professional/mediterranean_protein_bowl.png',
-                        fit: BoxFit.cover,
-                        alignment: Alignment.centerRight,
-                        errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                      ),
-                    ),
-                    Positioned.fill(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? const [
-                                    Color(0xF2112031),
-                                    Color(0xC5112031),
-                                    Color(0x20112031),
-                                  ]
-                                : const [
-                                    Color(0xFAFCFDFE),
-                                    Color(0xF2FCFDFE),
-                                    Color(0xA8FCFDFE),
-                                  ],
-                            stops: const [0, .6, 1],
-                            begin: ar
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
-                            end: ar
-                                ? Alignment.centerLeft
-                                : Alignment.centerRight,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: FractionallySizedBox(
-                        widthFactor: .77,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              t(
-                                'Turn any meal into insights',
-                                'حوّل وجبتك إلى معلومات',
-                              ),
-                              style: TextStyle(
-                                color: scheme.onSurface,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              t(
-                                "Snap a photo to review food and portions before adding it to your log.",
-                                'التقط صورة لمراجعة الطعام والكميات قبل إضافتها إلى سجلك.',
-                              ),
-                              style: TextStyle(
-                                color: muted,
-                                fontSize: 11,
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 11),
-                            FilledButton(
-                              onPressed: onPhoto,
-                              style: FilledButton.styleFrom(
-                                backgroundColor: _blue,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(48, 36),
+                          width: (constraints.maxWidth - 9) / 2,
+                          child: _WorkspaceCard(
+                            child: InkWell(
+                              onTap: tool.$5,
+                              borderRadius: BorderRadius.circular(13),
+                              child: Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
+                                  horizontal: 10,
+                                  vertical: 13,
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                child: Row(
+                                  children: [
+                                    BilNavigationFeedback(
+                                      child: Icon(
+                                        tool.$1,
+                                        color: _workspaceAccent(
+                                          context,
+                                          tool.$4,
+                                        ),
+                                        size: 25,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            tool.$2,
+                                            style: TextStyle(
+                                              color: scheme.onSurface,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            tool.$3,
+                                            style: TextStyle(
+                                              color: muted,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Text(
-                                t(
-                                  'Try Photo Logging  ›',
-                                  'جرّب تسجيل الصورة  ‹',
-                                ),
-                                style: TextStyle(fontSize: 11),
-                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 17),
-              Text(
-                t('Your Health Timeline', 'تسلسل يومك الصحي'),
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 9),
-              DecoratedBox(
-                decoration: BilPearlFinish.panel(context),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Column(
-                    children: [
-                      if (mealCount > 0)
-                        _TimelineRow(
-                          icon: Icons.restaurant_rounded,
-                          label: t('Meals logged', 'وجبات مسجلة'),
-                          detail: t(
-                            '$mealCount meal entries in your actual log',
-                            '$mealCount وجبات في سجلك الفعلي',
-                          ),
-                          onTap: () => onRoute('/daily-log'),
-                        ),
-                      if (snapshot?.weights.isNotEmpty == true)
-                        _TimelineRow(
-                          icon: Icons.monitor_weight_outlined,
-                          label: t('Weight logged', 'وزن مسجل'),
-                          detail:
-                              '${snapshot!.weights.reduce((a, b) => a.at.isAfter(b.at) ? a : b).kg} kg',
-                          onTap: () => onRoute('/weight-history'),
-                        ),
-                      if (snapshot?.waterHistory.isNotEmpty == true)
-                        _TimelineRow(
-                          icon: Icons.water_drop_outlined,
-                          label: t('Water logged', 'ماء مسجل'),
-                          detail: _water(
-                            _latestMap(snapshot!.waterHistory, 'at'),
-                          ),
-                          onTap: () => onRoute('/daily-log/water'),
-                        ),
-                      if (snapshot?.activityHistory.isNotEmpty == true)
-                        _TimelineRow(
-                          icon: Icons.directions_walk_rounded,
-                          label: t('Activity synced', 'نشاط متزامن'),
-                          detail: _steps(
-                            _latestMap(snapshot!.activityHistory, 'day'),
-                            context,
-                          ),
-                          onTap: () => onRoute('/connected-health/steps'),
-                        ),
-                      if (mealCount == 0 &&
-                          snapshot?.weights.isNotEmpty != true &&
-                          snapshot?.waterHistory.isNotEmpty != true &&
-                          snapshot?.activityHistory.isNotEmpty != true)
-                        Padding(
-                          padding: const EdgeInsets.all(18),
-                          child: Text(
-                            t(
-                              'Your verified entries will appear here.',
-                              'ستظهر تسجيلاتك الفعلية هنا.',
-                            ),
-                            style: TextStyle(color: muted, fontSize: 12),
                           ),
                         ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 13),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BilPearlFinish.panel(context),
-                child: Text(
-                  t(
-                    'Small consistent actions create meaningful progress.\n— BIL AI Coach',
-                    'خطوات صغيرة مستمرة تصنع تقدمًا حقيقيًا.\n— مدرب BIL الذكي',
+                const SizedBox(height: 15),
+                _WorkspaceCard(
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Image.asset(
+                          'assets/images/professional/mediterranean_protein_bowl.png',
+                          fit: BoxFit.cover,
+                          alignment: Alignment.centerRight,
+                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const [
+                                      Color(0xF2112031),
+                                      Color(0xC5112031),
+                                      Color(0x20112031),
+                                    ]
+                                  : const [
+                                      Color(0xFAFCFDFE),
+                                      Color(0xF2FCFDFE),
+                                      Color(0xA8FCFDFE),
+                                    ],
+                              stops: const [0, .6, 1],
+                              begin: ar
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              end: ar
+                                  ? Alignment.centerLeft
+                                  : Alignment.centerRight,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: FractionallySizedBox(
+                          widthFactor: .77,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t(
+                                  'Turn any meal into insights',
+                                  'حوّل وجبتك إلى معلومات',
+                                ),
+                                style: TextStyle(
+                                  color: scheme.onSurface,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                t(
+                                  "Snap a photo to review food and portions before adding it to your log.",
+                                  'التقط صورة لمراجعة الطعام والكميات قبل إضافتها إلى سجلك.',
+                                ),
+                                style: TextStyle(
+                                  color: muted,
+                                  fontSize: 11,
+                                  height: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 11),
+                              FilledButton(
+                                onPressed: onPhoto,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: _blue,
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size(48, 36),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  t(
+                                    'Try Photo Logging  ›',
+                                    'جرّب تسجيل الصورة  ‹',
+                                  ),
+                                  style: TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11, height: 1.7, color: muted),
                 ),
-              ),
-            ],
+                const SizedBox(height: 17),
+                Text(
+                  t('Your Health Timeline', 'تسلسل يومك الصحي'),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 9),
+                DecoratedBox(
+                  decoration: BilPearlFinish.panel(context),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Column(
+                      children: [
+                        if (mealCount > 0)
+                          _TimelineRow(
+                            icon: Icons.restaurant_rounded,
+                            label: t('Meals logged', 'وجبات مسجلة'),
+                            detail: t(
+                              '$mealCount meal entries in your actual log',
+                              '$mealCount وجبات في سجلك الفعلي',
+                            ),
+                            onTap: () => onRoute('/daily-log'),
+                          ),
+                        if (snapshot?.weights.isNotEmpty == true)
+                          _TimelineRow(
+                            icon: Icons.monitor_weight_outlined,
+                            label: t('Weight logged', 'وزن مسجل'),
+                            detail:
+                                '${snapshot!.weights.reduce((a, b) => a.at.isAfter(b.at) ? a : b).kg} kg',
+                            onTap: () => onRoute('/weight-history'),
+                          ),
+                        if (snapshot?.waterHistory.isNotEmpty == true)
+                          _TimelineRow(
+                            icon: Icons.water_drop_outlined,
+                            label: t('Water logged', 'ماء مسجل'),
+                            detail: _water(
+                              _latestMap(snapshot!.waterHistory, 'at'),
+                            ),
+                            onTap: () => onRoute('/daily-log/water'),
+                          ),
+                        if (snapshot?.activityHistory.isNotEmpty == true)
+                          _TimelineRow(
+                            icon: Icons.directions_walk_rounded,
+                            label: t('Activity synced', 'نشاط متزامن'),
+                            detail: _steps(
+                              _latestMap(snapshot!.activityHistory, 'day'),
+                              context,
+                            ),
+                            onTap: () => onRoute('/connected-health/steps'),
+                          ),
+                        if (mealCount == 0 &&
+                            snapshot?.weights.isNotEmpty != true &&
+                            snapshot?.waterHistory.isNotEmpty != true &&
+                            snapshot?.activityHistory.isNotEmpty != true)
+                          Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Text(
+                              t(
+                                'Your verified entries will appear here.',
+                                'ستظهر تسجيلاتك الفعلية هنا.',
+                              ),
+                              style: TextStyle(color: muted, fontSize: 12),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 13),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BilPearlFinish.panel(context),
+                  child: Text(
+                    t(
+                      'Small consistent actions create meaningful progress.\n— BIL AI Coach',
+                      'خطوات صغيرة مستمرة تصنع تقدمًا حقيقيًا.\n— مدرب BIL الذكي',
+                    ),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, height: 1.7, color: muted),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

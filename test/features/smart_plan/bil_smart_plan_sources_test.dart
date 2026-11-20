@@ -174,6 +174,10 @@ void main() {
               await tester.tap(find.byKey(_book));
               await _frames(tester);
               expect(find.byType(BilSmartPlanSourcesPanel), findsOneWidget);
+              final heading = find.byKey(
+                const Key('smart-plan-sources-pinned-heading'),
+              );
+              final headingBeforeScroll = tester.getRect(heading);
               expect(
                 Directionality.of(
                   tester.element(find.byType(BilSmartPlanSourcesPanel)),
@@ -186,13 +190,14 @@ void main() {
               final metadata = await const BilSmartPlanPrescriptions()
                   .homeSources();
               final scroll = find.descendant(
-                of: find.byType(BilSmartPlanSourcesPanel),
+                of: find.byKey(const ValueKey('bil-smart-plan-sources-scroll')),
                 matching: find.byType(Scrollable),
               );
               for (final item in metadata) {
                 final label = find.text('${item.publisher} · ${item.title}');
                 await tester.scrollUntilVisible(label, 180, scrollable: scroll);
                 await _frames(tester);
+                expect(tester.getRect(heading), headingBeforeScroll);
                 await tester.tap(label);
                 await _frames(tester);
                 expect(launcher.urls.last, item.url.toString());
@@ -235,7 +240,17 @@ void main() {
                   'health-source-${HealthEvidenceIds.activityGuidelines}',
                 ),
               );
-              await tester.scrollUntilVisible(featured, 180);
+              await tester.scrollUntilVisible(
+                featured,
+                180,
+                scrollable: find.descendant(
+                  of: find.descendant(
+                    of: find.byType(HealthInformationSourcesPage),
+                    matching: find.byType(ListView),
+                  ),
+                  matching: find.byType(Scrollable),
+                ),
+              );
               expect(featured, findsOneWidget);
               router.pop();
               await _frames(tester);

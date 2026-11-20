@@ -54,16 +54,26 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        final pinnedHeader = find.byKey(
+          const Key('nutrition-pathways-pinned-header'),
+        );
+        final headerBefore = tester.getRect(pinnedHeader);
         final hero = find.byKey(
           Key('nutrition-pathway-access-hero-${carbCyclingPathway.id}'),
         );
         await tester.scrollUntilVisible(
           hero,
           180,
-          scrollable: find.byType(Scrollable).first,
+          scrollable: find
+              .descendant(
+                of: find.byType(ListView).first,
+                matching: find.byType(Scrollable),
+              )
+              .first,
         );
         await tester.pumpAndSettle();
         expect(hero, findsOneWidget);
+        expect(tester.getRect(pinnedHeader).topLeft, headerBefore.topLeft);
         expect(tester.takeException(), isNull, reason: '$locale / $scale');
       }
     }
@@ -170,7 +180,12 @@ void main() {
         await tester.scrollUntilVisible(
           compactPremiumBadge,
           260,
-          scrollable: find.byType(Scrollable).first,
+          scrollable: find
+              .descendant(
+                of: find.byType(ListView).first,
+                matching: find.byType(Scrollable),
+              )
+              .first,
         );
         expect(compactPremiumBadge, findsOneWidget);
         expect(

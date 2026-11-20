@@ -1,4 +1,6 @@
+import '../../../shared/widgets/bil_page_heading.dart';
 import 'package:flutter/material.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
@@ -93,85 +95,101 @@ class _MealCopyPageState extends ConsumerState<MealCopyPage> {
       canPop: !_saving,
       child: Scaffold(
         appBar: AppBar(title: Text(t('Copy previous meal', 'نسخ وجبة سابقة'))),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Text(
-              widget.source.meal.name,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            Text(
-              MaterialLocalizations.of(
-                context,
-              ).formatFullDate(widget.source.meal.date),
-            ),
-            for (final item in widget.source.items)
-              ListTile(
-                title: Text(
-                  widget.source.foodsById[item.foodId] == null
-                      ? t('Saved food', 'طعام مسجّل')
-                      : FoodPresentationLocalizer.foodName(
-                          name: widget.source.foodsById[item.foodId]!.name,
-                          arabicName:
-                              widget.source.foodsById[item.foodId]!.arabicName,
-                          localeTag: locale,
-                          isCustom:
-                              widget.source.foodsById[item.foodId]!.isCustom,
-                          source: widget.source.foodsById[item.foodId]!.source,
-                        ),
+        body: BilPinnedHeaderBody(
+          header: Padding(
+            key: const Key('meal-copy-pinned-header'),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  widget.source.meal.name,
+                  style: bilPageHeadingStyle(context),
                 ),
-                trailing: Text(
-                  MealItemEvidencePresenter.quantityLabel(
-                    item: item,
-                    languageCode: Localizations.localeOf(context).languageCode,
+                Text(
+                  MaterialLocalizations.of(
+                    context,
+                  ).formatFullDate(widget.source.meal.date),
+                ),
+              ],
+            ),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            children: [
+              for (final item in widget.source.items)
+                ListTile(
+                  title: Text(
+                    widget.source.foodsById[item.foodId] == null
+                        ? t('Saved food', 'طعام مسجّل')
+                        : FoodPresentationLocalizer.foodName(
+                            name: widget.source.foodsById[item.foodId]!.name,
+                            arabicName: widget
+                                .source
+                                .foodsById[item.foodId]!
+                                .arabicName,
+                            localeTag: locale,
+                            isCustom:
+                                widget.source.foodsById[item.foodId]!.isCustom,
+                            source:
+                                widget.source.foodsById[item.foodId]!.source,
+                          ),
+                  ),
+                  trailing: Text(
+                    MealItemEvidencePresenter.quantityLabel(
+                      item: item,
+                      languageCode: Localizations.localeOf(
+                        context,
+                      ).languageCode,
+                    ),
+                  ),
+                ),
+              const Divider(),
+              nutritionDestinationFields(
+                context,
+                date: _date,
+                type: _type,
+                enabled: enabled,
+                onDate: (date) {
+                  if (mounted) setState(() => _date = date);
+                },
+                onType: (type) => setState(() => _type = type),
+              ),
+              CheckboxListTile(
+                value: _append,
+                onChanged: enabled
+                    ? (value) => setState(() => _append = value == true)
+                    : null,
+                title: Text(
+                  t(
+                    'Append if this meal already contains food',
+                    'ضمّها إلى الأطعمة الموجودة إن كانت الوجهة تحتوي على وجبة',
+                  ),
+                ),
+                subtitle: Text(
+                  t(
+                    'The source meal is unchanged. A second confirmation can intentionally copy the meal again.',
+                    'الوجبة الأصلية لا تتغير. إعادة التأكيد لاحقًا قد تنسخ الوجبة مرة أخرى عمدًا.',
                   ),
                 ),
               ),
-            const Divider(),
-            nutritionDestinationFields(
-              context,
-              date: _date,
-              type: _type,
-              enabled: enabled,
-              onDate: (date) {
-                if (mounted) setState(() => _date = date);
-              },
-              onType: (type) => setState(() => _type = type),
-            ),
-            CheckboxListTile(
-              value: _append,
-              onChanged: enabled
-                  ? (value) => setState(() => _append = value == true)
-                  : null,
-              title: Text(
-                t(
-                  'Append if this meal already contains food',
-                  'ضمّها إلى الأطعمة الموجودة إن كانت الوجهة تحتوي على وجبة',
+              if (_error != null)
+                Text(
+                  _error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              FilledButton.icon(
+                key: const Key('confirm-copy-selected-meal'),
+                onPressed: enabled ? _save : null,
+                icon: const Icon(Icons.content_copy),
+                label: Text(
+                  _saving
+                      ? t('Copying…', 'جارٍ النسخ…')
+                      : t('Confirm copy', 'تأكيد النسخ'),
                 ),
               ),
-              subtitle: Text(
-                t(
-                  'The source meal is unchanged. A second confirmation can intentionally copy the meal again.',
-                  'الوجبة الأصلية لا تتغير. إعادة التأكيد لاحقًا قد تنسخ الوجبة مرة أخرى عمدًا.',
-                ),
-              ),
-            ),
-            if (_error != null)
-              Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            FilledButton.icon(
-              key: const Key('confirm-copy-selected-meal'),
-              onPressed: enabled ? _save : null,
-              icon: const Icon(Icons.content_copy),
-              label: Text(
-                _saving
-                    ? t('Copying…', 'جارٍ النسخ…')
-                    : t('Confirm copy', 'تأكيد النسخ'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

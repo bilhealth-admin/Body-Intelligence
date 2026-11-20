@@ -69,11 +69,16 @@ void main() {
               find.byKey(const Key('open-report-details-layout')),
             );
             await tester.pumpAndSettle();
+            final heading = find.byKey(
+              const Key('coach-report-pinned-heading'),
+            );
+            final headingBeforeScroll = tester.getRect(heading);
             final details = find.byKey(
               const Key('ai-coach-report-privacy-details'),
             );
             await tester.ensureVisible(details);
             await tester.pumpAndSettle();
+            expect(tester.getRect(heading), headingBeforeScroll);
             final text = find.descendant(
               of: details,
               matching: find.byType(Text),

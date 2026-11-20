@@ -44,6 +44,7 @@ class _FeedTabState extends State<_FeedTab>
   ) {
     final scoped = List<CommunityPost>.unmodifiable(posts);
     _postModes[scoped] = mode;
+    _rememberPresentedPosts(scoped, mode);
     return scoped;
   }
 

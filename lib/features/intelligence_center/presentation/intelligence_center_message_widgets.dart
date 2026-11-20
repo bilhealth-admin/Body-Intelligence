@@ -614,46 +614,52 @@ class _ActionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: ListView(
+      child: BilPinnedHeaderBody(
         shrinkWrap: true,
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
+        header: Padding(
+          key: const Key("coach-actions-pinned-heading"),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Text(
             intelligenceText(context, 'Suggested actions', 'إجراءات مقترحة'),
-            style: Theme.of(context).textTheme.titleLarge,
+            style: bilPageHeadingStyle(context),
           ),
-          const SizedBox(height: 8),
-          for (final action in actions)
-            ListTile(
-              key: Key(
-                'ai-coach-action-sheet-${action.type.name}-${action.id}',
-              ),
-              leading: switch (_semanticKindForAction(action.type)) {
-                final kind? => BilSemanticIconBadge(
-                  kind: kind,
-                  iconOverride: _iconForAction(action.type),
-                  appleIconOverride: _iconForAction(action.type),
+        ),
+        body: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          children: [
+            for (final action in actions)
+              ListTile(
+                key: Key(
+                  'ai-coach-action-sheet-${action.type.name}-${action.id}',
                 ),
-                null => BilNavigationFeedback(
-                  child: Icon(_iconForAction(action.type)),
+                leading: switch (_semanticKindForAction(action.type)) {
+                  final kind? => BilSemanticIconBadge(
+                    kind: kind,
+                    iconOverride: _iconForAction(action.type),
+                    appleIconOverride: _iconForAction(action.type),
+                  ),
+                  null => BilNavigationFeedback(
+                    child: Icon(_iconForAction(action.type)),
+                  ),
+                },
+                title: Text(action.label),
+                subtitle: Text(
+                  action.requiresConfirmation
+                      ? intelligenceText(
+                          context,
+                          'Requires your confirmation',
+                          'يتطلب تأكيدك',
+                        )
+                      : '',
                 ),
-              },
-              title: Text(action.label),
-              subtitle: Text(
-                action.requiresConfirmation
-                    ? intelligenceText(
-                        context,
-                        'Requires your confirmation',
-                        'يتطلب تأكيدك',
-                      )
-                    : '',
+                onTap: () {
+                  Navigator.pop(context);
+                  onAction(action);
+                },
               ),
-              onTap: () {
-                Navigator.pop(context);
-                onAction(action);
-              },
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

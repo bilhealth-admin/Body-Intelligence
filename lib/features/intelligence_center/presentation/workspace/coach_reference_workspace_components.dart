@@ -216,3 +216,224 @@ class _TimelineRow extends StatelessWidget {
     ),
   );
 }
+
+/// Stationary workspace chrome; data/access decisions remain in its owner.
+class _CoachWorkspaceHeading extends StatelessWidget {
+  const _CoachWorkspaceHeading({
+    required this.now,
+    required this.name,
+    required this.paidLabel,
+    required this.unlocked,
+    required this.paidPlan,
+    required this.onExit,
+    required this.onChat,
+    required this.onTools,
+    required this.onRoute,
+  });
+  final DateTime now;
+  final String? name;
+  final bool paidLabel;
+  final bool unlocked;
+  final CommercePlan? paidPlan;
+  final VoidCallback? onExit;
+  final VoidCallback onChat;
+  final VoidCallback? onTools;
+  final ValueChanged<String> onRoute;
+  @override
+  Widget build(BuildContext context) {
+    final name = this.name;
+    final ar = Directionality.of(context) == TextDirection.rtl;
+    final scheme = Theme.of(context).colorScheme;
+    final muted = scheme.onSurfaceVariant;
+    String t(String en, String arabic) => intelligenceText(context, en, arabic);
+    return Padding(
+      key: const Key("coach-workspace-pinned-heading"),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 12),
+                child: SizedBox.square(
+                  dimension: 48,
+                  child: IconButton(
+                    key: const Key('coach-workspace-back-to-chat'),
+                    tooltip: t('Back', 'رجوع'),
+                    onPressed: onExit ?? onChat,
+                    icon: BilNavigationFeedback(
+                      child: Icon(
+                        ar
+                            ? Icons.chevron_right_rounded
+                            : Icons.chevron_left_rounded,
+                        color: muted,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${now.hour < 12 ? t('Good morning', 'صباح الخير') : t('Welcome back', 'أهلًا بعودتك')}${name == null || name.isEmpty ? '' : ', $name'}',
+                      key: const Key('coach-workspace-greeting'),
+                      style: bilPageHeadingStyle(
+                        context,
+                        color: scheme.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      t("Let's make today count.", 'لنصنع فرقًا اليوم.'),
+                      key: const Key('coach-workspace-greeting-detail'),
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: _CoachAccessLabelSlot(
+                        visible: paidLabel || unlocked,
+                        labels: [
+                          BilStoreCopy.text(
+                            Localizations.localeOf(context).toLanguageTag(),
+                            'premium',
+                          ),
+                          BilStoreCopy.text(
+                            Localizations.localeOf(context).toLanguageTag(),
+                            'premium_ai_coach',
+                          ),
+                          t(
+                            'Verified AI Boost access',
+                            'وصول موثق عبر AI Boost',
+                          ),
+                        ],
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: scheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            paidLabel
+                                ? BilStoreCopy.text(
+                                    Localizations.localeOf(
+                                      context,
+                                    ).toLanguageTag(),
+                                    paidPlan == CommercePlan.premiumAiCoach
+                                        ? 'premium_ai_coach'
+                                        : 'premium',
+                                  )
+                                : t(
+                                    'Verified AI Boost access',
+                                    'وصول موثق عبر AI Boost',
+                                  ),
+                            key: const Key('coach-workspace-plan-label'),
+                            style: TextStyle(
+                              color: scheme.onPrimaryContainer,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 9),
+              Container(
+                width: 44,
+                height: 44,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: const Color(0xFF84BFF3),
+                    width: 1.5,
+                  ),
+                ),
+                child: const ClipOval(
+                  child: BilCoachPortrait(width: 38, height: 38),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final item in <(String, String)>[
+                  (t('Coach', 'المدرب'), 'coach'),
+                  (t('Insights', 'تحليلات'), '/analytics'),
+                  (t('Plan', 'الخطة'), '/plan'),
+                  (t('Progress', 'التقدم'), '/history'),
+                  (t('Tools', 'الأدوات'), '/daily-log'),
+                  (t('My Plan', 'خطتي'), '/smart-plan'),
+                ])
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 5),
+                    child: MergeSemantics(
+                      child: Semantics(
+                        selected: item.$2 == 'coach',
+                        child: TextButton(
+                          key: Key('coach-workspace-tab-${item.$2}'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: CommunitySapphire.actionBlue(
+                              context,
+                            ),
+                            disabledForegroundColor: scheme.onSurface
+                                .withValues(alpha: .38),
+                            backgroundColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 17,
+                              vertical: 10,
+                            ),
+                            minimumSize: const Size(48, 40),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                          ),
+                          onPressed: item.$2 == 'coach'
+                              ? onChat
+                              : item.$2 == '/daily-log'
+                              ? (onTools ?? () => onRoute('/daily-log'))
+                              : () => onRoute(item.$2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (item.$2 == 'coach') ...[
+                                const Icon(Icons.smart_toy_outlined, size: 18),
+                                const SizedBox(width: 6),
+                              ],
+                              Text(
+                                item.$1,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: item.$2 == 'coach'
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+  }
+}

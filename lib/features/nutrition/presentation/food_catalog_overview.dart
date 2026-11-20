@@ -73,69 +73,73 @@ class _FoodAddActionSheet extends ConsumerWidget {
           16,
           16 + MediaQuery.viewInsetsOf(context).bottom,
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                t('Add food'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 8),
-              KeyedSubtree(
-                key: const Key('food-add-barcode-premium-group'),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (verifiedDenied)
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: PremiumLabelBadge(
-                          onTap: () => context.push('/plans'),
+        child: BilPinnedHeaderBody(
+          shrinkWrap: true,
+          header: Padding(
+            key: const Key('food-add-pinned-header'),
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(t('Add food'), style: bilPageHeadingStyle(context)),
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                KeyedSubtree(
+                  key: const Key('food-add-barcode-premium-group'),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (verifiedDenied)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: PremiumLabelBadge(
+                            onTap: () => context.push('/plans'),
+                          ),
+                        ),
+                      _FoodAddActionTile(
+                        actionKey: const Key('food-add-scan-barcode'),
+                        kind: BilSemanticIconKind.barcode,
+                        label: nutritionText(
+                          context,
+                          'Scan barcode',
+                          'مسح الباركود',
+                        ),
+                        onTap: () =>
+                            Navigator.pop(context, _FoodAddMethod.scanBarcode),
+                      ),
+                      _FoodAddActionTile(
+                        actionKey: const Key('food-add-manual-barcode'),
+                        kind: BilSemanticIconKind.barcode,
+                        iconOverride: Icons.dialpad_rounded,
+                        label: t('Enter barcode manually'),
+                        onTap: () => Navigator.pop(
+                          context,
+                          _FoodAddMethod.manualBarcode,
                         ),
                       ),
-                    _FoodAddActionTile(
-                      actionKey: const Key('food-add-scan-barcode'),
-                      kind: BilSemanticIconKind.barcode,
-                      label: nutritionText(
-                        context,
-                        'Scan barcode',
-                        'مسح الباركود',
-                      ),
-                      onTap: () =>
-                          Navigator.pop(context, _FoodAddMethod.scanBarcode),
-                    ),
-                    _FoodAddActionTile(
-                      actionKey: const Key('food-add-manual-barcode'),
-                      kind: BilSemanticIconKind.barcode,
-                      iconOverride: Icons.dialpad_rounded,
-                      label: t('Enter barcode manually'),
-                      onTap: () =>
-                          Navigator.pop(context, _FoodAddMethod.manualBarcode),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              _FoodAddActionTile(
-                actionKey: const Key('food-add-meal-photo'),
-                kind: BilSemanticIconKind.mealPhoto,
-                label: nutritionText(
-                  context,
-                  'Analyze meal photo',
-                  'تحليل صورة الوجبة',
+                _FoodAddActionTile(
+                  actionKey: const Key('food-add-meal-photo'),
+                  kind: BilSemanticIconKind.mealPhoto,
+                  label: nutritionText(
+                    context,
+                    'Analyze meal photo',
+                    'تحليل صورة الوجبة',
+                  ),
+                  onTap: () => Navigator.pop(context, _FoodAddMethod.mealPhoto),
                 ),
-                onTap: () => Navigator.pop(context, _FoodAddMethod.mealPhoto),
-              ),
-              _FoodAddActionTile(
-                actionKey: const Key('food-add-custom-food'),
-                kind: BilSemanticIconKind.notes,
-                label: customFoodText(context, 'Create custom food'),
-                onTap: () => Navigator.pop(context, _FoodAddMethod.customFood),
-              ),
-            ],
+                _FoodAddActionTile(
+                  actionKey: const Key('food-add-custom-food'),
+                  kind: BilSemanticIconKind.notes,
+                  label: customFoodText(context, 'Create custom food'),
+                  onTap: () =>
+                      Navigator.pop(context, _FoodAddMethod.customFood),
+                ),
+              ],
+            ),
           ),
         ),
       ),

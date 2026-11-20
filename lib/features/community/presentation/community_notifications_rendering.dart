@@ -20,9 +20,7 @@ extension _CommunityNotificationsRendering on _CommunityNotificationsPageState {
       centerTitle: true,
       title: Text(
         communityText(context, 'Notifications', 'الإشعارات'),
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+        style: bilPageHeadingStyle(context),
       ),
       actions: [
         IconButton(

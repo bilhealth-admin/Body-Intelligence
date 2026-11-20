@@ -9,6 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../shared/widgets/bil_wordmark.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
+import '../../shared/widgets/bil_page_heading.dart';
 import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
 
@@ -204,169 +206,194 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       ),
       body: SafeArea(
         child: Center(
-          child: SingleChildScrollView(
+          child: Padding(
             padding: const EdgeInsets.all(28),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 460),
               child: Form(
                 key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Center(child: BilFullWordmark(height: 42)),
-                    const SizedBox(height: 44),
-                    Text(
-                      tr('Set a new password', 'تعيين كلمة مرور جديدة'),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      tr(
-                        'Use at least 8 characters, then sign in with your new password.',
-                        'استخدم 8 أحرف على الأقل، ثم سجّل الدخول بكلمة المرور الجديدة.',
+                child: BilPinnedHeaderBody(
+                  shrinkWrap: true,
+                  header: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Center(child: BilFullWordmark(height: 42)),
+                      const SizedBox(height: 44),
+                      Text(
+                        tr('Set a new password', 'تعيين كلمة مرور جديدة'),
+                        key: const Key('reset-password-page-heading'),
+                        textAlign: TextAlign.center,
+                        style: bilPageHeadingStyle(context),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 28),
-                    if (!recoverySessionReady)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 18),
-                        child: !cloudConfigured
-                            ? Text(
-                                tr(
-                                  'Cloud account recovery is not enabled in this build.',
-                                  'استعادة الحساب السحابي غير مفعّلة في هذا الإصدار.',
-                                ),
-                                textAlign: TextAlign.center,
-                              )
-                            : recoveryFailed
-                            ? Column(
-                                key: const Key(
-                                  'reset-password-callback-failed',
-                                ),
-                                children: [
-                                  const Icon(
-                                    Icons.link_off_rounded,
-                                    color: Color(0xFFB42318),
-                                    size: 36,
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Text(
+                      const SizedBox(height: 10),
+                      Text(
+                        tr(
+                          'Use at least 8 characters, then sign in with your new password.',
+                          'استخدم 8 أحرف على الأقل، ثم سجّل الدخول بكلمة المرور الجديدة.',
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 28),
+                    ],
+                  ),
+                  body: SingleChildScrollView(
+                    key: const Key('reset-password-body-scroll'),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (!recoverySessionReady)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 18),
+                            child: !cloudConfigured
+                                ? Text(
                                     tr(
-                                      'The recovery link could not be verified. Try it again, or request a new link.',
-                                      'تعذّر التحقق من رابط الاستعادة. حاول مرة أخرى أو اطلب رابطًا جديدًا.',
+                                      'Cloud account recovery is not enabled in this build.',
+                                      'استعادة الحساب السحابي غير مفعّلة في هذا الإصدار.',
                                     ),
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Color(0xFFB42318),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 14),
-                                  FilledButton.tonalIcon(
+                                  )
+                                : recoveryFailed
+                                ? Column(
                                     key: const Key(
-                                      'reset-password-callback-retry',
+                                      'reset-password-callback-failed',
                                     ),
-                                    onPressed: retryingRecovery
-                                        ? null
-                                        : _retryRecovery,
-                                    icon: const BilNavigationFeedback(
-                                      child: Icon(Icons.refresh_rounded),
-                                    ),
-                                    label: Text(
-                                      tr('Try again', 'حاول مرة أخرى'),
-                                    ),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => context.go('/login'),
-                                    child: Text(
-                                      tr('Request a new link', 'طلب رابط جديد'),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox.square(
-                                    dimension: 18,
-                                    child: BilFeatureWelcomeStatus(),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Flexible(
-                                    child: Text(
-                                      tr(
-                                        'Checking the recovery link…',
-                                        'جارٍ التحقق من رابط الاستعادة…',
+                                    children: [
+                                      const Icon(
+                                        Icons.link_off_rounded,
+                                        color: Color(0xFFB42318),
+                                        size: 36,
                                       ),
-                                      textAlign: TextAlign.center,
-                                    ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        tr(
+                                          'The recovery link could not be verified. Try it again, or request a new link.',
+                                          'تعذّر التحقق من رابط الاستعادة. حاول مرة أخرى أو اطلب رابطًا جديدًا.',
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Color(0xFFB42318),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      FilledButton.tonalIcon(
+                                        key: const Key(
+                                          'reset-password-callback-retry',
+                                        ),
+                                        onPressed: retryingRecovery
+                                            ? null
+                                            : _retryRecovery,
+                                        icon: const BilNavigationFeedback(
+                                          child: Icon(Icons.refresh_rounded),
+                                        ),
+                                        label: Text(
+                                          tr('Try again', 'حاول مرة أخرى'),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => context.go('/login'),
+                                        child: Text(
+                                          tr(
+                                            'Request a new link',
+                                            'طلب رابط جديد',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const SizedBox.square(
+                                        dimension: 18,
+                                        child: BilFeatureWelcomeStatus(),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Flexible(
+                                        child: Text(
+                                          tr(
+                                            'Checking the recovery link…',
+                                            'جارٍ التحقق من رابط الاستعادة…',
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                      ),
-                    TextFormField(
-                      controller: password,
-                      obscureText: obscure,
-                      autofillHints: const [AutofillHints.newPassword],
-                      decoration: InputDecoration(
-                        labelText: tr('New password', 'كلمة المرور الجديدة'),
-                        prefixIcon: const Icon(Icons.lock_outline_rounded),
-                        suffixIcon: IconButton(
-                          onPressed: () => setState(() => obscure = !obscure),
-                          icon: Icon(
-                            obscure
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
                           ),
+                        TextFormField(
+                          controller: password,
+                          obscureText: obscure,
+                          autofillHints: const [AutofillHints.newPassword],
+                          decoration: InputDecoration(
+                            labelText: tr(
+                              'New password',
+                              'كلمة المرور الجديدة',
+                            ),
+                            prefixIcon: const Icon(Icons.lock_outline_rounded),
+                            suffixIcon: IconButton(
+                              onPressed: () =>
+                                  setState(() => obscure = !obscure),
+                              icon: Icon(
+                                obscure
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                            ),
+                          ),
+                          validator: (value) => (value?.length ?? 0) >= 8
+                              ? null
+                              : tr(
+                                  'Use at least 8 characters.',
+                                  'استخدم 8 أحرف على الأقل.',
+                                ),
                         ),
-                      ),
-                      validator: (value) => (value?.length ?? 0) >= 8
-                          ? null
-                          : tr(
-                              'Use at least 8 characters.',
-                              'استخدم 8 أحرف على الأقل.',
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: confirmation,
+                          obscureText: obscure,
+                          autofillHints: const [AutofillHints.newPassword],
+                          decoration: InputDecoration(
+                            labelText: tr(
+                              'Confirm password',
+                              'تأكيد كلمة المرور',
                             ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: confirmation,
-                      obscureText: obscure,
-                      autofillHints: const [AutofillHints.newPassword],
-                      decoration: InputDecoration(
-                        labelText: tr('Confirm password', 'تأكيد كلمة المرور'),
-                        prefixIcon: const Icon(Icons.verified_user_outlined),
-                      ),
-                      validator: (value) => value == password.text
-                          ? null
-                          : tr(
-                              'Passwords do not match.',
-                              'كلمتا المرور غير متطابقتين.',
+                            prefixIcon: const Icon(
+                              Icons.verified_user_outlined,
                             ),
-                      onFieldSubmitted: (_) => updatePassword(),
+                          ),
+                          validator: (value) => value == password.text
+                              ? null
+                              : tr(
+                                  'Passwords do not match.',
+                                  'كلمتا المرور غير متطابقتين.',
+                                ),
+                          onFieldSubmitted: (_) => updatePassword(),
+                        ),
+                        if (status != null) ...[
+                          const SizedBox(height: 14),
+                          Text(
+                            status!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Color(0xFFB42318)),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                        FilledButton(
+                          onPressed: recoverySessionReady && !loading
+                              ? updatePassword
+                              : null,
+                          child: loading
+                              ? const SizedBox.square(
+                                  dimension: 22,
+                                  child: BilFeatureWelcomeStatus(),
+                                )
+                              : Text(tr('Save password', 'حفظ كلمة المرور')),
+                        ),
+                      ],
                     ),
-                    if (status != null) ...[
-                      const SizedBox(height: 14),
-                      Text(
-                        status!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(color: Color(0xFFB42318)),
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: recoverySessionReady && !loading
-                          ? updatePassword
-                          : null,
-                      child: loading
-                          ? const SizedBox.square(
-                              dimension: 22,
-                              child: BilFeatureWelcomeStatus(),
-                            )
-                          : Text(tr('Save password', 'حفظ كلمة المرور')),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

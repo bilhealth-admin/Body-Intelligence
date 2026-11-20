@@ -395,6 +395,19 @@ void main() {
       );
       final birth = find.byKey(const Key('onboarding-birth-date'));
       await tester.ensureVisible(birth);
+      await tester.pumpAndSettle();
+      final bodyScroll = find.ancestor(
+        of: find.byKey(const Key('onboarding-step-input-content')),
+        matching: find.byType(SingleChildScrollView),
+      );
+      expect(
+        birth.hitTestable(),
+        findsOneWidget,
+        reason:
+            'birth=${tester.getRect(birth)}; '
+            'body=${tester.getRect(bodyScroll)}; '
+            'feedback=${tester.getRect(find.byKey(const Key('onboarding-validation-feedback')))}',
+      );
       final localizations = MaterialLocalizations.of(tester.element(birth));
       expect(tester.takeException(), isNull, reason: 'before date picker');
       await tester.tap(birth);

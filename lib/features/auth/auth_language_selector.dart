@@ -1,5 +1,6 @@
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
+import '../../shared/widgets/bil_page_heading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -139,11 +140,9 @@ class AuthLanguageSelector extends ConsumerWidget {
                     AuthEntryCopyKey.chooseLanguage,
                   ),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Color(0xFF1C1C1E),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -.25,
+                  style: bilPageHeadingStyle(
+                    sheetContext,
+                    color: const Color(0xFF1C1C1E),
                   ),
                 ),
               ),

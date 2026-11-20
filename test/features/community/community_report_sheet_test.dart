@@ -30,6 +30,10 @@ void main() {
         );
         await tester.tap(find.text('Open'));
         await tester.pumpAndSettle();
+        final heading = find.byKey(
+          const Key('community-report-pinned-heading'),
+        );
+        final headingBeforeScroll = tester.getRect(heading);
         expect(find.byType(BilReportReasonOption), findsNWidgets(4));
         final send = find.byKey(const Key('community-report-submit'));
         expect(tester.widget<FilledButton>(send).onPressed, isNull);
@@ -45,6 +49,7 @@ void main() {
           'Please review this content',
         );
         await tester.ensureVisible(send);
+        expect(tester.getRect(heading), headingBeforeScroll);
         await tester.tap(send);
         await tester.pumpAndSettle();
         expect(completions, 1);

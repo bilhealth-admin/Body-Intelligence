@@ -3,6 +3,7 @@ import '../../app/theme/bil_navigation_press_style.dart';
 import 'package:flutter/material.dart';
 
 import 'bil_wordmark.dart';
+import 'bil_page_heading.dart';
 
 class BilAccountSurface extends StatelessWidget {
   const BilAccountSurface({
@@ -27,47 +28,117 @@ class BilAccountSurface extends StatelessWidget {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 520),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 64,
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        width: 152,
-                        child: Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: languageSelector,
+            child: LayoutBuilder(
+              builder: (context, constraints) => Column(
+                children: [
+                  ConstrainedBox(
+                    key: const Key('bil-account-header'),
+                    constraints: BoxConstraints(
+                      maxHeight: constraints.maxHeight / 2,
+                    ),
+                    child: SingleChildScrollView(
+                      primary: false,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          title ?? '',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.titleLarge,
-                        ),
-                      ),
-                      SizedBox.square(
-                        dimension: 48,
-                        child: onBack == null
-                            ? null
-                            : IconButton.filledTonal(
-                                style: BilNavigationPressStyle.neutralBubble(
-                                  context,
-                                ),
-                                onPressed: onBack,
-                                icon: const BilCrystalArrow(
-                                  child: BackButtonIcon(),
-                                ),
+                        child: LayoutBuilder(
+                          builder: (context, headerConstraints) {
+                            final style = bilPageHeadingStyle(context);
+                            final slotWidth =
+                                headerConstraints.maxWidth -
+                                (languageSelector == null ? 0 : 152) -
+                                64;
+                            final painter = TextPainter(
+                              text: TextSpan(text: title ?? '', style: style),
+                              textDirection: Directionality.of(context),
+                              textScaler: MediaQuery.textScalerOf(context),
+                              maxLines: 2,
+                            );
+                            late final bool stack;
+                            try {
+                              painter.layout(
+                                maxWidth: slotWidth.clamp(0.0, double.infinity),
+                              );
+                              stack =
+                                  slotWidth <= 0 || painter.didExceedMaxLines;
+                            } finally {
+                              painter.dispose();
+                            }
+                            final heading = Semantics(
+                              header: true,
+                              child: Text(
+                                title ?? '',
+                                key: const Key('bil-account-page-title'),
+                                textAlign: TextAlign.center,
+                                style: style,
                               ),
+                            );
+                            final back = SizedBox.square(
+                              dimension: 48,
+                              child: onBack == null
+                                  ? null
+                                  : IconButton.filledTonal(
+                                      key: const Key('bil-account-back'),
+                                      style:
+                                          BilNavigationPressStyle.neutralBubble(
+                                            context,
+                                          ),
+                                      onPressed: onBack,
+                                      icon: const BilCrystalArrow(
+                                        child: BackButtonIcon(),
+                                      ),
+                                    ),
+                            );
+                            if (stack) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Align(
+                                          alignment:
+                                              AlignmentDirectional.centerStart,
+                                          child: languageSelector,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      back,
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  heading,
+                                ],
+                              );
+                            }
+                            return Row(
+                              children: [
+                                if (languageSelector != null) ...[
+                                  SizedBox(
+                                    width: 152,
+                                    child: Align(
+                                      alignment:
+                                          AlignmentDirectional.centerStart,
+                                      child: languageSelector,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                ],
+                                Expanded(child: heading),
+                                const SizedBox(width: 8),
+                                back,
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                    ],
+                    ),
                   ),
-                ),
-                Expanded(child: child),
-              ],
+                  Expanded(child: child),
+                ],
+              ),
             ),
           ),
         ),

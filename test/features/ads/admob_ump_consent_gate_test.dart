@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'package:body_intelligence_log/features/ads/advertising_privacy_page.dart';
 import 'package:body_intelligence_log/features/ads/domain/ad_policy.dart';
@@ -12,6 +13,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final nativeStatusMessenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+  const nativeStatusChannel = MethodChannel('bil/ads_privacy');
+  setUp(() {
+    nativeStatusMessenger.setMockMethodCallHandler(
+      nativeStatusChannel,
+      (_) async => {'trackingAuthorizationStatus': 'notDetermined'},
+    );
+  });
+  tearDown(
+    () => nativeStatusMessenger.setMockMethodCallHandler(
+      nativeStatusChannel,
+      null,
+    ),
+  );
   test('UMP supports Android and iOS, never desktop or web', () {
     for (final platform in TargetPlatform.values) {
       expect(

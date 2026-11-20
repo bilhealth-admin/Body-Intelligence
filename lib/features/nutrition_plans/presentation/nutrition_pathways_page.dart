@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_pinned_header_body.dart';
+import '../../../shared/widgets/bil_page_heading.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
@@ -49,89 +51,95 @@ class NutritionPathwaysPage extends ConsumerWidget {
         centerTitle: true,
         surfaceTintColor: Colors.transparent,
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 32),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-            child: Text(
-              nutritionText(
-                context,
-                'Choose a pathway built around your goal.',
-                'اختر مساراً يناسب هدفك وحالتك.',
-              ),
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              nutritionText(
-                context,
-                'Compare first, then create an editable draft. Your goals never change without approval.',
-                'قارن أولاً، ثم أنشئ مسودة قابلة للمراجعة. لا تتغير أهدافك دون موافقتك.',
-              ),
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: const Color(0xFF667085),
-                height: 1.45,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: PremiumLabelBadge(
-                key: Key('nutrition-pathways-premium-page-label'),
-                semanticLabel: nutritionText(context, 'Premium', 'مميز'),
-                onTap: () => context.push('/plans'),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            // Keep the approved normal-size card; scaled Arabic/native fonts
-            // and the optional current-plan chip need extra vertical space.
-            height:
-                334 +
-                (MediaQuery.textScalerOf(context).scale(80) - 80).clamp(
-                  0.0,
-                  double.infinity,
+      body: BilPinnedHeaderBody(
+        header: Column(
+          key: const Key('nutrition-pathways-pinned-header'),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+              child: Text(
+                nutritionText(
+                  context,
+                  'Choose a pathway built around your goal.',
+                  'اختر مساراً يناسب هدفك وحالتك.',
                 ),
-            child: ListView.separated(
+                style: bilPageHeadingStyle(context),
+              ),
+            ),
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              scrollDirection: Axis.horizontal,
-              itemCount: nutritionPathways.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 14),
-              itemBuilder: (context, index) => _HeroCard(
-                plan: nutritionPathways[index],
+              child: Text(
+                nutritionText(
+                  context,
+                  'Compare first, then create an editable draft. Your goals never change without approval.',
+                  'قارن أولاً، ثم أنشئ مسودة قابلة للمراجعة. لا تتغير أهدافك دون موافقتك.',
+                ),
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: const Color(0xFF667085),
+                  height: 1.45,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+        body: ListView(
+          padding: const EdgeInsets.only(bottom: 32),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: PremiumLabelBadge(
+                  key: Key('nutrition-pathways-premium-page-label'),
+                  semanticLabel: nutritionText(context, 'Premium', 'مميز'),
+                  onTap: () => context.push('/plans'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              // Keep the approved normal-size card; scaled Arabic/native fonts
+              // and the optional current-plan chip need extra vertical space.
+              height:
+                  334 +
+                  (MediaQuery.textScalerOf(context).scale(80) - 80).clamp(
+                    0.0,
+                    double.infinity,
+                  ),
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                scrollDirection: Axis.horizontal,
+                itemCount: nutritionPathways.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 14),
+                itemBuilder: (context, index) => _HeroCard(
+                  plan: nutritionPathways[index],
+                  localeTag: localeTag,
+                  selected: activeId == nutritionPathways[index].id,
+                  onOpen: open,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 28, 20, 10),
+              child: Text(
+                nutritionText(context, 'All pathways', 'جميع المسارات'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ),
+            ...nutritionPathways.map(
+              (plan) => _PlanRow(
+                plan: plan,
                 localeTag: localeTag,
-                selected: activeId == nutritionPathways[index].id,
+                selected: activeId == plan.id,
                 onOpen: open,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 28, 20, 10),
-            child: Text(
-              nutritionText(context, 'All pathways', 'جميع المسارات'),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-            ),
-          ),
-          ...nutritionPathways.map(
-            (plan) => _PlanRow(
-              plan: plan,
-              localeTag: localeTag,
-              selected: activeId == plan.id,
-              onOpen: open,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

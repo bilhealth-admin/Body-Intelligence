@@ -107,17 +107,24 @@ void main() {
     final verify = File(
       'lib/features/auth/verify_email_page.dart',
     ).readAsStringSync();
+    final topBar = File(
+      'lib/features/auth/auth_page_top_bar.dart',
+    ).readAsStringSync();
 
     for (final source in [login, verify]) {
       expect(source, contains('backgroundColor: pageBackground'));
-      expect(source, contains('Color(0xFFFAFAFC)'));
-      expect(source, contains('scheme.surfaceContainerLow'));
+      expect(source, contains('AuthPageTopBar('));
       expect(source, contains('scheme.onSurface'));
-      expect(source, contains('CircleBorder()'));
-      expect(source, contains('Icons.arrow_back_ios_new_rounded'));
       expect(source, isNot(contains('BilWordmark(')));
       expect(source, isNot(contains('auth_language_selector.dart')));
     }
+    expect(topBar, contains('Color(0xFFFAFAFC)'));
+    expect(topBar, contains('scheme.surfaceContainerLow'));
+    expect(topBar, contains('CircleBorder()'));
+    expect(topBar, contains('Icons.arrow_back_ios_new_rounded'));
+    expect(topBar, contains('bilPageHeadingStyle('));
+    expect(topBar, isNot(contains('maxLines:')));
+    expect(topBar, isNot(contains('TextOverflow.ellipsis')));
 
     expect(login, contains('AuthEntryCopyKey.emailAddress'));
     expect(login, isNot(contains('BilFullWordmark')));
@@ -126,7 +133,12 @@ void main() {
     expect(login, contains('elevation: 5'));
     expect(verify, contains('BilFullWordmark'));
     expect(verify, contains('List.generate(6'));
-    expect(verify, contains('authEntryResendCountdown(context, _clock)'));
+    expect(
+      RegExp(
+        r'authEntryResendCountdown\(\s*context\s*,\s*_clock\s*,?\s*\)',
+      ).hasMatch(verify),
+      isTrue,
+    );
   });
 
   test(

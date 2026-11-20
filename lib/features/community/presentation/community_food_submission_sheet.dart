@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/material.dart';
 
@@ -123,22 +125,18 @@ class _CommunityFoodSubmissionSheetState
     canPop: !_submitting,
     child: SafeArea(
       top: false,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          MediaQuery.viewInsetsOf(context).bottom + 20,
-        ),
-        child: Form(
-          key: _formKey,
+      child: BilPinnedHeaderBody(
+        shrinkWrap: true,
+        header: Padding(
+          key: const Key("community-food-pinned-heading"),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 _text('Submit community food', 'إضافة غذاء مجتمعي'),
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: bilPageHeadingStyle(context),
               ),
               const SizedBox(height: 8),
               Text(
@@ -148,70 +146,87 @@ class _CommunityFoodSubmissionSheetState
                 ),
               ),
               const SizedBox(height: 16),
-              for (final field in CommunityFoodField.values) ...[
-                TextFormField(
-                  key: Key('community-food-input-${field.name}'),
-                  controller: _controllers[field],
-                  enabled: !_submitting,
-                  validator: (_) => _validate(field),
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  keyboardType: field == CommunityFoodField.name
-                      ? TextInputType.text
-                      : const TextInputType.numberWithOptions(decimal: true),
-                  textInputAction: field == CommunityFoodField.fat
-                      ? TextInputAction.done
-                      : TextInputAction.next,
-                  onFieldSubmitted: (_) {
-                    if (field == CommunityFoodField.fat) _submit();
-                  },
-                  decoration: InputDecoration(
-                    labelText: _label(field),
-                    errorMaxLines: 3,
-                    suffixText: field == CommunityFoodField.name
-                        ? null
-                        : field == CommunityFoodField.calories
-                        ? 'kcal'
-                        : 'g',
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
-              if (_failure != null) ...[
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    _failure!,
-                    key: const Key('community-food-submit-error'),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
+            ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            0,
+            20,
+            MediaQuery.viewInsetsOf(context).bottom + 20,
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final field in CommunityFoodField.values) ...[
+                  TextFormField(
+                    key: Key('community-food-input-${field.name}'),
+                    controller: _controllers[field],
+                    enabled: !_submitting,
+                    validator: (_) => _validate(field),
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    keyboardType: field == CommunityFoodField.name
+                        ? TextInputType.text
+                        : const TextInputType.numberWithOptions(decimal: true),
+                    textInputAction: field == CommunityFoodField.fat
+                        ? TextInputAction.done
+                        : TextInputAction.next,
+                    onFieldSubmitted: (_) {
+                      if (field == CommunityFoodField.fat) _submit();
+                    },
+                    decoration: InputDecoration(
+                      labelText: _label(field),
+                      errorMaxLines: 3,
+                      suffixText: field == CommunityFoodField.name
+                          ? null
+                          : field == CommunityFoodField.calories
+                          ? 'kcal'
+                          : 'g',
                     ),
                   ),
+                  const SizedBox(height: 12),
+                ],
+                if (_failure != null) ...[
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      _failure!,
+                      key: const Key('community-food-submit-error'),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                FilledButton.icon(
+                  key: const Key('community-food-submit'),
+                  onPressed: _submitting ? null : _submit,
+                  icon: _submitting
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: BilFeatureWelcomeStatus(),
+                        )
+                      : const Icon(Icons.fact_check_outlined),
+                  label: Text(
+                    _submitting
+                        ? _text('Sending…', 'جارٍ الإرسال…')
+                        : _text('Send for review', 'إرسال للمراجعة'),
+                  ),
                 ),
-                const SizedBox(height: 12),
+                TextButton(
+                  key: const Key('community-food-cancel'),
+                  onPressed: _submitting
+                      ? null
+                      : () => Navigator.of(context).pop(false),
+                  child: Text(_text('Cancel', 'إلغاء')),
+                ),
               ],
-              FilledButton.icon(
-                key: const Key('community-food-submit'),
-                onPressed: _submitting ? null : _submit,
-                icon: _submitting
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: BilFeatureWelcomeStatus(),
-                      )
-                    : const Icon(Icons.fact_check_outlined),
-                label: Text(
-                  _submitting
-                      ? _text('Sending…', 'جارٍ الإرسال…')
-                      : _text('Send for review', 'إرسال للمراجعة'),
-                ),
-              ),
-              TextButton(
-                key: const Key('community-food-cancel'),
-                onPressed: _submitting
-                    ? null
-                    : () => Navigator.of(context).pop(false),
-                child: Text(_text('Cancel', 'إلغاء')),
-              ),
-            ],
+            ),
           ),
         ),
       ),

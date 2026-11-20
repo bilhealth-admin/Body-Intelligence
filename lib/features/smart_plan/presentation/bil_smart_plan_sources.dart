@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -143,138 +145,154 @@ class _BilSmartPlanSourcesPanelState extends State<BilSmartPlanSourcesPanel> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * .85,
       ),
-      child: SingleChildScrollView(
-        key: const ValueKey('bil-smart-plan-sources-scroll'),
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    t('Plan sources', 'مصادر الخطة'),
-                    key: const ValueKey('bil-smart-plan-sources-title'),
-                    style: Theme.of(context).textTheme.headlineSmall,
+      child: BilPinnedHeaderBody(
+        shrinkWrap: true,
+        header: Padding(
+          key: const Key("smart-plan-sources-pinned-heading"),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      t('Plan sources', 'مصادر الخطة'),
+                      key: const ValueKey('bil-smart-plan-sources-title'),
+                      style: bilPageHeadingStyle(context),
+                    ),
                   ),
-                ),
-                IconButton(
-                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close_rounded),
-                ),
-              ],
-            ),
-            if (widget.training) ...[
-              const SizedBox(height: 12),
-              BilSmartPlanPanel(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        t('Training references', 'مراجع التدريب'),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.home
-                            ? t(
-                                'BIL adapts published strength guidance for this general adult program. It is not injury rehabilitation. Sets and resistance never increase automatically; review and approve any change.',
-                                'يطبّق BIL إرشادات القوة المنشورة في برنامج عام للبالغين وليس لتأهيل الإصابات. لا تزيد المجموعات أو المقاومة تلقائيًا؛ راجع أي تعديل ووافق عليه.',
-                              )
-                            : t(
-                                'Reference: BIL source-verified Gym plan. Adjust only through a reviewed plan change.',
-                                'المرجع: خطة النادي الموثقة من مصدر BIL. لا تُعدّل إلا بعد مراجعة تغيير الخطة.',
-                              ),
-                      ),
-                      if (exercise != null && exercise.verified)
-                        _reference(
-                          '${exercise.title} · ${exercise.publisher}',
-                          exercise.sourceUrl,
-                        ),
-                      if (widget.home) ...[
-                        FutureBuilder<
-                          List<({String publisher, String title, Uri url})>
-                        >(
-                          future: _homeSources,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  for (final source in snapshot.data!)
-                                    _reference(
-                                      '${source.publisher} · ${source.title}',
-                                      source.url,
-                                    ),
-                                ],
-                              );
-                            }
-                            if (snapshot.hasError) {
-                              return TextButton(
-                                onPressed: () => setState(() {
-                                  _homeSources =
-                                      const BilSmartPlanPrescriptions()
-                                          .homeSources();
-                                }),
-                                child: Text(
-                                  t(
-                                    'References unavailable. Tap to retry.',
-                                    'المراجع غير متاحة. اضغط لإعادة المحاولة.',
-                                  ),
-                                ),
-                              );
-                            }
-                            return const SizedBox(
-                              height: 24,
-                              child: BilFeatureWelcomeStatus(),
-                            );
-                          },
-                        ),
-                        _reference(
-                          t('NHS warm-up reference', 'مرجع الإحماء من NHS'),
-                          Uri.parse(
-                            'https://www.nhs.uk/live-well/exercise/how-to-warm-up-before-exercising/',
-                          ),
-                        ),
-                      ],
-                    ],
+                  IconButton(
+                    tooltip: MaterialLocalizations.of(
+                      context,
+                    ).closeButtonTooltip,
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close_rounded),
                   ),
-                ),
+                ],
               ),
             ],
-            if (widget.nutrition) ...[
-              const SizedBox(height: 12),
-              BilSmartPlanPanel(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    t(
-                      'Meal values come from the verified recipe and its source serving. Open the book beside a meal title for its ingredients, portions and original sources. Saved daily goals are separate from food consumed.',
-                      'تأتي قيم الوجبة من الوصفة الموثقة وحصتها من المصدر. افتح الكتاب بجانب عنوان الوجبة للاطلاع على المكونات والحصص والمصادر الأصلية. الأهداف اليومية المحفوظة منفصلة عن الطعام المستهلك.',
+          ),
+        ),
+        body: SingleChildScrollView(
+          key: const ValueKey('bil-smart-plan-sources-scroll'),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.training) ...[
+                const SizedBox(height: 12),
+                BilSmartPlanPanel(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          t('Training references', 'مراجع التدريب'),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.home
+                              ? t(
+                                  'BIL adapts published strength guidance for this general adult program. It is not injury rehabilitation. Sets and resistance never increase automatically; review and approve any change.',
+                                  'يطبّق BIL إرشادات القوة المنشورة في برنامج عام للبالغين وليس لتأهيل الإصابات. لا تزيد المجموعات أو المقاومة تلقائيًا؛ راجع أي تعديل ووافق عليه.',
+                                )
+                              : t(
+                                  'Reference: BIL source-verified Gym plan. Adjust only through a reviewed plan change.',
+                                  'المرجع: خطة النادي الموثقة من مصدر BIL. لا تُعدّل إلا بعد مراجعة تغيير الخطة.',
+                                ),
+                        ),
+                        if (exercise != null && exercise.verified)
+                          _reference(
+                            '${exercise.title} · ${exercise.publisher}',
+                            exercise.sourceUrl,
+                          ),
+                        if (widget.home) ...[
+                          FutureBuilder<
+                            List<({String publisher, String title, Uri url})>
+                          >(
+                            future: _homeSources,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    for (final source in snapshot.data!)
+                                      _reference(
+                                        '${source.publisher} · ${source.title}',
+                                        source.url,
+                                      ),
+                                  ],
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return TextButton(
+                                  onPressed: () => setState(() {
+                                    _homeSources =
+                                        const BilSmartPlanPrescriptions()
+                                            .homeSources();
+                                  }),
+                                  child: Text(
+                                    t(
+                                      'References unavailable. Tap to retry.',
+                                      'المراجع غير متاحة. اضغط لإعادة المحاولة.',
+                                    ),
+                                  ),
+                                );
+                              }
+                              return const SizedBox(
+                                height: 24,
+                                child: BilFeatureWelcomeStatus(),
+                              );
+                            },
+                          ),
+                          _reference(
+                            t('NHS warm-up reference', 'مرجع الإحماء من NHS'),
+                            Uri.parse(
+                              'https://www.nhs.uk/live-well/exercise/how-to-warm-up-before-exercising/',
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
+              ],
+              if (widget.nutrition) ...[
+                const SizedBox(height: 12),
+                BilSmartPlanPanel(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      t(
+                        'Meal values come from the verified recipe and its source serving. Open the book beside a meal title for its ingredients, portions and original sources. Saved daily goals are separate from food consumed.',
+                        'تأتي قيم الوجبة من الوصفة الموثقة وحصتها من المصدر. افتح الكتاب بجانب عنوان الوجبة للاطلاع على المكونات والحصص والمصادر الأصلية. الأهداف اليومية المحفوظة منفصلة عن الطعام المستهلك.',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              TextButton.icon(
+                key: const ValueKey('bil-smart-plan-health-methodology'),
+                onPressed: widget.onMethodology,
+                icon: const BilFlatIcon(
+                  kind: BilSemanticIconKind.learn,
+                  materialIcon: BilSemanticIcons.diary,
+                  size: 24,
+                  iconSize: 22,
+                ),
+                label: Text(
+                  t('Health sources & methodology', 'مصادر ومنهجية الصحة'),
+                ),
               ),
             ],
-            const SizedBox(height: 16),
-            TextButton.icon(
-              key: const ValueKey('bil-smart-plan-health-methodology'),
-              onPressed: widget.onMethodology,
-              icon: const BilFlatIcon(
-                kind: BilSemanticIconKind.learn,
-                materialIcon: BilSemanticIcons.diary,
-                size: 24,
-                iconSize: 22,
-              ),
-              label: Text(
-                t('Health sources & methodology', 'مصادر ومنهجية الصحة'),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

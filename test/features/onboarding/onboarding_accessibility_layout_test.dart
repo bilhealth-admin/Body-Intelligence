@@ -284,7 +284,13 @@ void main() {
             );
             expect(footer.top, greaterThanOrEqualTo(0));
             expect(footer.bottom, lessThanOrEqualTo(size.height));
-            expect(find.byType(SingleChildScrollView), findsOneWidget);
+            expect(
+              find.ancestor(
+                of: find.byKey(const Key('onboarding-step-input-content')),
+                matching: find.byType(SingleChildScrollView),
+              ),
+              findsOneWidget,
+            );
             expect(tester.takeException(), isNull);
           });
         }
@@ -513,7 +519,28 @@ void main() {
       viewInsets: const EdgeInsets.only(bottom: 250),
     );
 
-    expect(find.byType(SingleChildScrollView), findsOneWidget);
+    final bodyScroll = find.ancestor(
+      of: find.byKey(const Key('onboarding-step-input-content')),
+      matching: find.byType(SingleChildScrollView),
+    );
+    expect(bodyScroll, findsOneWidget);
+    expect(
+      find.descendant(
+        of: bodyScroll,
+        matching: find.byKey(const Key('onboarding-step-title')),
+      ),
+      findsNothing,
+    );
+    final header = find.byKey(const Key('bil-pinned-header-region'));
+    final headerRect = tester.getRect(header);
+    final footer = find.byKey(const Key('onboarding-footer'));
+    final footerRect = tester.getRect(footer);
+    expect(tester.getRect(bodyScroll).top, headerRect.bottom);
+    expect(tester.getSize(bodyScroll).height, greaterThan(0));
+    await tester.drag(bodyScroll, const Offset(0, -100));
+    await tester.pump();
+    expect(tester.getRect(header), headerRect);
+    expect(tester.getRect(footer), footerRect);
     expect(find.byKey(const Key('onboarding-back')), findsOneWidget);
     expect(find.byKey(const Key('onboarding-next')), findsOneWidget);
     expect(tester.takeException(), isNull);

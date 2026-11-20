@@ -11,6 +11,31 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
         _openingDrafts;
     final scale = MediaQuery.textScalerOf(context).scale(1);
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final pageTitle = communityText(context, 'Create a Post', 'إنشاء منشور');
+    final titleStyle = bilPageHeadingStyle(
+      context,
+      color: CommunitySapphire.ink(context),
+    );
+    final titleMeasure =
+        TextPainter(
+          text: TextSpan(text: pageTitle, style: titleStyle),
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+          locale: Localizations.localeOf(context),
+        )..layout(
+          maxWidth:
+              (MediaQuery.sizeOf(context).width -
+                      MediaQuery.paddingOf(context).horizontal -
+                      56 -
+                      116)
+                  .clamp(1.0, double.infinity),
+        );
+    final toolbarHeight = (titleMeasure.height + 16).clamp(
+      kToolbarHeight,
+      double.infinity,
+    );
+    titleMeasure.dispose();
+
     return PopScope<bool>(
       canPop: (!_publishing && !_savingDraft) || _completed,
       child: ScaffoldMessenger(
@@ -25,7 +50,7 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
                 ? CommunitySapphire.canvas(context)
                 : const Color(0xFFFBFDFF),
             surfaceTintColor: Colors.transparent,
-            toolbarHeight: scale >= 1.5 ? 100 : 56,
+            toolbarHeight: toolbarHeight,
             leading: IconButton(
               key: const Key('community-post-editor-close'),
               tooltip: communityText(context, 'Close', 'إغلاق'),
@@ -35,14 +60,9 @@ extension _CommunityPostComposerRendering on _CommunityPostComposerPageState {
             centerTitle: true,
             titleSpacing: 0,
             title: Text(
-              communityText(context, 'Create a Post', 'إنشاء منشور'),
+              pageTitle,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 17,
-                height: 1.25,
-                fontWeight: FontWeight.w700,
-                color: CommunitySapphire.ink(context),
-              ),
+              style: titleStyle,
             ),
             actions: [
               Padding(

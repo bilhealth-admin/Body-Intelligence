@@ -118,7 +118,9 @@ class BilCalmVisualScope extends StatelessWidget {
             : SystemUiOverlayStyle.dark,
         foregroundColor: ink,
         centerTitle: true,
-        titleTextStyle: typography.titleLarge,
+        titleTextStyle: typography.titleLarge?.copyWith(
+          fontWeight: FontWeight.w800,
+        ),
         iconTheme: IconThemeData(
           color: secondary,
           size: BilCalmTokens.iconSize,

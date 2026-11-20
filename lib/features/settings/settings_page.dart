@@ -1,3 +1,4 @@
+import '../../shared/widgets/bil_page_heading.dart';
 import '../commerce/providers/store_renewal_recheck_provider.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
@@ -71,14 +72,7 @@ class SettingsPage extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          copy('More'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontSize: 19,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0,
-          ),
-        ),
+        title: Text(copy('More'), style: bilPageHeadingStyle(context)),
       ),
       body: ColoredBox(
         color: Theme.of(context).scaffoldBackgroundColor,

@@ -178,49 +178,62 @@ extension _BilSmartPlanDrafts on _BilSmartPlanPageState {
           useSafeArea: true,
           isScrollControlled: true,
           builder: (sheet) => SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    _t(
-                      'Previous plans on this device',
-                      'الخطط السابقة على هذا الجهاز',
-                    ),
-                    style: Theme.of(sheet).textTheme.headlineSmall,
-                  ),
-                  Text(
-                    _t(
-                      'Read only. Export includes these plans. They are not included in active-plan cloud backup.',
-                      'للقراءة فقط. يشمل التصدير هذه الخطط، ولا يشملها النسخ السحابي للخطة الحالية.',
-                    ),
-                  ),
-                  for (final plan in previous.reversed)
-                    ExpansionTile(
-                      title: Text(
-                        '${plan.startDate} · ${_horizonName(plan.horizon)}',
+            child: BilPinnedHeaderBody(
+              shrinkWrap: true,
+              header: Padding(
+                key: const Key("smart-plan-drafts-pinned-heading"),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      _t(
+                        'Previous plans on this device',
+                        'الخطط السابقة على هذا الجهاز',
                       ),
-                      subtitle: Text(
-                        '${_statusName(plan.status)} · ${plan.revision}',
+                      style: bilPageHeadingStyle(sheet),
+                    ),
+                    Text(
+                      _t(
+                        'Read only. Export includes these plans. They are not included in active-plan cloud backup.',
+                        'للقراءة فقط. يشمل التصدير هذه الخطط، ولا يشملها النسخ السحابي للخطة الحالية.',
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final plan in previous.reversed)
+                      ExpansionTile(
+                        title: Text(
+                          '${plan.startDate} · ${_horizonName(plan.horizon)}',
+                        ),
+                        subtitle: Text(
+                          '${_statusName(plan.status)} · ${plan.revision}',
+                        ),
 
-                      trailing: const BilCrystalExpansionIndicator(),
-                      children: [
-                        for (final day in plan.days)
-                          ListTile(
-                            title: Text(day.date),
-                            subtitle: Text(
-                              day.workout == null
-                                  ? _t('Recovery day', 'يوم راحة')
-                                  : '${day.workout!.exerciseIds.map(const BilSmartPlanCatalog().exerciseTitle).join(', ')} · ${day.workout!.completed ? _t('Completed', 'مكتمل') : _t('Not confirmed', 'غير مؤكد')}',
+                        trailing: const BilCrystalExpansionIndicator(),
+                        children: [
+                          for (final day in plan.days)
+                            ListTile(
+                              title: Text(day.date),
+                              subtitle: Text(
+                                day.workout == null
+                                    ? _t('Recovery day', 'يوم راحة')
+                                    : '${day.workout!.exerciseIds.map(const BilSmartPlanCatalog().exerciseTitle).join(', ')} · ${day.workout!.completed ? _t('Completed', 'مكتمل') : _t('Not confirmed', 'غير مؤكد')}',
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                  if (previous.isEmpty)
-                    Text(_t('No previous plans.', 'لا توجد خطط سابقة.')),
-                ],
+                        ],
+                      ),
+                    if (previous.isEmpty)
+                      Text(_t('No previous plans.', 'لا توجد خطط سابقة.')),
+                  ],
+                ),
               ),
             ),
           ),

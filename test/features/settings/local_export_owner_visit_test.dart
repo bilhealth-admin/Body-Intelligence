@@ -93,7 +93,7 @@ void main() {
       await tester.ensureVisible(find.text('Create CSV export'));
       await tester.tap(find.text('Create CSV export'));
       await tester.pump();
-      await tester.ensureVisible(find.text('All dates'));
+      await _reachAllDates(tester);
       final allDates = find.ancestor(
         of: find.text('All dates'),
         matching: find.byType(TextButton),
@@ -106,11 +106,18 @@ void main() {
       // Let the genuine preparation snackbar leave the share hit target.
       await tester.pump(const Duration(seconds: 5));
       await tester.pumpAndSettle();
-      await tester.scrollUntilVisible(find.text('Share prepared export'), 200);
+      await tester.scrollUntilVisible(
+        find.text('Share prepared export'),
+        200,
+        scrollable: find.descendant(
+          of: find.byType(ListView),
+          matching: find.byType(Scrollable),
+        ),
+      );
       await tester.tap(find.text('Share prepared export'));
       await tester.pump();
       expect(fixture.share.calls, 1);
-      await tester.ensureVisible(find.text('All dates'));
+      await _reachAllDates(tester);
       expect(tester.widget<TextButton>(allDates).onPressed, isNull);
       fixture.share.pending!.complete();
       await tester.pumpAndSettle();
@@ -118,7 +125,14 @@ void main() {
       final localization = MaterialLocalizations.of(
         tester.element(find.byType(LocalExportRangePage)),
       );
-      await tester.scrollUntilVisible(find.text('Start date'), -200);
+      await tester.scrollUntilVisible(
+        find.text('Start date'),
+        -200,
+        scrollable: find.descendant(
+          of: find.byType(ListView),
+          matching: find.byType(Scrollable),
+        ),
+      );
       expect(find.text(localization.formatMediumDate(from)), findsOneWidget);
       expect(find.text(localization.formatMediumDate(to)), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -127,11 +141,30 @@ void main() {
   );
 }
 
+Future<void> _reachAllDates(WidgetTester tester) async {
+  await tester.scrollUntilVisible(
+    find.text('All dates'),
+    -200,
+    scrollable: find.descendant(
+      of: find.byType(ListView),
+      matching: find.byType(Scrollable),
+    ),
+  );
+  await tester.pump();
+}
+
 Future<void> _prepare(WidgetTester tester) async {
   await tester.ensureVisible(find.text('Create CSV export'));
   await tester.tap(find.text('Create CSV export'));
   await tester.pumpAndSettle();
-  await tester.scrollUntilVisible(find.text('Share prepared export'), 200);
+  await tester.scrollUntilVisible(
+    find.text('Share prepared export'),
+    200,
+    scrollable: find.descendant(
+      of: find.byType(ListView),
+      matching: find.byType(Scrollable),
+    ),
+  );
 }
 
 class _Fixture {

@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../shared/widgets/bil_wordmark.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
+import '../../../shared/widgets/bil_page_heading.dart';
 import '../onboarding_runtime_copy.dart';
 import 'onboarding_validation_feedback.dart';
 
@@ -147,60 +149,92 @@ class ModernOnboardingScaffold extends StatelessWidget {
                         ),
                       ),
                       Expanded(
-                        child: SingleChildScrollView(
-                          key: ValueKey<String>('onboarding-scroll-$step'),
-                          keyboardDismissBehavior:
-                              ScrollViewKeyboardDismissBehavior.onDrag,
-                          padding: EdgeInsets.fromLTRB(
-                            22,
-                            compact ? 20 : 26,
-                            22,
-                            compact ? 20 : 24,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Semantics(
-                                header: true,
-                                child: Text(
-                                  title,
-                                  key: const Key('onboarding-step-title'),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium
-                                      ?.copyWith(
-                                        fontSize: compact ? 24 : null,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -.7,
-                                        height: 1.12,
-                                      ),
-                                ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) => BilPinnedHeaderBody(
+                            // Leave at least half the form viewport usable when
+                            // keyboard or validation feedback reduces its height.
+                            header: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight:
+                                    constraints.maxHeight *
+                                    (validationFeedback == null ? .5 : .35),
                               ),
-                              if (subtitle case final subtitle?) ...[
-                                SizedBox(height: compact ? 8 : 10),
-                                Text(
-                                  subtitle,
-                                  style:
-                                      (compact
-                                              ? baseTheme.textTheme.bodyMedium
-                                              : baseTheme.textTheme.bodyLarge)
-                                          ?.copyWith(
-                                            color: scheme.onSurfaceVariant,
-                                            height: 1.45,
+                              child: SingleChildScrollView(
+                                primary: false,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    22,
+                                    compact ? 20 : 26,
+                                    22,
+                                    artwork != null
+                                        ? (compact ? 16 : 18)
+                                        : (compact ? 20 : 24),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Semantics(
+                                        header: true,
+                                        child: Text(
+                                          title,
+                                          key: const Key(
+                                            'onboarding-step-title',
                                           ),
+                                          style: bilPageHeadingStyle(context),
+                                        ),
+                                      ),
+                                      if (subtitle case final subtitle?) ...[
+                                        SizedBox(height: compact ? 8 : 10),
+                                        Text(
+                                          subtitle,
+                                          style:
+                                              (compact
+                                                      ? baseTheme
+                                                            .textTheme
+                                                            .bodyMedium
+                                                      : baseTheme
+                                                            .textTheme
+                                                            .bodyLarge)
+                                                  ?.copyWith(
+                                                    color:
+                                                        scheme.onSurfaceVariant,
+                                                    height: 1.45,
+                                                  ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ),
-                              ],
-                              if (artwork case final artwork?) ...[
-                                SizedBox(height: compact ? 16 : 18),
-                                artwork,
-                              ],
-                              SizedBox(height: compact ? 20 : 24),
-                              FocusTraversalOrder(
-                                key: const Key('onboarding-step-input-content'),
-                                order: const NumericFocusOrder(1),
-                                child: body,
                               ),
-                            ],
+                            ),
+                            body: SingleChildScrollView(
+                              key: ValueKey<String>('onboarding-scroll-$step'),
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              padding: EdgeInsets.fromLTRB(
+                                22,
+                                0,
+                                22,
+                                compact ? 20 : 24,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  if (artwork case final artwork?) ...[
+                                    artwork,
+                                    SizedBox(height: compact ? 20 : 24),
+                                  ],
+                                  FocusTraversalOrder(
+                                    key: const Key(
+                                      'onboarding-step-input-content',
+                                    ),
+                                    order: const NumericFocusOrder(1),
+                                    child: body,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ),

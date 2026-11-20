@@ -329,48 +329,60 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
-                    child: ListView(
+                    child: BilPinnedHeaderBody(
                       shrinkWrap: true,
-                      children: [
-                        Center(
-                          child: Text(
-                            _copy(
-                              context,
-                              en: 'Add nutrient goal cards',
-                              ar: 'إضافة بطاقات أهداف المغذيات',
-                              fr: 'Ajouter des cartes de nutriments',
-                              es: 'Añadir tarjetas de nutrientes',
-                              tr: 'Besin hedefi kartları ekle',
-                            ),
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        for (final id
-                            in DashboardNutrientGoalIds.dashboardCards)
-                          CheckboxListTile(
-                            key: Key('dashboard-nutrient-goal-$id'),
-                            value: selected.contains(id),
-                            title: Text(
-                              _copy(
-                                context,
-                                en: labels[id]!.$1,
-                                ar: labels[id]!.$2,
-                                fr: labels[id]!.$3,
-                                es: labels[id]!.$4,
-                                tr: labels[id]!.$5,
+                      header: Padding(
+                        key: const Key("dashboard-nutrients-pinned-heading"),
+                        padding: EdgeInsets.zero,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Center(
+                              child: Text(
+                                _copy(
+                                  context,
+                                  en: 'Add nutrient goal cards',
+                                  ar: 'إضافة بطاقات أهداف المغذيات',
+                                  fr: 'Ajouter des cartes de nutriments',
+                                  es: 'Añadir tarjetas de nutrientes',
+                                  tr: 'Besin hedefi kartları ekle',
+                                ),
+                                style: bilPageHeadingStyle(context),
                               ),
                             ),
-                            onChanged: savingCards
-                                ? null
-                                : (enabled) => setSheetState(() {
-                                    enabled == true
-                                        ? selected.add(id)
-                                        : selected.remove(id);
-                                  }),
-                          ),
-                      ],
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                      body: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          for (final id
+                              in DashboardNutrientGoalIds.dashboardCards)
+                            CheckboxListTile(
+                              key: Key('dashboard-nutrient-goal-$id'),
+                              value: selected.contains(id),
+                              title: Text(
+                                _copy(
+                                  context,
+                                  en: labels[id]!.$1,
+                                  ar: labels[id]!.$2,
+                                  fr: labels[id]!.$3,
+                                  es: labels[id]!.$4,
+                                  tr: labels[id]!.$5,
+                                ),
+                              ),
+                              onChanged: savingCards
+                                  ? null
+                                  : (enabled) => setSheetState(() {
+                                      enabled == true
+                                          ? selected.add(id)
+                                          : selected.remove(id);
+                                    }),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -436,9 +448,11 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
       showDragHandle: true,
       isScrollControlled: true,
       builder: (sheetContext) => SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+        child: BilPinnedHeaderBody(
+          shrinkWrap: true,
+          header: Padding(
+            key: const Key("dashboard-nutrients-preview-pinned-heading"),
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -449,54 +463,63 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
                     'Add nutrient goal cards',
                     'إضافة بطاقات أهداف المغذيات',
                   ),
-                  style: Theme.of(
-                    sheetContext,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                  style: bilPageHeadingStyle(sheetContext),
                 ),
                 const SizedBox(height: 8),
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: PremiumLabelBadge(
-                    key: Key('dashboard-nutrient-premium-page-label'),
-                    onTap: () => Navigator.of(sheetContext).pop(true),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DecoratedBox(
-                  key: const Key('dashboard-nutrient-glass-group'),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      sheetContext,
-                    ).colorScheme.surfaceContainerLow.withValues(alpha: .82),
-                    borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0x66D79A1E)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final label in const [
-                          'Protein',
-                          'Carbohydrates',
-                          'Fat',
-                          'Fiber',
-                          'Sodium',
-                          'Potassium',
-                        ])
-                          Chip(label: Text(context.strings.text(label))),
-                      ],
+              ],
+            ),
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: PremiumLabelBadge(
+                      key: Key('dashboard-nutrient-premium-page-label'),
+                      onTap: () => Navigator.of(sheetContext).pop(true),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                FilledButton.icon(
-                  onPressed: () => Navigator.pop(sheetContext, true),
-                  icon: const Icon(Icons.workspace_premium_rounded),
-                  label: Text(sheetContext.strings.text('Continue')),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  DecoratedBox(
+                    key: const Key('dashboard-nutrient-glass-group'),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        sheetContext,
+                      ).colorScheme.surfaceContainerLow.withValues(alpha: .82),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0x66D79A1E)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final label in const [
+                            'Protein',
+                            'Carbohydrates',
+                            'Fat',
+                            'Fiber',
+                            'Sodium',
+                            'Potassium',
+                          ])
+                            Chip(label: Text(context.strings.text(label))),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    onPressed: () => Navigator.pop(sheetContext, true),
+                    icon: const Icon(Icons.workspace_premium_rounded),
+                    label: Text(sheetContext.strings.text('Continue')),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

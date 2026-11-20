@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import '../../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/material.dart';
@@ -181,102 +183,118 @@ class CommunityTaxonomySheet extends StatelessWidget {
     return SafeArea(
       child: FractionallySizedBox(
         heightFactor: .9,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-          children: [
-            Text(copy.title, style: Theme.of(context).textTheme.headlineSmall),
-            if (copy.detailed) ...[
-              const SizedBox(height: 6),
-              Text(copy.subtitle),
-            ],
-            const SizedBox(height: 16),
-            for (final category in categories)
-              BilPearlMaterialCard(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: ListTile(
-                  leading: BilSemanticIconBadge(
-                    kind: BilSemanticIconKind.community,
-                    iconOverride: category.$1,
-                    appleIconOverride: category.$1,
-                  ),
-                  title: Text(category.$2),
-                  subtitle: copy.detailed ? Text(category.$3) : null,
-                  trailing: const Icon(Icons.tag_rounded),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    onSelectTag(category.$4);
-                  },
-                ),
-              ),
-            if (copy.detailed) ...[
-              const SizedBox(height: 12),
-              Text(
-                copy.quickLinks,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _Link(
-                    copy.posts,
-                    Icons.forum_outlined,
-                    () => Navigator.of(context).pop(),
-                  ),
-                  _Link(
-                    copy.friends,
-                    Icons.group_outlined,
-                    () => context.push('/community/connections'),
-                  ),
-                  _Link(
-                    copy.messages,
-                    Icons.mail_outline,
-                    () => context.push('/community/messages'),
-                  ),
-                  _Link(
-                    copy.guidelines,
-                    Icons.shield_outlined,
-                    () => context.push('/community/safety'),
-                  ),
-                  _Link(
-                    copy.help,
-                    Icons.help_outline,
-                    () => context.push('/help'),
-                  ),
+        child: BilPinnedHeaderBody(
+          shrinkWrap: true,
+          header: Padding(
+            key: const Key("community-taxonomy-pinned-heading"),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(copy.title, style: bilPageHeadingStyle(context)),
+                if (copy.detailed) ...[
+                  const SizedBox(height: 6),
+                  Text(copy.subtitle),
                 ],
-              ),
-              const SizedBox(height: 18),
-              Text(
-                copy.popularTags,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children:
-                    const [
-                          'nutrition',
-                          'fitness',
-                          'recipes',
-                          'wellness',
-                          'weight-loss',
-                        ]
-                        .map(
-                          (tag) => ActionChip(
-                            label: Text('#$tag'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              onSelectTag(tag);
-                            },
-                          ),
-                        )
-                        .toList(growable: false),
-              ),
-              const SizedBox(height: 14),
-              Text(copy.noCounts, style: Theme.of(context).textTheme.bodySmall),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+            children: [
+              for (final category in categories)
+                BilPearlMaterialCard(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    leading: BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.community,
+                      iconOverride: category.$1,
+                      appleIconOverride: category.$1,
+                    ),
+                    title: Text(category.$2),
+                    subtitle: copy.detailed ? Text(category.$3) : null,
+                    trailing: const Icon(Icons.tag_rounded),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      onSelectTag(category.$4);
+                    },
+                  ),
+                ),
+              if (copy.detailed) ...[
+                const SizedBox(height: 12),
+                Text(
+                  copy.quickLinks,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _Link(
+                      copy.posts,
+                      Icons.forum_outlined,
+                      () => Navigator.of(context).pop(),
+                    ),
+                    _Link(
+                      copy.friends,
+                      Icons.group_outlined,
+                      () => context.push('/community/connections'),
+                    ),
+                    _Link(
+                      copy.messages,
+                      Icons.mail_outline,
+                      () => context.push('/community/messages'),
+                    ),
+                    _Link(
+                      copy.guidelines,
+                      Icons.shield_outlined,
+                      () => context.push('/community/safety'),
+                    ),
+                    _Link(
+                      copy.help,
+                      Icons.help_outline,
+                      () => context.push('/help'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  copy.popularTags,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children:
+                      const [
+                            'nutrition',
+                            'fitness',
+                            'recipes',
+                            'wellness',
+                            'weight-loss',
+                          ]
+                          .map(
+                            (tag) => ActionChip(
+                              label: Text('#$tag'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                onSelectTag(tag);
+                              },
+                            ),
+                          )
+                          .toList(growable: false),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  copy.noCounts,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -1,8 +1,10 @@
+import '../../shared/widgets/bil_page_heading.dart';
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../shared/widgets/bil_pearl_material.dart';
 import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -276,67 +278,74 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
         canPop: !_submitting,
         child: Scaffold(
           appBar: AppBar(title: Text(copy.title)),
-          body: ListView(
-            padding: const EdgeInsets.all(20),
-            children: [
-              Icon(
-                Icons.person_remove_outlined,
-                size: 22,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                copy.heading,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 12),
-              Text(copy.body),
-              const SizedBox(height: 12),
-              Text(
-                copy.billingNotice,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: TextButton.icon(
-                  onPressed: _submitting ? null : _openSubscriptionManagement,
-                  icon: const BilNavigationFeedback(
-                    child: Icon(Icons.open_in_new_rounded),
+          body: BilPinnedHeaderBody(
+            header: Padding(
+              key: const Key('account-deletion-pinned-header'),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Icon(
+                    Icons.person_remove_outlined,
+                    size: 22,
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                  label: Text(copy.manageSubscription),
-                ),
+                  const SizedBox(height: 20),
+                  Text(copy.heading, style: bilPageHeadingStyle(context)),
+                  const SizedBox(height: 12),
+                  Text(copy.body),
+                ],
               ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _confirmation,
-                enabled: !_submitting,
-                cursorOpacityAnimates: false,
-                textCapitalization: TextCapitalization.characters,
-                decoration: InputDecoration(
-                  labelText: copy.confirmationLabel,
-                  hintText: 'DELETE',
+            ),
+            body: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              children: [
+                Text(
+                  copy.billingNotice,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: 20),
-              FilledButton.icon(
-                onPressed: _submitting ? null : _submit,
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  foregroundColor: Theme.of(context).colorScheme.onError,
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: _submitting ? null : _openSubscriptionManagement,
+                    icon: const BilNavigationFeedback(
+                      child: Icon(Icons.open_in_new_rounded),
+                    ),
+                    label: Text(copy.manageSubscription),
+                  ),
                 ),
-                icon: _submitting
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: BilFeatureWelcomeStatus(),
-                      )
-                    : const Icon(Icons.delete_forever_outlined),
-                label: Text(copy.submit),
-              ),
-            ],
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _confirmation,
+                  enabled: !_submitting,
+                  cursorOpacityAnimates: false,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: InputDecoration(
+                    labelText: copy.confirmationLabel,
+                    hintText: 'DELETE',
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: _submitting ? null : _submit,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                  ),
+                  icon: _submitting
+                      ? const SizedBox.square(
+                          dimension: 18,
+                          child: BilFeatureWelcomeStatus(),
+                        )
+                      : const Icon(Icons.delete_forever_outlined),
+                  label: Text(copy.submit),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -7,7 +7,7 @@ class _CommunityInlineTopicFeed extends StatefulWidget {
     super.key,
     required this.topic,
     required this.visit,
-    required this.metadata,
+    required this.referenceForPost,
     required this.identities,
     required this.viewCounts,
     required this.previews,
@@ -19,7 +19,8 @@ class _CommunityInlineTopicFeed extends StatefulWidget {
   });
   final CommunityTopic topic;
   final _CommunityFeedVisit visit;
-  final Map<String, CommunityPostReferenceMetadata> metadata;
+  final CommunityPostReferenceMetadata? Function(CommunityPost)
+  referenceForPost;
   final Map<String, CommunityPostAuthorIdentity> identities;
   final Map<String, int> viewCounts;
   final Map<String, CommunityComment> previews;
@@ -199,7 +200,7 @@ class _CommunityInlineTopicFeedState extends State<_CommunityInlineTopicFeed> {
                   actionsEnabled: widget.actionsEnabled,
                   ownerIsCurrent: widget.visit.isCurrent,
                   ownerChanges: widget.visit.changes,
-                  referenceMetadata: widget.metadata[post.id],
+                  referenceMetadata: widget.referenceForPost(post),
                   viewCount: widget.viewCounts[post.id],
                   commentPreview: widget.previews[post.id],
                   authorMembershipTier: widget.tiers[post.authorId],

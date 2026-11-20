@@ -15,7 +15,10 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
       ownerId: ownerId,
       now: now,
     );
-    if (inMemory != null && inMemory.provider != null) {
+    if (inMemory != null &&
+        inMemory.provider != null &&
+        _storeProofSurvivesDenial(ownerId, inMemory) &&
+        _storeObservationIsCurrent(ownerId, inMemory)) {
       return _withClosedTestContinuity(ownerId, inMemory);
     }
     try {
@@ -27,7 +30,10 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
       if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
         return FreePlan.createState();
       }
-      if (persisted != null && persisted.provider != null) {
+      if (persisted != null &&
+          persisted.provider != null &&
+          _storeProofSurvivesDenial(ownerId, persisted) &&
+          _storeObservationIsCurrent(ownerId, persisted)) {
         _rememberRestoredStoreVersion(ownerId, persisted);
         ServerEntitlementRepository._sessionCache.remember(
           ownerId: ownerId,
@@ -105,12 +111,14 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
 
   SubscriptionState _verifiedFree({
     DateTime? verifiedAt,
+    int? serverRevision,
     StoreRenewalObservation? storeRenewal,
     bool storeDefinitive = true,
   }) => SubscriptionState(
     storeRenewalObservation: storeRenewal,
     storeRenewalDefinitivelyInactive: storeDefinitive,
     verifiedAt: verifiedAt,
+    serverRevision: serverRevision,
     plan: CommercePlan.free,
     entitlements: FreePlan.entitlements,
     authority: EntitlementAuthority.verifiedServer,

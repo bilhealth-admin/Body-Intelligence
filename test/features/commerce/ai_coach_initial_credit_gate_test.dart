@@ -14,6 +14,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show AuthRetryableFetchException;
+import 'support/retryable_auth_fixture.dart';
 
 import '../../visual_closure/closure_surface_capture.dart';
 import '../../visual_closure/visual_evidence_font.dart';
@@ -24,13 +27,14 @@ Map<String, Object?> credits(int amount) => {
 
 Future<GoRouter> mountGate(
   WidgetTester tester,
-  Stream<String?> owners,
+  Stream<String?>? owners,
   Future<Object?> Function() load, {
   String language = 'en',
   bool dark = false,
   bool reducedMotion = false,
   double textScale = 1,
   String? ownerSeed,
+  RetryableAuthFixture? auth,
   String initialLocation = '/coach',
 }) async {
   final router = GoRouter(
@@ -74,8 +78,12 @@ Future<GoRouter> mountGate(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        verifiedEntitlementOwnerProvider.overrideWith((_) => owners),
-        verifiedEntitlementOwnerSeedProvider.overrideWithValue(ownerSeed),
+        if (owners != null)
+          verifiedEntitlementOwnerProvider.overrideWith((_) => owners),
+        if (auth == null)
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue(ownerSeed)
+        else
+          verifiedEntitlementAuthClientProvider.overrideWithValue(auth),
         aiCoachUsageStatusLoaderProvider.overrideWithValue(load),
       ],
       child: MaterialApp.router(
@@ -375,23 +383,22 @@ void main() {
   );
 
   testWidgets(
-    'stable known owner survives stream error but explicit null overrides its seed',
+    'stable SDK owner survives a classified retryable error until explicit sign-out',
     (tester) async {
-      final owners = StreamController<String?>();
-      addTearDown(owners.close);
+      final auth = RetryableAuthFixture('synthetic-A');
+      addTearDown(auth.changes.close);
       var loads = 0;
-      owners.add('synthetic-A');
-      await mountGate(tester, owners.stream, () async {
+      await mountGate(tester, null, () async {
         loads++;
         return credits(1000);
-      }, ownerSeed: 'synthetic-A');
+      }, auth: auth);
       expect(find.text('private:synthetic-A').hitTestable(), findsOneWidget);
-      owners.addError(StateError('transient owner-stream interruption'));
+      auth.fail(AuthRetryableFetchException(statusCode: '503'));
       await flushGate(tester);
       expect(find.text('private:synthetic-A').hitTestable(), findsOneWidget);
       expect(find.byKey(const Key('ai-coach-account-recovery')), findsNothing);
       expect(loads, 1);
-      owners.add(null);
+      auth.owner(null);
       await flushGate(tester);
       expect(find.byKey(const Key('protected-coach-value')), findsNothing);
       expect(find.byKey(const Key('ai-coach-account-sign-in')), findsOneWidget);
@@ -400,6 +407,83 @@ void main() {
     },
   );
 
+  testWidgets(
+    'unresolved owner error blocks credit reads and ignores the retired positive result',
+    (tester) async {
+      final owners = StreamController<String?>.broadcast(sync: true);
+      addTearDown(owners.close);
+      final retired = Completer<Map<String, Object?>>();
+      final recovered = Completer<Map<String, Object?>>();
+      var loads = 0;
+      await mountGate(tester, owners.stream, () async {
+        loads++;
+        return switch (loads) {
+          1 => credits(1000),
+          2 => retired.future,
+          3 => recovered.future,
+          _ => throw StateError('Unexpected credit read $loads'),
+        };
+      }, ownerSeed: 'synthetic-A');
+      owners.add('synthetic-A');
+      await flushGate(tester);
+      final privateChild = find.text('private:synthetic-A');
+      expect(privateChild.hitTestable(), findsOneWidget);
+      final container = ProviderScope.containerOf(
+        tester.element(privateChild),
+        listen: false,
+      );
+      container.invalidate(aiCoachCreditAccessProvider);
+      await flushGate(tester);
+      expect(loads, 2);
+      owners.addError(StateError('unclassified identity interruption'));
+      await flushGate(tester);
+      expect(
+        find.byKey(const Key('ai-coach-account-check-unavailable')),
+        findsOneWidget,
+      );
+      expect(privateChild, findsNothing);
+      expect(loads, 2);
+      retired.complete(credits(1000));
+      await flushGate(tester);
+      expect(privateChild, findsNothing);
+      owners.add('synthetic-A');
+      await flushGate(tester);
+      expect(privateChild, findsNothing);
+      expect(loads, 3);
+      // Wait for this exact owner-scoped quota request. Pumping a fixed number
+      // of frames alone does not establish that an async loader has completed.
+      final recoveredFuture = container.read(
+        aiCoachCreditAccessProvider.future,
+      );
+      bool? recoveredAccess;
+      Object? recoveryError;
+      final observedRecovery = recoveredFuture.then<void>(
+        (value) => recoveredAccess = value,
+        onError: (Object error, StackTrace _) {
+          recoveryError = error;
+        },
+      );
+      recovered.complete(credits(1000));
+      await flushGate(tester);
+      await tester.runAsync(
+        () => observedRecovery.timeout(const Duration(seconds: 2)),
+      );
+      final liveRecovery = container.read(aiCoachCreditAccessProvider);
+      expect(
+        container.read(verifiedEntitlementOwnerProvider).asData?.value,
+        'synthetic-A',
+      );
+      expect(recoveryError, isNull);
+      expect(recoveredAccess, isTrue);
+      expect(liveRecovery.asData?.value, isTrue);
+      expect(privateChild.hitTestable(), findsOneWidget);
+      owners.add(null);
+      await flushGate(tester);
+      expect(privateChild, findsNothing);
+      expect(loads, 3);
+      expect(tester.takeException(), isNull);
+    },
+  );
   testWidgets(
     'late settled signed-out owner replaces timeout with truthful sign-in',
     (tester) async {

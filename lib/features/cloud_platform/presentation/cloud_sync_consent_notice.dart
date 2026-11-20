@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,58 +116,70 @@ class _CloudSyncConsentNoticeState
                     // this nested navigator's viewport or its primary dock.
                     Flexible(
                       fit: FlexFit.loose,
-                      child: SingleChildScrollView(
-                        key: const Key('cloud-sync-consent-details-scroll'),
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Center(
-                              child: Container(
-                                width: 52,
-                                height: 52,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    sheetContext,
-                                  ).colorScheme.primaryContainer,
-                                  shape: BoxShape.circle,
+                      child: BilPinnedHeaderBody(
+                        shrinkWrap: true,
+                        header: Padding(
+                          key: const Key("cloud-sync-consent-pinned-heading"),
+                          padding: EdgeInsets.zero,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Center(
+                                child: Container(
+                                  width: 52,
+                                  height: 52,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(
+                                      sheetContext,
+                                    ).colorScheme.primaryContainer,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.backup_rounded,
+                                    size: 28,
+                                    color: Theme.of(
+                                      sheetContext,
+                                    ).colorScheme.onPrimaryContainer,
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.backup_rounded,
-                                  size: 28,
-                                  color: Theme.of(
-                                    sheetContext,
-                                  ).colorScheme.onPrimaryContainer,
-                                ),
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              sheetContext.strings.text(
-                                CloudSyncConsentCopy.title,
-                              ),
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineSmall
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 18),
-                            const CloudSyncConsentSummary(),
-                            const SizedBox(height: 8),
-                            TextButton(
-                              key: const Key('cloud-sync-manage-categories'),
-                              onPressed: () => _closeChoice(
-                                sheetContext,
-                                _CloudConsentChoice.manageCategories,
-                              ),
-                              child: Text(
+                              const SizedBox(height: 12),
+                              Text(
                                 sheetContext.strings.text(
-                                  CloudSyncConsentCopy.manageCategoriesAction,
+                                  CloudSyncConsentCopy.title,
+                                ),
+                                textAlign: TextAlign.center,
+                                style: bilPageHeadingStyle(context),
+                              ),
+                              const SizedBox(height: 18),
+                            ],
+                          ),
+                        ),
+                        body: SingleChildScrollView(
+                          key: const Key('cloud-sync-consent-details-scroll'),
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const CloudSyncConsentSummary(),
+                              const SizedBox(height: 8),
+                              TextButton(
+                                key: const Key('cloud-sync-manage-categories'),
+                                onPressed: () => _closeChoice(
+                                  sheetContext,
+                                  _CloudConsentChoice.manageCategories,
+                                ),
+                                child: Text(
+                                  sheetContext.strings.text(
+                                    CloudSyncConsentCopy.manageCategoriesAction,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

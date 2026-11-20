@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.3";
 import { timingSafeEqual } from "node:crypto";
+import { privacySafePushBody } from "./privacy_safe_copy.ts";
 
 export type PushDispatchDependencies = {
   env?: (name: string) => string | undefined;
@@ -149,10 +150,13 @@ export async function handler(
     let badgeCount: number | undefined;
     if (event.recipient_id && (claimed ?? []).length > 0) {
       const { data: count, error: countError } = await client.rpc(
-        "bil_push_badge_count_v1", { p_owner_id: event.recipient_id },
+        "bil_push_badge_count_v1",
+        { p_owner_id: event.recipient_id },
       );
-      if (!countError && typeof count === "number" && Number.isInteger(count) &&
-          count >= 0 && count <= 2147483647) badgeCount = count;
+      if (
+        !countError && typeof count === "number" && Number.isInteger(count) &&
+        count >= 0 && count <= 2147483647
+      ) badgeCount = count;
     }
 
     // Start every bounded claim promptly so no row waits behind another
@@ -201,22 +205,26 @@ export async function handler(
               },
               body: JSON.stringify({
                 token: token.provider_token,
-                ...(badgeCount === undefined ? {} : { badge_count: badgeCount }),
+                ...(badgeCount === undefined
+                  ? {}
+                  : { badge_count: badgeCount }),
                 // Both visible fields must honor the same preview consent.
                 // The claim RPC has no trusted recipient locale. Keep the
-                // generic English fallback; never infer locale or safe copy
-                // from sender-controlled event payload metadata.
+                // static English event state; never infer locale or interpolate
+                // sender-controlled title/body/preview payload metadata.
                 title: showFullBody ? event.title ?? "BIL" : "BIL",
                 body: showFullBody
                   ? event.body
-                  : "You have a new private update.",
+                  : privacySafePushBody(event.category, event.copy_key),
                 deep_link: event.deep_link,
                 idempotency_key: token.delivery_key,
                 data: {
                   deep_link: event.deep_link,
                   category: event.category,
                   outbox_id: event.id,
-                  ...(badgeCount === undefined ? {} : { badge_count: badgeCount }),
+                  ...(badgeCount === undefined
+                    ? {}
+                    : { badge_count: badgeCount }),
                 },
               }),
             });
@@ -271,4 +279,3 @@ export async function handler(
     suppressed,
   });
 }
-

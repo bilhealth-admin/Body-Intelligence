@@ -291,12 +291,41 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final heading = find.byKey(
+      const Key('ai-coach-conversation-history-heading'),
+    );
+    final create = find.byKey(const Key('ai-coach-new-conversation'));
+    final list = find.byKey(const Key('ai-coach-conversation-history-list'));
+    final headingBefore = tester.getRect(heading);
+    final createBefore = tester.getRect(create);
+    expect(create.hitTestable(), findsOneWidget);
+    await tester.drag(list, const Offset(0, -700));
+    await tester.pumpAndSettle();
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(of: list, matching: find.byType(Scrollable)),
+    );
+    expect(scrollable.position.pixels, greaterThan(0));
+    expect(tester.getRect(heading), headingBefore);
+    expect(tester.getRect(create), createBefore);
+    expect(create.hitTestable(), findsOneWidget);
+
     final persisted = decodeCoachConversationHistory(
       await preferences.get('intelligenceConversationHistoryV1'),
     );
     expect(persisted.conversations, hasLength(25));
     expect(persisted.activeConversationId, isNull);
     expect(await preferences.get('intelligenceConversationActiveIdV1'), isNull);
+
+    await tester.tap(create);
+    await tester.pumpAndSettle();
+    expect(heading, findsNothing);
+    expect(
+      decodeCoachConversationHistory(
+        await preferences.get('intelligenceConversationHistoryV1'),
+      ).conversations,
+      hasLength(25),
+      reason: 'New conversation must preserve the existing local archive',
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();

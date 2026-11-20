@@ -1,5 +1,4 @@
 import '../../shared/widgets/bil_pearl_feature_welcome.dart';
-import '../../shared/widgets/bil_navigation_feedback.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,8 +7,11 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../shared/widgets/bil_wordmark.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
+import '../../shared/widgets/bil_page_heading.dart';
 import 'auth_entry_locale_copy.dart';
 import 'auth_error_localizer.dart';
+import 'auth_page_top_bar.dart';
 import 'supabase_auth_service.dart';
 
 class VerifyEmailPage extends StatefulWidget {
@@ -160,12 +162,14 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
     final pageBackground = dark ? scheme.surface : Colors.white;
+    final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       backgroundColor: pageBackground,
       body: SafeArea(
         child: Column(
           children: [
             _VerifyTopBar(
+              mediaQuery: mediaQuery,
               title: authEntryText(context, AuthEntryCopyKey.verifyEmail),
               onBack: loading ? null : () => context.go('/login'),
             ),
@@ -173,269 +177,297 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final compact = constraints.maxHeight < 570;
-                  return SingleChildScrollView(
+                  return Padding(
                     padding: EdgeInsets.fromLTRB(
                       constraints.maxWidth < 390 ? 22 : 28,
                       compact ? 26 : 38,
                       constraints.maxWidth < 390 ? 22 : 28,
-                      24 + MediaQuery.viewInsetsOf(context).bottom,
+                      24,
                     ),
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 430),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const BilFullWordmark(
-                              key: Key('verify-email-wordmark'),
-                              height: 38,
-                              alignment: Alignment.center,
-                            ),
-                            SizedBox(height: compact ? 18 : 24),
-                            Text(
-                              authEntryText(
-                                context,
-                                AuthEntryCopyKey.enterVerificationCode,
+                        child: BilPinnedHeaderBody(
+                          shrinkWrap: true,
+                          header: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const BilFullWordmark(
+                                key: Key('verify-email-wordmark'),
+                                height: 38,
+                                alignment: Alignment.center,
                               ),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: scheme.onSurface,
-                                fontSize: 24,
-                                height: 1.15,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -.45,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: Text(
-                                authEntryCodeSent(context, widget.email),
+                              SizedBox(height: compact ? 18 : 24),
+                              Text(
+                                authEntryText(
+                                  context,
+                                  AuthEntryCopyKey.enterVerificationCode,
+                                ),
+                                key: const Key('verify-code-heading'),
                                 textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: scheme.onSurfaceVariant,
-                                  fontSize: 14,
-                                  height: 1.4,
-                                  fontWeight: FontWeight.w500,
+                                style: bilPageHeadingStyle(
+                                  context,
+                                  color: scheme.onSurface,
                                 ),
                               ),
-                            ),
-                            SizedBox(height: compact ? 26 : 34),
-                            GestureDetector(
-                              key: const Key('verification-code-boxes'),
-                              behavior: HitTestBehavior.opaque,
-                              onTap: codeFocus.requestFocus,
-                              child: Stack(
-                                children: [
-                                  LayoutBuilder(
-                                    builder: (context, boxConstraints) {
-                                      final boxWidth =
-                                          ((boxConstraints.maxWidth - 40) / 6)
-                                              .clamp(36.0, 49.0)
-                                              .toDouble();
-                                      return Directionality(
-                                        textDirection: TextDirection.ltr,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: List.generate(6, (index) {
-                                            final value =
-                                                index < code.text.length
-                                                ? code.text[index]
-                                                : '';
-                                            final active =
-                                                codeFocus.hasFocus &&
-                                                code.text.length < 6 &&
-                                                index == code.text.length;
-                                            return AnimatedContainer(
-                                              duration: const Duration(
-                                                milliseconds: 130,
-                                              ),
-                                              width: boxWidth,
-                                              height: 59,
-                                              alignment: Alignment.center,
-                                              decoration: BoxDecoration(
-                                                color: dark
-                                                    ? scheme
-                                                          .surfaceContainerHighest
-                                                    : const Color(0xFFF9F9FB),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                border: Border.all(
-                                                  color: active
-                                                      ? scheme.primary
-                                                      : scheme.outlineVariant,
-                                                  width: active ? 1.8 : 1.2,
-                                                ),
-                                                boxShadow: active
-                                                    ? const [
-                                                        BoxShadow(
-                                                          color: Color(
-                                                            0x160877F9,
-                                                          ),
-                                                          blurRadius: 14,
-                                                          offset: Offset(0, 5),
-                                                        ),
-                                                      ]
-                                                    : const [],
-                                              ),
-                                              child: Text(
-                                                value,
-                                                style: TextStyle(
-                                                  fontSize: 23,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: scheme.onSurface,
-                                                ),
-                                              ),
-                                            );
-                                          }),
-                                        ),
-                                      );
-                                    },
+                              const SizedBox(height: 10),
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: Text(
+                                  authEntryCodeSent(context, widget.email),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: scheme.onSurfaceVariant,
+                                    fontSize: 14,
+                                    height: 1.4,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                  Positioned.fill(
-                                    child: Opacity(
-                                      opacity: .01,
-                                      child: TextField(
-                                        key: const Key(
-                                          'email-verification-code',
-                                        ),
-                                        controller: code,
-                                        focusNode: codeFocus,
-                                        enabled: !loading,
-                                        keyboardType: TextInputType.number,
-                                        textDirection: TextDirection.ltr,
-                                        textInputAction: TextInputAction.done,
-                                        autofillHints: const [
-                                          AutofillHints.oneTimeCode,
-                                        ],
-                                        maxLength: 6,
-                                        inputFormatters: <TextInputFormatter>[
-                                          FilteringTextInputFormatter
-                                              .digitsOnly,
-                                          LengthLimitingTextInputFormatter(6),
-                                        ],
-                                        decoration: const InputDecoration(
-                                          counterText: '',
-                                        ),
-                                        onChanged: (_) {
-                                          setState(() {});
-                                          if (code.text.length == 6 &&
-                                              !loading) {
-                                            unawaited(verify());
-                                          }
+                                ),
+                              ),
+                              SizedBox(height: compact ? 26 : 34),
+                            ],
+                          ),
+                          body: SingleChildScrollView(
+                            key: const Key('verify-email-body-scroll'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                GestureDetector(
+                                  key: const Key('verification-code-boxes'),
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: codeFocus.requestFocus,
+                                  child: Stack(
+                                    children: [
+                                      LayoutBuilder(
+                                        builder: (context, boxConstraints) {
+                                          final boxWidth =
+                                              ((boxConstraints.maxWidth - 40) /
+                                                      6)
+                                                  .clamp(36.0, 49.0)
+                                                  .toDouble();
+                                          return Directionality(
+                                            textDirection: TextDirection.ltr,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: List.generate(6, (
+                                                index,
+                                              ) {
+                                                final value =
+                                                    index < code.text.length
+                                                    ? code.text[index]
+                                                    : '';
+                                                final active =
+                                                    codeFocus.hasFocus &&
+                                                    code.text.length < 6 &&
+                                                    index == code.text.length;
+                                                return AnimatedContainer(
+                                                  duration: const Duration(
+                                                    milliseconds: 130,
+                                                  ),
+                                                  width: boxWidth,
+                                                  height: 59,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: dark
+                                                        ? scheme
+                                                              .surfaceContainerHighest
+                                                        : const Color(
+                                                            0xFFF9F9FB,
+                                                          ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                    border: Border.all(
+                                                      color: active
+                                                          ? scheme.primary
+                                                          : scheme
+                                                                .outlineVariant,
+                                                      width: active ? 1.8 : 1.2,
+                                                    ),
+                                                    boxShadow: active
+                                                        ? const [
+                                                            BoxShadow(
+                                                              color: Color(
+                                                                0x160877F9,
+                                                              ),
+                                                              blurRadius: 14,
+                                                              offset: Offset(
+                                                                0,
+                                                                5,
+                                                              ),
+                                                            ),
+                                                          ]
+                                                        : const [],
+                                                  ),
+                                                  child: Text(
+                                                    value,
+                                                    style: TextStyle(
+                                                      fontSize: 23,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      color: scheme.onSurface,
+                                                    ),
+                                                  ),
+                                                );
+                                              }),
+                                            ),
+                                          );
                                         },
-                                        onSubmitted: (_) => verify(),
+                                      ),
+                                      Positioned.fill(
+                                        child: Opacity(
+                                          opacity: .01,
+                                          child: TextField(
+                                            key: const Key(
+                                              'email-verification-code',
+                                            ),
+                                            controller: code,
+                                            focusNode: codeFocus,
+                                            enabled: !loading,
+                                            keyboardType: TextInputType.number,
+                                            textDirection: TextDirection.ltr,
+                                            textInputAction:
+                                                TextInputAction.done,
+                                            autofillHints: const [
+                                              AutofillHints.oneTimeCode,
+                                            ],
+                                            maxLength: 6,
+                                            inputFormatters: <TextInputFormatter>[
+                                              FilteringTextInputFormatter
+                                                  .digitsOnly,
+                                              LengthLimitingTextInputFormatter(
+                                                6,
+                                              ),
+                                            ],
+                                            decoration: const InputDecoration(
+                                              counterText: '',
+                                            ),
+                                            onChanged: (_) {
+                                              setState(() {});
+                                              if (code.text.length == 6 &&
+                                                  !loading) {
+                                                unawaited(verify());
+                                              }
+                                            },
+                                            onSubmitted: (_) => verify(),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (status != null) ...[
+                                  const SizedBox(height: 15),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: statusIsError
+                                          ? scheme.errorContainer
+                                          : scheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      status!,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: statusIsError
+                                            ? scheme.onErrorContainer
+                                            : scheme.onPrimaryContainer,
+                                        height: 1.35,
                                       ),
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
-                            if (status != null) ...[
-                              const SizedBox(height: 15),
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: statusIsError
-                                      ? scheme.errorContainer
-                                      : scheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(12),
+                                SizedBox(height: compact ? 21 : 28),
+                                FilledButton(
+                                  key: const Key('verify-email-submit'),
+                                  onPressed: code.text.length == 6 && !loading
+                                      ? verify
+                                      : null,
+                                  style: FilledButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(56),
+                                    backgroundColor: const Color(0xFF0877F9),
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor: const Color(
+                                      0xFFB8C8DE,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0,
+                                    textStyle: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: -.15,
+                                    ),
+                                  ),
+                                  child: loading
+                                      ? const SizedBox.square(
+                                          dimension: 20,
+                                          child: BilFeatureWelcomeStatus(
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : Text(
+                                          authEntryText(
+                                            context,
+                                            AuthEntryCopyKey.verify,
+                                          ),
+                                        ),
                                 ),
-                                child: Text(
-                                  status!,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: statusIsError
-                                        ? scheme.onErrorContainer
-                                        : scheme.onPrimaryContainer,
-                                    height: 1.35,
+                                const SizedBox(height: 12),
+                                TextButton(
+                                  key: const Key('resend-email-code'),
+                                  onPressed: resendSeconds == 0 && !loading
+                                      ? resend
+                                      : null,
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: const Color(0xFF0877F9),
+                                    disabledForegroundColor: const Color(
+                                      0xFF0877F9,
+                                    ),
+                                    textStyle: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    resendSeconds == 0
+                                        ? authEntryText(
+                                            context,
+                                            AuthEntryCopyKey.resendCode,
+                                          )
+                                        : authEntryResendCountdown(
+                                            context,
+                                            _clock,
+                                          ),
                                   ),
                                 ),
-                              ),
-                            ],
-                            SizedBox(height: compact ? 21 : 28),
-                            FilledButton(
-                              key: const Key('verify-email-submit'),
-                              onPressed: code.text.length == 6 && !loading
-                                  ? verify
-                                  : null,
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size.fromHeight(56),
-                                backgroundColor: const Color(0xFF0877F9),
-                                foregroundColor: Colors.white,
-                                disabledBackgroundColor: const Color(
-                                  0xFFB8C8DE,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 0,
-                                textStyle: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: -.15,
-                                ),
-                              ),
-                              child: loading
-                                  ? const SizedBox.square(
-                                      dimension: 20,
-                                      child: BilFeatureWelcomeStatus(
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : Text(
-                                      authEntryText(
-                                        context,
-                                        AuthEntryCopyKey.verify,
-                                      ),
+                                TextButton(
+                                  key: const Key('change-email'),
+                                  onPressed: loading
+                                      ? null
+                                      : () => context.go('/login'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: scheme.onSurfaceVariant,
+                                    textStyle: const TextStyle(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w600,
                                     ),
+                                  ),
+                                  child: Text(
+                                    authEntryText(
+                                      context,
+                                      AuthEntryCopyKey.changeEmail,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            TextButton(
-                              key: const Key('resend-email-code'),
-                              onPressed: resendSeconds == 0 && !loading
-                                  ? resend
-                                  : null,
-                              style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF0877F9),
-                                disabledForegroundColor: const Color(
-                                  0xFF0877F9,
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              child: Text(
-                                resendSeconds == 0
-                                    ? authEntryText(
-                                        context,
-                                        AuthEntryCopyKey.resendCode,
-                                      )
-                                    : authEntryResendCountdown(context, _clock),
-                              ),
-                            ),
-                            TextButton(
-                              key: const Key('change-email'),
-                              onPressed: loading
-                                  ? null
-                                  : () => context.go('/login'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: scheme.onSurfaceVariant,
-                                textStyle: const TextStyle(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              child: Text(
-                                authEntryText(
-                                  context,
-                                  AuthEntryCopyKey.changeEmail,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -451,68 +483,21 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 }
 
 class _VerifyTopBar extends StatelessWidget {
-  const _VerifyTopBar({required this.title, required this.onBack});
+  const _VerifyTopBar({
+    required this.title,
+    required this.onBack,
+    required this.mediaQuery,
+  });
 
   final String title;
   final VoidCallback? onBack;
+  final MediaQueryData mediaQuery;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final dark = scheme.brightness == Brightness.dark;
-    return Container(
-      height: 72,
-      decoration: BoxDecoration(
-        color: dark ? scheme.surfaceContainerLow : const Color(0xFFFAFAFC),
-        border: Border(
-          bottom: BorderSide(color: scheme.outlineVariant, width: 1),
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(start: 16),
-              child: Material(
-                color: dark ? scheme.surfaceContainerHighest : Colors.white,
-                shape: const CircleBorder(),
-                elevation: 4,
-                shadowColor: const Color(0x1F000000),
-                child: IconButton(
-                  key: const Key('verify-email-back'),
-                  tooltip: authEntryText(context, AuthEntryCopyKey.back),
-                  onPressed: onBack,
-                  icon: BilNavigationFeedback(
-                    child: Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.arrow_forward_ios_rounded
-                          : Icons.arrow_back_ios_new_rounded,
-                      size: 19,
-                    ),
-                  ),
-                  color: scheme.onSurface,
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 74),
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: scheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -.25,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AuthPageTopBar(
+    title: title,
+    backKey: const Key('verify-email-back'),
+    onBack: onBack,
+    mediaQuery: mediaQuery,
+  );
 }

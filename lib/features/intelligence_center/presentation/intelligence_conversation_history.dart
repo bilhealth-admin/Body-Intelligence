@@ -294,110 +294,127 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
       backgroundColor: Colors.transparent,
       useSafeArea: true,
       showDragHandle: true,
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * .9,
+      ),
       builder: (sheetContext) => BilFrostedPanel(
         radius: const BorderRadius.vertical(top: Radius.circular(24)),
         child: SafeArea(
-          child: ListView(
+          child: BilPinnedHeaderBody(
+            key: const Key('ai-coach-conversation-history-sheet'),
             shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(18, 2, 18, 18),
-            children: [
-              Text(
-                deleteMode
-                    ? tr('Clear conversation', 'مسح المحادثة')
-                    : tr('Conversations', 'المحادثات'),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                deleteMode
-                    ? tr(
-                        'Choose the conversation to delete',
-                        'اختر المحادثة التي تريد حذفها',
-                      )
-                    : tr(
-                        'Conversation history is stored locally on this device.',
-                        'يُحفظ سجل المحادثات محليًا على هذا الجهاز.',
+            header: Padding(
+              key: const Key('ai-coach-conversation-history-heading'),
+              padding: const EdgeInsets.fromLTRB(18, 2, 18, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    deleteMode
+                        ? tr('Clear conversation', 'مسح المحادثة')
+                        : tr('Conversations', 'المحادثات'),
+                    style: bilPageHeadingStyle(context),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    deleteMode
+                        ? tr(
+                            'Choose the conversation to delete',
+                            'اختر المحادثة التي تريد حذفها',
+                          )
+                        : tr(
+                            'Conversation history is stored locally on this device.',
+                            'يُحفظ سجل المحادثات محليًا على هذا الجهاز.',
+                          ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (!deleteMode)
+                    ListTile(
+                      key: const Key('ai-coach-new-conversation'),
+                      leading: const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.messages,
+                        iconOverride: Icons.add_comment_outlined,
+                        appleIconOverride: Icons.add_comment_outlined,
                       ),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                      title: Text(tr('New conversation', 'محادثة جديدة')),
+                      subtitle: Text(
+                        tr(
+                          'Keep this chat in history and start an empty one.',
+                          'احفظ هذه المحادثة في السجل وابدأ محادثة فارغة.',
+                        ),
+                      ),
+                      onTap: () => Navigator.pop(sheetContext, '__new__'),
+                    ),
+                  const Divider(height: 12),
+                ],
               ),
-              const SizedBox(height: 8),
-              for (final entry in history)
-                ListTile(
-                  key: Key('ai-coach-conversation-${entry['id']}'),
-                  leading: const Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    size: 22,
-                  ),
-                  title: Text(
-                    '${entry['title'] ?? tr('Conversation', 'محادثة')}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  selected: entry['id'] == activeConversationId,
-                  trailing: deleteMode
-                      ? Icon(
-                          Icons.delete_outline,
-                          semanticLabel: tr('Delete', 'حذف'),
-                        )
-                      : bilPearlPopupMenuButton<String>(
-                          key: Key(
-                            'ai-coach-conversation-actions-${entry['id']}',
-                          ),
-                          tooltip: tr(
-                            'Conversation actions',
-                            'إجراءات المحادثة',
-                          ),
-                          icon: const Icon(Icons.more_horiz_rounded),
-                          onSelected: (action) => Navigator.pop(
-                            sheetContext,
-                            '__rename__:${entry['id']}',
-                          ),
-                          itemBuilder: (_) => [
-                            PopupMenuItem(
-                              value: 'rename',
-                              child: Text(
-                                tr(
-                                  'Rename conversation',
-                                  'إعادة تسمية المحادثة',
+            ),
+            body: ListView(
+              key: const Key('ai-coach-conversation-history-list'),
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+              children: [
+                for (final entry in history)
+                  ListTile(
+                    key: Key('ai-coach-conversation-${entry['id']}'),
+                    leading: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 22,
+                    ),
+                    title: Text(
+                      '${entry['title'] ?? tr('Conversation', 'محادثة')}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    selected: entry['id'] == activeConversationId,
+                    trailing: deleteMode
+                        ? Icon(
+                            Icons.delete_outline,
+                            semanticLabel: tr('Delete', 'حذف'),
+                          )
+                        : bilPearlPopupMenuButton<String>(
+                            key: Key(
+                              'ai-coach-conversation-actions-${entry['id']}',
+                            ),
+                            tooltip: tr(
+                              'Conversation actions',
+                              'إجراءات المحادثة',
+                            ),
+                            icon: const Icon(Icons.more_horiz_rounded),
+                            onSelected: (action) => Navigator.pop(
+                              sheetContext,
+                              '__rename__:${entry['id']}',
+                            ),
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: 'rename',
+                                child: Text(
+                                  tr(
+                                    'Rename conversation',
+                                    'إعادة تسمية المحادثة',
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                  onTap: () => Navigator.pop(sheetContext, '${entry['id']}'),
-                ),
-              if (history.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(
-                    tr(
-                      'No previous conversations yet.',
-                      'لا توجد محادثات سابقة بعد.',
+                            ],
+                          ),
+                    onTap: () => Navigator.pop(sheetContext, '${entry['id']}'),
+                  ),
+                if (history.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      tr(
+                        'No previous conversations yet.',
+                        'لا توجد محادثات سابقة بعد.',
+                      ),
                     ),
                   ),
-                ),
-              if (!deleteMode) const Divider(height: 20),
-              if (!deleteMode)
-                ListTile(
-                  leading: const BilSemanticIconBadge(
-                    kind: BilSemanticIconKind.messages,
-                    iconOverride: Icons.add_comment_outlined,
-                    appleIconOverride: Icons.add_comment_outlined,
-                  ),
-                  title: Text(tr('New conversation', 'محادثة جديدة')),
-                  subtitle: Text(
-                    tr(
-                      'Keep this chat in history and start an empty one.',
-                      'احفظ هذه المحادثة في السجل وابدأ محادثة فارغة.',
-                    ),
-                  ),
-                  onTap: () => Navigator.pop(sheetContext, '__new__'),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

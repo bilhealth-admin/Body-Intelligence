@@ -12,6 +12,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/environment/app_environment.dart';
 import '../../data/database/database_provider.dart';
 import '../../shared/widgets/bil_wordmark.dart';
+import '../../shared/widgets/bil_pinned_header_body.dart';
+import '../../shared/widgets/bil_page_heading.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'account_gateway_page.dart'
     show localRecoveryServiceProvider, validRecoverySnapshotProvider;
@@ -150,7 +152,7 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
             final compact = constraints.maxHeight < 720;
             final horizontalPadding = constraints.maxWidth < 390 ? 18.0 : 22.0;
             return Center(
-              child: SingleChildScrollView(
+              child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   horizontalPadding,
                   compact ? 8 : 13,
@@ -159,103 +161,119 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                 ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 470),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _GatewayBrandHeader(compact: compact),
-                      SizedBox(height: compact ? 11 : 14),
-                      const Align(
-                        alignment: Alignment.center,
-                        child: AuthLanguageSelector(),
-                      ),
-                      SizedBox(height: compact ? 18 : 24),
-                      _GatewayStoryPager(
-                        controller: storyController,
-                        index: storyIndex,
-                        onChanged: (value) =>
-                            setState(() => storyIndex = value),
-                      ),
-                      SizedBox(height: compact ? 18 : 24),
-                      SizedBox(
-                        height: compact ? 54 : 58,
-                        child: FilledButton(
-                          key: const Key('gateway-account-action'),
-                          onPressed: restoring
-                              ? null
-                              : () => context.go('/login'),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF0877F9),
-                            foregroundColor: Colors.white,
-                            disabledBackgroundColor: const Color(0xFFD0D5DD),
-                            disabledForegroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            textStyle: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -.15,
-                              fontFamily: accountActionFontFamily,
-                            ),
-                          ),
-                          child: Text(
-                            authEntryText(context, AuthEntryCopyKey.signIn),
-                          ),
+                  child: BilPinnedHeaderBody(
+                    shrinkWrap: true,
+                    header: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _GatewayBrandHeader(compact: compact),
+                        SizedBox(height: compact ? 11 : 14),
+                        const Align(
+                          alignment: Alignment.center,
+                          child: AuthLanguageSelector(),
                         ),
-                      ),
-                      SizedBox(height: compact ? 3 : 5),
-                      Center(
-                        child: TextButton(
-                          key: const Key('gateway-continue-locally'),
-                          onPressed: restoring ? null : _continueLocally,
-                          style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xFF0877F9),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 12,
-                            ),
-                            textStyle: TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: accountActionFontFamily,
-                            ),
+                        SizedBox(height: compact ? 18 : 24),
+                      ],
+                    ),
+                    body: SingleChildScrollView(
+                      key: const Key('account-gateway-body-scroll'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _GatewayStoryPager(
+                            controller: storyController,
+                            index: storyIndex,
+                            onChanged: (value) =>
+                                setState(() => storyIndex = value),
                           ),
-                          child: Text(
-                            authEntryText(
-                              context,
-                              AuthEntryCopyKey.continueWithoutAccount,
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (snapshot.value == true)
-                        Center(
-                          child: TextButton.icon(
-                            key: const Key('gateway-restore'),
-                            onPressed: restoring ? null : _restore,
-                            icon: restoring
-                                ? const SizedBox.square(
-                                    dimension: 16,
-                                    child: BilFeatureWelcomeStatus(),
-                                  )
-                                : const Icon(Icons.restore_rounded, size: 18),
-                            label: Text(
-                              authEntryText(
-                                context,
-                                AuthEntryCopyKey.restorePreviousData,
+                          SizedBox(height: compact ? 18 : 24),
+                          SizedBox(
+                            height: compact ? 54 : 58,
+                            child: FilledButton(
+                              key: const Key('gateway-account-action'),
+                              onPressed: restoring
+                                  ? null
+                                  : () => context.go('/login'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF0877F9),
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: const Color(
+                                  0xFFD0D5DD,
+                                ),
+                                disabledForegroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                textStyle: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -.15,
+                                  fontFamily: accountActionFontFamily,
+                                ),
                               ),
-                            ),
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF667085),
-                              textStyle: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                              child: Text(
+                                authEntryText(context, AuthEntryCopyKey.signIn),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                          SizedBox(height: compact ? 3 : 5),
+                          Center(
+                            child: TextButton(
+                              key: const Key('gateway-continue-locally'),
+                              onPressed: restoring ? null : _continueLocally,
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF0877F9),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 12,
+                                ),
+                                textStyle: TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: accountActionFontFamily,
+                                ),
+                              ),
+                              child: Text(
+                                authEntryText(
+                                  context,
+                                  AuthEntryCopyKey.continueWithoutAccount,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (snapshot.value == true)
+                            Center(
+                              child: TextButton.icon(
+                                key: const Key('gateway-restore'),
+                                onPressed: restoring ? null : _restore,
+                                icon: restoring
+                                    ? const SizedBox.square(
+                                        dimension: 16,
+                                        child: BilFeatureWelcomeStatus(),
+                                      )
+                                    : const Icon(
+                                        Icons.restore_rounded,
+                                        size: 18,
+                                      ),
+                                label: Text(
+                                  authEntryText(
+                                    context,
+                                    AuthEntryCopyKey.restorePreviousData,
+                                  ),
+                                ),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: const Color(0xFF667085),
+                                  textStyle: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -277,13 +295,11 @@ class _GatewayBrandHeader extends StatelessWidget {
     children: [
       Text(
         authEntryText(context, AuthEntryCopyKey.welcomeTo),
+        key: const Key('gateway-welcome-heading'),
         textAlign: TextAlign.center,
-        style: TextStyle(
+        style: bilPageHeadingStyle(
+          context,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
-          fontSize: compact ? 12 : 13,
-          height: 1.1,
-          fontWeight: FontWeight.w600,
-          letterSpacing: .05,
         ),
       ),
       SizedBox(height: compact ? 4 : 5),

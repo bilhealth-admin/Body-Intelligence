@@ -99,7 +99,7 @@ extension _CommunityFeedRendering on _FeedTabState {
                           key: _topicFeedKey,
                           topic: topic,
                           visit: visit,
-                          metadata: _referenceByPost,
+                          referenceForPost: _referenceForPost,
                           identities: _authorIdentities,
                           viewCounts: _viewCountByPost,
                           previews: _commentPreviewByPost,
@@ -202,8 +202,7 @@ extension _CommunityFeedRendering on _FeedTabState {
                                     ownerIsCurrent: visit.isCurrent,
                                     ownerChanges: visit.changes,
                                     currentUserId: visit.ownerId,
-                                    referenceMetadata:
-                                        _referenceByPost[post.id],
+                                    referenceMetadata: _referenceForPost(post),
                                     viewCount: _viewCountByPost[post.id],
                                     commentPreview:
                                         _commentPreviewByPost[post.id],

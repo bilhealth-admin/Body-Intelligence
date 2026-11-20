@@ -214,6 +214,30 @@ void main() {
       pending.completeError(StateError('synthetic authority read failure'));
       await tester.pumpAndSettle();
       expect(
+        find.byKey(const ValueKey('authorized-/smart-plan')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-access-unavailable')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-upgrade-cta')),
+        findsNothing,
+      );
+
+      pending = Completer<SubscriptionState>();
+      container.invalidate(verifiedSubscriptionStateProvider);
+      await tester.pump();
+      pending.completeError(
+        const AuthException('Invalid session', statusCode: '401'),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('authorized-/smart-plan')),
+        findsNothing,
+      );
+      expect(
         find.byKey(const ValueKey('premium-route-access-unavailable')),
         findsOneWidget,
       );

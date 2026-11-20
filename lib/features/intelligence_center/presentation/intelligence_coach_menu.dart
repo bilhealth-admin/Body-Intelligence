@@ -14,142 +14,161 @@ class _CoachMenuSheet extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return SafeArea(
       top: false,
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(
-          18,
-          2,
-          18,
-          20 + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              intelligenceText(context, 'Your BIL Coach', 'مدرب BIL الخاص بك'),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              intelligenceText(
-                context,
-                'Conversations, context, privacy and usage.',
-                'المحادثات والسياق والخصوصية والاستخدام.',
-              ),
-              style: TextStyle(color: scheme.onSurfaceVariant),
-            ),
-            if (currentTitle != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Text(
-                  currentTitle!,
-                  key: const Key('ai-coach-current-conversation-title'),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+      child: BilPinnedHeaderBody(
+        shrinkWrap: true,
+        header: Padding(
+          key: const Key("coach-menu-pinned-heading"),
+          padding: const EdgeInsets.fromLTRB(18, 2, 18, 0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                intelligenceText(
+                  context,
+                  'Your BIL Coach',
+                  'مدرب BIL الخاص بك',
                 ),
+                style: bilPageHeadingStyle(context),
               ),
-            const SizedBox(height: 16),
-            _CoachMenuTile(
-              icon: Icons.dashboard_outlined,
-              title: intelligenceText(context, 'Overview', 'نظرة عامة'),
-              subtitle: intelligenceText(
-                context,
-                'Your Health Timeline',
-                'تسلسل يومك الصحي',
+              const SizedBox(height: 4),
+              Text(
+                intelligenceText(
+                  context,
+                  'Conversations, context, privacy and usage.',
+                  'المحادثات والسياق والخصوصية والاستخدام.',
+                ),
+                style: TextStyle(color: scheme.onSurfaceVariant),
               ),
-              onTap: () => Navigator.of(context).pop('overview'),
-            ),
-            const SizedBox(height: 9),
-            _CoachMenuTile(
-              icon: Icons.forum_outlined,
-              title: intelligenceText(
-                context,
-                'Conversation history',
-                'سجل المحادثات',
-              ),
-              subtitle: intelligenceText(
-                context,
-                'Open an earlier chat or start a new one',
-                'افتح محادثة سابقة أو ابدأ محادثة جديدة',
-              ),
-              onTap: () => Navigator.of(context).pop('history'),
-            ),
-            const SizedBox(height: 9),
-            _CoachMenuTile(
-              icon: Icons.psychology_alt_rounded,
-              title: intelligenceText(
-                context,
-                'What BIL remembers',
-                'ماذا يتذكر BIL عني',
-              ),
-              subtitle: intelligenceText(
-                context,
-                'Review the context behind your decisions',
-                'راجع السياق الذي يبني عليه قراراتك',
-              ),
-              onTap: () => Navigator.of(context).pop('memory'),
-            ),
-            const SizedBox(height: 9),
-            _CoachMenuTile(
-              icon: Icons.calendar_month_rounded,
-              title: intelligenceText(context, 'My Smart Plan', 'خطتي الذكية'),
-              subtitle: intelligenceText(
-                context,
-                'Training, nutrition and progress in one place',
-                'التدريب والتغذية والمتابعة في مكان واحد',
-              ),
-              onTap: () => Navigator.of(context).pop('smart_plan'),
-            ),
-            const SizedBox(height: 9),
-            _CoachMenuTile(
-              icon: Icons.tune_rounded,
-              title: intelligenceText(
-                context,
-                'Coach settings',
-                'إعدادات المدرب',
-              ),
-              subtitle: intelligenceText(
-                context,
-                'Context, privacy and balance',
-                'السياق والخصوصية والرصيد',
-              ),
-              onTap: () => Navigator.of(context).pop('settings'),
-            ),
-            const SizedBox(height: 9),
-            if (canRename)
+              if (currentTitle != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Text(
+                    currentTitle!,
+                    key: const Key('ai-coach-current-conversation-title'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            18,
+            0,
+            18,
+            20 + MediaQuery.viewInsetsOf(context).bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               _CoachMenuTile(
-                icon: Icons.edit_outlined,
+                icon: Icons.dashboard_outlined,
+                title: intelligenceText(context, 'Overview', 'نظرة عامة'),
+                subtitle: intelligenceText(
+                  context,
+                  'Your Health Timeline',
+                  'تسلسل يومك الصحي',
+                ),
+                onTap: () => Navigator.of(context).pop('overview'),
+              ),
+              const SizedBox(height: 9),
+              _CoachMenuTile(
+                icon: Icons.forum_outlined,
                 title: intelligenceText(
                   context,
-                  'Rename conversation',
-                  'إعادة تسمية المحادثة',
+                  'Conversation history',
+                  'سجل المحادثات',
                 ),
                 subtitle: intelligenceText(
                   context,
-                  'Change this conversation’s name',
-                  'غيّر اسم هذه المحادثة',
+                  'Open an earlier chat or start a new one',
+                  'افتح محادثة سابقة أو ابدأ محادثة جديدة',
                 ),
-                onTap: () => Navigator.of(context).pop('rename'),
+                onTap: () => Navigator.of(context).pop('history'),
               ),
-            const Divider(height: 24),
-            _CoachMenuTile(
-              icon: Icons.delete_sweep_outlined,
-              title: intelligenceText(
-                context,
-                'Clear conversation',
-                'مسح المحادثة',
+              const SizedBox(height: 9),
+              _CoachMenuTile(
+                icon: Icons.psychology_alt_rounded,
+                title: intelligenceText(
+                  context,
+                  'What BIL remembers',
+                  'ماذا يتذكر BIL عني',
+                ),
+                subtitle: intelligenceText(
+                  context,
+                  'Review the context behind your decisions',
+                  'راجع السياق الذي يبني عليه قراراتك',
+                ),
+                onTap: () => Navigator.of(context).pop('memory'),
               ),
-              subtitle: intelligenceText(
-                context,
-                'Choose the conversation to delete',
-                'اختر المحادثة التي تريد حذفها',
+              const SizedBox(height: 9),
+              _CoachMenuTile(
+                icon: Icons.calendar_month_rounded,
+                title: intelligenceText(
+                  context,
+                  'My Smart Plan',
+                  'خطتي الذكية',
+                ),
+                subtitle: intelligenceText(
+                  context,
+                  'Training, nutrition and progress in one place',
+                  'التدريب والتغذية والمتابعة في مكان واحد',
+                ),
+                onTap: () => Navigator.of(context).pop('smart_plan'),
               ),
-              onTap: () => Navigator.of(context).pop('clear'),
-              destructive: true,
-            ),
-          ],
+              const SizedBox(height: 9),
+              _CoachMenuTile(
+                icon: Icons.tune_rounded,
+                title: intelligenceText(
+                  context,
+                  'Coach settings',
+                  'إعدادات المدرب',
+                ),
+                subtitle: intelligenceText(
+                  context,
+                  'Context, privacy and balance',
+                  'السياق والخصوصية والرصيد',
+                ),
+                onTap: () => Navigator.of(context).pop('settings'),
+              ),
+              const SizedBox(height: 9),
+              if (canRename)
+                _CoachMenuTile(
+                  icon: Icons.edit_outlined,
+                  title: intelligenceText(
+                    context,
+                    'Rename conversation',
+                    'إعادة تسمية المحادثة',
+                  ),
+                  subtitle: intelligenceText(
+                    context,
+                    'Change this conversation’s name',
+                    'غيّر اسم هذه المحادثة',
+                  ),
+                  onTap: () => Navigator.of(context).pop('rename'),
+                ),
+              const Divider(height: 24),
+              _CoachMenuTile(
+                icon: Icons.delete_sweep_outlined,
+                title: intelligenceText(
+                  context,
+                  'Clear conversation',
+                  'مسح المحادثة',
+                ),
+                subtitle: intelligenceText(
+                  context,
+                  'Choose the conversation to delete',
+                  'اختر المحادثة التي تريد حذفها',
+                ),
+                onTap: () => Navigator.of(context).pop('clear'),
+                destructive: true,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -304,51 +323,63 @@ extension _CoachQuickPromptMenu on _IntelligenceCenterPageState {
       builder: (sheetContext) => BilFrostedPanel(
         child: SafeArea(
           top: false,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 6, 6, 4),
-                  child: Text(
-                    tr('Ask your Coach', 'اسأل مدربك'),
-                    style: Theme.of(sheetContext).textTheme.titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(6, 0, 6, 8),
-                  child: Text(
-                    tr(
-                      'Shortcuts use only the BIL data available to your Coach. They do not log food or make changes.',
-                      'تستخدم الاختصارات بيانات BIL المتاحة للمدرب فقط، ولا تسجّل طعامًا أو تُجري تغييرات.',
+          child: BilPinnedHeaderBody(
+            shrinkWrap: true,
+            header: Padding(
+              key: const Key("coach-prompts-pinned-heading"),
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 6, 6, 4),
+                    child: Text(
+                      tr('Ask your Coach', 'اسأل مدربك'),
+                      style: bilPageHeadingStyle(sheetContext),
                     ),
-                    style: Theme.of(sheetContext).textTheme.bodyMedium
-                        ?.copyWith(
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(6, 0, 6, 8),
+                    child: Text(
+                      tr(
+                        'Shortcuts use only the BIL data available to your Coach. They do not log food or make changes.',
+                        'تستخدم الاختصارات بيانات BIL المتاحة للمدرب فقط، ولا تسجّل طعامًا أو تُجري تغييرات.',
+                      ),
+                      style: Theme.of(sheetContext).textTheme.bodyMedium
+                          ?.copyWith(
+                            color: Theme.of(
+                              sheetContext,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var index = 0; index < prompts.length; index++)
+                    ListTile(
+                      key: Key('ai-coach-prompt-$index'),
+                      leading: BilNavigationFeedback(
+                        child: Icon(
+                          prompts[index].icon,
                           color: Theme.of(
                             sheetContext,
                           ).colorScheme.onSurfaceVariant,
                         ),
-                  ),
-                ),
-                for (var index = 0; index < prompts.length; index++)
-                  ListTile(
-                    key: Key('ai-coach-prompt-$index'),
-                    leading: BilNavigationFeedback(
-                      child: Icon(
-                        prompts[index].icon,
-                        color: Theme.of(
-                          sheetContext,
-                        ).colorScheme.onSurfaceVariant,
                       ),
+                      title: Text(prompts[index].title),
+                      onTap: () =>
+                          Navigator.of(sheetContext).pop(prompts[index].prompt),
                     ),
-                    title: Text(prompts[index].title),
-                    onTap: () =>
-                        Navigator.of(sheetContext).pop(prompts[index].prompt),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

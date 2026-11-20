@@ -1,3 +1,5 @@
+import '../../../shared/widgets/bil_page_heading.dart';
+import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
 import '../../../shared/widgets/bil_pearl_material.dart';
 import 'package:flutter/material.dart';
@@ -193,115 +195,125 @@ class _QuickMacroEntryDialogState extends State<_QuickMacroEntryDialog> {
             ),
             child: Form(
               key: formKey,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const BilFullWordmark(
-                      key: Key('quick-macro-wordmark'),
-                      height: 32,
-                      alignment: Alignment.center,
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      copy('Quick Add macros', 'إضافة المغذيات سريعًا'),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontFamily: 'BILDisplay',
-                        fontWeight: FontWeight.w800,
+              child: BilPinnedHeaderBody(
+                shrinkWrap: true,
+                header: Padding(
+                  key: const Key("quick-macro-pinned-heading"),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        copy('Quick Add macros', 'إضافة المغذيات سريعًا'),
+                        style: bilPageHeadingStyle(context),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    _InfoTile(
-                      kind: BilSemanticIconKind.meal,
-                      label: copy('Meal', 'الوجبة'),
-                      value: mealLabel,
-                    ),
-                    const SizedBox(height: 10),
-                    for (final field in fields)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: TextFormField(
-                          key: Key('quick-macro-field-${field.i}'),
-                          controller: controllers[field.i],
-                          enabled: !saving,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          textInputAction: field.i == 3
-                              ? TextInputAction.done
-                              : TextInputAction.next,
-                          onFieldSubmitted: (_) {
-                            if (field.i < 3) {
-                              FocusScope.of(context).nextFocus();
-                            }
-                          },
-                          decoration: InputDecoration(
-                            labelText: field.label,
-                            suffixText: field.suffix,
-                            filled: true,
-                            fillColor: scheme.surface.withValues(alpha: .82),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+                body: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const BilFullWordmark(
+                        key: Key('quick-macro-wordmark'),
+                        height: 32,
+                        alignment: Alignment.center,
+                      ),
+                      const SizedBox(height: 14),
+                      _InfoTile(
+                        kind: BilSemanticIconKind.meal,
+                        label: copy('Meal', 'الوجبة'),
+                        value: mealLabel,
+                      ),
+                      const SizedBox(height: 10),
+                      for (final field in fields)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: TextFormField(
+                            key: Key('quick-macro-field-${field.i}'),
+                            controller: controllers[field.i],
+                            enabled: !saving,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
                             ),
-                          ),
-                          validator: (raw) => validateNumber(raw, field.max),
-                        ),
-                      ),
-                    _InfoTile(
-                      kind: BilSemanticIconKind.time,
-                      label: copy('Time', 'الوقت'),
-                      value: time.format(context),
-                      enabled: !saving,
-                      onTap: saving
-                          ? null
-                          : () async {
-                              final picked = await showTimePicker(
-                                context: context,
-                                initialTime: time,
-                              );
-                              if (mounted && picked != null) {
-                                setState(() => time = picked);
+                            textInputAction: field.i == 3
+                                ? TextInputAction.done
+                                : TextInputAction.next,
+                            onFieldSubmitted: (_) {
+                              if (field.i < 3) {
+                                FocusScope.of(context).nextFocus();
                               }
                             },
-                    ),
-                    if (saveError != null) ...[
-                      const SizedBox(height: 10),
-                      Semantics(
-                        liveRegion: true,
-                        child: Text(
-                          saveError!,
-                          style: TextStyle(color: scheme.error),
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextButton(
-                            onPressed: saving
-                                ? null
-                                : () => Navigator.pop(dialogContext, false),
-                            child: Text(copy('Cancel', 'إلغاء')),
+                            decoration: InputDecoration(
+                              labelText: field.label,
+                              suffixText: field.suffix,
+                              filled: true,
+                              fillColor: scheme.surface.withValues(alpha: .82),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            validator: (raw) => validateNumber(raw, field.max),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: saving ? null : save,
-                            child: saving
-                                ? const SizedBox.square(
-                                    dimension: 20,
-                                    child: BilFeatureWelcomeStatus(),
-                                  )
-                                : Text(copy('Add', 'إضافة')),
+                      _InfoTile(
+                        kind: BilSemanticIconKind.time,
+                        label: copy('Time', 'الوقت'),
+                        value: time.format(context),
+                        enabled: !saving,
+                        onTap: saving
+                            ? null
+                            : () async {
+                                final picked = await showTimePicker(
+                                  context: context,
+                                  initialTime: time,
+                                );
+                                if (mounted && picked != null) {
+                                  setState(() => time = picked);
+                                }
+                              },
+                      ),
+                      if (saveError != null) ...[
+                        const SizedBox(height: 10),
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            saveError!,
+                            style: TextStyle(color: scheme.error),
                           ),
                         ),
                       ],
-                    ),
-                  ],
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: saving
+                                  ? null
+                                  : () => Navigator.pop(dialogContext, false),
+                              child: Text(copy('Cancel', 'إلغاء')),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: saving ? null : save,
+                              child: saving
+                                  ? const SizedBox.square(
+                                      dimension: 20,
+                                      child: BilFeatureWelcomeStatus(),
+                                    )
+                                  : Text(copy('Add', 'إضافة')),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

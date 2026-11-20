@@ -180,7 +180,11 @@ void main() {
         reason: path,
       );
       expect(source, contains('token.sensitive_preview_allowed'), reason: path);
-      expect(source, contains('You have a new private update.'), reason: path);
+      expect(
+        source,
+        contains('privacySafePushBody(event.category, event.copy_key)'),
+        reason: path,
+      );
     }
   });
 }

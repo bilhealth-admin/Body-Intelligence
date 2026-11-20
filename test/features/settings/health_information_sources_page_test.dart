@@ -32,7 +32,10 @@ void main() {
           await tester.scrollUntilVisible(
             card,
             150,
-            scrollable: find.byType(Scrollable),
+            scrollable: find.descendant(
+              of: find.byType(ListView),
+              matching: find.byType(Scrollable),
+            ),
           );
           final text = tester
               .widgetList<Text>(
@@ -104,7 +107,10 @@ void main() {
     await tester.scrollUntilVisible(
       sourceCard,
       220,
-      scrollable: find.byType(Scrollable),
+      scrollable: find.descendant(
+        of: find.byType(ListView),
+        matching: find.byType(Scrollable),
+      ),
     );
     await tester.pumpAndSettle();
     expect(sourceCard, findsOneWidget);
