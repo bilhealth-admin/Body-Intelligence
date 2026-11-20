@@ -25,6 +25,12 @@ part 'server_entitlement_grant_continuity.dart';
 part 'server_entitlement_row_decoding.dart';
 part 'server_entitlement_checkout_recovery.dart';
 
+bool isVerifiedCommerceSessionInvalid(Object? error) =>
+    (error is AuthException &&
+        const {'401', '403'}.contains(error.statusCode)) ||
+    (error is PostgrestException &&
+        const {'PGRST301', 'PGRST302', 'PGRST303'}.contains(error.code));
+
 /// Reads only the server-owned subscription snapshot.
 ///
 /// Network failure fails closed when no previously verified entitlement is
@@ -67,6 +73,7 @@ final class ServerEntitlementRepository {
   static final VerifiedEntitlementSessionCache _adminSessionCache =
       VerifiedEntitlementSessionCache(maximumAge: const Duration(minutes: 6));
   static final Set<String> _startupContinuityConsumed = <String>{};
+  static final _rejectedSessionCleanup = <String, Future<bool>>{};
   static String? _activeOwnerId;
   static SupabaseClient? _observedClient;
   static StreamSubscription<AuthState>? _ownerChanges;
@@ -109,12 +116,76 @@ final class ServerEntitlementRepository {
       client: client,
       ownerId: ownerId,
       retainSessionOnRetryableAuthReadError: !requireFreshFreeProof,
-      action: (_) => _currentOwned(
-        client,
-        ownerId,
-        requireFreshFreeProof: requireFreshFreeProof,
-      ),
+      action: (_) async {
+        final rejected = _rejectedSessionCleanup[ownerId];
+        try {
+          if (rejected != null) {
+            // A JWT rejection retires every source for this session. Fresh
+            // network proof can recover access even if secure deletion fails.
+            final cleared =
+                await rejected || await _clearRejectedSession(ownerId);
+            CommunityOwnerOperation.checkCurrent();
+            final proof = await _currentOwned(
+              client,
+              ownerId,
+              requireFreshFreeProof: requireFreshFreeProof || !cleared,
+              // With empty continuity, each independent authority can prove
+              // its own rights again. A failed secure erase still requires a
+              // proof-only read that cannot consult the old encrypted slot.
+              explicitCheckoutRead: cleared
+                  ? null
+                  : _ExplicitCheckoutCanonicalRead(),
+            );
+            CommunityOwnerOperation.checkCurrent();
+            if (!identical(rejected, _rejectedSessionCleanup[ownerId])) {
+              return FreePlan.createState();
+            }
+            if (proof.authority == EntitlementAuthority.verifiedServer &&
+                cleared) {
+              _rejectedSessionCleanup.remove(ownerId);
+            }
+            return proof;
+          }
+          final result = await _currentOwned(
+            client,
+            ownerId,
+            requireFreshFreeProof: requireFreshFreeProof,
+          );
+          if (_rejectedSessionCleanup.containsKey(ownerId)) {
+            return FreePlan.createState();
+          }
+          return result;
+        } on Object catch (error) {
+          if (!isVerifiedCommerceSessionInvalid(error)) rethrow;
+          CommunityOwnerOperation.checkCurrent();
+          _rejectedSessionCleanup[ownerId] = _clearRejectedSession(ownerId);
+          if (requireFreshFreeProof) return FreePlan.createState();
+          rethrow;
+        }
+      },
     );
+  }
+
+  Future<bool> _clearRejectedSession(String ownerId) async {
+    _startupContinuityConsumed.add(ownerId);
+    final denied = FreePlan.createState();
+    final now = _now();
+    for (final cache in [
+      _sessionCache,
+      _adminSessionCache,
+      _closedTestSessionCache,
+    ]) {
+      cache.remember(ownerId: ownerId, state: denied, now: now);
+    }
+    try {
+      await Future.wait([
+        _subscriptionStore.clear(ownerId),
+        _adminContinuityStore.clear(ownerId),
+      ]);
+      return true;
+    } on Object {
+      return false;
+    }
   }
 
   void _observeOwnerChanges(SupabaseClient client) {
@@ -199,7 +270,7 @@ final class ServerEntitlementRepository {
       final client = Supabase.instance.client;
       final user = client.auth.currentUser;
       if (user == null) return FreePlan.createState();
-      final now = _now();
+      var now = _now();
       var closedTestReadFailed = false;
       final closedTestReadGeneration = ++_closedTestReadGeneration;
       List<Map<String, dynamic>> closedTestRows;
@@ -210,7 +281,8 @@ final class ServerEntitlementRepository {
             .eq('owner_id', user.id)
             .limit(1)
             .timeout(const Duration(seconds: 10));
-      } on Object {
+      } on Object catch (error) {
+        if (isVerifiedCommerceSessionInvalid(error)) rethrow;
         // Closed-test is an independent, additive server authority. A
         // temporary failure to read that overlay must not skip the separate
         // verified Google/Apple subscription mirror for this same owner.
@@ -224,6 +296,7 @@ final class ServerEntitlementRepository {
       }
       CommunityOwnerOperation.checkCurrent();
       if (client.auth.currentUser?.id != user.id) return FreePlan.createState();
+      now = _now();
       if (!closedTestReadFailed && explicitCheckoutRead != null) {
         explicitCheckoutRead.observeClosedTestRows(closedTestRows);
         if (!explicitCheckoutRead.closedTestReadComplete) {
@@ -299,6 +372,12 @@ final class ServerEntitlementRepository {
           .eq('owner_id', user.id)
           .limit(1)
           .timeout(const Duration(seconds: 10));
+      CommunityOwnerOperation.checkCurrent();
+      if (client.auth.currentUser?.id != user.id) return FreePlan.createState();
+      // A request can cross a period's start or end while awaiting either
+      // authority. Resolve the returned row against arrival time, never the
+      // clock captured before up to twenty seconds of I/O.
+      now = _now();
       if (explicitCheckoutRead != null && rows.length > 1) {
         return explicitCheckoutRead.unresolved();
       }
@@ -328,6 +407,11 @@ final class ServerEntitlementRepository {
         return await fallback(user.id, now);
       }
       final providerValue = row['provider']?.toString().trim().toLowerCase();
+      final provider = switch (providerValue) {
+        'apple' => SubscriptionProvider.apple,
+        'google' => SubscriptionProvider.google,
+        _ => null,
+      };
       final originalTransaction = row['original_transaction_id'];
       final lineage =
           originalTransaction is String && originalTransaction.isNotEmpty
@@ -349,6 +433,20 @@ final class ServerEntitlementRepository {
       final revision = rawRevision is int && rawRevision > 0
           ? rawRevision
           : null;
+      final latest = _latestStoreVersions[user.id];
+      if ((rawRevision != null && revision == null) ||
+          (latest != null &&
+              (latest.revision != null
+                  ? revision == null || revision < latest.revision!
+                  : lineage != null &&
+                        lineage == latest.lineage &&
+                        providerValue == latest.provider &&
+                        verifiedAt!.isBefore(latest.verifiedAt)))) {
+        // Version ordering precedes EVERY destructive decision, including
+        // Free, expiry and revocation. An older response cannot erase newer
+        // paid proof or its already-verified next period.
+        return await fallback(user.id, now);
+      }
       if (explicitCheckoutRead != null &&
           (providerValue != 'apple' && providerValue != 'google' ||
               _lifecycleOrNull('${row['lifecycle']}') == null ||
@@ -361,6 +459,24 @@ final class ServerEntitlementRepository {
               ))) {
         return explicitCheckoutRead.unresolved();
       }
+      // Keep the verified negative store observation when an independent
+      // authority is unreadable. The composed Free state remains unverified.
+      SubscriptionState unresolvedAfterStoreDenial(
+        SubscriptionLifecycle lifecycle,
+      ) => withClosed(
+        user.id,
+        SubscriptionState(
+          plan: CommercePlan.free,
+          entitlements: FreePlan.entitlements,
+          authority: EntitlementAuthority.localDefault,
+          provider: provider,
+          lifecycle: lifecycle,
+          verifiedAt: verifiedAt,
+          serverRevision: revision,
+          isPurchasable: false,
+          canRestorePurchases: false,
+        ),
+      );
       if (plan == CommercePlan.free) {
         if (explicitCheckoutRead != null) {
           explicitCheckoutRead.storeReadComplete = true;
@@ -382,7 +498,7 @@ final class ServerEntitlementRepository {
                     providerValue == 'google' || providerValue == 'apple',
               );
         return closedTestReadFailed
-            ? withClosed(user.id, FreePlan.createState())
+            ? unresolvedAfterStoreDenial(SubscriptionLifecycle.inactive)
             : explicitCheckoutRead == null
             ? denied
             : withClosed(user.id, denied);
@@ -399,11 +515,6 @@ final class ServerEntitlementRepository {
       final gracePeriodEndsAt = DateTime.tryParse(
         '${row['grace_period_ends_at']}',
       )?.toUtc();
-      final provider = providerValue == 'apple'
-          ? SubscriptionProvider.apple
-          : providerValue == 'google'
-          ? SubscriptionProvider.google
-          : null;
       if (provider == null) return await fallback(user.id, now);
       final accessBoundary = lifecycle == SubscriptionLifecycle.gracePeriod
           ? gracePeriodEndsAt
@@ -458,23 +569,10 @@ final class ServerEntitlementRepository {
                 storeDefinitive: storeDefinitive,
               );
         return closedTestReadFailed
-            ? withClosed(user.id, FreePlan.createState())
+            ? unresolvedAfterStoreDenial(SubscriptionLifecycle.expired)
             : explicitCheckoutRead == null
             ? denied
             : withClosed(user.id, denied);
-      }
-      final latest = _latestStoreVersions[user.id];
-      if (lifecycle.mayGrantPaidAccess &&
-          ((rawRevision != null && revision == null) ||
-              (latest != null &&
-                  (revision != null && latest.revision != null
-                      ? revision < latest.revision!
-                      : lineage != null &&
-                            lineage == latest.lineage &&
-                            providerValue == latest.provider &&
-                            verifiedAt!.isBefore(latest.verifiedAt))))) {
-        clearPending(user.id);
-        return await fallback(user.id, now);
       }
       final record = SubscriptionRecord(
         plan: plan,
@@ -538,7 +636,7 @@ final class ServerEntitlementRepository {
       if (closedTestReadFailed && resolved.plan == CommercePlan.free) {
         // Never resurrect a terminal store receipt. Only the independently
         // verified, bounded closed-test proof can survive its own read outage.
-        return withClosed(user.id, FreePlan.createState());
+        return unresolvedAfterStoreDenial(lifecycle);
       }
       if (explicitCheckoutRead != null) {
         explicitCheckoutRead.storeReadComplete = true;
@@ -548,7 +646,8 @@ final class ServerEntitlementRepository {
       return withClosed(user.id, remembered);
     } on CommunityOwnerOperationCancelled {
       rethrow;
-    } on Object {
+    } on Object catch (error) {
+      if (isVerifiedCommerceSessionInvalid(error)) rethrow;
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) return FreePlan.createState();
       return await fallback(user.id, _now());

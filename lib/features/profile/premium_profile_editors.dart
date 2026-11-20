@@ -21,20 +21,60 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
     },
   );
 
-  Future<bool> editNumber(
+  MeasurementSystem get profileWeightSystem => units == 'imperial'
+      ? MeasurementSystem.imperial
+      : MeasurementSystem.metric;
+
+  String profileWeightLabel(double kilograms) =>
+      '${UnitConverter.weightFromKg(kilograms, profileWeightSystem).toStringAsFixed(1)} ${UnitConverter.weightUnit(profileWeightSystem)}';
+
+  Future<bool> editWeight(
     String title,
-    double current,
-    double min,
-    double max,
+    double currentKg,
     ValueChanged<double> apply,
   ) async {
-    final value = await edit(title, current.toStringAsFixed(1), number: true);
-    final parsed = double.tryParse(value?.replaceAll(',', '.') ?? '');
-    if (parsed != null && parsed >= min && parsed <= max) {
-      _updateState(() => apply(parsed));
-      return true;
+    final identity = ref.read(profileAuthIdentityProvider).value;
+    final owner = identity?.ownerId;
+    final database = ref.read(databaseProvider);
+    final identityKey = hydrationIdentityKey;
+    if (identity == null ||
+        database.localOwnerId != owner ||
+        identityKey == null) {
+      return false;
     }
-    return false;
+    final system = profileWeightSystem;
+    final displayed = UnitConverter.weightFromKg(
+      currentKg,
+      system,
+    ).toStringAsFixed(1);
+    final value = await edit(
+      '$title (${UnitConverter.weightUnit(system)})',
+      displayed,
+      number: true,
+    );
+    if (!mounted ||
+        hydrationIdentityKey != identityKey ||
+        ref.read(profileAuthIdentityProvider).value?.ownerId != owner ||
+        !identical(database, ref.read(databaseProvider)) ||
+        database.localOwnerId != owner ||
+        profileWeightSystem != system) {
+      return false;
+    }
+    final parsed = parseNutritionNumber(value ?? '');
+    // Applying the rounded display, even with localized digits/separators,
+    // must retain the exact canonical weight and must not create a measurement.
+    if (parsed == null || parsed == parseNutritionNumber(displayed)) {
+      return false;
+    }
+    final kilograms = UnitConverter.weightToKg(parsed, system);
+    if (!kilograms.isFinite ||
+        kilograms < 20 ||
+        kilograms > 500 ||
+        kilograms == currentKg) {
+      return false;
+    }
+    _updateState(() => apply(kilograms));
+    return true;
   }
 
   Future<bool> editDateOfBirth() async {

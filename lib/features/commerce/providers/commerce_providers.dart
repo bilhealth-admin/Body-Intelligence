@@ -16,12 +16,15 @@ import '../domain/storefront_market_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
 import '../domain/subscription_lifecycle.dart';
+import '../domain/subscription_provider.dart';
 import '../domain/subscription_state.dart';
 import '../repositories/entitlement_repository.dart';
 import '../repositories/local_entitlement_repository.dart';
 import '../repositories/server_entitlement_repository.dart';
 
 export '../domain/ai_coach_access_snapshot.dart';
+export '../repositories/server_entitlement_repository.dart'
+    show isVerifiedCommerceSessionInvalid;
 
 part 'commerce_presentation_providers.dart';
 
@@ -110,13 +113,23 @@ final class VerifiedEntitlementOwnerVisit extends Notifier<int> {
   @override
   int build() {
     var previous = ref.read(verifiedEntitlementOwnerSeedProvider);
-    ref.listen(verifiedEntitlementOwnerProvider, (_, next) {
+    // Keep only identity events observed when every route goes offscreen.
+    // A paused stream can buffer A -> B -> A until after a synchronous tap.
+    final identity = ref.container.listen(verifiedEntitlementOwnerProvider, (
+      _,
+      next,
+    ) {
+      if (next.hasError) {
+        state += 1;
+        return;
+      }
       if (!next.hasValue || next.isLoading) return;
       final owner = next.value;
       if (owner == previous) return;
       previous = owner;
       state += 1;
     });
+    ref.onDispose(identity.close);
     return 0;
   }
 }
@@ -171,12 +184,6 @@ final verifiedEntitlementLoaderProvider =
     Provider<Future<SubscriptionState> Function()>(
       (_) => const ServerEntitlementRepository().current,
     );
-
-bool isVerifiedCommerceSessionInvalid(Object? error) =>
-    (error is AuthException &&
-        const {'401', '403'}.contains(error.statusCode)) ||
-    (error is PostgrestException &&
-        const {'PGRST301', 'PGRST302'}.contains(error.code));
 
 /// Avoids the extra lifecycle transition assumptions of
 /// AppLifecycleListener. Each observed verification owns exactly one listener
@@ -276,13 +283,40 @@ final verifiedSubscriptionReadWitnessProvider =
 final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
   ref,
 ) async {
-  ref.watch(verifiedEntitlementOwnerIdProvider);
-  ref.watch(verifiedEntitlementOwnerVisitProvider);
+  final ownerId = ref.watch(verifiedEntitlementOwnerIdProvider);
+  final ownerVisit = ref.watch(verifiedEntitlementOwnerVisitProvider);
+  final canonical = ref.watch(_verifiedSubscriptionCanonicalSnapshotProvider);
   final loaded = _observedAuthorityReload(ref, ref.invalidateSelf);
+  final witness = ref.read(verifiedSubscriptionReadWitnessProvider)..begin();
+  final generation = witness.generation;
+  bool currentVisit() =>
+      ref.mounted &&
+      witness.generation == generation &&
+      ref.read(verifiedEntitlementOwnerIdProvider) == ownerId &&
+      ref.read(verifiedEntitlementOwnerVisitProvider) == ownerVisit &&
+      identical(
+        canonical,
+        ref.read(_verifiedSubscriptionCanonicalSnapshotProvider),
+      );
+  ref.listen(verifiedEntitlementOwnerProvider, (_, next) {
+    if (next.hasError && currentVisit()) canonical.verified = null;
+  });
   try {
     final loader = ref.watch(verifiedEntitlementLoaderProvider);
-    ref.read(verifiedSubscriptionReadWitnessProvider).begin();
-    return await loader();
+    final state = await loader();
+    // The authority owns this observation, not an auto-disposed route. A
+    // denial received while no access consumer exists must retire old proof
+    // before a later pending/error read can reopen that route.
+    if (currentVisit() &&
+        !ref.read(verifiedEntitlementOwnerProvider).hasError) {
+      canonical.observe(state);
+    }
+    return state;
+  } on Object catch (error) {
+    if (isVerifiedCommerceSessionInvalid(error) && currentVisit()) {
+      canonical.verified = null;
+    }
+    rethrow;
   } finally {
     loaded();
   }
@@ -313,34 +347,108 @@ final verifiedSubscriptionBoundaryRefreshProvider =
       return VerifiedSubscriptionBoundaryRefresh();
     });
 
-/// Presentation view of the server snapshot with an exact local access cutoff.
-/// The upstream repository still owns verification and its bounded continuity
-/// cache. A slow refresh must not keep a cached paid plan alive past its period.
+final class _VerifiedSubscriptionCanonicalSnapshot {
+  SubscriptionState? verified;
+
+  void observe(SubscriptionState state) {
+    if (state.authority == EntitlementAuthority.verifiedServer) {
+      verified = state;
+    } else if (state.plan == CommercePlan.free &&
+        state.verifiedAt != null &&
+        state.provider != null) {
+      // This row retires its store proof even if a separate grant was unreadable.
+      verified = state;
+    } else if (verified?.provider == null) {
+      // The repository already applies the independent grant/admin leases.
+      // An unresolved composite contains no surviving proof from either one.
+      verified = null;
+    }
+  }
+}
+
+// Canonical server proof, independent of Riverpod's refresh/reload decoration.
+// This is not the presentation cache or a new lease: its original interval is
+// re-evaluated below on every read and at the exact start/expiry timer.
+final _verifiedSubscriptionCanonicalSnapshotProvider =
+    Provider<_VerifiedSubscriptionCanonicalSnapshot>((ref) {
+      ref.watch(verifiedEntitlementOwnerIdProvider);
+      ref.watch(verifiedEntitlementOwnerVisitProvider);
+      return _VerifiedSubscriptionCanonicalSnapshot();
+    });
+
+/// Server-verified access with an exact local cutoff. Rechecking an unchanged
+/// owner cannot withdraw an already-proved period, including dependency reloads
+/// and transient transport failures. A fresh denial or invalid session wins.
 final verifiedSubscriptionAccessProvider =
     Provider.autoDispose<AsyncValue<SubscriptionState>>((ref) {
+      final ownerId = ref.watch(verifiedEntitlementOwnerIdProvider);
+      final canonical = ref.watch(
+        _verifiedSubscriptionCanonicalSnapshotProvider,
+      );
       final owner = ref.watch(verifiedEntitlementOwnerProvider);
       if (owner.hasError) {
+        canonical.verified = null;
         return AsyncValue.error(owner.error!, owner.stackTrace!);
       }
       final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
-      final snapshot = purchaseHandoffView(
-        ref.watch(verifiedSubscriptionStateProvider),
-        ref.watch(verifiedPurchaseHandoffProvider),
-        now,
-      );
-      // A dependency reload includes an account change. Never reuse another
-      // owner's previous AsyncValue; only an explicit same-owner refresh may
-      // retain its previously verified value while the server is answering.
-      // Keep a verified paid lease during a same-owner refresh, but never
-      // show a Free paywall while an on-demand entitlement recheck is pending.
+      final source = ref.watch(verifiedSubscriptionStateProvider);
+      var handoff = ref.watch(verifiedPurchaseHandoffProvider);
+      final previous = canonical.verified;
+      // A pending/error decoration can hide the last observed store denial
+      // from the handoff comparison. Keep its version fence across rereads.
+      if (handoff != null &&
+          handoff.plan != CommercePlan.free &&
+          previous?.plan == CommercePlan.free &&
+          previous?.verifiedAt != null &&
+          (previous!.serverRevision != null && handoff.serverRevision != null
+              ? previous.serverRevision! >= handoff.serverRevision!
+              : !previous.verifiedAt!.isBefore(handoff.verifiedAt!))) {
+        handoff = null;
+      }
+      var snapshot = purchaseHandoffView(source, handoff, now);
+      if (isVerifiedCommerceSessionInvalid(source.error) ||
+          isVerifiedCommerceSessionInvalid(snapshot.error)) {
+        canonical.verified = null;
+        return AsyncValue.error(snapshot.error!, snapshot.stackTrace!);
+      }
+      // A known store revocation also wins while its follow-up read is held.
+      // Independent admin/closed-test authority is composed separately.
+      if (handoff?.authority == EntitlementAuthority.verifiedServer &&
+          handoff?.plan == CommercePlan.free &&
+          (canonical.verified?.provider == SubscriptionProvider.apple ||
+              canonical.verified?.provider == SubscriptionProvider.google)) {
+        canonical.verified = null;
+      }
+      final fresh = snapshot.asData?.value;
+      if (!snapshot.isLoading &&
+          !snapshot.hasError &&
+          fresh?.authority == EntitlementAuthority.verifiedServer) {
+        canonical.verified = fresh;
+      } else if (ownerId != null &&
+          canonical.verified?.authority ==
+              EntitlementAuthority.verifiedServer &&
+          canonical.verified?.plan != CommercePlan.free) {
+        // Owner and visit changes create a new empty canonical slot above.
+        // Even an expired proof goes through the exact-boundary logic below;
+        // no retry can renew its dates or turn it into a fresh subscription.
+        snapshot = AsyncValue.data(canonical.verified!);
+      }
+      // A new/unverified owner and a previous Free snapshot remain unresolved
+      // during verification; they never borrow the AsyncValue's old account.
       if (snapshot.isLoading &&
           (!snapshot.isRefreshing ||
+              !identical(snapshot.value, canonical.verified) ||
               snapshot.value?.authority !=
                   EntitlementAuthority.verifiedServer ||
               snapshot.value?.plan == CommercePlan.free)) {
         return const AsyncValue.loading();
       }
-      if (snapshot.hasError) return snapshot;
+      if (snapshot.hasError) {
+        // A failed read may carry Riverpod's old paid .value even after that
+        // proof was retired while this consumer was absent. Expose the error
+        // without the previous account/period payload.
+        return AsyncValue.error(snapshot.error!, snapshot.stackTrace!);
+      }
       final rawState = snapshot.value;
       final state = rawState == null
           ? null

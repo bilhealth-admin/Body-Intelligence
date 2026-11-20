@@ -213,6 +213,77 @@ void main() {
     };
   }
 
+  test(
+    'one malformed cached signal preserves four measured Apple Health readings for their owner',
+    () async {
+      await consent();
+      final now = DateTime.now().toUtc();
+      final expected = {
+        'steps': 4321.0,
+        'heartRate': 68.0,
+        'activeEnergy': 247.0,
+        'sleep': 6.5,
+      };
+      final units = {
+        'steps': 'count',
+        'heartRate': 'count/min',
+        'activeEnergy': 'kcal',
+        'sleep': 'h',
+      };
+      final rows = [
+        for (final metric in expected.entries)
+          GlobalHealthSignal(
+            key: metric.key,
+            canonicalValue: metric.value,
+            canonicalUnit: units[metric.key]!,
+            provenance: GlobalProvenance(
+              providerId: apple.name,
+              sourceId: 'com.apple.health',
+              recordId: 'observed-${metric.key}',
+              observedAt: now,
+              confidence: 1,
+            ),
+          ).toMap(),
+      ];
+      await store.put('connected_health_ui', 'snapshot', {
+        'signals': [
+          rows.first,
+          {'unexpected': true},
+          ...rows.skip(1),
+        ],
+        'lastSyncAt': now.toIso8601String(),
+        'importedCount': rows.length,
+      });
+      for (final snapshot in [
+        await gateway.loadCachedSnapshot(),
+        await gateway.load(),
+      ]) {
+        expect({
+          for (final signal in snapshot.signals) signal.key: signal.value,
+        }, expected);
+        expect(
+          snapshot.signals.every((s) => s.observedAt.isAtSameMomentAs(now)),
+          isTrue,
+        );
+        expect(liveHealthWatchCanShowMetrics(snapshot), isTrue);
+      }
+      expect(calls.where((call) => call.method == 'readChanges'), isEmpty);
+      await store.put('connected_health_consent', 'Apple Health', {
+        'readRequested': false,
+      });
+      expect((await gateway.loadCachedSnapshot()).signals, isEmpty);
+      final withdrawn = await gateway.load();
+      expect(withdrawn.status, ConnectedHealthStatus.permissionRequired);
+      expect(
+        withdrawn.signals,
+        isEmpty,
+        reason: 'a stale projection cannot outlive local withdrawal',
+      );
+      currentOwner = 'different-owner';
+      expect((await gateway.loadCachedSnapshot()).signals, isEmpty);
+    },
+  );
+
   Map<String, Object?> lateHistory() => {
     'records': [
       row(

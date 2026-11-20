@@ -27,6 +27,10 @@ void main() {
   var offline = false;
   var adminOffline = false;
   var grantOffline = false;
+  String? rejectedPath;
+  final unreadablePaths = <String>{};
+  var closedGrantActive = false;
+  void Function()? beforeMirrorResponse;
   Object? adminGrant;
   Map<String, Object?>? row;
   final secure = <String, String>{};
@@ -97,15 +101,41 @@ void main() {
       ),
       httpClient: MockClient((request) async {
         Object? response;
+        if (unreadablePaths.contains(request.url.path)) {
+          return http.Response(
+            jsonEncode({'code': '42501', 'message': 'unreadable source'}),
+            403,
+            headers: {'content-type': 'application/json'},
+            request: request,
+          );
+        }
+        if (request.url.path == rejectedPath) {
+          return http.Response(
+            jsonEncode({'code': 'PGRST301', 'message': 'invalid JWT'}),
+            401,
+            headers: {'content-type': 'application/json'},
+            request: request,
+          );
+        }
         switch (request.url.path) {
           case '/rest/v1/bil_ai_closed_test_grants':
             if (grantOffline) return http.Response('unavailable', 503);
-            response = const [];
+            response = closedGrantActive
+                ? [
+                    {
+                      'active': true,
+                      'expires_at': now
+                          .add(const Duration(hours: 1))
+                          .toIso8601String(),
+                    },
+                  ]
+                : const [];
             break;
           case '/rest/v1/bil_subscriptions':
             mirrorReads++;
             expect(request.url.queryParameters['owner_id'], 'eq.$owner');
             if (offline) return http.Response('unavailable', 503);
+            beforeMirrorResponse?.call();
             response = row == null ? const [] : [row];
             break;
           case '/rest/v1/rpc/bil_get_my_admin_subscription':
@@ -136,6 +166,10 @@ void main() {
     boundary = now.add(const Duration(seconds: 10));
     owner = '88000000-0000-4000-8000-${(++serial).toString().padLeft(12, '0')}';
     offline = adminOffline = grantOffline = false;
+    rejectedPath = null;
+    unreadablePaths.clear();
+    closedGrantActive = false;
+    beforeMirrorResponse = null;
     adminGrant = null;
     mirrorReads = 0;
     secure.clear();
@@ -161,6 +195,106 @@ void main() {
     );
     return repository.current();
   }
+
+  for (final retired in ['free', 'expired', 'revoked']) {
+    test(
+      'valid Apple revision 665 survives a retired $retired response',
+      () async {
+        // Synthetic identity/lineage with the observed valid-term timestamps.
+        now = DateTime.utc(2026, 11, 19, 21, 55, 41);
+        boundary = DateTime.utc(2026, 11, 19, 22, 10, 16);
+        final start = DateTime.utc(2026, 11, 19, 21, 34, 16);
+        final verifiedAt = DateTime.utc(2026, 11, 19, 21, 33, 30, 232);
+        row = period(start: start, revision: 665)
+          ..['verified_at'] = verifiedAt.toIso8601String()
+          ..['auto_renews'] = false;
+        expect((await repository.current()).serverRevision, 665);
+        final paidStorage = Map<String, String>.of(secure);
+        row =
+            period(
+                start: start.subtract(const Duration(minutes: 16)),
+                end: start,
+                revision: 664,
+                plan: retired == 'free' ? 'free' : 'premium',
+                lifecycle: retired == 'free' ? 'inactive' : retired,
+              )
+              ..['verified_at'] = verifiedAt
+                  .subtract(const Duration(seconds: 1))
+                  .toIso8601String();
+
+        final retained = await repository.current();
+        expect(retained.plan, CommercePlan.premium);
+        expect(retained.serverRevision, 665);
+        expect(retained.currentPeriodEndsAt, boundary);
+        expect(
+          secure,
+          paidStorage,
+          reason: 'retired denial must not clear proof',
+        );
+
+        row = period(start: start, revision: 666, lifecycle: 'revoked');
+        expect(
+          (await repository.current()).plan,
+          CommercePlan.free,
+          reason: 'a current authoritative revocation remains immediate',
+        );
+      },
+    );
+  }
+
+  test(
+    'unversioned terminal cannot erase a versioned canonical period',
+    () async {
+      row = period(revision: 665);
+      expect((await repository.current()).serverRevision, 665);
+      row = period(revision: 666, lifecycle: 'revoked')
+        ..remove('revision')
+        ..['verified_at'] = now
+            .add(const Duration(seconds: 1))
+            .toIso8601String();
+      final current = await repository.current();
+      expect(current.plan, CommercePlan.premium);
+      expect(current.serverRevision, 665);
+      row = period(revision: 666, lifecycle: 'revoked');
+      expect((await repository.current()).plan, CommercePlan.free);
+    },
+  );
+
+  test(
+    'legacy-first unversioned rows preserve their original authority',
+    () async {
+      row = period()..remove('revision');
+      expect((await repository.current()).plan, CommercePlan.premium);
+      row = period(lifecycle: 'revoked')..remove('revision');
+      expect((await repository.current()).plan, CommercePlan.free);
+    },
+  );
+
+  test(
+    'Apple period is evaluated when its response arrives, not before I/O',
+    () async {
+      now = DateTime.utc(2026, 11, 19, 21, 34, 10);
+      boundary = DateTime.utc(2026, 11, 19, 22, 10, 16);
+      row = period(start: DateTime.utc(2026, 11, 19, 21, 34, 16), revision: 665)
+        ..['verified_at'] = DateTime.utc(
+          2026,
+          11,
+          19,
+          21,
+          33,
+          30,
+          232,
+        ).toIso8601String();
+      beforeMirrorResponse = () => now = DateTime.utc(2026, 11, 19, 21, 34, 17);
+      final current = await repository.current();
+      expect(current.plan, CommercePlan.premium);
+      expect(current.serverRevision, 665);
+      expect(current.currentPeriodEndsAt, boundary);
+      beforeMirrorResponse = null;
+      now = boundary;
+      expect((await repository.current()).plan, CommercePlan.free);
+    },
+  );
 
   testWidgets(
     'real repository preserves a contiguous verified renewal at T, including offline',
@@ -333,7 +467,82 @@ void main() {
     });
   }
 
+  ProviderContainer observedRepository() {
+    final container = ProviderContainer(
+      retry: (_, _) => null,
+      overrides: [
+        verifiedEntitlementClockProvider.overrideWithValue(() => now),
+        verifiedEntitlementLoaderProvider.overrideWithValue(repository.current),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.listen(verifiedSubscriptionAccessProvider, (_, _) {});
+    return container;
+  }
+
+  for (final authority in ['closed grant', 'admin']) {
+    test(
+      'retired $authority cannot reappear from canonical continuity',
+      () async {
+        row = null;
+        closedGrantActive = authority == 'closed grant';
+        if (authority == 'admin') {
+          adminGrant = {
+            'owner_id': owner,
+            'plan_id': 'premium_ai_coach',
+            'created_at': now.toIso8601String(),
+            'access_until': now
+                .add(const Duration(minutes: 4))
+                .toIso8601String(),
+          };
+        }
+        final container = observedRepository();
+        await container.read(verifiedSubscriptionStateProvider.future);
+        expect(
+          container.read(verifiedSubscriptionAccessProvider).value?.plan,
+          CommercePlan.premiumAiCoach,
+        );
+        closedGrantActive = false;
+        adminGrant = null;
+        unreadablePaths.add('/rest/v1/bil_subscriptions');
+        await container.refresh(verifiedSubscriptionStateProvider.future);
+        expect(
+          container.read(verifiedSubscriptionAccessProvider).value?.plan,
+          isNot(CommercePlan.premiumAiCoach),
+        );
+      },
+    );
+  }
+
   for (final denial in ['free', 'revoked']) {
+    test(
+      'composed access retires store $denial when independent grant is unreadable',
+      () async {
+        final container = observedRepository();
+        await container.read(verifiedSubscriptionStateProvider.future);
+        expect(
+          container.read(verifiedSubscriptionAccessProvider).value?.plan,
+          CommercePlan.premium,
+        );
+        row = period(
+          revision: 2,
+          plan: denial == 'free' ? 'free' : 'premium',
+          lifecycle: denial == 'free' ? 'inactive' : 'revoked',
+        );
+        unreadablePaths.add('/rest/v1/bil_ai_closed_test_grants');
+        await container.refresh(verifiedSubscriptionStateProvider.future);
+        expect(
+          container.read(verifiedSubscriptionAccessProvider).value?.plan,
+          isNot(CommercePlan.premium),
+        );
+        unreadablePaths.add('/rest/v1/bil_subscriptions');
+        await container.refresh(verifiedSubscriptionStateProvider.future);
+        expect(
+          container.read(verifiedSubscriptionAccessProvider).value?.plan,
+          isNot(CommercePlan.premium),
+        );
+      },
+    );
     test(
       'new verified $denial retires pending proof even if admin/grant read fails',
       () async {
@@ -360,6 +569,49 @@ void main() {
         expect((await repository.current()).plan, CommercePlan.free);
       },
     );
+  }
+
+  for (final path in [
+    'bil_subscriptions',
+    'bil_ai_closed_test_grants',
+    'rpc/bil_get_my_admin_subscription',
+  ]) {
+    test('composed access retires an actual JWT rejection at $path', () async {
+      final container = observedRepository();
+      await container.read(verifiedSubscriptionStateProvider.future);
+      expect(
+        container.read(verifiedSubscriptionAccessProvider).value?.plan,
+        CommercePlan.premium,
+      );
+      rejectedPath = '/rest/v1/$path';
+      container.invalidate(verifiedSubscriptionStateProvider);
+      await expectLater(
+        container.read(verifiedSubscriptionStateProvider.future),
+        throwsA(
+          isA<PostgrestException>().having((e) => e.code, 'code', 'PGRST301'),
+        ),
+      );
+      expect(
+        container.read(verifiedSubscriptionAccessProvider).value?.plan,
+        isNot(CommercePlan.premium),
+      );
+      rejectedPath = null;
+      unreadablePaths.add('/rest/v1/bil_subscriptions');
+      await container.refresh(verifiedSubscriptionStateProvider.future);
+      expect(
+        container.read(verifiedSubscriptionAccessProvider).value?.plan,
+        isNot(CommercePlan.premium),
+      );
+      unreadablePaths.clear();
+      // A separately unreadable overlay cannot hide a newly authenticated,
+      // current paid store row after the old encrypted proof was retired.
+      unreadablePaths.add('/rest/v1/bil_ai_closed_test_grants');
+      await container.refresh(verifiedSubscriptionStateProvider.future);
+      expect(
+        container.read(verifiedSubscriptionAccessProvider).value?.plan,
+        CommercePlan.premium,
+      );
+    });
   }
 
   test('owner transition retires pending renewal for A -> B -> A', () async {

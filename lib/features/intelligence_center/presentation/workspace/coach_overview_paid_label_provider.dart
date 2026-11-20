@@ -37,57 +37,22 @@ final coachOverviewCreditAccessProvider = Provider.autoDispose<bool>((ref) {
   return memory.creditAccess == true;
 });
 
-/// Display-only continuity for the Overview label. Route gates, credits and
-/// health data must continue to use their existing authority providers.
+/// The Overview label follows the same bounded server proof as paid access.
+/// Independent Boost credits retain their own presentation semantics above.
 final coachOverviewPaidLabelProvider = Provider.autoDispose<CommercePlan?>((
   ref,
 ) {
-  ref.watch(_paidLabelMemoryProvider);
-  final memory = ref.read(_paidLabelMemoryProvider.notifier);
   final owner = ref.watch(verifiedEntitlementOwnerIdProvider);
+  ref.watch(verifiedEntitlementOwnerVisitProvider);
   final ownerSnapshot = ref.watch(verifiedEntitlementOwnerProvider);
-  if (memory.owner != owner) memory.retire(owner);
-  if (owner == null || ownerSnapshot.hasError) {
-    memory.retire(owner);
-    return null;
-  }
-
-  final source = ref.watch(verifiedSubscriptionStateProvider);
-  final sourceFuture = ref.watch(verifiedSubscriptionStateProvider.future);
-  final sourceGeneration = ref
-      .read(verifiedSubscriptionReadWitnessProvider)
-      .generation;
-  if (!identical(sourceFuture, memory.observedFuture)) {
-    memory.observedFuture = sourceFuture;
-    sourceFuture.ignore();
-  }
+  if (owner == null || ownerSnapshot.hasError) return null;
   final access = ref.watch(verifiedSubscriptionAccessProvider);
   final now = ref.watch(verifiedEntitlementClockProvider)().toUtc();
-  // When a real source read has started its generation is authoritative. An
-  // unobserved Future must not bypass an already-retired read generation.
-  final currentRead = sourceGeneration > 0
-      ? sourceGeneration > memory.retiredSubscriptionGeneration
-      : !memory.retiredFutures.contains(sourceFuture);
-  // Retained AsyncValue data is not a new verification after an account
-  // boundary. A genuinely new source future must settle before it can repopulate
-  // the retired owner's label, including an A -> B -> A transition.
-  if (!source.isLoading &&
-      !source.hasError &&
-      !access.isLoading &&
-      !access.hasError &&
-      currentRead) {
-    final verified = access.asData?.value;
-    if (verified?.authority == EntitlementAuthority.verifiedServer) {
-      memory.accept(
-        _isPaidLease(verified!, now) ? verified : null,
-        sourceFuture,
-      );
-    }
-  }
-
-  final lease = memory.lease;
-  if (lease == null || !_isPaidLease(lease, now)) {
-    memory.lease = null;
+  final lease = access.asData?.value;
+  if (access.isLoading ||
+      access.hasError ||
+      lease == null ||
+      !_isPaidLease(lease, now)) {
     return null;
   }
   final expiry = Timer(
@@ -113,9 +78,8 @@ bool _isPaidLease(SubscriptionState state, DateTime now) =>
     (_leaseEnd(state)?.toUtc().isAfter(now) ?? false) &&
     !(state.startedAt?.toUtc().isAfter(now) ?? false);
 
-// Retain only a bounded label between Overview visits. This memory observes auth
-// boundaries, not subscription/quota providers, so a hidden Overview adds no
-// continuing subscription or quota poll. The active presentation owns its timer.
+// Credit presentation memory observes auth boundaries, not subscription/quota
+// providers, so a hidden Overview adds no continuing quota poll.
 final _paidLabelMemoryProvider = NotifierProvider<_PaidLabelMemory, int>(
   _PaidLabelMemory.new,
 );

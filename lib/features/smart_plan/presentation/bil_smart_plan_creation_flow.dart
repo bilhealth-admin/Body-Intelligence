@@ -113,12 +113,23 @@ extension _BilSmartPlanCreationFlow on _BilSmartPlanPageState {
       return;
     }
     if (!mounted) return;
-    final request = await _reviewSurface(
-      () => showBilModalBottomSheet<_PlanOptions>(
+    const catalog = BilSmartPlanCatalog();
+    final submission = await _reviewSurface(
+      () => showBilModalBottomSheet<_PlanSubmission>(
         context: context,
         useSafeArea: true,
         isScrollControlled: true,
         builder: (context) => _PlanCreationSheet(
+          checkRecipeStyle: (style) async {
+            _checkAccess();
+            final dietary = await ref
+                .read(dietaryPreferencesRepositoryProvider)
+                .read();
+            if (!mounted || _owner != owner || _ownerEpoch != epoch) {
+              throw StateError('smart_plan_owner_changed');
+            }
+            return catalog.checkRecipeStyle(style, dietary);
+          },
           isCurrent: () =>
               mounted &&
               _owner == owner &&
@@ -150,32 +161,24 @@ extension _BilSmartPlanCreationFlow on _BilSmartPlanPageState {
       ),
     );
     if (!mounted ||
-        request == null ||
+        submission == null ||
         owner != _owner ||
         epoch != _ownerEpoch) {
       return;
     }
+    final request = submission.options;
     final attempt = _PlanCreationAttempt(owner, epoch, request);
     _creationAttempt = attempt;
     _mutate(() => _busy = true);
     try {
       _checkAccess();
-      final dietary = await ref
-          .read(dietaryPreferencesRepositoryProvider)
-          .read();
-      final catalog = const BilSmartPlanCatalog();
+      if (submission.recipeError case final error?) throw error;
       final gym = request.focus == BilPlanFocus.nutrition
           ? <BilVerifiedWorkout>[]
           : request.setup?.environment == BilPlanEnvironment.home
           ? await catalog.homeSessions(request.setup!)
           : await catalog.gymSessions(
               sessionMinutes: request.setup!.sessionMinutes,
-            );
-      final recipes = request.focus == BilPlanFocus.training
-          ? <BilVerifiedRecipe>[]
-          : await catalog.sourcedRecipes(
-              dietary: dietary,
-              preferences: MealPlanPreferences(diet: request.diet!),
             );
       if (!mounted || _owner != owner || epoch != _ownerEpoch) return;
       final profile = await ref
@@ -235,7 +238,7 @@ extension _BilSmartPlanCreationFlow on _BilSmartPlanPageState {
         adultConfirmed: request.confirmedPreferences,
         ageYears: profile?.age,
         workoutCatalog: gym,
-        recipeCatalog: recipes,
+        recipeCatalog: submission.recipes,
         highRiskSymptoms: request.highRiskSymptoms,
         underMedicalReview: request.needsMedicalReview,
         setup: setup,

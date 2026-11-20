@@ -79,10 +79,13 @@ extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
           ? const <String, bool>{}
           : await _bridge.permissions().timeout(const Duration(seconds: 8));
       final consentState = await _store.get('connected_health_consent', source);
-      if (cachedOnly && consentState?['readRequested'] != true) {
+      final explicitlyRequested = consentState?['readRequested'] == true;
+      if (cachedOnly && !explicitlyRequested) {
         return const ConnectedHealthSnapshot.unavailable();
       }
-      final stored = await _store.get('connected_health_ui', 'snapshot');
+      final stored = explicitlyRequested
+          ? await _store.get('connected_health_ui', 'snapshot')
+          : null;
       final tombstones = await _loadTombstones();
       final signals = <ConnectedHealthSignalView>[];
       final stepHistory = <ConnectedHealthSignalView>[];
@@ -95,9 +98,14 @@ extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
         defaultTargetPlatform,
       ).map((type) => type.name).toSet();
       for (final raw in stored?['signals'] as List<Object?>? ?? const []) {
-        final signal = GlobalHealthSignal.fromMap(
-          Map<String, Object?>.from(raw! as Map),
-        );
+        if (raw is! Map) continue;
+        final GlobalHealthSignal signal;
+        try {
+          signal = GlobalHealthSignal.fromMap(Map<String, Object?>.from(raw));
+        } on Object {
+          // A damaged projection cannot invalidate its measured siblings.
+          continue;
+        }
         // Old preview/foreign-provider cache rows are not HealthKit evidence.
         // Ignore them for this source without deleting the underlying history.
         if (!_isEvidenceFromNativeBridge(signal)) continue;
@@ -167,7 +175,6 @@ extension _NativeConnectedHealthGatewayHelpers on NativeConnectedHealthGateway {
           'importedCount': retainedSignalMaps.length,
         });
       }
-      final explicitlyRequested = consentState?['readRequested'] == true;
       // HealthKit deliberately does not reveal whether read access was
       // granted or denied. authorizationStatus(for:) reports sharing/write
       // status, so an iOS request must remain indeterminate until records are

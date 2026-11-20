@@ -67,9 +67,9 @@ final class _PolicyRepository extends CommunityRepository {
 }
 
 final class _PublishGuardRepository extends CommunityRepository {
-  _PublishGuardRepository(this.failure) : super(_testClient);
+  _PublishGuardRepository([this.failure]) : super(_testClient);
 
-  final Object failure;
+  final Object? failure;
   int publishCalls = 0;
 
   @override
@@ -109,7 +109,28 @@ final class _PublishGuardRepository extends CommunityRepository {
   @override
   Future<void> publishPost(String body) async {
     publishCalls += 1;
-    throw failure;
+    final error = failure;
+    if (error != null) throw error;
+  }
+}
+
+final class _PublishedFeedRepository extends _PublishGuardRepository {
+  static const author = '22222222-2222-4222-8222-222222222222';
+  final afterPublish = Completer<List<CommunityPost>>();
+  final approved = CommunityPost(
+    id: '33333333-3333-4333-8333-333333333333',
+    authorId: author,
+    authorName: 'Community member',
+    body: 'Already approved post',
+    createdAt: DateTime.utc(2026, 11, 19),
+  );
+  var refreshStarted = false;
+
+  @override
+  Future<List<CommunityPost>> loadFeed({int limit = 40}) async {
+    if (publishCalls == 0) return [approved];
+    refreshStarted = true;
+    return afterPublish.future;
   }
 }
 
@@ -513,6 +534,49 @@ void main() {
       }
     }
   });
+
+  for (final stillVisible in [true, false]) {
+    testWidgets(
+      'after a pending publication Explore applies server visibility $stillVisible to the post and story',
+      (tester) async {
+        tester.view.physicalSize = const Size(430, 1050);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final repository = _PublishedFeedRepository();
+        await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
+        await tester.pumpAndSettle();
+        final story = find.byKey(
+          const ValueKey('community-story-${_PublishedFeedRepository.author}'),
+        );
+        expect(find.text(repository.approved.body), findsOneWidget);
+        expect(story, findsOneWidget);
+        await tester.tap(find.byKey(const Key('community-create-post')));
+        await tester.pumpAndSettle();
+        const draft = 'Pending post visible only to its author';
+        await tester.enterText(
+          find.byKey(const Key('community-post-composer')),
+          draft,
+        );
+        await tester.tap(find.byKey(const Key('community-post-publish')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 550));
+        await tester.pump();
+        expect(repository.publishCalls, 1);
+        expect(repository.refreshStarted, isTrue);
+        expect(find.text(repository.approved.body), findsOneWidget);
+        repository.afterPublish.complete([
+          if (stillVisible) repository.approved,
+        ]);
+        await tester.pumpAndSettle();
+        expect(
+          find.text(repository.approved.body),
+          stillVisible ? findsOneWidget : findsNothing,
+        );
+        expect(story, stillVisible ? findsOneWidget : findsNothing);
+        expect(find.text(draft), findsNothing);
+      },
+    );
+  }
 
   testWidgets('unaccepted publishing is blocked and keeps the draft', (
     tester,

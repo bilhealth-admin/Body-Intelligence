@@ -221,12 +221,17 @@ void main() {
       plan: CommercePlan.pro,
       entitlements: const {CommerceEntitlement.advancedIntelligence},
       authority: EntitlementAuthority.verifiedServer,
+      startedAt: DateTime.utc(2026, 8, 23),
+      currentPeriodEndsAt: DateTime.utc(2026, 8, 24),
       isPurchasable: true,
       canRestorePurchases: true,
     );
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          verifiedEntitlementClockProvider.overrideWithValue(
+            () => DateTime.utc(2026, 8, 23, 12),
+          ),
           weeklyReportProvider.overrideWith((ref) async => snapshot),
           accountCreatedAtProvider.overrideWithValue(null),
           userProfileProvider.overrideWith((ref) => Stream.value(null)),

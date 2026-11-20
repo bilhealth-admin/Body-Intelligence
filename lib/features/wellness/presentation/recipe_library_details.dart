@@ -1,7 +1,12 @@
 part of 'recipe_library_page.dart';
 
 class _RecipeDetails extends StatelessWidget {
-  const _RecipeDetails({required this.detail, required this.imageResult});
+  const _RecipeDetails({
+    required this.detail,
+    required this.imageResult,
+    required this.canReview,
+  });
+  final bool Function() canReview;
 
   final RecipeCatalogDetail detail;
   final Future<WellnessMediaCacheResult>? imageResult;
@@ -173,6 +178,7 @@ class _RecipeDetails extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () {
+              if (!context.mounted || !canReview()) return;
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => TrustedRecipeImportPage(

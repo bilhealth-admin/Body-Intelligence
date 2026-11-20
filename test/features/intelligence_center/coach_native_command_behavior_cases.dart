@@ -408,6 +408,70 @@ void _nativeCommandCases() {
     );
   });
 
+  for (final deletedCount in [1, 51]) {
+    testWidgets(
+      'memory save after $deletedCount forgotten facts keeps tombstones',
+      (tester) async {
+        await _withCoach(
+          tester,
+          [
+            _tool('save_memory', {
+              'text': 'I prefer concise walking tips',
+              'kind': 'preference',
+            }),
+          ],
+          (fixture) async {
+            await _openNativeAction(tester, 'saveMemory', 'save_memory');
+            await _confirmNative(tester);
+            final preferences = PreferencesRepository(fixture.database);
+            final memories = CoachMemoryRepository(preferences: preferences);
+            final visible = await memories.readLocal();
+            expect(visible.single['text'], 'I prefer concise walking tips');
+            final stored =
+                jsonDecode(
+                      (await preferences.get(
+                        CoachMemoryRepository.storageKey,
+                      ))!,
+                    )
+                    as List;
+            expect(
+              stored.where((row) => row['status'] == 'deleted'),
+              hasLength(deletedCount),
+            );
+            expect(
+              stored.where((row) => row['status'] == 'confirmed'),
+              hasLength(1),
+            );
+            expect(
+              stored
+                  .where((row) => row['status'] == 'deleted')
+                  .every((row) => row['text'] == ''),
+              isTrue,
+            );
+          },
+          seed: (fixture) async {
+            final memories = CoachMemoryRepository(
+              preferences: PreferencesRepository(fixture.database),
+            );
+            for (var index = 0; index < deletedCount; index++) {
+              final entry = await memories.saveConfirmed(
+                text: 'Disposable old preference $index',
+                kind: 'preference',
+              );
+              await memories.deleteSelected([
+                CoachMemorySelection(
+                  id: entry['id']! as String,
+                  expectedUpdatedAt: entry['updatedAt']! as String,
+                ),
+              ]);
+            }
+            expect(await memories.readLocal(), isEmpty);
+          },
+        );
+      },
+    );
+  }
+
   testWidgets('memory Undo restores a deduplicated pre-existing memory', (
     tester,
   ) async {

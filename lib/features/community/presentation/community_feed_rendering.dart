@@ -138,22 +138,10 @@ extension _CommunityFeedRendering on _FeedTabState {
                               onOpen: _openTopic,
                             ),
                           ),
-                        SliverToBoxAdapter(
+                        const SliverToBoxAdapter(
                           child: SizedBox(
-                            key: const Key('community-refresh-slot'),
-                            // Keep the existing feed anchor stable while the
-                            // full-size Splash glyph paints in this rail.
+                            key: Key('community-refresh-slot'),
                             height: 3,
-                            child: (loading && matched) || _cacheRefreshing
-                                ? const OverflowBox(
-                                    minHeight: 24,
-                                    maxHeight: 24,
-                                    child: SizedBox.square(
-                                      dimension: 24,
-                                      child: BilFeatureWelcomeStatus(),
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
                           ),
                         ),
                         if (_cacheRefreshFailed)

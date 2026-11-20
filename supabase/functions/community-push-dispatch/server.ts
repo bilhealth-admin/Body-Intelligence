@@ -112,11 +112,28 @@ export async function handler(
 
   let delivered = 0;
   let failed = 0;
+  let suppressed = 0;
   for (const rawEvent of events ?? []) {
     const event = {
       ...rawEvent,
       deep_link: boundedDeepLink(rawEvent.deep_link),
     };
+    // Review/admin work stays in its durable web inbox. Apply the database's
+    // narrow destination policy before claiming a phone token, so a removed
+    // mobile administration route cannot produce an unactionable push.
+    const { data: webOnly, error: policyError } = await client.rpc(
+      "bil_suppress_web_only_mobile_push_v1",
+      { p_outbox_id: event.id },
+    );
+    // Missing policy or an unreadable result cannot authorize phone delivery.
+    if (policyError || typeof webOnly !== "boolean") {
+      failed += 1;
+      continue;
+    }
+    if (webOnly) {
+      suppressed += 1;
+      continue;
+    }
     // The database atomically leases only the still-undelivered device rows.
     // This makes concurrent invocations safe and avoids replaying successful
     // devices after another device in the same account fails.
@@ -251,6 +268,7 @@ export async function handler(
     processed: events?.length ?? 0,
     delivered,
     failed,
+    suppressed,
   });
 }
 

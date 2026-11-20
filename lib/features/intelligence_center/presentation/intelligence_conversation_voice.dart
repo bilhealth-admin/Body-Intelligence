@@ -69,7 +69,23 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     final granted =
         await policy.request(effectiveCapability) ==
         BilRuntimePermissionState.granted;
-    if (!currentRequest() || !granted) return false;
+    if (!mounted || !currentRequest()) return false;
+    if (!granted) {
+      if (effectiveCapability == BilRuntimeCapability.microphone ||
+          effectiveCapability == BilRuntimeCapability.speechRecognition) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(
+                'This permission is off. Enable it in system settings to use this feature; typing remains available.',
+                'هذا الإذن متوقف. فعّله في إعدادات النظام لاستخدام هذه الميزة؛ وتبقى الكتابة متاحة.',
+              ),
+            ),
+          ),
+        );
+      }
+      return false;
+    }
     if (effectiveCapability != BilRuntimeCapability.microphone ||
         permissionSequence.length == 1) {
       return true;
@@ -328,10 +344,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     );
     if (!_voiceRequestCurrent(request, generation)) return;
     if (!accepted) {
-      if (voiceMode == _CoachVoiceMode.liveCall) {
-        _updateState(() => liveCallPaused = true);
-      }
-      await _stopVoiceCapture(resetMode: voiceMode != _CoachVoiceMode.liveCall);
+      await _stopVoiceCapture(resetMode: true);
       return;
     }
     final permissionGranted = await _ensureCoachRuntimePermission(
@@ -341,16 +354,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     );
     if (!_voiceRequestCurrent(request, generation)) return;
     if (!permissionGranted) {
-      if (mounted) {
-        _updateState(() {
-          if (voiceMode == _CoachVoiceMode.liveCall) {
-            liveCallPaused = true;
-          } else {
-            voiceMode = _CoachVoiceMode.idle;
-          }
-        });
-      }
-      request.attempt.cancel();
+      await _stopVoiceCapture(resetMode: true);
       return;
     }
     request.capabilities.addAll(

@@ -37,6 +37,13 @@ class CoachMemoryRepository {
     : cloud = cloud ?? _activeCloud();
 
   static const storageKey = 'coachExplicitMemoriesV1';
+
+  /// Native writes must retain pending privacy deletions as well as active
+  /// facts. The fifty-row display window is not a storage or deletion limit.
+  static List<Map<String, Object?>> retainStoredState(
+    List<Map<String, Object?>> entries,
+  ) => _retainMemoryState(entries);
+
   final PreferencesRepository preferences;
   final SupabaseClient? cloud;
 

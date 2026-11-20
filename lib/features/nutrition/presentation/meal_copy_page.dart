@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../data/repositories/meal_repository.dart';
+import '../../daily_log/presentation/meal_item_evidence_presenter.dart';
 import '../../foods/providers/food_provider.dart';
 import '../services/food_presentation_localizer.dart';
 import 'nutrition_entry_fields.dart';
@@ -120,7 +121,10 @@ class _MealCopyPageState extends ConsumerState<MealCopyPage> {
                         ),
                 ),
                 trailing: Text(
-                  '${item.quantity} ${item.servingUnitSnapshot == 'serving' ? t('servings', 'حصص') : t('g', 'جم')}',
+                  MealItemEvidencePresenter.quantityLabel(
+                    item: item,
+                    languageCode: Localizations.localeOf(context).languageCode,
+                  ),
                 ),
               ),
             const Divider(),

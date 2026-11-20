@@ -8,6 +8,7 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/dashboard/presentation/dashboard_preferences_page.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:body_intelligence_log/features/dashboard/providers/dashboard_preferences_provider.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
@@ -339,8 +340,8 @@ void main() {
     expect(
       tester
           .widget<ListTile>(find.byKey(const Key('dashboard-preset-custom')))
-          .trailing,
-      isNull,
+          .selected,
+      isFalse,
       reason: 'restored defaults are not a custom preset',
     );
     await tester.pumpWidget(const SizedBox.shrink());
@@ -819,6 +820,74 @@ void main() {
     await tester.pump();
   });
 
+  for (final locale in [const Locale('en'), const Locale('ar')]) {
+    testWidgets(
+      'selecting a preset keeps its text in place in ${locale.languageCode}',
+      (tester) async {
+        tester.view.physicalSize = const Size(600, 1800);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(database.close);
+        final pending = Completer<void>();
+        final repository = _TestPreferencesRepository(
+          database,
+          pendingWrite: pending,
+        );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              preferencesRepositoryProvider.overrideWithValue(repository),
+              for (final section in DashboardSectionIds.all)
+                dashboardSectionVisibleProvider(
+                  section,
+                ).overrideWith((_) => Stream.value(true)),
+            ],
+            child: MaterialApp(
+              locale: locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              home: const DashboardPreferencesPage(),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final card = find.byKey(const Key('dashboard-preset-calorie'));
+        final texts = find.descendant(of: card, matching: find.byType(Text));
+        List<Rect> textRects() => [
+          for (final element in texts.evaluate())
+            tester
+                .getRect(
+                  find.byElementPredicate((candidate) => candidate == element),
+                )
+                .shift(-tester.getTopLeft(card)),
+        ];
+        expect(texts, findsNWidgets(2));
+        final rects = textRects();
+        final size = tester.getSize(card);
+        await tester.tap(card);
+        await tester.pump();
+        expect(textRects(), rects);
+        expect(tester.getSize(card), size);
+        expect(tester.widget<ListTile>(card).selected, isTrue);
+        expect(
+          find.descendant(of: card, matching: find.byIcon(Icons.check_rounded)),
+          findsOneWidget,
+        );
+        pending.complete();
+        await tester.pumpAndSettle();
+        expect(textRects(), rects);
+        expect(tester.widget<ListTile>(card).onTap, isNotNull);
+        expect(repository.writeCount, 1);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      },
+    );
+  }
+
   testWidgets('busy save blocks every exit and duplicate submission', (
     tester,
   ) async {
@@ -859,8 +928,23 @@ void main() {
       const Offset(-1500, 0),
     );
     await tester.pumpAndSettle();
+    final carousel = find.byKey(const Key('dashboard-preset-carousel'));
+    final positionBeforeSave = tester.getTopLeft(carousel);
+    final waitsBeforeSave = find
+        .byType(BilFeatureWelcomeStatus)
+        .evaluate()
+        .length;
     await tester.tap(find.byKey(const Key('dashboard-preset-custom')));
     await tester.pump();
+    expect(
+      tester.getTopLeft(carousel),
+      positionBeforeSave,
+      reason: 'saving the selected preset must keep the card under the finger',
+    );
+    expect(
+      find.byType(BilFeatureWelcomeStatus).evaluate().length,
+      waitsBeforeSave,
+    );
     expect(tester.widget<PopScope>(find.byType(PopScope)).canPop, isFalse);
     expect(
       tester

@@ -35,12 +35,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
             children: [
-              SizedBox(
-                height: _savingLayout ? 24 : 12,
-                child: _savingLayout
-                    ? const BilFeatureWelcomeStatus()
-                    : const SizedBox.shrink(),
-              ),
+              const SizedBox(height: 12),
               _DashboardPreferencesHero(
                 title: _sectionCopy(
                   context,
@@ -131,9 +126,11 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                         for (final preset in _dashboardPresets)
                           SizedBox(
                             width: 310,
-                            child: BilPearlMaterialCard(
+                            child: _DashboardPresetSurface(
+                              selected: selected == preset.id,
                               child: ListTile(
                                 key: Key('dashboard-preset-${preset.id}'),
+                                selected: selected == preset.id,
                                 horizontalTitleGap: 12,
                                 leading: _DashboardLuxeIconBadge(
                                   kind: _dashboardPresetIconKind(preset.id),
@@ -162,40 +159,42 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                     tr: preset.bodyTr,
                                   ),
                                 ),
-                                trailing:
-                                    preset.premium &&
-                                        verifiedSubscription.hasError
-                                    ? IconButton(
-                                        tooltip: _sectionCopy(
-                                          context,
-                                          'Retry subscription check',
-                                          'إعادة فحص الاشتراك',
-                                        ),
-                                        onPressed: () => ref.invalidate(
-                                          verifiedSubscriptionStateProvider,
-                                        ),
-                                        icon: const BilNavigationFeedback(
-                                          child: Icon(Icons.refresh_rounded),
-                                        ),
-                                      )
-                                    : preset.premium && !entitlementResolved
-                                    ? const SizedBox.square(
-                                        dimension: 22,
-                                        child: BilFeatureWelcomeStatus(),
-                                      )
-                                    : preset.premium && !paid
-                                    ? const Icon(
-                                        Icons.workspace_premium_rounded,
-                                        color: Color(0xFFF2B632),
-                                      )
-                                    : selected == preset.id
-                                    ? Icon(
-                                        Icons.check_rounded,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                      )
-                                    : null,
+                                trailing: SizedBox(
+                                  width: preset.premium ? 48 : 24,
+                                  child: Center(
+                                    child:
+                                        preset.premium &&
+                                            verifiedSubscription.hasError
+                                        ? IconButton(
+                                            tooltip: _sectionCopy(
+                                              context,
+                                              'Retry subscription check',
+                                              'إعادة فحص الاشتراك',
+                                            ),
+                                            onPressed: () => ref.invalidate(
+                                              verifiedSubscriptionStateProvider,
+                                            ),
+                                            icon: const BilNavigationFeedback(
+                                              child: Icon(
+                                                Icons.refresh_rounded,
+                                              ),
+                                            ),
+                                          )
+                                        : preset.premium && !entitlementResolved
+                                        ? const SizedBox.square(
+                                            dimension: 22,
+                                            child: BilFeatureWelcomeStatus(),
+                                          )
+                                        : preset.premium && !paid
+                                        ? const Icon(
+                                            Icons.workspace_premium_rounded,
+                                            color: Color(0xFFF2B632),
+                                          )
+                                        : _DashboardPresetCheck(
+                                            selected: selected == preset.id,
+                                          ),
+                                  ),
+                                ),
                                 onTap:
                                     _savingLayout ||
                                         (preset.premium && !entitlementResolved)
@@ -215,9 +214,11 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                           ),
                         SizedBox(
                           width: 310,
-                          child: BilPearlMaterialCard(
+                          child: _DashboardPresetSurface(
+                            selected: selected == 'custom',
                             child: ListTile(
                               key: const Key('dashboard-preset-custom'),
+                              selected: selected == 'custom',
                               horizontalTitleGap: 12,
                               leading: _DashboardLuxeIconBadge(
                                 kind: BilSemanticIconKind.preferences,
@@ -246,21 +247,10 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                   tr: 'Aşağıdan her kartı seçin.',
                                 ),
                               ),
-                              trailing: selected == 'custom'
-                                  ? Icon(
-                                      Icons.check_rounded,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    )
-                                  : null,
-                              onTap: _savingLayout
-                                  ? null
-                                  : () => _guardedSave(
-                                      () => ref
-                                          .read(preferencesRepositoryProvider)
-                                          .set('dashboard.preset', 'custom'),
-                                    ),
+                              trailing: _DashboardPresetCheck(
+                                selected: selected == 'custom',
+                              ),
+                              onTap: _savingLayout ? null : _selectCustomPreset,
                             ),
                           ),
                         ),

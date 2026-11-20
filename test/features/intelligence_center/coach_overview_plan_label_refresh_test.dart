@@ -19,6 +19,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 const _label = Key('coach-workspace-plan-label');
 const _authorized = Key('overview-test-authorized-plan');
@@ -34,6 +35,7 @@ class _OverviewFixture {
     subscription = Future.value(paid());
     usage = Future.value(quota(initialCreditRemaining));
     container = ProviderContainer(
+      retry: (_, _) => null,
       overrides: [
         verifiedEntitlementOwnerSeedProvider.overrideWithValue(_ownerA),
         verifiedEntitlementOwnerProvider.overrideWith((_) => owners.stream),
@@ -328,6 +330,52 @@ Future<void> _completeOnlyCurrentOwnerRead(
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
+  for (final denial in ['free', '401', '403']) {
+    for (final hidden in [false, true]) {
+      testWidgets(
+        'Overview label retires after $denial hidden=$hidden even when next read is pending',
+        (tester) async {
+          final fixture = _OverviewFixture(initialCreditRemaining: 0);
+          final pending = Completer<SubscriptionState>();
+          final authority = fixture.container.listen(
+            verifiedSubscriptionStateProvider,
+            (_, _) {},
+          );
+          try {
+            await fixture.mount(tester);
+            expect(fixture.label(tester), 'Premium AI Coach');
+            if (hidden) await fixture.mount(tester, showOverview: false);
+            fixture.subscription = denial == 'free'
+                ? Future.value(_free())
+                : Future.error(
+                    AuthException(
+                      'synthetic invalid session',
+                      statusCode: denial,
+                    ),
+                  );
+            fixture.container.invalidate(verifiedSubscriptionStateProvider);
+            await fixture.container
+                .read(verifiedSubscriptionStateProvider.future)
+                .then<void>((_) {}, onError: (Object _) {});
+            await tester.pump();
+            fixture.subscription = pending.future;
+            fixture.container.invalidate(verifiedSubscriptionStateProvider);
+            fixture.container
+                .read(verifiedSubscriptionStateProvider.future)
+                .ignore();
+            await fixture.mount(tester, settle: false);
+            expect(find.byKey(_label), findsNothing);
+            expect(find.byKey(_authorized, skipOffstage: false), findsNothing);
+            expect(tester.takeException(), isNull);
+          } finally {
+            authority.close();
+            if (!pending.isCompleted) pending.complete(_free());
+            await fixture.close(tester);
+          }
+        },
+      );
+    }
+  }
   testWidgets(
     'quota refresh keeps a verified Premium badge and stable Overview geometry',
     (tester) async {
@@ -369,7 +417,7 @@ void main() {
   );
 
   testWidgets(
-    'transient subscription failure retains only the paid label while the real gate fails closed',
+    'transient subscription failure retains the label and valid canonical access',
     (tester) async {
       final fixture = _OverviewFixture();
       final refresh = Completer<SubscriptionState>();
@@ -395,9 +443,9 @@ void main() {
             const Key('premium-route-access-unavailable'),
             skipOffstage: false,
           ),
-          findsOneWidget,
+          findsNothing,
         );
-        expect(find.byKey(_authorized, skipOffstage: false), findsNothing);
+        expect(find.byKey(_authorized, skipOffstage: false), findsOneWidget);
         expect(fixture.label(tester), initialLabel);
       } finally {
         if (!refresh.isCompleted) refresh.complete(fixture.paid());
@@ -474,7 +522,10 @@ void main() {
             await observed;
             await tester.pump();
             expect(fixture.label(tester), 'Premium AI Coach');
-            expect(find.byKey(_authorized, skipOffstage: false), findsNothing);
+            expect(
+              find.byKey(_authorized, skipOffstage: false),
+              findsOneWidget,
+            );
           }
           fixture.now = end;
           await tester.pump(const Duration(seconds: 2));
@@ -759,9 +810,9 @@ void main() {
         final currentVisit = fixture.container.read(
           verifiedEntitlementOwnerVisitProvider,
         );
-        // Both raw visits have arrived, but the latest loader was begun in
-        // the retired visit. A dirty lazy provider need not start its next
-        // producer until the real Overview watches it again.
+        // Both raw visits have arrived. Without a second label cache forcing
+        // an intermediate producer, the active authority observer coalesces
+        // its replacement read to the returned A visit.
         expect(currentVisit, 2);
         final hiddenReads = fixture.subscriptionReads;
         expect(fixture.subscriptionLoads, 3);
@@ -774,20 +825,20 @@ void main() {
           hiddenReads.map((read) => read.generation),
           orderedEquals([1, 2, 3]),
         );
-        expect(hiddenReads.last.visit, 1);
-        expect(hiddenReads.last.visit, lessThan(currentVisit));
+        expect(hiddenReads.last.rawOwner, _ownerA);
+        expect(hiddenReads.last.scalarOwner, _ownerA);
+        expect(hiddenReads.last.visit, currentVisit);
         expect(hiddenReads.last.result.isCompleted, isFalse);
-        // Reopen the actual Overview; its real watch starts generation four
-        // for visit two. No fixture invalidation forces a replacement read.
+        // Reentry must use that current producer, with no duplicate cloud read.
         // Checking has a live animation, so drain frames without settling it.
         await fixture.mount(tester, settle: false);
-        _expectDistinctOwnerReads(fixture, 4, expectedVisit: currentVisit);
-        // Retired generations two and three each return paid independently;
-        // neither may grant before the current generation four completes.
+        _expectDistinctOwnerReads(fixture, 3, expectedVisit: currentVisit);
+        // Retired generation two returns paid independently; it cannot grant
+        // before the current generation three completes.
         await _completeOnlyCurrentOwnerRead(
           tester,
           fixture,
-          4,
+          3,
           expectedVisit: currentVisit,
         );
       } finally {
@@ -899,7 +950,7 @@ void main() {
         expect(fixture.usageLoads, usageLoads);
         await fixture.mount(tester);
         expect(fixture.label(tester), 'Premium AI Coach');
-        expect(find.byKey(_authorized, skipOffstage: false), findsNothing);
+        expect(find.byKey(_authorized, skipOffstage: false), findsOneWidget);
       } finally {
         if (!pending.isCompleted) pending.complete(fixture.paid());
         await fixture.close(tester);

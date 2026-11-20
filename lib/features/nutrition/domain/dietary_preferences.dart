@@ -1,4 +1,6 @@
 import 'dart:convert';
+import '../services/food_multilingual_lexicon.dart';
+import '../services/food_search_normalizer.dart';
 
 /// Food-selection preferences. These values never diagnose an allergy and do
 /// not change energy or nutrient requirements; they only constrain food and
@@ -63,7 +65,7 @@ final class DietaryPreferences {
     allergens: Set.unmodifiable(allergens ?? this.allergens),
     excludedIngredients: Set.unmodifiable(
       (excludedIngredients ?? this.excludedIngredients)
-          .map(normalizeDietaryTag)
+          .map(_normalizeExclusion)
           .where((value) => value.isNotEmpty),
     ),
   );
@@ -111,7 +113,7 @@ final class DietaryPreferences {
 
       final exclusions = value['excludedIngredients'] is List
           ? (value['excludedIngredients'] as List)
-                .map((item) => normalizeDietaryTag('$item'))
+                .map((item) => _normalizeExclusion('$item'))
                 .where((item) => item.isNotEmpty)
                 .take(30)
                 .toSet()
@@ -146,6 +148,9 @@ String normalizeDietaryTag(String value) => value
     .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
     .replaceAll(RegExp(r'^_+|_+$'), '');
 
+String _normalizeExclusion(String value) =>
+    FoodSearchNormalizer.normalize(value).replaceAll(' ', '_');
+
 extension _FirstOrNull<T> on Iterable<T> {
   T? get firstOrNull {
     final iterator = this.iterator;
@@ -168,9 +173,12 @@ abstract final class DietaryCompatibility {
     )) {
       return false;
     }
-    if (preferences.excludedIngredients.any(
-      (value) => ingredientText.contains(normalizeDietaryTag(value)),
-    )) {
+    if (preferences.excludedIngredients.isNotEmpty &&
+        _containsExclusion(
+          preferences.excludedIngredients,
+          ingredients,
+          ingredientText,
+        )) {
       return false;
     }
     if (preferences.requirements.contains(DietaryRequirement.glutenFree) &&
@@ -203,6 +211,56 @@ abstract final class DietaryCompatibility {
       DietaryPattern.vegan => tags.contains('vegan'),
     };
   }
+
+  static bool _containsExclusion(
+    Set<String> exclusions,
+    Iterable<String> ingredients,
+    String ingredientText,
+  ) {
+    late final names = ingredients.map(_inflectionKey).toList();
+    for (final excluded in exclusions) {
+      final name = FoodSearchNormalizer.normalize(excluded);
+      if (name.isEmpty) return true;
+      final translations = FoodMultilingualLexicon.exactConcepts(name);
+      // Release ingredient evidence is in English. An untranslated restriction
+      // cannot be cleared against that evidence.
+      if (translations.isEmpty && !_englishFoodName.hasMatch(name)) return true;
+      for (final term in [name, ...translations]) {
+        final literal = term.replaceAll(' ', '_');
+        if (ingredientText.contains(literal)) return true;
+        final phrase = ' ${_inflectionKey(term)} ';
+        if (names.any((candidate) => ' $candidate '.contains(phrase))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static final _englishFoodName = RegExp(r'^[a-z0-9 ]+$');
+  static final _pluralEs = RegExp(r'(ch|sh|ss|x|z|tato|mato)es$');
+
+  // Only exclusion comparisons use this key. The release reader verifies
+  // formulation item IDs and source descriptions verbatim.
+  static String _inflectionKey(String value) =>
+      FoodSearchNormalizer.tokens(value)
+          .map((word) {
+            if (word.length < 4) return word;
+            if (word.endsWith('ies')) {
+              return '${word.substring(0, word.length - 3)}y';
+            }
+            if (_pluralEs.hasMatch(word)) {
+              return word.substring(0, word.length - 2);
+            }
+            if (word.endsWith('s') &&
+                !word.endsWith('ss') &&
+                !word.endsWith('us') &&
+                !word.endsWith('is')) {
+              return word.substring(0, word.length - 1);
+            }
+            return word;
+          })
+          .join(' ');
 
   static String _normalizeAllergen(String value) {
     final normalized = normalizeDietaryTag(value);

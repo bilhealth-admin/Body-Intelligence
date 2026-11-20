@@ -188,6 +188,17 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
     }
   }
 
+  Future<void> _selectCustomPreset() async {
+    if (_saving) return;
+    _updateState(() => _pendingPresetId = 'custom');
+    final saved = await _guardedSave(
+      () => ref
+          .read(preferencesRepositoryProvider)
+          .set('dashboard.preset', 'custom'),
+    );
+    if (!saved && mounted) _updateState(() => _pendingPresetId = null);
+  }
+
   Future<void> _setSectionVisibility(
     BuildContext context,
     WidgetRef ref,

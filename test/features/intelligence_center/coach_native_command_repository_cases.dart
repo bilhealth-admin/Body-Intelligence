@@ -8,6 +8,54 @@ void _nativeRepositoryCases() {
   });
   tearDown(() => store.database.close());
 
+  test(
+    'memory preparation still rejects a blank active fact without writing',
+    () async {
+      final preferences = PreferencesRepository(store.database);
+      final raw = jsonEncode([
+        {..._memory, 'text': ''},
+      ]);
+      await preferences.set(CoachMemoryRepository.storageKey, raw);
+      await expectLater(store.prepare('save_memory'), throwsFormatException);
+      expect(await preferences.get(CoachMemoryRepository.storageKey), raw);
+      expect(await store.journals(), isEmpty);
+    },
+  );
+
+  test(
+    'memory preparation rejects a deletion queue above its storage bound',
+    () async {
+      final preferences = PreferencesRepository(store.database);
+      final raw = jsonEncode([
+        for (var index = 0; index < 1001; index++)
+          {'id': 'deleted-$index', 'text': '', 'status': 'deleted'},
+      ]);
+      await preferences.set(CoachMemoryRepository.storageKey, raw);
+      await expectLater(store.prepare('save_memory'), throwsStateError);
+      expect(await preferences.get(CoachMemoryRepository.storageKey), raw);
+      expect(await store.journals(), isEmpty);
+    },
+  );
+
+  test(
+    'memory commit refuses a full active collection without truncating it',
+    () async {
+      final preferences = PreferencesRepository(store.database);
+      final raw = jsonEncode([
+        for (var index = 0; index < 1000; index++)
+          {..._memory, 'id': 'active-$index', 'text': 'Saved fact $index'},
+      ]);
+      await preferences.set(CoachMemoryRepository.storageKey, raw);
+      final command = await store.prepare('save_memory');
+      await expectLater(
+        store.repository.commit(command: command, scope: store.scope),
+        throwsStateError,
+      );
+      expect(await preferences.get(CoachMemoryRepository.storageKey), raw);
+      expect(await store.journals(), isEmpty);
+    },
+  );
+
   for (final tool in _nativeInputs.keys) {
     test(
       '$tool commits a durable readback and compensates its exact snapshot',

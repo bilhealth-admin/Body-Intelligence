@@ -1,5 +1,9 @@
 part of 'recipe_library_page.dart';
 
+DietaryPreferences? _resolvedRecipePreferences(
+  AsyncValue<DietaryPreferences> value,
+) => value.isLoading || value.hasError ? null : value.asData?.value;
+
 class _RecipeLibraryDetailVisit extends ConsumerStatefulWidget {
   const _RecipeLibraryDetailVisit({required this.load, required this.image});
   final Future<RecipeCatalogDetail> Function() load;
@@ -27,16 +31,25 @@ class _RecipeLibraryDetailVisitState
   @override
   Widget build(BuildContext context) {
     final current = ref.watch(verifiedEntitlementOwnerIdProvider) == _owner;
+    final dietary = ref.watch(dietaryPreferencesProvider);
+    final preferences = _resolvedRecipePreferences(dietary);
     return FutureBuilder<RecipeCatalogDetail>(
       future: _detail,
       builder: (context, snapshot) {
-        if (current && snapshot.connectionState != ConnectionState.done) {
+        if (current &&
+            !dietary.hasError &&
+            (dietary.isLoading ||
+                snapshot.connectionState != ConnectionState.done)) {
           return const SizedBox(
             height: 320,
             child: Center(child: BilFeatureWelcomeStatus()),
           );
         }
-        if (!current || snapshot.hasError || !snapshot.hasData) {
+        if (!current ||
+            snapshot.hasError ||
+            !snapshot.hasData ||
+            preferences == null ||
+            !snapshot.requireData.dietaryEvidence.allows(preferences)) {
           return SizedBox(
             height: 320,
             child: Center(
@@ -53,6 +66,17 @@ class _RecipeLibraryDetailVisitState
         return _RecipeDetails(
           detail: snapshot.requireData,
           imageResult: _image,
+          canReview: () {
+            if (!mounted ||
+                ref.read(verifiedEntitlementOwnerIdProvider) != _owner) {
+              return false;
+            }
+            final live = _resolvedRecipePreferences(
+              ref.read(dietaryPreferencesProvider),
+            );
+            return live != null &&
+                snapshot.requireData.dietaryEvidence.allows(live);
+          },
         );
       },
     );

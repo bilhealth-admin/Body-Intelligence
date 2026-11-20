@@ -1,5 +1,11 @@
 part of 'bil_smart_plan_page.dart';
 
+typedef _PlanSubmission = ({
+  _PlanOptions options,
+  List<BilVerifiedRecipe> recipes,
+  Object? recipeError,
+});
+
 final class _PlanOptions {
   const _PlanOptions({
     required this.horizon,
@@ -22,6 +28,7 @@ final class _PlanOptions {
 class _PlanCreationSheet extends StatefulWidget {
   const _PlanCreationSheet({
     required this.isCurrent,
+    required this.checkRecipeStyle,
     this.initialHorizon,
     this.initialFocus,
     this.initialSetup,
@@ -29,6 +36,7 @@ class _PlanCreationSheet extends StatefulWidget {
     this.initialOptions,
   });
   final bool Function() isCurrent;
+  final Future<BilPlanRecipeChoices> Function(MealPlanDiet) checkRecipeStyle;
   final BilPlanHorizon? initialHorizon;
   final BilPlanFocus? initialFocus;
   final BilPlanSetup? initialSetup;
@@ -62,6 +70,8 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
       field: FocusNode(debugLabel: field),
   };
   bool _validationOpen = false;
+  bool _checkingRecipes = false;
+  BilPlanRecipeChoices? _recipeIssue;
   bool get _current => mounted && widget.isCurrent();
 
   Widget _anchor(String field, Widget child) => KeyedSubtree(
@@ -141,7 +151,7 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
   }
 
   Future<void> _validateAndSubmit() async {
-    if (!_current || _validationOpen) return;
+    if (!_current || _validationOpen || _checkingRecipes) return;
     final missing = _missingChoices();
     final needsReview = riskSymptoms == true || medicalReview == true;
     if (missing.isNotEmpty || needsReview) {
@@ -177,29 +187,59 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
       if (_current) _focusNodes[field]?.requestFocus();
       return;
     }
-    Navigator.pop(
-      context,
-      _PlanOptions(
-        horizon: horizon!,
-        focus: focus!,
-        workoutsPerWeek: focus == BilPlanFocus.nutrition ? 0 : sessions!,
-        diet: diet,
-        confirmedPreferences: confirmedPreferences,
-        highRiskSymptoms: riskSymptoms!,
-        needsMedicalReview: medicalReview!,
-        setup: focus == BilPlanFocus.nutrition
-            ? null
-            : BilPlanSetup(
-                environment: environment!,
-                experience: experience!,
-                sessionMinutes: minutes!,
-                equipment: environment == BilPlanEnvironment.gym
-                    ? {'gym'}
-                    : equipment,
-                preferredTime: preferredTime,
-              ),
-      ),
+    final options = _PlanOptions(
+      horizon: horizon!,
+      focus: focus!,
+      workoutsPerWeek: focus == BilPlanFocus.nutrition ? 0 : sessions!,
+      diet: diet,
+      confirmedPreferences: confirmedPreferences,
+      highRiskSymptoms: riskSymptoms!,
+      needsMedicalReview: medicalReview!,
+      setup: focus == BilPlanFocus.nutrition
+          ? null
+          : BilPlanSetup(
+              environment: environment!,
+              experience: experience!,
+              sessionMinutes: minutes!,
+              equipment: environment == BilPlanEnvironment.gym
+                  ? {'gym'}
+                  : equipment,
+              preferredTime: preferredTime,
+            ),
     );
+    await _finishSubmission(options);
+  }
+
+  Future<void> _finishSubmission(_PlanOptions options) async {
+    BilPlanRecipeChoices? choices;
+    Object? failure;
+    if (options.focus != BilPlanFocus.training) {
+      setState(() => _checkingRecipes = true);
+      try {
+        choices = await widget.checkRecipeStyle(options.diet!);
+      } catch (error) {
+        failure = error;
+      }
+      if (!mounted || !_current || ModalRoute.of(context)?.isCurrent != true) {
+        return;
+      }
+      setState(() {
+        _checkingRecipes = false;
+        _recipeIssue = choices?.missing.isNotEmpty == true ? choices : null;
+      });
+      if (_recipeIssue != null) {
+        final field = _anchors['diet']?.currentContext;
+        if (field != null && field.mounted) {
+          await Scrollable.ensureVisible(field, alignment: .12);
+        }
+        return;
+      }
+    }
+    Navigator.pop<_PlanSubmission>(context, (
+      options: options,
+      recipes: choices?.recipes ?? const [],
+      recipeError: failure,
+    ));
   }
 
   @override
@@ -249,7 +289,10 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      AbsorbPointer(absorbing: _checkingRecipes, child: _form(context));
+
+  Widget _form(BuildContext context) {
     String t(String en, String arabic) => _smartPlanText(context, en, arabic);
     final preferredTimes = <String>{
       for (var hour = 0; hour < 24; hour++)
@@ -327,7 +370,10 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                       child: Text(t('Nutrition only', 'تغذية فقط')),
                     ),
                   ],
-                  onChanged: (value) => setState(() => focus = value ?? focus),
+                  onChanged: (value) => setState(() {
+                    focus = value ?? focus;
+                    _recipeIssue = null;
+                  }),
 
                   icon: const BilCrystalArrow(
                     extent: 36,
@@ -552,22 +598,16 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                     isExpanded: true,
                     initialValue: diet,
                     items: [
-                      DropdownMenuItem(
-                        value: MealPlanDiet.balanced,
-                        child: Text(t('Balanced recipes', 'وجبات متوازنة')),
-                      ),
-                      DropdownMenuItem(
-                        value: MealPlanDiet.vegetarian,
-                        child: Text(t('Vegetarian recipes', 'وجبات نباتية')),
-                      ),
-                      DropdownMenuItem(
-                        value: MealPlanDiet.highProtein,
-                        child: Text(
-                          t('High-protein recipes', 'وجبات عالية البروتين'),
+                      for (final style in MealPlanDiet.values)
+                        DropdownMenuItem(
+                          value: style,
+                          child: Text(_planStyleLabel(context, style)),
                         ),
-                      ),
                     ],
-                    onChanged: (value) => setState(() => diet = value ?? diet),
+                    onChanged: (value) => setState(() {
+                      diet = value ?? diet;
+                      _recipeIssue = null;
+                    }),
 
                     icon: const BilCrystalArrow(
                       extent: 36,
@@ -575,6 +615,17 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
                     ),
                   ),
                 ),
+              if (focus != BilPlanFocus.training && _recipeIssue != null)
+                _planRecipeGuidance(context, _recipeIssue!, (style) {
+                  setState(() {
+                    if (style == null) {
+                      focus = BilPlanFocus.training;
+                    } else {
+                      diet = style;
+                    }
+                    _recipeIssue = null;
+                  });
+                }),
               _anchor(
                 'confirmation',
                 CheckboxListTile(
@@ -621,8 +672,8 @@ class _PlanCreationSheetState extends State<_PlanCreationSheet> {
               const SizedBox(height: 12),
               FilledButton(
                 key: const ValueKey('bil-smart-plan-review-draft'),
-                onPressed: _validateAndSubmit,
-                child: Text(t('Prepare a draft', 'تجهيز المسودة')),
+                onPressed: _checkingRecipes ? null : _validateAndSubmit,
+                child: _planPrepareLabel(context, checking: _checkingRecipes),
               ),
               const SizedBox(height: 8),
               Text(

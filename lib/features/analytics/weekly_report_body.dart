@@ -6,7 +6,7 @@ class _Body extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final days = report.days;
-    final verifiedSubscription = ref.watch(verifiedSubscriptionStateProvider);
+    final verifiedSubscription = ref.watch(verifiedSubscriptionAccessProvider);
     final premiumActive = verifiedSubscription.value?.grants(
       CommerceEntitlement.advancedIntelligence,
     );

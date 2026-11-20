@@ -56,6 +56,7 @@ class _CommunityPostBodyState extends State<CommunityPostBody> {
               widget.body,
               key: ValueKey('community-post-body-${widget.postId}'),
               textDirection: direction,
+              scrollPhysics: const NeverScrollableScrollPhysics(),
               style: style,
             )
           else

@@ -1,5 +1,88 @@
 part of 'bil_smart_plan_page.dart';
 
+Widget _planPrepareLabel(BuildContext context, {required bool checking}) => Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    SizedBox.square(
+      dimension: 24,
+      child: checking
+          ? BilFeatureWelcomeStatus(
+              label: _smartPlanText(
+                context,
+                'Checking recipes',
+                'جارٍ التحقق من الوصفات',
+              ),
+            )
+          : null,
+    ),
+    const SizedBox(width: 8),
+    Flexible(
+      child: Text(_smartPlanText(context, 'Prepare a draft', 'تجهيز المسودة')),
+    ),
+    const SizedBox(width: 32),
+  ],
+);
+
+String _planStyleLabel(BuildContext context, MealPlanDiet style) =>
+    switch (style) {
+      MealPlanDiet.balanced => _smartPlanText(
+        context,
+        'Balanced recipes',
+        'وجبات متوازنة',
+      ),
+      MealPlanDiet.vegetarian => _smartPlanText(
+        context,
+        'Vegetarian recipes',
+        'وجبات نباتية',
+      ),
+      MealPlanDiet.highProtein => _smartPlanText(
+        context,
+        'High-protein recipes',
+        'وجبات عالية البروتين',
+      ),
+    };
+
+Widget _planRecipeGuidance(
+  BuildContext context,
+  BilPlanRecipeChoices choices,
+  ValueChanged<MealPlanDiet?> choose,
+) {
+  String t(String en, String ar) => _smartPlanText(context, en, ar);
+  final missing = choices.missing.map(
+    (slot) => switch (slot) {
+      BilPlanMealSlot.breakfast => t('Breakfast', 'الفطور'),
+      BilPlanMealSlot.lunch => t('Lunch', 'الغداء'),
+      BilPlanMealSlot.dinner => t('Dinner', 'العشاء'),
+    },
+  );
+  return Column(
+    key: const ValueKey('bil-smart-plan-recipe-guidance'),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Semantics(
+        liveRegion: true,
+        child: Text(
+          "${t('No matching recipes.', 'لا توجد وصفات مطابقة.')} ${missing.join(' · ')}",
+        ),
+      ),
+      Wrap(
+        children: [
+          for (final style in choices.alternatives)
+            TextButton(
+              onPressed: () => choose(style),
+              child: Text(_planStyleLabel(context, style)),
+            ),
+          if (choices.alternatives.isEmpty)
+            TextButton(
+              onPressed: () => choose(null),
+              child: Text(t('Training only', 'تدريب فقط')),
+            ),
+        ],
+      ),
+    ],
+  );
+}
+
 const _planRequiredFields = [
   'horizon',
   'focus',

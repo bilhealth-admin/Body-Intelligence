@@ -11,6 +11,8 @@ import '../../nutrition/domain/dietary_preferences.dart';
 import '../../recipe_import/domain/recipe_ingredient_evidence.dart';
 
 part 'recipe_release_decoding.dart';
+part 'recipe_dietary_evidence.dart';
+part 'recipe_source_foods.dart';
 
 final class RecipeCatalogSummary {
   const RecipeCatalogSummary({
@@ -26,6 +28,7 @@ final class RecipeCatalogSummary {
     required this.dietTags,
     required this.allergens,
     required this.imageStatus,
+    this.dietaryEvidence = RecipeDietaryEvidence.unknown,
     this.region = 'global',
     this.cuisine,
   });
@@ -36,6 +39,7 @@ final class RecipeCatalogSummary {
   final Map<String, String> localizedTitles;
   final int shard, ordinal, totalMinutes;
   final List<String> mealTypes, dietTags, allergens;
+  final RecipeDietaryEvidence dietaryEvidence;
 
   String get category {
     if (totalMinutes <= 20) return 'quick';
@@ -61,18 +65,18 @@ final class RecipeCatalogSummary {
   String titleFor(String locale) => resolveTitle(locale).text;
 
   bool isCompatibleWith(DietaryPreferences preferences) =>
-      DietaryCompatibility.allows(
-        preferences: preferences,
-        dietTags: dietTags,
-        allergens: allergens,
-      );
+      dietaryEvidence.allows(preferences);
 }
 
 final class RecipeCatalogDetail {
-  const RecipeCatalogDetail({required this.summary, required this.record});
+  const RecipeCatalogDetail({required this.summary, required this.record})
+    : dietaryEvidence = RecipeDietaryEvidence.unknown;
+  RecipeCatalogDetail._release({required this.summary, required this.record})
+    : dietaryEvidence = RecipeDietaryEvidence._fromRecord(record);
 
   final RecipeCatalogSummary summary;
   final Map<String, dynamic> record;
+  final RecipeDietaryEvidence dietaryEvidence;
 
   ({Map<String, dynamic> value, String locale, bool isFallback})
   resolveLocalization(String requested) {
@@ -277,8 +281,21 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
     // Decoding alone was already isolated, but validating and projecting all
     // 1,500 entries still ran on the UI isolate. Keep the whole O(n) pass in a
     // worker isolate; only the immutable result crosses back.
+    final dietaryBytes = await _readBounded(
+      'assets/catalogs/recipes/v1/recipe-dietary-index.json',
+      35646,
+    );
+    _verifyBytes(
+      dietaryBytes,
+      expectedBytes: 35646,
+      expectedSha256:
+          'd80168545656d8e14d5457215f0e2b2898d7589105ea99f2118bc31ee070bc96',
+    );
     final result = await compute(_decodeRecipeIndex, (
       bytes: indexBytes,
+      dietary: dietaryBytes,
+      canonicalHash: manifest.canonicalSha256,
+      indexHash: manifest.indexSha256,
       imageStates: imageManifest.states,
     ));
     _byId = Map.unmodifiable({for (final recipe in result) recipe.id: recipe});
@@ -353,7 +370,7 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
         record['contentFingerprint'] != summary.fingerprint) {
       throw const FormatException('Recipe index/shard identity mismatch.');
     }
-    return RecipeCatalogDetail(summary: summary, record: record);
+    return RecipeCatalogDetail._release(summary: summary, record: record);
   }
 
   /// Loads the compact facts needed by a visible discovery card.
@@ -387,7 +404,7 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
       expectedBytes: descriptor.sizeBytes,
       expectedSha256: descriptor.sha256,
     );
-    final decoded = await compute(_decodeObject, bytes);
+    final decoded = await compute(_decodeImmutableRecipeShard, bytes);
     _exactKeys(decoded, const {'schema_version', 'shard_index', 'records'});
     final records = decoded['records'];
     if (decoded['schema_version'] != 1 ||

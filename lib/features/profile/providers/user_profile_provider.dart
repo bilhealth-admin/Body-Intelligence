@@ -67,8 +67,35 @@ final dietPlanRepositoryProvider = Provider<DietPlanRepository>((ref) {
 final dietPlanCommandProvider = Provider<DietPlanCommand>((ref) {
   return DietPlanCommand(
     repository: ref.watch(dietPlanRepositoryProvider),
-    verifiedSubscription: () =>
-        ref.read(verifiedSubscriptionStateProvider.future),
+    verifiedSubscription: () async {
+      final owner = ref.read(verifiedEntitlementOwnerIdProvider);
+      final visit = ref.read(verifiedEntitlementOwnerVisitProvider);
+      bool currentOwner() =>
+          ref.mounted &&
+          owner != null &&
+          ref.read(verifiedEntitlementOwnerIdProvider) == owner &&
+          ref.read(verifiedEntitlementOwnerVisitProvider) == visit &&
+          !ref.read(verifiedEntitlementOwnerProvider).hasError;
+      if (!currentOwner()) throw StateError('nutrition_plan_owner_changed');
+      var access = ref.read(verifiedSubscriptionAccessProvider);
+      // A local schedule activation can use the server's still-valid original
+      // period while a background read runs. Checkout recovery separately
+      // requires a fresh network response.
+      if (access.isLoading || access.hasError || !access.hasValue) {
+        await ref.read(verifiedSubscriptionStateProvider.future);
+        if (!currentOwner()) throw StateError('nutrition_plan_owner_changed');
+        // Never authorize with the awaited raw result: its owner or interval
+        // may have retired while the command was waiting.
+        access = ref.read(verifiedSubscriptionAccessProvider);
+      }
+      if (!currentOwner() ||
+          access.isLoading ||
+          access.hasError ||
+          !access.hasValue) {
+        throw StateError('nutrition_plan_verification_unavailable');
+      }
+      return access.requireValue;
+    },
   );
 });
 

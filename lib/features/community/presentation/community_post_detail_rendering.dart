@@ -1,6 +1,13 @@
 part of 'community_hub_page.dart';
 
 extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
+  Widget _detailRetry(BuildContext context) => FilledButton.icon(
+    key: const Key('community-post-detail-retry'),
+    onPressed: _retry,
+    icon: const BilNavigationFeedback(child: Icon(Icons.refresh_rounded)),
+    label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
+  );
+
   Widget buildCommunityPostDetail(BuildContext context) => Scaffold(
     appBar: AppBar(
       leading: const CommunityReturnButton(),
@@ -9,21 +16,12 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
     body: FutureBuilder<void>(
       future: _loading,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done &&
-            _comments.isEmpty) {
+        if (!_hasLoadedDetail &&
+            snapshot.connectionState != ConnectionState.done) {
           return const Center(child: BilFeatureWelcomeStatus());
         }
-        if (snapshot.hasError && _comments.isEmpty) {
-          return Center(
-            child: FilledButton.icon(
-              key: const Key('community-post-detail-retry'),
-              onPressed: _retry,
-              icon: const BilNavigationFeedback(
-                child: Icon(Icons.refresh_rounded),
-              ),
-              label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),
-            ),
-          );
+        if (!_hasLoadedDetail) {
+          return Center(child: _detailRetry(context));
         }
         return Column(
           children: [
@@ -161,6 +159,9 @@ extension _CommunityPostDetailRendering on _CommunityPostDetailPageState {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 10),
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasError)
+                      Center(child: _detailRetry(context)),
                     if (_comments.isEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 28),

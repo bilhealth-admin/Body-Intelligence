@@ -3,13 +3,18 @@ import '../../../data/database/app_database.dart';
 class MealItemEvidencePresenter {
   const MealItemEvidencePresenter._();
 
+  static String quantityLabel({
+    required MealItem item,
+    required String languageCode,
+  }) =>
+      '${_formatQuantity(item.quantity)} ${_unitLabel(item.servingUnitSnapshot, languageCode)}';
+
   static String subtitle({
     required MealItem item,
     required String mealLabel,
     required String languageCode,
   }) {
-    final quantity = _formatQuantity(item.quantity);
-    final unit = _unitLabel(item.servingUnitSnapshot, languageCode);
+    final quantity = quantityLabel(item: item, languageCode: languageCode);
     final source = sourceLabel(
       item.foodSourceSnapshot,
       verified: item.foodVerifiedSnapshot,
@@ -21,7 +26,7 @@ class MealItemEvidencePresenter {
       languageCode: languageCode,
     );
 
-    return '$mealLabel · $quantity $unit · $source · ${_copy(languageCode, 'reference')} $serving';
+    return '$mealLabel · $quantity · $source · ${_copy(languageCode, 'reference')} $serving';
   }
 
   static String sourceLabel(

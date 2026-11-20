@@ -4,6 +4,7 @@ import 'package:body_intelligence_log/app/theme/bil_flat_icon.dart';
 import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_sapphire.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_native_symbols.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_refresh_indicator.dart';
 
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_comment_threads.dart';
@@ -40,6 +41,7 @@ final class _SocialV2Repository extends CommunityRepository {
   static const replyId = '55555555-5555-4555-8555-555555555555';
 
   String rootBody = 'Root comment can be selected';
+  String postBody = 'A real Community Social v2 post';
   String replyAuthorId = currentId;
   final reportedCommentIds = <String>[];
   bool saved = false;
@@ -62,7 +64,7 @@ final class _SocialV2Repository extends CommunityRepository {
     id: postId,
     authorId: authorId,
     authorName: 'BIL Training Partner',
-    body: 'A real Community Social v2 post',
+    body: postBody,
     createdAt: DateTime.utc(2026, 9, 8, 9),
     likeCount: postLikeCount,
     liked: postLiked,
@@ -265,6 +267,43 @@ Widget _app(CommunityRepository repository) => MaterialApp(
   home: CommunityHubPage(repository: repository),
 );
 
+final class _EmptyCommentsRefreshRepository extends _SocialV2Repository {
+  _EmptyCommentsRefreshRepository() {
+    commentCount = 0;
+  }
+
+  Completer<List<CommunityCommentThread>>? nextComments;
+  bool visible = true;
+
+  @override
+  Future<List<CommunityPostStats>> loadPostStats(List<String> ids) async => [
+    if (visible && ids.contains(_SocialV2Repository.postId)) stats,
+  ];
+
+  @override
+  CommunityPost get post => CommunityPost(
+    id: _SocialV2Repository.postId,
+    authorId: _SocialV2Repository.authorId,
+    authorName: 'Photo author',
+    body: 'A photo from today',
+    createdAt: DateTime.utc(2026, 9, 8),
+    mediaObjectPath: 'owner/photo.png',
+    mediaUrl: 'asset://assets/branding/google_translate_color.png',
+    mediaMimeType: 'image/png',
+    mediaWidth: 600,
+    mediaHeight: 480,
+    mediaBytes: 100,
+  );
+
+  @override
+  Future<List<CommunityCommentThread>> loadPostCommentThreads(
+    String postId, {
+    DateTime? after,
+    String? afterId,
+    int limit = 20,
+  }) => nextComments?.future ?? Future.value(const []);
+}
+
 final class _ReplyRaceRepository extends _SocialV2Repository {
   final pendingReplies = Completer<List<CommunityComment>>();
   bool refreshed = false;
@@ -300,6 +339,155 @@ final class _ReplyRaceRepository extends _SocialV2Repository {
 }
 
 void main() {
+  testWidgets(
+    'dragging an expanded long post scrolls the actual Explore feed',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 740);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final repository = _SocialV2Repository()
+        ..postBody = List.filled(
+          55,
+          'نص من منشور طويل يمكن قراءته وتحديده.',
+        ).join('\n');
+      await tester.pumpWidget(_app(repository));
+      await tester.pumpAndSettle();
+      final toggle = find.byKey(
+        const Key('community-post-expand-${_SocialV2Repository.postId}'),
+      );
+      await tapCommunityControl(tester, toggle);
+      await tester.pumpAndSettle();
+      final feed = find.descendant(
+        of: find.byKey(const Key('community-public-feed')),
+        matching: find.byType(CustomScrollView),
+      );
+      final view = tester.widget<CustomScrollView>(feed);
+      final scroll = view.controller!.position;
+      final body = find.byKey(
+        const Key('community-post-body-${_SocialV2Repository.postId}'),
+      );
+      expect(tester.widget(body), isA<SelectableText>());
+      final rect = tester.getRect(feed).intersect(tester.getRect(body));
+      expect(rect.height, greaterThan(80));
+      final offset = scroll.pixels;
+      await tester.dragFrom(rect.center, const Offset(0, -160));
+      await tester.pumpAndSettle();
+      expect(scroll.pixels, greaterThan(offset + 85));
+      expect(tester.widget(body), isA<SelectableText>());
+    },
+  );
+
+  testWidgets(
+    'refreshing an open photo post preserves its scroll surface with zero comments',
+    (tester) async {
+      final repository = _EmptyCommentsRefreshRepository();
+      await tester.pumpWidget(_app(repository));
+      await tester.pumpAndSettle();
+      await tapCommunityControl(
+        tester,
+        find.byKey(
+          const Key('community-post-comments-${_SocialV2Repository.postId}'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final list = find.byKey(const Key('community-post-detail-list'));
+      final media = find.descendant(
+        of: list,
+        matching: find.byKey(
+          const Key('community-post-image-${_SocialV2Repository.postId}'),
+        ),
+      );
+      final scroll = Scrollable.of(tester.element(media));
+      scroll.position.jumpTo(20);
+      await tester.pump();
+      final imageElement = tester.element(media);
+      final image = find.descendant(of: media, matching: find.byType(Image));
+      expect(image, findsOneWidget);
+      final mediaRect = tester.getRect(media);
+      final scrollOffset = scroll.position.pixels;
+      final held = repository.nextComments =
+          Completer<List<CommunityCommentThread>>();
+      final refresh = tester
+          .widget<BilRefreshIndicator>(
+            find
+                .ancestor(of: list, matching: find.byType(BilRefreshIndicator))
+                .first,
+          )
+          .onRefresh();
+      await tester.pump();
+      try {
+        expect(list, findsOneWidget);
+        expect(tester.element(media), same(imageElement));
+        expect(tester.getRect(media), mediaRect);
+        expect(scroll.position.pixels, scrollOffset);
+        expect(
+          find.descendant(of: list, matching: find.text('A photo from today')),
+          findsOneWidget,
+        );
+      } finally {
+        held.complete(const []);
+        await refresh;
+        await tester.pumpAndSettle();
+      }
+      final failed = repository.nextComments =
+          Completer<List<CommunityCommentThread>>();
+      final failedRefresh = tester
+          .widget<BilRefreshIndicator>(
+            find
+                .ancestor(of: list, matching: find.byType(BilRefreshIndicator))
+                .first,
+          )
+          .onRefresh();
+      failed.completeError(
+        TimeoutException('comments temporarily unavailable'),
+      );
+      await failedRefresh;
+      await tester.pump();
+      await tester.pump();
+      expect(tester.element(media), same(imageElement));
+      final retry = find.byKey(const Key('community-post-detail-retry'));
+      await tester.scrollUntilVisible(
+        retry,
+        180,
+        scrollable: find.byElementPredicate(
+          (e) => identical(e, scroll.context),
+        ),
+        maxScrolls: 15,
+      );
+      expect(retry, findsOneWidget);
+      repository.nextComments = null;
+      await tester.ensureVisible(retry);
+      await tester.tap(retry);
+      await tester.pumpAndSettle();
+      expect(retry, findsNothing);
+      expect(list, findsOneWidget);
+      scroll.position.jumpTo(scrollOffset);
+      await tester.pump();
+      expect(media, findsOneWidget);
+      repository.visible = false;
+      final denied = repository.nextComments =
+          Completer<List<CommunityCommentThread>>();
+      final rejected = tester
+          .widget<BilRefreshIndicator>(
+            find
+                .ancestor(of: list, matching: find.byType(BilRefreshIndicator))
+                .first,
+          )
+          .onRefresh();
+      await tester.pump();
+      await tester.pump();
+      expect(
+        media,
+        findsNothing,
+        reason: 'the stats RPC no longer returns this visible post',
+      );
+      expect(list, findsNothing);
+      denied.complete(const []);
+      await rejected;
+      await tester.pumpAndSettle();
+      expect(retry, findsOneWidget);
+    },
+  );
   group('comment Unicode retention', () {
     late _SocialV2Repository repository;
 

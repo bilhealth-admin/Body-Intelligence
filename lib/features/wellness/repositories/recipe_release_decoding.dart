@@ -63,6 +63,19 @@ Map<String, dynamic> _decodeObject(Uint8List bytes) {
   return decoded;
 }
 
+// Release-derived dietary evidence belongs to this exact, immutable recipe.
+// Freeze the JSON in the decoding isolate before exposing any nested content.
+Map<String, dynamic> _decodeImmutableRecipeShard(Uint8List bytes) =>
+    jsonDecode(
+          utf8.decode(bytes),
+          reviver: (_, value) => switch (value) {
+            Map<String, dynamic>() => Map<String, dynamic>.unmodifiable(value),
+            List() => List<dynamic>.unmodifiable(value),
+            _ => value,
+          },
+        )
+        as Map<String, dynamic>;
+
 _ValidatedRecipeImages _decodeAndValidateImageManifest(Uint8List bytes) =>
     _validateImageManifest(_decodeObject(bytes));
 
@@ -70,7 +83,14 @@ int _decodeAndValidateProvenance(Uint8List bytes) =>
     _validateProvenance(_decodeObject(bytes));
 
 List<RecipeCatalogSummary> _decodeRecipeIndex(
-  ({Uint8List bytes, Map<String, String> imageStates}) input,
+  ({
+    Uint8List bytes,
+    Uint8List dietary,
+    String canonicalHash,
+    String indexHash,
+    Map<String, String> imageStates,
+  })
+  input,
 ) {
   final indexObject = _decodeObject(input.bytes);
   _exactKeys(indexObject, const {'schema_version', 'record_count', 'entries'});
@@ -82,6 +102,19 @@ List<RecipeCatalogSummary> _decodeRecipeIndex(
   if (entries is! List || entries.length != 1500) {
     throw const FormatException('Recipe index must contain 1500 entries.');
   }
+  final projection = _decodeObject(input.dietary);
+  if (projection['canonical'] != input.canonicalHash ||
+      projection['index'] != input.indexHash ||
+      projection['rows'] is! List ||
+      (projection['rows'] as List).length != entries.length) {
+    throw const FormatException(
+      'Recipe dietary projection belongs to another release.',
+    );
+  }
+  final terms = [
+    for (final term in projection['terms'] as List)
+      (term[0] as String, term[1] as String, term[2] as String),
+  ];
   final ids = <String>{};
   final fingerprints = <String>{};
   final result = <RecipeCatalogSummary>[];
@@ -134,6 +167,14 @@ List<RecipeCatalogSummary> _decodeRecipeIndex(
         ),
         totalMinutes: _integer(raw['total_minutes'], 'total_minutes'),
         mealTypes: _strings(raw['meal_types'], 'meal_types'),
+        dietaryEvidence: RecipeDietaryEvidence._fromIngredients(
+          [
+            for (final term in projection['rows'][index] as List)
+              if (term == null) null else terms[term as int],
+          ],
+          _strings(raw['diet_tags'], 'diet_tags'),
+          _strings(raw['allergens'], 'allergens'),
+        ),
         dietTags: _strings(raw['diet_tags'], 'diet_tags'),
         allergens: _strings(raw['allergens'], 'allergens'),
         imageStatus: imageStatus,

@@ -29,6 +29,8 @@ function fakeRuntime(options: {
   outboxError?: boolean;
   claimError?: boolean;
   resultError?: boolean;
+  policyError?: boolean;
+  policyResult?: unknown;
   event?: Record<string, unknown>;
   sensitivePreviewAllowed?: boolean;
 } = {}) {
@@ -62,11 +64,14 @@ function fakeRuntime(options: {
       rpc: (name: string, args?: Record<string, unknown>) => {
         calls.push({ name, args });
         const fail =
+          (name === "bil_suppress_web_only_mobile_push_v1" && options.policyError) ||
           (name === "bil_claim_push_deliveries" && options.claimError) ||
           (name === "bil_record_push_delivery_result" && options.resultError);
         return Promise.resolve({
           data: name === "bil_claim_push_deliveries"
             ? [{ ...token, sensitive_preview_allowed: options.sensitivePreviewAllowed ?? false }]
+            : name === "bil_suppress_web_only_mobile_push_v1"
+            ? (Object.hasOwn(options, "policyResult") ? options.policyResult : false)
             : null,
           error: fail ? { message: "offline" } : null,
         });
@@ -117,6 +122,7 @@ Deno.test("private push previews stay generic and every delivery is recorded onc
     processed: 1,
     delivered: 1,
     failed: 0,
+    suppressed: 0,
   });
   assertEquals(fake.payloads.length, 1);
   assertEquals(fake.payloads[0].title, "BIL");
@@ -124,11 +130,12 @@ Deno.test("private push previews stay generic and every delivery is recorded onc
   assertEquals(fake.payloads[0].idempotency_key, token.delivery_key);
   assertEquals(fake.calls.map((c) => c.name), [
     "bil_quarantine_stale_push_outbox",
+    "bil_suppress_web_only_mobile_push_v1",
     "bil_claim_push_deliveries",
     "bil_record_push_delivery_result",
     "bil_finalize_push_outbox",
   ]);
-  assertEquals(fake.calls[2].args?.p_delivered, true);
+  assertEquals(fake.calls[3].args?.p_delivered, true);
 });
 
 for (const invalidHeader of [false, true]) {
@@ -144,9 +151,10 @@ for (const invalidHeader of [false, true]) {
       processed: 1,
       delivered: 0,
       failed: 1,
+      suppressed: 0,
     });
-    assertEquals(fake.calls[2].args?.p_permanent_token_failure, invalidHeader);
-    assertEquals(fake.calls[2].args?.p_delivered, false);
+    assertEquals(fake.calls[3].args?.p_permanent_token_failure, invalidHeader);
+    assertEquals(fake.calls[3].args?.p_delivered, false);
   });
 }
 
@@ -159,6 +167,7 @@ Deno.test("outbox, claim, and result failures cannot masquerade as delivery", as
     processed: 1,
     delivered: 0,
     failed: 1,
+    suppressed: 0,
   });
   assertEquals(claim.payloads.length, 0);
   const result = fakeRuntime({ resultError: true });
@@ -166,6 +175,7 @@ Deno.test("outbox, claim, and result failures cannot masquerade as delivery", as
     processed: 1,
     delivered: 0,
     failed: 1,
+    suppressed: 0,
   });
 });
 
@@ -226,3 +236,69 @@ Deno.test("known administrative copy preserves its existing visible notification
   assertEquals(fake.payloads[0].title, "BIL account update");
   assertEquals(fake.payloads[0].body, "Your account gift is available in BIL.");
 });
+
+Deno.test("web-only policy closes moderation delivery before any phone claim", async () => {
+  const fake = fakeRuntime({
+    policyResult: true,
+    event: {
+      category: "community",
+      source_key: "post-event:review_requested:synthetic-post:synthetic-owner",
+      deep_link: "bil://community/moderation",
+    },
+  });
+  const response = await handler(request(), fake.dependencies);
+  assertEquals(await response.json(), {
+    processed: 1,
+    delivered: 0,
+    failed: 0,
+    suppressed: 1,
+  });
+  assertEquals(fake.payloads, []);
+  assertEquals(fake.calls.map((call) => call.name), [
+    "bil_quarantine_stale_push_outbox",
+    "bil_suppress_web_only_mobile_push_v1",
+  ]);
+  assertEquals(fake.calls[1].args, { p_outbox_id: event.id });
+});
+
+Deno.test("policy unavailable or malformed never authorizes a phone claim", async () => {
+  for (const options of [
+    { policyError: true },
+    { policyResult: null },
+    { policyResult: "false" },
+  ]) {
+    const fake = fakeRuntime(options);
+    assertEquals(await (await handler(request(), fake.dependencies)).json(), {
+      processed: 1,
+      delivered: 0,
+      failed: 1,
+      suppressed: 0,
+    });
+    assertEquals(fake.payloads, []);
+    assertEquals(fake.calls.some((call) => call.name === "bil_claim_push_deliveries"), false);
+  }
+});
+
+for (const social of [
+  { category: "friend_request", deep_link: "bil://community/connections" },
+  { category: "message", deep_link: "bil://community/chat/25110000-0000-4000-8000-000000000002" },
+  { category: "community", copy_key: "friend_accepted_v1", deep_link: "bil://community/notifications" },
+  { category: "community", source_key: "post-event:post_submitted:owned-post:owner", deep_link: "bil://community" },
+]) {
+  Deno.test(`mobile policy keeps ${social.category}/${social.deep_link} deliverable with private preview`, async () => {
+    const fake = fakeRuntime({ event: social });
+    assertEquals(await (await handler(request(), fake.dependencies)).json(), {
+      processed: 1,
+      delivered: 1,
+      failed: 0,
+      suppressed: 0,
+    });
+    assertEquals(fake.payloads.length, 1);
+    assertEquals(fake.payloads[0].deep_link, social.deep_link);
+    assertEquals(fake.payloads[0].title, "BIL");
+    assertEquals(fake.payloads[0].body, "You have a new private update.");
+    assertEquals(fake.calls[1].name, "bil_suppress_web_only_mobile_push_v1");
+    assertEquals(fake.calls[2].name, "bil_claim_push_deliveries");
+    assertEquals(fake.calls[3].args?.p_delivered, true);
+  });
+}

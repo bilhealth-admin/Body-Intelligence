@@ -128,6 +128,60 @@ class _DashboardPreferencesHero extends StatelessWidget {
   }
 }
 
+class _DashboardPresetSurface extends StatelessWidget {
+  const _DashboardPresetSurface({required this.selected, required this.child});
+
+  final bool selected;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return BilPearlMaterialCard(
+      color: selected
+          ? Color.alphaBlend(
+              scheme.primary.withValues(alpha: .09),
+              scheme.surface,
+            )
+          : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: selected ? scheme.primary : scheme.outlineVariant,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+class _DashboardPresetCheck extends StatelessWidget {
+  const _DashboardPresetCheck({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SizedBox.square(
+      dimension: 24,
+      child: selected
+          ? DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: scheme.primary,
+              ),
+              child: Icon(
+                Icons.check_rounded,
+                size: 17,
+                color: scheme.onPrimary,
+              ),
+            )
+          : null,
+    );
+  }
+}
+
 class _DashboardLuxeIconBadge extends StatelessWidget {
   const _DashboardLuxeIconBadge({
     required this.kind,

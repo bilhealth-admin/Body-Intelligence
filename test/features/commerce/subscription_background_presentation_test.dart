@@ -95,7 +95,7 @@ void main() {
   );
 
   test(
-    'a network failure keeps same-owner display but raw commands fail closed',
+    'a network failure retains same-owner canonical access within its exact period',
     () async {
       final now = DateTime.utc(2026, 11, 16);
       var fails = false;
@@ -121,8 +121,16 @@ void main() {
       container.invalidate(verifiedSubscriptionStateProvider);
       await settle();
       expect(
-        container.read(verifiedSubscriptionAccessProvider).hasError,
+        container.read(verifiedSubscriptionStateProvider).hasError,
         isTrue,
+      );
+      expect(
+        container.read(verifiedSubscriptionAccessProvider).hasError,
+        isFalse,
+      );
+      expect(
+        container.read(verifiedSubscriptionAccessProvider).value?.plan,
+        CommercePlan.premium,
       );
       expect(
         container.read(verifiedSubscriptionPresentationProvider).value?.plan,

@@ -43,8 +43,7 @@ class _DashboardPreferencesPageState
   bool _restoringDefaults = false;
   bool _signingOut = false;
   String? _savingSection;
-  // A single switch save must not dim every control or flash a page-wide
-  // progress bar. Batch changes still use the existing blocking presentation.
+  // A batch write locks conflicting layout actions until it settles.
   bool get _savingLayout => _saving && _savingSection == null;
   final _presetScrollController = ScrollController();
   final _stableSectionValues = <String, bool>{};

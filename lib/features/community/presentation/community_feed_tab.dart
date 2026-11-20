@@ -266,10 +266,10 @@ class _FeedTabState extends State<_FeedTab>
     }
     setState(() => _openingComposer = true);
     try {
-      await visit.run(() async {
-        if (!await _ensurePolicyAccepted(visit)) return;
+      final submitted = await visit.run(() async {
+        if (!await _ensurePolicyAccepted(visit)) return false;
         visit.check();
-        if (!mounted) return;
+        if (!mounted) return false;
         final submitted = await pushCommunityPage<bool>(
           context,
           _CommunityPostComposerPage(
@@ -279,31 +279,30 @@ class _FeedTabState extends State<_FeedTab>
             draft: _draft,
           ),
         );
-        visit.check();
-        if (submitted != true) return;
-        if (!mounted) return;
-        setState(() {
-          _feed = Future<List<CommunityPost>>.sync(_loadFirst);
-        });
-        final messenger = ScaffoldMessenger.of(context);
-        messenger.hideCurrentSnackBar();
-        messenger.showSnackBar(
-          SnackBar(
-            persist: false,
-            content: Text(
-              communityText(
-                context,
-                'Post submitted for human review. Only you can see it until it is approved.',
-                'تم إرسال المنشور للمراجعة البشرية. لن يراه سواك حتى يتم اعتماده.',
-              ),
-            ),
-            action: SnackBarAction(
-              label: communityText(context, 'My posts', 'منشوراتي'),
-              onPressed: () => _openMyPosts(visit),
+        return submitted == true;
+      });
+      visit.check();
+      if (!mounted || !submitted) return;
+      // The feed read owns its own visit after the composer's operation ends.
+      _reloadFeedAfterMutation();
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          persist: false,
+          content: Text(
+            communityText(
+              context,
+              'Post submitted for human review. Only you can see it until it is approved.',
+              'تم إرسال المنشور للمراجعة البشرية. لن يراه سواك حتى يتم اعتماده.',
             ),
           ),
-        );
-      });
+          action: SnackBarAction(
+            label: communityText(context, 'My posts', 'منشوراتي'),
+            onPressed: () => _openMyPosts(visit),
+          ),
+        ),
+      );
     } on CommunityOwnerOperationCancelled {
       // A retained composer callback never becomes work for a later visit.
     } on AuthException {
@@ -427,15 +426,7 @@ class _FeedTabState extends State<_FeedTab>
       });
       visit.check();
       if (!mounted) return;
-      if (refreshFeed) {
-        _modeReadEpoch++;
-        _modePages.clear();
-        _modePrefetch.clear();
-        final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
-        setState(() {
-          _feed = refreshedFeed;
-        });
-      }
+      if (refreshFeed) _reloadFeedAfterMutation();
       if (action == 'report' && !reportCreated) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -500,6 +491,16 @@ class _FeedTabState extends State<_FeedTab>
     } on Object {
       // FutureBuilder presents mode-specific load errors.
     }
+  }
+
+  void _reloadFeedAfterMutation() {
+    _modeReadEpoch++;
+    _modePages.clear();
+    _modePrefetch.clear();
+    final refreshedFeed = Future<List<CommunityPost>>.sync(_loadFirst);
+    setState(() {
+      _feed = refreshedFeed;
+    });
   }
 
   Future<void> _refresh({bool supersedeCachedRefresh = false}) async {

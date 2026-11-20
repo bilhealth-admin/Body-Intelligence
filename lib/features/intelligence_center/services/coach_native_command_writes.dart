@@ -130,13 +130,13 @@ extension _NativeCommandWrites on CoachNativeCommandRepository {
           'updatedAt': at,
           'source': 'explicit_user_confirmation',
         };
-        final entries = [
+        final entries = CoachMemoryRepository.retainStoredState([
           entry,
           for (final old in before.memories!)
             if ((old['text']! as String).toLowerCase() !=
                 (args['text']! as String).toLowerCase())
               old,
-        ].take(50).toList(growable: false);
+        ]);
         await _awaitOwner(
           () => preferences.setManyInCurrentTransaction({
             CoachMemoryRepository.storageKey: jsonEncode(entries),

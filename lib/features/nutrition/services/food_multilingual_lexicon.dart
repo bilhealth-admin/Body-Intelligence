@@ -9,6 +9,11 @@ class FoodMultilingualLexicon {
 
   static final Map<String, List<String>> _byAlias = _buildAliasIndex();
 
+  /// Whole-name translations only. Dietary exclusions must preserve a phrase's
+  /// meaning rather than use the individual-token suggestions from search.
+  static List<String> exactConcepts(String query) =>
+      _byAlias[FoodSearchNormalizer.normalize(query)] ?? const [];
+
   static List<String> expand(String query) {
     final normalized = FoodSearchNormalizer.normalize(query);
     if (normalized.isEmpty) return const <String>[];

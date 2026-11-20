@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -543,6 +544,261 @@ void main() {
     await database.close();
   });
 
+  for (final language in ['en', 'ar']) {
+    testWidgets('imperial health-goal weights display pounds in $language', (
+      tester,
+    ) async {
+      final owner = 'profile-pounds-display-$language';
+      final database = await _seedDatabase(
+        localOwnerId: owner,
+        currentWeight: 70,
+        targetWeight: 70,
+      );
+      addTearDown(database.close);
+      await PreferencesRepository(database).set('units', 'imperial');
+      await _pumpProfile(
+        tester,
+        database,
+        identity: ProfileAuthIdentity(ownerId: owner, email: null),
+        locale: Locale(language),
+      );
+      for (final key in [
+        'profile-current-weight-row',
+        'profile-goal-weight-row',
+      ]) {
+        final row = find.byKey(Key(key));
+        await tester.scrollUntilVisible(
+          row,
+          240,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(
+          find.descendant(of: row, matching: find.text('154.3 lb')),
+          findsOneWidget,
+        );
+      }
+      expect(
+        (await UserProfileRepository(database).getProfile())?.currentWeight,
+        70,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('imperial health-goal edits persist kilograms in $language', (
+      tester,
+    ) async {
+      final owner = 'profile-pounds-edit-$language';
+      final database = await _seedDatabase(localOwnerId: owner);
+      addTearDown(database.close);
+      final profiles = UserProfileRepository(database);
+      final profile = (await profiles.getProfile())!;
+      await GoalRepository(
+        database,
+      ).save(profileUuid: profile.uuid, type: 'lose', targetWeight: 85);
+      await PreferencesRepository(database).set('units', 'imperial');
+      await _pumpProfile(
+        tester,
+        database,
+        identity: ProfileAuthIdentity(ownerId: owner, email: null),
+        locale: Locale(language),
+      );
+      var editor = await _openProfileWeightEditor(
+        tester,
+        'profile-current-weight-row',
+      );
+      expect(tester.widget<TextField>(editor).controller!.text, '205.9');
+      expect(
+        tester.widget<TextField>(editor).decoration!.labelText,
+        contains('lb'),
+      );
+      await tester.enterText(
+        editor,
+        language == 'ar' ? '١٧٦٫٣٦٩٨٠٩٧٤٤' : '176.369809744',
+      );
+      await tester.tap(find.text(language == 'ar' ? 'اعتماد' : 'Apply'));
+      await tester.pumpAndSettle();
+      expect((await profiles.getProfile())!.currentWeight, closeTo(80, 1e-8));
+      expect(
+        (await WeightRepository(database).getAll()).first.weight,
+        closeTo(80, 1e-8),
+      );
+      expect((await GoalRepository(database).getActive())!.type, 'lose');
+
+      editor = await _openProfileWeightEditor(
+        tester,
+        'profile-goal-weight-row',
+      );
+      expect(tester.widget<TextField>(editor).controller!.text, '187.4');
+      expect(
+        tester.widget<TextField>(editor).decoration!.labelText,
+        contains('lb'),
+      );
+      await tester.enterText(
+        editor,
+        language == 'ar' ? '١٦٥٫٣٤٦٦٩٦٦٣٥' : '165.346696635',
+      );
+      await tester.tap(find.text(language == 'ar' ? 'اعتماد' : 'Apply'));
+      await tester.pumpAndSettle();
+      expect((await profiles.getProfile())!.targetWeight, closeTo(75, 1e-8));
+      final goal = (await GoalRepository(database).getActive())!;
+      expect(goal.targetWeight, closeTo(75, 1e-8));
+      expect(goal.type, 'lose');
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets(
+      'imperial health-goal unchanged cancel and bounds preserve kilograms in $language',
+      (tester) async {
+        final owner = 'profile-pounds-preserve-$language';
+        final database = await _seedDatabase(
+          localOwnerId: owner,
+          currentWeight: 70.0123456,
+          targetWeight: 68.7654321,
+        );
+        addTearDown(database.close);
+        final profiles = UserProfileRepository(database);
+        final before = (await profiles.getProfile())!.toJson();
+        await PreferencesRepository(database).set('units', 'imperial');
+        await _pumpProfile(
+          tester,
+          database,
+          identity: ProfileAuthIdentity(ownerId: owner, email: null),
+          locale: Locale(language),
+        );
+        for (final key in [
+          'profile-current-weight-row',
+          'profile-goal-weight-row',
+        ]) {
+          final editor = await _openProfileWeightEditor(tester, key);
+          // The rounded display value is a no-op even after locale normalization.
+          final original = tester.widget<TextField>(editor).controller!.text;
+          await tester.enterText(editor, original.replaceAll('.', ','));
+          await tester.tap(find.text(language == 'ar' ? 'اعتماد' : 'Apply'));
+          await tester.pumpAndSettle();
+          final cancelled = await _openProfileWeightEditor(tester, key);
+          await tester.enterText(cancelled, '200');
+          await tester.binding.handlePopRoute();
+          await tester.pumpAndSettle();
+          for (final invalid in ['10', '1200', 'NaN', 'Infinity']) {
+            final input = await _openProfileWeightEditor(tester, key);
+            await tester.enterText(input, invalid);
+            await tester.tap(find.text(language == 'ar' ? 'اعتماد' : 'Apply'));
+            await tester.pumpAndSettle();
+          }
+        }
+        expect((await profiles.getProfile())!.toJson(), before);
+        expect(await WeightRepository(database).getAll(), isEmpty);
+        expect(await database.select(database.goals).get(), isEmpty);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+      },
+    );
+  }
+
+  testWidgets(
+    'health-goal metric editors retain canonical 20 to 500 kg bounds',
+    (tester) async {
+      final database = await _seedDatabase();
+      addTearDown(database.close);
+      final profiles = UserProfileRepository(database);
+      await _pumpProfile(tester, database);
+      for (final key in [
+        'profile-current-weight-row',
+        'profile-goal-weight-row',
+      ]) {
+        final before = (await profiles.getProfile())!.toJson();
+        for (final invalid in ['19.9', '500.1', 'NaN', 'Infinity']) {
+          final editor = await _openProfileWeightEditor(tester, key);
+          expect(
+            tester.widget<TextField>(editor).decoration!.labelText,
+            contains('kg'),
+          );
+          await tester.enterText(editor, invalid);
+          await tester.tap(find.text('Apply'));
+          await tester.pumpAndSettle();
+          expect((await profiles.getProfile())!.toJson(), before);
+        }
+        for (final valid in [20, 500]) {
+          final editor = await _openProfileWeightEditor(tester, key);
+          await tester.enterText(editor, '$valid');
+          await tester.tap(find.text('Apply'));
+          await tester.pumpAndSettle();
+          final saved = (await profiles.getProfile())!;
+          expect(
+            key == 'profile-current-weight-row'
+                ? saved.currentWeight
+                : saved.targetWeight,
+            valid,
+          );
+        }
+      }
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'health-goal weight editor rejects an account switch before Apply',
+    (tester) async {
+      final database = await _seedDatabase(localOwnerId: 'profile-owner-a');
+      addTearDown(database.close);
+      final identities = StreamController<ProfileAuthIdentity>(sync: true);
+      identities.add(
+        const ProfileAuthIdentity(ownerId: 'profile-owner-a', email: null),
+      );
+      final before = (await UserProfileRepository(
+        database,
+      ).getProfile())!.toJson();
+      await _pumpProfile(tester, database, identityStream: identities.stream);
+      final editor = await _openProfileWeightEditor(
+        tester,
+        'profile-current-weight-row',
+      );
+      await tester.enterText(editor, '80');
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(PremiumProfilePage)),
+      );
+      // Keep the identity observed while Profile is covered by the modal.
+      final identitySubscription = container.listen(
+        profileAuthIdentityProvider,
+        (_, _) {},
+      );
+      identities.add(
+        const ProfileAuthIdentity(ownerId: 'profile-owner-b', email: null),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(
+        container.read(profileAuthIdentityProvider).value?.ownerId,
+        'profile-owner-b',
+      );
+      await tester.tap(find.text('Apply'));
+      // Owner B intentionally has no database in this owner-A fixture, so its
+      // loading indicator need not settle. Retire only the outgoing editor.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byType(BottomSheet), findsNothing);
+      expect(
+        (await UserProfileRepository(database).getProfile())!.toJson(),
+        before,
+      );
+      expect(await WeightRepository(database).getAll(), isEmpty);
+      expect(await database.select(database.goals).get(), isEmpty);
+      expect(tester.takeException(), isNull);
+      // Dispose the paused owner stream with its ProviderScope; awaiting its
+      // done event here would block Flutter's fake async test zone.
+      unawaited(identities.close());
+      identitySubscription.close();
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      expect(identities.isClosed, isTrue);
+    },
+  );
+
   testWidgets(
     'health-goal weight edit writes the authoritative measurement and preserves direction',
     (tester) async {
@@ -593,7 +849,24 @@ void main() {
   );
 }
 
-Future<AppDatabase> _seedDatabase({String? localOwnerId}) async {
+Future<Finder> _openProfileWeightEditor(WidgetTester tester, String key) async {
+  final row = find.byKey(Key(key));
+  await tester.scrollUntilVisible(
+    row,
+    240,
+    scrollable: find.byType(Scrollable).first,
+  );
+  await tester.ensureVisible(row);
+  await tester.tap(find.descendant(of: row, matching: find.byType(InkWell)));
+  await tester.pumpAndSettle();
+  return find.byType(TextField).last;
+}
+
+Future<AppDatabase> _seedDatabase({
+  String? localOwnerId,
+  double currentWeight = 93.4,
+  double targetWeight = 85,
+}) async {
   final database = AppDatabase.forTesting(
     NativeDatabase.memory(),
     localOwnerId: localOwnerId,
@@ -602,8 +875,8 @@ Future<AppDatabase> _seedDatabase({String? localOwnerId}) async {
     gender: 'male',
     age: 35,
     height: 181,
-    currentWeight: 93.4,
-    targetWeight: 85,
+    currentWeight: currentWeight,
+    targetWeight: targetWeight,
     activityLevel: 'light',
     exercises: true,
   );
@@ -618,6 +891,7 @@ Future<void> _pumpProfile(
   BilRuntimePermissionPolicy? cameraPolicy,
   ProfileCameraLauncher? cameraLauncher,
   ProfileAuthIdentity? identity,
+  Stream<ProfileAuthIdentity>? identityStream,
   Locale locale = const Locale('en'),
   TextScaler textScaler = TextScaler.noScaling,
   Size surfaceSize = const Size(390, 844),
@@ -628,7 +902,9 @@ Future<void> _pumpProfile(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
-        if (identity != null)
+        if (identityStream != null)
+          profileAuthIdentityProvider.overrideWith((ref) => identityStream)
+        else if (identity != null)
           profileAuthIdentityProvider.overrideWith(
             (ref) => Stream.value(identity),
           ),

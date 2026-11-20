@@ -14,6 +14,12 @@ import '../domain/bil_smart_plan_engine.dart';
 import '../domain/bil_smart_plan_nutrition.dart';
 import 'bil_smart_plan_prescriptions.dart';
 
+typedef BilPlanRecipeChoices = ({
+  List<BilVerifiedRecipe> recipes,
+  List<BilPlanMealSlot> missing,
+  List<MealPlanDiet> alternatives,
+});
+
 /// Reuse released workout and recipe identities. Never invent videos or food.
 final class BilSmartPlanCatalog {
   const BilSmartPlanCatalog();
@@ -48,19 +54,9 @@ final class BilSmartPlanCatalog {
     final result = <BilVerifiedRecipe>[];
     for (final summary in index) {
       if (summary.totalMinutes > preferences.maxMinutes ||
-          !summary.isCompatibleWith(dietary)) {
-        continue;
-      }
-      if (preferences.diet == MealPlanDiet.vegetarian &&
-          !summary.dietTags.any(
-            (tag) => const {'vegetarian', 'vegan'}.contains(tag),
-          )) {
-        continue;
-      }
-      if (preferences.diet == MealPlanDiet.highProtein &&
-          !summary.dietTags.any(
-            (tag) => const {'high-protein', 'high_protein'}.contains(tag),
-          )) {
+          !summary.isCompatibleWith(dietary) ||
+          (preferences.diet == MealPlanDiet.vegetarian &&
+              !summary.dietaryEvidence.dietTags.contains('vegetarian'))) {
         continue;
       }
       final slots = BilPlanMealSlot.values
@@ -72,7 +68,14 @@ final class BilSmartPlanCatalog {
           .toList(growable: false);
       if (slots.isEmpty) continue;
       final detail = await _recipeRepository.loadDetail(summary);
-      if (!_allowsRecipeDetail(detail, dietary)) continue;
+      final evidence = detail.dietaryEvidence;
+      if (!evidence.allows(dietary) ||
+          (preferences.diet == MealPlanDiet.vegetarian &&
+              !evidence.dietTags.contains('vegetarian')) ||
+          (preferences.diet == MealPlanDiet.highProtein &&
+              !evidence.highProtein)) {
+        continue;
+      }
       _recipeTitles[summary.id] = summary;
       final values = sourcedNutrition(detail);
       result.addAll(
@@ -98,17 +101,29 @@ final class BilSmartPlanCatalog {
     return List.unmodifiable(result);
   }
 
-  bool _allowsRecipeDetail(
-    RecipeCatalogDetail detail,
+  /// A full-day plan requires source-backed choices for every meal slot.
+  Future<BilPlanRecipeChoices> checkRecipeStyle(
+    MealPlanDiet style,
     DietaryPreferences dietary,
-  ) => DietaryCompatibility.allows(
-    preferences: dietary,
-    dietTags: detail.summary.dietTags,
-    allergens: detail.summary.allergens,
-    ingredients: (detail.record['ingredients'] as List).whereType<Map>().map(
-      (ingredient) => '${ingredient['itemId']}',
-    ),
-  );
+  ) async {
+    Future<List<BilVerifiedRecipe>> read(MealPlanDiet diet) => sourcedRecipes(
+      dietary: dietary,
+      preferences: MealPlanPreferences(diet: diet),
+    );
+    List<BilPlanMealSlot> missing(List<BilVerifiedRecipe> rows) =>
+        BilPlanMealSlot.values
+            .where((slot) => !rows.any((row) => row.slot == slot))
+            .toList();
+    final recipes = await read(style);
+    final gaps = missing(recipes);
+    final alternatives = <MealPlanDiet>[];
+    if (gaps.isNotEmpty) {
+      for (final other in MealPlanDiet.values.where((diet) => diet != style)) {
+        if (missing(await read(other)).isEmpty) alternatives.add(other);
+      }
+    }
+    return (recipes: recipes, missing: gaps, alternatives: alternatives);
+  }
 
   Future<RecipeCatalogDetail?> recipeDetail(
     String id,
@@ -119,7 +134,7 @@ final class BilSmartPlanCatalog {
         .firstOrNull;
     if (summary == null) return null;
     final detail = await _recipeRepository.loadDetail(summary);
-    if (!_allowsRecipeDetail(detail, dietary)) {
+    if (!detail.dietaryEvidence.allows(dietary)) {
       throw StateError('smart_plan_dietary_boundary_changed');
     }
     _recipeTitles[summary.id] = summary;

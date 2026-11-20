@@ -69,6 +69,78 @@ Future<void> _waitForCoachCall(
 }
 
 void registerCoachVoiceCases() {
+  testWidgets(
+    'declining voice disclosure returns Coach to typing without requesting the microphone',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final calls = _mockCoachVoice(tester);
+      final gateway = _HeldGateway();
+      await _mount(tester, database: database, gateway: gateway);
+      try {
+        await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+        final decline = find.byKey(
+          const Key('system-speech-disclosure-decline'),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(decline);
+        await tester.pumpAndSettle();
+        expect(
+          calls['flutter.baseflow.com/permissions/methods:requestPermissions'] ??
+              0,
+          0,
+        );
+        expect(calls['bil/speech:listen'] ?? 0, 0);
+        expect(gateway.calls, 0);
+        expect(find.byTooltip('Talk to BIL'), findsOneWidget);
+      } finally {
+        await _unmount(tester);
+      }
+    },
+  );
+
+  testWidgets(
+    'denied microphone returns Coach to typing without starting a call',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final calls = _mockCoachVoice(tester);
+      var permissionRequests = 0;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('flutter.baseflow.com/permissions/methods'),
+        (call) async {
+          if (call.method == 'checkPermissionStatus') return 0;
+          if (call.method == 'requestPermissions') {
+            permissionRequests++;
+            return {for (final id in call.arguments as List) id: 0};
+          }
+          throw StateError('Unexpected permission method: ${call.method}');
+        },
+      );
+      final gateway = _HeldGateway();
+      await _mount(tester, database: database, gateway: gateway);
+      try {
+        await tester.tap(find.byKey(const Key('ai-coach-voice-button')));
+        await _acceptCoachVoiceDisclosure(tester);
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(permissionRequests, 1);
+        expect(calls['bil/speech:listen'] ?? 0, 0);
+        expect(gateway.calls, 0);
+        expect(find.byTooltip('Talk to BIL'), findsOneWidget);
+        expect(find.byTooltip('End live call'), findsNothing);
+        expect(find.textContaining('typing remains available'), findsOneWidget);
+        await tester.enterText(
+          find.byKey(const Key('ai-coach-question-field')),
+          'My typed question',
+        );
+        await tester.pump();
+        expect(find.byKey(const Key('ai-coach-send-button')), findsOneWidget);
+      } finally {
+        await _unmount(tester);
+      }
+    },
+  );
+
   for (final dark in [false, true]) {
     testWidgets(
       'Coach pearl recording keeps real start stop and no text dispatch dark=$dark',

@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/meal_planner/domain/meal_plan.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/dietary_preferences.dart';
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan.dart';
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan_engine.dart';
@@ -183,6 +184,93 @@ void main() {
         }
       }
       expect(combinations, 204);
+    },
+  );
+
+  test(
+    'Gym75 week generates all recipe styles on seven local start weekdays',
+    () async {
+      final workouts = await catalog.gymSessions(sessionMinutes: 75);
+      final byStyle = {
+        for (final style in MealPlanDiet.values)
+          style: await catalog.checkRecipeStyle(
+            style,
+            const DietaryPreferences(),
+          ),
+      };
+      for (final choices in byStyle.values) {
+        expect(choices.missing, isEmpty);
+      }
+      var cases = 0;
+      for (var weekday = 0; weekday < 7; weekday++) {
+        final anchor = DateTime(2026, 11, 20 + weekday, 23, 45);
+        for (final style in <MealPlanDiet?>[null, ...MealPlanDiet.values]) {
+          for (final experience in BilPlanExperience.values) {
+            for (var sessions = 1; sessions <= 6; sessions++) {
+              // No active goal, maintenance, gain, and a gradual loss.
+              for (final targetKg in <double?>[null, 70, 72, 68]) {
+                final input = BilPlanCreationRequest(
+                  ownerId: 'synthetic-week-owner',
+                  planId: 'synthetic-week-plan',
+                  startOn: anchor,
+                  horizon: BilPlanHorizon.week,
+                  focus: style == null
+                      ? BilPlanFocus.training
+                      : BilPlanFocus.combined,
+                  workoutsPerWeek: sessions,
+                  confirmedPreferences: true,
+                  adultConfirmed: true,
+                  ageYears: 30,
+                  currentWeightKg: 70,
+                  targetWeightKg: targetKg,
+                  targetBy: targetKg == null
+                      ? null
+                      : anchor.add(const Duration(days: 56)),
+                  setup: BilPlanSetup(
+                    environment: BilPlanEnvironment.gym,
+                    experience: experience,
+                    sessionMinutes: 75,
+                    equipment: const ['gym'],
+                    preferredTime: style == null ? null : '18:00',
+                    goalId: targetKg == null ? null : 'synthetic-active-goal',
+                  ),
+                  workoutCatalog: workouts,
+                  recipeCatalog: byStyle[style]?.recipes ?? const [],
+                  phases: phases,
+                );
+                final reason =
+                    'style=$style experience=$experience sessions=$sessions target=$targetKg';
+                expect(
+                  BilPlanSafety.assess(input).reasons,
+                  isEmpty,
+                  reason: reason,
+                );
+                final plan = engine.generate(input, anchor);
+                final saved = BilSmartPlan.decode(plan.encode());
+                expect(saved.days.map((day) => day.date), [
+                  for (var day = 0; day < 7; day++)
+                    BilPlanDate.iso(
+                      DateTime(anchor.year, anchor.month, anchor.day + day),
+                    ),
+                ], reason: reason);
+                expect(
+                  saved.days.where((day) => day.workout != null),
+                  hasLength(sessions),
+                  reason: reason,
+                );
+                expectOnlyQualifiedWorkouts(saved, workouts, 75);
+                expect(
+                  saved.days.expand((day) => day.meals),
+                  hasLength(style == null ? 0 : 21),
+                  reason: reason,
+                );
+                cases++;
+              }
+            }
+          }
+        }
+      }
+      expect(cases, 2016);
     },
   );
 

@@ -172,7 +172,7 @@ class _PremiumFeature extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entitlement = ref.watch(verifiedSubscriptionStateProvider);
+    final entitlement = ref.watch(verifiedSubscriptionAccessProvider);
     final active =
         entitlement.value?.grants(CommerceEntitlement.advancedIntelligence) ??
         false;

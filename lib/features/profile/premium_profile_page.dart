@@ -14,6 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/environment/app_environment.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../../core/units/measurement_units.dart';
 import '../../data/database/app_database.dart';
 import '../../data/database/database_provider.dart';
 import '../../shared/widgets/bil_camera_capture_page.dart';
@@ -24,6 +25,8 @@ import '../../shared/widgets/bil_account_avatar.dart';
 import '../../shared/widgets/bil_media_review_sheet.dart';
 import '../../shared/widgets/bil_permission_recovery_dialog.dart';
 import '../nutrition/domain/dietary_preferences.dart';
+import '../nutrition/presentation/nutrition_entry_fields.dart'
+    show parseNutritionNumber;
 import '../nutrition_plans/domain/nutrition_pathway_catalog.dart';
 import '../onboarding/domain/adult_eligibility.dart';
 import '../weight/domain/weight_goal_progress.dart';
@@ -365,13 +368,11 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                       key: const Key('profile-current-weight-row'),
                       icon: Icons.monitor_weight_outlined,
                       label: tr('Current weight', 'الوزن الحالي'),
-                      value: '${weight.toStringAsFixed(1)} kg',
+                      value: profileWeightLabel(weight),
                       onTap: () async {
-                        final changed = await editNumber(
+                        final changed = await editWeight(
                           tr('Current weight', 'الوزن الحالي'),
                           weight,
-                          20,
-                          500,
                           (v) => weight = v,
                         );
                         if (changed) await persistProfile();
@@ -381,13 +382,11 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                       key: const Key('profile-goal-weight-row'),
                       icon: Icons.flag_outlined,
                       label: tr('Goal weight', 'الوزن المستهدف'),
-                      value: '${target.toStringAsFixed(1)} kg',
+                      value: profileWeightLabel(target),
                       onTap: () async {
-                        final changed = await editNumber(
+                        final changed = await editWeight(
                           tr('Goal weight', 'الوزن المستهدف'),
                           target,
-                          20,
-                          500,
                           (v) => target = v,
                         );
                         if (changed) await persistProfile();

@@ -19,6 +19,7 @@ import 'package:body_intelligence_log/features/smart_plan/presentation/bil_smart
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_catalog.dart';
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_clock.dart';
 import 'package:drift/native.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_compact_activity_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,10 +40,12 @@ final _now = DateTime(2026, 11, 17, 12);
 class _FaultPreferences extends PreferencesRepository {
   _FaultPreferences(super.database);
   int failDietaryReads = 0;
+  int dietaryReads = 0;
   int failPlanReads = 0;
   bool failNextCommittedReadback = false;
   int planCommits = 0;
   Completer<void>? holdNextPlanRead;
+  Completer<void>? holdNextDietaryRead;
 
   bool _planKey(String key) =>
       key.startsWith('bil.smart-plan.owner.') ||
@@ -50,6 +53,14 @@ class _FaultPreferences extends PreferencesRepository {
 
   @override
   Future<String?> get(String key) async {
+    if (key == DietaryPreferences.storageKey) dietaryReads++;
+    final dietaryRead = key == DietaryPreferences.storageKey
+        ? holdNextDietaryRead
+        : null;
+    if (dietaryRead != null) {
+      holdNextDietaryRead = null;
+      await dietaryRead.future;
+    }
     final held = _planKey(key) ? holdNextPlanRead : null;
     if (held != null) {
       holdNextPlanRead = null;
@@ -351,6 +362,7 @@ void main() {
     await catalog.sourcedRecipes(dietary: const DietaryPreferences());
   });
   late AppDatabase db;
+  var fixtureNow = _now;
   late _FaultPreferences preferences;
   late ProviderContainer container;
   BilSmartPlanRepository repository() => BilSmartPlanRepository(
@@ -359,6 +371,7 @@ void main() {
   );
 
   setUp(() async {
+    fixtureNow = _now;
     db = AppDatabase.forTesting(NativeDatabase.memory(), localOwnerId: _owner);
     preferences = _FaultPreferences(db);
     await UserProfileRepository(db).save(
@@ -386,7 +399,7 @@ void main() {
             ),
           ),
         ),
-        bilSmartPlanClockProvider.overrideWithValue(() => _now),
+        bilSmartPlanClockProvider.overrideWithValue(() => fixtureNow),
       ],
     );
   });
@@ -400,6 +413,7 @@ void main() {
     Locale locale = const Locale('en'),
     double width = 430,
     double textScale = 1,
+    bool expectCatalogReview = false,
   }) async {
     tester.view.physicalSize = Size(width, 1200);
     tester.view.devicePixelRatio = 1;
@@ -427,15 +441,19 @@ void main() {
     );
     await _until(
       tester,
-      () =>
-          find
-              .byKey(const ValueKey('bil-smart-plan-create'))
-              .evaluate()
-              .isNotEmpty ||
-          find
-              .byKey(const ValueKey('bil-smart-plan-tabs'))
-              .evaluate()
-              .isNotEmpty,
+      () => expectCatalogReview
+          ? find
+                .byKey(const ValueKey('bil-smart-plan-catalog-review'))
+                .evaluate()
+                .isNotEmpty
+          : find
+                    .byKey(const ValueKey('bil-smart-plan-create'))
+                    .evaluate()
+                    .isNotEmpty ||
+                find
+                    .byKey(const ValueKey('bil-smart-plan-tabs'))
+                    .evaluate()
+                    .isNotEmpty,
     );
   }
 
@@ -568,6 +586,345 @@ void main() {
       },
     );
   }
+
+  for (final horizon in BilPlanHorizon.values) {
+    for (final style in MealPlanDiet.values) {
+      testWidgets('Gym75 creates approves and reopens $style for $horizon', (
+        tester,
+      ) async {
+        fixtureNow = DateTime(2026, 11, 20, 23, 45);
+        await mount(tester);
+        await _openAndFill(tester, exactReported: true);
+        await _select<BilPlanHorizon>(tester, switch (horizon) {
+          BilPlanHorizon.week => 'One week',
+          BilPlanHorizon.month => 'One month',
+          BilPlanHorizon.threeMonths => 'Three months',
+          BilPlanHorizon.sixMonths => 'Six months',
+        });
+        final submit = find.byKey(
+          const ValueKey('bil-smart-plan-review-draft'),
+        );
+        await _select<MealPlanDiet>(tester, switch (style) {
+          MealPlanDiet.balanced => 'Balanced recipes',
+          MealPlanDiet.vegetarian => 'Vegetarian recipes',
+          MealPlanDiet.highProtein => 'High-protein recipes',
+        });
+        await tester.ensureVisible(submit);
+        await tester.tap(submit);
+        final approve = find.widgetWithText(
+          FilledButton,
+          'Approve and activate',
+        );
+        final error = find.byKey(const ValueKey('bil-smart-plan-error'));
+        await _until(
+          tester,
+          () => approve.evaluate().isNotEmpty || error.evaluate().isNotEmpty,
+        );
+        expect(error, findsNothing);
+        final draft = (await tester.runAsync(
+          () => repository().readFor(_owner),
+        ))!;
+        expect(draft.status, BilPlanStatus.draft);
+        expect(draft.horizon, horizon);
+        expect(draft.startDate, "2026-11-20");
+        expect(draft.days.expand((day) => day.meals), isNotEmpty);
+        expect(draft.setup!.environment, BilPlanEnvironment.gym);
+        expect(draft.setup!.sessionMinutes, 75);
+        await tester.ensureVisible(approve);
+        await tester.tap(approve);
+        await tester.pumpAndSettle();
+        await tester.tap(find.widgetWithText(FilledButton, 'Confirm'));
+        await _until(
+          tester,
+          () => preferences.planCommits == 2 || error.evaluate().isNotEmpty,
+        );
+        expect(error, findsNothing);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await mount(tester);
+        expect(error, findsNothing);
+        final active = (await tester.runAsync(
+          () => repository().readFor(_owner),
+        ))!;
+        expect(active.id, draft.id);
+        expect(active.revision, draft.revision + 1);
+        expect(active.status, BilPlanStatus.active);
+        expect(
+          active.days,
+          hasLength(BilPlanDate.durationDays(horizon, fixtureNow)),
+        );
+        expect(preferences.planCommits, 2);
+        await tester.pumpWidget(const SizedBox.shrink());
+      });
+    }
+  }
+
+  testWidgets(
+    'incomplete vegetarian menu keeps every choice until an explicit supported style is submitted',
+    (tester) async {
+      const dietary = DietaryPreferences(
+        excludedIngredients: {
+          'chickpeas',
+          'beans',
+          'lentils',
+          'tofu',
+          'peas',
+          'tahini',
+          'egg',
+          'quinoa',
+        },
+      );
+      await tester.runAsync(
+        () => preferences.set(DietaryPreferences.storageKey, dietary.encode()),
+      );
+      await mount(tester);
+      await _openAndFill(tester, exactReported: true);
+      await _select<BilPlanHorizon>(tester, 'One week');
+      await _select<MealPlanDiet>(tester, 'Vegetarian recipes');
+      final prepare = find.byKey(const ValueKey('bil-smart-plan-review-draft'));
+      final guidance = find.byKey(
+        const ValueKey('bil-smart-plan-recipe-guidance'),
+      );
+      await tester.ensureVisible(prepare);
+      await tester.tap(prepare);
+      await _until(tester, () => guidance.evaluate().isNotEmpty);
+      expect(
+        find.descendant(
+          of: guidance,
+          matching: find.text('No matching recipes. Lunch · Dinner'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<DropdownButtonFormField<MealPlanDiet>>(
+              find.byType(DropdownButtonFormField<MealPlanDiet>),
+            )
+            .initialValue,
+        MealPlanDiet.vegetarian,
+      );
+      expect(
+        tester
+            .widget<DropdownButtonFormField<int>>(_numberField('minutes'))
+            .initialValue,
+        75,
+      );
+      expect(preferences.planCommits, 0);
+      final alternative = find.descendant(
+        of: guidance,
+        matching: find.widgetWithText(TextButton, 'High-protein recipes'),
+      );
+      await tester.ensureVisible(alternative);
+      await tester.tap(alternative);
+      await tester.pump();
+      expect(preferences.planCommits, 0);
+      expect(guidance, findsNothing);
+      await tester.ensureVisible(prepare);
+      await tester.tap(prepare);
+      await _until(
+        tester,
+        () => find
+            .widgetWithText(FilledButton, 'Approve and activate')
+            .evaluate()
+            .isNotEmpty,
+      );
+      final draft = (await tester.runAsync(
+        () => repository().readFor(_owner),
+      ))!;
+      expect(draft.horizon, BilPlanHorizon.week);
+      for (final id
+          in draft.days
+              .expand((day) => day.meals)
+              .map((meal) => meal.recipeId)
+              .toSet()) {
+        final detail = await tester.runAsync(
+          () => const BilSmartPlanCatalog().recipeDetail(id, dietary),
+        );
+        expect(detail!.dietaryEvidence.highProtein, isTrue);
+      }
+      expect(
+        await tester.runAsync(
+          () => preferences.get(DietaryPreferences.storageKey),
+        ),
+        dietary.encode(),
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'Gym75 recipe guidance preserves saved restrictions when no style is complete',
+    (tester) async {
+      final dietary = const DietaryPreferences(
+        requirements: {DietaryRequirement.kosher},
+      ).encode();
+      await tester.runAsync(
+        () => preferences.set(DietaryPreferences.storageKey, dietary),
+      );
+      await mount(tester);
+      await _openAndFill(tester, exactReported: true);
+      final submit = find.byKey(const ValueKey('bil-smart-plan-review-draft'));
+      await tester.ensureVisible(submit);
+      await tester.tap(submit);
+      final guidance = find.byKey(
+        const ValueKey('bil-smart-plan-recipe-guidance'),
+      );
+      await _until(tester, () => guidance.evaluate().isNotEmpty);
+      expect(
+        find.descendant(of: guidance, matching: find.text('Balanced recipes')),
+        findsNothing,
+      );
+      expect(preferences.planCommits, 0);
+      final training = find.descendant(
+        of: guidance,
+        matching: find.widgetWithText(TextButton, 'Training only'),
+      );
+      await tester.ensureVisible(training);
+      await tester.tap(training);
+      await tester.pump();
+      expect(preferences.planCommits, 0);
+      await tester.ensureVisible(submit);
+      await tester.tap(submit);
+      await _until(
+        tester,
+        () => find
+            .widgetWithText(FilledButton, 'Approve and activate')
+            .evaluate()
+            .isNotEmpty,
+      );
+      final draft = (await tester.runAsync(
+        () => repository().readFor(_owner),
+      ))!;
+      expect(draft.focus, BilPlanFocus.training);
+      expect(draft.days.expand((day) => day.meals), isEmpty);
+      expect(
+        await tester.runAsync(
+          () => preferences.get(DietaryPreferences.storageKey),
+        ),
+        dietary,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'held Gym75 preflight shows stable busy feedback and retires on dismissal',
+    (tester) async {
+      await mount(tester);
+      await _openAndFill(tester, exactReported: true);
+      final submit = find.byKey(const ValueKey('bil-smart-plan-review-draft'));
+      final held = Completer<void>();
+      preferences.holdNextDietaryRead = held;
+      await tester.ensureVisible(submit);
+      await tester.pumpAndSettle();
+      final label = find.descendant(
+        of: submit,
+        matching: find.text('Prepare a draft'),
+      );
+      final indicator = find.descendant(
+        of: submit,
+        matching: find.byType(BilCompactActivityIndicator),
+      );
+      final beforeLabel = tester.getRect(label);
+      final beforeButton = tester.getRect(submit);
+      final press = tester.widget<FilledButton>(submit).onPressed!;
+      final initialReads = preferences.dietaryReads;
+      expect(indicator, findsNothing);
+      await tester.tap(submit);
+      await _until(tester, () => preferences.holdNextDietaryRead == null);
+      expect(indicator, findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('Checking recipes')), findsOneWidget);
+      expect(tester.widget<FilledButton>(submit).onPressed, isNull);
+      press();
+      await tester.tap(submit, warnIfMissed: false);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(preferences.dietaryReads, initialReads + 1);
+      expect(tester.getRect(label), beforeLabel);
+      expect(tester.getRect(submit), beforeButton);
+      Navigator.of(tester.element(submit)).pop();
+      await tester.pumpAndSettle();
+      held.complete();
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 30)),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('bil-smart-plan-create')),
+        findsOneWidget,
+      );
+      expect(preferences.planCommits, 0);
+      expect(await tester.runAsync(() => repository().readFor(_owner)), isNull);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
+  testWidgets(
+    'new stored milk and egg restrictions block activation and reopening a saved Gym75 draft',
+    (tester) async {
+      await mount(tester);
+      await _openAndFill(tester, exactReported: true);
+      await _select<BilPlanHorizon>(tester, 'One week');
+      final prepare = find.byKey(const ValueKey('bil-smart-plan-review-draft'));
+      await tester.ensureVisible(prepare);
+      await tester.tap(prepare);
+      final approve = find.widgetWithText(FilledButton, 'Approve and activate');
+      await _until(tester, () => approve.evaluate().isNotEmpty);
+      final before = (await tester.runAsync(
+        () => repository().readFor(_owner),
+      ))!;
+      const changed = DietaryPreferences(
+        allergens: {DietaryAllergen.milk, DietaryAllergen.egg},
+      );
+      await tester.runAsync(
+        () => preferences.set(DietaryPreferences.storageKey, changed.encode()),
+      );
+      final currentDietary = await tester.runAsync(
+        () => container.read(dietaryPreferencesRepositoryProvider).read(),
+      );
+      expect(currentDietary!.allergens, changed.allergens);
+      await tester.runAsync(
+        () => expectLater(
+          const BilSmartPlanCatalog().validate(before, currentDietary),
+          throwsStateError,
+        ),
+      );
+      await tester.ensureVisible(approve);
+      await tester.tap(approve);
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Confirm'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 350));
+      await _until(
+        tester,
+        () => tester
+            .widget<PopupMenuButton<String>>(
+              find.byKey(const ValueKey('bil-smart-plan-options')),
+            )
+            .enabled,
+      );
+      expect(preferences.planCommits, 1);
+      expect(
+        (await tester.runAsync(() => repository().readFor(_owner)))!.encode(),
+        before.encode(),
+      );
+      final page = find.byType(ListView).first;
+      await tester.drag(page, const Offset(0, 1200));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('bil-smart-plan-error')),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      await mount(tester, expectCatalogReview: true);
+      expect(
+        find.byKey(const ValueKey('bil-smart-plan-catalog-review')),
+        findsOneWidget,
+      );
+      expect(approve, findsNothing);
+      expect(preferences.planCommits, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 
   testWidgets('unresolved committed readback never performs another write', (
     tester,

@@ -203,7 +203,8 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
             );
     } on CommunityOwnerOperationCancelled {
       rethrow;
-    } on Object {
+    } on Object catch (error) {
+      if (isVerifiedCommerceSessionInvalid(error)) rethrow;
       if (requireFreshFreeProof) return FreePlan.createState();
       // A transient RPC failure must not visibly switch a currently verified
       // admin lease between Premium and Free. Continuity is owner-scoped,

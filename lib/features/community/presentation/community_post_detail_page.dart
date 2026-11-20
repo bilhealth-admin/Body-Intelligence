@@ -43,6 +43,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   DateTime? _after;
   String? _afterId;
   int _loadGeneration = 0;
+  bool _hasLoadedDetail = false;
   bool _refreshing = false;
   TextDirection? _composerDirection;
   String? _composerError;
@@ -303,6 +304,29 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     }
   }
 
+  void _retireDetail(int generation) {
+    if (mounted &&
+        _detailOwnerIsCurrent &&
+        generation == _loadGeneration &&
+        _hasLoadedDetail) {
+      setState(() => _hasLoadedDetail = false);
+    }
+  }
+
+  Future<T> _readDetail<T>(int generation, Future<T> Function() read) async {
+    try {
+      return await read();
+    } catch (error) {
+      // A failed transport may leave the last visible post in place. A
+      // missing row, rejected session or unknown response withdraws it even
+      // if the other request for this refresh is still outstanding.
+      if (error is! TimeoutException && error is! ClientException) {
+        _retireDetail(generation);
+      }
+      rethrow;
+    }
+  }
+
   Future<void> _loadInitial() => _runDetailOwner(() async {
     final generation = ++_loadGeneration;
     _focusGeneration++;
@@ -311,26 +335,37 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
     _loadingMore = false;
     try {
       final values = await Future.wait<Object>([
-        widget.repository.loadPostStats([widget.post.id]),
-        _loadCommentPage(),
-      ]);
+        _readDetail(generation, () async {
+          final stats = await widget.repository.loadPostStats([widget.post.id]);
+          if (stats.length != 1 || stats.single.postId != widget.post.id) {
+            _retireDetail(generation);
+            if (mounted &&
+                _detailOwnerIsCurrent &&
+                generation == _loadGeneration) {
+              await widget.verifyAccess?.call();
+            }
+            throw const FormatException('Post access could not be verified');
+          }
+          return stats.single;
+        }),
+        _readDetail(generation, () => _loadCommentPage()),
+      ], eagerError: true);
       _detailOwnerScope.check();
-      final stats = values[0] as List<CommunityPostStats>;
       final page = values[1] as CommunityNotificationCommentPage;
       final loadedComments = page.comments;
-      if (widget.notificationLoader != null &&
-          (stats.length != 1 || stats.single.postId != widget.post.id)) {
-        await widget.verifyAccess?.call();
-        throw const FormatException('Post access could not be verified');
-      }
       final tiers = await _fetchMembershipTiers(loadedComments);
       if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
-      if (widget.verifyAccess != null && !await widget.verifyAccess!()) return;
+      if (widget.verifyAccess != null) {
+        await _readDetail(generation, () async {
+          if (!await widget.verifyAccess!()) {
+            throw const FormatException('Post access could not be verified');
+          }
+        });
+      }
       _detailOwnerScope.check();
       if (!_detailOwnerIsCurrent || generation != _loadGeneration) return;
-      if (stats.length == 1 && stats.single.postId == widget.post.id) {
-        _stats = stats.single;
-      }
+      _stats = values[0] as CommunityPostStats;
+      _hasLoadedDetail = true;
       _comments
         ..clear()
         ..addAll(loadedComments);

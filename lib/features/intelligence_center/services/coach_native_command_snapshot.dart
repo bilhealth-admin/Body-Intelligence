@@ -219,7 +219,7 @@ extension _NativeSnapshotReads on CoachNativeCommandRepository {
 List<Map<String, Object?>> _decodeNativeMemories(String? raw) {
   if (raw == null || raw.trim().isEmpty) return [];
   final parsed = jsonDecode(raw);
-  if (parsed is! List || parsed.length > 50) {
+  if (parsed is! List || parsed.length > 2000) {
     throw const FormatException('Invalid memory collection');
   }
   final result = <Map<String, Object?>>[];
@@ -228,7 +228,8 @@ List<Map<String, Object?>> _decodeNativeMemories(String? raw) {
         entry['id'] is! String ||
         (entry['id'] as String).isEmpty ||
         entry['text'] is! String ||
-        (entry['text'] as String).trim().isEmpty) {
+        (entry['status'] != 'deleted' &&
+            (entry['text'] as String).trim().isEmpty)) {
       throw const FormatException('Invalid memory entry');
     }
     result.add(Map<String, Object?>.from(entry));
@@ -236,7 +237,7 @@ List<Map<String, Object?>> _decodeNativeMemories(String? raw) {
   if (result.map((entry) => entry['id']).toSet().length != result.length) {
     throw const FormatException('Duplicate memory identity');
   }
-  return result;
+  return CoachMemoryRepository.retainStoredState(result);
 }
 
 /// Sync acknowledgements may change transport metadata. Identity, revision,

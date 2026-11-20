@@ -220,7 +220,6 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
             if (snapshot.hasError || !snapshot.hasData) {
               return _CatalogUnavailable(onRetry: _retry);
             }
-            _scheduleInitialRecipe(snapshot.requireData);
             return _buildCatalog(snapshot.requireData);
           },
         ),
@@ -236,12 +235,20 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
       return _CatalogUnavailable(onRetry: _loadFavorites);
     }
     final query = _search.text.trim().toLowerCase();
-    final dietaryPreferences =
-        ref.watch(dietaryPreferencesProvider).value ??
-        const DietaryPreferences();
+    final dietary = ref.watch(dietaryPreferencesProvider);
+    if (dietary.hasError) {
+      return _CatalogUnavailable(
+        onRetry: () => ref.invalidate(dietaryPreferencesProvider),
+      );
+    }
+    final dietaryPreferences = _resolvedRecipePreferences(dietary);
+    if (dietaryPreferences == null) {
+      return const Center(child: BilFeatureWelcomeStatus());
+    }
     final compatibleSource = source
         .where((recipe) => recipe.isCompatibleWith(dietaryPreferences))
         .toList(growable: false);
+    _scheduleInitialRecipe(compatibleSource);
     final locale = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
@@ -607,6 +614,10 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   }
 
   Future<void> _open(RecipeCatalogSummary summary) async {
+    final dietary = _resolvedRecipePreferences(
+      ref.read(dietaryPreferencesProvider),
+    );
+    if (dietary == null || !summary.isCompatibleWith(dietary)) return;
     showBilPearlBottomSheet<void>(
       context: context,
       isScrollControlled: true,

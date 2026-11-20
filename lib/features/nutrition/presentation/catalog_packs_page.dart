@@ -7,11 +7,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'nutrition_copy.dart';
 
 import '../../commerce/domain/commerce_plan.dart';
-import '../../commerce/domain/free_plan.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../domain/catalog_pack.dart';
 import '../services/catalog_pack_manager.dart';
+
+final catalogPackManagerProvider = Provider<CatalogPackManager>(
+  (_) => CatalogPackManager(),
+);
 
 class CatalogPacksPage extends ConsumerStatefulWidget {
   const CatalogPacksPage({super.key});
@@ -25,7 +28,7 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
     'BIL_ENABLE_CATALOG_TEST_ACCESS',
   );
 
-  final _manager = CatalogPackManager();
+  late final CatalogPackManager _manager;
   List<CatalogPack> _available = const [];
   List<InstalledCatalogPack> _installed = const [];
   Object? _error;
@@ -34,6 +37,7 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
   @override
   void initState() {
     super.initState();
+    _manager = ref.read(catalogPackManagerProvider);
     _load();
   }
 
@@ -52,7 +56,20 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
     }
   }
 
-  Future<void> _install(CatalogPack pack) async {
+  Future<void> _install(
+    CatalogPack pack, {
+    required String? owner,
+    required int ownerVisit,
+  }) async {
+    if (!mounted ||
+        ref.read(verifiedEntitlementOwnerIdProvider) != owner ||
+        ref.read(verifiedEntitlementOwnerVisitProvider) != ownerVisit ||
+        !_permits(
+          pack.access,
+          readAccess: () => ref.read(verifiedSubscriptionAccessProvider),
+        )) {
+      return;
+    }
     setState(() => _busyId = pack.id);
     try {
       await _manager.install(pack);
@@ -85,23 +102,17 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Text(
-              nutritionText(
-                context,
-                'Download verified libraries when needed and search them offline.',
-                'نزّل مكتبات موثقة عند الحاجة، وابحث فيها دون إنترنت.',
+            if (_manager.downloadsConfigured) ...[
+              Text(
+                nutritionText(
+                  context,
+                  'Download verified libraries when needed and search them offline.',
+                  'نزّل مكتبات موثقة عند الحاجة، وابحث فيها دون إنترنت.',
+                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              nutritionText(
-                context,
-                'The core library is bundled. Optional packs enter BIL only after size and cryptographic hash verification.',
-                'المكتبة الأساسية مضمّنة. الحزم الإضافية لا تدخل التطبيق إلا بعد التحقق من الحجم والبصمة الرقمية.',
-              ),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
+            ],
             ListTile(
               key: const Key('catalog-core-installed'),
               leading: const Icon(Icons.verified_rounded),
@@ -118,14 +129,6 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
               trailing: const Icon(Icons.check_circle_rounded),
             ),
             for (final pack in _available) _availableTile(pack),
-            if (!_manager.downloadsConfigured)
-              _notice(
-                nutritionText(
-                  context,
-                  'Pack downloads are not configured in this build yet. No placeholder links or unverified downloads are used.',
-                  'تنزيل الحزم غير مفعّل في هذه النسخة بعد. لا توجد روابط وهمية أو تنزيلات غير موثقة.',
-                ),
-              ),
             if (_manager.downloadsConfigured &&
                 _available.isEmpty &&
                 _error == null)
@@ -152,6 +155,8 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
   }
 
   Widget _availableTile(CatalogPack pack) {
+    final owner = ref.watch(verifiedEntitlementOwnerIdProvider);
+    final ownerVisit = ref.watch(verifiedEntitlementOwnerVisitProvider);
     final installed = _installed
         .where((item) => item.id == pack.id)
         .firstOrNull;
@@ -171,7 +176,9 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
               )
             : installed == null
             ? FilledButton(
-                onPressed: permitted ? () => _install(pack) : null,
+                onPressed: permitted
+                    ? () => _install(pack, owner: owner, ownerVisit: ownerVisit)
+                    : null,
                 child: Text(
                   permitted
                       ? nutritionText(context, 'Download', 'تنزيل')
@@ -186,13 +193,22 @@ class _CatalogPacksPageState extends ConsumerState<CatalogPacksPage> {
     );
   }
 
-  bool _permits(CatalogPackAccess access) {
+  bool _permits(
+    CatalogPackAccess access, {
+    AsyncValue<SubscriptionState> Function()? readAccess,
+  }) {
     if (access == CatalogPackAccess.free) return true;
     if (kDebugMode && _catalogTestAccess) return true;
-    final state =
-        ref.watch(verifiedSubscriptionStateProvider).value ??
-        FreePlan.createState();
-    if (state.authority != EntitlementAuthority.verifiedServer) return false;
+    final verifiedAccess = readAccess != null
+        ? readAccess()
+        : ref.watch(verifiedSubscriptionAccessProvider);
+    final state = verifiedAccess.asData?.value;
+    if (verifiedAccess.isLoading ||
+        verifiedAccess.hasError ||
+        state == null ||
+        state.authority != EntitlementAuthority.verifiedServer) {
+      return false;
+    }
     return switch (access) {
       CatalogPackAccess.free => true,
       CatalogPackAccess.plus => state.plan != CommercePlan.free,

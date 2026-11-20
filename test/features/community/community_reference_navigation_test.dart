@@ -18,6 +18,7 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_pearl_feature_welcome.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -788,6 +789,14 @@ void main() {
       repository.simulateCachedRefreshFailure = true;
       await _mount(tester, repository);
       await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('explore server item 0'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('community-refresh-slot')),
+          matching: find.byType(BilFeatureWelcomeStatus),
+        ),
+        findsNothing,
+      );
       repository.failCachedRefresh!();
       await tester.pumpAndSettle();
       final notice = find.byKey(

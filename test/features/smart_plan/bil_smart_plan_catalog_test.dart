@@ -1,13 +1,253 @@
+import 'dart:convert';
+import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
+import 'package:body_intelligence_log/features/nutrition/repositories/dietary_preferences_repository.dart';
+import 'package:crypto/crypto.dart';
+import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:body_intelligence_log/features/meal_planner/domain/meal_plan.dart';
 import 'package:body_intelligence_log/features/meal_planner/services/meal_plan_engine.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/dietary_preferences.dart';
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan.dart';
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan_engine.dart';
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_catalog.dart';
 import 'package:body_intelligence_log/features/wellness/repositories/workout_release_catalog_repository.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/recipe_release_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _RecipeFixtureBundle extends CachingAssetBundle {
+  _RecipeFixtureBundle(this.overrides);
+
+  final Map<String, ByteData> overrides;
+
+  @override
+  Future<ByteData> load(String key) async =>
+      overrides[key] ?? await rootBundle.load(key);
+}
+
 void main() {
+  test(
+    'a saved milk allergy retires the untagged source yogurt breakfast',
+    () async {
+      const catalog = BilSmartPlanCatalog();
+      const dietary = DietaryPreferences(allergens: {DietaryAllergen.milk});
+      await expectLater(
+        catalog.recipeDetail('overnight-oats-figs', dietary),
+        throwsStateError,
+      );
+    },
+  );
   TestWidgetsFlutterBinding.ensureInitialized();
+  test('saved oat exclusions screen the released index and detail', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    final saved = DietaryPreferencesRepository(PreferencesRepository(db));
+    final recipes = RecipeReleaseRepository();
+    final index = await recipes.loadIndex();
+    final oats = index.singleWhere((r) => r.id == 'overnight-oats-figs');
+    final other = index.singleWhere((r) => r.id == 'spinach-omelet');
+    final oatDetail = await recipes.loadDetail(oats);
+    final otherDetail = await recipes.loadDetail(other);
+    expect(oatDetail.dietaryEvidence.complete, isTrue);
+    for (final term in ['oats', 'oat', 'شوفان', 'figs']) {
+      await saved.save(DietaryPreferences(excludedIngredients: {term}));
+      final restored = await saved.read();
+      expect(restored.excludedIngredients, {term});
+      expect(oats.isCompatibleWith(restored), isFalse, reason: term);
+      expect(oatDetail.dietaryEvidence.allows(restored), isFalse, reason: term);
+      expect(other.isCompatibleWith(restored), isTrue, reason: term);
+      expect(
+        otherDetail.dietaryEvidence.allows(restored),
+        isTrue,
+        reason: term,
+      );
+    }
+  });
+  test(
+    'an exclusion alias cannot validate a stale oat-bran source binding',
+    () async {
+      const manifestPath = RecipeReleaseRepository.manifestPath;
+      final manifest =
+          jsonDecode(await rootBundle.loadString(manifestPath)) as Map;
+      final index = await RecipeReleaseRepository().loadIndex();
+      final original = index.singleWhere((r) => r.id == 'overnight-oats-figs');
+      final descriptor = manifest['shards'][original.shard] as Map;
+      final path = descriptor['path'] as String;
+      final shard = jsonDecode(await rootBundle.loadString(path)) as Map;
+      final row =
+          (shard['records'][original.ordinal]['ingredients'] as List)
+                  .singleWhere((i) => i['recordId'] == 'usda:168872')
+              as Map;
+      expect(row['sourceDescription'], 'Oat bran, raw');
+      expect(row['itemId'], 'raw oat bran');
+      row['itemId'] = 'oats';
+      Uint8List encode(Map value) =>
+          Uint8List.fromList(utf8.encode(jsonEncode(value)));
+      final bytes = encode(shard);
+      descriptor['size_bytes'] = bytes.length;
+      descriptor['sha256'] = sha256.convert(bytes).toString();
+      final repo = RecipeReleaseRepository(
+        bundle: _RecipeFixtureBundle({
+          manifestPath: ByteData.sublistView(encode(manifest)),
+          path: ByteData.sublistView(bytes),
+        }),
+      );
+      final summary = (await repo.loadIndex()).singleWhere(
+        (r) => r.id == original.id,
+      );
+      final detail = await repo.loadDetail(summary);
+      expect(detail.dietaryEvidence.complete, isFalse);
+      expect(detail.dietaryEvidence.highProtein, isFalse);
+      expect(
+        detail.dietaryEvidence.allows(
+          const DietaryPreferences(excludedIngredients: {'figs'}),
+        ),
+        isFalse,
+      );
+    },
+  );
+  test(
+    'source food identity, edited recipes and verified protein boundary',
+    () async {
+      const catalog = BilSmartPlanCatalog();
+      const unrestricted = DietaryPreferences();
+      final oats = (await catalog.recipeDetail(
+        'overnight-oats-figs',
+        unrestricted,
+      ))!;
+      expect(oats.dietaryEvidence.dietTags, contains('vegetarian'));
+      expect(oats.dietaryEvidence.dietTags, isNot(contains('vegan')));
+      expect(oats.dietaryEvidence.highProtein, isTrue);
+      final mixed = (await catalog.recipeDetail('yogurt-oats', unrestricted))!;
+      expect(mixed.dietaryEvidence.allergens, containsAll(['treeNut', 'milk']));
+      expect(mixed.dietaryEvidence.complete, isFalse);
+      expect(mixed.dietaryEvidence.highProtein, isFalse);
+      for (final id in ['shakshuka', 'spinach-omelet']) {
+        await expectLater(
+          catalog.recipeDetail(
+            id,
+            const DietaryPreferences(allergens: {DietaryAllergen.egg}),
+          ),
+          throwsStateError,
+        );
+        expect(
+          (await catalog.recipeDetail(
+            id,
+            unrestricted,
+          ))!.dietaryEvidence.highProtein,
+          isTrue,
+        );
+      }
+      expect(
+        () => (oats.record['ingredients'][0] as Map)['recordId'] = 'unknown',
+        throwsUnsupportedError,
+      );
+      final changed =
+          jsonDecode(jsonEncode(oats.record)) as Map<String, dynamic>;
+      (changed['ingredients'][0] as Map)['recordId'] = 'unknown';
+      final edited = RecipeCatalogDetail(
+        summary: oats.summary,
+        record: changed,
+      );
+      expect(edited.dietaryEvidence.complete, isFalse);
+      expect(edited.dietaryEvidence.highProtein, isFalse);
+      expect(
+        edited.dietaryEvidence.allows(
+          const DietaryPreferences(pattern: DietaryPattern.vegetarian),
+        ),
+        isFalse,
+      );
+      expect(RecipeDietaryEvidence.meetsProteinEnergyShare(5, 100), isTrue);
+      for (final pair in <(Object?, Object?)>[
+        (4.99, 100),
+        (null, 100),
+        (5, null),
+        (double.nan, 100),
+        (5, double.infinity),
+        (0, 100),
+        (1, 0),
+        (-5, 100),
+        (40, 100),
+      ]) {
+        expect(
+          RecipeDietaryEvidence.meetsProteinEnergyShare(pair.$1, pair.$2),
+          isFalse,
+        );
+      }
+    },
+  );
+  test(
+    'all released recipes are audited and each offered style contains only compatible records',
+    () async {
+      final repository = RecipeReleaseRepository();
+      final summaries = await repository.loadIndex();
+      expect(summaries, hasLength(1500));
+      var unknown = 0, protein = 0, newlyIdentifiedAllergens = 0;
+      for (final summary in summaries) {
+        final record = await repository.loadDetail(summary);
+        final evidence = record.dietaryEvidence;
+        expect(
+          summary.dietaryEvidence.dietTags,
+          evidence.dietTags,
+          reason: summary.id,
+        );
+        expect(
+          summary.dietaryEvidence.allergens,
+          evidence.allergens,
+          reason: summary.id,
+        );
+        expect(
+          summary.dietaryEvidence.complete,
+          evidence.complete,
+          reason: summary.id,
+        );
+        expect(
+          summary.dietaryEvidence.ingredientNames,
+          evidence.ingredientNames,
+          reason: summary.id,
+        );
+        if (!evidence.complete) {
+          unknown++;
+          expect(
+            evidence.allows(
+              const DietaryPreferences(allergens: {DietaryAllergen.peanut}),
+            ),
+            isFalse,
+          );
+        }
+        if (evidence.highProtein) protein++;
+        if (evidence.allergens
+            .difference(summary.allergens.toSet())
+            .isNotEmpty) {
+          newlyIdentifiedAllergens++;
+        }
+      }
+      expect(unknown, greaterThan(0));
+      expect(protein, greaterThan(0));
+      expect(newlyIdentifiedAllergens, greaterThan(0));
+      debugPrint(
+        'Verified recipe index records=${summaries.length} unresolved ingredient selections=$unknown eligible protein=$protein additional allergen evidence=$newlyIdentifiedAllergens',
+      );
+      const catalog = BilSmartPlanCatalog();
+      for (final style in MealPlanDiet.values) {
+        const dietary = DietaryPreferences(allergens: {DietaryAllergen.milk});
+        final choices = await catalog.checkRecipeStyle(style, dietary);
+        expect(choices.missing, isEmpty, reason: style.name);
+        for (final choice in choices.recipes) {
+          final detail = (await catalog.recipeDetail(choice.id, dietary))!;
+          expect(detail.dietaryEvidence.complete, isTrue);
+          expect(detail.dietaryEvidence.allergens, isNot(contains('milk')));
+          if (style == MealPlanDiet.vegetarian) {
+            expect(detail.dietaryEvidence.dietTags, contains('vegetarian'));
+          }
+          if (style == MealPlanDiet.highProtein) {
+            expect(detail.dietaryEvidence.highProtein, isTrue);
+          }
+        }
+      }
+    },
+  );
   test(
     'real gym artifact and release manifests resolve only approved exercise IDs',
     () async {
