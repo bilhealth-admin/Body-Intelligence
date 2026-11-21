@@ -26,7 +26,18 @@ final verifiedSubscriptionBoundaryRefreshProvider =
     });
 
 final class _VerifiedSubscriptionCanonicalSnapshot {
-  SubscriptionState? verified;
+  SubscriptionState? _verified;
+  SubscriptionState? freePresentation;
+
+  SubscriptionState? get verified => _verified;
+  set verified(SubscriptionState? state) {
+    _verified = state;
+    freePresentation =
+        state?.authority == EntitlementAuthority.verifiedServer &&
+            state?.plan == CommercePlan.free
+        ? state
+        : null;
+  }
 
   void observe(SubscriptionState state) {
     if (state.authority == EntitlementAuthority.verifiedServer) {
@@ -35,11 +46,12 @@ final class _VerifiedSubscriptionCanonicalSnapshot {
         state.verifiedAt != null &&
         state.provider != null) {
       // This row retires its store proof even if a separate grant was unreadable.
-      verified = state;
+      _verified = state;
     } else if (verified?.provider == null) {
       // The repository already applies the independent grant/admin leases.
       // An unresolved composite contains no surviving proof from either one.
-      verified = null;
+      // Keep only the public Free display from a previous completed decision.
+      _verified = null;
     }
   }
 }

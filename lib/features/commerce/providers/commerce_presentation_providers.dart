@@ -18,10 +18,8 @@ final verifiedSubscriptionPresentationProvider =
       if ((access.isLoading ||
               access.hasError ||
               access.value?.authority != EntitlementAuthority.verifiedServer) &&
-          canonical.verified?.authority ==
-              EntitlementAuthority.verifiedServer &&
-          canonical.verified?.plan == CommercePlan.free) {
-        return AsyncValue.data(canonical.verified!);
+          canonical.freePresentation != null) {
+        return AsyncValue.data(canonical.freePresentation!);
       }
       return access;
     });
