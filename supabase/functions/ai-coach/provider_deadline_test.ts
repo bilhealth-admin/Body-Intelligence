@@ -179,6 +179,7 @@ Deno.test("provider deadline: real13s transport fails old10s but succeeds under1
 });
 
 Deno.test("provider deadline: late14s primary answer is discarded, never accepted as success", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const f = fixture();
   let clock = 0, calls = 0;
   const diagnostics: Array<Record<string, unknown>> = [];
@@ -206,9 +207,11 @@ Deno.test("provider deadline: late14s primary answer is discarded, never accepte
       .error_code,
     "provider_timeout",
   );
+  });
 });
 
 Deno.test("provider deadline:14s primary timeout leaves10s independent fallback within24s", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const f = fixture();
   let clock = 0, calls = 0;
   const models: string[] = [], deadlines: Array<number | undefined> = [];
@@ -234,7 +237,7 @@ Deno.test("provider deadline:14s primary timeout leaves10s independent fallback 
   const data = await response.json();
   assertEquals(data.latency_ms, 23_000);
   assertEquals(data.fallback_used, true);
-  assertEquals(models, ["gemini-3.8-flash", "gemini-3.6-flash"]);
+  assertEquals(models, ["gemini-3.8-flash", "gemini-3.5-flash"]);
   assertEquals(deadlines, [undefined, 10_000]);
   assertEquals(
     f.calls.filter((row) => row.name === "bil_reserve_ai_usage").length,
@@ -252,9 +255,11 @@ Deno.test("provider deadline:14s primary timeout leaves10s independent fallback 
     ),
     [14_000, 10_000],
   );
+  });
 });
 
 Deno.test("provider deadline: both failures stop at24s with one refund and no fourth call", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const f = fixture();
   let clock = 0, calls = 0;
   const response = await handler(request(), {
@@ -276,6 +281,7 @@ Deno.test("provider deadline: both failures stop at24s with one refund and no fo
     "bil_settle_ai_usage",
   ]);
   assertEquals(f.calls[2].params.p_succeeded, false);
+  });
 });
 
 Deno.test("provider deadline: trace redacts unknown model and arbitrary errors, no private fields", async () => {
@@ -330,3 +336,34 @@ Deno.test("provider deadline: diagnostic sink failure cannot change accepted ans
   assertEquals(f.calls[2].params.p_succeeded, true);
   assertEquals(f.calls.length, 3);
 });
+
+// Explicit isolated configuration for recovery tests. This fixture exercises
+// a configured nonretiring independent model; it is not a Production choice
+// or evidence of that model's live Express entitlement. No network is used.
+async function withCoachModelFixture<T>(
+  fallback: string | undefined,
+  run: () => Promise<T>,
+): Promise<T> {
+  const values: Record<string, string | undefined> = {
+    BIL_GEMINI_TEXT_MODEL: "gemini-3.8-flash",
+    BIL_GEMINI_TEXT_FALLBACK_MODEL: fallback,
+    BIL_GEMINI_VISION_ENDPOINT:
+      "https://aiplatform.googleapis.com/v1beta1/publishers/google",
+    BIL_GEMINI_TEXT_ENDPOINT: undefined,
+  };
+  const previous = Object.fromEntries(
+    Object.keys(values).map((key) => [key, Deno.env.get(key)]),
+  );
+  try {
+    for (const [key, value] of Object.entries(values)) {
+      if (value === undefined) Deno.env.delete(key);
+      else Deno.env.set(key, value);
+    }
+    return await run();
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) Deno.env.delete(key);
+      else Deno.env.set(key, value);
+    }
+  }
+}

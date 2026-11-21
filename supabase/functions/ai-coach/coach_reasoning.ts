@@ -53,24 +53,35 @@ export function coachReasoningFor(
   return { level: "LOW", task: "read" };
 }
 
-/** Google documents these aliases as routing to the same underlying model. */
-export function canonicalGeminiModel(model: string): string {
+/** Developer API aliases do not apply to Vertex model lifecycle entries. */
+export function canonicalGeminiModel(
+  model: string,
+  endpointProduct: "developer" | "vertex" = "developer",
+): string {
   const name = model.trim().replace(/^models\//u, "").toLowerCase();
-  if (name === "gemini-3.7-flash") return "gemini-3.8-flash";
-  if (name === "gemini-3.5-flash") return "gemini-3.6-flash";
+  if (endpointProduct === "developer") {
+    if (name === "gemini-3.7-flash") return "gemini-3.8-flash";
+    if (name === "gemini-3.5-flash") return "gemini-3.6-flash";
+  }
   return name;
 }
 
 export function independentGeminiFallback(
   primary: string,
   configured?: string,
+  endpointProduct: "developer" | "vertex" = "developer",
 ): string {
-  const canonical = canonicalGeminiModel(primary);
+  const canonical = canonicalGeminiModel(primary, endpointProduct);
   const candidate = configured?.trim();
-  if (candidate && canonicalGeminiModel(candidate) !== canonical) {
-    return candidate;
+  if (candidate) {
+    const candidateModel = canonicalGeminiModel(candidate, endpointProduct);
+    const retiringVertexModel = endpointProduct === "vertex" &&
+      (candidateModel === "gemini-3.6-flash" ||
+        candidateModel === "gemini-3.7-flash");
+    if (!retiringVertexModel && candidateModel !== canonical) return candidate;
   }
-  return canonical === "gemini-3.6-flash"
-    ? "gemini-3.5-flash-lite"
-    : "gemini-3.6-flash";
+  // 3.8 is documented for Express and does not inherit the 3.6/3.7 retirement.
+  // If it is already primary, fail once instead of repeating the same model
+  // or silently choosing a lower-quality or more expensive fallback.
+  return canonical === "gemini-3.8-flash" ? "" : "gemini-3.8-flash";
 }

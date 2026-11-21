@@ -18,7 +18,7 @@ const defaults: Record<
   gemini: {
     // Keep the default on a stable multimodal Gemini 3 model while retaining
     // BIL_GEMINI_VISION_MODEL as the staged rollout and rollback switch.
-    model: "gemini-3.7-flash",
+    model: "gemini-3.8-flash",
     endpoint: "https://generativelanguage.googleapis.com/v1beta",
   },
   mistral: {

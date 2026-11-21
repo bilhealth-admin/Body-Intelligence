@@ -607,6 +607,7 @@ Deno.test("Gemini retry policy does not repeat client or parse errors", async ()
 });
 
 Deno.test("Gemini falls back only after a transient primary-model outage", async () => {
+  await withCoachModelFixture(undefined, async () => {
   assertEquals(
     isFallbackEligibleGeminiError(new Error("provider_http_503")),
     true,
@@ -634,8 +635,8 @@ Deno.test("Gemini falls back only after a transient primary-model outage", async
     "test",
     32,
   );
-  assertEquals(models, ["gemini-primary", "gemini-3.6-flash"]);
-  assertEquals(recovered.model, "gemini-3.6-flash");
+  assertEquals(models, ["gemini-primary", "gemini-3.8-flash"]);
+  assertEquals(recovered.model, "gemini-3.8-flash");
   assertEquals(recovered.fallbackUsed, true);
 
   let permanentFailureCalls = 0;
@@ -655,6 +656,7 @@ Deno.test("Gemini falls back only after a transient primary-model outage", async
     "provider_http_400",
   );
   assertEquals(permanentFailureCalls, 1);
+  });
 });
 
 Deno.test("explicit app actions recover without treating bare values as writes", () => {
@@ -1928,6 +1930,7 @@ Deno.test("invalid citation catalog version fails before reservation provider or
 });
 
 Deno.test("version2 fallback preserves the same citation catalog across both real fetch calls", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const result = await exerciseHealthCitationHandlerContract({
     version: 2,
     citations: ["fda_label_daily_values"],
@@ -1949,6 +1952,7 @@ Deno.test("version2 fallback preserves the same citation catalog across both rea
   }
   assertEquals(result.settlements.length, 1);
   assertEquals(result.settlements[0].p_succeeded, true);
+  });
 });
 
 Deno.test("one missing-citation reply is regenerated under one reservation and settled once", async () => {
@@ -2112,6 +2116,7 @@ Deno.test("native timeout is a stable provider code and never repeats the same m
 });
 
 Deno.test("deep primary timeout recovers with independent balanced model and counts both attempts", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const calls: Array<{ model: string; level: string; catalog: number }> = [];
   const result = await geminiCallWithFallback(
     (model, _contents, _system, _maximum, _voice, level, _fetch, catalog) => {
@@ -2131,10 +2136,11 @@ Deno.test("deep primary timeout recovers with independent balanced model and cou
   );
   assertEquals(calls, [
     { model: "gemini-3.8-flash", level: "HIGH", catalog: 2 },
-    { model: "gemini-3.6-flash", level: "MEDIUM", catalog: 2 },
+    { model: "gemini-3.5-flash", level: "MEDIUM", catalog: 2 },
   ]);
   assertEquals(result.provider.attempts, 2);
   assertEquals(result.fallbackUsed, true);
+  });
 });
 
 Deno.test("allergen contradiction is withheld and refunds one reservation without another model call", async () => {
@@ -2202,6 +2208,7 @@ Deno.test("citation repair uses one normal bounded attempt within the existing t
 });
 
 Deno.test("fallback then citation repair has at most three calls and one billed reservation", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const actual = await exerciseHealthCitationHandlerContract({ failPrimaryOnce: true, firstCitations: [] });
   assertEquals(actual.response.status, 200);
   assertEquals(actual.providerRequests.length, 3);
@@ -2211,6 +2218,7 @@ Deno.test("fallback then citation repair has at most three calls and one billed 
   assertEquals(actual.settlements[0].p_succeeded, true);
   assertEquals(actual.settlements[0].p_input_tokens, 40);
   assertEquals(actual.settlements[0].p_output_tokens, 20);
+  });
 });
 
 Deno.test("unsafe health prose is withheld before citation repair and refunds exactly one reservation", async () => {
@@ -2495,3 +2503,54 @@ Deno.test("truth correction retains structural spoken-response and disclosure ch
     assertEquals(fake.settlements[0].p_succeeded,false);
   }
 });
+
+Deno.test("current Vertex3.8 primary with retiring3.7 override fails503 once and refunds one reservation", async () => {
+  await withCoachModelFixture("gemini-3.7-flash", async () => {
+    const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+    const models: string[] = [];
+    const response = await handler(requestBody(), {
+      clients: fake.create as never,
+      requireIntegrity: async ({ body }) => body,
+      diagnosticLog: () => {},
+      geminiCall: (model) => {
+        models.push(model);
+        return Promise.reject(new Error("provider_http_503"));
+      },
+    });
+    assertEquals(response.status, 503);
+    assertEquals(models, ["gemini-3.8-flash"]);
+    assertEquals(fake.settlements.length, 1);
+    assertEquals(fake.settlements[0].p_succeeded, false);
+  });
+});
+
+// Explicit isolated configuration for recovery tests. This fixture exercises
+// a configured nonretiring independent model; it is not a Production choice
+// or evidence of that model's live Express entitlement. No network is used.
+async function withCoachModelFixture<T>(
+  fallback: string | undefined,
+  run: () => Promise<T>,
+): Promise<T> {
+  const values: Record<string, string | undefined> = {
+    BIL_GEMINI_TEXT_MODEL: "gemini-3.8-flash",
+    BIL_GEMINI_TEXT_FALLBACK_MODEL: fallback,
+    BIL_GEMINI_VISION_ENDPOINT:
+      "https://aiplatform.googleapis.com/v1beta1/publishers/google",
+    BIL_GEMINI_TEXT_ENDPOINT: undefined,
+  };
+  const previous = Object.fromEntries(
+    Object.keys(values).map((key) => [key, Deno.env.get(key)]),
+  );
+  try {
+    for (const [key, value] of Object.entries(values)) {
+      if (value === undefined) Deno.env.delete(key);
+      else Deno.env.set(key, value);
+    }
+    return await run();
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) Deno.env.delete(key);
+      else Deno.env.set(key, value);
+    }
+  }
+}

@@ -58,6 +58,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   bool _purchaseFeedbackIsError = false;
   VerifiedStoreState? _lastStoreState;
   String? _lastStoreMessage;
+  int? _retriedPendingVisit;
 
   @override
   void initState() {
@@ -287,7 +288,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         // unavailable state instead of displaying an endless loading claim.
         offers = await catalog
             .loadOffers(productIds)
-            .timeout(const Duration(seconds: 12));
+            .timeout(BilStoreCatalogGateway.loadTimeout);
       } on TimeoutException {
         offers = const [];
       } catch (_) {
@@ -442,9 +443,14 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     final store = widget.store ?? _ownedStore;
     final locale = Localizations.localeOf(context).toLanguageTag();
     final copy = AppLocalizations(Localizations.localeOf(context));
-    final account = offer.kind == BilStoreProductKind.aiBoostConsumable
-        ? null
-        : ref.read(verifiedSubscriptionAccessProvider);
+    AsyncValue<SubscriptionState>? account;
+    if (offer.kind != BilStoreProductKind.aiBoostConsumable) {
+      try {
+        account = ref.read(verifiedSubscriptionAccessProvider);
+      } on StateError {
+        // Isolated previews may intentionally render without ProviderScope.
+      }
+    }
     final unresolved =
         _sharedBoost?.canRetry == true ||
         store != null &&
@@ -497,6 +503,19 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       );
   }
 
+  void _retrySlowRead(int generation, int visit) {
+    if (_retriedPendingVisit == visit ||
+        ref.read(verifiedEntitlementOwnerVisitProvider) != visit ||
+        ref.read(verifiedSubscriptionReadWitnessProvider).generation !=
+            generation ||
+        !ref.read(verifiedSubscriptionAccessProvider).isLoading) {
+      return;
+    }
+    // A manual recheck never enters the catalog or purchase service.
+    setState(() => _retriedPendingVisit = visit);
+    ref.invalidate(verifiedSubscriptionStateProvider);
+  }
+
   CommercePlan? _verifiedPlan(AsyncValue<SubscriptionState> snapshot) {
     final state = snapshot.asData?.value;
     return state?.authority == EntitlementAuthority.verifiedServer
@@ -527,13 +546,25 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     AsyncValue<SubscriptionState>? accountAccess;
     CommercePlan? currentPlan;
     CommercePlan? authoritativePlan;
+    (int, int)? slowRead;
     try {
       final access = ref.watch(verifiedSubscriptionPresentationProvider);
       accountAccess = access;
       currentPlan = _verifiedPlan(access);
-      authoritativePlan = _verifiedPlan(
-        ref.watch(verifiedSubscriptionAccessProvider),
-      );
+      final authority = ref.watch(verifiedSubscriptionAccessProvider);
+      authoritativePlan = _verifiedPlan(authority);
+      if (!authority.isLoading) {
+        _retriedPendingVisit = null;
+      } else if ((currentPlan == null || currentPlan == CommercePlan.free) &&
+          ref.watch(verifiedEntitlementOwnerIdProvider) != null) {
+        final generation = ref
+            .read(verifiedSubscriptionReadWitnessProvider)
+            .generation;
+        final visit = ref.watch(verifiedEntitlementOwnerVisitProvider);
+        if (ref.watch(_plansReadDeadline(generation)).asData?.value == true) {
+          slowRead = (generation, visit);
+        }
+      }
     } on StateError {
       // Standalone previews have no account authority or native checkout.
       currentPlan = CommercePlan.free;
@@ -572,7 +603,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       ),
       body: Column(
         children: [
-          if (accountAccess != null &&
+          if (slowRead != null)
+            _slowAccessStatus(slowRead.$1, slowRead.$2)
+          else if (accountAccess != null &&
               currentPlan != CommercePlan.free &&
               (!accountAccess.isLoading || currentPlan != null))
             _accountAccessStatus(

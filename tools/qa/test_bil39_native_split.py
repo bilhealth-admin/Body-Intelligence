@@ -45,9 +45,11 @@ class NativeSplitTest(unittest.TestCase):
             target = Path(folder)
             (target / 'runtimes.json').write_text(json.dumps({'runtimes': [
                 {'identifier': 'com.apple.CoreSimulator.SimRuntime.iOS-26-1',
-                 'version': '26.1', 'isAvailable': True},
+                 'version': '26.1', 'isAvailable': True,
+                 'supportedDeviceTypes': [{'identifier': row['identifier']} for row in types]},
                 {'identifier': 'com.apple.CoreSimulator.SimRuntime.iOS-25-0',
-                 'version': '25.0', 'isAvailable': True}]}), encoding='utf-8')
+                 'version': '25.0', 'isAvailable': True,
+                 'supportedDeviceTypes': [{'identifier': row['identifier']} for row in types]}]}), encoding='utf-8')
             (target / 'device-types.json').write_text(json.dumps({'devicetypes': types}), encoding='utf-8')
             return subprocess.run([sys.executable, '-c', code, folder, label],
                                   capture_output=True, text=True, timeout=10)
@@ -63,6 +65,29 @@ class NativeSplitTest(unittest.TestCase):
                 other = 'ipad' if label == 'iphone' else 'iphone'
                 self.assertNotEqual(self.select(other, types).returncode, 0)
 
+    def test_duo_first_actual_metadata_order_selects_only_exact_compatible_runtime(self):
+        code = self.script.split("<<'PY_DEVICE'\n", 1)[1].split('\nPY_DEVICE', 1)[0]
+        with tempfile.TemporaryDirectory(prefix='bil39-duo-first-') as folder:
+            target = Path(folder)
+            # Observed stock order: both 27.2, but Duo supports only iPhone Duo.
+            runtimes = {'runtimes': [
+                {'identifier': 'com.apple.CoreSimulator.SimRuntime.iOS-27-2-iPhone19-4',
+                 'version': '27.2', 'isAvailable': True,
+                 'supportedDeviceTypes': [{'identifier': 'qa-duo'}]},
+                {'identifier': 'com.apple.CoreSimulator.SimRuntime.iOS-27-2',
+                 'version': '27.2', 'isAvailable': True,
+                 'supportedDeviceTypes': [{'identifier': 'qa-iphone'}, {'identifier': 'qa-ipad'}]}]}
+            (target / 'runtimes.json').write_text(json.dumps(runtimes), encoding='utf8')
+            (target / 'device-types.json').write_text(json.dumps({'devicetypes': [
+                {'name': 'iPhone 16 Pro', 'identifier': 'qa-iphone'},
+                {'name': 'iPad Pro 13-inch (M4)', 'identifier': 'qa-ipad'}]}), encoding='utf8')
+            for label in ('iphone', 'ipad'):
+                result = subprocess.run([sys.executable, '-c', code, folder, label],
+                    capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout.strip(),
+                    f'com.apple.CoreSimulator.SimRuntime.iOS-27-2 qa-{label}')
+
     def test_quoted_selector_runs_through_the_actual_shell_and_preserves_python_literals(self):
         # Execute the complete shell/Python boundary, not just extracted Python.
         # macOS CI uses its /bin/bash (3.2); Windows runs the same boundary on Git Bash.
@@ -76,7 +101,9 @@ class NativeSplitTest(unittest.TestCase):
             target = Path(folder)
             (target / 'runtimes.json').write_text(json.dumps({'runtimes': [
                 {'identifier': 'com.apple.CoreSimulator.SimRuntime.iOS-26-1',
-                 'version': '26.1', 'isAvailable': True}]}), encoding='utf-8')
+                 'version': '26.1', 'isAvailable': True,
+                 'supportedDeviceTypes': [{'identifier': 'qa-iphone'},
+                                          {'identifier': 'qa-ipad'}]}]}), encoding='utf-8')
             (target / 'device-types.json').write_text(json.dumps({'devicetypes': [
                 {'name': 'iPhone 16 Pro', 'identifier': 'qa-iphone'},
                 {'name': 'iPad Pro 13-inch (M4)', 'identifier': 'qa-ipad'}]}), encoding='utf-8')

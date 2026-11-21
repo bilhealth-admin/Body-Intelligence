@@ -3,7 +3,9 @@ import 'dart:convert';
 
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/repositories/server_entitlement_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -32,6 +34,96 @@ void main() {
       }
     },
   );
+
+  for (final provider in ['apple', 'google']) {
+    test(
+      '$provider keeps a confirmed Free display through a completed outage',
+      () async {
+        final h = await _Harness.open();
+        final container = ProviderContainer(
+          retry: (_, _) => null,
+          overrides: [
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(h.owner),
+            verifiedEntitlementClockProvider.overrideWithValue(() => h.now),
+            verifiedEntitlementLoaderProvider.overrideWithValue(h.repo.current),
+          ],
+        );
+        final display = container.listen(
+          verifiedSubscriptionPresentationProvider,
+          (_, _) {},
+        );
+        try {
+          final confirmed = await container.read(
+            verifiedSubscriptionStateProvider.future,
+          );
+          expect(confirmed.plan, CommercePlan.free);
+          expect(confirmed.authority, EntitlementAuthority.verifiedServer);
+          expect(confirmed.provider, isNull);
+          expect(display.read().requireValue, same(confirmed));
+
+          h.failAdmin = true;
+          final unavailable = await container.refresh(
+            verifiedSubscriptionStateProvider.future,
+          );
+          expect(unavailable.authority, EntitlementAuthority.localDefault);
+          expect(
+            container.read(verifiedSubscriptionAccessProvider).requireValue,
+            same(unavailable),
+          );
+          expect(display.read().requireValue, same(confirmed));
+
+          h.failAdmin = false;
+          h.failClosed = true;
+          h.storeRows = [
+            h.paidRow(provider: provider)
+              ..['plan_id'] = 'free'
+              ..['lifecycle'] = 'revoked'
+              ..['revision'] = 9,
+          ];
+          final partial = await container.refresh(
+            verifiedSubscriptionStateProvider.future,
+          );
+          expect(partial.authority, EntitlementAuthority.localDefault);
+          expect(partial.serverRevision, 9);
+          expect(
+            container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue
+                .authority,
+            EntitlementAuthority.localDefault,
+          );
+          expect(display.read().requireValue, same(confirmed));
+
+          h.failClosed = false;
+          h.storeRows = [h.paidRow(provider: provider)];
+          final paid = await container.refresh(
+            verifiedSubscriptionStateProvider.future,
+          );
+          expect(paid.plan, CommercePlan.premiumAiCoach);
+          expect(display.read().requireValue.plan, paid.plan);
+
+          h.storeRows = [
+            h.paidRow(provider: provider)
+              ..['lifecycle'] = 'refunded'
+              ..['revision'] = 11,
+          ];
+          await container.refresh(verifiedSubscriptionStateProvider.future);
+          expect(
+            container
+                .read(verifiedSubscriptionAccessProvider)
+                .requireValue
+                .plan,
+            CommercePlan.free,
+          );
+          expect(display.read().requireValue.plan, CommercePlan.free);
+        } finally {
+          display.close();
+          container.dispose();
+          await h.close();
+        }
+      },
+    );
+  }
 
   for (final item in <({String id, String provider, CommercePlan plan})>[
     (id: 'premium', provider: 'google', plan: CommercePlan.premium),

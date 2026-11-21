@@ -53,6 +53,7 @@ def native_source_paths(device):
     return [REUSABLE, f'.github/workflows/bil39_{device}_native.yml',
         '.github/scripts/bil39_ios_native_integration.sh',
         '.github/scripts/bil39_native_receipts.py',
+        '.github/scripts/bil_ios_os_readiness.py',
         '.github/scripts/bil39_simulator_vm_attach.py', '.github/scripts/bil_ios_runner_tests.py',
         'integration_test/system_crypto_bridge_integration_test.dart',
         'integration_test/native_settings_polish_test.dart',

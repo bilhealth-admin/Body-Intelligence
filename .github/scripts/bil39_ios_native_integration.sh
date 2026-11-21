@@ -21,6 +21,14 @@ stage() {
   python3 "$BOUND" --label "$label" --log "$log" \
     --receipt "$OUT/$label-result.json" --timeout-seconds "$seconds" -- "$@"
 }
+require_sdk27_os_readiness() {
+  local label="$1"
+  ACTIVE_DEVICE="$DEVICE"
+  # This is a cleanup marker for the exact owned device, not readiness proof.
+  BOOTED_DEVICE="$DEVICE"
+  python3 .github/scripts/bil_ios_os_readiness.py \
+    --device "$DEVICE" --runtime "$RUNTIME" --output "$OUT" --label "$label"
+}
 collect_app_files() {
   local label="$1" device="$2" container
   if stage "$label-app-container" 30 "$OUT/$label-app-container.log" \
@@ -103,7 +111,6 @@ ios = [item for item in runtimes if item.get('isAvailable') and
        item['identifier'].startswith('com.apple.CoreSimulator.SimRuntime.iOS-')]
 if not ios:
     raise SystemExit('No available iOS Simulator runtime')
-runtime = max(ios, key=lambda item: tuple(map(int, re.findall(r'\d+', item['version']))))
 types = json.loads((root / 'device-types.json').read_text())['devicetypes']
 prefix = {'iphone': 'iPhone', 'ipad': 'iPad'}[label]
 items = [item for item in types if item['name'].startswith(prefix)]
@@ -112,6 +119,13 @@ if not items:
 preferred = (['iPhone 16 Pro', 'iPhone 16', 'iPhone 15 Pro'] if label == 'iphone' else
              ['iPad Pro 13-inch (M4)', 'iPad Pro (13-inch) (M4)', 'iPad Pro (12.9-inch) (6th generation)'])
 device = next((item for name in preferred for item in items if item['name'] == name), items[-1])
+compatible = [item for item in ios if any(
+    supported.get('identifier') == device['identifier']
+    for supported in item.get('supportedDeviceTypes', [])
+)]
+if not compatible:
+    raise SystemExit('No available iOS Simulator runtime supports ' + device['identifier'])
+runtime = max(compatible, key=lambda item: tuple(map(int, re.findall(r'\d+', item['version']))))
 print(runtime['identifier'], device['identifier'])
 PY_DEVICE
 read -r RUNTIME DEVICE_TYPE < "$OUT/selected-device.txt"
@@ -156,11 +170,15 @@ stage storekit-binding-after-native-config 60 "$OUT/storekit-binding-after-nativ
   --project-root "$GITHUB_WORKSPACE" --verify-native-binding
 # Exercise the existing native XCTest target, separately from Flutter drivers.
 # Its in-memory App Attest key-store tests are not hardware-attestation proof.
-ACTIVE_DEVICE="$DEVICE"
-stage runner-tests-boot 120 "$OUT/runner-tests-boot.log" xcrun simctl boot "$DEVICE"
-BOOTED_DEVICE="$DEVICE"
-stage runner-tests-bootstatus 180 "$OUT/runner-tests-bootstatus.log" \
-  xcrun simctl bootstatus "$DEVICE" -b
+if [[ "$RUNTIME" == com.apple.CoreSimulator.SimRuntime.iOS-27-* ]]; then
+  require_sdk27_os_readiness runner-tests
+else
+  ACTIVE_DEVICE="$DEVICE"
+  stage runner-tests-boot 120 "$OUT/runner-tests-boot.log" xcrun simctl boot "$DEVICE"
+  BOOTED_DEVICE="$DEVICE"
+  stage runner-tests-bootstatus 180 "$OUT/runner-tests-bootstatus.log" \
+    xcrun simctl bootstatus "$DEVICE" -b
+fi
 python3 .github/scripts/bil_ios_runner_tests.py \
   --workspace "$GITHUB_WORKSPACE" --output "$GITHUB_WORKSPACE/$OUT/runner-tests" \
   --device "$DEVICE" --build-number 39 "${DEFINES[@]}"
@@ -179,6 +197,9 @@ for KIND in "${KINDS[@]}"; do
       TARGET=integration_test/native_feature_splashes_test.dart
       DRIVER=test_driver/native_feature_splashes_driver.dart ;;
   esac
+  if [[ "$RUNTIME" == com.apple.CoreSimulator.SimRuntime.iOS-27-* ]]; then
+    require_sdk27_os_readiness "$LABEL-$KIND"
+  fi
   stage "$KIND-generic-config" 900 "$OUT/$KIND-generic-config.log" \
     flutter --verbose build ios --config-only --simulator --debug --no-codesign --no-pub \
     --build-number 39 --target "$TARGET" "${DEFINES[@]}"
@@ -273,11 +294,13 @@ output.write_text(json.dumps({'scope': 'Compiled simulator declarations only; no
     'swiftpm_resolved_locks': swift_packages,
     'signed_release': False, 'sdk_signatures_verified': False, 'network_collection_verified': False}, indent=2) + '\n')
 BIL_PRIVACY_PY
-    ACTIVE_DEVICE="$DEVICE"
-    stage "$LABEL-$KIND-boot" 120 "$OUT/$LABEL-$KIND-boot.log" xcrun simctl boot "$DEVICE"
-    BOOTED_DEVICE="$DEVICE"
-    stage "$LABEL-$KIND-bootstatus" 180 "$OUT/$LABEL-$KIND-bootstatus.log" \
-      xcrun simctl bootstatus "$DEVICE" -b
+    if [[ "$RUNTIME" != com.apple.CoreSimulator.SimRuntime.iOS-27-* ]]; then
+      ACTIVE_DEVICE="$DEVICE"
+      stage "$LABEL-$KIND-boot" 120 "$OUT/$LABEL-$KIND-boot.log" xcrun simctl boot "$DEVICE"
+      BOOTED_DEVICE="$DEVICE"
+      stage "$LABEL-$KIND-bootstatus" 180 "$OUT/$LABEL-$KIND-bootstatus.log" \
+        xcrun simctl bootstatus "$DEVICE" -b
+    fi
     stage "$LABEL-$KIND-appearance" 120 "$OUT/$LABEL-$KIND-appearance.log" \
       xcrun simctl ui "$DEVICE" appearance light
     # Driver response and exit remain mandatory. Avoid Flutter stopApp hanging

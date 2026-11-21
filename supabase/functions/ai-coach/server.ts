@@ -590,10 +590,23 @@ function modelFor() {
   return env("BIL_GEMINI_TEXT_MODEL") || "gemini-3.8-flash";
 }
 
+function configuredGeminiEndpoint() {
+  // Resolve the same allowlisted recipient for transport and fallback routing.
+  return disclosedGeminiEndpoint(
+    env("BIL_GEMINI_VISION_ENDPOINT") ||
+      env("BIL_GEMINI_TEXT_ENDPOINT") ||
+      "https://generativelanguage.googleapis.com/v1beta",
+  );
+}
+
 function fallbackModelFor(primary: string) {
+  const endpoint = configuredGeminiEndpoint();
   return independentGeminiFallback(
     primary,
     env("BIL_GEMINI_TEXT_FALLBACK_MODEL"),
+    new URL(endpoint).hostname === "aiplatform.googleapis.com"
+      ? "vertex"
+      : "developer",
   );
 }
 
@@ -897,8 +910,9 @@ export async function geminiCallWithFallback(
       fallbackUsed: false,
     };
   } catch (error) {
+    if (!isFallbackEligibleGeminiError(error)) throw error;
     const fallbackModel = fallbackModelFor(primaryModel);
-    if (!fallbackModel || !isFallbackEligibleGeminiError(error)) throw error;
+    if (!fallbackModel) throw error;
     const recovered = await call(
       fallbackModel,
       contents,
@@ -936,11 +950,7 @@ export async function geminiCall(
   if (!key) throw new Error("provider_not_configured");
   // Both endpoints are Google-operated Gemini APIs. The server's existing
   // Vertex key must use Vertex; do not widen the key or permit other providers.
-  const endpoint = disclosedGeminiEndpoint(
-    env("BIL_GEMINI_VISION_ENDPOINT") ||
-      env("BIL_GEMINI_TEXT_ENDPOINT") ||
-      "https://generativelanguage.googleapis.com/v1beta",
-  );
+  const endpoint = configuredGeminiEndpoint();
   const url = `${endpoint}/models/${encodeURIComponent(model)}:generateContent`;
   let last = "provider_failed";
   // One bounded attempt per model keeps primary + fallback below the client's

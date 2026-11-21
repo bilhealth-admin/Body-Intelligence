@@ -66,13 +66,13 @@ Deno.test("all provider envelopes normalize to the BIL schema", () => {
   }
 });
 
-Deno.test("Gemini vision defaults to the stable multimodal 3.7 model", () => {
+Deno.test("Gemini vision defaults to the stable multimodal 3.8 model", () => {
   const values: Record<string, string> = {
     BIL_GEMINI_API_KEY: "test-only",
   };
   const config = loadProviderConfig("gemini", (name) => values[name]);
   if (
-    config.model !== "gemini-3.7-flash" ||
+    config.model !== "gemini-3.8-flash" ||
     config.endpoint !== "https://generativelanguage.googleapis.com/v1beta"
   ) {
     throw new Error("unexpected Gemini vision defaults");

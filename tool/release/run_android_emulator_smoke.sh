@@ -4,7 +4,7 @@ set -euo pipefail
 readonly app_id='com.bilhealth.bodyintelligencelog'
 readonly api_level="${BIL_ANDROID_EMULATOR_API:-}"
 readonly apk='build/app/outputs/flutter-apk/app-debug.apk'
-readonly evidence="artifacts/release/android_emulator_smoke/api-${BIL_ANDROID_EMULATOR_API:-unknown}"
+evidence="artifacts/release/android_emulator_smoke/api-${BIL_ANDROID_EMULATOR_API:-unknown}"
 stage='initialize'
 
 mkdir -p "$evidence"
@@ -123,101 +123,139 @@ stage='install-debug-apk'
 adb install "$apk"
 stage='launch-main-activity'
 adb shell am start -n "$app_id/.MainActivity"
-stage='wait-for-app-foreground'
-app_pid=''
-foreground_ready=false
-for attempt in {1..15}; do
-  app_pid=$(adb shell pidof "$app_id" | tr -d '\r' || true)
-  adb shell dumpsys window > "$evidence/foreground-focused-window.txt"
-  window_exit=0
-  python3 tool/release/verify_android_startup_frame.py \
-    --window-health-only --require-app-focus \
-    --window-state "$evidence/foreground-focused-window.txt" \
-    > "$evidence/foreground-window-check.txt" \
-    2> "$evidence/foreground-window-errors.txt" || window_exit=$?
-  if (( window_exit >= 20 && window_exit <= 22 )); then
-    cat "$evidence/foreground-window-check.txt" >&2
-    cat "$evidence/foreground-window-errors.txt" >&2
-    exit "$window_exit"
-  fi
-  if [[ -n "$app_pid" && "$window_exit" == 0 ]]; then
-    foreground_ready=true
-    break
-  fi
-  sleep 2
-done
-if [[ "$foreground_ready" != true ]]; then
-  cat "$evidence/foreground-window-check.txt" >&2 || true
-  echo 'BIL did not become the actual focused Android window.' >&2
-  exit 1
-fi
 
-stage='wait-for-accessible-app-content-and-first-frame'
-frame_ready=false
-app_content_ready=false
-frame_attempt=0
-for attempt in {1..30}; do
-  frame_attempt=$attempt
-  if adb shell uiautomator dump /sdcard/bil-startup-window.xml \
-      > "$evidence/startup-uiautomator-poll.txt" 2>&1 \
-      && adb pull /sdcard/bil-startup-window.xml \
-        "$evidence/startup-window.xml" >/dev/null 2>&1; then
-    if adb exec-out screencap -p > "$evidence/startup.png" \
-        2> "$evidence/screencap-errors.txt"; then
-      adb shell dumpsys window > "$evidence/startup-focused-window.txt"
-      frame_exit=0
-      python3 tool/release/verify_android_startup_frame.py \
-          "$evidence/startup.png" "$evidence/startup-window.xml" \
-          --window-state "$evidence/startup-focused-window.txt" \
-          > "$evidence/startup-frame.txt" \
-          2> "$evidence/startup-frame-errors.txt" || frame_exit=$?
-      if (( frame_exit >= 20 && frame_exit <= 22 )); then
-        cat "$evidence/startup-frame.txt" >&2
-        cat "$evidence/startup-frame-errors.txt" >&2
-        exit "$frame_exit"
-      fi
-      if (( frame_exit == 0 )); then
-        app_content_ready=true
-        frame_ready=true
-        break
+verify_running_activity() {
+  stage='wait-for-app-foreground'
+  app_pid=''
+  foreground_ready=false
+  for attempt in {1..15}; do
+    app_pid=$(adb shell pidof "$app_id" | tr -d '\r' || true)
+    adb shell dumpsys window > "$evidence/foreground-focused-window.txt"
+    window_exit=0
+    python3 tool/release/verify_android_startup_frame.py \
+      --window-health-only --require-app-focus \
+      --window-state "$evidence/foreground-focused-window.txt" \
+      > "$evidence/foreground-window-check.txt" \
+      2> "$evidence/foreground-window-errors.txt" || window_exit=$?
+    if (( window_exit >= 20 && window_exit <= 22 )); then
+      cat "$evidence/foreground-window-check.txt" >&2
+      cat "$evidence/foreground-window-errors.txt" >&2
+      exit "$window_exit"
+    fi
+    if [[ -n "$app_pid" && "$window_exit" == 0 ]]; then
+      foreground_ready=true
+      break
+    fi
+    sleep 2
+  done
+  if [[ "$foreground_ready" != true ]]; then
+    cat "$evidence/foreground-window-check.txt" >&2 || true
+    echo 'BIL did not become the actual focused Android window.' >&2
+    exit 1
+  fi
+
+  stage='wait-for-accessible-app-content-and-first-frame'
+  frame_ready=false
+  app_content_ready=false
+  frame_attempt=0
+  for attempt in {1..30}; do
+    frame_attempt=$attempt
+    if adb shell uiautomator dump /sdcard/bil-startup-window.xml \
+        > "$evidence/startup-uiautomator-poll.txt" 2>&1 \
+        && adb pull /sdcard/bil-startup-window.xml \
+          "$evidence/startup-window.xml" >/dev/null 2>&1; then
+      if adb exec-out screencap -p > "$evidence/startup.png" \
+          2> "$evidence/screencap-errors.txt"; then
+        adb shell dumpsys window > "$evidence/startup-focused-window.txt"
+        frame_exit=0
+        python3 tool/release/verify_android_startup_frame.py \
+            "$evidence/startup.png" "$evidence/startup-window.xml" \
+            --window-state "$evidence/startup-focused-window.txt" \
+            > "$evidence/startup-frame.txt" \
+            2> "$evidence/startup-frame-errors.txt" || frame_exit=$?
+        if (( frame_exit >= 20 && frame_exit <= 22 )); then
+          cat "$evidence/startup-frame.txt" >&2
+          cat "$evidence/startup-frame-errors.txt" >&2
+          exit "$frame_exit"
+        fi
+        if (( frame_exit == 0 )); then
+          app_content_ready=true
+          frame_ready=true
+          break
+        fi
       fi
     fi
+    sleep 2
+  done
+  printf 'attempts=%s\napp_content_ready=%s\nframe_ready=%s\n' \
+    "$frame_attempt" "$app_content_ready" "$frame_ready" \
+    > "$evidence/startup-frame-wait.txt"
+  if [[ -f "$evidence/startup.png" ]]; then
+    sha256sum "$evidence/startup.png" > "$evidence/startup.sha256"
   fi
-  sleep 2
-done
-printf 'attempts=%s\napp_content_ready=%s\nframe_ready=%s\n' \
-  "$frame_attempt" "$app_content_ready" "$frame_ready" \
-  > "$evidence/startup-frame-wait.txt"
-if [[ -f "$evidence/startup.png" ]]; then
-  sha256sum "$evidence/startup.png" > "$evidence/startup.sha256"
-fi
-if [[ "$frame_ready" != true ]]; then
-  cat "$evidence/startup-frame.txt" >&2 || true
-  echo 'BIL did not expose interactive app content and a visible frame within the startup wait.' >&2
-  exit 1
-fi
+  if [[ "$frame_ready" != true ]]; then
+    cat "$evidence/startup-frame.txt" >&2 || true
+    echo 'BIL did not expose interactive app content and a visible frame within the startup wait.' >&2
+    exit 1
+  fi
 
-stage='capture-launch-evidence'
-adb logcat -v threadtime -d -t 5000 > "$evidence/startup-logcat.txt" 2>&1 || true
-adb shell dumpsys activity activities > "$evidence/activity-state.txt" 2>&1 || true
-adb shell dumpsys window windows > "$evidence/window-state.txt" 2>&1 || true
-adb shell uiautomator dump /sdcard/bil-startup-window.xml \
-  > "$evidence/uiautomator.txt" 2>&1 || true
-adb pull /sdcard/bil-startup-window.xml "$evidence/startup-window.xml" \
-  >/dev/null 2>&1 || true
+  stage='capture-launch-evidence'
+  adb logcat -v threadtime -d -t 5000 > "$evidence/startup-logcat.txt" 2>&1 || true
+  adb shell dumpsys activity activities > "$evidence/activity-state.txt" 2>&1 || true
+  adb shell dumpsys window windows > "$evidence/window-state.txt" 2>&1 || true
+  adb shell uiautomator dump /sdcard/bil-startup-window.xml \
+    > "$evidence/uiautomator.txt" 2>&1 || true
+  adb pull /sdcard/bil-startup-window.xml "$evidence/startup-window.xml" \
+    >/dev/null 2>&1 || true
 
-stage='verify-first-frame-content'
-if ! python3 tool/release/classify_android_startup_anr.py \
-  --logcat "$evidence/startup-logcat.txt" \
-  --ui "$evidence/startup-window.xml" \
-  --evidence "$evidence/startup-anr-classification.json" \
-  > "$evidence/startup-anr-check.txt"; then
-  echo 'Android startup ANR evidence check failed.' >&2
-  exit 1
-fi
+  stage='verify-first-frame-content'
+  if ! python3 tool/release/classify_android_startup_anr.py \
+    --logcat "$evidence/startup-logcat.txt" \
+    --ui "$evidence/startup-window.xml" \
+    --evidence "$evidence/startup-anr-classification.json" \
+    > "$evidence/startup-anr-check.txt"; then
+    echo 'Android startup ANR evidence check failed.' >&2
+    exit 1
+  fi
 
-stage='check-app-crash-log'
-if adb logcat -d -t 2000 --pid="$app_pid" | grep -Eq 'FATAL EXCEPTION|Fatal signal [0-9]+'; then
-  echo 'Android reported a fatal app crash during offline startup.' >&2
-  exit 1
+  stage='check-app-crash-log'
+  if adb logcat -d -t 2000 --pid="$app_pid" | grep -Eq 'FATAL EXCEPTION|Fatal signal [0-9]+'; then
+    echo 'Android reported a fatal app crash during offline startup.' >&2
+    exit 1
+  fi
+}
+
+verify_running_activity
+
+if [[ "$api_level" == 26 ]]; then
+  stage='qualify-early-flutter-window-relaunch'
+  evidence="$evidence/early-relaunch"
+  mkdir -p "$evidence"
+  nonce=$(python3 -c 'import secrets; print(secrets.token_hex(16))')
+  printf '%s\n' "$nonce" > "$evidence/nonce.txt"
+  timeout 270s adb shell am instrument -w -r -e nonce "$nonce" \
+    "$app_id/.Api26FirstDrawInstrumentation" > "$evidence/instrumentation.txt" 2>&1 &
+  instrumentation_pid=$!
+  ready=false
+  for attempt in {1..80}; do
+    if adb shell run-as "$app_id" ls "cache/bil-drew-$nonce" >/dev/null 2>&1; then
+      ready=true
+      break
+    fi
+    kill -0 "$instrumentation_pid" 2>/dev/null || break
+    sleep 1
+  done
+  if [[ "$ready" != true ]]; then
+    cat "$evidence/instrumentation.txt" >&2
+    echo 'No qualified API 26 early relaunch and replacement draw.' >&2
+    exit 1
+  fi
+  verify_running_activity
+  stage='verify-early-relaunch-result'
+  adb shell run-as "$app_id" touch "cache/bil-captured-$nonce"
+  wait "$instrumentation_pid"
+  tr -d '\r' < "$evidence/instrumentation.txt" > "$evidence/result.txt"
+  grep -Fxq "INSTRUMENTATION_RESULT: verified=$nonce" "$evidence/result.txt"
+  grep -Fxq "INSTRUMENTATION_RESULT: pid=$app_pid" "$evidence/result.txt"
+  grep -Fxq 'INSTRUMENTATION_CODE: -1' "$evidence/result.txt"
 fi

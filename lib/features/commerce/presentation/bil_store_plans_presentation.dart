@@ -1,5 +1,19 @@
 part of 'bil_store_plans_page.dart';
 
+// A presentation deadline only. The original authority read can still settle.
+final _plansReadDeadline = FutureProvider.autoDispose.family<bool, int>((
+  ref,
+  _,
+) {
+  final elapsed = Completer<bool>();
+  final timer = Timer(
+    const Duration(seconds: 30),
+    () => elapsed.complete(true),
+  );
+  ref.onDispose(timer.cancel);
+  return elapsed.future;
+});
+
 extension _BilStorePlansPresentation on _BilStorePlansPageState {
   String? _ownedActiveProductHint(
     VerifiedStorePurchaseService? store,
@@ -122,6 +136,20 @@ extension _BilStorePlansPresentation on _BilStorePlansPageState {
 
   void _leavePlans() =>
       context.canPop() ? context.pop() : context.go('/dashboard');
+
+  Widget _slowAccessStatus(int generation, int visit) {
+    final copy = AppLocalizations(Localizations.localeOf(context));
+    return ListTile(
+      title: Text(copy.text('Subscription check unavailable')),
+      trailing: _retriedPendingVisit == visit
+          ? null
+          : TextButton(
+              key: const Key('store-slow-access-retry'),
+              onPressed: () => _retrySlowRead(generation, visit),
+              child: Text(copy.text('Try again')),
+            ),
+    );
+  }
 
   Widget _accountAccessStatus({
     required String locale,

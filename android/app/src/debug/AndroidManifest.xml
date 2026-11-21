@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- emulator-5554 exposes a zero-sized OpenGL texture limit to Impeller.
          Keep release behavior untouched while enabling deterministic live QA. -->
+    <instrumentation
+        android:name=".Api26FirstDrawInstrumentation"
+        android:targetPackage="${applicationId}" />
     <application>
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"

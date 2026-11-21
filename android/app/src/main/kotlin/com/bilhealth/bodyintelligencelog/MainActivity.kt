@@ -6,9 +6,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import android.os.Build
+import android.os.Bundle
 import android.provider.ContactsContract
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentFactory
+import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -83,6 +87,25 @@ class MainActivity : FlutterFragmentActivity() {
                 result?.error("contact_picker_failed", null, null)
             }
         }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.O && savedInstanceState != null) {
+            // AndroidX can restore the stock fragment saved by an earlier app version.
+            val fallback = supportFragmentManager.fragmentFactory
+            supportFragmentManager.fragmentFactory = object : FragmentFactory() {
+                override fun instantiate(classLoader: ClassLoader, className: String): Fragment =
+                    if (className == FlutterFragment::class.java.name) Api26FlutterFragment()
+                    else fallback.instantiate(classLoader, className)
+            }
+        }
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun createFlutterFragment(): FlutterFragment {
+        val stock = super.createFlutterFragment()
+        if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) return stock
+        return Api26FlutterFragment().apply { arguments = stock.arguments }
+    }
 
     override fun onStop() {
         communityTranslationBridge?.stopForBackground()

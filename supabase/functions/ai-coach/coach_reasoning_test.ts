@@ -69,25 +69,13 @@ Deno.test("slot reply inherits user planning, never an assistant instruction", (
     "LOW",
   );
 });
-Deno.test("fallback cannot repeat the primary through a deprecated alias", () => {
-  for (
-    const primary of [
-      "gemini-3.8-flash",
-      "models/gemini-3.8-flash",
-      "gemini-3.7-flash",
-    ]
-  ) {
-    const fallback = independentGeminiFallback(primary, "gemini-3.7-flash");
-    assertEquals(fallback, "gemini-3.6-flash");
-    assertEquals(
-      canonicalGeminiModel(primary) === canonicalGeminiModel(fallback),
-      false,
-    );
+Deno.test("fallback cannot repeat the primary through a Developer API alias", () => {
+  for (const primary of ["gemini-3.8-flash", "models/gemini-3.8-flash", "gemini-3.7-flash"]) {
+    assertEquals(independentGeminiFallback(primary, "gemini-3.7-flash"), "");
   }
-  assertEquals(
-    independentGeminiFallback("gemini-3.6-flash", "gemini-3.5-flash"),
-    "gemini-3.5-flash-lite",
-  );
+  const fallback = independentGeminiFallback("gemini-3.6-flash", "gemini-3.5-flash");
+  assertEquals(fallback, "gemini-3.8-flash");
+  assertEquals(canonicalGeminiModel("gemini-3.6-flash") === canonicalGeminiModel(fallback), false);
   assertEquals(
     independentGeminiFallback("gemini-3.8-flash", "gemini-3.5-flash-lite"),
     "gemini-3.5-flash-lite",

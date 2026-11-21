@@ -117,6 +117,7 @@ function request(body: Record<string, unknown> = {}) {
 const integrity = async ({ body }: { body: Record<string, unknown> }) => body;
 
 Deno.test("citation-repair timeout recovers on independent model within24s/three calls/one reservation", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const f = fixture();
   let now = 0;
   const attempts: Array<{ model: string; timeout: number | undefined }> = [];
@@ -143,11 +144,11 @@ Deno.test("citation-repair timeout recovers on independent model within24s/three
   assertEquals(attempts.map((row) => row.model), [
     "gemini-3.8-flash",
     "gemini-3.8-flash",
-    "gemini-3.6-flash",
+    "gemini-3.5-flash",
   ]);
   assertEquals(attempts.map((row) => row.timeout), [undefined, 10000, 10000]);
   assertEquals(data.fallback_used, true);
-  assertEquals(data.model, "gemini-3.6-flash");
+  assertEquals(data.model, "gemini-3.5-flash");
   assertEquals(data.attempts, 3);
   assertEquals(data.citations, ["cdc_healthy_eating"]);
   assertEquals(
@@ -162,9 +163,11 @@ Deno.test("citation-repair timeout recovers on independent model within24s/three
   assertEquals(settlements[0].params.p_input_tokens, 40);
   assertEquals(settlements[0].params.p_output_tokens, 20);
   assertEquals(settlements[0].params.p_owner_id, owner);
+  });
 });
 
 Deno.test("failed primary/fallback/repair never dispatch a fourth call or a second debit", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const f = fixture();
   let now = 0, calls = 0;
   const diagnostics: Array<{ provider_attempts: number }> = [];
@@ -196,9 +199,11 @@ Deno.test("failed primary/fallback/repair never dispatch a fourth call or a seco
     "bil_settle_ai_usage",
   ]);
   assertEquals(f.calls[2].params.p_succeeded, false);
+  });
 });
 
 Deno.test("two provider timeouts remain an honest failure, refund once and do not loop", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const f = fixture();
   let now = 0, calls = 0;
   const response = await handler(request(), {
@@ -216,6 +221,7 @@ Deno.test("two provider timeouts remain an honest failure, refund once and do no
   assertEquals((await response.json()).error, "provider_timeout");
   assertEquals(calls, 2);
   assertEquals(f.calls[2].params.p_succeeded, false);
+  });
 });
 
 Deno.test("late provider success past absolute24s is discarded and refunded", async () => {
@@ -238,6 +244,7 @@ Deno.test("late provider success past absolute24s is discarded and refunded", as
 });
 
 Deno.test("independent repair must still pass the unchanged citation validator", async () => {
+  await withCoachModelFixture("gemini-3.5-flash", async () => {
   const f = fixture();
   let calls = 0;
   const response = await handler(request(), {
@@ -263,6 +270,7 @@ Deno.test("independent repair must still pass the unchanged citation validator",
   assertEquals((await response.json()).error, "missing_health_citation");
   assertEquals(calls, 3);
   assertEquals(f.calls[2].params.p_succeeded, false);
+  });
 });
 
 for (
@@ -463,3 +471,34 @@ Deno.test("response-body abort is a bounded timeout, not a malformed JSON retry"
     else Deno.env.set("BIL_GEMINI_API_KEY", oldKey);
   }
 });
+
+// Explicit isolated configuration for recovery tests. This fixture exercises
+// a configured nonretiring independent model; it is not a Production choice
+// or evidence of that model's live Express entitlement. No network is used.
+async function withCoachModelFixture<T>(
+  fallback: string | undefined,
+  run: () => Promise<T>,
+): Promise<T> {
+  const values: Record<string, string | undefined> = {
+    BIL_GEMINI_TEXT_MODEL: "gemini-3.8-flash",
+    BIL_GEMINI_TEXT_FALLBACK_MODEL: fallback,
+    BIL_GEMINI_VISION_ENDPOINT:
+      "https://aiplatform.googleapis.com/v1beta1/publishers/google",
+    BIL_GEMINI_TEXT_ENDPOINT: undefined,
+  };
+  const previous = Object.fromEntries(
+    Object.keys(values).map((key) => [key, Deno.env.get(key)]),
+  );
+  try {
+    for (const [key, value] of Object.entries(values)) {
+      if (value === undefined) Deno.env.delete(key);
+      else Deno.env.set(key, value);
+    }
+    return await run();
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) Deno.env.delete(key);
+      else Deno.env.set(key, value);
+    }
+  }
+}
