@@ -42,8 +42,10 @@ final class AppleStoreOfferMetadata {
 
   final String? billingPeriodIso8601;
   final String? trialPeriodIso8601;
-  final bool trialEligible;
+  final bool? trialEligible;
 }
+
+const _appleEligibilityTimeout = Duration(seconds: 2);
 
 typedef AppleIntroductoryEligibility = Future<bool> Function(String productId);
 
@@ -78,22 +80,13 @@ String? _storeKit1PeriodIso8601(
   return 'P$value$unit';
 }
 
-Future<bool> _defaultAppleIntroductoryEligibility(String productId) async {
-  try {
-    return await SK2Product.isIntroductoryOfferEligible(productId);
-  } on Object {
-    // Eligibility must be authoritative. A platform failure cannot turn an
-    // introductory offer into a user-visible free-trial promise.
-    return false;
-  }
-}
-
 /// Reads only a configured, zero-price Apple introductory free trial and then
 /// asks StoreKit whether the current account is eligible. Missing metadata or
 /// an eligibility error fails closed.
 Future<AppleStoreOfferMetadata?> appleStoreOfferMetadata(
   ProductDetails product, {
   AppleIntroductoryEligibility? isIntroductoryOfferEligible,
+  Duration eligibilityTimeout = _appleEligibilityTimeout,
 }) async {
   String? billingPeriod;
   String? configuredTrialPeriod;
@@ -149,18 +142,20 @@ Future<AppleStoreOfferMetadata?> appleStoreOfferMetadata(
   }
 
   final eligibility =
-      isIntroductoryOfferEligible ?? _defaultAppleIntroductoryEligibility;
-  var eligible = false;
-  try {
-    eligible = await eligibility(product.id);
-  } on Object {
-    // StoreKit eligibility is authoritative. If it cannot be resolved, hide
-    // the trial instead of presenting an offer the account may not receive.
-    eligible = false;
+      isIntroductoryOfferEligible ?? SK2Product.isIntroductoryOfferEligible;
+  bool? eligible;
+  if (eligibilityTimeout > Duration.zero) {
+    try {
+      eligible = await eligibility(product.id).timeout(eligibilityTimeout);
+    } on Object {
+      // The recurring price and term are known even when trial eligibility
+      // is unavailable. Only an affirmative StoreKit answer advertises it.
+      eligible = null;
+    }
   }
   return AppleStoreOfferMetadata(
     billingPeriodIso8601: billingPeriod,
-    trialPeriodIso8601: eligible ? configuredTrialPeriod : null,
+    trialPeriodIso8601: eligible == true ? configuredTrialPeriod : null,
     trialEligible: eligible,
   );
 }
@@ -314,15 +309,18 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
     this.boostCheckout,
     this.loadBoostCatalog,
     this.boostProduct,
+    this.isIntroductoryOfferEligible,
   });
 
   final VerifiedStorePurchaseService store;
   final Future<void> Function(BilStoreOfferMetadata)? boostCheckout;
   final Future<void> Function()? loadBoostCatalog;
   final ProductDetails? Function()? boostProduct;
+  final AppleIntroductoryEligibility? isIntroductoryOfferEligible;
 
   @override
   Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) async {
+    final elapsed = Stopwatch()..start();
     final visit = store.captureCatalogVisit();
     final country = await store.readStorefrontCountry();
     if (!store.isCurrentCatalogVisit(visit)) return const [];
@@ -388,7 +386,19 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
       final binding = StoreCatalogConfiguration.bindingForProduct(product.id);
       if (binding == null) continue;
       final playOffer = googlePlayOfferMetadata(product);
-      final appleOffer = await appleStoreOfferMetadata(product);
+      // Optional eligibility must finish before the page's catalog deadline,
+      // including when the required product query consumed most of its time.
+      final remaining =
+          BilStoreCatalogGateway.loadTimeout -
+          elapsed.elapsed -
+          const Duration(milliseconds: 250);
+      final appleOffer = await appleStoreOfferMetadata(
+        product,
+        isIntroductoryOfferEligible: isIntroductoryOfferEligible,
+        eligibilityTimeout: remaining < _appleEligibilityTimeout
+            ? remaining
+            : _appleEligibilityTimeout,
+      );
       if (!store.isCurrentCatalogVisit(visit)) return const [];
       final allowsTrial =
           binding.plan == CommercePlan.premiumAiCoach &&
