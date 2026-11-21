@@ -1,25 +1,76 @@
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.initialization.resolve.RepositoriesMode
+import org.gradle.internal.Actions
+import org.gradle.api.internal.artifacts.repositories.ArtifactRepositoryInternal
+import org.gradle.api.internal.artifacts.repositories.ContentFilteringRepository
+import org.gradle.api.internal.artifacts.repositories.ResolutionAwareRepository
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Proxy
 
-// CI-only process opt-in. Never writes source, SDK, dependency versions or repos.
+// CI-only process opt-in. Add an independent transport for public Maven Central artifacts.
 if (System.getenv('GITHUB_ACTIONS') == 'true') {
     def mirrorUrl = 'https://maven-central.storage-download.googleapis.com/maven2/'
-    def mirrorName = 'BIL_CI_GoogleCentralMirror_Kotlin'
+    def mirrorName = 'BIL_CI_GoogleCentralMirror'
     def busy = Collections.newSetFromMap(new IdentityHashMap())
     def attached = Collections.newSetFromMap(new IdentityHashMap())
     def buildSettings = null
-    def attach
-    attach = { repositories, pluginScope = false ->
+    // Gradle 9.1 exposes a read-only snapshot of the anchor's content policy.
+    // Inspect the copy so source repositories remain configurable.
+    def unrestricted = { anchor ->
+        def policy = anchor.repositoryDescriptorCopy
+        policy.toContentFilter().is(Actions.doNothing()) &&
+            policy.includedConfigurations == null && policy.excludedConfigurations == null &&
+            policy.requiredAttributes == null
+    }
+    def publicAnchor = { repo ->
+        if (!(repo instanceof MavenArtifactRepository)) return false
+        def uri = repo.url
+        if (uri == null || uri.scheme != 'https' || uri.userInfo != null ||
+            uri.port != -1 || uri.query != null || uri.fragment != null) return false
+        def path = uri.path.replaceAll('/+$','')
+        def central = uri.host in ['repo.maven.apache.org', 'repo1.maven.org'] && path == '/maven2'
+        def portal = uri.host == 'plugins.gradle.org' && path == '/m2'
+        if ((!central && !portal) || repo.configuredCredentials.present ||
+            !repo.authentication.empty || !repo.artifactUrls.empty) return false
+        def metadata = repo.metadataSources
+        metadata.mavenPomEnabled && !metadata.gradleMetadataEnabled && !metadata.artifactEnabled &&
+            !metadata.ignoreGradleMetadataRedirectionEnabled && unrestricted(repo)
+    }
+    // Gradle copies plugin-repository filters and reads ordinary repository filters
+    // directly. Check the source policy at those two boundaries, including rules
+    // added after repository declaration. A constrained anchor keeps its own route.
+    def bindPolicy = { mirror, anchor, repositories ->
+        def bound
+        def policy = {
+            def copy = mirror.repositoryDescriptorCopy
+            def slot = repositories.indexOf(anchor)
+            if (slot <= 0 || !repositories[slot - 1].is(bound) || !publicAnchor(anchor)) {
+                copy.excludeGroupByRegex('.*')
+            }
+            copy
+        }
+        def types = [MavenArtifactRepository, ArtifactRepositoryInternal,
+                     ContentFilteringRepository, ResolutionAwareRepository] as Class[]
+        bound = Proxy.newProxyInstance(this.class.classLoader, types, { proxy, method, args ->
+            switch (method.name) {
+                case 'getRepositoryDescriptorCopy': return policy()
+                case 'getContentFilter': return policy().toContentFilter()
+                case 'equals': return proxy.is(args[0])
+                case 'hashCode': return System.identityHashCode(proxy)
+                default:
+                    try { return method.invoke(mirror, args) }
+                    catch (InvocationTargetException error) { throw error.cause }
+            }
+        } as java.lang.reflect.InvocationHandler)
+    }
+    def attach = { repositories ->
         if (!attached.add(repositories)) return
+        def installedMirror = null
         def maybeAdd = { repository ->
-            if (!(repository instanceof MavenArtifactRepository) || busy.contains(repositories)) return
-            def uri = repository.url
-            def central = uri.scheme == 'https' && uri.host in ['repo.maven.apache.org','repo1.maven.org'] && uri.path.replaceAll('/+$','') == '/maven2'
-            def portal = uri.scheme == 'https' && uri.host == 'plugins.gradle.org' && uri.path.replaceAll('/+$','') == '/m2'
-            if (!central && !portal) return
+            if (busy.contains(repositories) || repository.is(installedMirror) || !publicAnchor(repository)) return
             def existing = repositories.findByName(mirrorName)
             if (existing != null) {
-                if (!(existing instanceof MavenArtifactRepository) || existing.url.toString() != mirrorUrl) throw new GradleException('Unexpected CI mirror name collision')
+                if (!existing.is(installedMirror)) throw new GradleException('Unexpected CI mirror name collision')
                 return
             }
             busy.add(repositories)
@@ -27,15 +78,12 @@ if (System.getenv('GITHUB_ACTIONS') == 'true') {
                 def mirror = repositories.maven {
                     name = mirrorName
                     url = mirrorUrl
-                    // Only the proven public Kotlin namespace. Private/Google
-                    // namespaces and every original repository/auth object stay.
-                    content { includeGroup('org.jetbrains.kotlin') }
                 }
                 repositories.remove(mirror)
-                repositories.addFirst(mirror)
-                if (pluginScope && !repositories.any { candidate ->
-                    candidate instanceof MavenArtifactRepository && candidate.url.scheme == 'https' && candidate.url.host in ['repo.maven.apache.org','repo1.maven.org'] && candidate.url.path.replaceAll('/+$','') == '/maven2'
-                }) repositories.mavenCentral()
+                installedMirror = bindPolicy(mirror, repository, repositories)
+                // Insert at the public repository's slot so earlier Google and
+                // private repositories retain priority and their original objects.
+                repositories.add(repositories.indexOf(repository), installedMirror)
             } finally { busy.remove(repositories) }
         }
         repositories.whenObjectAdded(maybeAdd)
@@ -43,13 +91,17 @@ if (System.getenv('GITHUB_ACTIONS') == 'true') {
     }
     gradle.beforeSettings { settings ->
         buildSettings = settings
-        attach(settings.pluginManagement.repositories, true)
+        attach(settings.pluginManagement.repositories)
         attach(settings.dependencyResolutionManagement.repositories)
     }
     gradle.settingsEvaluated { settings ->
         // Preserve Gradle's implicit default Portal, explicitly only if source
         // declared no plugin repositories. Critical for Flutter included build.
-        if (settings.pluginManagement.repositories.isEmpty()) settings.pluginManagement.repositories.gradlePluginPortal()
+        def plugins = settings.pluginManagement.repositories
+        if (plugins.isEmpty()) {
+            plugins.gradlePluginPortal()
+            plugins.mavenCentral()
+        }
     }
     gradle.beforeProject { project ->
         def mode = buildSettings.dependencyResolutionManagement.repositoriesMode.get()

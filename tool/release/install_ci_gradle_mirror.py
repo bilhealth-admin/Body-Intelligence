@@ -1,11 +1,11 @@
-"""Install the exact public-Kotlin repository init only on a GitHub-hosted CI runner."""
+"""Install the exact public Maven Central repository init only on a GitHub-hosted CI runner."""
 from __future__ import annotations
 import hashlib
 import os
 from pathlib import Path
 import tempfile
 
-ASSET_SHA256 = "e4467d99fb37cc0f3689e6a8eb0a1c700d074187f0720d6b08f8f55d88ca7961"
+ASSET_SHA256 = "2aefee6a65cd561b9c3446ade54e1ad08470acd4285eb14cb67d2e8289c30d56"
 ASSET_RELATIVE = ".github/gradle/bil_ci_kotlin_central_mirror.init.gradle"
 INIT_NAME = "bil_ci_kotlin_central_mirror.init.gradle"
 
