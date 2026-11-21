@@ -623,10 +623,13 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
       fit: StackFit.expand,
       children: [
         page,
-        const Positioned(
+        Positioned(
           left: 0,
+          right: 0,
           top: 0,
-          child: CoachNativeRendererPreparation(),
+          child: CoachNativeRendererPreparation(
+            bodyFontSize: _coachConversationBodyStyle(context)?.fontSize ?? 16,
+          ),
         ),
       ],
     );

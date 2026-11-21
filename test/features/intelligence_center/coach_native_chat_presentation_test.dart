@@ -81,6 +81,69 @@ void main() {
   });
 
   testWidgets(
+    'hidden preparation sends the native body sizing inputs',
+    (tester) async {
+      final messenger = tester.binding.defaultBinaryMessenger;
+      final payloads = <Map<Object?, Object?>>[];
+      messenger.setMockMethodCallHandler(SystemChannels.platform_views, (
+        call,
+      ) async {
+        if (call.method == 'create') {
+          final args = call.arguments as Map;
+          expect(args['viewType'], 'bil/coach_markdown');
+          final bytes = args['params'] as Uint8List;
+          final payload = const StandardMessageCodec().decodeMessage(
+            ByteData.sublistView(bytes),
+          );
+          payloads.add(payload as Map<Object?, Object?>);
+        }
+        return null;
+      });
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(
+          SystemChannels.platform_views,
+          null,
+        ),
+      );
+      for (final rtl in [true, false]) {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: MediaQueryData(
+              size: const Size(402, 874),
+              padding: EdgeInsets.only(left: rtl ? 0 : 12),
+              textScaler: TextScaler.linear(rtl ? 2 : 1),
+            ),
+            child: Directionality(
+              textDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+              child: const Center(
+                child: SizedBox(
+                  width: 402,
+                  child: CoachNativeRendererPreparation(bodyFontSize: 16),
+                ),
+              ),
+            ),
+          ),
+        );
+        final finder = find.byType(UiKitView);
+        final view = tester.widget<UiKitView>(finder);
+        expect(payloads, hasLength(rtl ? 1 : 2));
+        final params = payloads.last;
+        expect(params['width'], rtl ? 356.0 : 344.0);
+        expect(params['fontSize'], rtl ? 32.0 : 16.0);
+        expect(params['rtl'], rtl);
+        expect(params['text'], rtl ? 'المدرب BIL' : 'BIL Coach');
+        expect(params['foreground'], 0);
+        expect(params['accent'], 0);
+        expect(view.onPlatformViewCreated, isNull);
+        expect(tester.getSize(finder), const Size.square(1));
+        await tester.pump();
+        expect(payloads, hasLength(rtl ? 1 : 2));
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
     'renderer preparation is composed without taking input or semantics',
     (tester) async {
       final semantics = tester.ensureSemantics();

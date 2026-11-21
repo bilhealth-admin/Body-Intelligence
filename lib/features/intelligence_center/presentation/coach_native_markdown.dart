@@ -50,7 +50,9 @@ class CoachNativeMarkdownSurface extends StatelessWidget {
 /// before a reply arrives. It contains only fixed, transparent preparation text;
 /// no account/context data, input, semantics, network or AI work is involved.
 class CoachNativeRendererPreparation extends StatelessWidget {
-  const CoachNativeRendererPreparation({super.key});
+  const CoachNativeRendererPreparation({required this.bodyFontSize, super.key});
+
+  final double bodyFontSize;
 
   static Widget surface(Widget child) => SizedBox.square(
     dimension: 1,
@@ -60,23 +62,43 @@ class CoachNativeRendererPreparation extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) => surface(
-    const UiKitView(
-      viewType: 'bil/coach_markdown',
-      layoutDirection: TextDirection.rtl,
-      creationParamsCodec: StandardMessageCodec(),
-      creationParams: <String, Object>{
-        'generation': 'bil-renderer-preparation',
-        'text': 'BIL المدرب',
-        'rtl': true,
-        'fontSize': 32.0,
-        'foreground': 0,
-        'accent': 0,
+  Widget build(BuildContext context) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final fontSize = MediaQuery.textScalerOf(context).scale(bodyFontSize);
+    final safePadding = MediaQuery.paddingOf(context).horizontal;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Match the 920-point Coach canvas, 10-point history gutters and
+        // 13-point reply card padding. The real reply still measures itself.
+        final canvas = (constraints.maxWidth - safePadding).clamp(0.0, 920.0);
+        final width = canvas - 2 * (10 + 13);
+        if (!constraints.hasBoundedWidth || width <= 0) {
+          return const SizedBox.shrink();
+        }
+        return Align(
+          alignment: Alignment.topLeft,
+          child: surface(
+            UiKitView(
+              key: ValueKey((width, fontSize, rtl)),
+              viewType: 'bil/coach_markdown',
+              layoutDirection: rtl ? TextDirection.rtl : TextDirection.ltr,
+              creationParamsCodec: const StandardMessageCodec(),
+              creationParams: <String, Object>{
+                'generation': 'bil-renderer-preparation',
+                'width': width,
+                'text': rtl ? 'المدرب BIL' : 'BIL Coach',
+                'rtl': rtl,
+                'fontSize': fontSize,
+                'foreground': 0,
+                'accent': 0,
+              },
+              // No visibility acknowledgement is sent for this preparation.
+            ),
+          ),
+        );
       },
-      // No visibility acknowledgement is sent. UIKit retains its initial
-      // alpha=0 and accessibility-hidden state for this preparation view.
-    ),
-  );
+    );
+  }
 }
 
 /// The current ai-coach contract is one validated JSON response, not SSE.
