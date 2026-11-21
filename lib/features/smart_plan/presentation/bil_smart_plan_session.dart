@@ -227,9 +227,12 @@ class _BilSmartPlanSessionState extends ConsumerState<BilSmartPlanSessionPage> {
                         }
                         final item = items[_step];
                         final dose = _doses[item.id];
-                        final title = locale == 'ar' && dose?.titleAr != null
-                            ? dose!.titleAr!
-                            : item.title;
+                        final title =
+                            const BilSmartPlanPrescriptions().exerciseTitle(
+                              item.id,
+                              locale: locale,
+                            ) ??
+                            item.title;
                         return ListView(
                           key: const ValueKey(
                             'bil-smart-plan-exercises-scroll',

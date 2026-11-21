@@ -22,6 +22,7 @@ class CommunityTranslationContent extends ConsumerStatefulWidget {
     required this.builder,
     this.ownerChanges,
     this.ownerIsCurrent,
+    this.controlsVisible = true,
   });
   final String contentId;
   final String ownerId;
@@ -29,6 +30,7 @@ class CommunityTranslationContent extends ConsumerStatefulWidget {
   final Widget Function(Map<String, String>) builder;
   final Listenable? ownerChanges;
   final ValueGetter<bool>? ownerIsCurrent;
+  final bool controlsVisible;
   @override
   ConsumerState<CommunityTranslationContent> createState() =>
       _TranslationState();
@@ -76,7 +78,10 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
       oldWidget.ownerChanges?.removeListener(_ownerChanged);
       widget.ownerChanges?.addListener(_ownerChanged);
     }
-    if (oldWidget.ownerId != widget.ownerId ||
+    // Compact feed previews return the exact authored source on collapse.
+    // A translated preview must never remain visible without its attribution.
+    if ((oldWidget.controlsVisible && !widget.controlsVisible) ||
+        oldWidget.ownerId != widget.ownerId ||
         oldWidget.contentId != widget.contentId ||
         !mapEquals(oldWidget.texts, widget.texts)) {
       _retire();
@@ -106,7 +111,7 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
   }
 
   Future<void> _translate() async {
-    if (!_allowed || _request != null) {
+    if (!widget.controlsVisible || !_allowed || _request != null) {
       return;
     }
     if (_result != null) {
@@ -208,7 +213,8 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         widget.builder(_translated ? _result!.texts : widget.texts),
-        if (_allowed &&
+        if (widget.controlsVisible &&
+            _allowed &&
             widget.texts.values.any((text) => text.trim().isNotEmpty))
           Align(
             alignment: AlignmentDirectional.centerStart,
@@ -233,7 +239,7 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
               ),
             ),
           ),
-        if (busy || _failed || _sameLanguage)
+        if (widget.controlsVisible && (busy || _failed || _sameLanguage))
           Semantics(
             liveRegion: true,
             child: Text(
@@ -248,12 +254,12 @@ class _TranslationState extends ConsumerState<CommunityTranslationContent>
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
-        if (_allowed && !_translated)
+        if (widget.controlsVisible && _allowed && !_translated)
           Text(
             cloudTranslationDisclosure(context),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-        if (_translated) ...[
+        if (widget.controlsVisible && _translated) ...[
           Row(
             children: [
               Expanded(

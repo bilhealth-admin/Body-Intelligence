@@ -69,7 +69,7 @@ class _PremiumRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Use the exact-expiry access view shared by the destination gate.
     // Never classify an unverified response as a confirmed Free entitlement.
-    final entitlement = ref.watch(verifiedSubscriptionAccessProvider);
+    final entitlement = ref.watch(verifiedSubscriptionPresentationProvider);
     final verified = entitlement.asData?.value;
     final active =
         verified?.authority == EntitlementAuthority.verifiedServer &&

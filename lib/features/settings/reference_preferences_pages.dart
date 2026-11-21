@@ -26,6 +26,7 @@ import '../nutrition/domain/nutrition_goal_snapshot.dart';
 import '../nutrition/providers/nutrition_goal_snapshot_provider.dart';
 import '../nutrition/providers/nutrition_goal_defaults_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
+import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
 import 'data/diary_sharing_support_repository.dart';
 import '../visual_2026/bil_calm_visual_scope.dart';

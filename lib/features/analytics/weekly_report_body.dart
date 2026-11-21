@@ -7,9 +7,14 @@ class _Body extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final days = report.days;
     final verifiedSubscription = ref.watch(verifiedSubscriptionAccessProvider);
-    final premiumActive = verifiedSubscription.value?.grants(
-      CommerceEntitlement.advancedIntelligence,
-    );
+    final presentation = ref.watch(verifiedSubscriptionPresentationProvider);
+    final verified = verifiedSubscription.asData?.value;
+    final premiumActive =
+        verified?.authority == EntitlementAuthority.verifiedServer
+        ? verified!.grants(CommerceEntitlement.advancedIntelligence)
+        : ref.watch(verifiedFreePresentationProvider)
+        ? false
+        : null;
     final start = days.isEmpty ? '' : days.first.dayKey;
     final end = days.isEmpty ? '' : days.last.dayKey;
     final memberSince =
@@ -67,9 +72,7 @@ class _Body extends ConsumerWidget {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 12),
-        if (verifiedSubscription.isLoading)
-          const BilFeatureWelcomeStatus(key: Key('weekly-entitlement-loading'))
-        else if (verifiedSubscription.hasError)
+        if (presentation.hasError)
           ListTile(
             key: const Key('weekly-entitlement-error'),
             leading: const Icon(Icons.cloud_off_rounded),
@@ -161,22 +164,6 @@ class _Body extends ConsumerWidget {
                 icon: Icons.workspace_premium_outlined,
                 label: _t(context, 'unlock_calorie_insights'),
                 filled: true,
-              )
-            else
-              Semantics(
-                key: const Key('weekly-calories-premium-cta'),
-                container: true,
-                label: _t(context, 'checking_subscription'),
-                child: Row(
-                  children: [
-                    const SizedBox.square(
-                      dimension: 18,
-                      child: BilFeatureWelcomeStatus(),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(child: Text(_t(context, 'checking_subscription'))),
-                  ],
-                ),
               ),
             const SizedBox(height: 10),
           ],
@@ -211,12 +198,12 @@ class _Body extends ConsumerWidget {
               ? Icons.workspace_premium_rounded
               : premiumActive == false
               ? Icons.lock_outline_rounded
-              : Icons.hourglass_top_rounded,
+              : Icons.insights_outlined,
           children: [
             Semantics(
               key: const Key('weekly-report-premium-state'),
               label: premiumActive == null
-                  ? _t(context, 'subscription_check_unavailable')
+                  ? _t(context, 'premium_insights')
                   : _weeklyPremiumState(context, premiumActive),
               button: premiumActive == false,
               child: InkWell(
@@ -231,7 +218,7 @@ class _Body extends ConsumerWidget {
                         ? _t(context, 'premium_truth')
                         : premiumActive == false
                         ? _weeklyPremiumState(context, false)
-                        : _t(context, 'subscription_check_unavailable'),
+                        : _t(context, 'premium_insights'),
                   ),
                 ),
               ),

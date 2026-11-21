@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/features/commerce/repositories/admin_entitlement_continuity_store.dart';
 import 'package:body_intelligence_log/features/commerce/repositories/server_entitlement_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
@@ -186,6 +187,186 @@ void main() {
         expect(result.authority, EntitlementAuthority.verifiedServer);
         expect(h.seen, [_closedPath, _storePath, _adminPath]);
         expect(h.storageOperations, isEmpty);
+      } finally {
+        await h.close();
+      }
+    },
+  );
+
+  for (final admin in [false, true]) {
+    test(
+      'passive malformed grant keeps only its proven lease: admin=$admin',
+      () async {
+        final h = await _Harness.open();
+        try {
+          if (admin) {
+            h.adminBody = h.adminGrant();
+          } else {
+            h.closedRows = [h.closedGrant()];
+          }
+          final first = await h.repo.current();
+          final tier = admin
+              ? CommercePlan.premium
+              : CommercePlan.premiumAiCoach;
+          expect(first.plan, tier);
+          final cutoff = h.now.add(const Duration(minutes: 5));
+          h.now = h.now.add(const Duration(seconds: 30));
+          if (admin) {
+            h.adminBody = {'owner_id': h.owner, 'plan_id': 'premium'};
+          } else {
+            h.closedRows = [
+              {'active': 'true', 'expires_at': 'unknown'},
+            ];
+          }
+          final second = await h.repo.current();
+          expect(second.plan, tier);
+          expect(second.authority, EntitlementAuthority.verifiedServer);
+          expect(second.currentPeriodEndsAt, cutoff);
+          h.now = cutoff;
+          final expired = await h.repo.current();
+          expect(expired.plan, CommercePlan.free);
+          expect(expired.authority, EntitlementAuthority.localDefault);
+          h.adminBody = null;
+          h.closedRows = [];
+          final denied = await h.repo.current();
+          expect(denied.plan, CommercePlan.free);
+          expect(denied.authority, EntitlementAuthority.verifiedServer);
+        } finally {
+          await h.close();
+        }
+      },
+    );
+  }
+
+  for (final latestPaid in [false, true]) {
+    test(
+      'a late admin response cannot reverse the newer decision: paid=$latestPaid',
+      () async {
+        final h = await _Harness.open();
+        try {
+          final pending = Completer<Object?>();
+          h.holdNextAdmin = pending;
+          h.adminEntered = Completer<void>();
+          final older = h.repo.current();
+          await h.adminEntered!.future.timeout(const Duration(seconds: 5));
+          final grant = h.adminGrant();
+          h.adminBody = latestPaid ? grant : null;
+          final newest = await h.repo.current();
+          final expected = latestPaid
+              ? CommercePlan.premium
+              : CommercePlan.free;
+          expect(newest.plan, expected);
+          pending.complete(latestPaid ? null : grant);
+          final late = await older;
+          expect(late.plan, expected);
+          h.failAdmin = true;
+          expect((await h.repo.current()).plan, expected);
+        } finally {
+          await h.close();
+        }
+      },
+    );
+  }
+
+  test(
+    'invalid admin read cleanup cannot erase a newer accepted secure lease',
+    () async {
+      final h = await _Harness.open();
+      final secure = _HeldAdminSecureStore();
+      final store = AdminEntitlementContinuityStore(secureStore: secure);
+      final repo = ServerEntitlementRepository(
+        adminContinuityStore: store,
+        clock: () => h.now,
+      );
+      final key = 'bil.admin-entitlement-lease.v1.${h.owner}';
+      secure.saved[key] = jsonEncode({
+        'owner_id': h.owner,
+        'plan_id': 'premium',
+        'verified_at': h.now
+            .subtract(const Duration(minutes: 2))
+            .toIso8601String(),
+        'started_at': h.now
+            .subtract(const Duration(hours: 1))
+            .toIso8601String(),
+        'access_until': h.now
+            .subtract(const Duration(seconds: 1))
+            .toIso8601String(),
+      });
+      final grant = h.adminGrant();
+      final accessUntil = DateTime.parse(grant['access_until']! as String);
+      final adminReply = Completer<Object?>();
+      try {
+        // The first cold read captures an expired slot, then pauses before
+        // read() can validate it and delete it.
+        final older = repo.current();
+        await secure.readEntered.future.timeout(const Duration(seconds: 5));
+        h.holdNextAdmin = adminReply;
+        h.adminEntered = Completer<void>();
+        final newer = repo.current();
+        await h.adminEntered!.future.timeout(const Duration(seconds: 5));
+        adminReply.complete(grant);
+        // Drain the in-memory HTTP response chain. On the old implementation
+        // the new grant is already written; the fixed queue holds that write.
+        await Future<void>.delayed(Duration.zero);
+        secure.releaseRead.complete();
+        final results = await Future.wait([
+          older,
+          newer,
+        ]).timeout(const Duration(seconds: 5));
+        for (final result in results) {
+          expect(result.plan, CommercePlan.premium);
+          expect(result.authority, EntitlementAuthority.verifiedServer);
+          expect(result.currentPeriodEndsAt, accessUntil);
+        }
+        // Prove both the invalid-read deletion and the newer write occurred.
+        // Persisted proof is then read through the unchanged security validator.
+        expect(
+          secure.operations.where((value) => value == 'delete'),
+          hasLength(1),
+        );
+        expect(
+          secure.operations.where((value) => value == 'write'),
+          hasLength(1),
+        );
+        final restored = await store.read(ownerId: h.owner, now: h.now);
+        expect(
+          restored?.plan,
+          CommercePlan.premium,
+          reason:
+              'older invalid-read cleanup must not delete the newer secure lease',
+        );
+        expect(restored?.currentPeriodEndsAt, accessUntil);
+      } finally {
+        if (!secure.releaseRead.isCompleted) secure.releaseRead.complete();
+        if (!adminReply.isCompleted) adminReply.complete(grant);
+        await h.close();
+      }
+    },
+  );
+
+  test(
+    'verified store denial cannot decide an unreadable independent admin grant',
+    () async {
+      final h = await _Harness.open();
+      try {
+        await h.primePaid();
+        h.storeRows = [
+          h.paidRow()..addAll({
+            'plan_id': 'free',
+            'lifecycle': 'inactive',
+            'revision': 11,
+          }),
+        ];
+        h.adminBody = {'owner_id': h.owner, 'plan_id': 'premium'};
+        final partial = await h.repo.current();
+        expect(partial.plan, CommercePlan.free);
+        expect(partial.authority, EntitlementAuthority.localDefault);
+        expect(partial.serverRevision, 11);
+        expect(partial.storeRenewalDefinitivelyInactive, isTrue);
+        h.adminBody = null;
+        final complete = await h.repo.current();
+        expect(complete.plan, CommercePlan.free);
+        expect(complete.authority, EntitlementAuthority.verifiedServer);
       } finally {
         await h.close();
       }
@@ -712,5 +893,37 @@ final class _Harness {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(_storage, null);
     }
+  }
+}
+
+final class _HeldAdminSecureStore implements AdminEntitlementSecureStore {
+  final saved = <String, String>{};
+  final operations = <String>[];
+  final readEntered = Completer<void>();
+  final releaseRead = Completer<void>();
+  bool _holdFirstRead = true;
+
+  @override
+  Future<String?> read(String key) async {
+    operations.add('read');
+    final captured = saved[key];
+    if (_holdFirstRead) {
+      _holdFirstRead = false;
+      readEntered.complete();
+      await releaseRead.future;
+    }
+    return captured;
+  }
+
+  @override
+  Future<void> write(String key, String value) async {
+    operations.add('write');
+    saved[key] = value;
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    operations.add('delete');
+    saved.remove(key);
   }
 }

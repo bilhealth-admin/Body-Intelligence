@@ -44,7 +44,7 @@ final class _VerifiedSubscriptionCanonicalSnapshot {
       verified = state;
     } else if (state.plan == CommercePlan.free &&
         state.verifiedAt != null &&
-        state.provider != null) {
+        (state.provider != null || state.storeRenewalDefinitivelyInactive)) {
       // This row retires its store proof even if a separate grant was unreadable.
       _verified = state;
     } else if (verified?.provider == null) {

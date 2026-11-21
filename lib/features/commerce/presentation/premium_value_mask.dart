@@ -43,9 +43,7 @@ class PremiumValueMask extends StatelessWidget {
       AppLocalizations,
     );
     String text(String value) => strings?.text(value) ?? value;
-    final label = checking
-        ? text('Checking subscription')
-        : onRetry != null
+    final label = onRetry != null && !checking
         ? text('Subscription check unavailable')
         : text('Premium');
     Widget size(Widget value) => reserveSpace
@@ -92,7 +90,7 @@ class PremiumValueMask extends StatelessWidget {
               child: Center(
                 child: Semantics(
                   container: true,
-                  liveRegion: checking || onRetry != null,
+                  liveRegion: !checking && onRetry != null,
                   label: label,
                   child: checking
                       ? const SizedBox.square(

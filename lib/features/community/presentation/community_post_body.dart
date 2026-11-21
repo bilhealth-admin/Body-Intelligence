@@ -1,19 +1,25 @@
-import 'package:body_intelligence_log/shared/widgets/bil_crystal_arrow.dart';
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/bil_written_language_resolver.dart';
 import 'community_copy.dart';
 
-/// Feed preview measures actual wrapped lines, including translated content.
+/// A two-line reading preview with its disclosure beside the final line.
+/// The parent may share expansion with metadata and translation controls.
 class CommunityPostBody extends StatefulWidget {
   const CommunityPostBody({
     super.key,
     required this.postId,
     required this.body,
+    this.expanded,
+    this.onExpandedChanged,
+    this.alwaysExpandable = false,
   });
 
   final String postId;
   final String body;
+  final bool? expanded;
+  final ValueChanged<bool>? onExpandedChanged;
+  final bool alwaysExpandable;
 
   @override
   State<CommunityPostBody> createState() => _CommunityPostBodyState();
@@ -21,6 +27,7 @@ class CommunityPostBody extends StatefulWidget {
 
 class _CommunityPostBodyState extends State<CommunityPostBody> {
   bool _expanded = false;
+  bool get _isExpanded => widget.expanded ?? _expanded;
 
   @override
   void didUpdateWidget(covariant CommunityPostBody oldWidget) {
@@ -28,6 +35,12 @@ class _CommunityPostBodyState extends State<CommunityPostBody> {
     if (oldWidget.postId != widget.postId || oldWidget.body != widget.body) {
       _expanded = false;
     }
+  }
+
+  void _toggle() {
+    final next = !_isExpanded;
+    if (widget.expanded == null) setState(() => _expanded = next);
+    widget.onExpandedChanged?.call(next);
   }
 
   @override
@@ -43,58 +56,77 @@ class _CommunityPostBodyState extends State<CommunityPostBody> {
         textDirection: direction,
         textScaler: MediaQuery.textScalerOf(context),
         locale: Localizations.maybeLocaleOf(context),
-        maxLines: 3,
+        maxLines: 2,
       )..layout(maxWidth: constraints.maxWidth);
-      final overflows = painter.didExceedMaxLines;
+      final expandable = widget.alwaysExpandable || painter.didExceedMaxLines;
       painter.dispose();
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (_expanded)
-            SelectableText(
+      final body = _isExpanded
+          ? SelectableText(
               widget.body,
               key: ValueKey('community-post-body-${widget.postId}'),
               textDirection: direction,
               scrollPhysics: const NeverScrollableScrollPhysics(),
               style: style,
             )
-          else
-            Text(
+          : Text(
               widget.body,
               key: ValueKey('community-post-body-${widget.postId}'),
               textDirection: direction,
-              maxLines: 3,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: style,
+            );
+      if (!expandable) return body;
+      final toggle = TextButton(
+        key: ValueKey('community-post-expand-${widget.postId}'),
+        onPressed: _toggle,
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          minimumSize: const Size(0, 44),
+          textStyle: Theme.of(context).textTheme.bodyMedium,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _isExpanded
+                  ? communityText(context, 'Show less', 'عرض أقل')
+                  : communityText(context, 'Show more', 'عرض المزيد'),
             ),
-          if (overflows)
-            TextButton.icon(
-              key: ValueKey('community-post-expand-${widget.postId}'),
-              onPressed: () => setState(() => _expanded = !_expanded),
-              iconAlignment: IconAlignment.end,
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                visualDensity: VisualDensity.compact,
-              ),
-              icon: BilCrystalArrow(
-                extent: 36,
-                reserveSpace: true,
-                child: Icon(
-                  _expanded
-                      ? Icons.expand_less_rounded
-                      : Icons.expand_more_rounded,
-                  size: 19,
-                ),
-              ),
-              label: Text(
-                _expanded
-                    ? communityText(context, 'Show less', 'عرض أقل')
-                    : communityText(context, 'Show more', 'عرض المزيد'),
-              ),
+            const SizedBox(width: 2),
+            Icon(
+              _isExpanded
+                  ? Icons.expand_less_rounded
+                  : Icons.expand_more_rounded,
+              size: 16,
             ),
-        ],
+          ],
+        ),
       );
+      // At large accessibility sizes the action gets its own full-width line
+      // rather than narrowing the author's text or reducing the system scale.
+      final inline =
+          !_isExpanded &&
+          constraints.maxWidth >= 240 &&
+          MediaQuery.textScalerOf(context).scale(14) <= 21;
+      return inline
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(child: body),
+                const SizedBox(width: 4),
+                toggle,
+              ],
+            )
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                body,
+                Align(alignment: AlignmentDirectional.centerEnd, child: toggle),
+              ],
+            );
     },
   );
 }

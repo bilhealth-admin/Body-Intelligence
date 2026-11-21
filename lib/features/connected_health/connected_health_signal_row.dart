@@ -7,9 +7,11 @@ class _ConnectedSignalRow extends StatelessWidget {
     required this.leading,
     required this.title,
     required this.trailing,
+    this.subtitle,
     this.contentPadding = EdgeInsets.zero,
   });
   final Widget leading, title, trailing;
+  final Widget? subtitle;
   final EdgeInsetsGeometry contentPadding;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -20,6 +22,7 @@ class _ConnectedSignalRow extends StatelessWidget {
           contentPadding: contentPadding,
           leading: leading,
           title: title,
+          subtitle: subtitle,
           trailing: trailing,
         );
       }
@@ -36,6 +39,7 @@ class _ConnectedSignalRow extends StatelessWidget {
                   Expanded(child: title),
                 ],
               ),
+              if (subtitle != null) ...[const SizedBox(height: 8), subtitle!],
               const SizedBox(height: 8),
               Align(alignment: AlignmentDirectional.centerEnd, child: trailing),
             ],

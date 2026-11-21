@@ -73,6 +73,35 @@ final class ServerEntitlementRepository {
   static int _settledClosedTestReadGeneration = 0;
   static final VerifiedEntitlementSessionCache _adminSessionCache =
       VerifiedEntitlementSessionCache(maximumAge: const Duration(minutes: 6));
+  static int _adminReadGeneration = 0;
+  static final _settledAdminReads = <String, int>{};
+  static final _adminStorageOperations = <String, Future<void>>{};
+
+  // A read can delete an invalid slot. Serialize its complete operation with
+  // accepted writes and revocations so old cleanup cannot erase a newer lease.
+  Future<T> _withAdminStorage<T>(
+    String ownerId,
+    Future<T> Function() operation,
+  ) async {
+    final previous = _adminStorageOperations[ownerId];
+    final next = previous == null
+        ? Future<T>.sync(operation)
+        : previous.then<T>((_) => operation());
+    // Only the queue barrier absorbs errors; this caller still receives next.
+    final settled = next.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    );
+    _adminStorageOperations[ownerId] = settled;
+    try {
+      return await next;
+    } finally {
+      if (identical(_adminStorageOperations[ownerId], settled)) {
+        _adminStorageOperations.remove(ownerId);
+      }
+    }
+  }
+
   static final Set<String> _startupContinuityConsumed = <String>{};
   static final _rejectedSessionCleanup = <String, Future<bool>>{};
   static String? _activeOwnerId;
@@ -173,6 +202,7 @@ final class ServerEntitlementRepository {
 
   Future<bool> _clearRejectedSession(String ownerId) async {
     _startupContinuityConsumed.add(ownerId);
+    _settledAdminReads[ownerId] = ++_adminReadGeneration;
     final denied = FreePlan.createState();
     final now = _now();
     for (final cache in [
@@ -185,7 +215,7 @@ final class ServerEntitlementRepository {
     try {
       await Future.wait([
         _subscriptionStore.clear(ownerId),
-        _adminContinuityStore.clear(ownerId),
+        _withAdminStorage(ownerId, () => _adminContinuityStore.clear(ownerId)),
       ]);
       return true;
     } on Object {
@@ -310,10 +340,13 @@ final class ServerEntitlementRepository {
       CommunityOwnerOperation.checkCurrent();
       if (client.auth.currentUser?.id != user.id) return FreePlan.createState();
       now = _now();
-      if (!closedTestReadFailed && explicitCheckoutRead != null) {
-        explicitCheckoutRead.observeClosedTestRows(closedTestRows);
-        if (!explicitCheckoutRead.closedTestReadComplete) {
+      if (!closedTestReadFailed) {
+        final complete = _validClosedTestRows(closedTestRows);
+        explicitCheckoutRead?.closedTestReadComplete = complete;
+        if (!complete) {
           closedTestReadFailed = true;
+          explicitCheckoutRead?.unresolved();
+          closedTestRows = const [];
         }
       }
       if (!closedTestReadFailed) {

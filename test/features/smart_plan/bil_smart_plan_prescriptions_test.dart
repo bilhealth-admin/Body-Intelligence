@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
@@ -10,6 +11,52 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test(
+    'Gym exercise display uses the reviewed Arabic name without ID prefixes',
+    () async {
+      const catalog = BilSmartPlanCatalog();
+      final workouts = await catalog.gymSessions(sessionMinutes: 35);
+      final source =
+          jsonDecode(
+                File(BilSmartPlanPrescriptions.assetPath).readAsStringSync(),
+              )
+              as Map;
+      final names = <String, String>{
+        for (final session in source['sessions'] as List)
+          for (final row in session['exercises'] as List)
+            row['exerciseId'] as String: row['sourceName'] as String,
+      };
+      expect(names, hasLength(28));
+      for (final workout in workouts) {
+        for (final id in workout.exerciseIds) {
+          final canonical = names[id]!;
+          for (final tag in BilLocalePolicy.productionTags) {
+            final title = catalog.exerciseTitle(id, locale: tag);
+            if (tag == 'ar') {
+              expect(title, contains(RegExp(r'[\u0600-\u06ff]')));
+              expect(title, endsWith(' — $canonical'));
+            } else {
+              // Exercise discovery retains the reviewed canonical name.
+              expect(title, canonical);
+            }
+            expect(title, isNot(contains('Resistance Upper Body')));
+          }
+        }
+      }
+      expect(
+        catalog.exerciseTitle(
+          'resistance-upper-body-dumbbell-bench-press-technique',
+          locale: 'ar',
+        ),
+        'دمبل بنش بريس — Dumbbell bench press',
+      );
+      expect(
+        catalog.exerciseTitle('unknown-safe-id', locale: 'ar'),
+        'Unknown Safe Id',
+      );
+    },
+  );
+
   test(
     'every prescription matches the complete pinned source in exact released movement order',
     () async {

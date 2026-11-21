@@ -167,23 +167,18 @@ class _CommunityInlineTopicFeedState extends State<_CommunityInlineTopicFeed> {
         );
       }
       if (snapshot.connectionState != ConnectionState.done && _posts.isEmpty) {
-        return const SliverToBoxAdapter(
-          child: Padding(
-            padding: EdgeInsets.all(32),
-            child: Center(child: BilFeatureWelcomeStatus()),
-          ),
-        );
+        return const SliverToBoxAdapter(child: _CommunityFeedSkeleton());
       }
       return SliverPadding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
         sliver: SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             if (index == 0) {
-              return SizedBox(
-                height: _refreshing ? 24 : 3,
-                child: _refreshing
-                    ? const BilFeatureWelcomeStatus()
-                    : const SizedBox.shrink(),
+              // Refresh is owned by the surrounding pull gesture. Never add
+              // a second glyph or change the existing post's vertical position.
+              return const SizedBox(
+                key: Key('community-category-refresh-slot'),
+                height: 3,
               );
             }
             if (index <= _posts.length) {

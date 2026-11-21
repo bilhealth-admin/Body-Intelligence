@@ -175,7 +175,7 @@ class _PremiumFeature extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entitlement = ref.watch(verifiedSubscriptionAccessProvider);
+    final entitlement = ref.watch(verifiedSubscriptionPresentationProvider);
     final active =
         entitlement.value?.grants(CommerceEntitlement.advancedIntelligence) ??
         false;
@@ -200,7 +200,11 @@ class _PremiumFeature extends ConsumerWidget {
       title: Text(_diaryText(context, title)),
       subtitle: Text(_diaryText(context, subtitle)),
       trailing: Semantics(
-        label: status,
+        label:
+            entitlement.asData?.value.authority ==
+                EntitlementAuthority.verifiedServer
+            ? status
+            : null,
         child: BilNavigationFeedback(
           child: Icon(
             Icons.chevron_right_rounded,

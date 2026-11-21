@@ -106,7 +106,8 @@ class _BilWorkoutRoutineDetailsPageState
     final rights = ref.watch(verifiedSubscriptionAccessProvider);
     final subscription = _usableVerifiedSubscription(rights);
     final verified =
-        subscription?.authority == EntitlementAuthority.verifiedServer;
+        subscription?.authority == EntitlementAuthority.verifiedServer ||
+        ref.watch(verifiedFreePresentationProvider);
     final locked = !workoutItemAccessGranted(item, subscription);
     return Scaffold(
       appBar: AppBar(
@@ -213,9 +214,13 @@ class _BilWorkoutRoutineDetailsPageState
                           context,
                           verified
                               ? 'View membership plans'
+                              : rights.isLoading
+                              ? 'Membership'
                               : 'Retry subscription check',
                           verified
                               ? 'عرض خطط العضوية'
+                              : rights.isLoading
+                              ? 'العضوية'
                               : 'إعادة التحقق من الاشتراك',
                         ),
                         overflow: TextOverflow.ellipsis,

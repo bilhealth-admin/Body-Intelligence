@@ -6,12 +6,16 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
     required this.repository,
     this.compact = false,
     this.displayTitle,
+    this.showTitle = true,
+    this.showDetails = true,
   });
 
   final CommunityPostReferenceMetadata metadata;
   final CommunityRepository repository;
   final bool compact;
   final String? displayTitle;
+  final bool showTitle;
+  final bool showDetails;
 
   String _collaboratorLabel(
     BuildContext context,
@@ -45,7 +49,7 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (title?.isNotEmpty == true) ...[
+        if (showTitle && title?.isNotEmpty == true) ...[
           Text(
             title!,
             key: const Key('community-post-reference-title'),
@@ -65,61 +69,63 @@ class _CommunityPostReferenceBlock extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ],
-        if (collaborators.isNotEmpty) ...[
-          Wrap(
-            key: const Key('community-post-collaborators'),
-            spacing: 6,
-            runSpacing: 6,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                communityText(context, 'With', 'بالتعاون مع'),
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-              for (final collaborator in collaborators)
-                Chip(
-                  visualDensity: VisualDensity.compact,
-                  avatar: BilAccountAvatar(
-                    radius: 10,
-                    networkUrl: collaborator.avatarUrl,
-                  ),
-                  label: Text(_collaboratorLabel(context, collaborator)),
-                  side:
-                      collaborator.status ==
-                          CommunityCollaborationStatus.accepted
-                      ? null
-                      : BorderSide(
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (metadata.topics.isNotEmpty || metadata.circle != null) ...[
-          _CommunityPostTaxonomyReference(
-            metadata: metadata,
-            repository: repository,
-          ),
-          const SizedBox(height: 8),
-        ],
-        if (metadata.hashtags.isNotEmpty)
-          Wrap(
-            key: const Key('community-post-hashtags'),
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              for (final hashtag in metadata.hashtags)
+        if (showDetails) ...[
+          if (collaborators.isNotEmpty) ...[
+            Wrap(
+              key: const Key('community-post-collaborators'),
+              spacing: 6,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
                 Text(
-                  '#$hashtag',
-                  textDirection: TextDirection.ltr,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  communityText(context, 'With', 'بالتعاون مع'),
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
-            ],
-          ),
+                for (final collaborator in collaborators)
+                  Chip(
+                    visualDensity: VisualDensity.compact,
+                    avatar: BilAccountAvatar(
+                      radius: 10,
+                      networkUrl: collaborator.avatarUrl,
+                    ),
+                    label: Text(_collaboratorLabel(context, collaborator)),
+                    side:
+                        collaborator.status ==
+                            CommunityCollaborationStatus.accepted
+                        ? null
+                        : BorderSide(
+                            color: Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (metadata.topics.isNotEmpty || metadata.circle != null) ...[
+            _CommunityPostTaxonomyReference(
+              metadata: metadata,
+              repository: repository,
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (metadata.hashtags.isNotEmpty)
+            Wrap(
+              key: const Key('community-post-hashtags'),
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final hashtag in metadata.hashtags)
+                  Text(
+                    '#$hashtag',
+                    textDirection: TextDirection.ltr,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+              ],
+            ),
+        ],
       ],
     );
   }

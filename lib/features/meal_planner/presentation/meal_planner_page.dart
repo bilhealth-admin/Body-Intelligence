@@ -1,3 +1,5 @@
+import '../../../app/localization/bil_locale_policy.dart';
+import '../domain/planner_recipe_display.dart';
 import '../../../shared/widgets/bil_pinned_header_body.dart';
 import '../../../shared/widgets/bil_page_heading.dart';
 import '../../../shared/widgets/bil_pearl_feature_welcome.dart';
@@ -70,7 +72,9 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
 
   @override
   Widget build(BuildContext context) {
-    final language = Localizations.localeOf(context).languageCode;
+    final language = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
     final copy = _PlannerCopy(language);
     final activeRepository = ref.watch(preferencesRepositoryProvider);
     if (!identical(activeRepository, _boundRepository) ||
@@ -291,9 +295,9 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
             return BilPearlMaterialCard(
               child: ListTile(
                 leading: CircleAvatar(child: Text('${meal.day + 1}')),
-                title: Text(recipe.title),
+                title: Text(PlannerRecipeDisplay.title(recipe, copy.language)),
                 subtitle: Text(
-                  '${copy.day(meal.day)} • ${recipe.minutes} ${copy.text('minutes')} • ${recipe.meal}',
+                  '${copy.day(meal.day)} • ${recipe.minutes} ${copy.text('minutes')} • ${PlannerRecipeDisplay.slot(recipe.meal, copy.language)}',
                 ),
                 trailing: const BilNavigationFeedback(
                   child: Icon(Icons.chevron_right),
@@ -399,7 +403,9 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           }
           return BilPearlMaterialCard(
             child: ExpansionTile(
-              title: Text('${copy.day(meal.day)} — ${recipe.title}'),
+              title: Text(
+                '${copy.day(meal.day)} — ${PlannerRecipeDisplay.title(recipe, copy.language)}',
+              ),
               subtitle: Text(
                 '${copy.text('prep')}: ${details.prepMinutes} ${copy.text('minutes')} • '
                 '${copy.text('cook')}: ${recipe.minutes} ${copy.text('minutes')}',
@@ -569,7 +575,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
                 key: const Key('meal-planner-recipe-pinned-header'),
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
                 child: Text(
-                  recipe.title,
+                  PlannerRecipeDisplay.title(recipe, copy.language),
                   style: bilPageHeadingStyle(sheetContext),
                 ),
               ),

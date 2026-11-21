@@ -168,6 +168,60 @@ void main() {
   }
 
   for (final language in ['en', 'ar']) {
+    testWidgets('saved Gym detail names use reviewed display $language', (
+      tester,
+    ) async {
+      final original = plan.encode();
+      await pump(tester, locale: language);
+      const canonical = [
+        'Dumbbell bench press',
+        'Standing dumbbell shoulder press',
+        'Dumbbell lateral raise',
+        'Overhead triceps extension',
+        'Bench push-up',
+      ];
+      const arabic = [
+        'دمبل بنش بريس — Dumbbell bench press',
+        'ستاندينغ دمبل شولدر بريس — Standing dumbbell shoulder press',
+        'دمبل لاترال ريز — Dumbbell lateral raise',
+        'أوفرهِد ترايسبس إكستنشن — Overhead triceps extension',
+        'بنش بوش أب — Bench push-up',
+      ];
+      final expected = language == 'ar' ? arabic : canonical;
+      expect(plan.days.first.workout!.exerciseIds, hasLength(expected.length));
+      for (var index = 0; index < expected.length; index++) {
+        final primary = tester
+            .widget<Text>(
+              find.byKey(const ValueKey('bil-smart-plan-session-exercise')),
+            )
+            .data;
+        String? displayed = primary;
+        if (language == 'ar') {
+          final officialName = find.text(canonical[index]);
+          expect(officialName, findsOneWidget);
+          displayed = '$primary — ${tester.widget<Text>(officialName).data}';
+        }
+        expect(displayed, expected[index]);
+        expect(
+          find.text('Resistance Upper Body Dumbbell Bench Press'),
+          findsNothing,
+        );
+        if (index + 1 == expected.length) break;
+        final done = find.byKey(
+          const ValueKey('bil-smart-plan-session-step-done'),
+        );
+        await tester.ensureVisible(done);
+        await tester.tap(done);
+        await tester.pumpAndSettle();
+        final next = find.byKey(const ValueKey('bil-smart-plan-session-next'));
+        await tester.ensureVisible(next);
+        await tester.tap(next);
+        await tester.pumpAndSettle();
+      }
+      expect(plan.encode(), original);
+      expect(plan.days.first.workout!.completed, isFalse);
+      expect(tester.takeException(), isNull);
+    });
     testWidgets(
       'warm-up continue glass leaves the full label gap in $language',
       (tester) async {

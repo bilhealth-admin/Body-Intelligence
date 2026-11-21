@@ -217,6 +217,53 @@ void main() {
     );
   }
 
+  testWidgets(
+    'weekly Free CTA keeps its geometry throughout an uncompleted reread',
+    (tester) async {
+      final fixture = _Fixture();
+      addTearDown(fixture.close);
+      fixture.next = Future.value(
+        SubscriptionState(
+          plan: CommercePlan.free,
+          entitlements: FreePlan.entitlements,
+          authority: EntitlementAuthority.verifiedServer,
+          isPurchasable: false,
+          canRestorePurchases: false,
+        ),
+      );
+      await fixture.verify();
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: fixture.container,
+          child: _app(const WeeklyReportPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final action = find.byKey(const Key('weekly-go-premium'));
+      await tester.scrollUntilVisible(action, 350);
+      await tester.pumpAndSettle();
+      final rect = tester.getRect(action);
+      final held = fixture.reload();
+      await tester.pump();
+      await tester.pump();
+      expect(
+        fixture.container.read(verifiedSubscriptionAccessProvider).isLoading,
+        isTrue,
+      );
+      expect(tester.getRect(action), rect);
+      expect(find.text('Checking subscription'), findsNothing);
+      expect(find.byKey(const Key('weekly-entitlement-loading')), findsNothing);
+      expect(find.text('Premium insight active'), findsNothing);
+      held.completeError(StateError('offline fixture'));
+      await tester.pump();
+      await tester.pump();
+      expect(tester.getRect(action), rect);
+      expect(find.byKey(const Key('weekly-entitlement-error')), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      await fixture.close();
+    },
+  );
+
   for (final failed in [false, true]) {
     testWidgets(
       'weekly paid content stays stable during background failed=$failed',

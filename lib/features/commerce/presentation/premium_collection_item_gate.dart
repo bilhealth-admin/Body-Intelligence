@@ -56,14 +56,14 @@ class PremiumCollectionItemGate extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Tooltip(
               message: checking
-                  ? context.strings.text('Checking subscription')
+                  ? tier
                   : unavailable
                   ? context.strings.text('Subscription check unavailable')
                   : upgrade,
               child: Semantics(
                 button: !checking,
                 label: checking
-                    ? context.strings.text('Checking subscription')
+                    ? tier
                     : unavailable
                     ? context.strings.text('Retry')
                     : '$upgrade · $tier',

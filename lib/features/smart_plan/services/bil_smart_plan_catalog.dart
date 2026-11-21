@@ -1,3 +1,4 @@
+import '../../meal_planner/domain/planner_recipe_display.dart';
 import 'package:flutter/services.dart';
 
 import '../../meal_planner/domain/meal_plan.dart';
@@ -287,8 +288,12 @@ final class BilSmartPlanCatalog {
     }
   }
 
-  String recipeTitle(String id, {String locale = 'en'}) =>
-      _recipeTitles[id]?.titleFor(locale) ?? recipeById(id)?.title ?? id;
+  String recipeTitle(String id, {String locale = 'en'}) {
+    final sourced = _recipeTitles[id];
+    if (sourced != null) return sourced.titleFor(locale);
+    final legacy = recipeById(id);
+    return legacy == null ? id : PlannerRecipeDisplay.title(legacy, locale);
+  }
 
   Future<String> exerciseRoute(
     String id, {
@@ -307,7 +312,12 @@ final class BilSmartPlanCatalog {
 
   /// Readable metadata from approved release identifiers; never an invented
   /// exercise or a promise that a video is locally installed.
-  String exerciseTitle(String id) {
+  String exerciseTitle(String id, {String locale = 'en'}) {
+    final prescribed = const BilSmartPlanPrescriptions().exerciseTitle(
+      id,
+      locale: locale,
+    );
+    if (prescribed != null) return prescribed;
     final words = id
         .replaceAll(RegExp(r'-technique$'), '')
         .replaceAll('-', ' ')

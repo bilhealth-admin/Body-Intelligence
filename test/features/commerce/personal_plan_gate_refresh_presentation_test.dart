@@ -78,7 +78,9 @@ void main() {
             );
             expect(
               tester.widget<FilledButton>(find.byKey(_ctaKey)).onPressed,
-              isNull,
+              isNotNull,
+              reason:
+                  'The public Plans route is available; protected content stays locked.',
             );
             await _captureIfRequested(
               tester,
@@ -133,7 +135,7 @@ void main() {
   });
 
   _boundedTestWidgets(
-    'refresh failure replaces retained offer with existing Retry surface',
+    'background failure preserves the verified Free public gate through retry',
     (tester) async {
       final fixture = _GateFixture();
       try {
@@ -147,18 +149,20 @@ void main() {
         fixture.requests.last.completeError(StateError('offline-test'));
         await tester.pump();
         await tester.pump();
-        expect(find.byKey(_ctaKey), findsNothing);
+        expect(find.byKey(_ctaKey), findsOneWidget);
         expect(find.byKey(_protectedKey), findsNothing);
         expect(
+          fixture.container.read(verifiedSubscriptionAccessProvider).hasError,
+          isTrue,
+        );
+        expect(
           find.byKey(const ValueKey('premium-route-access-unavailable')),
-          findsOneWidget,
+          findsNothing,
         );
-        await tester.tap(
-          find.byKey(const ValueKey('premium-route-access-retry')),
-        );
+        fixture.container.invalidate(verifiedSubscriptionStateProvider);
         await tester.pump();
-        expect(find.byKey(_checkingKey), findsOneWidget);
-        expect(find.byKey(_ctaKey), findsNothing);
+        expect(find.byKey(_checkingKey), findsNothing);
+        expect(find.byKey(_ctaKey), findsOneWidget);
         fixture.requests.last.complete(_free());
         await tester.pump();
         await tester.pump();

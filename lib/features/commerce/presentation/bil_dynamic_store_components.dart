@@ -501,6 +501,7 @@ class _StickyPurchaseBar extends StatelessWidget {
     required this.enabled,
     required this.statusMessage,
     required this.statusIsError,
+    required this.refreshingKnownFree,
     required this.onPressed,
     this.onBlockedTap,
     this.blockedActionLabel,
@@ -512,6 +513,7 @@ class _StickyPurchaseBar extends StatelessWidget {
   final bool enabled;
   final String? statusMessage;
   final bool statusIsError;
+  final bool refreshingKnownFree;
   final VoidCallback onPressed;
   final VoidCallback? onBlockedTap;
   final String? blockedActionLabel;
@@ -585,7 +587,7 @@ class _StickyPurchaseBar extends StatelessWidget {
                   const SizedBox(height: 8),
                 ],
                 Opacity(
-                  opacity: enabled || loading ? 1 : .55,
+                  opacity: enabled || loading || refreshingKnownFree ? 1 : .55,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(19),

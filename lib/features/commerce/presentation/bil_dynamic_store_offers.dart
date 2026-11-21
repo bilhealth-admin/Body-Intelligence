@@ -34,6 +34,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onManage,
     this.onOfferSelected,
     this.onBlockedPurchaseRequested,
+    this.refreshingKnownFree = false,
     this.onRetry,
     this.onTerms,
     this.onPrivacy,
@@ -67,6 +68,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
 
   /// Explains an unavailable checkout on an explicit tap; never bills.
   final ValueChanged<BilStoreOfferMetadata>? onBlockedPurchaseRequested;
+  final bool refreshingKnownFree;
   final VoidCallback? onRetry;
   final VoidCallback? onTerms;
   final VoidCallback? onPrivacy;
@@ -431,6 +433,10 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
               label: _copy('continue'),
               price: selectedOffer.localizedPrice,
               loading: controlsLocked,
+              refreshingKnownFree:
+                  widget.refreshingKnownFree &&
+                  selectedIsSubscription &&
+                  !selectedOwnershipBlocked,
               enabled:
                   (widget.purchaseAllowedForKind?.call(selectedOffer.kind) ??
                       widget.purchaseEnabled) &&

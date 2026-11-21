@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/premium_design_tokens.dart';
+import '../../app/localization/app_localizations.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../../app/theme/bil_flat_icon.dart';
 import '../../app/localization/runtime_copy_connected_health.dart';
@@ -479,6 +480,14 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                           connectedHealthDataTypeText(
                                             context,
                                             signal.key,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          '${context.strings.text('Measured')}: '
+                                          '${MaterialLocalizations.of(context).formatFullDate(signal.observedAt.toLocal())}'
+                                          ' • ${TimeOfDay.fromDateTime(signal.observedAt.toLocal()).format(context)}',
+                                          key: Key(
+                                            'connected-health-signal-measured-${signal.key}',
                                           ),
                                         ),
                                         trailing: Text(

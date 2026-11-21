@@ -412,7 +412,7 @@ void main() {
     final body = find.byKey(Key('community-post-body-$firstId'));
     await tester.ensureVisible(body);
     await tester.pumpAndSettle();
-    expect(tester.widget<Text>(body).maxLines, 3);
+    expect(tester.widget<Text>(body).maxLines, 2);
     final surface = find.ancestor(
       of: body,
       matching: find.byType(CommunityPostSurface),

@@ -251,6 +251,11 @@ void main() {
       expect(repository.metadataReads, 2);
       expect(find.text('My progress'), findsOneWidget);
       final feed = find.byKey(const Key('community-translate-post-$_postId'));
+      expect(feed, findsNothing);
+      await _tap(
+        tester,
+        find.byKey(const Key('community-post-expand-$_postId')),
+      );
       expect(feed, findsOneWidget);
       expect(find.text('I walked today'), findsOneWidget);
       expect(find.text('My progress'), findsOneWidget);

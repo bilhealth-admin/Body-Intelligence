@@ -56,7 +56,10 @@ class _FoodAddActionSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.strings.text;
-    final access = ref.watch(verifiedSubscriptionAccessProvider).asData?.value;
+    final access = ref
+        .watch(verifiedSubscriptionPresentationProvider)
+        .asData
+        ?.value;
     final verifiedDenied =
         access?.authority == EntitlementAuthority.verifiedServer &&
         !const {

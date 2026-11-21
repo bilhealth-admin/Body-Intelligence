@@ -84,7 +84,7 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(verifiedSubscriptionAccessProvider);
+    final state = ref.watch(verifiedSubscriptionPresentationProvider);
     Widget lockedSurface() => Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(
@@ -105,12 +105,10 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
       ),
     );
     return state.when(
-      loading: () => ref.watch(verifiedFreePresentationProvider)
-          ? lockedSurface()
-          : Scaffold(
-              appBar: AppBar(title: Text(title)),
-              body: const Center(child: Icon(Icons.shield_outlined)),
-            ),
+      loading: () => Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: const Center(child: Icon(Icons.lock_outline_rounded)),
+      ),
       error: (_, _) => Scaffold(
         appBar: AppBar(title: Text(title)),
         body: Center(

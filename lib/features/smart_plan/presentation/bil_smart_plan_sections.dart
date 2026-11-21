@@ -226,7 +226,12 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
                     leading: const Icon(Icons.restaurant_menu_rounded),
                     onTap: _busy ? null : () => _reviewMeal(day, meal),
                     title: Text(
-                      const BilSmartPlanCatalog().recipeTitle(meal.recipeId),
+                      const BilSmartPlanCatalog().recipeTitle(
+                        meal.recipeId,
+                        locale: BilLocalePolicy.canonicalTag(
+                          Localizations.localeOf(context),
+                        ),
+                      ),
                     ),
                     subtitle: Text(_mealSlot(meal.slot)),
                   ),
@@ -267,12 +272,10 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
     _ => _t('Verified training session', 'جلسة تدريب موثقة'),
   };
 
-  String _exerciseTitle(String id) =>
-      const BilSmartPlanPrescriptions().exerciseTitle(
-        id,
-        locale: BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
-      ) ??
-      const BilSmartPlanCatalog().exerciseTitle(id);
+  String _exerciseTitle(String id) => const BilSmartPlanCatalog().exerciseTitle(
+    id,
+    locale: BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+  );
 
   String _horizonName(BilPlanHorizon value) => switch (value) {
     BilPlanHorizon.week => _t('One week', 'أسبوع'),
@@ -568,7 +571,12 @@ extension _BilSmartPlanSections on _BilSmartPlanPageState {
             for (final meal in day.meals)
               ListTile(
                 title: Text(
-                  const BilSmartPlanCatalog().recipeTitle(meal.recipeId),
+                  const BilSmartPlanCatalog().recipeTitle(
+                    meal.recipeId,
+                    locale: BilLocalePolicy.canonicalTag(
+                      Localizations.localeOf(context),
+                    ),
+                  ),
                 ),
                 subtitle: Text(_mealSlot(meal.slot)),
                 onTap: () {

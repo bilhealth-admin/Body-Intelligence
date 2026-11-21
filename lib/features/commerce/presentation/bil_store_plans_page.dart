@@ -59,6 +59,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   VerifiedStoreState? _lastStoreState;
   String? _lastStoreMessage;
   int? _retriedPendingVisit;
+  int? _requestedCheckoutVisit;
 
   @override
   void initState() {
@@ -465,6 +466,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                 }.contains(store.messageCode));
     final ownershipBlocked =
         store?.ownershipConflictProductId == offer.productId;
+    if (!ownershipBlocked && !unresolved && account?.isLoading == true) {
+      final visit = ref.read(verifiedEntitlementOwnerVisitProvider);
+      setState(() => _requestedCheckoutVisit = visit);
+    }
     final message = ownershipBlocked
         ? BilStoreCopy.text(locale, 'purchase_owned_by_another_account')
         : unresolved
@@ -512,7 +517,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       return;
     }
     // A manual recheck never enters the catalog or purchase service.
-    setState(() => _retriedPendingVisit = visit);
+    setState(() {
+      _requestedCheckoutVisit = visit;
+      _retriedPendingVisit = visit;
+    });
     ref.invalidate(verifiedSubscriptionStateProvider);
   }
 
@@ -546,6 +554,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     AsyncValue<SubscriptionState>? accountAccess;
     CommercePlan? currentPlan;
     CommercePlan? authoritativePlan;
+    var refreshingKnownFree = false;
     (int, int)? slowRead;
     try {
       final access = ref.watch(verifiedSubscriptionPresentationProvider);
@@ -553,15 +562,19 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       currentPlan = _verifiedPlan(access);
       final authority = ref.watch(verifiedSubscriptionAccessProvider);
       authoritativePlan = _verifiedPlan(authority);
+      refreshingKnownFree =
+          currentPlan == CommercePlan.free && authority.isLoading;
       if (!authority.isLoading) {
         _retriedPendingVisit = null;
+        _requestedCheckoutVisit = null;
       } else if ((currentPlan == null || currentPlan == CommercePlan.free) &&
           ref.watch(verifiedEntitlementOwnerIdProvider) != null) {
         final generation = ref
             .read(verifiedSubscriptionReadWitnessProvider)
             .generation;
         final visit = ref.watch(verifiedEntitlementOwnerVisitProvider);
-        if (ref.watch(_plansReadDeadline(generation)).asData?.value == true) {
+        final overdue = ref.watch(_plansReadDeadline(generation)).asData?.value;
+        if (overdue == true && _requestedCheckoutVisit == visit) {
           slowRead = (generation, visit);
         }
       }
@@ -605,6 +618,30 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         children: [
           if (slowRead != null)
             _slowAccessStatus(slowRead.$1, slowRead.$2)
+          else if (accountAccess?.isLoading == true &&
+              currentPlan == null &&
+              ref.watch(verifiedEntitlementOwnerIdProvider) != null)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(
+                key: const Key('store-request-account-refresh'),
+                onPressed:
+                    _retriedPendingVisit ==
+                        ref.watch(verifiedEntitlementOwnerVisitProvider)
+                    ? null
+                    : () => _retrySlowRead(
+                        ref
+                            .read(verifiedSubscriptionReadWitnessProvider)
+                            .generation,
+                        ref.read(verifiedEntitlementOwnerVisitProvider),
+                      ),
+                child: Text(
+                  AppLocalizations(
+                    Localizations.localeOf(context),
+                  ).text('Refresh access'),
+                ),
+              ),
+            )
           else if (accountAccess != null &&
               currentPlan != CommercePlan.free &&
               (!accountAccess.isLoading || currentPlan != null))
@@ -621,6 +658,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
               purchaseInProgress: _purchaseInProgress,
               restoreInProgress:
                   _restoring || store?.isRecoveringSubscription == true,
+              refreshingKnownFree:
+                  refreshingKnownFree && (store?.canStartPurchase ?? true),
               purchaseEnabled:
                   authoritativePlan != null &&
                   (store?.canStartPurchase ?? true),

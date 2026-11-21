@@ -187,9 +187,22 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
           _now.difference(observed).abs() > const Duration(minutes: 30)) {
         continue;
       }
-      if (key == 'sleep' &&
-          _now.difference(observed).abs() > const Duration(hours: 36)) {
-        continue;
+      if (key == 'sleep') {
+        final endedAt = DateTime.tryParse(
+          signal.attributes['endedAt']?.toString() ?? '',
+        );
+        // Sleep is recent from its measured completion, not its first stage.
+        // Keep the original start/provenance and never infer an end from the
+        // asleep total: a session can contain gaps between measured stages.
+        final freshnessAt =
+            endedAt != null &&
+                endedAt.isAfter(signal.observedAt) &&
+                !endedAt.isAfter(_now)
+            ? endedAt
+            : observed;
+        if (_now.difference(freshnessAt).abs() > const Duration(hours: 36)) {
+          continue;
+        }
       }
       if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {
         latest = signal;

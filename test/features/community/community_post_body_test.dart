@@ -38,7 +38,7 @@ void main() {
         final text = find.byKey(const Key('community-post-body-one'));
         final arrow = find.byKey(const Key('community-post-expand-one'));
         final collapsed = tester.getSize(text).height;
-        expect(tester.widget<Text>(text).maxLines, 3);
+        expect(tester.widget<Text>(text).maxLines, 2);
         expect(tester.widget<Text>(text).overflow, TextOverflow.ellipsis);
         expect(find.byIcon(Icons.expand_more_rounded), findsOneWidget);
         await tester.tap(arrow);
@@ -52,7 +52,7 @@ void main() {
         await tester.ensureVisible(arrow);
         await tester.tap(arrow);
         await tester.pump();
-        await mount('one', 'Translation changed');
+        await mount('one', 'Edited');
         expect(find.byType(SelectableText), findsNothing);
         expect(arrow, findsNothing);
         await mount('two', body);

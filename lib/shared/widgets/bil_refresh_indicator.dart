@@ -13,6 +13,7 @@ class BilRefreshIndicator extends StatefulWidget {
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.semanticsLabel,
     this.semanticsValue,
+    this.showDragIndicator = true,
   });
 
   final Widget child;
@@ -21,6 +22,9 @@ class BilRefreshIndicator extends StatefulWidget {
   final RefreshIndicatorTriggerMode triggerMode;
   final String? semanticsLabel;
   final String? semanticsValue;
+
+  /// When false, a held drag is not presented as running network work.
+  final bool showDragIndicator;
 
   @override
   State<BilRefreshIndicator> createState() => _BilRefreshIndicatorState();
@@ -50,7 +54,10 @@ class _BilRefreshIndicatorState extends State<BilRefreshIndicator> {
       // Hide at completion instead of leaving an animated glyph indefinitely.
       if (_status != null &&
           _status != RefreshIndicatorStatus.canceled &&
-          _status != RefreshIndicatorStatus.done)
+          _status != RefreshIndicatorStatus.done &&
+          (widget.showDragIndicator ||
+              _status == RefreshIndicatorStatus.snap ||
+              _status == RefreshIndicatorStatus.refresh))
         Positioned(
           top: 28,
           left: 0,

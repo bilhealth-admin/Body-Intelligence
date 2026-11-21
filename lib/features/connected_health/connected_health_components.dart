@@ -322,6 +322,8 @@ class _FitnessDeviceSection extends ConsumerWidget {
                         child: Text(
                           accessGranted
                               ? tr('Connect', 'اتصال')
+                              : checking
+                              ? tr('Connect', 'اتصال')
                               : verifiedDenied
                               ? tr('Upgrade', 'ترقية')
                               : tr('Retry', 'إعادة المحاولة'),
@@ -347,7 +349,7 @@ class _FitnessDeviceSection extends ConsumerWidget {
                       accessGranted
                           ? Icons.bluetooth_searching_rounded
                           : checking
-                          ? Icons.shield_outlined
+                          ? Icons.bluetooth_rounded
                           : verifiedDenied
                           ? Icons.lock_outline_rounded
                           : Icons.refresh_rounded,
@@ -359,7 +361,7 @@ class _FitnessDeviceSection extends ConsumerWidget {
                   : accessGranted
                   ? tr('Scan for fitness devices', 'البحث عن أجهزة لياقة')
                   : checking
-                  ? tr('Checking subscription', 'جارٍ التحقق من الاشتراك')
+                  ? tr('Scan for fitness devices', 'البحث عن أجهزة لياقة')
                   : verifiedDenied
                   ? tr('Upgrade', 'ترقية')
                   : tr('Retry', 'إعادة المحاولة'),

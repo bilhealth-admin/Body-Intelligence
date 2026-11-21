@@ -49,6 +49,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   bool _saving = false;
   bool _sharing = false;
   bool _openingDetail = false;
+  bool _expanded = false;
 
   bool get _socialActionsAvailable =>
       widget.actionsEnabled &&
@@ -58,6 +59,10 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   @override
   void didUpdateWidget(covariant _CommunityPostCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.post.id != widget.post.id ||
+        oldWidget.post.body != widget.post.body) {
+      _expanded = false;
+    }
     if (oldWidget.post.id != widget.post.id ||
         oldWidget.post.likeCount != widget.post.likeCount ||
         oldWidget.post.liked != widget.post.liked ||
@@ -218,6 +223,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
 
   @override
   Widget build(BuildContext context) => CommunityPostSurface(
+    compact: true,
     margin: const EdgeInsets.symmetric(vertical: 5),
     child: Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
@@ -346,8 +352,13 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
               ],
             ),
           ],
+          if (widget.post.hasImage) ...[
+            const SizedBox(height: 10),
+            _CommunityFeedImage(post: widget.post),
+          ],
           CommunityTranslationContent(
             contentId: 'post-${widget.post.id}',
+            controlsVisible: _expanded,
             ownerId: widget.currentUserId,
             ownerChanges: widget.ownerChanges,
             ownerIsCurrent: widget.ownerIsCurrent,
@@ -366,17 +377,30 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                     displayTitle: texts['title'],
                     repository: widget.repository,
                     compact: true,
+                    showDetails: false,
                   ),
                 ],
                 const SizedBox(height: 6),
-                CommunityPostBody(postId: widget.post.id, body: texts['body']!),
+                CommunityPostBody(
+                  postId: widget.post.id,
+                  body: texts['body']!,
+                  expanded: _expanded,
+                  alwaysExpandable: true,
+                  onExpandedChanged: (value) =>
+                      setState(() => _expanded = value),
+                ),
+                if (_expanded && widget.referenceMetadata != null) ...[
+                  const SizedBox(height: 8),
+                  _CommunityPostReferenceBlock(
+                    metadata: widget.referenceMetadata!,
+                    repository: widget.repository,
+                    compact: true,
+                    showTitle: false,
+                  ),
+                ],
               ],
             ),
           ),
-          if (widget.post.hasImage) ...[
-            const SizedBox(height: 10),
-            _CommunityFeedImage(post: widget.post),
-          ],
           if (widget.post.poll case final poll?) ...[
             const SizedBox(height: 12),
             _CommunityPollPanel(

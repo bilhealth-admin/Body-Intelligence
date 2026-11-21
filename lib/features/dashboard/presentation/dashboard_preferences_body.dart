@@ -5,8 +5,12 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
     final identity = ref.watch(profileAuthIdentityProvider);
     final ownerId = identity.asData?.value.ownerId;
     final sessionReady = identity.hasValue && !identity.hasError;
-    final verifiedSubscription = ref.watch(verifiedSubscriptionAccessProvider);
-    final entitlementResolved = verifiedSubscription.asData != null;
+    final verifiedSubscription = ref.watch(
+      verifiedSubscriptionPresentationProvider,
+    );
+    final entitlementResolved =
+        verifiedSubscription.asData?.value.authority ==
+        EntitlementAuthority.verifiedServer;
     final paid =
         verifiedSubscription.asData?.value.grants(
           CommerceEntitlement.advancedIntelligence,
@@ -183,7 +187,7 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
                                         : preset.premium && !entitlementResolved
                                         ? const SizedBox.square(
                                             dimension: 22,
-                                            child: BilFeatureWelcomeStatus(),
+                                            child: Icon(Icons.tune_rounded),
                                           )
                                         : preset.premium && !paid
                                         ? const Icon(
@@ -490,7 +494,13 @@ extension _DashboardPreferencesBody on _DashboardPreferencesPageState {
               const SizedBox(height: 8),
               BilPearlMaterialCard(
                 child: Semantics(
-                  label: paid
+                  label: !entitlementResolved
+                      ? _sectionCopy(
+                          context,
+                          'Add nutrient goal cards',
+                          'إضافة بطاقات أهداف المغذيات',
+                        )
+                      : paid
                       ? _sectionCopy(
                           context,
                           'Add nutrient goal cards, Premium active',

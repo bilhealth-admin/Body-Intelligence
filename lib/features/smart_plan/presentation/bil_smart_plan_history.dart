@@ -85,8 +85,8 @@ extension _BilSmartPlanHistory on _BilSmartPlanPageState {
                         ))
                       Text(
                         '${_mealSlot(oldMeal.slot)}\n'
-                        '${const BilSmartPlanCatalog().recipeTitle(oldMeal.recipeId, locale: Localizations.localeOf(sheet).languageCode)}\n↓\n'
-                        '${const BilSmartPlanCatalog().recipeTitle(version.onDate(BilPlanDate.parse(before.date))!.meals.singleWhere((m) => m.slot == oldMeal.slot).recipeId, locale: Localizations.localeOf(sheet).languageCode)}',
+                        '${const BilSmartPlanCatalog().recipeTitle(oldMeal.recipeId, locale: BilLocalePolicy.canonicalTag(Localizations.localeOf(sheet)))}\n↓\n'
+                        '${const BilSmartPlanCatalog().recipeTitle(version.onDate(BilPlanDate.parse(before.date))!.meals.singleWhere((m) => m.slot == oldMeal.slot).recipeId, locale: BilLocalePolicy.canonicalTag(Localizations.localeOf(sheet)))}',
                       ),
                   const SizedBox(height: 12),
                 ],

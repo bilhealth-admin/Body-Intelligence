@@ -113,91 +113,14 @@ class PremiumRouteGlassGate extends ConsumerWidget {
   }
 }
 
-class _PremiumRouteGateContents extends ConsumerStatefulWidget {
+class _PremiumRouteGateContents extends ConsumerWidget {
   const _PremiumRouteGateContents({required this.feature, required this.child});
 
   final PremiumGateFeature feature;
   final Widget child;
 
   @override
-  ConsumerState<_PremiumRouteGateContents> createState() =>
-      _PremiumRouteGateContentsState();
-}
-
-class _PremiumRouteGateContentsState
-    extends ConsumerState<_PremiumRouteGateContents> {
-  ProviderSubscription<AsyncValue<String?>>? _ownerSubscription;
-  String? _observedOwner;
-  int _ownerVisit = 0;
-  int? _verifiedFreeVisit;
-  Future<SubscriptionState>? _sourceReadWitness;
-  final _retiredSourceReads = Expando<bool>();
-  int _retiredReadGeneration = -1;
-
-  void _retireFreePresentationRead() {
-    final previousRead = _sourceReadWitness;
-    if (previousRead != null) _retiredSourceReads[previousRead] = true;
-    // Retire an in-flight read even if no frame has observed it yet. A pending
-    // Future may be forwarded across invalidations: a retired handle may never
-    // seed display continuity again. This is deliberately conservative; fresh
-    // authority still controls the real gate/child in the original code below.
-    if (widget.feature != PremiumGateFeature.aiCoach) {
-      final currentRead = ref.read(verifiedSubscriptionStateProvider.future);
-      // Observe only identity here. The AsyncValue below still owns and shows
-      // its error; do not leave this extra Future projection unhandled.
-      currentRead.ignore();
-      _retiredSourceReads[currentRead] = true;
-      final generation = ref
-          .read(verifiedSubscriptionReadWitnessProvider)
-          .generation;
-      if (generation > _retiredReadGeneration) {
-        _retiredReadGeneration = generation;
-      }
-    }
-    _ownerVisit++;
-    _verifiedFreeVisit = null;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _observedOwner = ref.read(verifiedEntitlementOwnerIdProvider);
-    // Observe raw owner transitions, including A -> B -> A between frames.
-    // A scalar owner key alone can miss that visit boundary. This retains only
-    // public Free gate presentation, never an entitlement or account data.
-    _ownerSubscription = ref.listenManual(verifiedEntitlementOwnerProvider, (
-      previous,
-      next,
-    ) {
-      if (next.hasError) {
-        setState(() {
-          _retireFreePresentationRead();
-        });
-      } else if (next.hasValue && next.value != _observedOwner) {
-        setState(() {
-          _observedOwner = next.value;
-          _retireFreePresentationRead();
-        });
-      }
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant _PremiumRouteGateContents oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.feature != widget.feature) _verifiedFreeVisit = null;
-  }
-
-  @override
-  void dispose() {
-    _ownerSubscription?.close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final feature = widget.feature;
-    final child = widget.child;
+  Widget build(BuildContext context, WidgetRef ref) {
     final isAiCoach = feature == PremiumGateFeature.aiCoach;
     // Boost belongs to the account, not its membership tier. A subscription
     // lookup (including its loading/error state) must not block verified credit.
@@ -208,67 +131,10 @@ class _PremiumRouteGateContentsState
         ? null
         : ref.watch(storefrontTargetPlanProvider).value;
     final state = subscription.asData?.value;
-    final owner = isAiCoach
-        ? null
-        : ref.watch(verifiedEntitlementOwnerIdProvider);
-    final ownerSnapshot = isAiCoach
-        ? const AsyncValue<String?>.data(null)
-        : ref.watch(verifiedEntitlementOwnerProvider);
-    if (!isAiCoach && owner != _observedOwner) {
-      _observedOwner = owner;
-      _retireFreePresentationRead();
-    }
-    final source = isAiCoach
-        ? const AsyncValue<SubscriptionState>.loading()
-        : ref.watch(verifiedSubscriptionStateProvider);
-    final sourceRead = isAiCoach
-        ? null
-        : ref.read(verifiedSubscriptionStateProvider.future);
-    sourceRead?.ignore();
-    _sourceReadWitness = sourceRead;
-    final readGeneration = isAiCoach
-        ? 0
-        : ref.read(verifiedSubscriptionReadWitnessProvider).generation;
-    // A pending Future can be forwarded by Riverpod across owner reloads.
-    // A genuinely new canonical read is identified by its loader generation,
-    // never by a previously retired Future handle. Direct preview overrides
-    // have no loader witness and retain the conservative identity check.
-    final currentPresentationRead = readGeneration == 0
-        ? sourceRead != null && _retiredSourceReads[sourceRead] != true
-        : readGeneration > _retiredReadGeneration;
-    if (!isAiCoach && !subscription.isLoading) {
-      _verifiedFreeVisit =
-          !subscription.hasError &&
-              !ownerSnapshot.hasError &&
-              !source.isLoading &&
-              !source.hasError &&
-              sourceRead != null &&
-              currentPresentationRead &&
-              owner != null &&
-              state?.authority == EntitlementAuthority.verifiedServer &&
-              state?.plan == CommercePlan.free
-          ? _ownerVisit
-          : null;
-    }
-    // A timer/resume refresh must not replace a settled Free card with a
-    // full-page spinner. Keep only its public presentation during an explicit
-    // same-owner source refresh. Initial loads, owner/dependency reloads,
-    // errors and completed paid/denied results use the original authority path.
-    // The source is never overridden and the Plans action stays disabled until
-    // verification completes; this cannot grant access to the protected child.
+    // Only re-use a completed public Free display for this authenticated
+    // owner visit. Neither the protected child nor checkout uses that display.
     final retainingFreeGate =
-        !isAiCoach &&
-        subscription.isLoading &&
-        !subscription.hasError &&
-        !ownerSnapshot.hasError &&
-        owner != null &&
-        sourceRead != null &&
-        currentPresentationRead &&
-        _verifiedFreeVisit == _ownerVisit &&
-        source.isRefreshing &&
-        !source.hasError &&
-        source.value?.authority == EntitlementAuthority.verifiedServer &&
-        source.value?.plan == CommercePlan.free;
+        !isAiCoach && ref.watch(verifiedFreePresentationProvider);
     final creditSnapshot = isAiCoach
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
@@ -285,7 +151,7 @@ class _PremiumRouteGateContentsState
     // Fail closed with Retry, not a paid offer that mislabels an entitled
     // reviewer as Free after a transient auth/network read.
     final verificationUnavailable =
-        subscription.hasError ||
+        (!retainingFreeGate && subscription.hasError) ||
         (!isAiCoach &&
             !retainingFreeGate &&
             (state == null ||
@@ -352,13 +218,9 @@ class _PremiumRouteGateContentsState
               compact: constraints.maxHeight < 700,
               isDark: isDark,
               showCoach: isAiCoach,
-              onPressed: retainingFreeGate
-                  ? null
-                  : () => context.push(
-                      isAiCoach
-                          ? '/plans?focus=boost'
-                          : '/plans?focus=subscription',
-                    ),
+              onPressed: () => context.push(
+                isAiCoach ? '/plans?focus=boost' : '/plans?focus=subscription',
+              ),
               onSecondaryPressed: null,
             ),
           ),

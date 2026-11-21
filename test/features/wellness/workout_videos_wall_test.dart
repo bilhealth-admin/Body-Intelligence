@@ -102,6 +102,102 @@ void main() {
     },
   );
 
+  for (final locale in const [Locale('en'), Locale('ar')]) {
+    for (final size in const [Size(390, 844), Size(428, 926)]) {
+      for (final textScale in const [1.0, 1.3]) {
+        testWidgets(
+          'workout section edges respect ${locale.languageCode} '
+          '${size.width.toInt()}px at $textScale text scale',
+          (tester) async {
+            await tester.binding.setSurfaceSize(size);
+            addTearDown(() => tester.binding.setSurfaceSize(null));
+            await tester.pumpWidget(
+              _app(
+                discovery,
+                plan,
+                _NoTransferMediaCache(),
+                locale: locale,
+                textScale: textScale,
+              ),
+            );
+            await tester.pumpAndSettle();
+
+            final viewport = Offset.zero & size;
+            final rtl = locale.languageCode == 'ar';
+            double leadingMargin(Rect bounds) => rtl
+                ? viewport.right - bounds.right
+                : bounds.left - viewport.left;
+            double trailingMargin(Rect bounds) => rtl
+                ? bounds.left - viewport.left
+                : viewport.right - bounds.right;
+
+            // Videos and Gym exercise the two library section surfaces.
+            for (final tabIndex in const [0, 1]) {
+              if (tabIndex != 0) {
+                await tester.tap(find.byType(Tab).at(tabIndex));
+                await tester.pumpAndSettle();
+              }
+              final sectionLists = tester
+                  .widgetList<ListView>(find.byType(ListView))
+                  .where((list) {
+                    return list.scrollDirection == Axis.horizontal &&
+                        find.descendant(
+                          of: find.byWidget(list),
+                          matching: find.byType(PremiumCollectionItemGate),
+                        ).evaluate().isNotEmpty;
+                  })
+                  .toList();
+              expect(sectionLists, isNotEmpty);
+              final listFinder = find.byWidget(sectionLists.first);
+              final sectionFinder = find.ancestor(
+                of: listFinder,
+                matching: find.byType(Column),
+              ).first;
+              final titleFinder = find.descendant(
+                of: sectionFinder,
+                matching: find.byType(Text),
+              ).first;
+              expect(titleFinder, findsOneWidget);
+              final cardFinder = find.descendant(
+                of: listFinder,
+                matching: find.byType(PremiumCollectionItemGate),
+              ).first;
+              expect(cardFinder, findsOneWidget);
+              expect(
+                Directionality.of(tester.element(cardFinder)),
+                rtl ? TextDirection.rtl : TextDirection.ltr,
+              );
+
+              final titleBounds = tester.getRect(titleFinder);
+              final cardBounds = tester.getRect(cardFinder);
+              final reason = '${locale.languageCode}, $size, '
+                  'scale $textScale, tab $tabIndex';
+              expect(
+                leadingMargin(titleBounds),
+                closeTo(20, 0.1),
+                reason: reason,
+              );
+              expect(
+                trailingMargin(titleBounds),
+                greaterThanOrEqualTo(19.9),
+                reason: reason,
+              );
+              expect(
+                leadingMargin(cardBounds),
+                closeTo(20, 0.1),
+                reason: reason,
+              );
+              expect(cardBounds.width, closeTo(304, 0.1), reason: reason);
+              expect(cardBounds.left, greaterThanOrEqualTo(viewport.left));
+              expect(cardBounds.right, lessThanOrEqualTo(viewport.right));
+              expect(tester.takeException(), isNull, reason: reason);
+            }
+          },
+        );
+      }
+    }
+  }
+
   testWidgets('Videos is first and visible unique sections stay safely gated', (
     tester,
   ) async {
@@ -228,19 +324,28 @@ void _expectSectionPreviewContract(
 Widget _app(
   List<WellnessContentItem> discovery,
   GymSixMonthPlan plan,
-  WellnessMediaCache cache,
-) => ProviderScope(
+  WellnessMediaCache cache, {
+  Locale locale = const Locale('en'),
+  double textScale = 1,
+}) => ProviderScope(
   overrides: [
     verifiedSubscriptionStateProvider.overrideWith(
       (ref) async => FreePlan.createState(),
     ),
   ],
   child: MaterialApp(
+    locale: locale,
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: const [
       AppLocalizations.delegate,
       ...GlobalMaterialLocalizations.delegates,
     ],
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaler: TextScaler.linear(textScale),
+      ),
+      child: child!,
+    ),
     home: BilWorkoutRoutinesPage(
       loader: (_) async => discovery,
       gymPlanLoader: () async => plan,

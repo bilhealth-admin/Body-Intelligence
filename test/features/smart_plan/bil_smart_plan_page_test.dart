@@ -604,6 +604,150 @@ void main() {
     return repo;
   }
 
+  testWidgets(
+    'saved catalog meal names follow the current locale without rewriting the plan',
+    (tester) async {
+      final repo = (await tester.runAsync(activePlan))!;
+      final original = (await tester.runAsync(
+        () => repo.readFor('owner-123'),
+      ))!;
+      // These are the released identities seen in the reported saved plan.
+      // Persist IDs only; English display text is never a stored translation.
+      final json = original.toJson();
+      final firstDay = (json['days'] as List).first as Map<String, Object?>;
+      final meals = firstDay['meals'] as List;
+      for (final raw in meals) {
+        final meal = raw as Map<String, Object?>;
+        if (meal['slot'] == 'breakfast') {
+          meal['recipeId'] = 'overnight-oats-figs';
+        } else if (meal['slot'] == 'lunch') {
+          meal['recipeId'] = 'antalya-piyaz';
+        }
+      }
+      final saved = BilSmartPlan.decode(jsonEncode(json));
+      final savedBytes = saved.encode();
+      await tester.runAsync(
+        () => repo.preferences.set(repo.storageKey('owner-123'), savedBytes),
+      );
+      const titles = {
+        'en': ['Overnight oats with figs', 'Antalya piyaz'],
+        'ar': ['شوفان منقوع مع التين', 'بياز أنطاليا'],
+        'fr': ['Gruau du soir aux figues', 'Piyaz d’Antalya'],
+      };
+      for (final language in ['en', 'ar', 'fr', 'en']) {
+        await pump(tester, language, 390, 1);
+        tester
+            .state<ScrollableState>(find.byType(Scrollable).first)
+            .position
+            .jumpTo(0);
+        await tester.pumpAndSettle();
+        final today = find.byKey(const ValueKey('bil-smart-plan-tab-0'));
+        await tester.ensureVisible(today);
+        await tester.tap(today);
+        await tester.pumpAndSettle();
+        final exercises = find.byKey(
+          const ValueKey('bil-smart-plan-workout-steps'),
+        );
+        await tester.ensureVisible(exercises);
+        if (!tester.widget<ExpansionTile>(exercises).initiallyExpanded &&
+            find.text('Dumbbell bench press').evaluate().isEmpty &&
+            find
+                .text('دمبل بنش بريس — Dumbbell bench press')
+                .evaluate()
+                .isEmpty) {
+          await tester.tap(exercises);
+          await tester.pumpAndSettle();
+        }
+        const canonicalExercises = [
+          'Dumbbell bench press',
+          'Standing dumbbell shoulder press',
+          'Dumbbell lateral raise',
+          'Overhead triceps extension',
+          'Bench push-up',
+        ];
+        const arabicExercises = [
+          'دمبل بنش بريس — Dumbbell bench press',
+          'ستاندينغ دمبل شولدر بريس — Standing dumbbell shoulder press',
+          'دمبل لاترال ريز — Dumbbell lateral raise',
+          'أوفرهِد ترايسبس إكستنشن — Overhead triceps extension',
+          'بنش بوش أب — Bench push-up',
+        ];
+        final exerciseTitles = language == 'ar'
+            ? arabicExercises
+            : canonicalExercises;
+        for (final title in exerciseTitles) {
+          expect(find.text(title), findsOneWidget);
+        }
+        expect(
+          find.text('Resistance Upper Body Dumbbell Bench Press'),
+          findsNothing,
+        );
+        for (final (index, slot) in ['breakfast', 'lunch'].indexed) {
+          final row = find.byKey(ValueKey('bil-smart-plan-meal-$slot'));
+          await tester.scrollUntilVisible(
+            row,
+            170,
+            scrollable: find.byType(Scrollable).first,
+          );
+          expect(
+            (tester.widget<ListTile>(row).title! as Text).data,
+            titles[language]![index],
+            reason: '$language $slot in Suggested meals',
+          );
+        }
+        tester
+            .state<ScrollableState>(find.byType(Scrollable).first)
+            .position
+            .jumpTo(0);
+        await tester.pumpAndSettle();
+        final schedule = find.byKey(const ValueKey('bil-smart-plan-tab-1'));
+        await tester.ensureVisible(schedule);
+        await tester.tap(schedule);
+        await tester.pumpAndSettle();
+        final day = find.widgetWithText(ListTile, saved.days.first.date);
+        await tester.scrollUntilVisible(
+          day,
+          170,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.tap(day);
+        await tester.pumpAndSettle();
+        final sheetScroll = find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.byType(Scrollable),
+        );
+        for (final title in [...exerciseTitles, ...titles[language]!]) {
+          final shownTitle = find.descendant(
+            of: find.byType(BottomSheet),
+            matching: find.text(title),
+          );
+          await tester.scrollUntilVisible(
+            shownTitle,
+            120,
+            scrollable: sheetScroll,
+          );
+          expect(
+            shownTitle,
+            findsOneWidget,
+            reason: '$language saved schedule day',
+          );
+        }
+        Navigator.of(tester.element(find.byType(BottomSheet))).pop();
+        await tester.pumpAndSettle();
+        expect(
+          await tester.runAsync(
+            () => repo.preferences.get(repo.storageKey('owner-123')),
+          ),
+          savedBytes,
+          reason: 'Changing locale must preserve every saved plan byte.',
+        );
+        expect(tester.takeException(), isNull);
+      }
+      expect(await tester.runAsync(() => db.select(db.meals).get()), isEmpty);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   for (final language in ['en', 'ar']) {
     testWidgets(
       'plan and meal books $language open real references and exact recipe without logging food',

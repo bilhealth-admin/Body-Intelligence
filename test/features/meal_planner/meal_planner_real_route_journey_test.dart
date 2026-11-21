@@ -315,7 +315,11 @@ void main() {
           }
           final rounds = scenario == 'repeat-after-return' ? 2 : 1;
           for (var round = 0; round < rounds; round++) {
-            final recipe = find.text('Bean and salad wrap');
+            final recipe = find.text(
+              language == 'ar'
+                  ? 'لفافة بالفاصولياء والسلطة'
+                  : 'Bean and salad wrap',
+            );
             if (largeText) {
               final plannerBodies = find.descendant(
                 of: find.byType(MealPlannerPage),

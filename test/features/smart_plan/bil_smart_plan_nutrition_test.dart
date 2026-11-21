@@ -157,4 +157,203 @@ void main() {
       );
     },
   );
+  BilVerifiedRecipe serving(
+    String id,
+    BilPlanMealSlot slot, {
+    double kcal = 500,
+    double protein = 20,
+    bool evidence = true,
+  }) => BilVerifiedRecipe(
+    id: id,
+    slot: slot,
+    nutrition: evidence
+        ? BilPlanNutrients(
+            values: {'kcal': kcal, 'proteinG': protein},
+            source: 'fixture_source:$id',
+          )
+        : null,
+  );
+
+  Map<BilPlanMealSlot, List<BilVerifiedRecipe>> overlapping({
+    double alternativeKcal = 500,
+    double alternativeProtein = 20,
+    bool evidence = true,
+  }) => {
+    BilPlanMealSlot.breakfast: [
+      serving(
+        'breakfast',
+        BilPlanMealSlot.breakfast,
+        kcal: 200,
+        evidence: evidence,
+      ),
+    ],
+    BilPlanMealSlot.lunch: [
+      serving('shared', BilPlanMealSlot.lunch, evidence: evidence),
+    ],
+    BilPlanMealSlot.dinner: [
+      serving('shared', BilPlanMealSlot.dinner, evidence: evidence),
+      serving(
+        'dinner-alternative',
+        BilPlanMealSlot.dinner,
+        kcal: alternativeKcal,
+        protein: alternativeProtein,
+        evidence: evidence,
+      ),
+    ],
+  };
+
+  test(
+    'same-day diversity uses existing eligible alternatives without a target',
+    () {
+      final source = overlapping();
+      final uses = <String, int>{'shared': 2};
+      final selected = selectSmartPlanMeals(
+        choices: source,
+        target: null,
+        useCount: uses,
+        rotation: 0,
+      );
+      expect(selected.values.map((recipe) => recipe.id).toSet(), hasLength(3));
+      expect(selected[BilPlanMealSlot.lunch]!.id, 'shared');
+      expect(
+        identical(
+          selected[BilPlanMealSlot.dinner],
+          source[BilPlanMealSlot.dinner]![1],
+        ),
+        isTrue,
+        reason: 'Selection reuses the source serving, identity, and evidence.',
+      );
+      expect(uses, {'shared': 2});
+    },
+  );
+
+  test(
+    'scarce compatible pools still fill all slots and permit necessary repeats',
+    () {
+      final source = {
+        for (final slot in BilPlanMealSlot.values)
+          slot: [serving('only-safe-choice', slot)],
+      };
+      final selected = selectSmartPlanMeals(
+        choices: source,
+        target: null,
+        useCount: {},
+        rotation: 7,
+      );
+      expect(selected.keys.toSet(), BilPlanMealSlot.values.toSet());
+      expect(
+        selected.values.map((recipe) => recipe.id),
+        everyElement('only-safe-choice'),
+      );
+    },
+  );
+
+  test(
+    'fallback finds feasible diversity even when the first slot must change',
+    () {
+      final source = {
+        BilPlanMealSlot.breakfast: [
+          serving('shared', BilPlanMealSlot.breakfast),
+          serving('breakfast-alternative', BilPlanMealSlot.breakfast),
+        ],
+        BilPlanMealSlot.lunch: [serving('shared', BilPlanMealSlot.lunch)],
+        BilPlanMealSlot.dinner: [serving('dinner', BilPlanMealSlot.dinner)],
+      };
+      final selected = selectSmartPlanMeals(
+        choices: source,
+        target: null,
+        useCount: {},
+        rotation: 0,
+      );
+      expect(selected.values.map((recipe) => recipe.id).toSet(), hasLength(3));
+      expect(selected[BilPlanMealSlot.breakfast]!.id, 'breakfast-alternative');
+    },
+  );
+
+  test(
+    'missing evidence permits safe diversity without inventing target nutrition',
+    () {
+      final selected = selectSmartPlanMeals(
+        choices: overlapping(evidence: false),
+        target: BilPlanNutrients(values: {'kcal': 1200}, source: 'saved_goal'),
+        useCount: {},
+        rotation: 0,
+      );
+      expect(selected.values.map((recipe) => recipe.id).toSet(), hasLength(3));
+      expect(
+        BilPlanNutrients.total(
+          selected.values.map((recipe) => recipe.nutrition),
+        ),
+        isNull,
+      );
+    },
+  );
+
+  test(
+    'identical source nutrient totals and target score prefer distinct meals',
+    () {
+      final selected = selectSmartPlanMeals(
+        choices: overlapping(),
+        target: BilPlanNutrients(values: {'kcal': 1200}, source: 'saved_goal'),
+        useCount: {},
+        rotation: 0,
+      );
+      expect(selected.values.map((recipe) => recipe.id).toSet(), hasLength(3));
+      expect(
+        BilPlanNutrients.total(
+          selected.values.map((recipe) => recipe.nutrition),
+        )!.values,
+        {'kcal': 1200, 'proteinG': 60},
+      );
+    },
+  );
+
+  test('diversity never overrides a better saved nutrient-target fit', () {
+    final selected = selectSmartPlanMeals(
+      choices: overlapping(alternativeKcal: 700),
+      target: BilPlanNutrients(values: {'kcal': 1200}, source: 'saved_goal'),
+      useCount: {},
+      rotation: 0,
+    );
+    expect(selected[BilPlanMealSlot.lunch]!.id, 'shared');
+    expect(selected[BilPlanMealSlot.dinner]!.id, 'shared');
+    expect(
+      BilPlanNutrients.total(
+        selected.values.map((recipe) => recipe.nutrition),
+      )!.values,
+      {'kcal': 1200, 'proteinG': 60},
+    );
+  });
+
+  test(
+    'a calorie tie cannot silently change another source nutrient total',
+    () {
+      final selected = selectSmartPlanMeals(
+        choices: overlapping(alternativeProtein: 30),
+        target: BilPlanNutrients(values: {'kcal': 1200}, source: 'saved_goal'),
+        useCount: {},
+        rotation: 0,
+      );
+      expect(selected[BilPlanMealSlot.dinner]!.id, 'shared');
+      expect(
+        BilPlanNutrients.total(
+          selected.values.map((recipe) => recipe.nutrition),
+        )!.values,
+        {'kcal': 1200, 'proteinG': 60},
+      );
+    },
+  );
+
+  test(
+    'an identical nutrient tie preserves the existing prior-use objective',
+    () {
+      final selected = selectSmartPlanMeals(
+        choices: overlapping(),
+        target: BilPlanNutrients(values: {'kcal': 1200}, source: 'saved_goal'),
+        useCount: {'dinner-alternative': 1},
+        rotation: 0,
+      );
+      expect(selected[BilPlanMealSlot.dinner]!.id, 'shared');
+    },
+  );
 }

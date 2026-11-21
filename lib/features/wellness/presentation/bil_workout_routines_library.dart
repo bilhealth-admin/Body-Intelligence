@@ -298,7 +298,7 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
             )
           else if (_tabs.index == 0)
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 0, 40),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 0, 40),
               sliver: _WorkoutVideosWall(
                 plan: gymPlan,
                 catalogItems: items,
@@ -316,7 +316,7 @@ extension _WorkoutLibrarySurface on _BilWorkoutRoutinesPageState {
             )
           else if (_tabs.index != 3)
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 0, 40),
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 8, 0, 40),
               sliver: SliverToBoxAdapter(
                 child: _WorkoutExploreSections(
                   items: visible,

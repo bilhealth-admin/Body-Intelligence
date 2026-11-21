@@ -274,51 +274,47 @@ void main() {
     },
   );
 
-  testWidgets(
-    'feed composer is branded as a post and hides its own author story',
-    (tester) async {
-      final repository = _FeedRepository()
-        ..feed = [
-          CommunityPost(
-            id: 'own-post',
-            authorId: '11111111-1111-4111-8111-111111111111',
-            authorName: 'Current member',
-            body: 'My own post',
-            createdAt: DateTime.utc(2026, 9, 8),
-          ),
-          CommunityPost(
-            id: 'friend-post',
-            authorId: '22222222-2222-4222-8222-222222222222',
-            authorName: 'Friend member',
-            body: 'Friend post',
-            createdAt: DateTime.utc(2026, 9, 7),
-          ),
-        ];
-      await tester.pumpWidget(
-        MaterialApp(home: CommunityHubPage(repository: repository)),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('feed uses one fixed post action and no member-story strip', (
+    tester,
+  ) async {
+    final repository = _FeedRepository()
+      ..feed = [
+        CommunityPost(
+          id: 'own-post',
+          authorId: '11111111-1111-4111-8111-111111111111',
+          authorName: 'Current member',
+          body: 'My own post',
+          createdAt: DateTime.utc(2026, 9, 8),
+        ),
+        CommunityPost(
+          id: 'friend-post',
+          authorId: '22222222-2222-4222-8222-222222222222',
+          authorName: 'Friend member',
+          body: 'Friend post',
+          createdAt: DateTime.utc(2026, 9, 7),
+        ),
+      ];
+    await tester.pumpWidget(
+      MaterialApp(home: CommunityHubPage(repository: repository)),
+    );
+    await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const Key('community-create-post-icon')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(
-          const Key('community-story-11111111-1111-4111-8111-111111111111'),
-        ),
-        findsNothing,
-      );
-      expect(
-        find.byKey(
-          const Key('community-story-22222222-2222-4222-8222-222222222222'),
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('My own post'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.byKey(const Key('community-create-post-icon')), findsOneWidget);
+    expect(
+      find.byKey(
+        const Key('community-story-11111111-1111-4111-8111-111111111111'),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.byKey(
+        const Key('community-story-22222222-2222-4222-8222-222222222222'),
+      ),
+      findsNothing,
+    );
+    expect(find.text('My own post'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('pull-to-refresh keeps community posts anchored', (tester) async {
     final repository = _FeedRepository();

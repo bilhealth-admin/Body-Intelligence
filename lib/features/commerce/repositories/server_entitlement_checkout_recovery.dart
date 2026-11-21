@@ -33,6 +33,16 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
     bool requireFreshFreeProof = false,
     _ExplicitCheckoutCanonicalRead? explicitCheckoutRead,
   }) async {
+    // An authority decision this process has already observed supersedes any
+    // in-flight secure read, including a failed deletion of a previous lease.
+    SubscriptionState? latestAdmin(SubscriptionState? persisted) =>
+        ServerEntitlementRepository._settledAdminReads.containsKey(ownerId)
+        ? ServerEntitlementRepository._adminSessionCache.fallbackFor(
+            ownerId: ownerId,
+            now: _now(),
+          )
+        : persisted;
+
     // On a cold process, render a still-valid server lease from encrypted
     // storage before waiting for network timeouts. Consume this shortcut once
     // per owner so the observed provider's next scheduled refresh reaches the
@@ -42,14 +52,15 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
       final now = _now();
       SubscriptionState? persistedAdmin;
       try {
-        persistedAdmin = await _adminContinuityStore.read(
-          ownerId: ownerId,
-          now: now,
+        persistedAdmin = await _withAdminStorage(
+          ownerId,
+          () => _adminContinuityStore.read(ownerId: ownerId, now: _now()),
         );
         CommunityOwnerOperation.checkCurrent();
         if (client.auth.currentUser?.id != ownerId) {
           return FreePlan.createState();
         }
+        persistedAdmin = latestAdmin(persistedAdmin);
         if (persistedAdmin != null) {
           ServerEntitlementRepository._adminSessionCache.remember(
             ownerId: ownerId,
@@ -68,6 +79,7 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
         }
         // Legacy provider-null storage does not identify an independent grant.
         // Confirm that source again rather than turning it into fresh proof.
+        persistedAdmin = latestAdmin(persistedAdmin);
         final restored = _restoreStoreProof(ownerId, persistedSubscription);
         if (restored != null) {
           return persistedAdmin == null
@@ -81,6 +93,7 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
         // Continue to the authoritative network path when secure storage is
         // unavailable or corrupt.
         CommunityOwnerOperation.checkCurrent();
+        persistedAdmin = latestAdmin(persistedAdmin);
         if (persistedAdmin != null && client.auth.currentUser?.id == ownerId) {
           return persistedAdmin;
         }
@@ -108,6 +121,43 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
     if (explicitCheckoutRead != null && !explicitCheckoutRead.complete) {
       return FreePlan.createState();
     }
+    final adminRead = explicitCheckoutRead == null
+        ? ++ServerEntitlementRepository._adminReadGeneration
+        : null;
+    bool superseded() =>
+        adminRead != null &&
+        (ServerEntitlementRepository._settledAdminReads[ownerId] ?? 0) >
+            adminRead;
+    SubscriptionState currentComposite() {
+      final admin = latestAdmin(null);
+      final effective = currentStore();
+      return admin == null ? effective : _withAdminContinuity(effective, admin);
+    }
+
+    SubscriptionState withoutAdminProof() {
+      final state = currentStore();
+      if (state.plan != CommercePlan.free ||
+          state.authority != EntitlementAuthority.verifiedServer) {
+        return state;
+      }
+      // Retire an actual negative store receipt now. It does not prove that
+      // an unreadable, independently granted membership is also absent.
+      return SubscriptionState(
+        plan: CommercePlan.free,
+        entitlements: FreePlan.entitlements,
+        authority: EntitlementAuthority.localDefault,
+        provider: state.provider,
+        lifecycle: state.lifecycle,
+        verifiedAt: state.verifiedAt,
+        serverRevision: state.serverRevision,
+        storeRenewalObservation: state.storeRenewalObservation,
+        storeRenewalDefinitivelyInactive:
+            state.storeRenewalDefinitivelyInactive,
+        isPurchasable: false,
+        canRestorePurchases: false,
+      );
+    }
+
     try {
       final grant = await client
           .rpc('bil_get_my_admin_subscription')
@@ -120,6 +170,12 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
         ownerId: ownerId,
         now: _now(),
       );
+      // The RPC returns null for an authoritative absence. An unreadable
+      // non-null grant cannot erase the last verified same-owner lease.
+      if (grant != null &&
+          independentAdmin.authority != EntitlementAuthority.verifiedServer) {
+        throw const FormatException('Unverified admin grant response');
+      }
       if (explicitCheckoutRead != null) {
         // Every store-source attempt advances the started generation, even
         // if its independent closed-test lookup fails. Do not resurrect a
@@ -127,13 +183,12 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
         if (closedTestObservationGeneration !=
                 ServerEntitlementRepository._closedTestReadGeneration ||
             closedTestObservationGeneration !=
-                ServerEntitlementRepository._settledClosedTestReadGeneration ||
-            (grant != null &&
-                independentAdmin.authority !=
-                    EntitlementAuthority.verifiedServer)) {
+                ServerEntitlementRepository._settledClosedTestReadGeneration) {
           return FreePlan.createState();
         }
       } else {
+        if (superseded()) return currentComposite();
+        ServerEntitlementRepository._settledAdminReads[ownerId] = adminRead!;
         ServerEntitlementRepository._adminSessionCache.remember(
           ownerId: ownerId,
           // This cache is exclusively the independent admin authority. A store
@@ -142,10 +197,13 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
           now: _now(),
         );
         try {
-          await _adminContinuityStore.remember(
-            ownerId: ownerId,
-            state: independentAdmin,
-            now: _now(),
+          await _withAdminStorage(
+            ownerId,
+            () => _adminContinuityStore.remember(
+              ownerId: ownerId,
+              state: independentAdmin,
+              now: _now(),
+            ),
           );
         } on CommunityOwnerOperationCancelled {
           rethrow;
@@ -157,6 +215,7 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
           return FreePlan.createState();
         }
       }
+      if (superseded()) return currentComposite();
       // Neither encrypted storage nor the independent admin lookup may pin
       // an older closed-test snapshot across a later successful revocation.
       final effectiveStore = currentStore();
@@ -210,10 +269,15 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
       if (inMemory != null) {
         return _withAdminContinuity(currentStore(), inMemory);
       }
+      if (ServerEntitlementRepository._settledAdminReads.containsKey(ownerId)) {
+        return withoutAdminProof();
+      }
       try {
-        final persisted = await _adminContinuityStore.read(
-          ownerId: ownerId,
-          now: _now(),
+        final persisted = latestAdmin(
+          await _withAdminStorage(
+            ownerId,
+            () => _adminContinuityStore.read(ownerId: ownerId, now: _now()),
+          ),
         );
         CommunityOwnerOperation.checkCurrent();
         if (client.auth.currentUser?.id != ownerId) {
@@ -233,7 +297,7 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
         // Secure storage is continuity only. Store authority still determines
         // access when the local encrypted slot is unavailable.
       }
-      return currentStore();
+      return withoutAdminProof();
     }
   }
 }
@@ -250,25 +314,16 @@ final class _ExplicitCheckoutCanonicalRead {
     _failed = true;
     return FreePlan.createState();
   }
+}
 
-  void observeClosedTestRows(List<Map<String, dynamic>> rows) {
-    if (rows.length > 1) {
-      unresolved();
-      return;
-    }
-    if (rows.isNotEmpty) {
-      final row = rows.single;
-      final active = row['active'];
-      final rawExpiry = row['expires_at'];
-      final expiry = rawExpiry is String ? DateTime.tryParse(rawExpiry) : null;
-      // Source schema requires expires_at even after a grant is inactive.
-      if (active is! bool || rawExpiry is! String || expiry == null) {
-        unresolved();
-        return;
-      }
-    }
-    closedTestReadComplete = true;
-  }
+bool _validClosedTestRows(List<Map<String, dynamic>> rows) {
+  if (rows.isEmpty) return true;
+  if (rows.length != 1) return false;
+  final row = rows.single;
+  final expiry = row['expires_at'];
+  return row['active'] is bool &&
+      expiry is String &&
+      DateTime.tryParse(expiry) != null;
 }
 
 bool _explicitCheckoutSnapshotCurrent(SubscriptionState state, DateTime now) {

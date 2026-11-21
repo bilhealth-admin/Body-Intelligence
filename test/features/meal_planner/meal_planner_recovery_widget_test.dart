@@ -1,3 +1,6 @@
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
+import 'package:body_intelligence_log/features/meal_planner/domain/planner_recipe_display.dart';
 import '../../support/bil_waiting_indicators.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -82,7 +85,7 @@ Future<void> _pumpPlanner(
       child: router == null
           ? MaterialApp(
               locale: locale,
-              supportedLocales: const [Locale('en'), Locale('ar')],
+              supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: const [
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
@@ -92,7 +95,7 @@ Future<void> _pumpPlanner(
             )
           : MaterialApp.router(
               locale: locale,
-              supportedLocales: const [Locale('en'), Locale('ar')],
+              supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: const [
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
@@ -114,6 +117,56 @@ Future<void> _dispose(WidgetTester tester, AppDatabase database) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets(
+    'saved planner names and slots follow all locales without rewriting the week',
+    (tester) async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      final repo = _ControlledRepository(db);
+      addTearDown(() => _dispose(tester, db));
+      await _seed(repo, 'bean_wrap');
+      final original = await repo.get(_weekKey);
+      final recipe = recipeById('bean_wrap')!;
+      for (final tag in ['en', ...BilLocalePolicy.productionTags, 'en']) {
+        await _pumpPlanner(
+          tester,
+          repo,
+          locale: BilLocalePolicy.localeFromTag(tag),
+        );
+        final title = PlannerRecipeDisplay.title(recipe, tag);
+        final tile = find.widgetWithText(ListTile, title);
+        final weekScroll = find.descendant(
+          of: find.byType(ListView).first,
+          matching: find.byType(Scrollable),
+        );
+        await tester.scrollUntilVisible(tile, 160, scrollable: weekScroll);
+        expect(tile, findsOneWidget, reason: '$tag saved weekly title');
+        final subtitle = tester.widget<ListTile>(tile).subtitle! as Text;
+        expect(
+          subtitle.data,
+          contains(PlannerRecipeDisplay.slot('Lunch', tag)),
+        );
+        if (tag == 'ar') {
+          expect(title, 'لفافة بالفاصولياء والسلطة');
+          expect(find.text('Bean and salad wrap'), findsNothing);
+          await tester.tap(tile);
+          await tester.pumpAndSettle();
+          expect(
+            find.descendant(
+              of: find.byKey(const Key('meal-planner-recipe-pinned-header')),
+              matching: find.text(title),
+            ),
+            findsOneWidget,
+          );
+          Navigator.of(tester.element(find.byType(BottomSheet))).pop();
+          await tester.pumpAndSettle();
+        }
+        expect(await repo.get(_weekKey), original);
+        expect(repo.attemptedMutations, 0);
+        expect(tester.takeException(), isNull);
+      }
+    },
+  );
 
   testWidgets(
     'a stalled read expires without accepting its late result or changing the saved week',
@@ -343,11 +396,11 @@ void main() {
         matching: find.byType(Scrollable),
       );
       await tester.scrollUntilVisible(
-        find.text('Red lentil soup'),
+        find.text('شوربة العدس الأحمر'),
         160,
         scrollable: weekScroll,
       );
-      await tester.tap(find.text('Red lentil soup'));
+      await tester.tap(find.text('شوربة العدس الأحمر'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       await tester.ensureVisible(find.text('راجع وسجّل'));

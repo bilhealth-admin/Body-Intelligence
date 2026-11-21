@@ -1,3 +1,4 @@
+import '../../wellness/repositories/workout_discovery_arabic_transliteration.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
@@ -72,8 +73,14 @@ final class BilSmartPlanPrescriptions {
       for (final session in source['sessions'] as List) {
         for (final row in session['exercises'] as List) {
           if (row['exerciseId'] == id) {
-            return (locale == 'ar' ? row['titleAr'] : row['sourceName'])
-                as String?;
+            final sourceName = row['sourceName'] as String?;
+            if (locale != 'ar') return sourceName;
+            final arabic = row['titleAr'] as String?;
+            if (arabic != null) return arabic;
+            if (sourceName == null) return null;
+            // Reuse the same reviewed Arabic rendering as workout discovery.
+            // Exact prescription identity is checked above; doses are untouched.
+            return '${WorkoutDiscoveryArabicTransliteration.transliterate(sourceName)} — $sourceName';
           }
         }
       }

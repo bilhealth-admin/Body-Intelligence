@@ -9,11 +9,13 @@ Future<void> mount(
   WidgetTester tester,
   RefreshCallback onRefresh, {
   bool reverse = false,
+  bool showDragIndicator = true,
 }) => tester.pumpWidget(
   MaterialApp(
     home: Scaffold(
       body: BilRefreshIndicator(
         onRefresh: onRefresh,
+        showDragIndicator: showDragIndicator,
         child: ListView(
           reverse: reverse,
           physics: const AlwaysScrollableScrollPhysics(
@@ -29,6 +31,69 @@ Future<void> mount(
 );
 
 void main() {
+  testWidgets(
+    'quiet drag does not claim refresh before release and shows one pending indicator',
+    (tester) async {
+      var calls = 0;
+      final pending = Completer<void>();
+      addTearDown(() {
+        if (!pending.isCompleted) pending.complete();
+      });
+      await mount(tester, () {
+        calls++;
+        return pending.future;
+      }, showDragIndicator: false);
+      final list = find.byType(ListView);
+      final before = tester.getTopLeft(list);
+      final finger = await tester.startGesture(tester.getCenter(list));
+      await finger.moveBy(const Offset(0, 400));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(calls, 0);
+      expect(find.byType(BilFeatureWelcomeStatus), findsNothing);
+      await finger.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(calls, 1);
+      expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
+      expect(tester.getTopLeft(list), before);
+      await tester.drag(list, const Offset(0, 400));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(calls, 1);
+      expect(find.byType(BilFeatureWelcomeStatus), findsOneWidget);
+      pending.complete();
+      await tester.pumpAndSettle();
+      expect(find.byType(BilFeatureWelcomeStatus), findsNothing);
+      expect(find.text('Preserved content'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+  testWidgets(
+    'quiet ordinary scrolling and canceled short drag never become busy',
+    (tester) async {
+      var calls = 0;
+      await mount(tester, () async {
+        calls++;
+      }, showDragIndicator: false);
+      final list = find.byType(ListView);
+      var finger = await tester.startGesture(tester.getCenter(list));
+      await finger.moveBy(const Offset(0, 12));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(BilFeatureWelcomeStatus), findsNothing);
+      await finger.up();
+      await tester.pumpAndSettle();
+      await tester.drag(list, const Offset(0, -150));
+      finger = await tester.startGesture(tester.getCenter(list));
+      await finger.moveBy(const Offset(0, -50));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(BilFeatureWelcomeStatus), findsNothing);
+      await finger.up();
+      await tester.pumpAndSettle();
+      expect(calls, 0);
+      expect(find.byType(BilFeatureWelcomeStatus), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   for (final reverse in [false, true]) {
     testWidgets(
       'real pull refresh uses Splash and coalesces until completion; reverse=$reverse',

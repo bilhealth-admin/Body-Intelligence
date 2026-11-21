@@ -48,13 +48,12 @@ Map<BilPlanMealSlot, BilVerifiedRecipe> selectSmartPlanMeals({
   required Map<String, int> useCount,
   required int rotation,
 }) {
-  final fallback = {
-    for (final slot in BilPlanMealSlot.values)
-      slot: choices[slot]![rotation % choices[slot]!.length],
-  };
+  final fallback = _diverseMealFallback(choices, rotation);
   if (target == null || target.values['kcal'] == null) return fallback;
   var best = double.infinity;
   Map<BilPlanMealSlot, BilVerifiedRecipe>? selected;
+  BilPlanNutrients? selectedNutrients;
+  var selectedDistinct = 0;
   // The adapter supplies at most twelve source-verified choices per slot.
   for (final breakfast in choices[BilPlanMealSlot.breakfast]!.take(12)) {
     for (final lunch in choices[BilPlanMealSlot.lunch]!.take(12)) {
@@ -76,8 +75,21 @@ Map<BilPlanMealSlot, BilVerifiedRecipe> selectSmartPlanMeals({
           0,
           (sum, recipe) => sum + (useCount[recipe.id] ?? 0) * 0.03,
         );
-        if (score < best) {
+        final distinct = recipes.map((recipe) => recipe.id).toSet().length;
+        // Variety only breaks a true tie: neither the existing objective nor
+        // any source-backed nutrient total may worsen for a saved target.
+        final priorNutrients = selectedNutrients;
+        final sameNutrients =
+            priorNutrients != null &&
+            total.values.length == priorNutrients.values.length &&
+            total.values.entries.every(
+              (entry) => priorNutrients.values[entry.key] == entry.value,
+            );
+        if (score < best ||
+            (score == best && distinct > selectedDistinct && sameNutrients)) {
           best = score;
+          selectedNutrients = total;
+          selectedDistinct = distinct;
           selected = {
             BilPlanMealSlot.breakfast: breakfast,
             BilPlanMealSlot.lunch: lunch,
@@ -88,4 +100,42 @@ Map<BilPlanMealSlot, BilVerifiedRecipe> selectSmartPlanMeals({
     }
   }
   return selected ?? fallback;
+}
+
+/// Keep the rotated first choices when already distinct. Otherwise search only
+/// the same eligible, bounded pool; scarce pools still fill every meal slot.
+/// This affects a newly generated suggestion, never a stored plan or portion.
+Map<BilPlanMealSlot, BilVerifiedRecipe> _diverseMealFallback(
+  Map<BilPlanMealSlot, List<BilVerifiedRecipe>> choices,
+  int rotation,
+) {
+  Iterable<BilVerifiedRecipe> rotated(BilPlanMealSlot slot) sync* {
+    final rows = choices[slot]!;
+    for (var offset = 0; offset < rows.length && offset < 12; offset++) {
+      yield rows[(rotation + offset) % rows.length];
+    }
+  }
+
+  var selected = {
+    for (final slot in BilPlanMealSlot.values)
+      slot: choices[slot]![rotation % choices[slot]!.length],
+  };
+  var distinct = selected.values.map((recipe) => recipe.id).toSet().length;
+  if (distinct == BilPlanMealSlot.values.length) return selected;
+  for (final breakfast in rotated(BilPlanMealSlot.breakfast)) {
+    for (final lunch in rotated(BilPlanMealSlot.lunch)) {
+      for (final dinner in rotated(BilPlanMealSlot.dinner)) {
+        final count = {breakfast.id, lunch.id, dinner.id}.length;
+        if (count <= distinct) continue;
+        distinct = count;
+        selected = {
+          BilPlanMealSlot.breakfast: breakfast,
+          BilPlanMealSlot.lunch: lunch,
+          BilPlanMealSlot.dinner: dinner,
+        };
+        if (distinct == BilPlanMealSlot.values.length) return selected;
+      }
+    }
+  }
+  return selected;
 }

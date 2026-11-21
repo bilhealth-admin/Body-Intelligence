@@ -159,6 +159,104 @@ class _Gateway implements ConnectedHealthGateway {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   if (_capture) setUpAll(loadVisualEvidenceFont);
+  for (final language in ['ar', 'en']) {
+    testWidgets(
+      'passive Bluetooth entitlement reads stay silent in $language at 320/2x',
+      (tester) async {
+        tester.view.physicalSize = const Size(320, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        var read = Completer<SubscriptionState>();
+        final container = ProviderContainer(
+          overrides: [
+            preferencesRepositoryProvider.overrideWithValue(_Preferences()),
+            connectedHealthGatewayProvider.overrideWithValue(
+              _Gateway(_snapshot(TargetPlatform.iOS)),
+            ),
+            verifiedEntitlementOwnerSeedProvider.overrideWithValue('fixture-a'),
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream.value('fixture-a'),
+            ),
+            verifiedEntitlementLoaderProvider.overrideWithValue(
+              () => read.future,
+            ),
+            fitnessDeviceProvider.overrideWith(
+              (ref) => FitnessDeviceController(MethodChannelBleFitnessBridge()),
+            ),
+            liveHealthNowProvider.overrideWithValue(() => _now),
+          ],
+        );
+        addTearDown(container.dispose);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              locale: Locale(language),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                ...GlobalMaterialLocalizations.delegates,
+              ],
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(2)),
+                child: child!,
+              ),
+              home: const ConnectedHealthPage(),
+            ),
+          ),
+        );
+        await container.read(connectedHealthProvider.notifier).refresh();
+        await tester.pump();
+        final button = find.byKey(const Key('scan-fitness-devices-button'));
+        await tester.scrollUntilVisible(
+          button,
+          320,
+          scrollable: find.byType(Scrollable).first,
+        );
+        await tester.pump();
+        final checking = language == 'ar'
+            ? 'جارٍ التحقق من الاشتراك'
+            : 'Checking subscription';
+        expect(find.text(checking), findsNothing);
+        expect(tester.widget<FilledButton>(button).onPressed, isNull);
+        final free = SubscriptionState(
+          plan: CommercePlan.free,
+          entitlements: FreePlan.entitlements,
+          authority: EntitlementAuthority.verifiedServer,
+          isPurchasable: false,
+          canRestorePurchases: false,
+        );
+        read.complete(free);
+        await tester.pump();
+        await tester.pump();
+        final upgrade = find.descendant(
+          of: button,
+          matching: find.text(language == 'ar' ? 'ترقية' : 'Upgrade'),
+        );
+        expect(upgrade, findsOneWidget);
+        final before = tester.getRect(button);
+        read = Completer<SubscriptionState>();
+        container.invalidate(verifiedSubscriptionStateProvider);
+        await tester.pump();
+        await tester.pump();
+        expect(
+          container.read(verifiedSubscriptionAccessProvider).isLoading,
+          isTrue,
+        );
+        expect(upgrade, findsOneWidget);
+        expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+        expect(tester.getRect(button), before);
+        expect(find.text(checking), findsNothing);
+        read.complete(free);
+        await tester.pump();
+        await tester.pumpWidget(const SizedBox());
+        expect(tester.takeException(), isNull);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  }
   for (final (platform, plan) in [
     for (final platform in [TargetPlatform.iOS, TargetPlatform.android])
       for (final plan in [CommercePlan.premium, CommercePlan.free])

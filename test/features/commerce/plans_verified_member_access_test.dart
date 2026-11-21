@@ -248,6 +248,42 @@ void main() {
     },
   );
 
+  testWidgets(
+    'an initial held read stays neutral and keeps explicit recovery available',
+    (tester) async {
+      final held = Completer<SubscriptionState>();
+      var reads = 0;
+      final container = _container(() {
+        reads++;
+        return held.future;
+      });
+      final catalog = _Catalog(const [_aiAnnual]);
+      try {
+        await _pump(tester, container, catalog);
+        await tester.pump();
+        final refresh = find.byKey(const Key('store-request-account-refresh'));
+        expect(refresh, findsOneWidget);
+        final before = tester.getRect(refresh);
+        await tester.pump(const Duration(seconds: 31));
+        await tester.pump();
+        expect(tester.getRect(refresh), before);
+        expect(find.text('Subscription check unavailable'), findsNothing);
+        expect(find.text('Checking subscription'), findsNothing);
+        expect(find.byKey(const Key('store-purchase-cta')), findsNothing);
+        expect(catalog.requested, isEmpty);
+        final readsBeforeTap = reads;
+        await tester.tap(refresh);
+        await tester.pump();
+        expect(reads, readsBeforeTap + 1);
+        expect(tester.widget<TextButton>(refresh).onPressed, isNull);
+        expect(catalog.requested, isEmpty);
+      } finally {
+        held.complete(_verified(CommercePlan.free));
+        await _disposeFixture(tester, container);
+      }
+    },
+  );
+
   testWidgets('a held reread leaves an active member header untouched', (
     tester,
   ) async {
@@ -279,7 +315,7 @@ void main() {
   });
 
   testWidgets(
-    'a stalled background read offers one explicit recheck without selling',
+    'a stalled read stays silent until checkout requests one explicit recheck',
     (tester) async {
       final held = Completer<SubscriptionState>();
       final recovery = Completer<SubscriptionState>();
@@ -305,8 +341,14 @@ void main() {
         expect(reads, 2);
         await tester.pump(const Duration(seconds: 1));
         await tester.pump();
-        expect(retry, findsOneWidget);
+        expect(retry, findsNothing);
+        expect(find.text('Subscription check unavailable'), findsNothing);
         expect(cta, findsOneWidget);
+        expect(catalog.requested, isEmpty);
+        await tester.tap(cta);
+        await tester.pumpAndSettle();
+        expect(retry, findsOneWidget);
+        expect(catalog.requested, isEmpty);
         await tester.tap(retry);
         await tester.pump();
         expect(reads, 3);

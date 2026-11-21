@@ -62,6 +62,7 @@ class _Fixture extends StatefulWidget {
 class _FixtureState extends State<_Fixture> {
   String owner = 'A', body = 'I walked today', id = 'post-1';
   bool current = true;
+  bool controlsVisible = true;
   late Locale locale = widget.locale;
   final ownerChanges = ChangeNotifier();
   void update(VoidCallback change) => setState(change);
@@ -109,6 +110,7 @@ class _FixtureState extends State<_Fixture> {
                   key: const Key('translation-capture'),
                   child: CommunityTranslationContent(
                     contentId: id,
+                    controlsVisible: controlsVisible,
                     ownerId: owner,
                     ownerChanges: ownerChanges,
                     ownerIsCurrent: () => current,
@@ -143,6 +145,49 @@ Future<void> tap(WidgetTester tester) async {
 
 void main() {
   setUpAll(loadVisualEvidenceFont);
+  for (final completeBeforeCollapse in [false, true]) {
+    testWidgets(
+      'compact collapse restores author source and retires translation complete=$completeBeforeCollapse',
+      (tester) async {
+        final port = _Port();
+        final state = await _mount(tester, port);
+        await tap(tester);
+        if (completeBeforeCollapse) {
+          port.complete(0);
+          await tester.pump();
+          expect(find.text('Bugün yürüdüm'), findsOneWidget);
+        }
+        state.update(() => state.controlsVisible = false);
+        await tester.pump();
+        expect(find.text('I walked today'), findsOneWidget);
+        expect(find.text('Bugün yürüdüm'), findsNothing);
+        expect(
+          find.byKey(const Key('community-translate-post-1')),
+          findsNothing,
+        );
+        if (!completeBeforeCollapse) {
+          expect(port.cancelled, contains(port.calls.single.id));
+          port.complete(0);
+          await tester.pump();
+          expect(find.text('Bugün yürüdüm'), findsNothing);
+        }
+        state.update(() => state.controlsVisible = true);
+        await tester.pump();
+        expect(
+          find.byKey(const Key('community-translate-post-1')),
+          findsOneWidget,
+        );
+        expect(
+          port.calls,
+          hasLength(1),
+          reason: 'Expansion is not translation consent or a request.',
+        );
+        expect(find.text('I walked today'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets(
     'original first, Turkish app target, title/body toggle and local cache',
     (tester) async {

@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/localization/app_localizations.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
+import '../commerce/domain/subscription_state.dart';
 import '../commerce/providers/commerce_providers.dart';
 import 'weekly_report_engine.dart';
 import 'weekly_report_provider.dart';
