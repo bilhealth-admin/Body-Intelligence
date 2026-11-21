@@ -74,13 +74,13 @@ final verifiedSubscriptionAccessProvider =
       final previous = canonical.verified;
       // A pending/error decoration can hide the last observed store denial
       // from the handoff comparison. Keep its version fence across rereads.
+      final previousOrder = handoff == null
+          ? null
+          : comparePurchaseProofVersion(previous, handoff);
       if (handoff != null &&
           handoff.plan != CommercePlan.free &&
           previous?.plan == CommercePlan.free &&
-          previous?.verifiedAt != null &&
-          (previous!.serverRevision != null && handoff.serverRevision != null
-              ? previous.serverRevision! >= handoff.serverRevision!
-              : !previous.verifiedAt!.isBefore(handoff.verifiedAt!))) {
+          (previousOrder ?? -1) >= 0) {
         handoff = null;
       }
       var snapshot = purchaseHandoffView(source, handoff, now);
@@ -89,19 +89,28 @@ final verifiedSubscriptionAccessProvider =
         canonical.verified = null;
         return AsyncValue.error(snapshot.error!, snapshot.stackTrace!);
       }
-      // A known store revocation also wins while its follow-up read is held.
-      // Independent admin/closed-test authority is composed separately.
+      // A store denial retires only paid proof it could supersede. The
+      // composite Free result remains available for presentation while its
+      // next read is held. A later canonical repurchase keeps its own term.
       if (handoff?.authority == EntitlementAuthority.verifiedServer &&
           handoff?.plan == CommercePlan.free &&
-          (canonical.verified?.provider == SubscriptionProvider.apple ||
-              canonical.verified?.provider == SubscriptionProvider.google)) {
+          previous != null &&
+          previous.plan != CommercePlan.free &&
+          (previous.provider == SubscriptionProvider.apple ||
+              previous.provider == SubscriptionProvider.google) &&
+          (previousOrder ?? -1) <= 0) {
         canonical.verified = null;
       }
       final fresh = snapshot.asData?.value;
       if (!snapshot.isLoading &&
           !snapshot.hasError &&
           fresh?.authority == EntitlementAuthority.verifiedServer) {
-        canonical.verified = fresh;
+        // A store-only denial can supersede an older store grant immediately.
+        // Only a completed composite read can establish Free continuity for
+        // periods when independent account authorities are unresolved.
+        if (fresh!.plan != CommercePlan.free || !identical(fresh, handoff)) {
+          canonical.verified = fresh;
+        }
       } else if (ownerId != null &&
           canonical.verified?.authority ==
               EntitlementAuthority.verifiedServer &&

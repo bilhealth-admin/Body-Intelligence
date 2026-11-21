@@ -47,6 +47,23 @@ class VerifiedPurchaseHandoff extends Notifier<SubscriptionState?> {
   void retire() => publish(null);
 }
 
+/// Order a canonical read against the receipt handoff. Older store payloads
+/// may lack a revision; their server verification timestamps are comparable.
+int? comparePurchaseProofVersion(
+  SubscriptionState? canonical,
+  SubscriptionState handoff,
+) {
+  final revision = canonical?.serverRevision;
+  final handoffRevision = handoff.serverRevision;
+  if (revision != null && handoffRevision != null) {
+    return revision.compareTo(handoffRevision);
+  }
+  final verifiedAt = handoff.verifiedAt;
+  return verifiedAt == null
+      ? null
+      : canonical?.verifiedAt?.compareTo(verifiedAt);
+}
+
 AsyncValue<SubscriptionState> purchaseHandoffView(
   AsyncValue<SubscriptionState> read,
   SubscriptionState? handoff,
@@ -57,6 +74,7 @@ AsyncValue<SubscriptionState> purchaseHandoffView(
   }
   if (handoff == null) return read;
   final current = read.asData?.value ?? (read.isRefreshing ? read.value : null);
+  final order = comparePurchaseProofVersion(current, handoff) ?? -1;
   bool independentGrant() =>
       current?.authority == EntitlementAuthority.verifiedServer &&
       current != null &&
@@ -71,8 +89,7 @@ AsyncValue<SubscriptionState> purchaseHandoffView(
     if (read.isLoading) return const AsyncValue.loading();
     if (read.hasError) return AsyncValue.error(read.error!, read.stackTrace!);
     if (current?.authority != EntitlementAuthority.verifiedServer) return read;
-    if (current?.verifiedAt != null &&
-        !current!.verifiedAt!.isBefore(handoff.verifiedAt!)) {
+    if (order > 0 || (order == 0 && current!.plan == CommercePlan.free)) {
       return read;
     }
     return AsyncValue.data(handoff);
@@ -92,8 +109,7 @@ AsyncValue<SubscriptionState> purchaseHandoffView(
       handoff.plan == CommercePlan.premium) {
     return read;
   }
-  if (current?.verifiedAt != null &&
-      !current!.verifiedAt!.isBefore(handoff.verifiedAt!)) {
+  if (order >= 0) {
     return read;
   }
   return AsyncValue.data(handoff);

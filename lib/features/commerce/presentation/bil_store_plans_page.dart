@@ -441,6 +441,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   void _explainBlockedPurchase(BilStoreOfferMetadata offer) {
     final store = widget.store ?? _ownedStore;
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final copy = AppLocalizations(Localizations.localeOf(context));
+    final account = offer.kind == BilStoreProductKind.aiBoostConsumable
+        ? null
+        : ref.read(verifiedSubscriptionAccessProvider);
     final unresolved =
         _sharedBoost?.canRetry == true ||
         store != null &&
@@ -453,13 +457,17 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                   'purchase_status_unknown',
                   'store_finish_pending',
                 }.contains(store.messageCode));
-    final message = store?.ownershipConflictProductId == offer.productId
+    final ownershipBlocked =
+        store?.ownershipConflictProductId == offer.productId;
+    final message = ownershipBlocked
         ? BilStoreCopy.text(locale, 'purchase_owned_by_another_account')
         : unresolved
         ? BilStoreCopy.text(locale, 'purchase_reconciliation_failed')
-        : AppLocalizations(
-            Localizations.localeOf(context),
-          ).text('Subscription check unavailable');
+        : copy.text(
+            account?.isLoading == true
+                ? 'Checking subscription'
+                : 'Subscription check unavailable',
+          );
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -470,6 +478,19 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                   label: BilStoreCopy.text(locale, 'continue_verification'),
                   onPressed: () =>
                       unawaited(store!.recoverSubscriptionBlocker()),
+                )
+              : !ownershipBlocked &&
+                    !unresolved &&
+                    account != null &&
+                    !account.isLoading &&
+                    _verifiedPlan(account) == null
+              ? SnackBarAction(
+                  label: copy.text('Try again'),
+                  onPressed: () {
+                    if (mounted) {
+                      ref.invalidate(verifiedSubscriptionStateProvider);
+                    }
+                  },
                 )
               : null,
         ),

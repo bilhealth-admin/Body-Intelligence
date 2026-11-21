@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../../app/theme/bil_pearl_finish.dart';
 import 'bil_experience_presentation.dart';
 import 'first_use_tap_celebration.dart';
@@ -38,6 +39,18 @@ class FirstUseSpotlight extends StatelessWidget {
           (animation != null &&
               animation.status != AnimationStatus.completed)) {
         return const SizedBox.shrink();
+      }
+      // A retained lazy-list target can already have a size while its new
+      // sliver parent has not assigned a layout offset yet. Geometry becomes
+      // valid after layout; the target guide's post-frame sync rebuilds it.
+      RenderObject? ancestor = box;
+      while (ancestor != null) {
+        final data = ancestor.parentData;
+        if (data is SliverMultiBoxAdaptorParentData &&
+            data.layoutOffset == null) {
+          return const SizedBox.shrink();
+        }
+        ancestor = ancestor.parent;
       }
       final rect = box.localToGlobal(Offset.zero, ancestor: overlay) & box.size;
       // Dialogs remove inherited viewInsets after applying their own padding.
