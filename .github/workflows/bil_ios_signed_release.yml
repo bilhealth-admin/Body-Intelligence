@@ -1,659 +1,98 @@
-name: BIL ios 38 signed artifact preparation
-run-name: "BIL ios 38 exact-source signed artifact; no store upload"
+name: BIL SDK27 stock runtime boot readiness measurement
 on:
   workflow_dispatch:
     inputs:
-      internal_testflight_existing_evidence:
-        description: 'Explicit owner-approved internal TestFlight only; byte-identical prior app evidence, no full CI repeat'
-        type: boolean
-        default: false
-      expected_source_sha:
-        description: Final committed SHA that passed every candidate prerequisite
-        required: true
+      reviewed_controller_sha:
+        description: Exact controller SHA from Root verified one-file publication receipt
         type: string
-      qa_run_ids:
-        description: Complete exact-source lane-id to successful run-id JSON
         required: true
-        type: string
 permissions:
   contents: read
-  actions: read
-  security-events: read
-concurrency:
-  group: bil-ios-38-artifact-${{ github.ref }}
-  cancel-in-progress: false
-env:
-  BIL_INTERNAL_TESTFLIGHT: ${{ inputs.internal_testflight_existing_evidence }}
-  BIL_VALIDATION_MODE: ${{ inputs.internal_testflight_existing_evidence && 'owner_authorized_internal_prior_app_evidence' || 'all_exact_source_ci' }}
-  BIL_INTERNAL_TESTFLIGHT_AUTHORIZATION: ${{ inputs.internal_testflight_existing_evidence && 'OWNER_APPROVED_INTERNAL_ONLY_20261023' || '' }}
-  BIL_TESTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
-  BIL_RELEASE_MANIFEST_PATH: ${{ inputs.internal_testflight_existing_evidence && 'docs/release/BIL_IOS38_INTERNAL_TESTFLIGHT_FREEZE_2026-10-23.md' || 'docs/release/BIL_IOS_V38_CANDIDATE_2026-10-22.md' }}
-  BIL_ORIGINAL_SHA: 31554b3e078667a38bd3c53aa105f5f1d2a4dc96
 jobs:
-  signed-ios-release:
-    runs-on: macos-26
-    timeout-minutes: 120
+  environment-readiness:
+    name: SDK27 stock ${{ matrix.device }} cold and fresh boot measurement
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/codex/bil-ios50-sdk27-stock-runtime-probe-20261121' && inputs.reviewed_controller_sha == github.sha }}
+    runs-on: xcode-27
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        device: [iphone, ipad]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+      BIL_PROBE_DEVICE: ${{ matrix.device }}
+      BIL_REVIEWED_CONTROLLER_SHA: ${{ inputs.reviewed_controller_sha }}
     steps:
-      - name: Checkout the exact dispatched and tested candidate
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Read only the exact controller workflow and parent Git objects
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.expected_source_sha }}
-          fetch-depth: 0
+          fetch-depth: 2
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /.github/workflows/bil_ios_signed_release.yml
+          lfs: false
+          submodules: false
           persist-credentials: false
-      - name: Require complete exact-source CI, security and accepted manifest before credentials
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          QA_RUN_IDS: ${{ inputs.qa_run_ids }}
-        run: |
-          set -euo pipefail
-          if [[ "$BIL_INTERNAL_TESTFLIGHT" == true ]]; then
-            python3 tools/qa/bil_internal_testflight_source.py --expected-head "$BIL_TESTED_SOURCE_SHA" --output BIL-internal-testflight-authorization.json
-          else
-            python3 tools/qa/bil_candidate_release.py --verify-ci --platform ios --expected-head "$BIL_TESTED_SOURCE_SHA"
-          fi
-          echo "BIL_AUDITED_FREEZE_MANIFEST_SHA256=$(python3 -c 'import hashlib,pathlib,os;print(hashlib.sha256(pathlib.Path(os.environ["BIL_RELEASE_MANIFEST_PATH"]).read_bytes()).hexdigest())')" >> "$GITHUB_ENV"
-      - name: Verify selected Xcode 26+ and iOS SDK 26+
-        id: apple_toolchain_gate
+      - name: Verify exact reviewed controller and S7 metadata parent
         shell: bash
         run: |
           set -euo pipefail
-          # Do not guess or switch Xcode installations. The runner-selected
-          # toolchain itself must satisfy the store gate.
-          python3 tool/release/verify_apple_release_toolchain.py \
-            --text-evidence BIL-apple-release-toolchain.txt \
-            --json-evidence BIL-apple-release-toolchain.json
-
-      - name: Upload Apple toolchain version evidence
-        if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: bil-ios38-preview-toolchain-${{ github.run_id }}
-          if-no-files-found: error
-          retention-days: 14
-          path: |
-            BIL-apple-release-toolchain.txt
-            BIL-apple-release-toolchain.json
-
-      - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-
-      - name: Validate release build number and Apple team
-        shell: bash
-        env:
-          BUILD_NUMBER: '38'
-          UPLOAD_TO_TESTFLIGHT: 'false'
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          set -euo pipefail
-          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
-            echo 'build_number must be a positive integer.' >&2
-            exit 1
-          }
-          (( BUILD_NUMBER == 38 )) || {
-            echo 'build_number must be exactly 38 for the iOS release candidate; build 36 and earlier must never be selected.' >&2
-            exit 1
-          }
-          [[ "$UPLOAD_TO_TESTFLIGHT" == 'true' || "$UPLOAD_TO_TESTFLIGHT" == 'false' ]] || {
-            echo 'upload_to_testflight must be a boolean.' >&2
-            exit 1
-          }
-          test -n "${APPLE_TEAM_ID:-}" || {
-            echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID' >&2
-            exit 1
-          }
-          grep -Eq "DEVELOPMENT_TEAM = \"?${APPLE_TEAM_ID}\"?;" \
-            ios/Runner.xcodeproj/project.pbxproj || {
-              echo 'Xcode DEVELOPMENT_TEAM does not match APPLE_TEAM_ID.' >&2
-              exit 1
-            }
-
-      - name: Require Apple signing inputs
-        shell: bash
-        env:
-          CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
-          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-        run: |
-          set -euo pipefail
-          test -n "${CERTIFICATE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_BASE64'; exit 1; }
-          test -n "${CERTIFICATE_PASSWORD:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD'; exit 1; }
-          test -n "${PROVISIONING_PROFILE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_PROVISIONING_PROFILE_BASE64'; exit 1; }
-          test -n "${APPLE_TEAM_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID'; exit 1; }
-          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
-
-      - name: Import distribution certificate
-        uses: apple-actions/import-codesign-certs@63fff01cd422d4b7b855d40ca1e9d34d2de9427d
-        with:
-          p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
-          p12-password: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
-
-      - name: Install provisioning profile
-        shell: bash
-        env:
-          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          PROFILE="$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
-          python3 - "$PROFILE" <<'PY'
-          import base64
-          import binascii
-          import os
-          import pathlib
-          import sys
-
-          try:
-              decoded = base64.b64decode(os.environ['PROFILE_BASE64'], validate=True)
-          except (KeyError, ValueError, binascii.Error) as error:
-              raise SystemExit(f'Invalid provisioning-profile Base64: {error}')
-          pathlib.Path(sys.argv[1]).write_bytes(decoded)
-          PY
-          security cms -D -i "$PROFILE" > "$RUNNER_TEMP/BIL-profile.plist"
-          python3 - "$RUNNER_TEMP/BIL-profile.plist" "$APPLE_TEAM_ID" <<'PY'
-          import datetime as dt
-          import plistlib
-          import sys
-
-          profile_path, team_id = sys.argv[1:]
-          with open(profile_path, 'rb') as handle:
-              profile = plistlib.load(handle)
-          entitlements = profile.get('Entitlements', {})
-          expected_app_id = f'{team_id}.com.bilhealth.bodyintelligencelog'
-          if entitlements.get('application-identifier') != expected_app_id:
-              raise SystemExit('Provisioning profile has the wrong application identifier.')
-          if entitlements.get('com.apple.developer.healthkit') is not True:
-              raise SystemExit('Provisioning profile does not authorize HealthKit.')
-          if 'Default' not in entitlements.get('com.apple.developer.applesignin', []):
-              raise SystemExit('Provisioning profile does not authorize Sign in with Apple.')
-          associated_domains = entitlements.get(
-              'com.apple.developer.associated-domains',
-              [],
-          )
-          if isinstance(associated_domains, str):
-              associated_domain_values = {associated_domains}
-          elif isinstance(associated_domains, list):
-              associated_domain_values = {
-                  value for value in associated_domains if isinstance(value, str)
-              }
-          else:
-              associated_domain_values = set()
-          if not (
-              '*' in associated_domain_values
-              or 'applinks:www.bilhealth.com' in associated_domain_values
-          ):
-              raise SystemExit(
-                  'Provisioning profile does not authorize '
-                  'applinks:www.bilhealth.com.'
-              )
-          if entitlements.get('aps-environment') != 'production':
-              raise SystemExit('Provisioning profile does not authorize production push.')
-          app_attest = entitlements.get(
-              'com.apple.developer.devicecheck.appattest-environment'
-          )
-          if isinstance(app_attest, str):
-              app_attest_environments = {app_attest}
-          elif isinstance(app_attest, list):
-              app_attest_environments = {
-                  value for value in app_attest if isinstance(value, str)
-              }
-          else:
-              app_attest_environments = set()
-          if 'production' not in app_attest_environments:
-              raise SystemExit(
-                  'Provisioning profile does not authorize production App Attest.'
-              )
-          if entitlements.get('get-task-allow', False) is not False:
-              raise SystemExit('Provisioning profile unexpectedly enables get-task-allow.')
-          expiry = profile.get('ExpirationDate')
-          now = dt.datetime.now(dt.timezone.utc)
-          if expiry is None or expiry.replace(tzinfo=dt.timezone.utc) <= now:
-              raise SystemExit('Provisioning profile is expired.')
-          print('APPLE_PROVISIONING_PROFILE_GATE=PASS')
-          PY
-
-      - name: Resolve and validate source
-        env:
-          BIL_RELEASE_PRODUCTION: true
-          BIL_RELEASE_PLATFORM: ios
-          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
-          BIL_USE_SUPABASE: true
-          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
-          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
-          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
-          BIL_PAYMENTS_ENABLED: true
-          BIL_STORE_CONFIGURED: true
-          BIL_FACEBOOK_REQUIRED: true
-          BIL_FACEBOOK_LOGIN_ENABLED: true
-          BIL_FACEBOOK_LOGIN_READY: true
-          BIL_ADS_ENABLED: true
-          BIL_AD_PROVIDER_READY: true
-          BIL_ADMOB_PRODUCTION_READY: true
-          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
-          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
-          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
-          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
-          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
-          BIL_PUSH_ENABLED: true
-          BIL_PUSH_PROVIDER_READY: true
-          BIL_MOBILE_INTEGRITY_REQUIRED: true
-          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
-          BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_COUNTERPART_AUDITED_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_RELEASE_EXPECTED_BUILD_NUMBER: '38'
-        run: |
-          flutter pub get --enforce-lockfile
-          dart run tool/release/validate_release_configuration.dart
-          if [[ "$BIL_INTERNAL_TESTFLIGHT" != true ]]; then
-          flutter analyze --no-pub
-          # The owner comprehensive suite already runs independently.
-          flutter test --no-pub --concurrency 1 --timeout 30s \
-            --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
-            test/features/commerce/app_purchase_confirmation_test.dart \
-            test/features/commerce/app_subscription_confirmation_test.dart
-          fi
-          flutter test --no-pub \
-            test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
-            --timeout 2m
-          plutil -lint ios/Runner/Info.plist
-          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
-          plutil -lint ios/Runner/Runner.entitlements
-          plutil -lint ios/Runner/RunnerDebug.entitlements
-
-      - name: Select exact CocoaPods in an isolated job gem home
+          python3 - <<'PY_CONTROLLER_GUARD'
+          import hashlib,json,os,pathlib,re,subprocess
+          SOURCE="5c2a3c4ac35bc7c4d2bc72c27c160ba89607d96e"; TREE="0298d6d98b50533ffe84dc2fa2a696d733ece8e1"; BRANCH="codex/bil-ios50-sdk27-stock-runtime-probe-20261121"
+          PATH=".github/workflows/bil_ios_signed_release.yml"
+          def need(ok,message):
+              if not ok:raise RuntimeError(message)
+          def git(*args):return subprocess.check_output(["git",*args],timeout=30).decode().strip()
+          need(os.environ.get("GITHUB_REPOSITORY")=="bilhealth-admin/Body-Intelligence" and os.environ.get("GITHUB_EVENT_NAME")=="workflow_dispatch" and os.environ.get("GITHUB_REF")=="refs/heads/"+BRANCH and os.environ.get("GITHUB_RUN_ATTEMPT")=="1","EXACT_ONE_PROBE_CONTEXT_REQUIRED")
+          controller=os.environ.get("GITHUB_SHA","")
+          need(re.fullmatch("[a-f0-9]{40}",controller) and controller==os.environ.get("GITHUB_WORKFLOW_SHA")==os.environ.get("BIL_REVIEWED_CONTROLLER_SHA"),"EXACT_REVIEWED_CONTROLLER_REQUIRED")
+          need(git("rev-parse","HEAD")==controller,"CHECKOUT_CONTROLLER_DRIFT")
+          need(git("show","-s","--format=%P","HEAD").split()==[SOURCE] and git("rev-parse",SOURCE+"^{tree}")==TREE,"SOLE_EXACT_S7_SOURCE_PARENT_REQUIRED")
+          change=git("diff-tree","--no-commit-id","--no-abbrev","--raw","-r",SOURCE,controller).splitlines()
+          need(len(change)==1,"ONE_FILE_CONTROLLER_REQUIRED")
+          meta,path=change[0].split("\t")
+          need(path==PATH and re.fullmatch(r":100644 100644 [a-f0-9]{40} [a-f0-9]{40} M",meta),"EXACT_REGULAR_WORKFLOW_ONLY")
+          need(git("status","--porcelain")=="" and git("config","--get","core.sparseCheckout")=="true","CLEAN_SPARSE_WORKFLOW_CHECKOUT_REQUIRED")
+          need(not pathlib.Path("lib").exists() and not pathlib.Path("ios").exists() and not pathlib.Path("pubspec.yaml").exists(),"NO_APP_SOURCE_CHECKOUT_REQUIRED")
+          workflow=subprocess.check_output(["git","show","HEAD:"+PATH],timeout=30)
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])/("bil-sdk27-boot-probe-"+os.environ["BIL_PROBE_DEVICE"])
+          root.mkdir(exist_ok=False)
+          receipt={"scope":"Environment-only measurement, not application source acceptance", "controller_sha":controller,"controller_workflow_sha256":hashlib.sha256(workflow).hexdigest(),"source_parent":SOURCE,"source_parent_tree":TREE,"source_reference_branch":"codex/bil49-android41-native40-fixes-20261120","run_id":os.environ["GITHUB_RUN_ID"],"run_attempt":os.environ["GITHUB_RUN_ATTEMPT"],"probe_branch":BRANCH,"device":os.environ["BIL_PROBE_DEVICE"],"host_image_metadata":{key:os.environ.get(key)for key in ["ImageOS","ImageVersion","RUNNER_OS","RUNNER_ARCH"]},"app_build_install_signing_tests":False,"runtime_image_deletion_requested":False,"stock_runtimes_preserved":True}
+          (root/"CONTROLLER_PROVENANCE.json").write_text(json.dumps(receipt,indent=2)+"\n")
+          print(json.dumps(receipt))
+          PY_CONTROLLER_GUARD
+      - name: Select exact Xcode27.2 SDKs on disposable host
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
-          python3 .github/scripts/install_isolated_cocoapods.py \
-            --output BIL-ios-cocoapods-installation.json
-
-      - name: Upload isolated CocoaPods installation receipt
+          test -d "$DEVELOPER_DIR"
+          sudo /usr/bin/xcode-select --switch "$DEVELOPER_DIR"
+          test "$(/usr/bin/xcode-select -p)" = "$DEVELOPER_DIR"
+          test "$(uname -m)" = arm64
+          test "$(xcodebuild -version)" = $'Xcode 27.2\nBuild version 27B52'
+          test "$(xcrun --sdk iphoneos --show-sdk-version)" = 27.2
+          test "$(xcrun --sdk iphonesimulator --show-sdk-version)" = 27.2
+      - name: Materialize exact reviewed environment measurement helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY_PROBE_HELPER'
+          import base64,hashlib,os,pathlib
+          raw=base64.b64decode('IiIiSU5FUlQgcmV2aWV3IGhlbHBlcjogZGlzcG9zYWJsZSBTREsyNyBlbnZpcm9ubWVudCBtZWFzdXJlbWVudHM7IG5vIGFwcCBRQS4iIiIKaW1wb3J0IGRhdGV0aW1lLCBlcnJubywgaGFzaGxpYiwganNvbiwgb3MsIHBhdGhsaWIsIHB0eSwgcmUsIHNlbGVjdCwgc2lnbmFsLCBzdWJwcm9jZXNzLCBzeXMsIHRocmVhZGluZywgdGltZQoKQlJBTkNIID0gImNvZGV4L2JpbC1pb3M1MC1zZGsyNy1zdG9jay1ydW50aW1lLXByb2JlLTIwMjYxMTIxIgpTT1VSQ0UgPSAiNWMyYTNjNGFjMzViYzdjNGQyYmM3MmMyN2MxNjBiYTg5NjA3ZDk2ZSIKVFJFRSA9ICIwMjk4ZDZkOThiNTA1MzNmZmU4NGRjMmZhMmE2OTZkNzMzZWNlOGUxIgpSVU5USU1FID0gImNvbS5hcHBsZS5Db3JlU2ltdWxhdG9yLlNpbVJ1bnRpbWUuaU9TLTI3LTIiCkJVSUxEID0gIjI0QjgxMTciClRZUEVTID0geyJpcGhvbmUiOiAiY29tLmFwcGxlLkNvcmVTaW11bGF0b3IuU2ltRGV2aWNlVHlwZS5pUGhvbmUtMTYtUHJvIiwgImlwYWQiOiAiY29tLmFwcGxlLkNvcmVTaW11bGF0b3IuU2ltRGV2aWNlVHlwZS5pUGFkLVByby0xMy1pbmNoLU00LThHQiJ9Ck1BWF9MT0cgPSA0ICogMTAyNCAqIDEwMjQKTUFYX1NUUkVBTSA9IDggKiAxMDI0ICogMTAyNAoKZGVmIG5lZWQob2ssIG1lc3NhZ2UpOgogICAgaWYgbm90IG9rOgogICAgICAgIHJhaXNlIFJ1bnRpbWVFcnJvcihtZXNzYWdlKQoKZGVmIHV0YygpOgogICAgcmV0dXJuIGRhdGV0aW1lLmRhdGV0aW1lLm5vdyhkYXRldGltZS50aW1lem9uZS51dGMpLmlzb2Zvcm1hdCgpCgpkZWYgbWFpbigpOgogICAgZGV2aWNlX3R5cGUgPSBvcy5lbnZpcm9uWyJCSUxfUFJPQkVfREVWSUNFIl0KICAgIG5lZWQoZGV2aWNlX3R5cGUgaW4gVFlQRVMsICJFWEFDVF9ERVZJQ0VfVFlQRV9SRVFVSVJFRCIpCiAgICBuZWVkKG9zLmVudmlyb24uZ2V0KCJHSVRIVUJfUkVQT1NJVE9SWSIpID09ICJiaWxoZWFsdGgtYWRtaW4vQm9keS1JbnRlbGxpZ2VuY2UiIGFuZCBvcy5lbnZpcm9uLmdldCgiR0lUSFVCX1JFRiIpID09ICJyZWZzL2hlYWRzLyIgKyBCUkFOQ0gsICJFWEFDVF9QUk9CRV9CUkFOQ0hfUkVRVUlSRUQiKQogICAgbmVlZChvcy5lbnZpcm9uLmdldCgiR0lUSFVCX0VWRU5UX05BTUUiKSA9PSAid29ya2Zsb3dfZGlzcGF0Y2giIGFuZCBvcy5lbnZpcm9uLmdldCgiR0lUSFVCX1JVTl9BVFRFTVBUIikgPT0gIjEiLCAiT05FX0VYUExJQ0lUX0RJU1BBVENIX09OTFkiKQogICAgY29udHJvbGxlciA9IG9zLmVudmlyb24uZ2V0KCJHSVRIVUJfU0hBIiwgIiIpCiAgICBuZWVkKHJlLmZ1bGxtYXRjaChyIlthLWYwLTldezQwfSIsIGNvbnRyb2xsZXIpIGFuZCBjb250cm9sbGVyID09IG9zLmVudmlyb24uZ2V0KCJHSVRIVUJfV09SS0ZMT1dfU0hBIikgPT0gb3MuZW52aXJvbi5nZXQoIkJJTF9SRVZJRVdFRF9DT05UUk9MTEVSX1NIQSIpLCAiUkVWSUVXRURfQ09OVFJPTExFUl9SRVFVSVJFRCIpCiAgICByb290ID0gcGF0aGxpYi5QYXRoKG9zLmVudmlyb25bIlJVTk5FUl9URU1QIl0pIC8gKCJiaWwtc2RrMjctYm9vdC1wcm9iZS0iICsgZGV2aWNlX3R5cGUpCiAgICBuZWVkKHJvb3QuaXNfZGlyKCkgYW5kIG5vdCByb290LmlzX3N5bWxpbmsoKSwgIlBST1ZFTkFOQ0VfRElSRUNUT1JZX1JFUVVJUkVEIikKICAgIHByb3ZlbmFuY2UgPSBqc29uLmxvYWRzKChyb290IC8gIkNPTlRST0xMRVJfUFJPVkVOQU5DRS5qc29uIikucmVhZF90ZXh0KCkpCiAgICBuZWVkKHByb3ZlbmFuY2VbImNvbnRyb2xsZXJfc2hhIl0gPT0gY29udHJvbGxlciBhbmQgcHJvdmVuYW5jZVsic291cmNlX3BhcmVudCJdID09IFNPVVJDRSBhbmQgcHJvdmVuYW5jZVsic291cmNlX3BhcmVudF90cmVlIl0gPT0gVFJFRSwgIkVYQUNUX1M3X1BBUkVOVF9SRVFVSVJFRCIpCiAgICBjcmVhdGVkLCBjYXNlcywgZXJyb3JzLCBjbGVhbnVwX2F0dGVtcHRlZCA9IHt9LCBbXSwgW10sIHNldCgpCiAgICBzdHJlYW0sIHN0cmVhbV90aHJlYWQgPSBOb25lLCBOb25lCiAgICBzdHJlYW1fc3RhdGUgPSB7ImVuYWJsZWQiOiBGYWxzZSwgImJ5dGVzIjogMCwgImxpbWl0X2hpdCI6IEZhbHNlLCAiY29sbGVjdG9yX2Vycm9yIjogTm9uZSwgInJldHVybmNvZGVfYmVmb3JlX3N0b3AiOiBOb25lLCAicmVhZGVyX2NvbXBsZXRlIjogRmFsc2V9CgogICAgZGVmIHNhdmUobmFtZSwgZGF0YSk6CiAgICAgICAgd2l0aCAocm9vdCAvIG5hbWUpLm9wZW4oIngiLCBlbmNvZGluZz0idXRmOCIpIGFzIGhhbmRsZToKICAgICAgICAgICAganNvbi5kdW1wKGRhdGEsIGhhbmRsZSwgaW5kZW50PTIpCiAgICAgICAgICAgIGhhbmRsZS53cml0ZSgiXG4iKQoKICAgIGRlZiBzdG9wKHByb2Nlc3MpOgogICAgICAgIGlmIHByb2Nlc3MucG9sbCgpIGlzIE5vbmU6CiAgICAgICAgICAgIHRyeToKICAgICAgICAgICAgICAgIG9zLmtpbGxwZyhwcm9jZXNzLnBpZCwgc2lnbmFsLlNJR1RFUk0pCiAgICAgICAgICAgICAgICBwcm9jZXNzLndhaXQodGltZW91dD01KQogICAgICAgICAgICBleGNlcHQgKFByb2Nlc3NMb29rdXBFcnJvciwgc3VicHJvY2Vzcy5UaW1lb3V0RXhwaXJlZCk6CiAgICAgICAgICAgICAgICBpZiBwcm9jZXNzLnBvbGwoKSBpcyBOb25lOgogICAgICAgICAgICAgICAgICAgIG9zLmtpbGxwZyhwcm9jZXNzLnBpZCwgc2lnbmFsLlNJR0tJTEwpCiAgICAgICAgICAgICAgICAgICAgcHJvY2Vzcy53YWl0KHRpbWVvdXQ9NSkKCiAgICBkZWYgcnVuKGxhYmVsLCBhcmd2LCBkZWFkbGluZSk6CiAgICAgICAgc3RhcnRlZCwgc3RhcnRfdXRjID0gdGltZS5tb25vdG9uaWMoKSwgdXRjKCkKICAgICAgICBtYXN0ZXIsIHNsYXZlID0gcHR5Lm9wZW5wdHkoKQogICAgICAgIHByb2Nlc3MgPSBzdWJwcm9jZXNzLlBvcGVuKGFyZ3YsIHN0ZGluPXN1YnByb2Nlc3MuREVWTlVMTCwgc3Rkb3V0PXNsYXZlLCBzdGRlcnI9c2xhdmUsIHN0YXJ0X25ld19zZXNzaW9uPVRydWUpCiAgICAgICAgb3MuY2xvc2Uoc2xhdmUpCiAgICAgICAgb3Muc2V0X2Jsb2NraW5nKG1hc3RlciwgRmFsc2UpCiAgICAgICAgZGF0YSwgcmVhc29uLCBuZXh0X3Byb2dyZXNzLCBlb2YsIGV4aXRfb2JzZXJ2ZWQgPSBieXRlYXJyYXkoKSwgInByb2Nlc3NfZXhpdCIsIDMwLjAsIEZhbHNlLCBOb25lCiAgICAgICAgdHJ5OgogICAgICAgICAgICB3aGlsZSBub3QgKHByb2Nlc3MucG9sbCgpIGlzIG5vdCBOb25lIGFuZCBlb2YpOgogICAgICAgICAgICAgICAgZWxhcHNlZCA9IHRpbWUubW9ub3RvbmljKCkgLSBzdGFydGVkCiAgICAgICAgICAgICAgICBpZiBwcm9jZXNzLnBvbGwoKSBpcyBub3QgTm9uZToKICAgICAgICAgICAgICAgICAgICBleGl0X29ic2VydmVkID0gZXhpdF9vYnNlcnZlZCBvciB0aW1lLm1vbm90b25pYygpCiAgICAgICAgICAgICAgICAgICAgaWYgdGltZS5tb25vdG9uaWMoKSAtIGV4aXRfb2JzZXJ2ZWQgPj0gMiBhbmQgbm90IGVvZjoKICAgICAgICAgICAgICAgICAgICAgICAgcmVhc29uLCBlb2YgPSAib3V0cHV0X2RyYWluX2xpbWl0IiwgVHJ1ZQogICAgICAgICAgICAgICAgaWYgZWxhcHNlZCA+PSBkZWFkbGluZSBhbmQgcHJvY2Vzcy5wb2xsKCkgaXMgTm9uZToKICAgICAgICAgICAgICAgICAgICByZWFzb24gPSAiZGVhZGxpbmUiCiAgICAgICAgICAgICAgICAgICAgc3RvcChwcm9jZXNzKQogICAgICAgICAgICAgICAgaWYgZWxhcHNlZCA+PSBuZXh0X3Byb2dyZXNzOgogICAgICAgICAgICAgICAgICAgIHByaW50KGpzb24uZHVtcHMoeyJzdGFnZSI6IGxhYmVsLCAiZWxhcHNlZF9zZWNvbmRzIjogcm91bmQoZWxhcHNlZCwgMyksICJvdXRwdXRfYnl0ZXMiOiBsZW4oZGF0YSl9KSwgZmx1c2g9VHJ1ZSkKICAgICAgICAgICAgICAgICAgICBuZXh0X3Byb2dyZXNzICs9IDMwCiAgICAgICAgICAgICAgICBpZiBzZWxlY3Quc2VsZWN0KFttYXN0ZXJdLCBbXSwgW10sIDAuMilbMF06CiAgICAgICAgICAgICAgICAgICAgdHJ5OgogICAgICAgICAgICAgICAgICAgICAgICBjaHVuayA9IG9zLnJlYWQobWFzdGVyLCA2NTUzNikKICAgICAgICAgICAgICAgICAgICBleGNlcHQgT1NFcnJvciBhcyBlcnJvcjoKICAgICAgICAgICAgICAgICAgICAgICAgaWYgZXJyb3IuZXJybm8gIT0gZXJybm8uRUlPOgogICAgICAgICAgICAgICAgICAgICAgICAgICAgcmFpc2UKICAgICAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBiIiIKICAgICAgICAgICAgICAgICAgICBpZiBub3QgY2h1bms6CiAgICAgICAgICAgICAgICAgICAgICAgIGVvZiA9IFRydWUKICAgICAgICAgICAgICAgICAgICBlbGlmIGxlbihkYXRhKSArIGxlbihjaHVuaykgPD0gTUFYX0xPRzoKICAgICAgICAgICAgICAgICAgICAgICAgZGF0YS5leHRlbmQoY2h1bmspCiAgICAgICAgICAgICAgICAgICAgZWxzZToKICAgICAgICAgICAgICAgICAgICAgICAgcmVhc29uID0gIm91dHB1dF9saW1pdCIKICAgICAgICAgICAgICAgICAgICAgICAgc3RvcChwcm9jZXNzKQogICAgICAgICAgICAgICAgICAgICAgICBlb2YgPSBUcnVlCiAgICAgICAgICAgICAgICBlbGlmIHByb2Nlc3MucG9sbCgpIGlzIG5vdCBOb25lOgogICAgICAgICAgICAgICAgICAgIGVvZiA9IFRydWUKICAgICAgICBmaW5hbGx5OgogICAgICAgICAgICBzdG9wKHByb2Nlc3MpCiAgICAgICAgICAgIG9zLmNsb3NlKG1hc3RlcikKICAgICAgICByZXN1bHQgPSB7ImxhYmVsIjogbGFiZWwsICJhcmd2IjogYXJndiwgInN0YXJ0ZWRfYXRfdXRjIjogc3RhcnRfdXRjLCAiZWxhcHNlZF9zZWNvbmRzIjogcm91bmQodGltZS5tb25vdG9uaWMoKSAtIHN0YXJ0ZWQsIDMpLCAiZGVhZGxpbmVfc2Vjb25kcyI6IGRlYWRsaW5lLCAicmVhc29uIjogcmVhc29uLCAicmF3X3JldHVybmNvZGUiOiBwcm9jZXNzLnJldHVybmNvZGUsICJlZmZlY3RpdmVfcmV0dXJuY29kZSI6IHByb2Nlc3MucmV0dXJuY29kZSBpZiByZWFzb24gPT0gInByb2Nlc3NfZXhpdCIgZWxzZSAxMjQsICJvdXRwdXRfYnl0ZXMiOiBsZW4oZGF0YSksICJzaGEyNTYiOiBoYXNobGliLnNoYTI1NihkYXRhKS5oZXhkaWdlc3QoKSwgInB0eV9jYXB0dXJlIjogVHJ1ZSwgImFwcF9hY2NlcHRhbmNlIjogRmFsc2V9CiAgICAgICAgKHJvb3QgLyAobGFiZWwgKyAiLmxvZyIpKS53cml0ZV9ieXRlcyhkYXRhKQogICAgICAgIHNhdmUobGFiZWwgKyAiLmpzb24iLCByZXN1bHQpCiAgICAgICAgcHJpbnQoanNvbi5kdW1wcyhyZXN1bHQpLCBmbHVzaD1UcnVlKQogICAgICAgIHJldHVybiByZXN1bHQsIGJ5dGVzKGRhdGEpCgogICAgZGVmIHJlcXVpcmVkKGxhYmVsLCBhcmd2LCBkZWFkbGluZSk6CiAgICAgICAgcmVzdWx0LCBvdXRwdXQgPSBydW4obGFiZWwsIGFyZ3YsIGRlYWRsaW5lKQogICAgICAgIG5lZWQocmVzdWx0WyJlZmZlY3RpdmVfcmV0dXJuY29kZSJdID09IDAsIGxhYmVsICsgIl9GQUlMRUQiKQogICAgICAgIHJldHVybiBvdXRwdXQKCiAgICBkZWYgcmVzb3VyY2VzKGxhYmVsKToKICAgICAgICBmb3Igc3VmZml4LCBhcmd2IGluIFsoImRpc2siLCBbImRmIiwgIi1oIiwgIi8iXSksICgibWVtb3J5IiwgWyJ2bV9zdGF0Il0pLCAoImhhcmR3YXJlIiwgWyJzeXNjdGwiLCAiaHcubWVtc2l6ZSIsICJody5uY3B1IiwgImh3LmxvZ2ljYWxjcHUiXSksICgibG9hZCIsIFsidXB0aW1lIl0pLCAoInByb2Nlc3NlcyIsIFsicHMiLCAiLUFvIiwgInBpZCxwcGlkLCVjcHUsJW1lbSxyc3Msc3RhdGUsY29tbSJdKV06CiAgICAgICAgICAgIHJ1bihsYWJlbCArICItIiArIHN1ZmZpeCwgYXJndiwgMTUpCgogICAgZGVmIGZpbmdlcnByaW50KGxhYmVsKToKICAgICAgICByb3dzID0ganNvbi5sb2FkcyhyZXF1aXJlZChsYWJlbCArICItcnVudGltZXMiLCBbInhjcnVuIiwgInNpbWN0bCIsICJsaXN0IiwgInJ1bnRpbWVzIiwgImF2YWlsYWJsZSIsICItaiJdLCA0NSkpWyJydW50aW1lcyJdCiAgICAgICAgaW1hZ2VzID0ganNvbi5sb2FkcyhyZXF1aXJlZChsYWJlbCArICItaW1hZ2VzIiwgWyJ4Y3J1biIsICJzaW1jdGwiLCAicnVudGltZSIsICJsaXN0IiwgIi1qIl0sIDQ1KSkKICAgICAgICBnZW5lcmljID0gW3IgZm9yIHIgaW4gcm93cyBpZiByLmdldCgiaWRlbnRpZmllciIpID09IFJVTlRJTUUgYW5kIHIuZ2V0KCJpc0F2YWlsYWJsZSIpXQogICAgICAgIG5lZWQobGVuKGdlbmVyaWMpID09IDEsICJVTklRVUVfQVZBSUxBQkxFX0dFTkVSSUNfUkVRVUlSRUQiKQogICAgICAgIHJ1bnRpbWUgPSBnZW5lcmljWzBdCiAgICAgICAgbmVlZChydW50aW1lLmdldCgidmVyc2lvbiIpID09ICIyNy4yIiBhbmQgcnVudGltZS5nZXQoImJ1aWxkdmVyc2lvbiIpID09IEJVSUxEIGFuZCBydW50aW1lLmdldCgic3VwcG9ydGVkQXJjaGl0ZWN0dXJlcyIpID09IFsiYXJtNjQiXSwgIlJVTlRJTUVfSURFTlRJVFlfRFJJRlQiKQogICAgICAgIG5lZWQoVFlQRVNbZGV2aWNlX3R5cGVdIGluIHtyWyJpZGVudGlmaWVyIl0gZm9yIHIgaW4gcnVudGltZVsic3VwcG9ydGVkRGV2aWNlVHlwZXMiXX0sICJERVZJQ0VfUlVOVElNRV9DT01QQVRJQklMSVRZX1JFUVVJUkVEIikKICAgICAgICBtYXRjaGVkID0gWyhrLCByKSBmb3IgaywgciBpbiBpbWFnZXMuaXRlbXMoKSBpZiByLmdldCgicnVudGltZUlkZW50aWZpZXIiKSA9PSBSVU5USU1FXQogICAgICAgIG5lZWQobGVuKG1hdGNoZWQpID09IDEsICJVTklRVUVfUlVOVElNRV9JTUFHRV9SRVFVSVJFRCIpCiAgICAgICAgdWlkLCBpbWFnZSA9IG1hdGNoZWRbMF0KICAgICAgICBuZWVkKGltYWdlLmdldCgiYnVpbGQiKSA9PSBCVUlMRCBhbmQgaW1hZ2UuZ2V0KCJzdGF0ZSIpID09ICJSZWFkeSIgYW5kIGltYWdlLmdldCgicnVudGltZUJ1bmRsZVBhdGgiKSA9PSBydW50aW1lWyJidW5kbGVQYXRoIl0sICJSVU5USU1FX0lNQUdFX09SX01PVU5UX0RSSUZUIikKICAgICAgICBuZWVkKHBhdGhsaWIuUGF0aChydW50aW1lWyJidW5kbGVQYXRoIl0pLmlzX2RpcigpIGFuZCBwYXRobGliLlBhdGgocnVudGltZVsicnVudGltZVJvb3QiXSkuaXNfZGlyKCksICJSVU5USU1FX1BBVEhfTk9UX1JFQURBQkxFIikKICAgICAgICB2YWx1ZSA9IHsicnVudGltZSI6IHtrOiBydW50aW1lLmdldChrKSBmb3IgayBpbiBbImlkZW50aWZpZXIiLCAidmVyc2lvbiIsICJidWlsZHZlcnNpb24iLCAiaXNBdmFpbGFibGUiLCAic3VwcG9ydGVkQXJjaGl0ZWN0dXJlcyIsICJzdXBwb3J0ZWREZXZpY2VUeXBlcyIsICJidW5kbGVQYXRoIiwgInJ1bnRpbWVSb290Il19LCAiaW1hZ2VfdXVpZCI6IHVpZCwgImltYWdlIjoge2s6IGltYWdlLmdldChrKSBmb3IgayBpbiBbImlkZW50aWZpZXIiLCAicnVudGltZUlkZW50aWZpZXIiLCAidmVyc2lvbiIsICJidWlsZCIsICJwbGF0Zm9ybUlkZW50aWZpZXIiLCAia2luZCIsICJzdXBwb3J0ZWRBcmNoaXRlY3R1cmVzIiwgInJ1bnRpbWVCdW5kbGVQYXRoIl19fQogICAgICAgIHNhdmUobGFiZWwgKyAiLWZpbmdlcnByaW50Lmpzb24iLCB2YWx1ZSkKICAgICAgICByZXR1cm4gdmFsdWUKCiAgICBkZWYgY2xlYW51cChsYWJlbCwgdWlkKToKICAgICAgICBuZWVkKHVpZCBpbiBjcmVhdGVkLCAiQ0xFQU5VUF9PTkxZX0VYQUNUX0NSRUFURURfVVVJRCIpCiAgICAgICAgbmVlZCh1aWQgbm90IGluIGNsZWFudXBfYXR0ZW1wdGVkLCAiTk9fVU5DRVJUQUlOX0NMRUFOVVBfUkVUUlkiKQogICAgICAgIGNsZWFudXBfYXR0ZW1wdGVkLmFkZCh1aWQpCiAgICAgICAgcnVuKGxhYmVsICsgIi1zaHV0ZG93biIsIFsieGNydW4iLCAic2ltY3RsIiwgInNodXRkb3duIiwgdWlkXSwgMzApCiAgICAgICAgaW52ZW50b3J5ID0ganNvbi5sb2FkcyhyZXF1aXJlZChsYWJlbCArICItY2xlYW51cC1pbnZlbnRvcnkiLCBbInhjcnVuIiwgInNpbWN0bCIsICJsaXN0IiwgImRldmljZXMiLCAiLWoiXSwgMzApKQogICAgICAgIHJvd3MgPSBbciBmb3IgciBpbiBpbnZlbnRvcnlbImRldmljZXMiXS5nZXQoUlVOVElNRSwgW10pIGlmIHIuZ2V0KCJ1ZGlkIikgPT0gdWlkXQogICAgICAgIG5lZWQobGVuKHJvd3MpID09IDEgYW5kIHJvd3NbMF0uZ2V0KCJuYW1lIikgPT0gY3JlYXRlZFt1aWRdIGFuZCByb3dzWzBdLmdldCgic3RhdGUiKSA9PSAiU2h1dGRvd24iLCAiRVhBQ1RfT1dORURfU0hVVERPV05fUkVRVUlSRUQiKQogICAgICAgIHJlcXVpcmVkKGxhYmVsICsgIi1kZWxldGUiLCBbInhjcnVuIiwgInNpbWN0bCIsICJkZWxldGUiLCB1aWRdLCAzMCkKICAgICAgICBkZWwgY3JlYXRlZFt1aWRdCgogICAgZGVmIGNhcHR1cmVfc3RyZWFtKCk6CiAgICAgICAgc3RyZWFtX3N0YXRlWyJlbmFibGVkIl0gPSBUcnVlCiAgICAgICAgdHJ5OgogICAgICAgICAgICB3aXRoIChyb290IC8gImhvc3QtY29yZS1zaW11bGF0b3ItbGl2ZS5sb2ciKS5vcGVuKCJ4YiIpIGFzIGhhbmRsZToKICAgICAgICAgICAgICAgIHdoaWxlIFRydWU6CiAgICAgICAgICAgICAgICAgICAgY2h1bmsgPSBzdHJlYW0uc3Rkb3V0LnJlYWQxKDY1NTM2KQogICAgICAgICAgICAgICAgICAgIGlmIG5vdCBjaHVuazoKICAgICAgICAgICAgICAgICAgICAgICAgYnJlYWsKICAgICAgICAgICAgICAgICAgICByZW1haW5pbmcgPSBNQVhfU1RSRUFNIC0gc3RyZWFtX3N0YXRlWyJieXRlcyJdCiAgICAgICAgICAgICAgICAgICAgaGFuZGxlLndyaXRlKGNodW5rWzpyZW1haW5pbmddKQogICAgICAgICAgICAgICAgICAgIHN0cmVhbV9zdGF0ZVsiYnl0ZXMiXSArPSBtaW4obGVuKGNodW5rKSwgcmVtYWluaW5nKQogICAgICAgICAgICAgICAgICAgIGlmIGxlbihjaHVuaykgPiByZW1haW5pbmc6CiAgICAgICAgICAgICAgICAgICAgICAgIHN0cmVhbV9zdGF0ZVsibGltaXRfaGl0Il0gPSBUcnVlCiAgICAgICAgICAgICAgICAgICAgICAgIHN0b3Aoc3RyZWFtKQogICAgICAgICAgICAgICAgICAgICAgICBicmVhawogICAgICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXJyb3I6CiAgICAgICAgICAgIHN0cmVhbV9zdGF0ZVsiY29sbGVjdG9yX2Vycm9yIl0gPSB0eXBlKGVycm9yKS5fX25hbWVfXwogICAgICAgIGZpbmFsbHk6CiAgICAgICAgICAgIHN0cmVhbV9zdGF0ZVsicmVhZGVyX2NvbXBsZXRlIl0gPSBUcnVlCgogICAgdHJ5OgogICAgICAgIG5lZWQocmVxdWlyZWQoInhjb2RlLXZlcnNpb24iLCBbInhjb2RlYnVpbGQiLCAiLXZlcnNpb24iXSwgMzApLmRlY29kZSgpLnJlcGxhY2UoIlxyXG4iLCAiXG4iKS5zdHJpcCgpID09ICJYY29kZSAyNy4yXG5CdWlsZCB2ZXJzaW9uIDI3QjUyIiwgIkVYQUNUX1hDT0RFX1JFUVVJUkVEIikKICAgICAgICBuZWVkKHJlcXVpcmVkKCJhcmNoaXRlY3R1cmUiLCBbInVuYW1lIiwgIi1tIl0sIDE1KS5kZWNvZGUoKS5zdHJpcCgpID09ICJhcm02NCIsICJBUk02NF9IT1NUX1JFUVVJUkVEIikKICAgICAgICByZXF1aXJlZCgiaG9zdC1vcyIsIFsic3dfdmVycyJdLCAxNSkKICAgICAgICByZXNvdXJjZXMoImJlZm9yZSIpCiAgICAgICAgaW52ZW50b3J5ID0ganNvbi5sb2FkcyhyZXF1aXJlZCgiYmVmb3JlLWRldmljZS1pbnZlbnRvcnkiLCBbInhjcnVuIiwgInNpbWN0bCIsICJsaXN0IiwgImRldmljZXMiLCAiLWoiXSwgMzApKQogICAgICAgIHByZWV4aXN0aW5nX2FjdGl2ZSA9IFtyIGZvciByb3dzIGluIGludmVudG9yeVsiZGV2aWNlcyJdLnZhbHVlcygpIGZvciByIGluIHJvd3MgaWYgci5nZXQoInN0YXRlIikgaW4geyJCb290ZWQiLCAiQm9vdGluZyJ9XQogICAgICAgIHNhdmUoImJlZm9yZS1hY3RpdmUtZGV2aWNlLWNoZWNrLmpzb24iLCB7ImFjdGl2ZV9kZXZpY2VzIjogcHJlZXhpc3RpbmdfYWN0aXZlLCAibm9fZ2xvYmFsX3NodXRkb3duX29yX2RlbGV0ZSI6IFRydWUsICJjYWNoZV93YXJtdGhfbm90X2Fzc3VtZWQiOiBUcnVlfSkKICAgICAgICBuZWVkKG5vdCBwcmVleGlzdGluZ19hY3RpdmUsICJQUkVFWElTVElOR19BQ1RJVkVfU0lNVUxBVE9SX1JFRlVTRUQiKQogICAgICAgIGJhc2VsaW5lID0gZmluZ2VycHJpbnQoImJlZm9yZSIpCiAgICAgICAgcHJlZGljYXRlID0gJ3Byb2Nlc3MgSU4geyJDb3JlU2ltdWxhdG9yU2VydmljZSIsICJzaW1kaXNraW1hZ2VkIiwgImNyeXB0ZXhkIiwgImxhdW5jaGRfc2ltIiwgIlNpbUxhdW5jaEhvc3QuYXJtNjQifScKICAgICAgICBzdHJlYW0gPSBzdWJwcm9jZXNzLlBvcGVuKFsiL3Vzci9iaW4vbG9nIiwgInN0cmVhbSIsICItLXN0eWxlIiwgImNvbXBhY3QiLCAiLS1sZXZlbCIsICJpbmZvIiwgIi0tcHJlZGljYXRlIiwgcHJlZGljYXRlXSwgc3Rkb3V0PXN1YnByb2Nlc3MuUElQRSwgc3RkZXJyPXN1YnByb2Nlc3MuU1RET1VULCBzdGFydF9uZXdfc2Vzc2lvbj1UcnVlKQogICAgICAgIHN0cmVhbV90aHJlYWQgPSB0aHJlYWRpbmcuVGhyZWFkKHRhcmdldD1jYXB0dXJlX3N0cmVhbSwgZGFlbW9uPVRydWUpCiAgICAgICAgc3RyZWFtX3RocmVhZC5zdGFydCgpCiAgICAgICAgcHJldmlvdXNfdWlkID0gTm9uZQogICAgICAgIGZvciBwaGFzZSwgZGVhZGxpbmUgaW4gWygiZmlyc3QtY29sZCIsIDYwMCksICgic2Vjb25kLWZyZXNoIiwgMTgwKV06CiAgICAgICAgICAgIGNhc2UgPSB7InBoYXNlIjogcGhhc2UsICJ0eXBlIjogVFlQRVNbZGV2aWNlX3R5cGVdLCAicnVudGltZSI6IFJVTlRJTUUsICJydW50aW1lX2J1aWxkIjogQlVJTEQsICJkZWFkbGluZV9zZWNvbmRzIjogZGVhZGxpbmUsICJhcHBfYWNjZXB0YW5jZSI6IEZhbHNlfQogICAgICAgICAgICBjYXNlcy5hcHBlbmQoY2FzZSkKICAgICAgICAgICAgbmFtZSA9ICJCSUwtU0RLMjctcHJvYmUtIiArIG9zLmVudmlyb25bIkdJVEhVQl9SVU5fSUQiXSArICItIiArIGRldmljZV90eXBlICsgIi0iICsgcGhhc2UKICAgICAgICAgICAgdWlkID0gcmVxdWlyZWQocGhhc2UgKyAiLWNyZWF0ZSIsIFsieGNydW4iLCAic2ltY3RsIiwgImNyZWF0ZSIsIG5hbWUsIFRZUEVTW2RldmljZV90eXBlXSwgUlVOVElNRV0sIDYwKS5kZWNvZGUoKS5zdHJpcCgpCiAgICAgICAgICAgIG5lZWQocmUuZnVsbG1hdGNoKHIiW0EtRmEtZjAtOV17OH0oPzotW0EtRmEtZjAtOV17NH0pezN9LVtBLUZhLWYwLTldezEyfSIsIHVpZCksICJFWEFDVF9DUkVBVEVEX1VVSURfUkVRVUlSRUQiKQogICAgICAgICAgICBuZWVkKHVpZCAhPSBwcmV2aW91c191aWQgYW5kIHVpZCBub3QgaW4gY3JlYXRlZCwgIlNFQ09ORF9ERVZJQ0VfTVVTVF9CRV9ORVciKQogICAgICAgICAgICBjcmVhdGVkW3VpZF0sIGNhc2VbInVkaWQiXSA9IG5hbWUsIHVpZAogICAgICAgICAgICBpbnZlbnRvcnkgPSBqc29uLmxvYWRzKHJlcXVpcmVkKHBoYXNlICsgIi1mcmVzaC1kZXZpY2UtaW52ZW50b3J5IiwgWyJ4Y3J1biIsICJzaW1jdGwiLCAibGlzdCIsICJkZXZpY2VzIiwgIi1qIl0sIDMwKSkKICAgICAgICAgICAgZnJlc2ggPSBbciBmb3IgciBpbiBpbnZlbnRvcnlbImRldmljZXMiXS5nZXQoUlVOVElNRSwgW10pIGlmIHIuZ2V0KCJ1ZGlkIikgPT0gdWlkXQogICAgICAgICAgICBuZWVkKGxlbihmcmVzaCkgPT0gMSBhbmQgZnJlc2hbMF0uZ2V0KCJuYW1lIikgPT0gbmFtZSBhbmQgZnJlc2hbMF0uZ2V0KCJzdGF0ZSIpID09ICJTaHV0ZG93biIsICJORVdfU0hVVERPV05fREVWSUNFX1JFUVVJUkVEIikKICAgICAgICAgICAgc2F2ZShwaGFzZSArICItZnJlc2gtZGV2aWNlLXByb29mLmpzb24iLCB7Im5ld191dWlkIjogdWlkLCAicHJldmlvdXNfdXVpZCI6IHByZXZpb3VzX3VpZCwgImNyZWF0ZV9hcmd2X3R5cGUiOiBUWVBFU1tkZXZpY2VfdHlwZV0sICJydW50aW1lIjogUlVOVElNRSwgImRldmljZSI6IGZyZXNoWzBdfSkKICAgICAgICAgICAgY2FzZVsiYm9vdCJdLCBfID0gcnVuKHBoYXNlICsgIi1ib290IiwgWyJ4Y3J1biIsICJzaW1jdGwiLCAiYm9vdCIsIHVpZF0sIDEyMCkKICAgICAgICAgICAgaWYgY2FzZVsiYm9vdCJdWyJlZmZlY3RpdmVfcmV0dXJuY29kZSJdID09IDA6CiAgICAgICAgICAgICAgICBjYXNlWyJib290c3RhdHVzIl0sIF8gPSBydW4ocGhhc2UgKyAiLWJvb3RzdGF0dXMiLCBbInhjcnVuIiwgInNpbWN0bCIsICJib290c3RhdHVzIiwgdWlkLCAiLWIiXSwgZGVhZGxpbmUpCiAgICAgICAgICAgICAgICBjYXNlWyJyZWFkeSJdID0gY2FzZVsiYm9vdHN0YXR1cyJdWyJlZmZlY3RpdmVfcmV0dXJuY29kZSJdID09IDAKICAgICAgICAgICAgZWxzZToKICAgICAgICAgICAgICAgIGNhc2VbInJlYWR5Il0gPSBGYWxzZQogICAgICAgICAgICBpZiBub3QgY2FzZVsicmVhZHkiXToKICAgICAgICAgICAgICAgIGVycm9ycy5hcHBlbmQocGhhc2UgKyAiX0JPT1RfUkVBRElORVNTX0ZBSUxFRCIpCiAgICAgICAgICAgIGNhc2VbInNjcmVlbnNob3QiXSwgXyA9IHJ1bihwaGFzZSArICItc2NyZWVuc2hvdCIsIFsieGNydW4iLCAic2ltY3RsIiwgImlvIiwgdWlkLCAic2NyZWVuc2hvdCIsIHN0cihyb290IC8gKHBoYXNlICsgIi1vcy1yZWFkaW5lc3MucG5nIikpXSwgMzApCiAgICAgICAgICAgIGlmIGNhc2VbInJlYWR5Il06CiAgICAgICAgICAgICAgICBjYXNlWyJzaGVsbF9oZWFsdGgiXSwgXyA9IHJ1bihwaGFzZSArICItc2hlbGwtaGVhbHRoIiwgWyJ4Y3J1biIsICJzaW1jdGwiLCAic3Bhd24iLCB1aWQsICJsYXVuY2hjdGwiLCAicHJpbnQiLCAic3lzdGVtIl0sIDMwKQogICAgICAgICAgICAgICAgaWYgY2FzZVsic2hlbGxfaGVhbHRoIl1bImVmZmVjdGl2ZV9yZXR1cm5jb2RlIl0gIT0gMDoKICAgICAgICAgICAgICAgICAgICBlcnJvcnMuYXBwZW5kKHBoYXNlICsgIl9TSEVMTF9VTlJFU1BPTlNJVkUiKQogICAgICAgICAgICBpZiBjYXNlWyJzY3JlZW5zaG90Il1bImVmZmVjdGl2ZV9yZXR1cm5jb2RlIl0gIT0gMDoKICAgICAgICAgICAgICAgIGVycm9ycy5hcHBlbmQocGhhc2UgKyAiX09TX1NDUkVFTlNIT1RfRkFJTEVEIikKICAgICAgICAgICAgcmVzb3VyY2VzKHBoYXNlICsgIi1hZnRlciIpCiAgICAgICAgICAgIG5lZWQoZmluZ2VycHJpbnQocGhhc2UgKyAiLWFmdGVyIikgPT0gYmFzZWxpbmUsICJHRU5FUklDX1JVTlRJTUVfQ0hBTkdFRF9EVVJJTkdfQk9PVCIpCiAgICAgICAgICAgIGNsZWFudXAocGhhc2UsIHVpZCkKICAgICAgICAgICAgcHJldmlvdXNfdWlkID0gdWlkCiAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGVycm9yOgogICAgICAgIGVycm9ycy5hcHBlbmQodHlwZShlcnJvcikuX19uYW1lX18gKyAiOiIgKyBzdHIoZXJyb3IpKQogICAgZmluYWxseToKICAgICAgICBmb3IgdWlkIGluIGxpc3QoY3JlYXRlZCk6CiAgICAgICAgICAgIGlmIHVpZCBpbiBjbGVhbnVwX2F0dGVtcHRlZDoKICAgICAgICAgICAgICAgIGNvbnRpbnVlCiAgICAgICAgICAgIHRyeToKICAgICAgICAgICAgICAgIGNsZWFudXAoImZpbmFsLWNsZWFudXAtIiArIHVpZCwgdWlkKQogICAgICAgICAgICBleGNlcHQgRXhjZXB0aW9uIGFzIGVycm9yOgogICAgICAgICAgICAgICAgZXJyb3JzLmFwcGVuZCgiQ0xFQU5VUF9GQUlMRUQ6IiArIHR5cGUoZXJyb3IpLl9fbmFtZV9fKQogICAgICAgIGlmIHN0cmVhbSBpcyBub3QgTm9uZToKICAgICAgICAgICAgc3RyZWFtX3N0YXRlWyJyZXR1cm5jb2RlX2JlZm9yZV9zdG9wIl0gPSBzdHJlYW0ucG9sbCgpCiAgICAgICAgICAgIHN0b3Aoc3RyZWFtKQogICAgICAgICAgICBpZiBzdHJlYW1fdGhyZWFkIGlzIG5vdCBOb25lOgogICAgICAgICAgICAgICAgc3RyZWFtX3RocmVhZC5qb2luKHRpbWVvdXQ9MykKICAgICAgICAgICAgaWYgc3RyZWFtX3N0YXRlWyJjb2xsZWN0b3JfZXJyb3IiXSBvciBub3Qgc3RyZWFtX3N0YXRlWyJyZWFkZXJfY29tcGxldGUiXSBvciBzdHJlYW1fc3RhdGVbInJldHVybmNvZGVfYmVmb3JlX3N0b3AiXSBpcyBub3QgTm9uZSBhbmQgbm90IHN0cmVhbV9zdGF0ZVsibGltaXRfaGl0Il06CiAgICAgICAgICAgICAgICBlcnJvcnMuYXBwZW5kKCJIT1NUX0xPR19DT0xMRUNUT1JfSU5DT01QTEVURSIpCiAgICAgICAgICAgIHNhdmUoImhvc3QtbG9nLXN0cmVhbS5qc29uIiwgc3RyZWFtX3N0YXRlKQogICAgICAgIHJlc3VsdCA9IHsic2NvcGUiOiAiRGlzcG9zYWJsZSBob3N0IGVudmlyb25tZW50IG9ubHk7IG5vIEZsdXR0ZXIsIFBvZHMsIGFwcGxpY2F0aW9uIGNvbXBpbGF0aW9uLCBzaWduaW5nLCBpbnN0YWxsYXRpb24gb3IgdGVzdHMiLCAic291cmNlX3JlZmVyZW5jZV9vbmx5IjogU09VUkNFLCAic291cmNlX3RyZWVfcmVmZXJlbmNlX29ubHkiOiBUUkVFLCAiY29udHJvbGxlcl9zaGEiOiBjb250cm9sbGVyLCAiZGV2aWNlIjogZGV2aWNlX3R5cGUsICJjYXNlcyI6IGNhc2VzLCAiZXJyb3JzIjogZXJyb3JzLCAic3RhdHVzIjogIkVOVklST05NRU5UX01FQVNVUkVNRU5UX1BBU1MiIGlmIGxlbihjYXNlcykgPT0gMiBhbmQgbm90IGVycm9ycyBlbHNlICJGQUlMRURfQ0xPU0VEIiwgImFwcF9vcl9uYXRpdmVfdGVzdF9hY2NlcHRhbmNlIjogRmFsc2UsICJvcmlnaW5hbF9hcHBfZHJpdmVyX2Jvb3RzdGF0dXNfc2Vjb25kcyI6IDE4MCwgIm9yaWdpbmFsXzIwX3hjdGVzdHNfMTZfc2NlbmVzX2RvdWJsZV9hc3NlcnRpb25zXzE1MDBtc191bmNoYW5nZWQiOiBUcnVlLCAibm9fcmV0cnlfbG9vcCI6IFRydWUsICJyZW1haW5pbmdfb3duZWRfZGV2aWNlX3V1aWRzIjogbGlzdChjcmVhdGVkKSwgImZpbmlzaGVkX2F0X3V0YyI6IHV0YygpfQogICAgICAgIHNhdmUoIlBST0JFX1JFU1VMVC5qc29uIiwgcmVzdWx0KQogICAgICAgIHByaW50KGpzb24uZHVtcHMocmVzdWx0KSwgZmx1c2g9VHJ1ZSkKICAgIHJldHVybiAwIGlmIHJlc3VsdFsic3RhdHVzIl0gPT0gIkVOVklST05NRU5UX01FQVNVUkVNRU5UX1BBU1MiIGVsc2UgMQoKaWYgX19uYW1lX18gPT0gIl9fbWFpbl9fIjoKICAgIHN5cy5leGl0KG1haW4oKSkK')
+          assert hashlib.sha256(raw).hexdigest()=='8d5d49c4768ea9ddf7bc17f347d78ed6955725154cda4839efb4a8db89020e32'
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"sdk27_boot_readiness_probe.py"
+          with p.open("xb")as f:f.write(raw)
+          PY_PROBE_HELPER
+      - name: Measure one cold boot and one fresh device without application actions
+        shell: bash
+        run: python3 "$RUNNER_TEMP/sdk27_boot_readiness_probe.py"
+      - name: Preserve all environment cases including failure
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: bil-ios38-preview-pods-${{ github.run_id }}
-          path: BIL-ios-cocoapods-installation.json
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Run native AES-GCM gate on iOS Simulator
-        id: native_crypto_runtime_gate
-        if: ${{ !inputs.internal_testflight_existing_evidence }}
-        shell: bash
-        env:
-          BIL_NATIVE_TARGET: system-crypto
-        run: |
-          set -euo pipefail
-          test -n "${FLUTTER_ROOT:-}"
-          test -f "$FLUTTER_ROOT/packages/integration_test/example/test_driver/integration_test.dart"
-          OUT=artifacts/qa/text18/ios37-simulators
-          mkdir -p "$OUT"
-          python3 .github/scripts/bil_native_bounded_command.py \
-            --label signed-crypto-plugin-prep --log "$OUT/signed-crypto-plugin-prep.log" \
-            --receipt "$OUT/signed-crypto-plugin-prep-result.json" --timeout-seconds 120 -- \
-            dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
-          python3 .github/scripts/bil_native_bounded_command.py \
-            --label signed-crypto-pods --log "$OUT/signed-crypto-pods.log" \
-            --receipt "$OUT/signed-crypto-pods-result.json" --timeout-seconds 900 -- \
-            pod install --project-directory=ios
-          # system-crypto executes integration_test/system_crypto_bridge_integration_test.dart
-          # The shared script owns fresh simulator creation, bounded commands and cleanup.
-          bash .github/scripts/bil_ios37_native_integration.sh
-
-      - name: Preserve bounded native cryptography diagnostics
-        if: ${{ always() && steps.native_crypto_runtime_gate.outcome != 'skipped' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: bil-ios38-native-crypto-${{ github.run_id }}
-          path: artifacts/qa/text18/ios37-simulators/
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Require successful native iOS cryptography without a waiver
-        if: ${{ !inputs.internal_testflight_existing_evidence }}
-        shell: bash
-        env:
-          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
-        run: |
-          set -euo pipefail
-          test "$NATIVE_CRYPTO_OUTCOME" = success
-          printf '%s\n' 'NATIVE_CRYPTO_RUNTIME_GATE=PASS' > BIL-ios-native-crypto-gate.txt
-
-      - name: Record owner-approved prior evidence without repeating simulator tests
-        if: ${{ inputs.internal_testflight_existing_evidence }}
-        shell: bash
-        env:
-          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
-        run: |
-          set -euo pipefail
-          test "$BIL_INTERNAL_TESTFLIGHT_AUTHORIZATION" = OWNER_APPROVED_INTERNAL_ONLY_20261023
-          test "$NATIVE_CRYPTO_OUTCOME" = skipped
-          printf '%s\n' \
-            'NATIVE_CRYPTO_RUNTIME_GATE=NOT_RERUN_OWNER_APPROVED_INTERNAL_PRIOR_EVIDENCE' \
-            'FRESH_NATIVE_RUNTIME_PASS=NOT_CLAIMED' \
-            'OWNER_SKIP_RETEST_AUTHORIZATION=2026-10-24' \
-            > BIL-ios-native-crypto-gate.txt
-
-      - name: Preserve production AdMob plugin and validate configuration
-        shell: bash
-        env:
-          BIL_ADMOB_PRODUCTION_READY: true
-          BIL_ADMOB_PUBLISHER_ID: pub-9688223318643509
-          BIL_ADMOB_ANDROID_APP_ID: ca-app-pub-9688223318643509~2357875410
-          BIL_ADMOB_ANDROID_BANNER_ID: ca-app-pub-9688223318643509/9430375211
-          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
-          BIL_ADMOB_IOS_BANNER_ID: ca-app-pub-9688223318643509/6445204944
-        run: |
-          set -euo pipefail
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
-          python3 tool/release/test_validate_admob_production_configuration.py
-          python3 tool/release/validate_admob_production_configuration.py \
-            | tee BIL-ios-production-admob-source.txt
-          printf '%s\n' \
-            'BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347' \
-            > ios/Flutter/ReleaseAdMob.xcconfig
-          grep -Fqx $'\t<key>GADApplicationIdentifier</key>' ios/Runner/Info.plist
-          grep -Fqx $'\t<string>$(BIL_ADMOB_IOS_APP_ID)</string>' ios/Runner/Info.plist
-          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
-          # GeneratedPluginRegistrant.m is checked after flutter build ipa,
-          # where Flutter/Xcode must actually regenerate it.
-
-      - name: Configure manual App Store distribution signing
-        shell: bash
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          set -euo pipefail
-          PROFILE_PLIST="$RUNNER_TEMP/BIL-profile.plist"
-          EXPORT_OPTIONS="$RUNNER_TEMP/BIL-export-options.plist"
-          test -s "$PROFILE_PLIST" || {
-            echo 'Decoded provisioning-profile metadata is missing.' >&2
-            exit 1
-          }
-          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PROFILE_PLIST")"
-          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PROFILE_PLIST")"
-          test -n "$PROFILE_NAME" || {
-            echo 'Provisioning profile name is missing.' >&2
-            exit 1
-          }
-          test -n "$PROFILE_UUID" || {
-            echo 'Provisioning profile UUID is missing.' >&2
-            exit 1
-          }
-
-          {
-            printf '\n// CI App Store distribution signing\n'
-            printf 'CODE_SIGN_STYLE = Manual\n'
-            printf 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution\n'
-            printf 'DEVELOPMENT_TEAM = %s\n' "$APPLE_TEAM_ID"
-            printf 'PROVISIONING_PROFILE_SPECIFIER = %s\n' "$PROFILE_NAME"
-            printf 'PROVISIONING_PROFILE = %s\n' "$PROFILE_UUID"
-          } >> ios/Flutter/Release.xcconfig
-
-          python3 - "$EXPORT_OPTIONS" "$APPLE_TEAM_ID" "$PROFILE_UUID" <<'PY'
-          import pathlib
-          import plistlib
-          import sys
-
-          output_path, team_id, profile_uuid = sys.argv[1:]
-          options = {
-              'method': 'app-store-connect',
-              'signingStyle': 'manual',
-              'teamID': team_id,
-              'signingCertificate': 'Apple Distribution',
-              'provisioningProfiles': {
-                  'com.bilhealth.bodyintelligencelog': profile_uuid,
-              },
-              'manageAppVersionAndBuildNumber': False,
-              'uploadSymbols': True,
-              'stripSwiftSymbols': True,
-          }
-          with pathlib.Path(output_path).open('wb') as handle:
-              plistlib.dump(options, handle, sort_keys=True)
-          PY
-          plutil -lint "$EXPORT_OPTIONS"
-
-          # Do not invoke `xcodebuild -showBuildSettings` here. Immediately
-          # before this step the deferred-plugin graph is intentionally
-          # sanitized; Xcode 26 aborts while resolving that transient graph.
-          # `flutter build ipa` regenerates the graph in the next step and is
-          # the authoritative resolved-settings and signing gate.
-          grep -Fqx 'CODE_SIGN_STYLE = Manual' ios/Flutter/Release.xcconfig
-          grep -Fqx 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution' ios/Flutter/Release.xcconfig
-          grep -Fqx "DEVELOPMENT_TEAM = $APPLE_TEAM_ID" ios/Flutter/Release.xcconfig
-          grep -Fqx "PROVISIONING_PROFILE_SPECIFIER = $PROFILE_NAME" ios/Flutter/Release.xcconfig
-          grep -Fqx "PROVISIONING_PROFILE = $PROFILE_UUID" ios/Flutter/Release.xcconfig
-          test "$(/usr/libexec/PlistBuddy -c 'Print :signingStyle' "$EXPORT_OPTIONS")" = 'manual'
-          test "$(/usr/libexec/PlistBuddy -c 'Print :teamID' "$EXPORT_OPTIONS")" = "$APPLE_TEAM_ID"
-          test "$(/usr/libexec/PlistBuddy -c 'Print :provisioningProfiles:com.bilhealth.bodyintelligencelog' "$EXPORT_OPTIONS")" = "$PROFILE_UUID"
-          printf '%s\n' 'IOS_MANUAL_DISTRIBUTION_SIGNING_GATE=PASS'
-
-      - name: Build signed archive
-        env:
-          BUILD_NUMBER: '38'
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          BIL_ADMOB_IOS_APP_ID: ca-app-pub-9688223318643509~4090504347
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter build ipa --release --no-pub \
-            --target lib/main.dart \
-            --export-options-plist "$RUNNER_TEMP/BIL-export-options.plist" \
-            --build-number "$BUILD_NUMBER" \
-            --dart-define=BIL_ENVIRONMENT=production \
-            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
-            --dart-define=BIL_SMART_PLAN_CLOUD_ENABLED=true --dart-define=BIL_PAYMENTS_ENABLED=true \
-            --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
-            --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
-            --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
-            --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json \
-            --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
-            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true \
-            --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
-            --dart-define=BIL_PUSH_ENABLED=true \
-            --dart-define=BIL_PUSH_PROVIDER_READY=true \
-            --dart-define=BIL_ADS_ENABLED=true \
-            --dart-define=BIL_AD_PROVIDER_READY=true \
-            --dart-define=BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
-            --dart-define=BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
-            --dart-define=BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
-            --dart-define=BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
-            --dart-define=BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
-            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
-
-      - name: Verify regenerated iOS production AdMob plugin graph
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -Fq 'google_mobile_ads' .flutter-plugins-dependencies
-          grep -Fq 'FLTGoogleMobileAdsPlugin' ios/Runner/GeneratedPluginRegistrant.m
-          printf '%s\n' 'ADMOB_IOS_NATIVE_SDK_GRAPH_GATE=PASS' \
-            | tee BIL-ios-production-admob-plugin-graph.txt
-
-      - name: Capture signed IPA evidence
-        shell: bash
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          BUILD_NUMBER: '38'
-        run: |
-          set -euo pipefail
-          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
-          test -s "$IPA"
-
-          SIGNED_IPA_DIR="$(mktemp -d "$RUNNER_TEMP/bil-final-signed-ipa.XXXXXX")"
-          unzip -qq "$IPA" -d "$SIGNED_IPA_DIR"
-          SIGNED_APP_COUNT="$(find "$SIGNED_IPA_DIR/Payload" \
-            -mindepth 1 -maxdepth 1 -type d -name '*.app' | wc -l | tr -d '[:space:]')"
-          test "$SIGNED_APP_COUNT" = 1 || {
-            echo "Expected exactly one application in final IPA Payload; found $SIGNED_APP_COUNT." >&2
-            exit 1
-          }
-          SIGNED_APP="$(find "$SIGNED_IPA_DIR/Payload" \
-            -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
-          test -d "$SIGNED_APP"
-
-          BIL_ADMOB_PRODUCTION_READY=true \
-          BIL_ADMOB_PUBLISHER_ID=pub-9688223318643509 \
-          BIL_ADMOB_ANDROID_APP_ID=ca-app-pub-9688223318643509~2357875410 \
-          BIL_ADMOB_ANDROID_BANNER_ID=ca-app-pub-9688223318643509/9430375211 \
-          BIL_ADMOB_IOS_APP_ID=ca-app-pub-9688223318643509~4090504347 \
-          BIL_ADMOB_IOS_BANNER_ID=ca-app-pub-9688223318643509/6445204944 \
-          python3 tool/release/validate_admob_production_configuration.py \
-            --ios-info-plist "$SIGNED_APP/Info.plist" \
-            | tee BIL-ios-production-admob.txt
-
-          codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
-            2>&1 | tee BIL-ios-codesign-verify.txt
-          printf '%s\n' 'SIGNED_IPA_CODESIGN_GATE=PASS' \
-            | tee -a BIL-ios-codesign-verify.txt
-          codesign -dv --verbose=4 "$SIGNED_APP" 2> BIL-ios-codesign.txt
-          codesign --display --entitlements - --xml \
-            "$SIGNED_APP" \
-            | plutil -convert xml1 -o BIL-ios-entitlements.plist -
-          test -s BIL-ios-entitlements.plist
-
-          EMBEDDED_PROFILE="$SIGNED_APP/embedded.mobileprovision"
-          test -s "$EMBEDDED_PROFILE" || {
-            echo 'Final IPA app has no embedded provisioning profile.' >&2
-            exit 1
-          }
-          security cms -D -i "$EMBEDDED_PROFILE" \
-            > BIL-ios-embedded-profile.plist
-          plutil -lint BIL-ios-embedded-profile.plist
-          python3 tool/release/verify_signed_ios_entitlements.py \
-            --entitlements BIL-ios-entitlements.plist \
-            --embedded-profile BIL-ios-embedded-profile.plist \
-            --team-id "$APPLE_TEAM_ID" \
-            --bundle-id com.bilhealth.bodyintelligencelog
-          python3 -m unittest discover -s tool/release \
-            -p test_verify_final_artifact_identity.py -v
-          python3 tool/release/verify_final_artifact_identity.py \
-            --ipa "$IPA" \
-            --package com.bilhealth.bodyintelligencelog \
-            --version 1.0.0 --build "$BUILD_NUMBER" \
-            --output BIL-ios-final-artifact-inventory.json
-          python3 tool/release/verify_ios_app_icon.py --ipa "$IPA" --output BIL-ios-final-icon-inventory.json
-          shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
-          stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
-          git rev-parse HEAD | tee BIL-source-head.txt
-          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
-
-      - name: Reject forbidden bundled crypto implementations in signed IPA
-        shell: bash
-        run: |
-          set -euo pipefail
-          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
-          SCAN_DIR="$RUNNER_TEMP/bil-ios-crypto-scan"
-          rm -rf "$SCAN_DIR"
-          mkdir -p "$SCAN_DIR"
-          unzip -qq "$IPA" -d "$SCAN_DIR"
-          if find "$SCAN_DIR/Payload" -type f -perm -0111 \
-            -exec strings {} + 2>/dev/null \
-            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
-            echo 'Forbidden non-OS crypto implementation marker found in signed IPA.' >&2
-            exit 1
-          fi
-          printf '%s\n' 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' \
-            | tee BIL-ios-crypto-scan.txt
-
-      - name: Record code and physical-device gate boundary
-        shell: bash
-        run: |
-          printf '%s\n' \
-            'CODE_GATE=SIGNED_IPA_ARTIFACT_ONLY' \
-            'FACEBOOK_LOGIN_COMPILED_GATE=SUPABASE_BROWSER_OAUTH_SOURCE_PRESENT' \
-            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
-            'ADS_COMPILED_GATE=ENABLED_PRODUCTION' \
-            'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=PASS' \
-            'ADMOB_IOS_UMP_CONFIGURATION_GATE=SOURCE_CONFIG_VALIDATED' \
-            'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=NOT_VERIFIED_IN_IPA_BY_THIS_JOB' \
-            'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_OWNER_INSTALL_OR_UPLOAD' \
-            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
-            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
-            'PHYSICAL_DEVICE_GATE=REQUIRED' \
-            'PHYSICAL_DEVICE_SCOPE=Facebook OAuth browser flow and Supabase token exchange,App Attest JIT registration/assertion/replay denial,HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox,AdMob consent and served ad review' \
-            'TESTFLIGHT=NOT_RUN' \
-            > BIL-ios-gate-status.txt
-
-      - name: Generate signed IPA-only receipt after codesign and entitlements PASS
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$BIL_TESTED_SOURCE_SHA"
-          grep -Fq 'SIGNED_IPA_CODESIGN_GATE=PASS' BIL-ios-codesign-verify.txt
-          grep -Fq 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' BIL-ios-crypto-scan.txt
-          test -s BIL-ios-final-artifact-inventory.json
-          test -s BIL-ios-entitlements.plist
-          test -s BIL-ios-embedded-profile.plist
-          test -s BIL-ios-ipa.sha256
-          python3 - <<'PY'
-          import hashlib,json,os,pathlib,subprocess
-          files=list(pathlib.Path('build/ios/ipa').glob('*.ipa'))
-          if len(files)!=1 or not files[0].is_file() or files[0].stat().st_size<=0:
-              raise SystemExit('Exactly one signed IPA required')
-          digest=hashlib.sha256(files[0].read_bytes()).hexdigest()
-          if pathlib.Path('BIL-ios-ipa.sha256').read_text().split()[0]!=digest:
-              raise SystemExit('IPA hash readback mismatch')
-          githead=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
-          if githead!=os.environ['BIL_TESTED_SOURCE_SHA']:
-              raise SystemExit('Built source differs from audited candidate')
-          native_status=('NOT_RERUN_OWNER_APPROVED_INTERNAL_PRIOR_EVIDENCE'
-              if os.environ['BIL_INTERNAL_TESTFLIGHT']=='true' else 'PASS')
-          if ('NATIVE_CRYPTO_RUNTIME_GATE='+native_status) not in pathlib.Path('BIL-ios-native-crypto-gate.txt').read_text():
-              raise SystemExit('Native runtime evidence scope mismatch')
-          pathlib.Path('BIL-ios-build-only-receipt.json').write_text(json.dumps({
-              'status':'SIGNED_IPA_BUILT_AND_LOCALLY_VERIFIED','source_sha':githead,
-              'workflow_sha':os.environ['GITHUB_SHA'],'build':38,
-              'validation_mode':os.environ['BIL_VALIDATION_MODE'],'public_release_approved':False,
-              'native_crypto_runtime_status':native_status,
-              'ipa_sha256':digest,'ipa_bytes':files[0].stat().st_size,
-              'testflight_upload':'NOT_RUN','app_store_connect':'NOT_RUN',
-              'production_deploy':'NOT_RUN','physical_device':'NOT_RUN',
-              'release_certification':'NOT_CLAIMED'
-          },indent=2)+'\n')
-          print('SIGNED_IPA_BUILD_ONLY_PASS; NO_TESTFLIGHT_UPLOAD')
-          PY
-
-      - name: Upload signed IPA and validation evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: bil-ios38-signed-only-${{ github.run_id }}
-          if-no-files-found: error
-          retention-days: 14
+          name: bil-sdk27-stock-boot-readiness-${{ matrix.device }}-${{ github.sha }}-r${{ github.run_id }}-a${{ github.run_attempt }}
           path: |
-            build/ios/ipa/*.ipa
-            BIL-ios-codesign.txt
-            BIL-ios-codesign-verify.txt
-            BIL-ios-entitlements.plist
-            BIL-ios-final-artifact-inventory.json
-            BIL-ios-final-icon-inventory.json
-            BIL-ios-embedded-profile.plist
-            BIL-ios-ipa.sha256
-            BIL-ios-ipa.size
-            BIL-ios-crypto-scan.txt
-            BIL-ios-native-crypto-gate.txt
-            BIL-ios-production-admob-source.txt
-            BIL-ios-production-admob.txt
-            BIL-ios-production-admob-plugin-graph.txt
-            BIL-ios-gate-status.txt
-            BIL-build-number.txt
-            BIL-source-head.txt
-            BIL-ios-build-only-receipt.json
-            BIL-internal-testflight-authorization.json
-            BIL-apple-release-toolchain.txt
-            BIL-apple-release-toolchain.json
-
-      - name: Remove temporary Apple distribution profile and export options
-        if: always()
-        shell: bash
-        run: |
-          rm -f "$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
-          rm -f "$RUNNER_TEMP/BIL-profile.plist" "$RUNNER_TEMP/BIL-export-options.plist"
+            ${{ runner.temp }}/bil-sdk27-boot-probe-${{ matrix.device }}
+          if-no-files-found: error
+          retention-days: 14
