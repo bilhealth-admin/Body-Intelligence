@@ -154,7 +154,11 @@ void main() {
     expect(source, contains('independentGeminiFallback('));
     expect(
       reasoning,
-      contains('canonicalGeminiModel(candidate) !== canonical'),
+      contains('canonicalGeminiModel(candidate, endpointProduct)'),
+    );
+    expect(
+      reasoning,
+      contains('!retiringVertexModel && candidateModel !== canonical'),
     );
     expect(
       source,

@@ -150,6 +150,14 @@ jobs:
           set -euo pipefail
           evidence='artifacts/release/android_emulator_smoke/api-${{ matrix.api-level }}'
           mkdir -p "$evidence"
+          sha256sum build/app/outputs/flutter-apk/app-debug.apk > "$evidence/host-provisioning-apk.sha256"
+          ps -eo pid,ppid,comm,pcpu,rss > "$evidence/host-processes-before-gradle-stop.txt"
+          (
+            cd android
+            timeout 45s ./gradlew --stop --console=plain
+          ) > "$evidence/host-gradle-stop.txt" 2>&1
+          sha256sum --check "$evidence/host-provisioning-apk.sha256"
+          ps -eo pid,ppid,comm,pcpu,rss > "$evidence/host-processes-after-gradle-stop.txt"
           {
             printf 'host_cpu_threads=%s\nemulator_cpu_cores=2\n' "$(nproc)"
             printf 'emulator_ram_override=%s\n' '${{ matrix.ram-size }}'
