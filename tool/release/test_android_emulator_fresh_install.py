@@ -27,7 +27,7 @@ case "$*" in
   'wait-for-device') exit 0 ;;
   'get-state') printf 'device\n'; exit 0 ;;
   'shell getprop sys.boot_completed') printf '1\n'; exit 0 ;;
-  'shell getprop ro.build.version.sdk') printf '33\n'; exit 0 ;;
+  'shell getprop ro.build.version.sdk') printf '%s\n' "$BIL_ANDROID_EMULATOR_API"; exit 0 ;;
   'shell pm list packages --user 0 com.bilhealth.bodyintelligencelog')
     if [[ "$BIL_TEST_MODE" == list-failed ]]; then echo 'package service unavailable' >&2; exit 1; fi
     if [[ "$BIL_TEST_MODE" == malformed-list ]]; then printf 'unexpected-output\n'; exit 0; fi
@@ -67,6 +67,12 @@ if [[ "$*" == *'--verify-emulator-before-launch'* ]]; then
   exit 0
 fi
 if [[ "$*" == *'configure_android_emulator_display.py verify-runtime'* ]]; then exit 0; fi
+if [[ "$#" == 6 && "$1" == tool/release/configure_android_emulator_memory.py &&
+      "$2" == verify-runtime && "$3" == --api-level && "$4" == "$BIL_ANDROID_EMULATOR_API" &&
+      "$5" == --evidence-dir && "$6" == "artifacts/release/android_emulator_smoke/api-$4" ]]; then
+  [[ "$BIL_TEST_MODE" != memory-failed ]] || exit 5
+  exit 0
+fi
 if [[ "$*" == *'--window-health-only'* ]]; then
   if [[ "$BIL_TEST_MODE" == focus-anr ]]; then exit 20; fi
   [[ -f "$BIL_TEST_STATE/running" && "$BIL_TEST_MODE" != focus-failed ]] || exit 1
@@ -103,7 +109,7 @@ class AndroidEmulatorFreshInstallTest(unittest.TestCase):
             raise RuntimeError('Bash cannot fork a minimal child process: ' + probe.stderr)
         cls.source = SCRIPT.read_text(encoding='utf-8')
 
-    def run_script(self, mode: str = 'normal', *, late_clear: bool = False):
+    def run_script(self, mode: str = 'normal', *, late_clear: bool = False, api: int = 33):
         with tempfile.TemporaryDirectory(prefix='bil-startup-fresh-fixture-') as raw:
             root = Path(raw)
             (root / 'bin').mkdir()
@@ -130,14 +136,14 @@ class AndroidEmulatorFreshInstallTest(unittest.TestCase):
             env['PATH'] = str(root / 'bin') + os.pathsep + env.get('PATH', '')
             env['BIL_TEST_STATE'] = (root / 'state').as_posix()
             env['BIL_TEST_MODE'] = mode
-            env['BIL_ANDROID_EMULATOR_API'] = '33'
+            env['BIL_ANDROID_EMULATOR_API'] = str(api)
             env['GITHUB_SHA'] = 'synthetic-owned-fixture'
             out = subprocess.run([self.bash, '--noprofile', '--norc', '-c',
                                   'export BIL_TEST_STATE="$PWD/state"; export PATH="$PWD/bin:$PATH"; exec /bin/bash smoke.sh'], cwd=root, env=env, text=True,
                                  capture_output=True, timeout=20, check=False)
             def read(path: Path) -> str:
                 return path.read_text(encoding='utf-8') if path.exists() else ''
-            evidence = root / 'artifacts/release/android_emulator_smoke/api-33'
+            evidence = root / f'artifacts/release/android_emulator_smoke/api-{api}'
             return out, read(root/'state/adb-trace.txt'), read(root/'state/events.txt'), read(evidence/'failure.txt'), read(root/'state/validator-trace.txt')
 
     def test_actual_workflow_explicitly_recreates_the_snapshot_disabled_avd(self):
@@ -156,6 +162,8 @@ class AndroidEmulatorFreshInstallTest(unittest.TestCase):
         self.assertNotIn('shell pm clear', trace)
         self.assertNotIn('am_kill', events)
         self.assertEqual(failure, '')
+        self.assertIn('tool/release/configure_android_emulator_memory.py verify-runtime '
+                      '--api-level 33 --evidence-dir artifacts/release/android_emulator_smoke/api-33\n', validators)
         self.assertIn('classify_android_startup_anr.py', validators)
         self.assertIn('--pid=4972', trace)
 
@@ -210,6 +218,16 @@ class AndroidEmulatorFreshInstallTest(unittest.TestCase):
         result, trace, _, failure, _ = self.run_script('prelaunch-anr')
         self.assertEqual(result.returncode, 20)
         self.assertIn('stage=verify-emulator-system-ui-before-launch', failure)
+        self.assertNotIn('install build/', trace)
+        self.assertNotIn('shell am start', trace)
+
+    def test_api29_memory_readback_failure_stops_before_package_query_install_or_launch(self):
+        result, trace, _, failure, validators = self.run_script('memory-failed', api=29)
+        self.assertEqual(result.returncode, 5, result.stdout + result.stderr)
+        self.assertIn('stage=verify-emulator-memory-budget', failure)
+        self.assertIn('tool/release/configure_android_emulator_memory.py verify-runtime '
+                      '--api-level 29 --evidence-dir artifacts/release/android_emulator_smoke/api-29\n', validators)
+        self.assertNotIn('shell pm list packages', trace)
         self.assertNotIn('install build/', trace)
         self.assertNotIn('shell am start', trace)
 
