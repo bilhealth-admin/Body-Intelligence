@@ -106,6 +106,10 @@ stage='verify-emulator-display-budget'
 python3 tool/release/configure_android_emulator_display.py verify-runtime \
   --api-level "$api_level" --evidence-dir "$evidence"
 
+stage='verify-emulator-memory-budget'
+python3 tool/release/configure_android_emulator_memory.py verify-runtime \
+  --api-level "$api_level" --evidence-dir "$evidence"
+
 # The owned action creates a fresh, snapshot-disabled AVD. Fail closed if the
 # package is already present; never clear a running app immediately before launch.
 stage='verify-fresh-app-install'
