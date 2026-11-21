@@ -131,7 +131,6 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     if (!mounted || _sharedBoost == null) return;
     final boost = _sharedBoost!;
     if (!boost.hasUserInitiatedFeedback &&
-        !_purchaseRequestInFlight &&
         boost.errorCode != 'purchase_inactive' &&
         boost.errorCode != 'license_unlicensed' &&
         boost.errorCode != 'play_license_recovered_pending' &&
@@ -439,7 +438,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     }
   }
 
-  void _explainBlockedPurchase(BilStoreOfferMetadata _) {
+  void _explainBlockedPurchase(BilStoreOfferMetadata offer) {
     final store = widget.store ?? _ownedStore;
     final locale = Localizations.localeOf(context).toLanguageTag();
     final unresolved =
@@ -454,7 +453,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                   'purchase_status_unknown',
                   'store_finish_pending',
                 }.contains(store.messageCode));
-    final message = unresolved
+    final message = store?.ownershipConflictProductId == offer.productId
+        ? BilStoreCopy.text(locale, 'purchase_owned_by_another_account')
+        : unresolved
         ? BilStoreCopy.text(locale, 'purchase_reconciliation_failed')
         : AppLocalizations(
             Localizations.localeOf(context),
@@ -614,6 +615,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
                   blockedPurchaseKinds.isNotEmpty || _purchaseFeedbackIsError,
               currentPlan: currentPlan,
               initialFocus: widget.initialFocus,
+              initialSelectedProductId: _ownedActiveProductHint(
+                store,
+                currentPlan,
+              ),
               onPurchaseRequested: _requestPurchase,
               onBlockedPurchaseRequested: _explainBlockedPurchase,
               onOfferSelected: _onOfferSelected,

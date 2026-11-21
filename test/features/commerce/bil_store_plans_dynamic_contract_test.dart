@@ -978,34 +978,49 @@ void main() {
     expect(find.text('EGP 129.99'), findsWidgets);
   });
 
-  testWidgets('Continue dispatches exactly one selected store offer', (
-    tester,
-  ) async {
-    final catalog = _DeferredPurchaseCatalog();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: BilStorePlansPage(
-          catalog: catalog,
-          productIds: const {'premium.monthly'},
-        ),
-      ),
+  for (final entry in const {
+    'en': 'Processing your purchase…',
+    'ar': 'جارٍ معالجة عملية الشراء…',
+    'fr': 'Traitement de votre achat…',
+    'es': 'Procesando tu compra…',
+    'tr': 'Satın alma işleminiz işleniyor…',
+  }.entries) {
+    testWidgets(
+      'Continue dispatches exactly one selected store offer [${entry.key}]',
+      (tester) async {
+        final catalog = _DeferredPurchaseCatalog();
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: Locale(entry.key),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              ...GlobalMaterialLocalizations.delegates,
+            ],
+            home: BilStorePlansPage(
+              catalog: catalog,
+              productIds: const {'premium.monthly'},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final cta = find.byKey(const ValueKey('store-purchase-cta'));
+        expect(cta, findsOneWidget);
+        expect(catalog.requested, isEmpty);
+        await tester.tap(cta);
+        await tester.pump();
+
+        expect(catalog.requested, <BilStoreOfferMetadata>[_monthlyOffer]);
+        expect(find.text(entry.value), findsOneWidget);
+        expect(tester.widget<InkWell>(cta).onTap, isNull);
+
+        catalog.completePurchase();
+        await tester.pumpAndSettle();
+        expect(tester.widget<InkWell>(cta).onTap, isNotNull);
+      },
     );
-    await tester.pumpAndSettle();
-
-    final cta = find.byKey(const ValueKey('store-purchase-cta'));
-    expect(cta, findsOneWidget);
-    expect(catalog.requested, isEmpty);
-    await tester.tap(cta);
-    await tester.pump();
-
-    expect(catalog.requested, <BilStoreOfferMetadata>[_monthlyOffer]);
-    expect(find.text('Opening secure purchase…'), findsOneWidget);
-    expect(tester.widget<InkWell>(cta).onTap, isNull);
-
-    catalog.completePurchase();
-    await tester.pumpAndSettle();
-    expect(tester.widget<InkWell>(cta).onTap, isNotNull);
-  });
+  }
 
   testWidgets(
     'a cancelled native sheet clears feedback and permits a lower term',

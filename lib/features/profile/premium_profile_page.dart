@@ -106,6 +106,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
   String timeZone = '';
   String email = '';
   String units = 'metric';
+  String heightUnits = 'metric';
   DateTime? dateOfBirth;
   int age = 30;
   double height = 170;
@@ -327,9 +328,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                       key: const Key('profile-units-row'),
                       icon: Icons.straighten_rounded,
                       label: tr('Units', 'الوحدات'),
-                      value: units == 'metric'
-                          ? tr('Metric · kg, cm, ml', 'متري · كغ، سم، مل')
-                          : tr('Imperial · lb, ft', 'إمبراطوري · رطل، قدم'),
+                      value: profileUnitsLabel,
                       onTap: () =>
                           openSettingsRoute('/settings/units', profile),
                     ),

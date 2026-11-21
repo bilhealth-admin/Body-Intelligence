@@ -132,6 +132,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
         checkoutTrace?.mark(StorePurchaseStage.benefitPublished);
         _recordBenefit(purchase, ownerId, active: true);
         lastVerifiedProductId = purchase.productID;
+        _observeActiveRestoreReceipt(purchase);
         state = VerifiedStoreState.verified;
         messageCode = boost ? 'ai_boost_verified' : 'subscription_verified';
         notifyListeners();
@@ -158,6 +159,11 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       if (_disposed || !_isCurrentStoreOwner(ownerId)) return;
       switch (verification) {
         case _StoreReceiptVerificationResult.ownershipConflict:
+          _rememberOwnershipRejection(purchase);
+          if (_hasOwnedActiveRestoreProof()) {
+            ownershipConflictProductId ??= purchase.productID;
+            break;
+          }
           final preserveExplicitConflict =
               origin == _StorePurchaseEventOrigin.reconciliation &&
               messageCode == 'purchase_owned_by_another_account';
@@ -173,6 +179,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
           if (_restoring) _restoreOwnershipConflict = true;
           state = VerifiedStoreState.failed;
         case _StoreReceiptVerificationResult.verifiedActive:
+          if (_hasOwnedActiveRestoreProof()) _restoreOwnershipConflict = false;
           lastVerifiedProductId = purchase.productID;
           state = VerifiedStoreState.verified;
           messageCode = boost ? 'ai_boost_verified' : 'subscription_verified';
@@ -370,6 +377,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
       queueKey: cooldownKey ?? fingerprint,
       cooldownKey: cooldownKey,
       replayKey: _settledReplayKey(purchase),
+      ownershipKey: _ownershipReplayKey(purchase),
     );
   }
 
@@ -379,9 +387,10 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
     if (!_queuedTransactionKeys.add(attempt.queueKey)) {
       return _StoreTransactionReservation.alreadyQueued;
     }
-    if (StoreVerificationRequestPolicy.shared.isBackedOff(
-      _currentStoreOwnerId(),
-    )) {
+    if (_wasOwnershipRejected(attempt.ownershipKey) ||
+        StoreVerificationRequestPolicy.shared.isBackedOff(
+          _currentStoreOwnerId(),
+        )) {
       _queuedTransactionKeys.remove(attempt.queueKey);
       return _StoreTransactionReservation.cooledDown;
     }
@@ -484,6 +493,7 @@ extension _VerifiedStorePurchaseProcessing on VerifiedStorePurchaseService {
         state == VerifiedStoreState.purchasePending) {
       return;
     }
+    if (_preserveKnownOwnershipPresentation()) return;
     _storeStartupFaultBeforeCatalog = false;
     _purchaseEventGeneration++;
     final origin = _restoring
@@ -671,9 +681,11 @@ final class _StoreTransactionAttempt {
     required this.queueKey,
     required this.cooldownKey,
     required this.replayKey,
+    required this.ownershipKey,
   });
 
   final String queueKey;
   final String? cooldownKey;
   final String? replayKey;
+  final String? ownershipKey;
 }

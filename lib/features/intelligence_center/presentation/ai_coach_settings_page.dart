@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
+import '../../../app/localization/runtime_copy_apple_ai_privacy.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/bil_flat_icon.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';

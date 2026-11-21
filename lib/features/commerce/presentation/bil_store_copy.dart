@@ -179,7 +179,7 @@ abstract final class BilStoreCopy {
           'The store offer changed or is unavailable. Review the refreshed plans before trying again. No purchase was started.',
       'purchase_error':
           'The store could not complete this request. Try again later.',
-      'purchase_in_progress': 'Opening secure purchase…',
+      'purchase_in_progress': 'Processing your purchase…',
       'purchase_reconciliation_pending':
           'Checking a previous store transaction. No new purchase was started.',
       'purchase_reconciliation_failed':
@@ -276,7 +276,7 @@ abstract final class BilStoreCopy {
       'purchase_catalog_changed':
           'تغيّر عرض المتجر أو أصبح غير متاح. راجع الخطط المحدّثة قبل المحاولة مجددًا. لم تبدأ أي عملية شراء.',
       'purchase_error': 'تعذر إكمال الطلب من المتجر. يمكنك المحاولة لاحقًا.',
-      'purchase_in_progress': 'جارٍ فتح عملية الشراء الآمنة…',
+      'purchase_in_progress': 'جارٍ معالجة عملية الشراء…',
       'purchase_reconciliation_pending':
           'جارٍ التحقق من عملية سابقة من المتجر. لم تبدأ عملية شراء جديدة.',
       'purchase_reconciliation_failed':
@@ -382,7 +382,7 @@ abstract final class BilStoreCopy {
           'L’offre a changé ou n’est plus disponible. Vérifiez les offres actualisées avant de réessayer. Aucun achat n’a été lancé.',
       'purchase_error':
           'La boutique n’a pas pu traiter cette demande. Réessayez plus tard.',
-      'purchase_in_progress': 'Ouverture de l’achat sécurisé…',
+      'purchase_in_progress': 'Traitement de votre achat…',
       'purchase_reconciliation_pending':
           'Vérification d’une transaction antérieure de la boutique. Aucun nouvel achat n’a été lancé.',
       'purchase_reconciliation_failed':
@@ -490,7 +490,7 @@ abstract final class BilStoreCopy {
           'La oferta cambió o ya no está disponible. Revisa los planes actualizados antes de reintentar. No se inició ninguna compra.',
       'purchase_error':
           'La tienda no pudo completar la solicitud. Inténtalo más tarde.',
-      'purchase_in_progress': 'Abriendo la compra segura…',
+      'purchase_in_progress': 'Procesando tu compra…',
       'purchase_reconciliation_pending':
           'Comprobando una transacción anterior de la tienda. No se inició ninguna compra nueva.',
       'purchase_reconciliation_failed':
@@ -591,7 +591,7 @@ abstract final class BilStoreCopy {
           'Teklif değişti veya artık kullanılamıyor. Tekrar denemeden önce güncel planları inceleyin. Satın alma başlatılmadı.',
       'purchase_error':
           'Mağaza bu isteği tamamlayamadı. Daha sonra tekrar deneyin.',
-      'purchase_in_progress': 'Güvenli satın alma açılıyor…',
+      'purchase_in_progress': 'Satın alma işleminiz işleniyor…',
       'purchase_reconciliation_pending':
           'Önceki bir mağaza işlemi kontrol ediliyor. Yeni bir satın alma başlatılmadı.',
       'purchase_reconciliation_failed':

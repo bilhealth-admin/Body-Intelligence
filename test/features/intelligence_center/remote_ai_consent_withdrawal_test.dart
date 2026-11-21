@@ -15,6 +15,8 @@ void main() {
       var reads = 0;
       RemoteAiConsentCoordinator create() => RemoteAiConsentCoordinator(
         owner: () => owner,
+        readDisclosureAcknowledgement: (_) async => true,
+        writeDisclosureAcknowledgement: (_, _) async {},
         read: () async {
           reads++;
           return _allow;
@@ -50,6 +52,8 @@ void main() {
       final readback = Completer<Object?>();
       final coordinator = RemoteAiConsentCoordinator(
         owner: () => 'owner-a',
+        readDisclosureAcknowledgement: (_) async => true,
+        writeDisclosureAcknowledgement: (_, _) async {},
         read: () => readback.future,
         write: () async {
           writes++;
@@ -75,6 +79,8 @@ void main() {
     final disk = <String, bool>{'owner-a': true};
     final coordinator = RemoteAiConsentCoordinator(
       owner: () => 'owner-a',
+      readDisclosureAcknowledgement: (_) async => true,
+      writeDisclosureAcknowledgement: (_, _) async {},
       read: () async => throw StateError('readback unavailable'),
       write: () async {},
       readDenial: (key) async => disk[key] ?? false,
@@ -93,6 +99,8 @@ void main() {
     final lateAllow = Completer<void>();
     final coordinator = RemoteAiConsentCoordinator(
       owner: () => 'owner-a',
+      readDisclosureAcknowledgement: (_) async => true,
+      writeDisclosureAcknowledgement: (_, _) async {},
       read: () async => _deny,
       write: () {
         writeStarted.complete();
@@ -118,6 +126,8 @@ void main() {
     var reads = 0;
     final coordinator = RemoteAiConsentCoordinator(
       owner: () => 'owner-a',
+      readDisclosureAcknowledgement: (_) async => true,
+      writeDisclosureAcknowledgement: (_, _) async {},
       read: () {
         reads++;
         return reads == 1 ? readback.future : Future.value(_deny);
@@ -139,6 +149,8 @@ void main() {
     final disk = <String, bool>{};
     final coordinator = RemoteAiConsentCoordinator(
       owner: () => owner,
+      readDisclosureAcknowledgement: (_) async => true,
+      writeDisclosureAcknowledgement: (_, _) async {},
       read: () => readback.future,
       write: () async {},
       readDenial: (key) async => disk[key] ?? false,
@@ -159,6 +171,8 @@ void main() {
     () async {
       final coordinator = RemoteAiConsentCoordinator(
         owner: () => 'owner-a',
+        readDisclosureAcknowledgement: (_) async => true,
+        writeDisclosureAcknowledgement: (_, _) async {},
         read: () async => const {},
         write: () async {},
         revoke: () async {},
@@ -172,6 +186,8 @@ void main() {
     var writes = 0;
     final coordinator = RemoteAiConsentCoordinator(
       owner: () => 'owner-a',
+      readDisclosureAcknowledgement: (_) async => true,
+      writeDisclosureAcknowledgement: (_, _) async {},
       read: () async => _allow,
       write: () async {
         writes++;

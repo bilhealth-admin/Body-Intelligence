@@ -45,45 +45,48 @@ class _CommunityCreatorPanel extends StatelessWidget {
         showDragHandle: true,
         isScrollControlled: true,
         builder: (sheetContext) => visit.guard(
-          BilPinnedHeaderBody(
-            shrinkWrap: true,
-            header: Padding(
-              key: const Key("community-badges-pinned-heading"),
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-              child: Text(
-                communityText(
-                  sheetContext,
-                  'Community badges',
-                  'شارات المجتمع',
+          SafeArea(
+            top: false,
+            child: BilPinnedHeaderBody(
+              shrinkWrap: true,
+              header: Padding(
+                key: const Key("community-badges-pinned-heading"),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                child: Text(
+                  communityText(
+                    sheetContext,
+                    'Community badges',
+                    'شارات المجتمع',
+                  ),
+                  style: bilPageHeadingStyle(sheetContext),
                 ),
-                style: bilPageHeadingStyle(sheetContext),
               ),
-            ),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (final badge in creator.badges)
-                    ListTile(
-                      key: Key('community-creator-badge-${badge.badgeKey}'),
-                      contentPadding: EdgeInsets.zero,
-                      leading: CircleAvatar(
-                        child: Icon(
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final badge in creator.badges)
+                      ListTile(
+                        key: Key('community-creator-badge-${badge.badgeKey}'),
+                        contentPadding: EdgeInsets.zero,
+                        leading: CircleAvatar(
+                          child: Icon(
+                            badge.earned
+                                ? Icons.verified_rounded
+                                : Icons.lock_outline_rounded,
+                          ),
+                        ),
+                        title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
+                        subtitle: Text(
                           badge.earned
-                              ? Icons.verified_rounded
-                              : Icons.lock_outline_rounded,
+                              ? communityText(sheetContext, 'Earned', 'مكتسبة')
+                              : communityText(sheetContext, 'Locked', 'مقفلة'),
                         ),
                       ),
-                      title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
-                      subtitle: Text(
-                        badge.earned
-                            ? communityText(sheetContext, 'Earned', 'مكتسبة')
-                            : communityText(sheetContext, 'Locked', 'مقفلة'),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

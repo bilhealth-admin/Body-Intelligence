@@ -77,6 +77,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   bool _subscriptionRecoveryInFlight = false;
   String? _failedSubscriptionProductId;
   final Map<String, PurchaseDetails> _unresolvedVerificationReceipts = {};
+  final Map<String, StoreAccountSnapshot> _ownershipRejectedReceipts = {};
   bool _unresolvedReceiptOverflow = false;
   final Duration pendingTimeout;
   final bool handlesBoost;
@@ -149,6 +150,8 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   Future<void>? _nativeRestoreOperation;
   bool _restoreOwnershipConflict = false;
   _StoreRestoreAttempt? _restoreAttempt;
+  ({StoreAccountSnapshot visit, int benefitRevision, String productId})?
+  _ownedActiveRestoreProof;
   String? get restoreSupportCode => _currentRestoreSupportCode();
   bool _checkoutPreflightInFlight = false;
   bool _disposed = false;

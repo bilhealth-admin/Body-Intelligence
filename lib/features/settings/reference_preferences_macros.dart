@@ -133,6 +133,12 @@ String _diaryText(BuildContext context, String key) {
 }
 
 const _diarySupplementalCopy = <String, Map<String, String>>{
+  'Choose an option': {
+    'ar': 'اختر خيارًا',
+    'fr': 'Choisissez une option',
+    'es': 'Elige una opción',
+    'tr': 'Bir seçenek seçin',
+  },
   'WHO · Dietary fibre': {
     'ar': 'منظمة الصحة العالمية · الألياف الغذائية',
     'fr': 'OMS · Fibres alimentaires',

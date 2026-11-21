@@ -112,6 +112,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   Timer? debounce;
   StreamSubscription<FoodRuntimeSearchResult>? _progressiveSearch;
   int searchGeneration = 0;
+  bool runtimeSearchPending = false;
   _CatalogView catalogView = _CatalogView.all;
   _RuntimeSearchUiState runtimeSearchState = _RuntimeSearchUiState.idle;
   static const FoodSearchAssistance _assistance = FoodSearchAssistance();
@@ -142,11 +143,12 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     final trimmed = value.trim();
 
     if (mounted) {
-      setState(
-        () => runtimeSearchState = trimmed.isEmpty
+      setState(() {
+        runtimeSearchPending = trimmed.isNotEmpty;
+        runtimeSearchState = trimmed.isEmpty
             ? _RuntimeSearchUiState.idle
-            : _RuntimeSearchUiState.searching,
-      );
+            : _RuntimeSearchUiState.searching;
+      });
     }
 
     final repository = ref.read(foodRepositoryProvider);
@@ -160,6 +162,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       if (!current()) return;
       setState(() {
         results = _foodsInScope(outcome.foods);
+        if (widget.userOwnedOnly) runtimeSearchPending = false;
         correction = results!.isEmpty
             ? _assistance.explicitCorrectionFor(trimmed)
             : null;
@@ -190,9 +193,10 @@ class _FoodPageState extends ConsumerState<FoodPage> {
         );
       } on Object {
         if (current()) {
-          setState(
-            () => runtimeSearchState = _RuntimeSearchUiState.localFallback,
-          );
+          setState(() {
+            runtimeSearchPending = false;
+            runtimeSearchState = _RuntimeSearchUiState.localFallback;
+          });
         }
       }
     } else {
@@ -202,11 +206,15 @@ class _FoodPageState extends ConsumerState<FoodPage> {
             accept,
             onError: (Object _) {
               if (current()) {
-                setState(
-                  () =>
-                      runtimeSearchState = _RuntimeSearchUiState.localFallback,
-                );
+                setState(() {
+                  runtimeSearchPending = false;
+                  runtimeSearchState = _RuntimeSearchUiState.localFallback;
+                });
               }
+            },
+            onDone: () {
+              if (!current()) return;
+              setState(() => runtimeSearchPending = false);
             },
           );
     }
@@ -218,6 +226,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     // Rebuild immediately. Waiting for the debounce left the browse filters
     // and a false empty state visible underneath an active search.
     setState(() {
+      runtimeSearchPending = trimmed.isNotEmpty;
       runtimeSearchState = trimmed.isEmpty
           ? _RuntimeSearchUiState.idle
           : _RuntimeSearchUiState.searching;
@@ -384,7 +393,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                     if (runtimeSearchState != _RuntimeSearchUiState.idle) ...[
                       const SizedBox(height: 8),
                       _RuntimeSearchStatus(
-                        state: runtimeSearchState,
+                        state: runtimeSearchPending
+                            ? _RuntimeSearchUiState.searching
+                            : runtimeSearchState,
                         languageCode: Localizations.localeOf(
                           context,
                         ).languageCode,
@@ -502,8 +513,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                             )
                             .toList(growable: false)
                       : selectedRows;
-                  if (search.text.trim().isNotEmpty &&
-                      runtimeSearchState == _RuntimeSearchUiState.searching) {
+                  if (activeQuery.isNotEmpty &&
+                      runtimeSearchPending &&
+                      visible.isEmpty) {
                     return const Center(
                       key: Key('food-search-results-loading'),
                       child: BilFeatureWelcomeStatus(),

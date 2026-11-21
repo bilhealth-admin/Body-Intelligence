@@ -27,6 +27,90 @@ import 'package:go_router/go_router.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  for (final language in ['en', 'ar']) {
+    for (final unitCase in [0, 1, 2]) {
+      final imperialWeight = unitCase != 0;
+      testWidgets(
+        'independent mixed profile units stay truthful [$language/$unitCase]',
+        (tester) async {
+          final database = await _seedDatabase();
+          addTearDown(database.close);
+          final preferences = PreferencesRepository(database);
+          await preferences.setMany({
+            'units': imperialWeight ? 'imperial' : 'metric',
+            'units.weight': imperialWeight ? 'Pounds' : 'Kilograms',
+            if (unitCase != 2)
+              'units.height': imperialWeight ? 'Centimeters' : 'Feet/Inches',
+          });
+          await _pumpProfile(tester, database, locale: Locale(language));
+          final row = find.byKey(const Key('profile-units-row'));
+          await tester.scrollUntilVisible(
+            row,
+            240,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.pumpAndSettle();
+          expect(
+            find.descendant(
+              of: row,
+              matching: find.text(imperialWeight ? 'lb · cm' : 'kg · ft/in'),
+            ),
+            findsOneWidget,
+            reason: 'Selecting one dimension must not claim the other changed',
+          );
+          final heightRow = find.byKey(const Key('profile-height-row'));
+          await tester.scrollUntilVisible(
+            heightRow,
+            -200,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.pumpAndSettle();
+          expect(
+            find.descendant(
+              of: heightRow,
+              matching: find.text(imperialWeight ? '181 cm' : '5 ft, 11 in'),
+            ),
+            findsOneWidget,
+          );
+          await tester.tap(heightRow);
+          await tester.pumpAndSettle();
+          final segments = tester.widget<SegmentedButton<String>>(
+            find.byType(SegmentedButton<String>),
+          );
+          expect(segments.selected, {imperialWeight ? 'metric' : 'imperial'});
+          final field = tester.widget<TextField>(
+            find.byKey(const Key('profile-height-editor')),
+          );
+          expect(field.decoration?.suffixText, imperialWeight ? 'cm' : 'in');
+          expect(field.controller?.text, imperialWeight ? '181' : '71.3');
+          await tester.binding.handlePopRoute();
+          await tester.pumpAndSettle();
+          // The editor deliberately retires its controller after the sheet's
+          // exit frame, then a500ms ownership grace period.
+          await tester.pump(const Duration(milliseconds: 600));
+          await tester.pumpAndSettle();
+          final profile = await UserProfileRepository(database).getProfile();
+          expect(profile?.height, 181);
+          expect(profile?.currentWeight, 93.4);
+          expect(
+            await preferences.get('units'),
+            imperialWeight ? 'imperial' : 'metric',
+          );
+          expect(
+            await preferences.get('units.height'),
+            unitCase == 2
+                ? isNull
+                : imperialWeight
+                ? 'Centimeters'
+                : 'Feet/Inches',
+          );
+          await tester.pumpWidget(const SizedBox.shrink());
+          await tester.pumpAndSettle();
+        },
+      );
+    }
+  }
+
   test(
     'profile edit recovers the owner-scoped database instead of retrying a stale stream',
     () {

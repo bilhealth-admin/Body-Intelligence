@@ -26,6 +26,8 @@ class RemoteAiConsentCoordinator {
     this.revoke,
     this.readDenial,
     this.writeDenial,
+    this.readDisclosureAcknowledgement,
+    this.writeDisclosureAcknowledgement,
   });
 
   final RemoteAiConsentOwner owner;
@@ -34,6 +36,8 @@ class RemoteAiConsentCoordinator {
   final RemoteAiConsentWrite? revoke;
   final RemoteAiDenialRead? readDenial;
   final RemoteAiDenialWrite? writeDenial;
+  final RemoteAiDenialRead? readDisclosureAcknowledgement;
+  final RemoteAiDenialWrite? writeDisclosureAcknowledgement;
   final Set<String> _deniedOwners = <String>{};
   Future<void> _denialWrites = Future<void>.value();
 
@@ -118,11 +122,24 @@ class RemoteAiConsentCoordinator {
       return false;
     }
     if (_syncOwner() != owner || _generation != generation) return false;
+    // Preserve the existing authoritative status read. Its metadata alone
+    // cannot establish which disclosure a historical policy-3 user saw.
     final receipt = await read().timeout(const Duration(seconds: 8));
-    final granted = isCurrentRemoteAiConsentGranted(receipt);
+    final serverGranted = isCurrentRemoteAiConsentGranted(receipt);
     if (_syncOwner() != owner || _generation != generation) return false;
-    _granted = granted;
-    return granted;
+    if (!serverGranted) {
+      _granted = false;
+      return false;
+    }
+    // Only a new explicit Allow may acknowledge the current Google recipient.
+    final acknowledged =
+        await readDisclosureAcknowledgement
+            ?.call(owner)
+            .timeout(const Duration(seconds: 8)) ==
+        true;
+    if (_syncOwner() != owner || _generation != generation) return false;
+    _granted = acknowledged;
+    return acknowledged;
   }
 
   Future<bool> _grantCurrent(String owner, int generation) async {
@@ -141,6 +158,11 @@ class RemoteAiConsentCoordinator {
         _generation != generation) {
       return false;
     }
+    await _persistDisclosureAcknowledgement(owner, true);
+    if (_syncOwner() != owner || _generation != generation) {
+      await _persistDenial(owner, true);
+      return false;
+    }
     await _persistDenial(owner, false);
     if (_syncOwner() != owner || _generation != generation) {
       await _persistDenial(owner, true);
@@ -154,16 +176,52 @@ class RemoteAiConsentCoordinator {
   Future<bool> _revokeCurrent(String owner, int generation) async {
     await _persistDenial(owner, true);
     if (_syncOwner() != owner || _generation != generation) return false;
+    Object? acknowledgementFailure;
+    StackTrace? acknowledgementFailureStack;
+    try {
+      await _persistDisclosureAcknowledgement(owner, false);
+    } on Object catch (error, stack) {
+      // A failed local marker clear must not suppress server withdrawal.
+      // The durable denial above already blocks this device.
+      acknowledgementFailure = error;
+      acknowledgementFailureStack = stack;
+    }
+    if (_syncOwner() != owner || _generation != generation) return false;
     final write = revoke;
     if (write == null) return false;
     await write().timeout(const Duration(seconds: 8));
     if (_syncOwner() != owner || _generation != generation) return false;
     final receipt = await read().timeout(const Duration(seconds: 8));
+    if (acknowledgementFailure != null) {
+      Error.throwWithStackTrace(
+        acknowledgementFailure,
+        acknowledgementFailureStack!,
+      );
+    }
     return receipt is Map &&
         receipt['policy_version'] == '3' &&
         receipt['granted'] == false &&
         _syncOwner() == owner &&
         _generation == generation;
+  }
+
+  Future<void> _persistDisclosureAcknowledgement(
+    String owner,
+    bool acknowledged,
+  ) {
+    final write = writeDisclosureAcknowledgement;
+    if (write == null) {
+      return Future<void>.error(
+        StateError('remote_ai_disclosure_acknowledgement_unavailable'),
+      );
+    }
+    // Order acknowledgement and withdrawal writes through the same queue.
+    // A timed-out/late Allow cannot overtake a newer durable withdrawal.
+    final pending = _denialWrites.then((_) async {
+      await write(owner, acknowledged);
+    });
+    _denialWrites = pending.then<void>((_) {}, onError: (Object _) {});
+    return pending.timeout(const Duration(seconds: 8));
   }
 
   Future<void> _persistDenial(String owner, bool denied) {
@@ -226,6 +284,22 @@ RemoteAiConsentCoordinator sharedRemoteAiConsentCoordinator([
           },
         );
       }),
+      readDisclosureAcknowledgement: (owner) async =>
+          (await SharedPreferences.getInstance()).getBool(
+            'bil.remoteAi.disclosure.googleRecipient.v1.$owner',
+          ) ??
+          false,
+      writeDisclosureAcknowledgement: (owner, acknowledged) async {
+        final persisted = await (await SharedPreferences.getInstance()).setBool(
+          'bil.remoteAi.disclosure.googleRecipient.v1.$owner',
+          acknowledged,
+        );
+        if (!persisted) {
+          throw StateError(
+            'remote_ai_disclosure_acknowledgement_not_persisted',
+          );
+        }
+      },
       readDenial: (owner) async =>
           (await SharedPreferences.getInstance()).getBool(
             'bil.remoteAi.denied.v3.$owner',

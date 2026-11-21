@@ -5,7 +5,11 @@ void _memoryOwnerSyncCases() {
   // Supabase workers and auxiliary subscription disposal belong to the outer
   // test runner, never to a widget test's fake clock.
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    // These owner/transport cases start after the complete disclosure.
+    SharedPreferences.setMockInitialValues({
+      'bil.remoteAi.disclosure.googleRecipient.v1.$_ownerA': true,
+      'bil.remoteAi.disclosure.googleRecipient.v1.$_ownerB': true,
+    });
     store = _MemorySyncStore();
     await store.initialize();
   });

@@ -19,11 +19,13 @@ extension _OwnedStorePurchase on VerifiedStorePurchaseService {
     if (_disposed) return;
     _purchaseEventGeneration++;
     _clearRestoreDiagnostic();
+    _ownedActiveRestoreProof = null;
     _entitlementRefreshGeneration++;
     _clearEntitlement();
     _clearPurchaseInitiation();
     _pendingVerifiedFinishes.clear();
     _unresolvedVerificationReceipts.clear();
+    _ownershipRejectedReceipts.clear();
     _unresolvedReceiptOverflow = false;
     _failedSubscriptionProductId = null;
     ownershipConflictProductId = null;
@@ -38,6 +40,47 @@ extension _OwnedStorePurchase on VerifiedStorePurchaseService {
     state = VerifiedStoreState.unavailable;
     messageCode = 'authentication_required';
     notifyListeners();
+  }
+
+  String? _ownershipReplayKey(PurchaseDetails purchase) {
+    final owner = _currentStoreOwnerId();
+    if (owner == null) return null;
+    return storeReceiptReplayKey(
+      ownerId: owner,
+      source: purchase.verificationData.source,
+      productId: purchase.productID,
+      purchaseId: purchase.purchaseID,
+      status: 'ownership_proof',
+      verificationData: purchase.verificationData.serverVerificationData,
+    );
+  }
+
+  void _rememberOwnershipRejection(PurchaseDetails purchase) {
+    final key = _ownershipReplayKey(purchase);
+    if (key == null) return;
+    if (_ownershipRejectedReceipts.length >=
+        VerifiedStorePurchaseService._maximumFailedTransactionCooldowns) {
+      _ownershipRejectedReceipts.remove(_ownershipRejectedReceipts.keys.first);
+    }
+    _ownershipRejectedReceipts[key] = _storeVisit.capture();
+  }
+
+  bool _wasOwnershipRejected(String? key) {
+    final visit = key == null ? null : _ownershipRejectedReceipts[key];
+    return visit != null && _storeVisit.isCurrent(visit);
+  }
+
+  bool _preserveKnownOwnershipPresentation() {
+    if (_hasOwnedActiveRestoreProof()) return true;
+    if (ownershipConflictProductId == null ||
+        (!_restoring && messageCode != 'purchase_owned_by_another_account')) {
+      return false;
+    }
+    if (_restoring) _restoreOwnershipConflict = true;
+    state = VerifiedStoreState.failed;
+    messageCode = 'purchase_owned_by_another_account';
+    notifyListeners();
+    return true;
   }
 
   Future<void> _handleVerifiedPurchase(

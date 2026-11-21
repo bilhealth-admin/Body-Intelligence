@@ -31,6 +31,7 @@ class _NutritionFoodPickerState extends ConsumerState<NutritionFoodPicker> {
   late final _query = TextEditingController(text: widget.initialQuery);
   FoodRuntimeSearchAuthority? _authority;
   Stream<List<Food>>? _results;
+  List<Food>? _receivedRows;
   int _generation = 0;
   @override
   void initState() {
@@ -40,6 +41,7 @@ class _NutritionFoodPickerState extends ConsumerState<NutritionFoodPicker> {
 
   void _search() {
     _generation++;
+    _receivedRows = null;
     _authority = ref.read(foodRuntimeSearchAuthorityProvider);
     _results = _authority!.searchProgressively(_query.text.trim(), limit: 25);
   }
@@ -89,24 +91,30 @@ class _NutritionFoodPickerState extends ConsumerState<NutritionFoodPicker> {
                 key: ValueKey(_generation),
                 stream: _results,
                 builder: (context, snapshot) {
-                  final foods = snapshot.data;
+                  if (snapshot.hasData) _receivedRows = snapshot.data;
+                  final foods = snapshot.data ?? _receivedRows;
+                  final errorCopy = ar
+                      ? 'تعذر البحث. عدّل العبارة وأعد المحاولة.'
+                      : 'Search unavailable. Edit the phrase and retry.';
                   if (foods == null && snapshot.hasError) {
-                    return Center(
-                      child: Text(
-                        ar
-                            ? 'تعذر البحث. عدّل العبارة وأعد المحاولة.'
-                            : 'Search unavailable. Edit the phrase and retry.',
-                      ),
-                    );
+                    return Center(child: Text(errorCopy));
                   }
                   if (foods == null) {
                     return const Center(child: BilFeatureWelcomeStatus());
                   }
                   return ListView(
                     children: [
-                      if (snapshot.connectionState != ConnectionState.done)
+                      if (snapshot.hasError)
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(errorCopy),
+                        ),
+                      if (snapshot.connectionState != ConnectionState.done &&
+                          !snapshot.hasError)
                         const BilFeatureWelcomeStatus(),
-                      if (foods.isEmpty)
+                      if (foods.isEmpty &&
+                          !snapshot.hasError &&
+                          snapshot.connectionState == ConnectionState.done)
                         Padding(
                           padding: const EdgeInsets.all(16),
                           child: Text(

@@ -95,10 +95,10 @@ void main() {
     test('J Arabic decline copy cannot leak the English fallback', () {
       final copy = intelligenceTextFor(
         'ar',
-        'No problem. I’ll keep helping from verified data on this device.',
-        'لا مشكلة. سأستمر بمساعدتك من البيانات الموثقة على هذا الجهاز.',
+        'No problem. Iâ€™ll keep helping from verified data on this device.',
+        'Ù„Ø§ Ù…Ø´ÙƒÙ„Ø©. Ø³Ø£Ø³ØªÙ…Ø± Ø¨Ù…Ø³Ø§Ø¹Ø¯ØªÙƒ Ù…Ù† Ø§Ù„Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…ÙˆØ«Ù‚Ø© Ø¹Ù„Ù‰ Ù‡Ø°Ø§ Ø§Ù„Ø¬Ù‡Ø§Ø².',
       );
-      expect(copy, contains('لا مشكلة'));
+      expect(copy, contains('Ù„Ø§ Ù…Ø´ÙƒÙ„Ø©'));
       expect(copy, isNot(contains('No problem')));
     });
 
@@ -204,6 +204,8 @@ class _Harness {
   }) : _readValues = List<Object?>.of(readValues) {
     coordinator = RemoteAiConsentCoordinator(
       owner: () => owner,
+      readDisclosureAcknowledgement: (_) async => true,
+      writeDisclosureAcknowledgement: (_, _) async {},
       read: _read,
       write: _write,
     );

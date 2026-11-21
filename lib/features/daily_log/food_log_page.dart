@@ -616,7 +616,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               if (!current()) return;
               setState(() {
                 searchResults = result;
-                searchLoading = false;
               });
             },
             onError: (Object error, StackTrace stack) {
@@ -625,6 +624,10 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 searchResults ??= const <Food>[];
                 searchLoading = false;
               });
+            },
+            onDone: () {
+              if (!current()) return;
+              setState(() => searchLoading = false);
             },
           );
     });

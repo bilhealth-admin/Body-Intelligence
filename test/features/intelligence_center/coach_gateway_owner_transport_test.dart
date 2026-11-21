@@ -80,7 +80,11 @@ void main() {
   for (final gap in _Gap.values) {
     for (final move in _Move.values) {
       test('real SDK Coach owner ${move.name} across ${gap.name}', () async {
-        SharedPreferences.setMockInitialValues({});
+        // These owner/transport cases start after the complete disclosure.
+        SharedPreferences.setMockInitialValues({
+          'bil.remoteAi.disclosure.googleRecipient.v1.$_a': true,
+          'bil.remoteAi.disclosure.googleRecipient.v1.$_b': true,
+        });
         final entered = Completer<void>(), release = Completer<void>();
         final isolate = _HeldJson(gap, entered, release);
         await isolate.initialize();

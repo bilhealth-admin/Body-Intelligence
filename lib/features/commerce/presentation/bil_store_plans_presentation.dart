@@ -1,6 +1,47 @@
 part of 'bil_store_plans_page.dart';
 
 extension _BilStorePlansPresentation on _BilStorePlansPageState {
+  String? _ownedActiveProductHint(
+    VerifiedStorePurchaseService? store,
+    CommercePlan? currentPlan,
+  ) {
+    if (store == null ||
+        currentPlan == null ||
+        currentPlan == CommercePlan.free ||
+        store.state != VerifiedStoreState.verified ||
+        store.busy ||
+        store.userOperationInProgress ||
+        store.verifiedInactiveAt != null) {
+      return null;
+    }
+    final productId = store.lastVerifiedProductId;
+    final binding = productId == null
+        ? null
+        : StoreCatalogConfiguration.bindingForProduct(productId);
+    final proof = store.entitlement;
+    if (binding?.plan != currentPlan ||
+        proof?.plan != currentPlan ||
+        proof?.grantsPaidAccess != true ||
+        !const {
+          'app_store',
+          'google_play',
+        }.contains(store.benefitStoreSource)) {
+      return null;
+    }
+    final visit = store.captureCatalogVisit();
+    try {
+      final owner = ref.read(verifiedEntitlementOwnerIdProvider);
+      return owner != null &&
+              owner == visit.ownerId &&
+              owner == store.benefitOwnerId &&
+              store.isCurrentCatalogVisit(visit)
+          ? productId
+          : null;
+    } on StateError {
+      return null;
+    }
+  }
+
   (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
     final code = store.presentationMessageCode;
     // A background StoreKit replay is not a purchase made on this screen.

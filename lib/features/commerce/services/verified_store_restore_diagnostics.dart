@@ -102,6 +102,31 @@ extension _VerifiedStoreRestoreDiagnostics on VerifiedStorePurchaseService {
     }
   }
 
+  void _observeActiveRestoreReceipt(PurchaseDetails purchase) {
+    final attempt = _restoreAttempt;
+    if (attempt != null &&
+        _isCurrentRestoreAttempt(attempt) &&
+        StoreCatalogConfiguration.bindingForProduct(purchase.productID) !=
+            null) {
+      _ownedActiveRestoreProof = (
+        visit: attempt.visit,
+        benefitRevision: verifiedBenefitRevision,
+        productId: purchase.productID,
+      );
+    }
+  }
+
+  bool _hasOwnedActiveRestoreProof() {
+    final proof = _ownedActiveRestoreProof;
+    return proof != null &&
+        !_disposed &&
+        _storeVisit.isCurrent(proof.visit) &&
+        benefitOwnerId == proof.visit.ownerId &&
+        verifiedBenefitRevision == proof.benefitRevision &&
+        lastVerifiedProductId == proof.productId &&
+        entitlement?.grantsPaidAccess == true;
+  }
+
   bool _restoreResultHasPriority(_StoreRestoreAttempt attempt) {
     if (!_isCurrentRestoreAttempt(attempt)) return false;
     // A previous cached membership is not proof for this Restore. Only the

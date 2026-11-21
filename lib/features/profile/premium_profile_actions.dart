@@ -67,6 +67,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         repo.get('cityName'),
         repo.get('timezoneName'),
         repo.get('units.height'),
+        repo.get('units.weight'),
       ]);
       if (!mounted) return;
       final currentIdentity = ref.read(profileAuthIdentityProvider).value;
@@ -109,9 +110,14 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           authIdentity: authIdentity,
           cachedEmail: storedEmail,
         );
-        units = values[10] == 'Feet/Inches' || values[5] == 'imperial'
-            ? 'imperial'
-            : 'metric';
+        units = values[5] == 'imperial' ? 'imperial' : 'metric';
+        heightUnits = switch (values[10]) {
+          'Feet/Inches' => 'imperial',
+          'Centimeters' => 'metric',
+          // A dimension-specific weight choice must not change height's
+          // independent default. Preserve the legacy global-only preference.
+          _ => values[11] == null ? units : 'metric',
+        };
         dateOfBirth = DateTime.tryParse(values[6] ?? '');
         gender = profile.gender;
         activity = profile.activityLevel;

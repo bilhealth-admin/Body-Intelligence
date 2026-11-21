@@ -50,6 +50,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
     this.purchaseStatusIsError = false,
     this.currentPlan = CommercePlan.free,
     this.initialFocus,
+    this.initialSelectedProductId,
     super.key,
   });
 
@@ -92,12 +93,17 @@ class BilDynamicStoreOffers extends StatefulWidget {
   final CommercePlan? currentPlan;
   final String? initialFocus;
 
+  /// Presentation hint from the current owner's active verified store proof.
+  /// This never authorizes checkout or changes the store offer metadata.
+  final String? initialSelectedProductId;
+
   @override
   State<BilDynamicStoreOffers> createState() => _BilDynamicStoreOffersState();
 }
 
 class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
   BilStoreOfferMetadata? _selectedOffer;
+  bool _hasUserSelection = false;
 
   String _copy(String key) => BilStoreCopy.text(widget.locale, key);
 
@@ -111,10 +117,17 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
   void didUpdateWidget(covariant BilDynamicStoreOffers oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialFocus != widget.initialFocus) {
+      _hasUserSelection = false;
       _selectedOffer = _preferredOffer(widget.offers);
       return;
     }
     final available = MarketOfferPolicy.visibleOffers(widget.offers);
+    if (!_hasUserSelection &&
+        widget.initialSelectedProductId != null &&
+        oldWidget.initialSelectedProductId != widget.initialSelectedProductId) {
+      _selectedOffer = _preferredOffer(available);
+      return;
+    }
     final selectedIndex = available.indexWhere(
       (offer) => _offerIdentity(offer) == _offerIdentity(_selectedOffer),
     );
@@ -135,11 +148,16 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
       return null;
     }
     if (widget.initialFocus == 'ai-coach') {
-      for (final offer in visible) {
-        if (offer.kind == BilStoreProductKind.premiumAiCoachSubscription) {
-          return offer;
-        }
+      final coachOffers = visible
+          .where(
+            (offer) =>
+                offer.kind == BilStoreProductKind.premiumAiCoachSubscription,
+          )
+          .toList(growable: false);
+      for (final offer in coachOffers) {
+        if (offer.productId == widget.initialSelectedProductId) return offer;
       }
+      if (coachOffers.isNotEmpty) return coachOffers.first;
       // The AI Coach subscription CTA is exact. If that product is unavailable
       // in the current storefront, do not silently select ordinary Premium.
       return null;
@@ -147,6 +165,9 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
     final subscriptions = visible
         .where((offer) => offer.kind != BilStoreProductKind.aiBoostConsumable)
         .toList(growable: false);
+    for (final offer in subscriptions) {
+      if (offer.productId == widget.initialSelectedProductId) return offer;
+    }
     for (final offer in subscriptions) {
       if (offer.billingPeriodIso8601 == 'P1Y') return offer;
     }
@@ -292,7 +313,10 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           interactionLocked: controlsLocked,
                           selectedOfferIdentity: _offerIdentity(selectedOffer),
                           onOfferSelected: (offer) {
-                            setState(() => _selectedOffer = offer);
+                            setState(() {
+                              _selectedOffer = offer;
+                              _hasUserSelection = true;
+                            });
                             widget.onOfferSelected?.call(offer);
                           },
                           onRetry: widget.onRetry,

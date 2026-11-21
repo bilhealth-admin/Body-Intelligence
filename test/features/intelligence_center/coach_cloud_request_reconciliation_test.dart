@@ -281,7 +281,10 @@ class _HttpFixture {
   static Future<_HttpFixture> open({
     List<String> states = const ['succeeded'],
   }) async {
-    SharedPreferences.setMockInitialValues({});
+    // These owner/transport cases start after the complete disclosure.
+    SharedPreferences.setMockInitialValues({
+      'bil.remoteAi.disclosure.googleRecipient.v1.$_owner': true,
+    });
     final fixture = _HttpFixture(states);
     final transport = MockClient(fixture.handle);
     fixture.supabase = await Supabase.initialize(

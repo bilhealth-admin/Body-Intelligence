@@ -6,6 +6,7 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
   Future<void> restore() async {
     if (_disposed || !configured || busy) return;
     _clearRestoreDiagnostic();
+    _ownedActiveRestoreProof = null;
     if (Supabase.instance.client.auth.currentUser == null) {
       state = VerifiedStoreState.unavailable;
       messageCode = 'authentication_required';

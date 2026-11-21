@@ -148,15 +148,18 @@ class _PreferenceListPage extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.label);
+  const _SectionLabel(this.label, {this.useDiaryCopy = false});
   final String label;
+  final bool useDiaryCopy;
   @override
   Widget build(BuildContext context) => Container(
     width: double.infinity,
     color: Theme.of(context).colorScheme.surfaceContainerHighest,
     padding: const EdgeInsets.fromLTRB(16, 18, 16, 10),
     child: Text(
-      _nutritionGoalText(context, label),
+      useDiaryCopy
+          ? _diaryText(context, label)
+          : _nutritionGoalText(context, label),
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
@@ -453,9 +456,10 @@ class _ReferenceChoicePageState extends State<_ReferenceChoicePage> {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       centerTitle: true,
-      title: Text(context.strings.text(widget.title)),
+      title: Text(_diaryText(context, widget.title)),
       actions: [
         IconButton(
+          tooltip: context.strings.text('Save'),
           icon: const Icon(Icons.check_rounded),
           onPressed: () => Navigator.pop(context, selected),
         ),
@@ -466,7 +470,8 @@ class _ReferenceChoicePageState extends State<_ReferenceChoicePage> {
         _SectionLabel(
           widget.diaryWarning
               ? 'Choose your diary sharing option'
-              : 'Choose your ${widget.title.toLowerCase()}',
+              : 'Choose an option',
+          useDiaryCopy: !widget.diaryWarning,
         ),
         if (widget.diaryWarning)
           Padding(
@@ -483,7 +488,7 @@ class _ReferenceChoicePageState extends State<_ReferenceChoicePage> {
             children: [
               ListTile(
                 minTileHeight: 66,
-                title: Text(context.strings.text(option)),
+                title: Text(_diaryText(context, option)),
                 trailing: selected == option
                     ? const Icon(Icons.check_rounded, color: Color(0xFF0A6FF5))
                     : null,

@@ -60,7 +60,11 @@ class _ConsentSdkBoundary {
   int refreshes = 0;
 
   Future<void> initialize() async {
-    SharedPreferences.setMockInitialValues({});
+    // Existing owner/transport cases start from fully disclosed grants.
+    SharedPreferences.setMockInitialValues({
+      'bil.remoteAi.disclosure.googleRecipient.v1.$_a': true,
+      'bil.remoteAi.disclosure.googleRecipient.v1.$_b': true,
+    });
     await client.auth.recoverSession(jsonEncode(_session(_a)));
     observer = client.auth.onAuthStateChange.listen((state) {
       final delivered = state.session?.user.id;

@@ -104,7 +104,7 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
   Future<bool> editHeight() async {
     if (_heightEditorOpen) return false;
     _heightEditorOpen = true;
-    var editorUnit = units == 'imperial' ? 'imperial' : 'metric';
+    var editorUnit = heightUnits;
     final controller = TextEditingController(
       text: editorUnit == 'metric'
           ? height.toStringAsFixed(0)
@@ -233,8 +233,19 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
     );
   }
 
+  String get profileUnitsLabel {
+    if (units != heightUnits) {
+      final weightUnit = UnitConverter.weightUnit(profileWeightSystem);
+      final heightUnit = heightUnits == 'metric' ? 'cm' : 'ft/in';
+      return '$weightUnit · $heightUnit';
+    }
+    return units == 'metric'
+        ? tr('Metric · kg, cm, ml', 'متري · كغ، سم، مل')
+        : tr('Imperial · lb, ft', 'إمبراطوري · رطل، قدم');
+  }
+
   String get heightLabel {
-    if (units == 'metric') return '${height.round()} cm';
+    if (heightUnits == 'metric') return '${height.round()} cm';
     final totalInches = height / 2.54;
     return '${totalInches ~/ 12} ft, ${(totalInches % 12).round()} in';
   }
