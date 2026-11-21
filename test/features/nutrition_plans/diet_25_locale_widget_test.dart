@@ -101,16 +101,48 @@ void main() {
 
       await pump(NutritionPathwaysPage(key: ValueKey('$tag-catalog')));
       expect(find.byType(NutritionPathwaysPage), findsOneWidget);
+      // Scroll the catalog body, not the independent pinned-heading viewport
+      // or its horizontal carousel. The editor pages below keep one body.
+      final catalogList = find.descendant(
+        of: find.byType(NutritionPathwaysPage),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is ListView && widget.scrollDirection == Axis.vertical,
+        ),
+      );
+      expect(catalogList, findsOneWidget);
+      final catalogScroll = find.descendant(
+        of: catalogList,
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+        ),
+      );
+      expect(catalogScroll, findsOneWidget);
       await tester.scrollUntilVisible(
         find.byKey(const Key('nutrition-pathway-row-carb-cycling')),
         420,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: catalogScroll,
       );
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('nutrition-pathway-row-carb-cycling')),
         findsOneWidget,
         reason: '$tag pathway rows',
       );
+      final pathwayRow = find.byKey(
+        const Key('nutrition-pathway-row-carb-cycling'),
+      );
+      expect(
+        pathwayRow.hitTestable(),
+        findsOneWidget,
+        reason: '$tag row action',
+      );
+      final rowRect = tester.getRect(pathwayRow);
+      final bodyRect = tester.getRect(catalogScroll);
+      if (rowRect.height <= bodyRect.height) {
+        expect(rowRect.top, greaterThanOrEqualTo(bodyRect.top), reason: tag);
+        expect(rowRect.bottom, lessThanOrEqualTo(bodyRect.bottom), reason: tag);
+      }
       expect(tester.takeException(), isNull, reason: '$tag catalog');
 
       await pump(

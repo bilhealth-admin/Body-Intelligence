@@ -96,7 +96,27 @@ void main() {
     ).readAsStringSync();
     expect(source, contains("from('bil_ai_closed_test_grants')"));
     expect(source, contains('closedTestActive'));
-    expect(source, contains('CommercePlan.premiumAiCoach'));
+    expect(
+      source,
+      contains("part 'server_entitlement_grant_continuity.dart';"),
+    );
+    final grantContinuity = File(
+      'lib/features/commerce/repositories/server_entitlement_grant_continuity.dart',
+    ).readAsStringSync();
+    final grantStart = grantContinuity.indexOf(
+      'SubscriptionState _closedTestState(',
+    );
+    final grantEnd = grantContinuity.indexOf(
+      'SubscriptionState _withStoreRenewalObservation(',
+    );
+    expect(grantStart, greaterThanOrEqualTo(0));
+    expect(grantEnd, greaterThan(grantStart));
+    final grantFactory = grantContinuity.substring(grantStart, grantEnd);
+    expect(grantFactory, contains('plan: CommercePlan.premiumAiCoach'));
+    expect(grantFactory, contains('authorityVerified: true'));
+    expect(grantFactory, contains('provider: null'));
+    expect(grantFactory, isNot(contains('userMetadata')));
+    expect(grantFactory, isNot(contains('raw_user_meta_data')));
     expect(source, isNot(contains('userMetadata')));
     expect(source, isNot(contains('raw_user_meta_data')));
 

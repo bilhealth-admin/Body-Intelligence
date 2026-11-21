@@ -68,19 +68,11 @@ extension _ServerCheckoutRecovery on ServerEntitlementRepository {
         }
         // Legacy provider-null storage does not identify an independent grant.
         // Confirm that source again rather than turning it into fresh proof.
-        if (persistedSubscription != null &&
-            persistedSubscription.provider != null &&
-            _storeProofSurvivesDenial(ownerId, persistedSubscription) &&
-            _storeObservationIsCurrent(ownerId, persistedSubscription)) {
-          _rememberRestoredStoreVersion(ownerId, persistedSubscription);
-          ServerEntitlementRepository._sessionCache.remember(
-            ownerId: ownerId,
-            state: persistedSubscription,
-            now: now,
-          );
+        final restored = _restoreStoreProof(ownerId, persistedSubscription);
+        if (restored != null) {
           return persistedAdmin == null
-              ? persistedSubscription
-              : _withAdminContinuity(persistedSubscription, persistedAdmin);
+              ? restored
+              : _withAdminContinuity(restored, persistedAdmin);
         }
         if (persistedAdmin != null) return persistedAdmin;
       } on CommunityOwnerOperationCancelled {

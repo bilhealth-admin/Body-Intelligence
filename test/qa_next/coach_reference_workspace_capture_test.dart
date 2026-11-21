@@ -221,16 +221,25 @@ Future<void> _mount(
 
 Future<void> _revealWorkspaceAction(WidgetTester tester, Finder action) async {
   if (action.evaluate().isEmpty) {
-    final vertical = find.byWidgetPredicate(
-      (widget) =>
-          widget is Scrollable &&
-          (widget.axisDirection == AxisDirection.down ||
-              widget.axisDirection == AxisDirection.up),
+    final bodyList = find.descendant(
+      of: find.byType(CoachReferenceWorkspace),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is ListView && widget.scrollDirection == Axis.vertical,
+      ),
     );
+    expect(bodyList, findsOneWidget);
+    final vertical = find.descendant(
+      of: bodyList,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+      ),
+    );
+    expect(vertical, findsOneWidget);
     await tester.scrollUntilVisible(
       action,
       150,
-      scrollable: vertical.first,
+      scrollable: vertical,
       maxScrolls: 40,
     );
   } else {

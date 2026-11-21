@@ -465,55 +465,57 @@ class _BilPremiumAiConsentSheet extends StatelessWidget {
                                 const SizedBox(height: 10),
                             ],
                             const SizedBox(height: 20),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton(
-                                key: allowKey,
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF1677FF),
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size.fromHeight(56),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                            _BilPremiumAiConsentActions(
+                              allow: SizedBox(
+                                width: double.infinity,
+                                child: FilledButton(
+                                  key: allowKey,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF1677FF),
+                                    foregroundColor: Colors.white,
+                                    minimumSize: const Size.fromHeight(56),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    textStyle: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w800),
                                   ),
-                                  textStyle: theme.textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                ),
-                                onPressed: () => Navigator.pop(context, true),
-                                child: Text(
-                                  allowLabel,
-                                  textAlign: TextAlign.center,
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: Text(
+                                    allowLabel,
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton(
-                                key: declineKey,
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: dark
-                                      ? Colors.white
-                                      : scheme.onSurface,
-                                  backgroundColor: dark
-                                      ? Colors.white.withValues(alpha: .055)
-                                      : scheme.surfaceContainerLow,
-                                  minimumSize: const Size.fromHeight(54),
-                                  side: BorderSide(
-                                    color: dark
-                                        ? Colors.white.withValues(alpha: .12)
-                                        : scheme.outlineVariant,
+                              decline: SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton(
+                                  key: declineKey,
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: dark
+                                        ? Colors.white
+                                        : scheme.onSurface,
+                                    backgroundColor: dark
+                                        ? Colors.white.withValues(alpha: .055)
+                                        : scheme.surfaceContainerLow,
+                                    minimumSize: const Size.fromHeight(54),
+                                    side: BorderSide(
+                                      color: dark
+                                          ? Colors.white.withValues(alpha: .12)
+                                          : scheme.outlineVariant,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    textStyle: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.w700),
                                   ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: Text(
+                                    declineLabel,
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textStyle: theme.textTheme.titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.w700),
-                                ),
-                                onPressed: () => Navigator.pop(context, false),
-                                child: Text(
-                                  declineLabel,
-                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
@@ -530,6 +532,39 @@ class _BilPremiumAiConsentSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+class _BilPremiumAiConsentActions extends StatelessWidget {
+  const _BilPremiumAiConsentActions({
+    required this.allow,
+    required this.decline,
+  });
+  final Widget allow, decline;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final sideBySide =
+          constraints.maxWidth >= 260 &&
+          MediaQuery.textScalerOf(context).scale(14) <= 17.5;
+      if (sideBySide) {
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(child: allow),
+              const SizedBox(width: 10),
+              Expanded(child: decline),
+            ],
+          ),
+        );
+      }
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [allow, const SizedBox(height: 8), decline],
+      );
+    },
+  );
 }
 
 class _BilPremiumAiConsentRow extends StatelessWidget {

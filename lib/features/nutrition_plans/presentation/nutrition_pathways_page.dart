@@ -52,6 +52,7 @@ class NutritionPathwaysPage extends ConsumerWidget {
         surfaceTintColor: Colors.transparent,
       ),
       body: BilPinnedHeaderBody(
+        bodyReserve: 340,
         header: Column(
           key: const Key('nutrition-pathways-pinned-header'),
           crossAxisAlignment: CrossAxisAlignment.stretch,

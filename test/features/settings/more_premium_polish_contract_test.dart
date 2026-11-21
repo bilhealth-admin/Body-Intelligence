@@ -65,9 +65,9 @@ void main() {
     }
     expect(source, contains('BorderRadius.circular(14)'));
     expect(source, isNot(contains('fontWeight: FontWeight.w900')));
-    // The native font family is already supplied by the platform theme:
-    // only More's weights and sizes should be locally refined.
-    expect(source, contains('fontSize: 19,'));
+    // The page heading now derives the active localized theme; row metrics
+    // below retain their separately approved restrained hierarchy.
+    expect(source, contains('bilPageHeadingStyle(context)'));
     expect(source, contains('fontSize: 14,'));
     expect(source, contains('fontSize: 15.5,'));
     expect(source, contains('fontWeight: FontWeight.w400'));

@@ -18,7 +18,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 final _start = DateTime.utc(2026, 11, 20, 21);
 
-enum _Phase { paid5, revoked6, refunded6, stale5, paid7, offline }
+enum _Phase {
+  paid5,
+  lowerPaid5,
+  revoked6,
+  refunded6,
+  stale5,
+  paid7,
+  higherIndependent7,
+  offline,
+}
 
 class _Secure implements AdminEntitlementSecureStore {
   final values = <String, String>{};
@@ -139,7 +148,8 @@ void main() {
               request: request,
             );
           }
-          final revision = phase == _Phase.paid7
+          final revision =
+              (phase == _Phase.paid7 || phase == _Phase.higherIndependent7)
               ? 7
               : (phase == _Phase.revoked6 || phase == _Phase.refunded6)
               ? 6
@@ -154,10 +164,15 @@ void main() {
             _ => [
               {
                 'owner_id': owner,
-                'plan_id': 'premium_ai_coach',
+                'plan_id': phase == _Phase.lowerPaid5
+                    ? 'premium'
+                    : 'premium_ai_coach',
                 'provider': 'google',
-                'product_id': 'bil_premium_ai_coach_annual',
-                'original_transaction_id': 'synthetic-owned-annual-lineage',
+                if (phase != _Phase.lowerPaid5)
+                  'product_id': 'bil_premium_ai_coach_annual',
+                'original_transaction_id': phase == _Phase.higherIndependent7
+                    ? 'synthetic-independent-higher-lineage'
+                    : 'synthetic-owned-annual-lineage',
                 'lifecycle': switch (phase) {
                   _Phase.revoked6 => 'revoked',
                   _Phase.refunded6 => 'refunded',
@@ -334,6 +349,60 @@ void main() {
       } finally {
         if (!release.isCompleted) release.complete();
         await Future.wait([old, ?denied, ?repurchased]);
+        observedRevisions.clear();
+      }
+    },
+  );
+  test(
+    'late lower-tier foreground proof from distinct lineage cannot overwrite newer higher-tier proof',
+    () async {
+      final f = await fixture();
+      phase = _Phase.lowerPaid5;
+      final release = Completer<void>();
+      f.secure.holdPaid5Write = release;
+      f.secure.paid5WriteEntered = Completer<void>();
+      observedRevisions[7] = Completer<void>();
+      final older = f.repository.current();
+      Future<SubscriptionState>? newer;
+      try {
+        await f.secure.paid5WriteEntered!.future.timeout(
+          const Duration(seconds: 3),
+        );
+        // No denial occurs: the strict publication fence itself must preserve
+        // the newer higher tier, even though prior independent leases may be
+        // read for bounded continuity after the newer interval expires.
+        phase = _Phase.higherIndependent7;
+        newer = f.repository.current();
+        await observedRevisions[7]!.future.timeout(const Duration(seconds: 3));
+        await Future<void>.delayed(Duration.zero);
+        release.complete();
+        final results = await Future.wait([older, newer]);
+        for (final result in results) {
+          expect(result.authority, EntitlementAuthority.verifiedServer);
+          expect(result.plan, CommercePlan.premiumAiCoach);
+          expect(result.serverRevision, 7);
+          expect(
+            result.storeOriginalTransactionId,
+            'synthetic-independent-higher-lineage',
+          );
+        }
+        phase = _Phase.offline;
+        final current = await f.repository.current();
+        expect(current.plan, CommercePlan.premiumAiCoach);
+        expect(current.serverRevision, 7);
+        final durable = _Secure()..values.addAll(f.secure.values);
+        final restored = await VerifiedEntitlementContinuityStore(
+          secureStore: durable,
+        ).read(ownerId: f.owner, now: f.now);
+        expect(restored?.plan, CommercePlan.premiumAiCoach);
+        expect(restored?.serverRevision, 7);
+        expect(
+          restored?.storeOriginalTransactionId,
+          'synthetic-independent-higher-lineage',
+        );
+      } finally {
+        if (!release.isCompleted) release.complete();
+        await Future.wait([older, ?newer]);
         observedRevisions.clear();
       }
     },

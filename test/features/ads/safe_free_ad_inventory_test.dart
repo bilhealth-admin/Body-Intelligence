@@ -105,12 +105,21 @@ void main() {
         repository,
         contains("part 'server_entitlement_grant_continuity.dart';"),
       );
+      final storeContinuity = File(
+        'lib/features/commerce/repositories/server_entitlement_store_continuity.dart',
+      ).readAsStringSync();
+      expect(
+        repository,
+        contains("part 'server_entitlement_store_continuity.dart';"),
+      );
       final closedTestBranch = repository.indexOf('if (closedTestActive) {');
       final subscriptionQuery = repository.indexOf(
         ".from('bil_subscriptions')",
       );
       final verifiedFree = repository.indexOf(
-        '_verifiedFree(verifiedAt: verifiedAt)',
+        RegExp(
+          r'_verifiedFree\(\s*verifiedAt:\s*verifiedAt,\s*serverRevision:\s*revision',
+        ),
       );
       expect(closedTestBranch, greaterThanOrEqualTo(0));
       expect(subscriptionQuery, greaterThan(closedTestBranch));
@@ -140,7 +149,7 @@ void main() {
         contains(
           RegExp(
             r'_remember\(\s*user\.id,\s*_verifiedFree\(\s*'
-            r'verifiedAt:\s*verifiedAt,\s*storeDefinitive:\s*'
+            r'verifiedAt:\s*verifiedAt,\s*serverRevision:\s*revision,\s*storeDefinitive:\s*'
             r"providerValue\s*==\s*'google'\s*\|\|\s*"
             r"providerValue\s*==\s*'apple',\s*\),\s*now,\s*\)",
           ),
@@ -151,7 +160,7 @@ void main() {
         contains(
           RegExp(
             r'_remember\(\s*user\.id,\s*_verifiedFree\(\s*'
-            r'verifiedAt:\s*verifiedAt,\s*storeRenewal:\s*storeRenewal,\s*'
+            r'verifiedAt:\s*verifiedAt,\s*serverRevision:\s*revision,\s*storeRenewal:\s*storeRenewal,\s*'
             r'storeDefinitive:\s*storeDefinitive,\s*\),\s*now,\s*\)',
           ),
         ),
@@ -169,6 +178,10 @@ void main() {
         constructorEnd,
       );
       expect(verifiedFreeConstructor, contains('plan: CommercePlan.free'));
+      expect(
+        verifiedFreeConstructor,
+        contains('serverRevision: serverRevision'),
+      );
       expect(
         verifiedFreeConstructor,
         contains('storeRenewalObservation: storeRenewal'),
@@ -198,7 +211,9 @@ void main() {
       expect(fallbackBody, contains(RegExp(r'_sessionCache\.fallbackFor\(')));
       expect(
         fallbackBody,
-        contains(RegExp(r'inMemory != null && inMemory\.provider != null')),
+        contains(
+          RegExp(r'inMemory\s*!=\s*null\s*&&\s*inMemory\.provider\s*!=\s*null'),
+        ),
       );
       expect(
         fallbackBody,
@@ -206,9 +221,51 @@ void main() {
       );
       expect(
         fallbackBody,
-        contains(RegExp(r'persisted != null && persisted\.provider != null')),
+        contains('final restored = _restoreStoreProof(ownerId, persisted);'),
       );
+      final restoreStart = storeContinuity.indexOf(
+        'SubscriptionState? _restoreStoreProof(',
+      );
+      final restoreEnd = storeContinuity.indexOf(
+        'SubscriptionState _survivingStoreProof(',
+      );
+      expect(restoreStart, greaterThanOrEqualTo(0));
+      expect(restoreEnd, greaterThan(restoreStart));
+      final restoreBody = storeContinuity.substring(restoreStart, restoreEnd);
+      expect(
+        restoreBody,
+        contains(
+          RegExp(
+            r'persisted\s*==\s*null\s*\|\|\s*persisted\.provider\s*==\s*null',
+          ),
+        ),
+      );
+      expect(
+        restoreBody,
+        contains('final current = _survivingStoreProof(ownerId)'),
+      );
+      expect(
+        restoreBody,
+        contains('if (current.provider != null) return current'),
+      );
+      expect(restoreBody, contains('final now = _now();'));
+      expect(restoreBody, contains('!boundary.isAfter(now)'));
+      expect(
+        restoreBody,
+        contains('(persisted.startedAt?.toUtc().isAfter(now)'),
+      );
+      expect(restoreBody, contains('_storeObservationIsCurrent('));
+      expect(restoreBody, contains('allowIndependentPriorLease: true'));
+      expect(restoreBody, isNot(contains('_verifiedFree(')));
       expect(fallbackBody, isNot(contains('_verifiedFree(')));
+      expect(
+        fallbackBody,
+        contains('_storeProofSurvivesDenial(ownerId, inMemory)'),
+      );
+      expect(
+        restoreBody,
+        contains('_storeProofSurvivesDenial(ownerId, persisted)'),
+      );
       expect(
         fallbackBody,
         contains(
@@ -230,6 +287,24 @@ void main() {
       expect(
         revalidationBody,
         contains('CommunityOwnerOperation.checkCurrent();'),
+      );
+      expect(
+        revalidationBody,
+        contains('_storeProofSurvivesDenial(ownerId, state)'),
+      );
+      expect(
+        revalidationBody,
+        contains('_storeObservationIsCurrent(ownerId, state)'),
+      );
+      expect(
+        revalidationBody,
+        contains('verifiedSubscriptionPeriodAt(state, now)'),
+      );
+      expect(
+        revalidationBody,
+        contains(
+          'allowContinuity ? _survivingStoreProof(ownerId) : FreePlan.createState()',
+        ),
       );
       expect(revalidationBody, contains('_settledClosedTestReadGeneration'));
       expect(revalidationBody, contains('boundary.isAfter(_now())'));

@@ -152,11 +152,21 @@ void main() {
         final planTab = find.byKey(const Key('coach-workspace-tab-/plan'));
         await tester.ensureVisible(planTab);
         await tester.pumpAndSettle();
-        final overviewScroll = find.byWidgetPredicate(
-          (widget) =>
-              widget is Scrollable &&
-              widget.axisDirection == AxisDirection.down,
+        final overviewList = find.descendant(
+          of: find.byType(CoachReferenceWorkspace),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is ListView && widget.scrollDirection == Axis.vertical,
+          ),
         );
+        expect(overviewList, findsOneWidget);
+        final overviewScroll = find.descendant(
+          of: overviewList,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+          ),
+        );
+        expect(overviewScroll, findsOneWidget);
         final overviewOffset = tester
             .state<ScrollableState>(overviewScroll)
             .position

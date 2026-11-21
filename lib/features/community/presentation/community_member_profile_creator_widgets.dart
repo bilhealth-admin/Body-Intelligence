@@ -77,7 +77,7 @@ class _CommunityCreatorPanel extends StatelessWidget {
                         ),
                       ),
                       title: Text(_badgeLabel(sheetContext, badge.badgeKey)),
-                      trailing: Text(
+                      subtitle: Text(
                         badge.earned
                             ? communityText(sheetContext, 'Earned', 'مكتسبة')
                             : communityText(sheetContext, 'Locked', 'مقفلة'),

@@ -12,6 +12,7 @@ import 'package:body_intelligence_log/features/nutrition/domain/dietary_preferen
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan.dart';
 import 'package:body_intelligence_log/features/smart_plan/domain/bil_smart_plan_engine.dart';
 import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_catalog.dart';
+import 'package:body_intelligence_log/features/smart_plan/services/bil_smart_plan_prescriptions.dart';
 import 'package:body_intelligence_log/features/wellness/repositories/workout_release_catalog_repository.dart';
 import 'package:body_intelligence_log/features/wellness/repositories/recipe_release_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,6 +28,61 @@ class _RecipeFixtureBundle extends CachingAssetBundle {
 }
 
 void main() {
+  for (final style in MealPlanDiet.values) {
+    test(
+      'reported Gym75 week beginner3 creates a complete ${style.name} draft',
+      () async {
+        const catalog = BilSmartPlanCatalog();
+        const dietary = DietaryPreferences();
+        final recipes = await catalog.checkRecipeStyle(style, dietary);
+        expect(recipes.missing, isEmpty, reason: style.name);
+        final workouts = await catalog.gymSessions(sessionMinutes: 75);
+        final request = BilPlanCreationRequest(
+          ownerId: 'reported-style-owner',
+          planId: 'reported-style-${style.name}',
+          startOn: DateTime(2026, 11, 21),
+          horizon: BilPlanHorizon.week,
+          focus: BilPlanFocus.combined,
+          workoutsPerWeek: 3,
+          confirmedPreferences: true,
+          adultConfirmed: true,
+          ageYears: 18,
+          highRiskSymptoms: false,
+          underMedicalReview: false,
+          workoutCatalog: workouts,
+          recipeCatalog: recipes.recipes,
+          setup: BilPlanSetup(
+            environment: BilPlanEnvironment.gym,
+            experience: BilPlanExperience.beginner,
+            sessionMinutes: 75,
+            equipment: const {'gym'},
+            preferredTime: '05:00',
+          ),
+          phases: await const BilSmartPlanPrescriptions().phases(),
+        );
+        final assessment = BilPlanSafety.assess(request);
+        expect(
+          assessment.result,
+          BilPlanSafetyResult.ready,
+          reason: assessment.reasons.join(','),
+        );
+        final plan = const BilSmartPlanEngine().generate(
+          request,
+          DateTime.utc(2026, 11, 21),
+        );
+        expect(plan.status, BilPlanStatus.draft);
+        expect(plan.days, hasLength(7));
+        expect(plan.days.where((day) => day.workout != null), hasLength(3));
+        expect(plan.setup!.sessionMinutes, 75);
+        expect(plan.setup!.environment, BilPlanEnvironment.gym);
+        await catalog.validate(BilSmartPlan.decode(plan.encode()), dietary);
+        debugPrint(
+          'Reported style ${style.name}: ${recipes.recipes.length} verified choices; complete seven-day draft, three Gym sessions, no medical override.',
+        );
+      },
+    );
+  }
+
   test(
     'a saved milk allergy retires the untagged source yogurt breakfast',
     () async {

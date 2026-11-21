@@ -37,7 +37,12 @@ void main() {
     expect(verify, contains('List.generate(6'));
     expect(verify, contains("Key('resend-email-code')"));
     expect(verify, contains("padLeft(2, '0')"));
-    expect(verify, contains('authEntryResendCountdown(context, _clock)'));
+    expect(
+      verify,
+      contains(
+        RegExp(r'authEntryResendCountdown\(\s*context,\s*_clock,?\s*\)'),
+      ),
+    );
     expect(verify, contains('sendEmailOtp(widget.email)'));
     expect(verify, contains('Color(0xFF0877F9)'));
     expect(verify, isNot(contains('AuthLanguageSelector')));

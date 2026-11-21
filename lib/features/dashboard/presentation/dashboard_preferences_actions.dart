@@ -331,6 +331,7 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
                   Flexible(
                     child: BilPinnedHeaderBody(
                       shrinkWrap: true,
+                      bodyReserve: 140,
                       header: Padding(
                         key: const Key("dashboard-nutrients-pinned-heading"),
                         padding: EdgeInsets.zero,

@@ -18,7 +18,11 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
     if (inMemory != null &&
         inMemory.provider != null &&
         _storeProofSurvivesDenial(ownerId, inMemory) &&
-        _storeObservationIsCurrent(ownerId, inMemory)) {
+        _storeObservationIsCurrent(
+          ownerId,
+          inMemory,
+          allowIndependentPriorLease: true,
+        )) {
       return _withClosedTestContinuity(ownerId, inMemory);
     }
     try {
@@ -30,17 +34,9 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
       if (Supabase.instance.client.auth.currentUser?.id != ownerId) {
         return FreePlan.createState();
       }
-      if (persisted != null &&
-          persisted.provider != null &&
-          _storeProofSurvivesDenial(ownerId, persisted) &&
-          _storeObservationIsCurrent(ownerId, persisted)) {
-        _rememberRestoredStoreVersion(ownerId, persisted);
-        ServerEntitlementRepository._sessionCache.remember(
-          ownerId: ownerId,
-          state: persisted,
-          now: now,
-        );
-        return _withClosedTestContinuity(ownerId, persisted);
+      final restored = _restoreStoreProof(ownerId, persisted);
+      if (restored != null) {
+        return _withClosedTestContinuity(ownerId, restored);
       }
     } on CommunityOwnerOperationCancelled {
       rethrow;
@@ -92,7 +88,29 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
     // Store receipts remain independent. Only provider-null states from this
     // store read can represent the closed-test overlay; admin is composed
     // separately after this check.
-    if (state.provider != null) return state;
+    if (state.provider != null) {
+      // Admin and optional persistence add awaits after the store read. Recheck
+      // its strict publication version, denial floor and own interval now.
+      final now = _now();
+      final effective = verifiedSubscriptionPeriodAt(state, now);
+      final boundary = verifiedSubscriptionBoundary(effective)?.toUtc();
+      if (_storeProofSurvivesDenial(ownerId, state) &&
+          (effective.plan == CommercePlan.free
+              ? _storeNegativeObservationIsCurrent(ownerId, effective)
+              : _storeObservationIsCurrent(ownerId, state) &&
+                    effective.authority ==
+                        EntitlementAuthority.verifiedServer &&
+                    boundary != null &&
+                    boundary.isAfter(now) &&
+                    !(effective.startedAt?.toUtc().isAfter(now) ?? false))) {
+        return allowContinuity
+            ? _withClosedTestContinuity(ownerId, effective)
+            : effective;
+      }
+      return allowContinuity
+          ? _withClosedTestContinuity(ownerId, _survivingStoreProof(ownerId))
+          : FreePlan.createState();
+    }
     final boundary = verifiedSubscriptionBoundary(state)?.toUtc();
     if (observationGeneration ==
             ServerEntitlementRepository._settledClosedTestReadGeneration &&
@@ -104,7 +122,7 @@ extension _ServerGrantContinuity on ServerEntitlementRepository {
     // bounded same-owner proof. A fallback never renews that proof's lease.
     return _withClosedTestContinuity(
       ownerId,
-      FreePlan.createState(),
+      allowContinuity ? _survivingStoreProof(ownerId) : FreePlan.createState(),
       allowContinuity: allowContinuity,
     );
   }

@@ -65,13 +65,29 @@ extension _ServerStoreContinuity on ServerEntitlementRepository {
     return state.verifiedAt?.toUtc().isAfter(denied.verifiedAt) == true;
   }
 
-  bool _storeObservationIsCurrent(String ownerId, SubscriptionState state) {
+  bool _storeObservationIsCurrent(
+    String ownerId,
+    SubscriptionState state, {
+    bool allowIndependentPriorLease = false,
+  }) {
     if (state.authority != EntitlementAuthority.verifiedServer ||
         state.provider == null && state.plan != CommercePlan.free) {
       return true;
     }
     final latest = ServerEntitlementRepository._latestStoreVersions[ownerId];
     if (latest == null) return true;
+    // A different known chain can retain its own unexpired verified interval.
+    // This is continuity only: publication remains strictly version ordered,
+    // and the separate authoritative denial floor is always checked first.
+    if (allowIndependentPriorLease &&
+        state.provider != null &&
+        state.storeOriginalTransactionId != null &&
+        latest.provider != null &&
+        latest.lineage != null &&
+        (state.provider!.name != latest.provider ||
+            state.storeOriginalTransactionId != latest.lineage)) {
+      return true;
+    }
     // A contiguous future period is part of this same remembered proof.
     final revision =
         state.verifiedNextPeriod?.serverRevision ?? state.serverRevision;
@@ -83,6 +99,60 @@ extension _ServerStoreContinuity on ServerEntitlementRepository {
         !verifiedAt.toUtc().isBefore(latest.verifiedAt);
   }
 
+  bool _storeNegativeObservationIsCurrent(
+    String ownerId,
+    SubscriptionState state,
+  ) {
+    // An unreadable independent authority cannot upgrade this negative to
+    // verified Free. Its own store metadata still retires the observed row,
+    // unless a newer store proof superseded it while another source waited.
+    final observedAt = state.verifiedAt?.toUtc();
+    if (observedAt == null) return false;
+    final latest = ServerEntitlementRepository._latestStoreVersions[ownerId];
+    if (latest == null) return true;
+    if (latest.revision != null) {
+      return state.serverRevision != null &&
+          state.serverRevision! >= latest.revision!;
+    }
+    return !observedAt.isBefore(latest.verifiedAt);
+  }
+
+  SubscriptionState? _restoreStoreProof(
+    String ownerId,
+    SubscriptionState? persisted,
+  ) {
+    // A newer verified read can publish while native storage is waiting. Its
+    // bounded live proof wins before an older independent disk lease.
+    final current = _survivingStoreProof(ownerId);
+    if (current.provider != null) return current;
+    final now = _now();
+    final boundary = persisted == null
+        ? null
+        : verifiedSubscriptionBoundary(persisted)?.toUtc();
+    if (persisted == null ||
+        persisted.provider == null ||
+        persisted.authority != EntitlementAuthority.verifiedServer ||
+        persisted.plan == CommercePlan.free ||
+        boundary == null ||
+        !boundary.isAfter(now) ||
+        (persisted.startedAt?.toUtc().isAfter(now) ?? false) ||
+        !_storeProofSurvivesDenial(ownerId, persisted) ||
+        !_storeObservationIsCurrent(
+          ownerId,
+          persisted,
+          allowIndependentPriorLease: true,
+        )) {
+      return null;
+    }
+    _rememberRestoredStoreVersion(ownerId, persisted);
+    ServerEntitlementRepository._sessionCache.remember(
+      ownerId: ownerId,
+      state: persisted,
+      now: now,
+    );
+    return persisted;
+  }
+
   SubscriptionState _survivingStoreProof(String ownerId) {
     final current = ServerEntitlementRepository._sessionCache.fallbackFor(
       ownerId: ownerId,
@@ -91,7 +161,11 @@ extension _ServerStoreContinuity on ServerEntitlementRepository {
     return current != null &&
             current.provider != null &&
             _storeProofSurvivesDenial(ownerId, current) &&
-            _storeObservationIsCurrent(ownerId, current)
+            _storeObservationIsCurrent(
+              ownerId,
+              current,
+              allowIndependentPriorLease: true,
+            )
         ? current
         : FreePlan.createState();
   }
@@ -119,6 +193,10 @@ extension _ServerStoreContinuity on ServerEntitlementRepository {
     DateTime now,
   ) async {
     CommunityOwnerOperation.checkCurrent();
+    // Closed-test grants already have their independent bounded session cache.
+    // They cannot restore from this store slot, and must never replace a store
+    // receipt or make a later grant revocation await optional store IO.
+    if (state.provider == null && state.plan != CommercePlan.free) return state;
     if (!_storeProofSurvivesDenial(ownerId, state) ||
         !_storeObservationIsCurrent(ownerId, state)) {
       return _survivingStoreProof(ownerId);

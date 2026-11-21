@@ -186,19 +186,21 @@ void _registerPreferencesMatrix() {
                 expect(find.byType(BottomSheet), findsOneWidget);
                 expect(find.byType(CheckboxListTile), findsNothing);
                 _assertMeaning(tester, find.byType(BottomSheet));
-                final previewScrollable = find.descendant(
+                final previewChips = find.descendant(
                   of: find.byType(BottomSheet),
+                  matching: find.byType(Chip),
+                );
+                expect(previewChips, findsNWidgets(6));
+                // The stationary heading has its own accessibility viewport.
+                // Exercise the content viewport that actually contains chips.
+                final previewScrollable = find.ancestor(
+                  of: previewChips.first,
                   matching: find.byWidgetPredicate(
                     (widget) =>
                         widget is Scrollable && widget.axis == Axis.vertical,
                   ),
                 );
                 expect(previewScrollable, findsOneWidget);
-                final previewChips = find.descendant(
-                  of: find.byType(BottomSheet),
-                  matching: find.byType(Chip),
-                );
-                expect(previewChips, findsNWidgets(6));
                 for (var index = 0; index < 6; index++) {
                   await _reach(
                     tester,
@@ -241,8 +243,27 @@ void _registerPreferencesMatrix() {
                 await _settle(tester, '$label Premium chooser');
                 expect(harness.path, '/dashboard/preferences');
                 expect(find.byType(BottomSheet), findsOneWidget);
-                final chooserScrollable = find.descendant(
+                // The chooser body owns the nutrient checkboxes; its pinned
+                // heading has a separate accessibility viewport.
+                final firstChooserCheckbox = find.byKey(
+                  Key(
+                    'dashboard-nutrient-goal-${DashboardNutrientGoalIds.dashboardCards.first}',
+                  ),
+                );
+                expect(firstChooserCheckbox, findsOneWidget);
+                // Keep the body finder stable after a lazy checkbox scrolls
+                // offscreen or selection rebuilds the sheet.
+                final chooserList = find.descendant(
                   of: find.byType(BottomSheet),
+                  matching: find.byWidgetPredicate(
+                    (widget) =>
+                        widget is ListView &&
+                        widget.scrollDirection == Axis.vertical,
+                  ),
+                );
+                expect(chooserList, findsOneWidget);
+                final chooserScrollable = find.descendant(
+                  of: chooserList,
                   matching: find.byWidgetPredicate(
                     (widget) =>
                         widget is Scrollable && widget.axis == Axis.vertical,

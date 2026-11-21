@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -47,7 +49,29 @@ void main() {
     expect(source, contains('centerTitle: true'));
     expect(source, isNot(contains('FontWeight.w300')));
     expect(source, isNot(contains('FontWeight.w500')));
-    expect(source, isNot(contains('FontWeight.w800')));
+    // The approved page-heading exception is confined to AppBar titleLarge.
+    final pageHeading = RegExp(
+      r'titleTextStyle:\s*textTheme\.titleLarge\?\.copyWith\(\s*'
+      r'color:\s*scheme\.onSurface,\s*fontWeight:\s*FontWeight\.w800,\s*\),',
+    );
+    expect(pageHeading.allMatches(source), hasLength(1));
+    expect(
+      source.replaceAll(pageHeading, ''),
+      isNot(contains('FontWeight.w800')),
+    );
+    for (final theme in [
+      BilFlagshipTheme.light(),
+      BilFlagshipTheme.dark(),
+      BilFlagshipTheme.light(isArabic: true),
+      BilFlagshipTheme.dark(isArabic: true),
+    ]) {
+      final heading = theme.appBarTheme.titleTextStyle!;
+      final localizedTitle = theme.textTheme.titleLarge!;
+      expect(heading.fontWeight, FontWeight.w800);
+      expect(heading.fontFamily, localizedTitle.fontFamily);
+      expect(heading.fontSize, localizedTitle.fontSize);
+      expect(heading.height, localizedTitle.height);
+    }
     expect(source, isNot(contains('FontWeight.w900')));
     expect(tokens, contains('static const double radiusMd = 12'));
     expect(

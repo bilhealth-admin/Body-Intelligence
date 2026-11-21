@@ -376,21 +376,28 @@ void main() {
   );
 
   test(
-    'grant held in secure write cannot outlive a newer revocation',
+    'independent grant bypasses store writes and cannot outlive a newer revocation',
     () async {
       await fixture.repository.current();
       final release = Completer<void>();
-      fixture.subscriptionSecure.heldWrite = release;
-      fixture.subscriptionSecure.writeEntered = Completer<void>();
+      final writesBefore = fixture.subscriptionSecure.writeCalls;
+      fixture.subscriptionSecure.rejectWrites = true;
+      fixture.heldAdmin = release;
+      fixture.adminReadEntered = Completer<void>();
       final older = fixture.repository.current();
-      await fixture.subscriptionSecure.writeEntered!.future;
+      await fixture.adminReadEntered!.future;
       try {
+        expect(
+          fixture.subscriptionSecure.writeCalls,
+          writesBefore,
+          reason: 'independent grants must not write the store receipt slot',
+        );
         fixture.grantActive = false;
         expect((await fixture.repository.current()).plan, CommercePlan.free);
         release.complete();
         expect((await older).plan, CommercePlan.free);
-        // The old secure write may finish last. Its untagged provider-null
-        // snapshot must not re-create independent grant authority on fallback.
+        // A delayed public response must recheck the independent grant witness;
+        // the store slot is never a source of provider-null grant authority.
         fixture.grantFailure = _GrantFailure.rateLimited;
         expect((await fixture.repository.current()).plan, CommercePlan.free);
       } finally {
@@ -400,21 +407,47 @@ void main() {
     },
   );
 
-  test('grant held in secure write is rechecked at its real expiry', () async {
-    fixture.grantExpires = fixture.now.add(const Duration(seconds: 30));
-    final release = Completer<void>();
-    fixture.subscriptionSecure.heldWrite = release;
-    fixture.subscriptionSecure.writeEntered = Completer<void>();
-    final older = fixture.repository.current();
-    await fixture.subscriptionSecure.writeEntered!.future;
-    try {
-      fixture.now = fixture.now.add(const Duration(seconds: 31));
-      release.complete();
-      expect((await older).plan, CommercePlan.free);
-    } finally {
-      if (!release.isCompleted) release.complete();
-      await older;
-    }
+  test(
+    'independent grant awaiting admin is rechecked at its real expiry',
+    () async {
+      fixture.grantExpires = fixture.now.add(const Duration(seconds: 30));
+      final release = Completer<void>();
+      final writesBefore = fixture.subscriptionSecure.writeCalls;
+      fixture.subscriptionSecure.rejectWrites = true;
+      fixture.heldAdmin = release;
+      fixture.adminReadEntered = Completer<void>();
+      final older = fixture.repository.current();
+      await fixture.adminReadEntered!.future;
+      try {
+        expect(fixture.subscriptionSecure.writeCalls, writesBefore);
+        fixture.now = fixture.now.add(const Duration(seconds: 31));
+        release.complete();
+        expect((await older).plan, CommercePlan.free);
+      } finally {
+        if (!release.isCompleted) release.complete();
+        await older;
+      }
+    },
+  );
+
+  test('independent grant preserves the exact stored paid receipt', () async {
+    fixture.grantAbsent = true;
+    fixture.storeLifecycle = 'active';
+    final store = await fixture.repository.current();
+    expect(store.plan, CommercePlan.premium);
+    expect(store.provider, SubscriptionProvider.apple);
+    final original = Map<String, String>.of(fixture.subscriptionSecure._values);
+    expect(original, isNotEmpty);
+    fixture.grantAbsent = false;
+    final grant = await fixture.repository.current();
+    expect(grant.plan, CommercePlan.premiumAiCoach);
+    expect(grant.provider, isNull);
+    expect(fixture.subscriptionSecure._values, original);
+    fixture.grantActive = false;
+    final retained = await fixture.repository.current();
+    expect(retained.plan, CommercePlan.premium);
+    expect(retained.provider, SubscriptionProvider.apple);
+    expect(retained.serverRevision, store.serverRevision);
   });
 
   test(
@@ -592,6 +625,8 @@ final class _Fixture {
 
 final class _Secure implements AdminEntitlementSecureStore {
   final _values = <String, String>{};
+  int writeCalls = 0;
+  bool rejectWrites = false;
   Completer<void>? heldWrite;
   Completer<void>? writeEntered;
   Completer<void>? heldDelete;
@@ -601,6 +636,8 @@ final class _Secure implements AdminEntitlementSecureStore {
   Future<String?> read(String key) async => _values[key];
   @override
   Future<void> write(String key, String value) async {
+    writeCalls++;
+    if (rejectWrites) throw StateError('synthetic unwanted store write');
     final held = heldWrite;
     if (held != null) {
       heldWrite = null;

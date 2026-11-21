@@ -125,7 +125,18 @@ void main() {
               final allowRect = tester.getRect(allow);
               final declineRect = tester.getRect(decline);
               expect(allowRect.width, closeTo(declineRect.width, .1));
-              expect(allowRect.width, greaterThan(240));
+              if (scale == 1.0) {
+                expect(allowRect.width, greaterThan(112));
+                expect(allowRect.center.dy, closeTo(declineRect.center.dy, .1));
+                expect(allowRect.height, closeTo(declineRect.height, .1));
+                expect(allowRect.center.dx < declineRect.center.dx, !arabic);
+              } else {
+                expect(allowRect.width, greaterThan(240));
+                expect(
+                  declineRect.top,
+                  greaterThanOrEqualTo(allowRect.bottom + 7.9),
+                );
+              }
               expect(allowRect.height, greaterThanOrEqualTo(48));
               expect(declineRect.height, greaterThanOrEqualTo(48));
               final action = decision ? allow : decline;
