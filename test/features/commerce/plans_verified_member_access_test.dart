@@ -214,6 +214,110 @@ void main() {
     });
   }
 
+  testWidgets('a completed offline reread preserves the visible CTA without selling', (tester) async {
+    var state = _verified(CommercePlan.free);
+    final container = _container(() async => state);
+    final catalog = _Catalog(const [_aiAnnual]);
+    final cta = find.byKey(const Key('store-purchase-cta'));
+    try {
+      await _pump(tester, container, catalog);
+      await tester.pumpAndSettle();
+      final before = tester.element(cta);
+      state = FreePlan.createState();
+      container.invalidate(verifiedSubscriptionStateProvider);
+      await tester.pumpAndSettle();
+      expect(tester.element(cta), same(before));
+      await tester.tap(cta);
+      await tester.pump();
+      expect(catalog.requested, isEmpty);
+      expect(find.text('Subscription check unavailable'), findsOneWidget);
+      state = _verified(CommercePlan.free);
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+      await tester.tap(cta);
+      await tester.pumpAndSettle();
+      expect(catalog.requested, [_aiAnnual]);
+    } finally {
+      await _disposeFixture(tester, container);
+    }
+  });
+
+  testWidgets('a held reread leaves an active member header untouched', (tester) async {
+    final held = Completer<SubscriptionState>();
+    var reads = 0;
+    final paid = _verified(CommercePlan.premiumAiCoach);
+    final container = _container(() => ++reads == 1 ? Future.value(paid) : held.future);
+    final catalog = _Catalog(const [_aiAnnual]);
+    try {
+      await _pump(tester, container, catalog);
+      await tester.pumpAndSettle();
+      final header = find.byKey(const Key('store-current-plan-continue'));
+      final before = tester.element(header);
+      container.invalidate(verifiedSubscriptionStateProvider);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 31));
+      await tester.pump();
+      expect(tester.element(header), same(before));
+      expect(find.byKey(const Key('store-slow-access-retry')), findsNothing);
+      expect(find.text('Subscription check unavailable'), findsNothing);
+      expect(find.byKey(const Key('store-purchase-cta')), findsNothing);
+      expect(catalog.requested, isEmpty);
+    } finally {
+      if (!held.isCompleted) held.complete(paid);
+      await _disposeFixture(tester, container);
+    }
+  });
+
+  testWidgets('a stalled background read offers one explicit recheck without selling', (tester) async {
+    final held = Completer<SubscriptionState>();
+    final recovery = Completer<SubscriptionState>();
+    var reads = 0;
+    final container = _container(() {
+      reads++;
+      return switch (reads) {
+        1 => Future.value(_verified(CommercePlan.free)),
+        2 => held.future,
+        _ => recovery.future,
+      };
+    });
+    final catalog = _Catalog(const [_aiAnnual]);
+    final cta = find.byKey(const Key('store-purchase-cta'));
+    final retry = find.byKey(const Key('store-slow-access-retry'));
+    try {
+      await _pump(tester, container, catalog);
+      await tester.pumpAndSettle();
+      container.invalidate(verifiedSubscriptionStateProvider);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 29));
+      expect(retry, findsNothing);
+      expect(reads, 2);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      expect(retry, findsOneWidget);
+      expect(cta, findsOneWidget);
+      await tester.tap(retry);
+      await tester.pump();
+      expect(reads, 3);
+      await tester.pump(const Duration(seconds: 31));
+      await tester.pump();
+      expect(retry, findsNothing);
+      expect(find.text('Subscription check unavailable'), findsOneWidget);
+      expect(reads, 3);
+      expect(catalog.requested, isEmpty);
+      recovery.complete(_verified(CommercePlan.premiumAiCoach));
+      await tester.pumpAndSettle();
+      held.complete(_verified(CommercePlan.free));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('store-current-plan-continue')), findsOneWidget);
+      expect(cta, findsNothing);
+      expect(catalog.requested, isEmpty);
+    } finally {
+      if (!held.isCompleted) held.complete(FreePlan.createState());
+      if (!recovery.isCompleted) recovery.complete(FreePlan.createState());
+      await _disposeFixture(tester, container);
+    }
+  });
+
   testWidgets('queued Free checkout cannot purchase an already verified tier', (
     tester,
   ) async {

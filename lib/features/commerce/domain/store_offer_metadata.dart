@@ -94,6 +94,8 @@ class BilStoreOfferMetadata {
 }
 
 abstract interface class BilStoreCatalogGateway {
+  static const loadTimeout = Duration(seconds: 12);
+
   Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds);
   Future<void> requestPurchase(BilStoreOfferMetadata offer);
   Future<void> restorePurchases();
