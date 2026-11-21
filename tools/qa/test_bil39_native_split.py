@@ -9,10 +9,13 @@ import subprocess
 import sys
 import shlex
 import tempfile
+import textwrap
 import unittest
 from types import SimpleNamespace
+from unittest import mock
 
 import bil39_internal_build_ci as gate
+import bil_native_source_evidence as native
 from bil_native_source_evidence import validate_native_workflow_contract, native_job_name
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -28,6 +31,73 @@ class NativeSplitTest(unittest.TestCase):
                     else '/bin/bash' if sys.platform == 'darwin' else shutil.which('bash'))
         if not cls.bash:
             raise RuntimeError('Real Bash is required to verify native orchestration')
+
+    def emitted_provenance(self, device, future_pin=False):
+        workflow = (ROOT / '.github/workflows/bil39_ios_native_reusable.yml').read_text(encoding='utf-8')
+        code = textwrap.dedent(workflow.split("<<'PY_NATIVE_SOURCE_PROVENANCE'\n", 1)[1]
+            .split('\n          PY_NATIVE_SOURCE_PROVENANCE', 1)[0])
+        ast.parse(code)
+        extra = '.github/scripts/future-native-registry-pin.py'
+        required = list(native.native_source_paths(device)) + ([extra] if future_pin else [])
+        with tempfile.TemporaryDirectory(prefix='bil39-actual-provenance-') as folder:
+            target = Path(folder)
+            for name in native.native_source_paths(device):
+                output = target / name
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.write_bytes((ROOT / name).read_bytes())
+            helper = target / 'tools/qa/bil_native_source_evidence.py'
+            helper.parent.mkdir(parents=True, exist_ok=True)
+            helper.write_bytes((ROOT / 'tools/qa/bil_native_source_evidence.py').read_bytes())
+            if future_pin:
+                (target / extra).write_text('future required native source pin\n', encoding='utf-8')
+            with mock.patch.object(native, 'native_source_paths', return_value=required):
+                expected = native.native_source_pins(target, device)
+            wrapper = '''import subprocess,sys
+from pathlib import Path
+def source_git(args, **kwargs):
+    if args == ['git','rev-parse','HEAD']: return '@SHA@\\n'
+    if args == ['git','rev-parse','HEAD^{tree}']: return '@TREE@\\n'
+    raise AssertionError('Unexpected Git operation in provenance-only fixture')
+subprocess.check_output = source_git
+def refuse_process(*args, **kwargs):
+    raise AssertionError('No native or other command may run in the provenance fixture')
+subprocess.Popen = refuse_process
+'''.replace('@SHA@', SHA).replace('@TREE@', 'b' * 40)
+            if future_pin:
+                wrapper += '''sys.path.insert(0, str(Path('tools/qa').resolve()))
+import bil_native_source_evidence as registry
+original_paths = registry.native_source_paths
+registry.native_source_paths = lambda device: original_paths(device) + [@EXTRA@]
+'''.replace('@EXTRA@', repr(extra))
+            wrapper += 'exec(compile(' + repr(code) + ", '<actual-native-provenance>', 'exec'))\n"
+            result = subprocess.run([sys.executable, '-B', '-c', wrapper], cwd=target,
+                env={**os.environ, 'BIL_NATIVE_DEVICE': device, 'GITHUB_SHA': SHA,
+                    'GITHUB_REPOSITORY': gate.REPOSITORY,
+                    'GITHUB_WORKFLOW_REF': gate.REPOSITORY + '/.github/workflows/bil39_' + device + '_native.yml@refs/heads/' + gate.BRANCH,
+                    'GITHUB_REF': 'refs/heads/' + gate.BRANCH,
+                    'GITHUB_RUN_ID': '123', 'GITHUB_RUN_ATTEMPT': '1'},
+                capture_output=True, text=True, timeout=20)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            receipt = json.loads((target / 'artifacts/qa' / ('bil39-native-' + device)
+                / 'controller-provenance.json').read_text(encoding='utf-8'))
+            return receipt, expected
+
+    def test_actual_provenance_emitter_records_current_and_future_registry(self):
+        for device in ('iphone', 'ipad'):
+            for future in (False, True):
+                with self.subTest(device=device, future_pin=future):
+                    receipt, expected = self.emitted_provenance(device, future)
+                    actual = receipt['source_scope_hashes']
+                    self.assertIn('.github/scripts/bil_ios_os_readiness.py', expected)
+                    self.assertEqual(set(actual), set(expected),
+                        f'Actual emitter recorded {len(actual)} pins; consumer requires {len(expected)}; missing {sorted(set(expected)-set(actual))}')
+                    self.assertEqual(actual, expected)
+                    self.assertEqual(receipt['application_source_sha'], SHA)
+                    self.assertEqual(receipt['application_source_tree'], 'b' * 40)
+                    self.assertEqual(receipt['device'], device)
+                    self.assertEqual(receipt['run_attempt'], '1')
+                    self.assertFalse(receipt['signed_artifact_acceptance'])
+                    self.assertFalse(receipt['physical_device_acceptance'])
 
     def test_single_device_script_parses_and_refuses_ambiguous_device_before_any_mutation(self):
         result = subprocess.run([self.bash, '-n', str(SCRIPT)], capture_output=True, timeout=10)

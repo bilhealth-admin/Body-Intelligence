@@ -77,7 +77,11 @@ def require_os_readiness(device, runtime, output, label, *, run=run_bounded,
         return log
 
     def device_state(suffix):
-        log = command(suffix, ['xcrun', 'simctl', 'list', 'devices', '-j'])
+        argv = ['xcrun', 'simctl', 'list', 'devices', '-j']
+        if suffix == 'os-ready-state' and runtime.split('-')[1] == '27':
+            # Query the selected UUID while retaining exact runtime and Booted checks.
+            argv = ['xcrun', 'simctl', 'list', 'devices', device, '--json']
+        log = command(suffix, argv)
         rows = json.loads(log.read_text(encoding='utf8'))['devices'].get(runtime, [])
         exact = [row for row in rows if row.get('udid') == device]
         if len(exact) != 1:

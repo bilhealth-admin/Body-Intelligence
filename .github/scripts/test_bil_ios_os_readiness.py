@@ -25,9 +25,11 @@ class Clock:
 
 
 class FakeRun:
-    def __init__(self, clock, durations=(), initial='Shutdown', final='Booted', fail=None, status=7, png=True):
+    def __init__(self, clock, durations=(), initial='Shutdown', final='Booted', fail=None, status=7, png=True,
+                 runtime=RUNTIME, final_document=None, fail_label=None):
         self.clock, self.durations = clock, list(durations)
         self.initial, self.final, self.fail, self.status, self.png = initial, final, fail, status, png
+        self.runtime, self.final_document, self.fail_label = runtime, final_document, fail_label
         self.calls, self.state_queries = [], 0
 
     def __call__(self, command, **options):
@@ -35,16 +37,20 @@ class FakeRun:
         self.clock.value += self.durations.pop(0) if self.durations else 0
         text = ''
         if command[2] == 'list':
+            is_final = self.state_queries > 0
             state = self.initial if self.state_queries == 0 else self.final
             self.state_queries += 1
-            text = json.dumps({'devices': {RUNTIME: [{'udid': DEVICE, 'state': state}]}})
+            if is_final and self.final_document is not None:
+                text = self.final_document if isinstance(self.final_document, str) else json.dumps(self.final_document)
+            else:
+                text = json.dumps({'devices': {self.runtime: [{'udid': DEVICE, 'state': state}]}})
         elif command[2] == 'io' and self.png:
             Path(command[-1]).write_bytes(b'\x89PNG\r\n\x1a\n' + b'\x00\x00\x00\rIHDR' + struct.pack('>II', 1200, 1600))
         elif command[2] == 'spawn':
             text = 'system = { responsive synthetic guest fixture }\n'
         options['log_path'].write_text(text, encoding='utf8')
         options['receipt_path'].write_text('{}', encoding='utf8')
-        return self.status if command[2] == self.fail else 0
+        return self.status if command[2] == self.fail or options['label'] == self.fail_label else 0
 
 
 class OSReadinessTest(unittest.TestCase):
@@ -60,10 +66,11 @@ class OSReadinessTest(unittest.TestCase):
             raise RuntimeError('Fixture cleanup must remain in its explicit temp directory')
         self.temp.cleanup()
 
-    def invoke(self, run, **options):
-        status = readiness.require_os_readiness(DEVICE, RUNTIME, self.path, 'runner-tests',
+    def invoke(self, run, *, runtime=RUNTIME, output=None, **options):
+        path = self.path if output is None else output
+        status = readiness.require_os_readiness(DEVICE, runtime, path, 'runner-tests',
             run=run, clock=self.clock, resources=lambda _: {'fixture_resources': True}, host='darwin', **options)
-        receipt = json.loads((self.path / 'runner-tests-os-readiness.json').read_text())
+        receipt = json.loads((path / 'runner-tests-os-readiness.json').read_text())
         return status, receipt
 
     def test_budget_uses_selected_runtime_major_only_and_keeps_26_default(self):
@@ -84,6 +91,70 @@ class OSReadinessTest(unittest.TestCase):
         self.assertEqual(sum(c[0][2] == 'bootstatus' for c in run.calls), 1)
         self.assertFalse(receipt['application_acceptance'])
         self.assertFalse(receipt['native_tests_proven'])
+
+    def test_sdk27_postboot_query_selects_exact_uuid_and_keeps_initial_catalog(self):
+        run = FakeRun(self.clock)
+        status, receipt = self.invoke(run)
+        self.assertEqual(status, 0)
+        queries = [command for command, _ in run.calls if command[2] == 'list']
+        self.assertEqual(queries, [
+            ['xcrun', 'simctl', 'list', 'devices', '-j'],
+            ['xcrun', 'simctl', 'list', 'devices', DEVICE, '--json'],
+        ])
+        self.assertEqual(receipt['total_budget_seconds'], 600)
+        self.assertEqual(receipt['status'], 'OS_READY')
+        self.assertTrue(any(command[2] == 'io' for command, _ in run.calls))
+        self.assertTrue(any(command[2] == 'spawn' for command, _ in run.calls))
+
+    def test_sdk26_state_queries_and_remaining_budget_remain_unchanged(self):
+        runtime = 'com.apple.CoreSimulator.SimRuntime.iOS-26-1'
+        run = FakeRun(self.clock, runtime=runtime, durations=[1, 2, 3, 4, 5, 6])
+        status, receipt = self.invoke(run, runtime=runtime)
+        self.assertEqual(status, 0)
+        self.assertEqual([command for command, _ in run.calls if command[2] == 'list'], [
+            ['xcrun', 'simctl', 'list', 'devices', '-j'],
+            ['xcrun', 'simctl', 'list', 'devices', '-j'],
+        ])
+        self.assertEqual(receipt['total_budget_seconds'], 180)
+        self.assertEqual([options['timeout_seconds'] for _, options in run.calls], [180, 179, 177, 174, 170, 165])
+
+    def test_filtered_response_keeps_exact_runtime_uuid_uniqueness_and_booted_guards(self):
+        target = {'udid': DEVICE, 'state': 'Booted'}
+        cases = {
+            'missing': {'devices': {RUNTIME: []}},
+            'wrong-target': {'devices': {RUNTIME: [{'udid': 'ffffffff-ffff-ffff-ffff-ffffffffffff', 'state': 'Booted'}]}},
+            'lookalike-target': {'devices': {RUNTIME: [{'udid': DEVICE + '-other', 'state': 'Booted'}]}},
+            'ambiguous': {'devices': {RUNTIME: [target, dict(target)]}},
+            'wrong-runtime': {'devices': {'com.apple.CoreSimulator.SimRuntime.iOS-26-1': [target]}},
+            'shutdown': {'devices': {RUNTIME: [{'udid': DEVICE, 'state': 'Shutdown'}]}},
+            'still-booting': {'devices': {RUNTIME: [{'udid': DEVICE, 'state': 'Booting'}]}},
+            'invalid-json': '{not valid JSON',
+        }
+        for name, document in cases.items():
+            with self.subTest(name=name):
+                self.clock.value = 0
+                run = FakeRun(self.clock, final_document=document)
+                status, receipt = self.invoke(run, output=self.path / name)
+                self.assertNotEqual(status, 0)
+                self.assertEqual(receipt['status'], 'FAILED_CLOSED')
+                self.assertEqual(len(run.calls), 4)
+                self.assertFalse(any(command[2] in ('io', 'spawn') for command, _ in run.calls))
+                self.assertFalse(receipt['application_acceptance'])
+                self.assertFalse(receipt['native_tests_proven'])
+
+    def test_filtered_query_error_and_timeout_never_fallback_or_refresh_budget(self):
+        for name, code, duration in [('error', 7, 1), ('timeout', 124, 266)]:
+            with self.subTest(name=name):
+                self.clock.value = 0
+                run = FakeRun(self.clock, durations=[2, 5, 328, duration],
+                              fail_label='runner-tests-os-ready-state', status=code)
+                status, receipt = self.invoke(run, output=self.path / name)
+                self.assertEqual(status, code)
+                self.assertEqual(len(run.calls), 4)
+                self.assertEqual(run.calls[-1][1]['timeout_seconds'], 265)
+                self.assertEqual(receipt['commands'][-1]['stage'], 'os-ready-state')
+                self.assertEqual(receipt['status'], 'FAILED_CLOSED')
+                self.assertFalse(any(command[2] in ('io', 'spawn') for command, _ in run.calls))
 
     def test_already_booted_skips_boot_request_but_keeps_one_bootstatus(self):
         run = FakeRun(self.clock, initial='Booted')
