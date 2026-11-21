@@ -18,6 +18,9 @@ import tempfile
 
 SUPPORTED_APIS = (26, 29, 33, 34, 35, 36)
 API29_MEMORY = {"hw.ramSize": "2048", "vm.heapSize": "256"}
+# For this fixed API29 pixel_2 lane, the emulator minimum is RAM / 4.
+# The requested config.ini value is 256 MiB; the boot value is 512 MiB.
+API29_BOOT_HEAP_MIB = int(API29_MEMORY["hw.ramSize"]) // 4
 READ_TIMEOUT_SECONDS = 8
 
 
@@ -99,6 +102,7 @@ def verify_runtime_memory(api: int, run=subprocess.run) -> dict:
         return {"status": "UNCHANGED_API", "api_level": api, "commands": []}
     commands = (
         ("sdk", ["adb", "shell", "getprop", "ro.build.version.sdk"]),
+        ("boot_heap", ["adb", "shell", "getprop", "ro.kernel.qemu.dalvik.vm.heapsize"]),
         ("heap", ["adb", "shell", "getprop", "dalvik.vm.heapsize"]),
         ("growth", ["adb", "shell", "getprop", "dalvik.vm.heapgrowthlimit"]),
         ("memory", ["adb", "shell", "cat", "/proc/meminfo"]),
@@ -124,8 +128,13 @@ def verify_runtime_memory(api: int, run=subprocess.run) -> dict:
             if result.returncode:
                 raise MemoryContractError("Guest memory readback command failed")
             outputs[key] = result.stdout.replace("\r", "").strip()
-        if outputs["sdk"] != "29" or outputs["heap"].lower() != "256m":
-            raise MemoryContractError("Expected API29 with a 256 MiB guest VM heap")
+        if outputs["sdk"] != "29":
+            raise MemoryContractError("Guest did not report API29")
+        expected_heap = f"{API29_BOOT_HEAP_MIB}m"
+        if outputs["boot_heap"].lower() != expected_heap:
+            raise MemoryContractError(f"Expected API29 emulator boot heap {expected_heap}")
+        if outputs["heap"].lower() != expected_heap:
+            raise MemoryContractError(f"Expected API29 dalvik.vm.heapsize {expected_heap}")
         growth = outputs["growth"].lower()
         if growth not in ("", "0"):
             match = re.fullmatch(r"([1-9][0-9]*)m", growth)
@@ -135,7 +144,9 @@ def verify_runtime_memory(api: int, run=subprocess.run) -> dict:
                             re.MULTILINE)
         if len(totals) != 1 or not 1536 * 1024 <= int(totals[0]) <= 2304 * 1024:
             raise MemoryContractError("Guest RAM does not match the 2048 MiB AVD")
-        receipt.update(status="MATCHED", heap_mib=256,
+        receipt.update(status="MATCHED", heap_mib=API29_BOOT_HEAP_MIB,
+                       requested_avd_heap_mib=int(API29_MEMORY["vm.heapSize"]),
+                       boot_heap_property=outputs["boot_heap"],
                        heap_growth_property=growth, mem_total_kib=int(totals[0]))
         return receipt
     except MemoryContractError as error:

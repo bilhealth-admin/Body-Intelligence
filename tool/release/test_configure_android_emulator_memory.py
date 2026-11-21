@@ -20,7 +20,8 @@ class AndroidEmulatorMemoryTest(unittest.TestCase):
 
     def fake_runtime(self, **overrides):
         outputs = {
-            "ro.build.version.sdk": "29\n", "dalvik.vm.heapsize": "256m\n",
+            "ro.build.version.sdk": "29\n", "ro.kernel.qemu.dalvik.vm.heapsize": "512m\n",
+            "dalvik.vm.heapsize": "512m\n",
             "dalvik.vm.heapgrowthlimit": "128m\n",
             "/proc/meminfo": "MemTotal:        2015000 kB\nMemFree: 12345 kB\n",
         }
@@ -81,16 +82,41 @@ class AndroidEmulatorMemoryTest(unittest.TestCase):
             with self.assertRaisesRegex(memory.MemoryContractError, "symbolic"):
                 memory.configure_memory(29, self.config)
 
-    def test_runtime_good_uses_only_four_bounded_readonly_commands(self):
+    def test_runtime_good_uses_only_five_bounded_readonly_commands(self):
         run, calls = self.fake_runtime()
         receipt = memory.verify_runtime_memory(29, run=run)
         self.assertEqual(receipt["status"], "MATCHED")
-        self.assertEqual(len(calls), 4)
+        self.assertEqual(len(calls), 5)
         for argv, kwargs in calls:
             self.assertEqual(argv[:2], ["adb", "shell"])
             self.assertIn(argv[2], ("getprop", "cat"))
             self.assertEqual(kwargs["timeout"], 8)
             self.assertFalse(kwargs["check"])
+
+    def test_actual_api29_fields_with_matching_boot_heap_pass_configuration_only(self):
+        # The four original values are recorded in artifact 14725962449.
+        # The boot property is the deliberately synthetic fifth observation.
+        run, calls = self.fake_runtime(**{
+            "dalvik.vm.heapgrowthlimit": "\n", "/proc/meminfo": "MemTotal: 2040592 kB\n",
+        })
+        receipt = memory.verify_runtime_memory(29, run=run)
+        self.assertEqual([argv[-1] for argv, _ in calls], [
+            "ro.build.version.sdk", "ro.kernel.qemu.dalvik.vm.heapsize",
+            "dalvik.vm.heapsize", "dalvik.vm.heapgrowthlimit", "/proc/meminfo",
+        ])
+        self.assertEqual(memory.API29_MEMORY, {"hw.ramSize": "2048", "vm.heapSize": "256"})
+        self.assertEqual(receipt["requested_avd_heap_mib"], 256)
+        self.assertEqual(receipt["heap_mib"], 512)
+        self.assertEqual(receipt["boot_heap_property"], "512m")
+        self.assertEqual(receipt["mem_total_kib"], 2040592)
+
+    def test_both_boot_and_runtime_properties_must_independently_match_the_floor(self):
+        for key in ("ro.kernel.qemu.dalvik.vm.heapsize", "dalvik.vm.heapsize"):
+            for value in ("16m", "256m", "384m", "513m", "", "invalid", "512m\n256m"):
+                with self.subTest(key=key, value=value):
+                    run, _ = self.fake_runtime(**{key: value})
+                    with self.assertRaises(memory.MemoryContractError):
+                        memory.verify_runtime_memory(29, run=run)
 
     def test_actual_failed_heap_value_and_low_growth_are_rejected(self):
         for overrides in ({"dalvik.vm.heapsize": "16m"},
@@ -99,7 +125,7 @@ class AndroidEmulatorMemoryTest(unittest.TestCase):
                 run, calls = self.fake_runtime(**overrides)
                 with self.assertRaises(memory.MemoryContractError):
                     memory.verify_runtime_memory(29, run=run)
-                self.assertEqual(len(calls), 4)
+                self.assertEqual(len(calls), 5)
 
     def test_wrong_sdk_or_ram_and_ambiguous_memtotal_are_rejected(self):
         for overrides in ({"ro.build.version.sdk": "26"},
