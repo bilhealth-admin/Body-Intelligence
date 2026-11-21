@@ -384,8 +384,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--project-root", type=Path, default=Path.cwd())
     args = parser.parse_args(argv)
     try:
-        print(json.dumps(prepare(args.project_root), ensure_ascii=False, sort_keys=True))
-    except (OverlayError, OSError, KeyError, TypeError) as error:
+        result = prepare(args.project_root)
+        # Only the real source checkout CLI can install the reviewed CI init.
+        if (os.environ.get("GITHUB_ACTIONS") == "true"
+                and args.project_root.resolve() == Path(__file__).resolve().parents[2]):
+            from install_ci_gradle_mirror import install
+            result["ci_repository_init"] = install(args.project_root.resolve())
+        print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+    except (OverlayError, OSError, KeyError, TypeError, ValueError) as error:
         parser.exit(2, f"ANDROID_POLICY_PLUGIN_OVERLAYS=FAIL: {error}\n")
     return 0
 

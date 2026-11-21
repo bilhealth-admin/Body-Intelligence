@@ -1,0 +1,60 @@
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.initialization.resolve.RepositoriesMode
+
+// CI-only process opt-in. Never writes source, SDK, dependency versions or repos.
+if (System.getenv('GITHUB_ACTIONS') == 'true') {
+    def mirrorUrl = 'https://maven-central.storage-download.googleapis.com/maven2/'
+    def mirrorName = 'BIL_CI_GoogleCentralMirror_Kotlin'
+    def busy = Collections.newSetFromMap(new IdentityHashMap())
+    def attached = Collections.newSetFromMap(new IdentityHashMap())
+    def buildSettings = null
+    def attach
+    attach = { repositories, pluginScope = false ->
+        if (!attached.add(repositories)) return
+        def maybeAdd = { repository ->
+            if (!(repository instanceof MavenArtifactRepository) || busy.contains(repositories)) return
+            def uri = repository.url
+            def central = uri.scheme == 'https' && uri.host in ['repo.maven.apache.org','repo1.maven.org'] && uri.path.replaceAll('/+$','') == '/maven2'
+            def portal = uri.scheme == 'https' && uri.host == 'plugins.gradle.org' && uri.path.replaceAll('/+$','') == '/m2'
+            if (!central && !portal) return
+            def existing = repositories.findByName(mirrorName)
+            if (existing != null) {
+                if (!(existing instanceof MavenArtifactRepository) || existing.url.toString() != mirrorUrl) throw new GradleException('Unexpected CI mirror name collision')
+                return
+            }
+            busy.add(repositories)
+            try {
+                def mirror = repositories.maven {
+                    name = mirrorName
+                    url = mirrorUrl
+                    // Only the proven public Kotlin namespace. Private/Google
+                    // namespaces and every original repository/auth object stay.
+                    content { includeGroup('org.jetbrains.kotlin') }
+                }
+                repositories.remove(mirror)
+                repositories.addFirst(mirror)
+                if (pluginScope && !repositories.any { candidate ->
+                    candidate instanceof MavenArtifactRepository && candidate.url.scheme == 'https' && candidate.url.host in ['repo.maven.apache.org','repo1.maven.org'] && candidate.url.path.replaceAll('/+$','') == '/maven2'
+                }) repositories.mavenCentral()
+            } finally { busy.remove(repositories) }
+        }
+        repositories.whenObjectAdded(maybeAdd)
+        repositories.toList().each(maybeAdd)
+    }
+    gradle.beforeSettings { settings ->
+        buildSettings = settings
+        attach(settings.pluginManagement.repositories, true)
+        attach(settings.dependencyResolutionManagement.repositories)
+    }
+    gradle.settingsEvaluated { settings ->
+        // Preserve Gradle's implicit default Portal, explicitly only if source
+        // declared no plugin repositories. Critical for Flutter included build.
+        if (settings.pluginManagement.repositories.isEmpty()) settings.pluginManagement.repositories.gradlePluginPortal()
+    }
+    gradle.beforeProject { project ->
+        def mode = buildSettings.dependencyResolutionManagement.repositoriesMode.get()
+        if (mode == RepositoriesMode.PREFER_PROJECT) attach(project.repositories)
+        // Buildscript is a separate repository scope, not project dependencies.
+        attach(project.buildscript.repositories)
+    }
+}

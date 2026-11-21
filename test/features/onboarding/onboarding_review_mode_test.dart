@@ -264,89 +264,162 @@ void main() {
             addTearDown(tester.view.resetPhysicalSize);
             addTearDown(tester.view.resetDevicePixelRatio);
             final remote = _BlockingRemoteAiGateway();
-            await mountAiConsent(
-              tester,
-              remote,
-              locale: Locale(language),
-              textScale: scale,
-              platform: platform,
-            );
-            final toggle = find.byKey(const Key('onboarding-cloud-ai-toggle'));
-            final allow = find.byKey(const Key('onboarding-ai-consent-accept'));
-            final decline = find.byKey(
-              const Key('onboarding-ai-consent-decline'),
-            );
-            await revealAiButton(
-              tester,
-              const Key('onboarding-cloud-ai-toggle'),
-            );
-            await tester.tap(toggle);
-            await tester.pumpAndSettle();
-            expect(remote.setGrantedCalls, 0);
-            expect(
-              Directionality.of(tester.element(allow)),
-              language == 'ar' ? TextDirection.rtl : TextDirection.ltr,
-            );
-            final disclosure = find
-                .ancestor(of: allow, matching: find.byType(BilPinnedHeaderBody))
-                .first;
-            expect(
-              find.descendant(
-                of: disclosure,
-                matching: find.textContaining('Google Gemini'),
-              ),
-              findsNWidgets(2),
-            );
-            if (scale == 1 &&
-                platform == TargetPlatform.iOS &&
-                const bool.fromEnvironment('BIL_CAPTURE_CONSENT_REVIEW')) {
-              final boundary = tester.renderObject<RenderRepaintBoundary>(
-                find.byKey(const Key('onboarding-consent-review-boundary')),
+            final semanticsHandle = tester.ensureSemantics();
+            try {
+              await mountAiConsent(
+                tester,
+                remote,
+                locale: Locale(language),
+                textScale: scale,
+                platform: platform,
               );
-              await tester.runAsync(() async {
-                final image = await boundary.toImage();
-                final bytes = await image.toByteData(
-                  format: ui.ImageByteFormat.png,
-                );
-                final file = File(
-                  'build/consent-layout-review/onboarding-$language.png',
-                );
-                await file.parent.create(recursive: true);
-                await file.writeAsBytes(bytes!.buffer.asUint8List());
-                image.dispose();
-              });
-            }
-            for (final action in [allow, decline]) {
-              await tester.ensureVisible(action);
+              final toggle = find.byKey(
+                const Key('onboarding-cloud-ai-toggle'),
+              );
+              final allow = find.byKey(
+                const Key('onboarding-ai-consent-accept'),
+              );
+              final decline = find.byKey(
+                const Key('onboarding-ai-consent-decline'),
+              );
+              await revealAiButton(
+                tester,
+                const Key('onboarding-cloud-ai-toggle'),
+              );
+              await tester.tap(toggle);
               await tester.pumpAndSettle();
-              expect(action.hitTestable(), findsOneWidget);
-              final rect = tester.getRect(action);
-              expect(rect.width, greaterThan(240));
-              expect(rect.height, greaterThanOrEqualTo(48));
-              expect(rect.left, greaterThanOrEqualTo(0));
-              expect(rect.right, lessThanOrEqualTo(size.width));
-              expect(rect.top, greaterThanOrEqualTo(24));
-              expect(rect.bottom, lessThanOrEqualTo(size.height - 24));
+              expect(remote.setGrantedCalls, 0);
+              expect(
+                Directionality.of(tester.element(allow)),
+                language == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+              );
+              final disclosure = find
+                  .ancestor(
+                    of: allow,
+                    matching: find.byType(BilPinnedHeaderBody),
+                  )
+                  .first;
+              expect(
+                find.descendant(
+                  of: disclosure,
+                  matching: find.textContaining('Google Gemini'),
+                ),
+                findsNWidgets(2),
+              );
+              if (scale == 1 &&
+                  platform == TargetPlatform.iOS &&
+                  const bool.fromEnvironment('BIL_CAPTURE_CONSENT_REVIEW')) {
+                final boundary = tester.renderObject<RenderRepaintBoundary>(
+                  find.byKey(const Key('onboarding-consent-review-boundary')),
+                );
+                await tester.runAsync(() async {
+                  final image = await boundary.toImage();
+                  final bytes = await image.toByteData(
+                    format: ui.ImageByteFormat.png,
+                  );
+                  final file = File(
+                    'build/consent-layout-review/onboarding-$language.png',
+                  );
+                  await file.parent.create(recursive: true);
+                  await file.writeAsBytes(bytes!.buffer.asUint8List());
+                  image.dispose();
+                });
+              }
+              if (scale == 1) {
+                await tester.ensureVisible(allow);
+                await tester.pumpAndSettle();
+                final allowRect = tester.getRect(allow);
+                final declineRect = tester.getRect(decline);
+                final actionRow = find
+                    .ancestor(of: allow, matching: find.byType(Row))
+                    .first;
+                expect(
+                  find.descendant(of: actionRow, matching: decline),
+                  findsOneWidget,
+                );
+                final rowRect = tester.getRect(actionRow);
+                final actionBounds = allowRect.expandToInclude(declineRect);
+                expect(allow.hitTestable(), findsOneWidget);
+                expect(decline.hitTestable(), findsOneWidget);
+                expect(allowRect.width, moreOrLessEquals(declineRect.width));
+                expect(allowRect.top, moreOrLessEquals(declineRect.top));
+                expect(allowRect.bottom, moreOrLessEquals(declineRect.bottom));
+                expect(actionBounds.left, moreOrLessEquals(rowRect.left));
+                expect(actionBounds.right, moreOrLessEquals(rowRect.right));
+                expect(allowRect.overlaps(declineRect), isFalse);
+                expect(
+                  allowRect.center.dx,
+                  language == 'ar'
+                      ? greaterThan(declineRect.center.dx)
+                      : lessThan(declineRect.center.dx),
+                );
+              }
+              for (final action in [allow, decline]) {
+                await tester.ensureVisible(action);
+                await tester.pumpAndSettle();
+                expect(action.hitTestable(), findsOneWidget);
+                final rect = tester.getRect(action);
+                expect(
+                  rect.width,
+                  scale == 1 ? greaterThanOrEqualTo(48) : greaterThan(240),
+                );
+                expect(rect.height, greaterThanOrEqualTo(48));
+                expect(rect.left, greaterThanOrEqualTo(0));
+                expect(rect.right, lessThanOrEqualTo(size.width));
+                expect(rect.top, greaterThanOrEqualTo(24));
+                expect(rect.bottom, lessThanOrEqualTo(size.height - 24));
+                final expectedLabel = action == allow
+                    ? (language == 'ar'
+                          ? 'السماح والمتابعة'
+                          : 'Allow & Continue')
+                    : (language == 'ar' ? 'عدم السماح' : "Don't Allow");
+                final semanticData = tester
+                    .getSemantics(action)
+                    .getSemanticsData();
+                expect(semanticData.label, expectedLabel);
+                expect(semanticData.flagsCollection.isButton, isTrue);
+                expect(
+                  semanticData.flagsCollection.isEnabled,
+                  ui.Tristate.isTrue,
+                );
+                expect(semanticData.hasAction(ui.SemanticsAction.tap), isTrue);
+                final label = find.descendant(
+                  of: action,
+                  matching: find.byType(RichText),
+                );
+                expect(label, findsOneWidget);
+                expect(
+                  tester.renderObject<RenderParagraph>(label).didExceedMaxLines,
+                  isFalse,
+                );
+                final labelRect = tester.getRect(label);
+                expect(labelRect.left, greaterThanOrEqualTo(rect.left));
+                expect(labelRect.right, lessThanOrEqualTo(rect.right));
+                expect(labelRect.top, greaterThanOrEqualTo(rect.top));
+                expect(labelRect.bottom, lessThanOrEqualTo(rect.bottom));
+                expect(tester.takeException(), isNull);
+              }
+              await tester.tap(decline);
+              await tester.pumpAndSettle();
+              expect(
+                remote.setGrantedCalls,
+                0,
+                reason: 'Declining a disclosure cannot activate Remote AI.',
+              );
+              await tester.tap(toggle);
+              await tester.pumpAndSettle();
+              await tester.ensureVisible(allow);
+              await tester.pumpAndSettle();
+              expect(remote.setGrantedCalls, 0);
+              await tester.tap(allow);
+              await tester.pump();
+              expect(remote.setGrantedCalls, 1);
+              remote.complete(OnboardingRemoteAiResult.granted);
+              await tester.pumpAndSettle();
               expect(tester.takeException(), isNull);
+            } finally {
+              semanticsHandle.dispose();
             }
-            await tester.tap(decline);
-            await tester.pumpAndSettle();
-            expect(
-              remote.setGrantedCalls,
-              0,
-              reason: 'Declining a disclosure cannot activate Remote AI.',
-            );
-            await tester.tap(toggle);
-            await tester.pumpAndSettle();
-            await tester.ensureVisible(allow);
-            await tester.pumpAndSettle();
-            expect(remote.setGrantedCalls, 0);
-            await tester.tap(allow);
-            await tester.pump();
-            expect(remote.setGrantedCalls, 1);
-            remote.complete(OnboardingRemoteAiResult.granted);
-            await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
           },
         );
       }

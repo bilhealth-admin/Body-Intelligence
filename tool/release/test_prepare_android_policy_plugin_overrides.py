@@ -349,5 +349,86 @@ public class Harness {
 '''
 
 
+
+
+class CiRepositoryInitInstallTest(unittest.TestCase):
+    def setUp(self):
+        import install_ci_gradle_mirror as ci
+        self.ci = ci
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.root = self.base / "workspace"
+        self.asset = self.root / ci.ASSET_RELATIVE
+        self.asset.parent.mkdir(parents=True)
+        self.asset.write_bytes((PROJECT / ci.ASSET_RELATIVE).read_bytes())
+        self.home = self.base / "runner-home"
+        self.home.mkdir()
+        self.temp = self.base / "runner-temp"
+        self.temp.mkdir()
+        self.env = {"GITHUB_ACTIONS": "true", "RUNNER_ENVIRONMENT": "github-hosted",
+                    "GITHUB_WORKSPACE": str(self.root), "RUNNER_TEMP": str(self.temp)}
+
+    def install(self):
+        return self.ci.install(self.root, self.env, self.home)
+
+    def test_ci_only_no_local_writes(self):
+        self.env["GITHUB_ACTIONS"] = "false"
+        self.assertFalse(self.install()["modified"])
+        self.assertFalse((self.home / ".gradle").exists())
+
+    def test_exact_install_idempotent_preserves_cache_and_other_init(self):
+        gradle = self.home / ".gradle"
+        (gradle / "init.d").mkdir(parents=True)
+        (gradle / "cache-sentinel").write_bytes(b"owned-cache")
+        other = gradle / "init.d/other.gradle"
+        other.write_bytes(b"// owned other init")
+        self.assertTrue(self.install()["modified"])
+        self.assertFalse(self.install()["modified"])
+        self.assertEqual((gradle / "cache-sentinel").read_bytes(), b"owned-cache")
+        self.assertEqual(other.read_bytes(), b"// owned other init")
+        self.assertEqual((gradle / "init.d" / self.ci.INIT_NAME).read_bytes(), self.asset.read_bytes())
+
+    def test_unknown_existing_init_is_never_overwritten(self):
+        destination = self.home / ".gradle/init.d" / self.ci.INIT_NAME
+        destination.parent.mkdir(parents=True)
+        destination.write_bytes(b"unknown-user-content")
+        with self.assertRaises(ValueError): self.install()
+        self.assertEqual(destination.read_bytes(), b"unknown-user-content")
+
+    def test_altered_asset_is_rejected_before_write(self):
+        self.asset.write_bytes(b"not-reviewed")
+        with self.assertRaises(ValueError): self.install()
+        self.assertFalse((self.home / ".gradle").exists())
+
+    def test_external_custom_cache_is_rejected(self):
+        self.env["GRADLE_USER_HOME"] = str(self.base / "external")
+        with self.assertRaises(ValueError): self.install()
+        self.assertFalse((self.base / "external").exists())
+
+    def test_owned_runner_temp_cache_allowed(self):
+        self.env["GRADLE_USER_HOME"] = str(self.temp / "gradle")
+        self.assertTrue(self.install()["modified"])
+
+    def test_self_hosted_or_wrong_workspace_fail_closed(self):
+        self.env["RUNNER_ENVIRONMENT"] = "self-hosted"
+        with self.assertRaises(ValueError): self.install()
+        self.env["RUNNER_ENVIRONMENT"] = "github-hosted"
+        self.env["GITHUB_WORKSPACE"] = str(self.base / "other")
+        with self.assertRaises(ValueError): self.install()
+        self.assertFalse((self.home / ".gradle").exists())
+
+    def test_atomic_publication_collision_preserves_racing_bytes(self):
+        from unittest.mock import patch
+        def race(source, destination):
+            Path(destination).write_bytes(b"racing-content")
+            raise FileExistsError("owned simulated race")
+        with patch.object(self.ci.os, "link", side_effect=race):
+            with self.assertRaises(FileExistsError): self.install()
+        destination = self.home / ".gradle/init.d" / self.ci.INIT_NAME
+        self.assertEqual(destination.read_bytes(), b"racing-content")
+        self.assertEqual(list(destination.parent.glob(".bil-ci-init-*")), [])
+
+
 if __name__ == "__main__":
     unittest.main()
