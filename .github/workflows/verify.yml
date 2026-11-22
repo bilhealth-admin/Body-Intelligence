@@ -1,209 +1,18 @@
-name: verify
-
+# INERT BOUND DRAFT: Root must verify exact Source16 full units green before publication or dispatch.
+name: Source16 original regression contexts only
+run-name: Source16 original regression contexts - 758a4aecc60ceb6d26c0c0967f576c45c1fbde67
 on:
-  push:
-    branches:
-      - phase-3-product-excellence
-      - codex/bil43-android35-verified-20261108
-      - codex/bil44-android36-verified-20261115
-      - codex/bil45-android37-inactive-catalog-20261115
-      - codex/bil46-android38-reviewer-fixes-20261116
-      - codex/bil47-android39-subscription-stability-20261116
-      - codex/bil48-android40-passive-reconciliation-20261117
-      - codex/bil49-android41-native40-fixes-20261120
-      - fix/admob-clean-production-2026-10-02
-      - bil39/integration-20261025
-      - codex/bil40-device-fixes-20261028
-      - codex/bil41-android33-release-20261106
-      - codex/bil-full-fix-batch-20261106
-  pull_request:
   workflow_dispatch:
-
 permissions:
   contents: read
-
 concurrency:
   group: verify-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
-
+env:
+  SOURCE_SHA: 758a4aecc60ceb6d26c0c0967f576c45c1fbde67
+  SOURCE_TREE: d7e4e26ad74df882192c3583a2853a5205b3d497
+  CONTROLLER_BRANCH: codex/bil-s16-context-regression-only-20261122
 jobs:
-  source:
-    name: source-checks
-    runs-on: windows-latest
-    timeout-minutes: 30
-    steps:
-      - name: Configure Git LF checkout
-        shell: pwsh
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-
-      - name: Check out accepted source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-
-      - name: Resolve packages
-        id: source_dependencies
-        run: flutter pub get
-
-      - name: Check formatting
-        shell: pwsh
-        run: |
-          if ($env:GITHUB_EVENT_NAME -eq "pull_request") {
-            $baseRef = $env:GITHUB_BASE_REF
-            if (-not $baseRef -or $baseRef.Contains("..")) {
-              throw "The pull-request base ref is missing or invalid."
-            }
-            $remoteRef = "refs/remotes/origin/$baseRef"
-            git fetch --no-tags --depth=1 origin "refs/heads/$baseRef`:$remoteRef"
-            if ($LASTEXITCODE -ne 0) { throw "Unable to fetch the pull-request base ref." }
-            $baseSha = git rev-parse $remoteRef
-            if ($LASTEXITCODE -ne 0) { throw "Unable to resolve the pull-request base SHA." }
-            $targets = git diff --name-only $baseSha HEAD -- '*.dart' |
-              Where-Object {
-                (Test-Path $_) -and (
-                  $_ -like 'lib/*' -or
-                  $_ -like 'test/*' -or
-                  $_ -like 'integration_test/*'
-                )
-              }
-            if (-not $targets) {
-              Write-Host "No changed Dart files to format-check."
-              exit 0
-            }
-            Write-Host "Format-checking $($targets.Count) changed Dart files."
-            dart format --output=none --set-exit-if-changed @targets
-          } else {
-            $targets = @('lib', 'test')
-            if (Test-Path integration_test) { $targets += 'integration_test' }
-            dart format --output=none --set-exit-if-changed @targets
-          }
-
-      - name: Diagnose exact formatter diff on failure
-        if: ${{ failure() && steps.source_dependencies.outcome == 'success' }}
-        shell: pwsh
-        run: |
-          # Diagnostic only; source-checks remains FAILED on formatting errors.
-          # Show the exact SDK patch for the known scoped sources and tests.
-          $formatTargets = @(
-            'lib/features/settings/settings_page.dart',
-            'lib/features/settings/help_center_page.dart',
-            'test/visual_closure/actual_data_pages_golden_test.dart',
-            'test/epic15_store_screenshot_golden_test.dart',
-            'test/premium_splash_experience_test.dart',
-            'lib/data/repositories/meal_repository.dart',
-            'lib/features/connected_health/widgets/live_health_watch.dart',
-            'lib/features/dashboard/dashboard_page.dart',
-            'lib/features/dashboard/widgets/dashboard_first_use_experience.dart',
-            'lib/features/dashboard/widgets/first_use_context_coachmark.dart',
-            'lib/features/dashboard/widgets/first_use_glass_surface.dart',
-            'lib/features/dashboard/widgets/first_value_handoff_card.dart',
-            'lib/features/daily_log/food_log_page.dart',
-            'lib/features/daily_log/food_log_actions.dart',
-            'test/features/dashboard/first_meal_celebration_visual_test.dart',
-            'test/features/dashboard/first_use_context_coachmark_test.dart',
-            'test/features/daily_log/food_log_first_use_coachmark_test.dart',
-            'lib/features/dashboard/widgets/dashboard_grid.dart',
-            'lib/features/dashboard/widgets/dashboard_header.dart',
-            'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
-            'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
-            'lib/features/dashboard/widgets/first_meal_celebration.dart',
-            'test/data/repositories/first_food_milestone_commit_test.dart',
-            'test/features/dashboard/dashboard_first_use_guidance_test.dart',
-            'lib/app/router/bil_external_route_navigator.dart',
-            'lib/app/router/bil_safe_return_button.dart',
-            'lib/features/notifications/services/inactivity_reminder_coordinator.dart',
-            'test/app/router/audited_route_return_source_contract_test.dart',
-            'test/app/router/notification_return_navigation_test.dart',
-            'test/features/community/community_reference_navigation_test.dart',
-            'lib/features/meal_planner/presentation/meal_planner_page.dart',
-            'lib/features/meal_planner/presentation/meal_planner_copy.dart',
-            'lib/features/daily_log/daily_log_navigation_actions.dart',
-            'test/features/meal_planner/meal_planner_e2e_contract_test.dart',
-            'test/features/meal_planner/meal_planner_recovery_contract_test.dart',
-            'lib/features/meal_planner/presentation/meal_planner_persistence.dart',
-            'test/features/meal_planner/meal_planner_recovery_widget_test.dart',
-            'lib/app/theme/bil_navigation_press_style.dart',
-            'lib/shared/widgets/bil_crystal_arrow.dart',
-            'lib/shared/widgets/secondary_page_app_bar.dart',
-            'test/bil_crystal_arrow_test.dart'
-          )
-          dart format @formatTargets
-          git diff -- @formatTargets
-
-      - name: Analyze complete source
-        # Report analyzer failures in the *same* run if formatting is red.
-        # The source job still fails; this never bypasses any required gate.
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        run: flutter analyze --no-pub
-
-      - name: Verify adaptive calendar presentation negative controls
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        run: dart run tool/test_verify_bil39_pinned_calendar.dart
-
-      - name: Prove pinned calendar date logic is unchanged
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        run: dart run tool/verify_bil39_pinned_calendar.dart
-
-      - name: Verify native observation, IME and capture negative controls
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        shell: pwsh
-        run: |
-          # Live cloud cycles retain their explicit isolated runner and credentials.
-          # This phase runs every host-safe native observer/transport control.
-          $bilNativeQaFiles = @(Get-ChildItem -LiteralPath tools/qa/flutter -File -Filter 'native_*_test.dart' |
-            Sort-Object Name | ForEach-Object { $_.FullName })
-          if ($bilNativeQaFiles.Count -eq 0) { throw 'Native QA controls must not be empty' }
-          flutter test --no-pub --concurrency=1 @bilNativeQaFiles
-
-      - name: Verify first-food commits, optional Skip and reviewer entitlement
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        shell: pwsh
-        run: >
-          flutter test --no-pub --timeout=2m
-          test/data/repositories/first_food_milestone_commit_test.dart
-          test/features/dashboard/dashboard_first_use_guidance_test.dart
-          test/features/dashboard/first_use_context_coachmark_test.dart
-          test/features/dashboard/first_meal_celebration_visual_test.dart
-          test/features/daily_log/food_log_first_use_coachmark_test.dart
-          test/features/commerce/reviewer_subscription_mirror_fallback_test.dart
-
-      - name: Verify cold and warm notification Back navigation
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        shell: pwsh
-        run: >
-          flutter test --no-pub --timeout=2m
-          test/app/router/notification_return_navigation_test.dart
-          test/app/router/audited_route_return_source_contract_test.dart
-          test/features/notifications/ios_notification_navigation_test.dart
-          test/features/community/community_deep_link_test.dart
-
-      - name: Verify More UI behavior before Golden captures
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        shell: pwsh
-        run: >
-          flutter test --no-pub
-          test/features/settings/more_section_headings_test.dart
-          test/features/settings/more_language_entry_test.dart
-          test/features/settings/more_latest_weight_test.dart
-          test/features/settings/more_premium_polish_contract_test.dart
-
-      - name: Verify Meal Planner recovery and Review & log
-        if: ${{ always() && !cancelled() && steps.source_dependencies.outcome == 'success' }}
-        shell: pwsh
-        run: >
-          flutter test --no-pub --timeout=2m
-          test/features/meal_planner/meal_planner_e2e_contract_test.dart
-          test/features/meal_planner/meal_planner_recovery_contract_test.dart
-          test/features/meal_planner/meal_planner_recovery_widget_test.dart
-
   p0:
     # Collect critical regressions independently. The final aggregate still
     # requires these tests and every other quality gate to pass before release.
@@ -234,7 +43,126 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 758a4aecc60ceb6d26c0c0967f576c45c1fbde67
           persist-credentials: false
+      - name: Verify immutable source and one-file controller provenance
+        shell: bash
+        env:
+          BINDING_JOB_KEY: p0-${{ matrix.suite }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          """Embedded in a future tests-only GitHub controller. Never run locally."""
+          import base64
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          
+          def require(condition, code):
+              if not condition:
+                  raise RuntimeError(code)
+          
+          def git(*args, env=None):
+              try:
+                  result = subprocess.run(['git', *args], env=env, capture_output=True, timeout=90)
+              except (subprocess.TimeoutExpired, OSError):
+                  raise RuntimeError('PROVENANCE_GIT_TIMEOUT_OR_OS_ERROR_NO_RAW_OUTPUT') from None
+              require(result.returncode == 0, 'PROVENANCE_GIT_FAILED_NO_RAW_STDERR')
+              return result.stdout
+          
+          
+          def fetch_controller(controller, fetch_env):
+              # Retry only this read of the same immutable controller, never a ref or push.
+              # A successful fetch still grants no binding: all checks below must finish.
+              for attempt in range(1, 3):
+                  try:
+                      result = subprocess.run(
+                          ['git', 'fetch', '--no-tags', '--depth=1', 'origin', controller],
+                          env=fetch_env, capture_output=True, timeout=180,
+                      )
+                  except (subprocess.TimeoutExpired, OSError):
+                      fetched = False
+                  else:
+                      fetched = result.returncode == 0
+                  if fetched:
+                      return
+                  if attempt < 2:
+                      print(json.dumps({'provenance_fetch_attempt': attempt,
+                                        'status': 'RETRYING_SAME_IMMUTABLE_CONTROLLER'}))
+              raise RuntimeError('PROVENANCE_FETCH_FAILED_AFTER_2_ATTEMPTS_NO_RAW_OUTPUT') from None
+          
+          source = os.environ['SOURCE_SHA']
+          source_tree = os.environ['SOURCE_TREE']
+          controller = os.environ['GITHUB_SHA']
+          branch = os.environ['CONTROLLER_BRANCH']
+          workflow = '.github/workflows/verify.yml'
+          require(all(re.fullmatch('[a-f0-9]{40}', value) for value in (source, source_tree, controller)), 'INVALID_IMMUTABLE_BINDING')
+          require(source != controller, 'SOURCE_AND_CONTROLLER_MUST_BE_DISTINCT')
+          require(os.environ['GITHUB_REPOSITORY'] == 'bilhealth-admin/Body-Intelligence', 'WRONG_REPOSITORY')
+          require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch', 'DISPATCH_ONLY')
+          require(os.environ['GITHUB_REF'] == 'refs/heads/' + branch, 'WRONG_CONTROLLER_REF')
+          require(os.environ['GITHUB_WORKFLOW_SHA'] == controller, 'WORKFLOW_AND_RUN_CONTROLLER_DIFFER')
+          require(git('rev-parse', 'HEAD').decode().strip() == source, 'SOURCE_HEAD_DRIFT')
+          require(git('rev-parse', 'HEAD^{tree}').decode().strip() == source_tree, 'SOURCE_TREE_DRIFT')
+          require(not git('status', '--porcelain', '--untracked-files=no').strip(), 'SOURCE_NOT_PRISTINE')
+          # Git credentials remain disabled in the checkout. Only this read-only child
+          # receives an ephemeral header; no token/header is printed, stored or in argv.
+          fetch_env = dict(os.environ)
+          fetch_env.update(GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never', GCM_GUI_PROMPT='0')
+          token = fetch_env.get('GH_TOKEN')
+          require(isinstance(token, str) and bool(token), 'READONLY_GITHUB_TOKEN_REQUIRED')
+          config_count = fetch_env.get('GIT_CONFIG_COUNT', '0')
+          require(re.fullmatch(r'\d+', config_count) is not None and int(config_count) < 100, 'GIT_CHILD_CONFIG_COUNT_INVALID')
+          slot = str(int(config_count))
+          fetch_env['GIT_CONFIG_KEY_' + slot] = 'http.https://github.com/.extraheader'
+          fetch_env['GIT_CONFIG_VALUE_' + slot] = 'AUTHORIZATION: basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+          fetch_env['GIT_CONFIG_COUNT'] = str(int(config_count) + 1)
+          for key in list(fetch_env):
+              if key.upper().startswith(('GIT_TRACE', 'GCM_TRACE')) or key.upper() == 'GIT_CURL_VERBOSE':
+                  fetch_env.pop(key)
+          try:
+              fetch_controller(controller, fetch_env)
+          finally:
+              fetch_env.pop('GH_TOKEN', None)
+              fetch_env.pop('GIT_CONFIG_VALUE_' + slot, None)
+              token = None
+          require(git('rev-parse', 'FETCH_HEAD').decode().strip() == controller, 'CONTROLLER_FETCH_DRIFT')
+          commit = git('cat-file', '-p', controller).decode('utf-8')
+          parents = [line.split(' ', 1)[1] for line in commit.split('\n\n', 1)[0].splitlines() if line.startswith('parent ')]
+          require(parents == [source], 'CONTROLLER_MUST_HAVE_EXACT_SOURCE_PARENT')
+          changed = git('diff-tree', '--no-commit-id', '--no-abbrev', '--raw', '-r', source, controller).decode().splitlines()
+          require(len(changed) == 1, 'CONTROLLER_MUST_CHANGE_EXACTLY_ONE_WORKFLOW')
+          fields = changed[0].split('\t')
+          require(len(fields) == 2 and fields[1] == workflow, 'CONTROLLER_CHANGED_UNREVIEWED_PATH')
+          metadata = fields[0].split()
+          require(len(metadata) == 5 and metadata[0:2] == [':100644', '100644'] and metadata[4] == 'M', 'CONTROLLER_WORKFLOW_MODE_OR_OPERATION_CHANGED')
+          workflow_bytes = git('show', controller + ':' + workflow)
+          report = {
+              'schema': 'bil49.tests-only-source-controller-binding.v1',
+              'status': 'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT',
+              'source_sha': source, 'source_tree': source_tree,
+              'controller_sha': controller,
+              'controller_tree': git('rev-parse', controller + '^{tree}').decode().strip(),
+              'controller_parent': source, 'controller_branch': branch,
+              'workflow_path': workflow,
+              'workflow_sha256': hashlib.sha256(workflow_bytes).hexdigest(),
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'job_key': os.environ['BINDING_JOB_KEY'],
+              'event': 'workflow_dispatch',
+              'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'release_approval': False,
+          }
+          out = Path(os.environ['RUNNER_TEMP']) / 'bil49-source-binding' / 'source-provenance.json'
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({key: report[key] for key in ('source_sha', 'source_tree', 'controller_sha', 'controller_tree', 'job_key', 'status')}))
+          PY
       - name: Verify POSIX StoreKit restore overlay isolation and reentry
         if: ${{ matrix.suite == 'architecture' }}
         run: python3 -B -m unittest discover -s tool/release -p 'test_prepare_ios_storekit_restore_codec_overlay*.py' -v
@@ -253,6 +181,15 @@ jobs:
           path: build/vision-captures/*.png
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Preserve immutable source and controller provenance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil49-source16-context-provenance-p0-${{ matrix.suite }}-${{ env.SOURCE_SHA }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bil49-source-binding/source-provenance.json
+          if-no-files-found: error
+          retention-days: 30
 
   focused:
     # A source or other-suite failure must not hide remaining test failures.
@@ -285,7 +222,126 @@ jobs:
       - name: Check out accepted source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 758a4aecc60ceb6d26c0c0967f576c45c1fbde67
           persist-credentials: false
+      - name: Verify immutable source and one-file controller provenance
+        shell: pwsh
+        env:
+          BINDING_JOB_KEY: focused-${{ matrix.suite }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          @'
+          """Embedded in a future tests-only GitHub controller. Never run locally."""
+          import base64
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          
+          def require(condition, code):
+              if not condition:
+                  raise RuntimeError(code)
+          
+          def git(*args, env=None):
+              try:
+                  result = subprocess.run(['git', *args], env=env, capture_output=True, timeout=90)
+              except (subprocess.TimeoutExpired, OSError):
+                  raise RuntimeError('PROVENANCE_GIT_TIMEOUT_OR_OS_ERROR_NO_RAW_OUTPUT') from None
+              require(result.returncode == 0, 'PROVENANCE_GIT_FAILED_NO_RAW_STDERR')
+              return result.stdout
+          
+          
+          def fetch_controller(controller, fetch_env):
+              # Retry only this read of the same immutable controller, never a ref or push.
+              # A successful fetch still grants no binding: all checks below must finish.
+              for attempt in range(1, 3):
+                  try:
+                      result = subprocess.run(
+                          ['git', 'fetch', '--no-tags', '--depth=1', 'origin', controller],
+                          env=fetch_env, capture_output=True, timeout=180,
+                      )
+                  except (subprocess.TimeoutExpired, OSError):
+                      fetched = False
+                  else:
+                      fetched = result.returncode == 0
+                  if fetched:
+                      return
+                  if attempt < 2:
+                      print(json.dumps({'provenance_fetch_attempt': attempt,
+                                        'status': 'RETRYING_SAME_IMMUTABLE_CONTROLLER'}))
+              raise RuntimeError('PROVENANCE_FETCH_FAILED_AFTER_2_ATTEMPTS_NO_RAW_OUTPUT') from None
+          
+          source = os.environ['SOURCE_SHA']
+          source_tree = os.environ['SOURCE_TREE']
+          controller = os.environ['GITHUB_SHA']
+          branch = os.environ['CONTROLLER_BRANCH']
+          workflow = '.github/workflows/verify.yml'
+          require(all(re.fullmatch('[a-f0-9]{40}', value) for value in (source, source_tree, controller)), 'INVALID_IMMUTABLE_BINDING')
+          require(source != controller, 'SOURCE_AND_CONTROLLER_MUST_BE_DISTINCT')
+          require(os.environ['GITHUB_REPOSITORY'] == 'bilhealth-admin/Body-Intelligence', 'WRONG_REPOSITORY')
+          require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch', 'DISPATCH_ONLY')
+          require(os.environ['GITHUB_REF'] == 'refs/heads/' + branch, 'WRONG_CONTROLLER_REF')
+          require(os.environ['GITHUB_WORKFLOW_SHA'] == controller, 'WORKFLOW_AND_RUN_CONTROLLER_DIFFER')
+          require(git('rev-parse', 'HEAD').decode().strip() == source, 'SOURCE_HEAD_DRIFT')
+          require(git('rev-parse', 'HEAD^{tree}').decode().strip() == source_tree, 'SOURCE_TREE_DRIFT')
+          require(not git('status', '--porcelain', '--untracked-files=no').strip(), 'SOURCE_NOT_PRISTINE')
+          # Git credentials remain disabled in the checkout. Only this read-only child
+          # receives an ephemeral header; no token/header is printed, stored or in argv.
+          fetch_env = dict(os.environ)
+          fetch_env.update(GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never', GCM_GUI_PROMPT='0')
+          token = fetch_env.get('GH_TOKEN')
+          require(isinstance(token, str) and bool(token), 'READONLY_GITHUB_TOKEN_REQUIRED')
+          config_count = fetch_env.get('GIT_CONFIG_COUNT', '0')
+          require(re.fullmatch(r'\d+', config_count) is not None and int(config_count) < 100, 'GIT_CHILD_CONFIG_COUNT_INVALID')
+          slot = str(int(config_count))
+          fetch_env['GIT_CONFIG_KEY_' + slot] = 'http.https://github.com/.extraheader'
+          fetch_env['GIT_CONFIG_VALUE_' + slot] = 'AUTHORIZATION: basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+          fetch_env['GIT_CONFIG_COUNT'] = str(int(config_count) + 1)
+          for key in list(fetch_env):
+              if key.upper().startswith(('GIT_TRACE', 'GCM_TRACE')) or key.upper() == 'GIT_CURL_VERBOSE':
+                  fetch_env.pop(key)
+          try:
+              fetch_controller(controller, fetch_env)
+          finally:
+              fetch_env.pop('GH_TOKEN', None)
+              fetch_env.pop('GIT_CONFIG_VALUE_' + slot, None)
+              token = None
+          require(git('rev-parse', 'FETCH_HEAD').decode().strip() == controller, 'CONTROLLER_FETCH_DRIFT')
+          commit = git('cat-file', '-p', controller).decode('utf-8')
+          parents = [line.split(' ', 1)[1] for line in commit.split('\n\n', 1)[0].splitlines() if line.startswith('parent ')]
+          require(parents == [source], 'CONTROLLER_MUST_HAVE_EXACT_SOURCE_PARENT')
+          changed = git('diff-tree', '--no-commit-id', '--no-abbrev', '--raw', '-r', source, controller).decode().splitlines()
+          require(len(changed) == 1, 'CONTROLLER_MUST_CHANGE_EXACTLY_ONE_WORKFLOW')
+          fields = changed[0].split('\t')
+          require(len(fields) == 2 and fields[1] == workflow, 'CONTROLLER_CHANGED_UNREVIEWED_PATH')
+          metadata = fields[0].split()
+          require(len(metadata) == 5 and metadata[0:2] == [':100644', '100644'] and metadata[4] == 'M', 'CONTROLLER_WORKFLOW_MODE_OR_OPERATION_CHANGED')
+          workflow_bytes = git('show', controller + ':' + workflow)
+          report = {
+              'schema': 'bil49.tests-only-source-controller-binding.v1',
+              'status': 'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT',
+              'source_sha': source, 'source_tree': source_tree,
+              'controller_sha': controller,
+              'controller_tree': git('rev-parse', controller + '^{tree}').decode().strip(),
+              'controller_parent': source, 'controller_branch': branch,
+              'workflow_path': workflow,
+              'workflow_sha256': hashlib.sha256(workflow_bytes).hexdigest(),
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'job_key': os.environ['BINDING_JOB_KEY'],
+              'event': 'workflow_dispatch',
+              'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'release_approval': False,
+          }
+          out = Path(os.environ['RUNNER_TEMP']) / 'bil49-source-binding' / 'source-provenance.json'
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({key: report[key] for key in ('source_sha', 'source_tree', 'controller_sha', 'controller_tree', 'job_key', 'status')}))
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -395,6 +451,15 @@ jobs:
           retention-days: 7
           compression-level: 0
 
+      - name: Preserve immutable source and controller provenance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil49-source16-context-provenance-focused-${{ matrix.suite }}-${{ env.SOURCE_SHA }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bil49-source-binding/source-provenance.json
+          if-no-files-found: error
+          retention-days: 30
+
   broad:
     # Run every historically failing full-suite file in smaller domain groups.
     # The final aggregate requires these focused regressions and all full shards.
@@ -432,7 +497,126 @@ jobs:
           git config --global core.eol lf
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 758a4aecc60ceb6d26c0c0967f576c45c1fbde67
           persist-credentials: false
+      - name: Verify immutable source and one-file controller provenance
+        shell: pwsh
+        env:
+          BINDING_JOB_KEY: broad-${{ matrix.suite }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          @'
+          """Embedded in a future tests-only GitHub controller. Never run locally."""
+          import base64
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          
+          def require(condition, code):
+              if not condition:
+                  raise RuntimeError(code)
+          
+          def git(*args, env=None):
+              try:
+                  result = subprocess.run(['git', *args], env=env, capture_output=True, timeout=90)
+              except (subprocess.TimeoutExpired, OSError):
+                  raise RuntimeError('PROVENANCE_GIT_TIMEOUT_OR_OS_ERROR_NO_RAW_OUTPUT') from None
+              require(result.returncode == 0, 'PROVENANCE_GIT_FAILED_NO_RAW_STDERR')
+              return result.stdout
+          
+          
+          def fetch_controller(controller, fetch_env):
+              # Retry only this read of the same immutable controller, never a ref or push.
+              # A successful fetch still grants no binding: all checks below must finish.
+              for attempt in range(1, 3):
+                  try:
+                      result = subprocess.run(
+                          ['git', 'fetch', '--no-tags', '--depth=1', 'origin', controller],
+                          env=fetch_env, capture_output=True, timeout=180,
+                      )
+                  except (subprocess.TimeoutExpired, OSError):
+                      fetched = False
+                  else:
+                      fetched = result.returncode == 0
+                  if fetched:
+                      return
+                  if attempt < 2:
+                      print(json.dumps({'provenance_fetch_attempt': attempt,
+                                        'status': 'RETRYING_SAME_IMMUTABLE_CONTROLLER'}))
+              raise RuntimeError('PROVENANCE_FETCH_FAILED_AFTER_2_ATTEMPTS_NO_RAW_OUTPUT') from None
+          
+          source = os.environ['SOURCE_SHA']
+          source_tree = os.environ['SOURCE_TREE']
+          controller = os.environ['GITHUB_SHA']
+          branch = os.environ['CONTROLLER_BRANCH']
+          workflow = '.github/workflows/verify.yml'
+          require(all(re.fullmatch('[a-f0-9]{40}', value) for value in (source, source_tree, controller)), 'INVALID_IMMUTABLE_BINDING')
+          require(source != controller, 'SOURCE_AND_CONTROLLER_MUST_BE_DISTINCT')
+          require(os.environ['GITHUB_REPOSITORY'] == 'bilhealth-admin/Body-Intelligence', 'WRONG_REPOSITORY')
+          require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch', 'DISPATCH_ONLY')
+          require(os.environ['GITHUB_REF'] == 'refs/heads/' + branch, 'WRONG_CONTROLLER_REF')
+          require(os.environ['GITHUB_WORKFLOW_SHA'] == controller, 'WORKFLOW_AND_RUN_CONTROLLER_DIFFER')
+          require(git('rev-parse', 'HEAD').decode().strip() == source, 'SOURCE_HEAD_DRIFT')
+          require(git('rev-parse', 'HEAD^{tree}').decode().strip() == source_tree, 'SOURCE_TREE_DRIFT')
+          require(not git('status', '--porcelain', '--untracked-files=no').strip(), 'SOURCE_NOT_PRISTINE')
+          # Git credentials remain disabled in the checkout. Only this read-only child
+          # receives an ephemeral header; no token/header is printed, stored or in argv.
+          fetch_env = dict(os.environ)
+          fetch_env.update(GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never', GCM_GUI_PROMPT='0')
+          token = fetch_env.get('GH_TOKEN')
+          require(isinstance(token, str) and bool(token), 'READONLY_GITHUB_TOKEN_REQUIRED')
+          config_count = fetch_env.get('GIT_CONFIG_COUNT', '0')
+          require(re.fullmatch(r'\d+', config_count) is not None and int(config_count) < 100, 'GIT_CHILD_CONFIG_COUNT_INVALID')
+          slot = str(int(config_count))
+          fetch_env['GIT_CONFIG_KEY_' + slot] = 'http.https://github.com/.extraheader'
+          fetch_env['GIT_CONFIG_VALUE_' + slot] = 'AUTHORIZATION: basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+          fetch_env['GIT_CONFIG_COUNT'] = str(int(config_count) + 1)
+          for key in list(fetch_env):
+              if key.upper().startswith(('GIT_TRACE', 'GCM_TRACE')) or key.upper() == 'GIT_CURL_VERBOSE':
+                  fetch_env.pop(key)
+          try:
+              fetch_controller(controller, fetch_env)
+          finally:
+              fetch_env.pop('GH_TOKEN', None)
+              fetch_env.pop('GIT_CONFIG_VALUE_' + slot, None)
+              token = None
+          require(git('rev-parse', 'FETCH_HEAD').decode().strip() == controller, 'CONTROLLER_FETCH_DRIFT')
+          commit = git('cat-file', '-p', controller).decode('utf-8')
+          parents = [line.split(' ', 1)[1] for line in commit.split('\n\n', 1)[0].splitlines() if line.startswith('parent ')]
+          require(parents == [source], 'CONTROLLER_MUST_HAVE_EXACT_SOURCE_PARENT')
+          changed = git('diff-tree', '--no-commit-id', '--no-abbrev', '--raw', '-r', source, controller).decode().splitlines()
+          require(len(changed) == 1, 'CONTROLLER_MUST_CHANGE_EXACTLY_ONE_WORKFLOW')
+          fields = changed[0].split('\t')
+          require(len(fields) == 2 and fields[1] == workflow, 'CONTROLLER_CHANGED_UNREVIEWED_PATH')
+          metadata = fields[0].split()
+          require(len(metadata) == 5 and metadata[0:2] == [':100644', '100644'] and metadata[4] == 'M', 'CONTROLLER_WORKFLOW_MODE_OR_OPERATION_CHANGED')
+          workflow_bytes = git('show', controller + ':' + workflow)
+          report = {
+              'schema': 'bil49.tests-only-source-controller-binding.v1',
+              'status': 'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT',
+              'source_sha': source, 'source_tree': source_tree,
+              'controller_sha': controller,
+              'controller_tree': git('rev-parse', controller + '^{tree}').decode().strip(),
+              'controller_parent': source, 'controller_branch': branch,
+              'workflow_path': workflow,
+              'workflow_sha256': hashlib.sha256(workflow_bytes).hexdigest(),
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'job_key': os.environ['BINDING_JOB_KEY'],
+              'event': 'workflow_dispatch',
+              'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'release_approval': False,
+          }
+          out = Path(os.environ['RUNNER_TEMP']) / 'bil49-source-binding' / 'source-provenance.json'
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({key: report[key] for key in ('source_sha', 'source_tree', 'controller_sha', 'controller_tree', 'job_key', 'status')}))
+          '@ | python -
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
           flutter-version: 3.44.6
@@ -453,177 +637,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  shards:
-    name: flutter-tests (shard ${{ matrix.shard }} of 8)
-    runs-on: windows-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      max-parallel: 8
-      matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
-    steps:
-      - name: Configure Git LF checkout
-        shell: pwsh
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-
-      - name: Check out accepted source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-
-      - name: Resolve packages
-        run: flutter pub get
-
-      - name: Archive stale generated Golden comparison images
-        shell: pwsh
-        run: |
-          $bilTestRoot = [IO.Path]::GetFullPath((Join-Path $env:GITHUB_WORKSPACE 'test'))
-          $bilPrefix = $bilTestRoot + [IO.Path]::DirectorySeparatorChar
-          $bilArchive = [IO.Path]::GetFullPath((Join-Path $env:RUNNER_TEMP 'bil39-stale-shard-comparisons'))
-          $bilTempPrefix = [IO.Path]::GetFullPath($env:RUNNER_TEMP) + [IO.Path]::DirectorySeparatorChar
-          if (-not $bilArchive.StartsWith($bilTempPrefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid archive root' }
-          Get-ChildItem -LiteralPath $bilTestRoot -File -Recurse -Filter '*.png' |
-            Where-Object { $_.Directory.Name -eq 'failures' -and $_.Name -match '_(masterImage|testImage|isolatedDiff|maskedDiff)\.png$' } |
-            ForEach-Object {
-              $bilSource = [IO.Path]::GetFullPath($_.FullName)
-              if (-not $bilSource.StartsWith($bilPrefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'Comparison escaped test root' }
-              if ($_.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Refusing a comparison symlink' }
-              $bilDestination = [IO.Path]::GetFullPath((Join-Path $bilArchive $bilSource.Substring($bilPrefix.Length)))
-              if (-not $bilDestination.StartsWith($bilArchive + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Invalid archive target' }
-              New-Item -ItemType Directory -Path ([IO.Path]::GetDirectoryName($bilDestination)) -Force | Out-Null
-              Move-Item -LiteralPath $bilSource -Destination $bilDestination
-            }
-
-      - name: Run complete Flutter test suite shard ${{ matrix.shard }} of 8
-        shell: pwsh
-        run: |
-          $bilEvidence=Join-Path $env:RUNNER_TEMP 'bil39-full-shard-${{ matrix.shard }}'
-          New-Item -ItemType Directory -Path $bilEvidence -Force | Out-Null
-          python tools/qa/bil39_full_suite_files.py --source-sha $env:GITHUB_SHA --index ${{ matrix.shard }} --total 8 --output (Join-Path $bilEvidence 'plan.json')
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $bilTestFiles = @((Get-Content -LiteralPath (Join-Path $bilEvidence 'plan.json') -Raw | ConvertFrom-Json).files)
-          if ($bilTestFiles.Count -eq 0) { throw 'An empty complete-suite partition cannot pass' }
-          $bilDart = Join-Path $env:FLUTTER_ROOT 'bin/cache/dart-sdk/bin/dart.exe'
-          $bilFlutterTools = Join-Path $env:FLUTTER_ROOT 'bin/cache/flutter_tools.snapshot'
-          & $bilDart $bilFlutterTools test `
-            --no-pub `
-            --machine `
-            --dart-define=BIL_PAYMENTS_ENABLED=true `
-            --concurrency=1 `
-            @bilTestFiles 2>&1 | Tee-Object -FilePath (Join-Path $bilEvidence 'events.jsonl')
-          $bilFlutterExit=$LASTEXITCODE
-          python tools/qa/bil39_flutter_event_receipt.py --log (Join-Path $bilEvidence 'events.jsonl') --source-sha $env:GITHUB_SHA --test-exit $bilFlutterExit --output (Join-Path $bilEvidence 'receipt.json')
-          exit $LASTEXITCODE
-
-      - name: Preserve exact-source complete test outcomes even on failure
+      - name: Preserve immutable source and controller provenance
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: bil39-full-shard-${{ matrix.shard }}-${{ github.sha }}
-          path: ${{ runner.temp }}/bil39-full-shard-${{ matrix.shard }}/
+          name: bil49-source16-context-provenance-broad-${{ matrix.suite }}-${{ env.SOURCE_SHA }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bil49-source-binding/source-provenance.json
           if-no-files-found: error
           retention-days: 30
 
-      - name: Preserve failed golden screenshots from this shard
-        if: failure()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: golden-failures-shard-${{ matrix.shard }}
-          path: test/**/failures/**
-          if-no-files-found: ignore
-          retention-days: 7
-          compression-level: 0
-
-  integration-tools:
-    name: Exact-source QA receipt and orchestration regression tests
-    runs-on: windows-latest
-    timeout-minutes: 20
-    env:
-      PYTHONUTF8: '1'
-    steps:
-      - name: Configure Git LF checkout
-        shell: pwsh
-        run: |
-          git config --global core.autocrlf false
-          git config --global core.eol lf
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0, Node24
-        with:
-          python-version: '3.14'
-      - name: Execute all QA tool regression tests
-        run: python -m unittest discover -s tools/qa -p 'test_*.py' -v
-      - name: Verify StoreKit restore overlay isolation and reentry
-        run: python -B -m unittest discover -s tool/release -p 'test_prepare_ios_storekit_restore_codec_overlay*.py' -v
-      - name: Verify bounded Maven HTTP429 recovery and failure propagation
-        run: python -B -m unittest discover -s tool/release -p test_retry_android_maven429_build.py -v
-      - name: Verify CI-owned Supabase ports and exact database identity
-        run: python -B -m unittest discover -s tool/release -p test_prepare_local_supabase_ci_stack.py -v
-      - name: Verify Android startup workflow retains its offline integrity controls
-        run: python -B -m unittest discover -s tool/release -p test_android_startup_workflow.py -v
-
-  flutter:
-    name: flutter
-    if: ${{ always() }}
-    needs: [source, p0, focused, broad, shards, integration-tools]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - name: Require analysis, formatting and all eight shards to pass
-        shell: bash
-        env:
-          SOURCE_RESULT: ${{ needs.source.result }}
-          P0_RESULT: ${{ needs.p0.result }}
-          BROAD_RESULT: ${{ needs.broad.result }}
-          FOCUSED_RESULT: ${{ needs.focused.result }}
-          SHARDS_RESULT: ${{ needs.shards.result }}
-          TOOLS_RESULT: ${{ needs.integration-tools.result }}
-        run: |
-          echo "Formatting and analysis: $SOURCE_RESULT"
-          echo "P0 critical data, Vision, architecture: $P0_RESULT"
-          echo "Broader targeted regressions: $BROAD_RESULT"
-          echo "Focused Goldens and commerce: $FOCUSED_RESULT"
-          echo "All eight Flutter test shards: $SHARDS_RESULT"
-          echo "QA tool regression tests: $TOOLS_RESULT"
-          if [[ "$SOURCE_RESULT" != "success" || "$P0_RESULT" != "success" || "$FOCUSED_RESULT" != "success" || "$BROAD_RESULT" != "success" || "$SHARDS_RESULT" != "success" || "$TOOLS_RESULT" != "success" ]]; then
-            echo "::error::All five quality phases must pass: source, P0, focused, broad, and the complete eight-shard suite."
-            exit 1
-          fi
-          echo "All quality gates passed."
-
-      - name: Checkout exact sources for complete file-coverage verification
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-
-      - name: Prove all complete-suite files ran exactly once
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          python3 tools/qa/bil39_full_suite_artifacts.py --sha "$GITHUB_SHA" --run-id "$GITHUB_RUN_ID" \
-            --branch "$GITHUB_REF_NAME" --total 8 --output "$RUNNER_TEMP/bil39-full-coverage"
-          python3 tools/qa/bil39_full_suite_files.py --source-sha "$GITHUB_SHA" --total 8 \
-            --verify "$RUNNER_TEMP/bil39-full-coverage" --output "$RUNNER_TEMP/bil39-full-coverage.json"
-
-      - name: Preserve exact-source full-suite coverage proof
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: bil39-complete-file-coverage-${{ github.sha }}
-          path: ${{ runner.temp }}/bil39-full-coverage.json
-          if-no-files-found: error
-          retention-days: 30
