@@ -1,26 +1,7 @@
-name: BIL CodeQL security-extended
-
+# INERT PREPARATION ONLY: exact Source17; Root-approved unit receipt and separate activation required.
+name: Source17 security exclusive Semgrep and macro audits
+run-name: Source17 security audit2 - 6c0dfbab576e797d24b42310e9194db2f1664188
 on:
-  push:
-    branches:
-      - main
-      - codex/bil43-android35-verified-20261108
-      - codex/bil44-android36-verified-20261115
-      - codex/bil45-android37-inactive-catalog-20261115
-      - codex/bil46-android38-reviewer-fixes-20261116
-      - codex/bil47-android39-subscription-stability-20261116
-      - codex/bil48-android40-passive-reconciliation-20261117
-      - codex/bil49-android41-native40-fixes-20261120
-      - integration/bil-qa-media-policy-20261011
-      - bil39/integration-20261025
-      - codex/bil40-device-fixes-20261028
-      - codex/bil41-android33-release-20261106
-  pull_request:
-    branches:
-      - main
-      - integration/bil-qa-media-policy-20261011
-    paths-ignore:
-      - 'docs/**'
   workflow_dispatch:
     inputs:
       supabase_only:
@@ -84,598 +65,11 @@ permissions:
   pull-requests: read
   security-events: write
 
+env:
+  SOURCE_SHA: 6c0dfbab576e797d24b42310e9194db2f1664188
+  SOURCE_TREE: bc22c3881ecc5cad8f3ee78d0a784de9e246e1a0
+  CONTROLLER_BRANCH: codex/bil-s17-security-audit-only-20261122
 jobs:
-  analyze:
-    if: ${{ inputs.mobsf_only != true && inputs.android_native_only != true && (inputs.source_audit_only == true || github.event_name != 'workflow_dispatch' || inputs.supabase_only != true || inputs.android_only == true || inputs.ios_only == true) }}
-    name: CodeQL (${{ matrix.language }})
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: ${{ matrix.language == 'swift' && 180 || 60 }}
-    strategy:
-      fail-fast: false
-      matrix: >-
-        ${{ fromJSON(
-          (inputs.source_audit_only == true || (github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011')) &&
-            '{"include":[{"language":"actions","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"javascript-typescript","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"python","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false}]}'
-          || inputs.android_only == true && inputs.ios_only == true &&
-            '{"include":[{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"},{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
-          || inputs.android_only == true &&
-            '{"include":[{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"}]}'
-          || inputs.ios_only == true &&
-            '{"include":[{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
-          || '{"include":[{"language":"actions","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"javascript-typescript","runner":"ubuntu-24.04","build-mode":"none","flutter-build":"web-worker"},{"language":"python","runner":"ubuntu-24.04","build-mode":"none","flutter-build":false},{"language":"java-kotlin","runner":"ubuntu-24.04","build-mode":"manual","flutter-build":"android"},{"language":"swift","runner":"macos-26-intel","build-mode":"manual","flutter-build":"ios"}]}'
-        ) }}
-
-    steps:
-      - name: Check out accepted source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install Flutter stable
-        if: matrix.flutter-build != false
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-
-      - name: Resolve Flutter dependencies
-        if: matrix.flutter-build != false
-        run: flutter pub get
-
-      - name: Prepare pinned Android policy library repairs
-        if: matrix.flutter-build == 'android'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/prepare_android_policy_plugin_overrides.py
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android --preserve-dev-native-plugins
-
-
-      - name: Select exact CocoaPods in an isolated job gem home
-        if: matrix.flutter-build == 'ios'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s .github/scripts -p test_install_isolated_cocoapods.py -v
-          python3 .github/scripts/install_isolated_cocoapods.py \
-            --output artifacts/qa/text18/ios37-simulators/cocoapods-installation.json
-
-      - name: Upload isolated CocoaPods installation receipt
-        if: always() && matrix.flutter-build == 'ios'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        with:
-          name: bil-cocoapods-codeql-${{ matrix.language }}-${{ github.sha }}
-          path: artifacts/qa/text18/ios37-simulators/cocoapods-installation.json
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Prepare iOS pods and verify simulator build settings before CodeQL tracing
-        if: matrix.flutter-build == 'ios'
-        shell: bash
-        run: |
-          set -euo pipefail
-          OUT=artifacts/qa/text18/ios37-simulators
-          mkdir -p "$OUT"
-          xcodebuild -version | tee "$OUT/xcode-version.txt"
-          dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --preserve-dev-native-plugins
-          python3 tool/release/prepare_ios_storekit_restore_codec_overlay.py \
-            --project-root "$GITHUB_WORKSPACE" --verify-native-binding \
-            | tee "$OUT/storekit-native-binding-before-codeql.json"
-          pod install --project-directory=ios 2>&1 | tee "$OUT/pod-install.log"
-          SOURCE_PACKAGES="$GITHUB_WORKSPACE/build/ios/SourcePackages"
-          mkdir -p "$SOURCE_PACKAGES"
-          xcodebuild \
-            -clonedSourcePackagesDirPath "$SOURCE_PACKAGES" \
-            -skipPackageUpdates \
-            -skipPackagePluginValidation \
-            -skipPackageSignatureValidation \
-            -project "$GITHUB_WORKSPACE/ios/Runner.xcodeproj" \
-            -scheme Runner \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -showBuildSettings \
-            "BUILD_DIR=$GITHUB_WORKSPACE/build/ios" \
-            > "$OUT/xcode-build-settings.log"
-          grep -E '^[[:space:]]*TARGET_BUILD_DIR = .+' "$OUT/xcode-build-settings.log"
-          grep -E '^[[:space:]]*WRAPPER_NAME = Runner.app$' "$OUT/xcode-build-settings.log"
-
-      - name: Initialize CodeQL with Security Extended
-        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
-        with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
-          queries: security-extended
-
-      - name: Build Android plugin sources for CodeQL
-        if: matrix.flutter-build == 'android'
-        run: >-
-          flutter build apk --debug --no-pub --build-number 33
-          --dart-define=BIL_ENVIRONMENT=testing
-          --dart-define=BIL_USE_SUPABASE=false
-          --dart-define=SUPABASE_URL=
-          --dart-define=SUPABASE_ANON_KEY=
-          --dart-define=BIL_PAYMENTS_ENABLED=false
-          --dart-define=BIL_ADS_ENABLED=false
-          --dart-define=BIL_COMMUNITY_ENABLED=false
-          --dart-define=BIL_PUSH_ENABLED=false
-
-      - name: Build iOS plugin sources for CodeQL
-        if: matrix.flutter-build == 'ios'
-        # CocoaPods and simulator build settings are prepared before CodeQL;
-        # the plugin build remains traced, and Podfile.lock is not committed.
-        run: >-
-          flutter --verbose build ios --simulator --debug --no-codesign --no-pub
-          --build-number 37
-          --dart-define=BIL_ENVIRONMENT=testing
-          --dart-define=BIL_USE_SUPABASE=false
-          --dart-define=SUPABASE_URL=
-          --dart-define=SUPABASE_ANON_KEY=
-          --dart-define=BIL_PAYMENTS_ENABLED=false
-          --dart-define=BIL_ADS_ENABLED=false
-          --dart-define=BIL_COMMUNITY_ENABLED=false
-          --dart-define=BIL_PUSH_ENABLED=false
-
-      - name: Verify the patched native StoreKit binding after the traced iOS build
-        if: matrix.flutter-build == 'ios'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 tool/release/prepare_ios_storekit_restore_codec_overlay.py \
-            --project-root "$GITHUB_WORKSPACE" --verify-native-binding \
-            | tee artifacts/qa/text18/ios37-simulators/storekit-native-binding-after-codeql.json
-
-      - name: Preserve the isolated Android debug APK for static inspection
-        if: matrix.flutter-build == 'android'
-        shell: bash
-        run: |
-          set -euo pipefail
-          OUT=artifacts/qa/text18/android-api33
-          mkdir -p "$OUT"
-          cp build/app/outputs/flutter-apk/app-debug.apk "$OUT/offline-debug-build33.apk"
-          sha256sum "$OUT/offline-debug-build33.apk" > "$OUT/apk.sha256"
-
-      - name: Diagnose iOS simulator build settings after Flutter failure
-        if: ${{ failure() && matrix.flutter-build == 'ios' }}
-        shell: bash
-        run: |
-          set +e
-          OUT=artifacts/qa/text18/ios37-simulators
-          mkdir -p "$OUT"
-          SOURCE_PACKAGES="$GITHUB_WORKSPACE/build/ios/SourcePackages"
-          xcodebuild \
-            -clonedSourcePackagesDirPath "$SOURCE_PACKAGES" \
-            -skipPackageUpdates \
-            -skipPackagePluginValidation \
-            -skipPackageSignatureValidation \
-            -project "$GITHUB_WORKSPACE/ios/Runner.xcodeproj" \
-            -scheme Runner \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -showBuildSettings \
-            "BUILD_DIR=$GITHUB_WORKSPACE/build/ios" \
-            > "$OUT/xcode-build-settings-after-failure.log" 2>&1
-          SETTINGS_STATUS=$?
-          echo "xcodebuild_show_build_settings_exit=$SETTINGS_STATUS"
-          rg -n 'TARGET_BUILD_DIR|WRAPPER_NAME|CONFIGURATION =|error:|Error' \
-            "$OUT/xcode-build-settings-after-failure.log" | tail -n 80 || true
-          find build/ios -maxdepth 7 -name Runner.app -print 2>/dev/null || true
-
-      - name: Rebuild the patched Drift worker before JavaScript analysis
-        if: matrix.flutter-build == 'web-worker'
-        shell: bash
-        run: |
-          set -euo pipefail
-          dart compile js -O2 -o web/drift_worker.dart.js tool/drift_worker.dart
-          # The deps manifest and source map contain runner-local package URIs.
-          # Compare the generated executable worker, which is the CodeQL input.
-          git diff --exit-code -- web/drift_worker.dart.js
-          test -s web/drift_worker.dart.js.deps
-          test -s web/drift_worker.dart.js.map
-
-      - name: Upload CodeQL results
-        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
-        with:
-          category: /language:${{ matrix.language }}
-
-      - name: Verify purchase and restore pipeline with isolated native SDK fakes
-        if: matrix.flutter-build == 'android'
-        run: >-
-          flutter test --no-pub --reporter expanded
-          --dart-define=BIL_PAYMENTS_ENABLED=true
-          test/features/commerce/store_transaction_queue_test.dart
-          test/features/commerce/store_native_purchase_completion_test.dart
-          test/features/commerce/app_purchase_confirmation_test.dart
-          test/features/commerce/app_subscription_confirmation_test.dart
-          test/features/commerce/verified_store_purchase_startup_event_test.dart
-          test/features/intelligence_center/ai_boost_purchase_service_test.dart
-
-      # The mandatory untraced job below owns all native journeys. Compiler
-      # tracing must not change the environment of frame-identity assertions.
-      - name: Upload Android CodeQL APK and build evidence
-        if: always() && matrix.flutter-build == 'android'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: bil-android-codeql-apk-${{ github.sha }}-${{ github.run_attempt }}
-          path: artifacts/qa/text18/android-api33
-          if-no-files-found: error
-          retention-days: 14
-
-      # Native journeys run in the separate fresh macOS job below. CodeQL's
-      # inherited process tracing must not be the native test environment.
-      - name: Upload iOS CodeQL build and preparation evidence
-        if: always() && matrix.flutter-build == 'ios'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: bil-ios-codeql-build-${{ github.sha }}
-          path: artifacts/qa/text18/ios37-simulators
-          if-no-files-found: warn
-          retention-days: 14
-
-  local-supabase-integration:
-    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011') && inputs.mobsf_only != true && inputs.android_native_only != true && inputs.source_audit_only != true && (github.event_name != 'workflow_dispatch' || (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true) || inputs.supabase_only == true) }}
-    name: Local Supabase migrations, SQL, Auth and RLS
-    runs-on: ubuntu-24.04
-    timeout-minutes: 180
-    permissions:
-      contents: read
-    steps:
-      - name: Check out accepted source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install Node.js 24
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: 24
-
-      - name: Install Deno 2
-        uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2
-        with:
-          deno-version: v2.x
-
-      - name: Install pinned Supabase CLI
-        uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3
-        with:
-          version: 2.121.0
-
-      - name: Verify local-only prerequisites and install SQL fixture dependency
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --version
-          deno --version
-          supabase --version
-          supabase --help
-          supabase start --help
-          supabase db reset --help
-          supabase test --help
-          docker version
-          test ! -e supabase/config.toml
-          npm ci --prefix supabase/tests --ignore-scripts --no-audit --no-fund
-
-      - name: Start the disposable local Supabase stack
-        shell: bash
-        run: |
-          set -euo pipefail
-          supabase init
-          python3 tool/release/prepare_local_supabase_ci_stack.py \
-            --config supabase/config.toml --github-env "$GITHUB_ENV" \
-            --evidence-dir "$RUNNER_TEMP/bil-supabase-port-preflight"
-          BIL_LOCAL_DB_CONTAINER="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["exact_database_container"])' "$RUNNER_TEMP/bil-supabase-port-preflight/OWNED_LOCAL_STACK_CONFIG.json")"
-          export BIL_LOCAL_DB_CONTAINER
-          # Checked-in migrations require the operational owner, a legacy
-          # review moderator, and a reviewer identity referenced by an older
-          # migration. These disposable CI-only rows have no password and are
-          # created only in this local database.
-          test ! -e supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql
-          cat > supabase/migrations/20260904025000_bil_local_ci_moderation_owner.sql <<'SQL'
-          insert into auth.users (
-            id,
-            aud,
-            role,
-            email,
-            encrypted_password,
-            email_confirmed_at,
-            raw_app_meta_data,
-            raw_user_meta_data,
-            created_at,
-            updated_at
-          ) values
-          (
-            '00000000-0000-4000-8000-000000000018',
-            'authenticated', 'authenticated', 'kademcom@yahoo.com', '',
-            pg_catalog.now(),
-            '{"provider":"email","providers":["email"]}'::jsonb,
-            '{"bil_ci_fixture":true,"bil_ci_role":"operational_owner"}'::jsonb,
-            pg_catalog.now(), pg_catalog.now()
-          ),
-          (
-            '00000000-0000-4000-8000-000000000019',
-            'authenticated', 'authenticated', 'play-review@bilhealth.com', '',
-            pg_catalog.now(),
-            '{"provider":"email","providers":["email"]}'::jsonb,
-            '{"bil_ci_fixture":true,"bil_ci_role":"store_review_moderator"}'::jsonb,
-            pg_catalog.now(), pg_catalog.now()
-          ),
-          (
-            '00000000-0000-4000-8000-000000000020',
-            'authenticated', 'authenticated', 'bilhealth.app@gmail.com', '',
-            pg_catalog.now(),
-            '{"provider":"email","providers":["email"]}'::jsonb,
-            '{"bil_ci_fixture":true,"bil_ci_role":"store_review_account"}'::jsonb,
-            pg_catalog.now(), pg_catalog.now()
-          ),
-          (
-            '00000000-0000-4000-8000-000000000021',
-            'authenticated', 'authenticated', 'dr-reviewer@bil-test.invalid', '',
-            pg_catalog.now(),
-            '{"provider":"email","providers":["email"]}'::jsonb,
-            '{"bil_ci_fixture":true,"bil_ci_role":"store_review_account"}'::jsonb,
-            pg_catalog.now(), pg_catalog.now()
-          );
-          SQL
-          supabase start --exclude studio,logflare,vector,postgres-meta,supavisor,imgproxy,mailpit \
-            > "$RUNNER_TEMP/bil-supabase-start.log" 2>&1 || {
-              python3 - "$RUNNER_TEMP/bil-supabase-start.log" <<'PY'
-          import re
-          import sys
-          for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
-              if re.search(r'(?i)(anon key|service.role key|jwt secret|password|secret key)', line):
-                  print('[redacted local Supabase credential line]')
-              else:
-                  print(line, end='')
-          PY
-              exit 1
-            }
-          python3 - "$RUNNER_TEMP/bil-supabase-start.log" <<'PY'
-          import re
-          import sys
-          for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
-              if re.search(r'(?i)(anon key|service.role key|jwt secret|password|secret key)', line):
-                  print('[redacted local Supabase credential line]')
-              else:
-                  print(line, end='')
-          PY
-          supabase status --output env > "$RUNNER_TEMP/bil-supabase-local.env"
-          LOCAL_ANON_KEY="$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
-          LOCAL_SERVICE_KEY="$(grep '^SERVICE_ROLE_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
-          test -n "$LOCAL_ANON_KEY"
-          test -n "$LOCAL_SERVICE_KEY"
-          echo "::add-mask::$LOCAL_ANON_KEY"
-          echo "::add-mask::$LOCAL_SERVICE_KEY"
-          {
-            echo "API_URL=$(grep '^API_URL=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
-            echo "ANON_KEY=$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env" | cut -d= -f2- | tr -d '\"')"
-            echo "BIL_LOCAL_SERVICE_ROLE_KEY=$LOCAL_SERVICE_KEY"
-          } >> "$GITHUB_ENV"
-          # Never select a different project merely because it is listed first.
-          docker ps --format '{{.Names}}' | grep -Fx -- "$BIL_LOCAL_DB_CONTAINER"
-          test -n "$(grep '^API_URL=' "$RUNNER_TEMP/bil-supabase-local.env")"
-          test -n "$(grep '^ANON_KEY=' "$RUNNER_TEMP/bil-supabase-local.env")"
-          test -n "$BIL_LOCAL_DB_CONTAINER"
-
-      - name: Apply checked-in migrations and verify local authority preconditions
-        id: checked_in_migrations
-        shell: bash
-        run: |
-          set -euo pipefail
-          supabase db reset --local --no-seed
-          docker exec -i "$BIL_LOCAL_DB_CONTAINER" psql \
-            -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
-          do $local_moderator_fixture_assertion$
-          declare
-            v_admin_id uuid;
-            v_admin_count integer;
-            v_reviewer_account_id uuid;
-            v_reviewer_account_count integer;
-            v_second_reviewer_id uuid;
-            v_second_reviewer_count integer;
-            v_reviewer_id uuid;
-            v_reviewer_count integer;
-          begin
-            select pg_catalog.count(*)::integer
-              into v_admin_count
-            from auth.users
-            where pg_catalog.lower(email) = 'kademcom@yahoo.com';
-
-            if v_admin_count <> 1 then
-              raise exception 'local_moderator_fixture_auth_user_count_invalid';
-            end if;
-
-            select id into v_admin_id
-            from auth.users
-            where pg_catalog.lower(email) = 'kademcom@yahoo.com';
-
-            select pg_catalog.count(*)::integer
-              into v_reviewer_account_count
-            from auth.users
-            where pg_catalog.lower(email) = 'bilhealth.app@gmail.com';
-
-            if v_reviewer_account_count <> 1 then
-              raise exception 'local_moderator_fixture_reviewer_account_count_invalid';
-            end if;
-
-            select id into v_reviewer_account_id
-            from auth.users
-            where pg_catalog.lower(email) = 'bilhealth.app@gmail.com';
-
-            select pg_catalog.count(*)::integer
-              into v_second_reviewer_count
-            from auth.users
-            where pg_catalog.lower(email) = 'dr-reviewer@bil-test.invalid';
-
-            if v_second_reviewer_count <> 1 then
-              raise exception 'local_moderator_fixture_second_reviewer_count_invalid';
-            end if;
-
-            select id into v_second_reviewer_id
-            from auth.users
-            where pg_catalog.lower(email) = 'dr-reviewer@bil-test.invalid';
-
-            select pg_catalog.count(*)::integer
-              into v_reviewer_count
-            from auth.users
-            where pg_catalog.lower(email) = 'play-review@bilhealth.com';
-
-            if v_reviewer_count <> 1 then
-              raise exception 'local_moderator_fixture_reviewer_count_invalid';
-            end if;
-
-            select id into v_reviewer_id
-            from auth.users
-            where pg_catalog.lower(email) = 'play-review@bilhealth.com';
-
-            -- The October 15 migration deliberately REMOVES the legacy
-            -- store reviewer moderator bootstrap. This must stay absent.
-            if exists (
-              select 1 from public.bil_community_moderators
-              where user_id = v_reviewer_id
-            ) or exists (
-              select 1 from private.bil_ai_coach_admins
-              where user_id = v_reviewer_id and active
-            ) then
-              raise exception 'local_store_reviewer_privilege_separation_failed';
-            end if;
-
-            if not exists (
-              select 1 from public.bil_community_moderators
-              where user_id = v_admin_id
-            ) or not exists (
-              select 1 from private.bil_ai_coach_admins
-              where user_id = v_admin_id and active
-            ) or not exists (
-              select 1 from public.bil_ai_closed_test_grants
-              where owner_id = v_admin_id
-                and active
-                and expires_at > pg_catalog.now()
-            ) then
-              raise exception 'local_moderator_fixture_entitlements_incomplete';
-            end if;
-
-            -- The operational owner and their approved secondary account
-            -- are the only two active admins; no store/test reviewer is one.
-            if (select pg_catalog.count(*)
-                from private.bil_ai_coach_admins
-                where active) <> 2
-              or not exists (
-                select 1 from private.bil_ai_coach_admins
-                where user_id = v_reviewer_account_id and active
-              )
-              or exists (
-                select 1 from private.bil_ai_coach_admins
-                where user_id in (v_reviewer_id, v_second_reviewer_id)
-                  and active
-              )
-              or not exists (
-                select 1 from private.bil_ai_coach_admins
-                where user_id = v_admin_id and active
-              ) then
-              raise exception 'local_moderator_fixture_reviewer_admin_separation_invalid';
-            end if;
-          end
-          $local_moderator_fixture_assertion$;
-          SQL
-
-      - name: Execute PostgreSQL migration and RLS tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          # These suites use RAISE/DO assertions, not the pgTAP protocol.
-          # Preserve every assertion and propagate the first SQL error.
-          sql_tests=(supabase/tests/*_test.sql)
-          test -f "${sql_tests[0]}"
-          for sql_test in "${sql_tests[@]}"; do
-            printf 'RUN SQL assertion suite: %s\n' "$sql_test"
-            docker exec -i "$BIL_LOCAL_DB_CONTAINER" \
-              psql -X -v ON_ERROR_STOP=1 -U postgres -d postgres < "$sql_test"
-            printf 'PASS SQL assertion suite: %s\n' "$sql_test"
-          done
-          printf 'SQL assertion suites passed: %s\n' "${#sql_tests[@]}" \
-            >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Exercise Auth sessions and owner-scoped RLS through local APIs
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --test \
-            supabase/tests/local_supabase_test_support_test.mjs \
-            supabase/tests/local_supabase_storage_fixture_test.mjs \
-            supabase/tests/local_supabase_auth_rls_e2e_test.mjs \
-            supabase/tests/local_supabase_product_rpc_e2e_test.mjs \
-            supabase/tests/local_supabase_storage_realtime_e2e_test.mjs
-
-      - name: Install Flutter for the actual SQLite to Supabase restore cycle
-        if: ${{ !cancelled() && steps.checked_in_migrations.outcome == 'success' }}
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-
-      - name: Restore independent SQLite databases through real local Auth and PostgREST
-        if: ${{ !cancelled() && steps.checked_in_migrations.outcome == 'success' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter pub get
-          command -v pwsh
-          PRIVATE="$RUNNER_TEMP/bil-sqlite-supabase-cycle"
-          mkdir -p "$PRIVATE"
-          node supabase/tests/local_supabase_sqlite_cycle_fixture.mjs prepare "$PRIVATE/session.json"
-          trap 'node supabase/tests/local_supabase_sqlite_cycle_fixture.mjs cleanup "$PRIVATE/session.json"' EXIT
-          BIL_LOCAL_RESTORE_CONFIG="$PRIVATE/session.json" \
-          BIL_TEST_PWSH="$(command -v pwsh)" \
-          BIL_CLOSURE_CAPTURE_STAGE=supabase-real-cycle \
-            flutter test --no-pub --concurrency=1 --timeout=10m --reporter expanded \
-              tools/qa/flutter/cloud_restore_postgres_cycle_test.dart
-          OUT=artifacts/qa/text18/supabase-sqlite-cycle
-          mkdir -p "$OUT"
-          cp "$PRIVATE/cycle-proof.json" "$OUT/cycle-proof.json"
-          cp build/stage1-closure/images/supabase-real-cycle-*.png "$OUT/"
-
-      - name: Upload restored-reader proof without sessions or databases
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: bil-supabase-sqlite-cycle-${{ github.sha }}
-          path: |
-            artifacts/qa/text18/supabase-sqlite-cycle
-            ${{ runner.temp }}/bil-supabase-port-preflight
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Run all isolated PostgreSQL and Edge Function suites
-        if: ${{ !cancelled() && steps.checked_in_migrations.outcome == 'success' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm test --prefix supabase/tests
-          # Include the checked-in isolated SQL/owner/privacy TypeScript suites.
-          # The npm script and functions/ discovery do not include this directory.
-          shopt -s nullglob
-          isolated_sql_tests=(supabase/tests/*_test.ts)
-          test "${#isolated_sql_tests[@]}" -gt 0
-          root_sql_tests=()
-          package_sql_tests=()
-          for sql_test in "${isolated_sql_tests[@]}"; do
-            if [[ "$sql_test" == "supabase/tests/community_food_explicit_publication_pglite_test.ts" ]]; then
-              package_sql_tests+=("${sql_test#supabase/tests/}")
-            else
-              root_sql_tests+=("$sql_test")
-            fi
-          done
-          test "${#package_sql_tests[@]}" -eq 1
-          test "${#root_sql_tests[@]}" -gt 0
-          test "$(( ${#root_sql_tests[@]} + ${#package_sql_tests[@]} ))" -eq "${#isolated_sql_tests[@]}"
-          deno test --no-lock --allow-env --allow-read --allow-net "${root_sql_tests[@]}"
-          (
-            cd supabase/tests
-            deno test --no-lock --allow-env --allow-read --allow-net "${package_sql_tests[@]}"
-          )
-          deno test --allow-env --allow-read --allow-net supabase/functions
-
   isolated-source-audit:
     if: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/integration/bil-qa-media-policy-20261011' || github.ref == 'refs/heads/bil39/integration-20261025' || github.ref == 'refs/heads/codex/bil40-device-fixes-20261028' || github.ref == 'refs/heads/codex/bil41-android33-release-20261106' || github.ref == 'refs/heads/codex/bil43-android35-verified-20261108' || github.ref == 'refs/heads/codex/bil44-android36-verified-20261115' || github.ref == 'refs/heads/codex/bil45-android37-inactive-catalog-20261115' || github.ref == 'refs/heads/codex/bil46-android38-reviewer-fixes-20261116')) || (github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true && inputs.mobsf_only != true) }}
     name: Isolated Semgrep source audit
@@ -687,7 +81,126 @@ jobs:
       - name: Check out accepted source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 6c0dfbab576e797d24b42310e9194db2f1664188
           persist-credentials: false
+      - name: Verify immutable Source17 and one-workflow security controller provenance
+        shell: bash
+        env:
+          BINDING_JOB_KEY: isolated-source-audit
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          """Embedded in a future tests-only GitHub controller. Never run locally."""
+          import base64
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          
+          def require(condition, code):
+              if not condition:
+                  raise RuntimeError(code)
+          
+          def git(*args, env=None):
+              try:
+                  result = subprocess.run(['git', *args], env=env, capture_output=True, timeout=90)
+              except (subprocess.TimeoutExpired, OSError):
+                  raise RuntimeError('PROVENANCE_GIT_TIMEOUT_OR_OS_ERROR_NO_RAW_OUTPUT') from None
+              require(result.returncode == 0, 'PROVENANCE_GIT_FAILED_NO_RAW_STDERR')
+              return result.stdout
+          
+          
+          def fetch_controller(controller, fetch_env):
+              # Retry only this read of the same immutable controller, never a ref or push.
+              # A successful fetch still grants no binding: all checks below must finish.
+              for attempt in range(1, 3):
+                  try:
+                      result = subprocess.run(
+                          ['git', 'fetch', '--no-tags', '--depth=1', 'origin', controller],
+                          env=fetch_env, capture_output=True, timeout=180,
+                      )
+                  except (subprocess.TimeoutExpired, OSError):
+                      fetched = False
+                  else:
+                      fetched = result.returncode == 0
+                  if fetched:
+                      return
+                  if attempt < 2:
+                      print(json.dumps({'provenance_fetch_attempt': attempt,
+                                        'status': 'RETRYING_SAME_IMMUTABLE_CONTROLLER'}))
+              raise RuntimeError('PROVENANCE_FETCH_FAILED_AFTER_2_ATTEMPTS_NO_RAW_OUTPUT') from None
+          
+          source = os.environ['SOURCE_SHA']
+          source_tree = os.environ['SOURCE_TREE']
+          controller = os.environ['GITHUB_SHA']
+          branch = os.environ['CONTROLLER_BRANCH']
+          workflow = '.github/workflows/bil_codeql_security_extended.yml'
+          require(all(re.fullmatch('[a-f0-9]{40}', value) for value in (source, source_tree, controller)), 'INVALID_IMMUTABLE_BINDING')
+          require(source != controller, 'SOURCE_AND_CONTROLLER_MUST_BE_DISTINCT')
+          require(os.environ['GITHUB_REPOSITORY'] == 'bilhealth-admin/Body-Intelligence', 'WRONG_REPOSITORY')
+          require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch', 'DISPATCH_ONLY')
+          require(os.environ['GITHUB_REF'] == 'refs/heads/' + branch, 'WRONG_CONTROLLER_REF')
+          require(os.environ['GITHUB_WORKFLOW_SHA'] == controller, 'WORKFLOW_AND_RUN_CONTROLLER_DIFFER')
+          require(git('rev-parse', 'HEAD').decode().strip() == source, 'SOURCE_HEAD_DRIFT')
+          require(git('rev-parse', 'HEAD^{tree}').decode().strip() == source_tree, 'SOURCE_TREE_DRIFT')
+          require(not git('status', '--porcelain', '--untracked-files=no').strip(), 'SOURCE_NOT_PRISTINE')
+          # Git credentials remain disabled in the checkout. Only this read-only child
+          # receives an ephemeral header; no token/header is printed, stored or in argv.
+          fetch_env = dict(os.environ)
+          fetch_env.update(GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never', GCM_GUI_PROMPT='0')
+          token = fetch_env.get('GH_TOKEN')
+          require(isinstance(token, str) and bool(token), 'READONLY_GITHUB_TOKEN_REQUIRED')
+          config_count = fetch_env.get('GIT_CONFIG_COUNT', '0')
+          require(re.fullmatch(r'\d+', config_count) is not None and int(config_count) < 100, 'GIT_CHILD_CONFIG_COUNT_INVALID')
+          slot = str(int(config_count))
+          fetch_env['GIT_CONFIG_KEY_' + slot] = 'http.https://github.com/.extraheader'
+          fetch_env['GIT_CONFIG_VALUE_' + slot] = 'AUTHORIZATION: basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+          fetch_env['GIT_CONFIG_COUNT'] = str(int(config_count) + 1)
+          for key in list(fetch_env):
+              if key.upper().startswith(('GIT_TRACE', 'GCM_TRACE')) or key.upper() == 'GIT_CURL_VERBOSE':
+                  fetch_env.pop(key)
+          try:
+              fetch_controller(controller, fetch_env)
+          finally:
+              fetch_env.pop('GH_TOKEN', None)
+              fetch_env.pop('GIT_CONFIG_VALUE_' + slot, None)
+              token = None
+          require(git('rev-parse', 'FETCH_HEAD').decode().strip() == controller, 'CONTROLLER_FETCH_DRIFT')
+          commit = git('cat-file', '-p', controller).decode('utf-8')
+          parents = [line.split(' ', 1)[1] for line in commit.split('\n\n', 1)[0].splitlines() if line.startswith('parent ')]
+          require(parents == [source], 'CONTROLLER_MUST_HAVE_EXACT_SOURCE_PARENT')
+          changed = git('diff-tree', '--no-commit-id', '--no-abbrev', '--raw', '-r', source, controller).decode().splitlines()
+          require(len(changed) == 1, 'CONTROLLER_MUST_CHANGE_EXACTLY_ONE_WORKFLOW')
+          fields = changed[0].split('\t')
+          require(len(fields) == 2 and fields[1] == workflow, 'CONTROLLER_CHANGED_UNREVIEWED_PATH')
+          metadata = fields[0].split()
+          require(len(metadata) == 5 and metadata[0:2] == [':100644', '100644'] and metadata[4] == 'M', 'CONTROLLER_WORKFLOW_MODE_OR_OPERATION_CHANGED')
+          workflow_bytes = git('show', controller + ':' + workflow)
+          report = {
+              'schema': 'bil49.tests-only-source-controller-binding.v1',
+              'status': 'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT',
+              'source_sha': source, 'source_tree': source_tree,
+              'controller_sha': controller,
+              'controller_tree': git('rev-parse', controller + '^{tree}').decode().strip(),
+              'controller_parent': source, 'controller_branch': branch,
+              'workflow_path': workflow,
+              'workflow_sha256': hashlib.sha256(workflow_bytes).hexdigest(),
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'job_key': os.environ['BINDING_JOB_KEY'],
+              'event': 'workflow_dispatch',
+              'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'release_approval': False,
+          }
+          out = Path(os.environ['RUNNER_TEMP']) / 'bil49-source-binding' / 'source-provenance.json'
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({key: report[key] for key in ('source_sha', 'source_tree', 'controller_sha', 'controller_tree', 'job_key', 'status')}))
+          PY
 
       - name: Install pinned free scanner in a temporary environment
         shell: bash
@@ -727,6 +240,15 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Preserve immutable source and security controller provenance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil49-source17-security-audit2-isolated-source-audit-${{ env.SOURCE_SHA }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bil49-source-binding/source-provenance.json
+          if-no-files-found: error
+          retention-days: 30
+
   macro-domain-generated-checks:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.source_audit_only == true }}
     name: Bounded macro editor generated checks, mutants and VM coverage
@@ -738,7 +260,126 @@ jobs:
       - name: Check out accepted source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 6c0dfbab576e797d24b42310e9194db2f1664188
           persist-credentials: false
+      - name: Verify immutable Source17 and one-workflow security controller provenance
+        shell: bash
+        env:
+          BINDING_JOB_KEY: macro-domain-generated-checks
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          """Embedded in a future tests-only GitHub controller. Never run locally."""
+          import base64
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          
+          def require(condition, code):
+              if not condition:
+                  raise RuntimeError(code)
+          
+          def git(*args, env=None):
+              try:
+                  result = subprocess.run(['git', *args], env=env, capture_output=True, timeout=90)
+              except (subprocess.TimeoutExpired, OSError):
+                  raise RuntimeError('PROVENANCE_GIT_TIMEOUT_OR_OS_ERROR_NO_RAW_OUTPUT') from None
+              require(result.returncode == 0, 'PROVENANCE_GIT_FAILED_NO_RAW_STDERR')
+              return result.stdout
+          
+          
+          def fetch_controller(controller, fetch_env):
+              # Retry only this read of the same immutable controller, never a ref or push.
+              # A successful fetch still grants no binding: all checks below must finish.
+              for attempt in range(1, 3):
+                  try:
+                      result = subprocess.run(
+                          ['git', 'fetch', '--no-tags', '--depth=1', 'origin', controller],
+                          env=fetch_env, capture_output=True, timeout=180,
+                      )
+                  except (subprocess.TimeoutExpired, OSError):
+                      fetched = False
+                  else:
+                      fetched = result.returncode == 0
+                  if fetched:
+                      return
+                  if attempt < 2:
+                      print(json.dumps({'provenance_fetch_attempt': attempt,
+                                        'status': 'RETRYING_SAME_IMMUTABLE_CONTROLLER'}))
+              raise RuntimeError('PROVENANCE_FETCH_FAILED_AFTER_2_ATTEMPTS_NO_RAW_OUTPUT') from None
+          
+          source = os.environ['SOURCE_SHA']
+          source_tree = os.environ['SOURCE_TREE']
+          controller = os.environ['GITHUB_SHA']
+          branch = os.environ['CONTROLLER_BRANCH']
+          workflow = '.github/workflows/bil_codeql_security_extended.yml'
+          require(all(re.fullmatch('[a-f0-9]{40}', value) for value in (source, source_tree, controller)), 'INVALID_IMMUTABLE_BINDING')
+          require(source != controller, 'SOURCE_AND_CONTROLLER_MUST_BE_DISTINCT')
+          require(os.environ['GITHUB_REPOSITORY'] == 'bilhealth-admin/Body-Intelligence', 'WRONG_REPOSITORY')
+          require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch', 'DISPATCH_ONLY')
+          require(os.environ['GITHUB_REF'] == 'refs/heads/' + branch, 'WRONG_CONTROLLER_REF')
+          require(os.environ['GITHUB_WORKFLOW_SHA'] == controller, 'WORKFLOW_AND_RUN_CONTROLLER_DIFFER')
+          require(git('rev-parse', 'HEAD').decode().strip() == source, 'SOURCE_HEAD_DRIFT')
+          require(git('rev-parse', 'HEAD^{tree}').decode().strip() == source_tree, 'SOURCE_TREE_DRIFT')
+          require(not git('status', '--porcelain', '--untracked-files=no').strip(), 'SOURCE_NOT_PRISTINE')
+          # Git credentials remain disabled in the checkout. Only this read-only child
+          # receives an ephemeral header; no token/header is printed, stored or in argv.
+          fetch_env = dict(os.environ)
+          fetch_env.update(GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never', GCM_GUI_PROMPT='0')
+          token = fetch_env.get('GH_TOKEN')
+          require(isinstance(token, str) and bool(token), 'READONLY_GITHUB_TOKEN_REQUIRED')
+          config_count = fetch_env.get('GIT_CONFIG_COUNT', '0')
+          require(re.fullmatch(r'\d+', config_count) is not None and int(config_count) < 100, 'GIT_CHILD_CONFIG_COUNT_INVALID')
+          slot = str(int(config_count))
+          fetch_env['GIT_CONFIG_KEY_' + slot] = 'http.https://github.com/.extraheader'
+          fetch_env['GIT_CONFIG_VALUE_' + slot] = 'AUTHORIZATION: basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+          fetch_env['GIT_CONFIG_COUNT'] = str(int(config_count) + 1)
+          for key in list(fetch_env):
+              if key.upper().startswith(('GIT_TRACE', 'GCM_TRACE')) or key.upper() == 'GIT_CURL_VERBOSE':
+                  fetch_env.pop(key)
+          try:
+              fetch_controller(controller, fetch_env)
+          finally:
+              fetch_env.pop('GH_TOKEN', None)
+              fetch_env.pop('GIT_CONFIG_VALUE_' + slot, None)
+              token = None
+          require(git('rev-parse', 'FETCH_HEAD').decode().strip() == controller, 'CONTROLLER_FETCH_DRIFT')
+          commit = git('cat-file', '-p', controller).decode('utf-8')
+          parents = [line.split(' ', 1)[1] for line in commit.split('\n\n', 1)[0].splitlines() if line.startswith('parent ')]
+          require(parents == [source], 'CONTROLLER_MUST_HAVE_EXACT_SOURCE_PARENT')
+          changed = git('diff-tree', '--no-commit-id', '--no-abbrev', '--raw', '-r', source, controller).decode().splitlines()
+          require(len(changed) == 1, 'CONTROLLER_MUST_CHANGE_EXACTLY_ONE_WORKFLOW')
+          fields = changed[0].split('\t')
+          require(len(fields) == 2 and fields[1] == workflow, 'CONTROLLER_CHANGED_UNREVIEWED_PATH')
+          metadata = fields[0].split()
+          require(len(metadata) == 5 and metadata[0:2] == [':100644', '100644'] and metadata[4] == 'M', 'CONTROLLER_WORKFLOW_MODE_OR_OPERATION_CHANGED')
+          workflow_bytes = git('show', controller + ':' + workflow)
+          report = {
+              'schema': 'bil49.tests-only-source-controller-binding.v1',
+              'status': 'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT',
+              'source_sha': source, 'source_tree': source_tree,
+              'controller_sha': controller,
+              'controller_tree': git('rev-parse', controller + '^{tree}').decode().strip(),
+              'controller_parent': source, 'controller_branch': branch,
+              'workflow_path': workflow,
+              'workflow_sha256': hashlib.sha256(workflow_bytes).hexdigest(),
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'job_key': os.environ['BINDING_JOB_KEY'],
+              'event': 'workflow_dispatch',
+              'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'release_approval': False,
+          }
+          out = Path(os.environ['RUNNER_TEMP']) / 'bil49-source-binding' / 'source-provenance.json'
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({key: report[key] for key in ('source_sha', 'source_tree', 'controller_sha', 'controller_tree', 'job_key', 'status')}))
+          PY
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
@@ -757,101 +398,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  android-native-only:
-    if: >-
-      ${{ inputs.source_audit_only != true && inputs.mobsf_only != true &&
-          (inputs.android_native_only == true ||
-           (inputs.android_only != true && inputs.ios_only != true && inputs.supabase_only != true)) }}
-    name: Android API 33 native integration without CodeQL tracing
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    permissions:
-      contents: read
-    env:
-      BIL_NATIVE_TARGET: ${{ inputs.android_native_target != 'inherit' && inputs.android_native_target || inputs.native_target }}
-    steps:
-      - name: Check out accepted source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Install Flutter stable
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          flutter-version: 3.44.6
-          cache: true
-      - name: Resolve existing Flutter dependencies
-        run: flutter pub get
-      - name: Verify affected health and reply regressions before the native feature run
-        if: env.BIL_NATIVE_TARGET != 'system-crypto'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p artifacts/qa/text18/android-api33
-          flutter test --no-pub --reporter expanded \
-            test/connected_health/apple_health_permission_flow_test.dart \
-            test/features/connected_health/health_cache_first_regression_test.dart \
-            test/features/connected_health/health_controller_disposal_test.dart \
-            test/features/connected_health/explicit_sync_deadline_test.dart \
-            test/features/connected_health/health_sync_responsiveness_test.dart \
-            test/connected_health/dashboard_health_cache_startup_contract_test.dart \
-            test/features/intelligence_center/coach_reply_arrival_test.dart \
-            tools/qa/flutter/native_visual_observer_regression_test.dart \
-            2>&1 | tee artifacts/qa/text18/android-api33/affected-source-tests.log
-      - name: Enable and require hardware acceleration on the disposable runner
-        shell: bash
-        run: bash .github/scripts/bil_prepare_android_kvm.sh
-      - name: Run the existing native integration suite on API 33
-        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
-        with:
-          api-level: 33
-          arch: x86_64
-          target: google_apis
-          profile: pixel_6
-          disable-animations: true
-          emulator-boot-timeout: 1200
-          script: bash .github/scripts/bil_android33_native_integration.sh
-      - name: Upload native integration evidence
+      - name: Preserve immutable source and security controller provenance
         if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: bil-android33-native-only-${{ github.sha }}
-          path: artifacts/qa/text18/android-api33
-          if-no-files-found: warn
-          retention-days: 14
+          name: bil49-source17-security-audit2-macro-domain-generated-checks-${{ env.SOURCE_SHA }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bil49-source-binding/source-provenance.json
+          if-no-files-found: error
+          retention-days: 30
 
-  # Native iOS coverage is mandatory in bil39_iphone_native.yml and
-  # bil39_ipad_native.yml through the same-commit reusable workflow. Both
-  # exact-source artifacts are required by the release prerequisite gate;
-  # CodeQL does not repeat the retired combined Simulator orchestration.
-
-  offline-mobile-static-audit:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.mobsf_only == true }}
-    name: Offline MobSF static debug APK audit
-    runs-on: ubuntu-24.04
-    timeout-minutes: 40
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - name: Check out accepted source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Audit the existing APK in a network-disabled disposable scanner
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BIL_ANDROID_ARTIFACT_RUN: ${{ inputs.android_artifact_run }}
-          BIL_AUDIT_BRANCH: ${{ github.ref_name }}
-        run: >-
-          python3 tools/qa/bil_mobsf_offline_static.py
-          --artifact-run "$BIL_ANDROID_ARTIFACT_RUN"
-          --expected-branch "$BIL_AUDIT_BRANCH"
-          --output artifacts/qa/text18/offline-mobsf/summary.json
-      - name: Upload sanitized static artifact evidence
-        if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: bil-offline-mobsf-${{ github.sha }}
-          path: artifacts/qa/text18/offline-mobsf
-          if-no-files-found: warn
-          retention-days: 14
