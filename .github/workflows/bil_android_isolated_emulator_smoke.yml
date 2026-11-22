@@ -1,19 +1,6 @@
-name: BIL Android isolated offline-config startup evidence
-
+# INERT: Root-approved complete Source17 unit gate, recipe hashes and registry binding required before activation.
+name: Source17 android-startup-missing5
 on:
-  push:
-    branches:
-      - integration/bil-qa-media-policy-20261011
-      - codex/bil43-android35-verified-20261108
-      - codex/bil44-android36-verified-20261115
-      - codex/bil45-android37-inactive-catalog-20261115
-      - codex/bil46-android38-reviewer-fixes-20261116
-      - codex/bil47-android39-subscription-stability-20261116
-      - codex/bil48-android40-passive-reconciliation-20261117
-      - codex/bil49-android41-native40-fixes-20261120
-      - bil39/integration-20261025
-      - codex/bil40-device-fixes-20261028
-      - codex/bil41-android33-release-20261106
   workflow_dispatch:
     inputs:
       api36_only:
@@ -29,6 +16,10 @@ concurrency:
   group: bil-android-isolated-emulator-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  SOURCE_SHA: 6c0dfbab576e797d24b42310e9194db2f1664188
+  SOURCE_TREE: bc22c3881ecc5cad8f3ee78d0a784de9e246e1a0
+  CONTROLLER_BRANCH: codex/bil-s17-android-startup-missing5-20261122
 jobs:
   android-debug-emulator:
     name: Android ${{ matrix.api-level }} offline-config startup
@@ -39,14 +30,133 @@ jobs:
       matrix: ${{ fromJSON(
         inputs.api36_only == true &&
           '{"include":[{"api-level":36,"profile":"pixel_6","ram-size":"4096M"}]}'
-        || '{"include":[{"api-level":26,"profile":"pixel_2"},{"api-level":29,"profile":"pixel_2"},{"api-level":33,"profile":"pixel_6","ram-size":"4096M"},{"api-level":34,"profile":"pixel_6","ram-size":"4096M"},{"api-level":35,"profile":"pixel_6","ram-size":"4096M"},{"api-level":36,"profile":"pixel_6","ram-size":"4096M"}]}'
+        || '{"include":[{"api-level":26,"profile":"pixel_2"},{"api-level":33,"profile":"pixel_6","ram-size":"4096M"},{"api-level":34,"profile":"pixel_6","ram-size":"4096M"},{"api-level":35,"profile":"pixel_6","ram-size":"4096M"},{"api-level":36,"profile":"pixel_6","ram-size":"4096M"}]}'
         ) }}
 
     steps:
       - name: Checkout exact source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: 6c0dfbab576e797d24b42310e9194db2f1664188
           persist-credentials: false
+      - name: Verify immutable source and one-file native controller provenance
+        shell: bash
+        env:
+          BINDING_JOB_KEY: android-startup-${{ matrix.api-level }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          """Embedded in a future tests-only GitHub controller. Never run locally."""
+          import base64
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          
+          def require(condition, code):
+              if not condition:
+                  raise RuntimeError(code)
+          
+          def git(*args, env=None):
+              try:
+                  result = subprocess.run(['git', *args], env=env, capture_output=True, timeout=90)
+              except (subprocess.TimeoutExpired, OSError):
+                  raise RuntimeError('PROVENANCE_GIT_TIMEOUT_OR_OS_ERROR_NO_RAW_OUTPUT') from None
+              require(result.returncode == 0, 'PROVENANCE_GIT_FAILED_NO_RAW_STDERR')
+              return result.stdout
+          
+          
+          def fetch_controller(controller, fetch_env):
+              # Retry only this read of the same immutable controller, never a ref or push.
+              # A successful fetch still grants no binding: all checks below must finish.
+              for attempt in range(1, 3):
+                  try:
+                      result = subprocess.run(
+                          ['git', 'fetch', '--no-tags', '--depth=1', 'origin', controller],
+                          env=fetch_env, capture_output=True, timeout=180,
+                      )
+                  except (subprocess.TimeoutExpired, OSError):
+                      fetched = False
+                  else:
+                      fetched = result.returncode == 0
+                  if fetched:
+                      return
+                  if attempt < 2:
+                      print(json.dumps({'provenance_fetch_attempt': attempt,
+                                        'status': 'RETRYING_SAME_IMMUTABLE_CONTROLLER'}))
+              raise RuntimeError('PROVENANCE_FETCH_FAILED_AFTER_2_ATTEMPTS_NO_RAW_OUTPUT') from None
+          
+          source = os.environ['SOURCE_SHA']
+          source_tree = os.environ['SOURCE_TREE']
+          controller = os.environ['GITHUB_SHA']
+          branch = os.environ['CONTROLLER_BRANCH']
+          workflow = '.github/workflows/bil_android_isolated_emulator_smoke.yml'
+          require(all(re.fullmatch('[a-f0-9]{40}', value) for value in (source, source_tree, controller)), 'INVALID_IMMUTABLE_BINDING')
+          require(source != controller, 'SOURCE_AND_CONTROLLER_MUST_BE_DISTINCT')
+          require(os.environ['GITHUB_REPOSITORY'] == 'bilhealth-admin/Body-Intelligence', 'WRONG_REPOSITORY')
+          require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch', 'DISPATCH_ONLY')
+          require(os.environ['GITHUB_REF'] == 'refs/heads/' + branch, 'WRONG_CONTROLLER_REF')
+          require(os.environ['GITHUB_WORKFLOW_SHA'] == controller, 'WORKFLOW_AND_RUN_CONTROLLER_DIFFER')
+          require(git('rev-parse', 'HEAD').decode().strip() == source, 'SOURCE_HEAD_DRIFT')
+          require(git('rev-parse', 'HEAD^{tree}').decode().strip() == source_tree, 'SOURCE_TREE_DRIFT')
+          require(not git('status', '--porcelain', '--untracked-files=no').strip(), 'SOURCE_NOT_PRISTINE')
+          # Git credentials remain disabled in the checkout. Only this read-only child
+          # receives an ephemeral header; no token/header is printed, stored or in argv.
+          fetch_env = dict(os.environ)
+          fetch_env.update(GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never', GCM_GUI_PROMPT='0')
+          token = fetch_env.get('GH_TOKEN')
+          require(isinstance(token, str) and bool(token), 'READONLY_GITHUB_TOKEN_REQUIRED')
+          config_count = fetch_env.get('GIT_CONFIG_COUNT', '0')
+          require(re.fullmatch(r'\d+', config_count) is not None and int(config_count) < 100, 'GIT_CHILD_CONFIG_COUNT_INVALID')
+          slot = str(int(config_count))
+          fetch_env['GIT_CONFIG_KEY_' + slot] = 'http.https://github.com/.extraheader'
+          fetch_env['GIT_CONFIG_VALUE_' + slot] = 'AUTHORIZATION: basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+          fetch_env['GIT_CONFIG_COUNT'] = str(int(config_count) + 1)
+          for key in list(fetch_env):
+              if key.upper().startswith(('GIT_TRACE', 'GCM_TRACE')) or key.upper() == 'GIT_CURL_VERBOSE':
+                  fetch_env.pop(key)
+          try:
+              fetch_controller(controller, fetch_env)
+          finally:
+              fetch_env.pop('GH_TOKEN', None)
+              fetch_env.pop('GIT_CONFIG_VALUE_' + slot, None)
+              token = None
+          require(git('rev-parse', 'FETCH_HEAD').decode().strip() == controller, 'CONTROLLER_FETCH_DRIFT')
+          commit = git('cat-file', '-p', controller).decode('utf-8')
+          parents = [line.split(' ', 1)[1] for line in commit.split('\n\n', 1)[0].splitlines() if line.startswith('parent ')]
+          require(parents == [source], 'CONTROLLER_MUST_HAVE_EXACT_SOURCE_PARENT')
+          changed = git('diff-tree', '--no-commit-id', '--no-abbrev', '--raw', '-r', source, controller).decode().splitlines()
+          require(len(changed) == 1, 'CONTROLLER_MUST_CHANGE_EXACTLY_ONE_WORKFLOW')
+          fields = changed[0].split('\t')
+          require(len(fields) == 2 and fields[1] == workflow, 'CONTROLLER_CHANGED_UNREVIEWED_PATH')
+          metadata = fields[0].split()
+          require(len(metadata) == 5 and metadata[0:2] == [':100644', '100644'] and metadata[4] == 'M', 'CONTROLLER_WORKFLOW_MODE_OR_OPERATION_CHANGED')
+          workflow_bytes = git('show', controller + ':' + workflow)
+          report = {
+              'schema': 'bil49.tests-only-source-controller-binding.v1',
+              'status': 'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT',
+              'source_sha': source, 'source_tree': source_tree,
+              'controller_sha': controller,
+              'controller_tree': git('rev-parse', controller + '^{tree}').decode().strip(),
+              'controller_parent': source, 'controller_branch': branch,
+              'workflow_path': workflow,
+              'workflow_sha256': hashlib.sha256(workflow_bytes).hexdigest(),
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'job_key': os.environ['BINDING_JOB_KEY'],
+              'event': 'workflow_dispatch',
+              'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'release_approval': False,
+          }
+          out = Path(os.environ['RUNNER_TEMP']) / 'bil49-source-binding' / 'source-provenance.json'
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({key: report[key] for key in ('source_sha', 'source_tree', 'controller_sha', 'controller_tree', 'job_key', 'status')}))
+          PY
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -211,3 +321,13 @@ jobs:
           path: artifacts/release/android_emulator_smoke/api-${{ matrix.api-level }}
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Preserve immutable source and native controller provenance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil49-source17-native-android-startup-missing5-android-startup-${{ matrix.api-level }}-${{ env.SOURCE_SHA }}-${{ github.sha }}
+          path: ${{ runner.temp }}/bil49-source-binding/source-provenance.json
+          if-no-files-found: error
+          retention-days: 30
+
