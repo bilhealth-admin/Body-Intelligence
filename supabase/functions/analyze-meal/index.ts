@@ -245,6 +245,7 @@ deno.serve(async (request: Request) => {
       }
       return reply({
         ...cached,
+        request_id: idempotencyKey,
         cache: {
           hit: reservation.cache_hit === true,
           charged: false,

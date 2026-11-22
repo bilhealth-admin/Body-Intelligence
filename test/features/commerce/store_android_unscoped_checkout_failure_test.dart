@@ -10,6 +10,7 @@ import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog
 import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_provider.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
@@ -413,6 +414,195 @@ void main() {
     await Supabase.instance.dispose();
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets(
+    'actual plugin blank cancellation then empty Restore keeps public recovery and requires fresh proof',
+    (tester) async {
+      ProviderContainer? container;
+      try {
+        canonicalMode = 'free';
+        await tester.runAsync(() async {
+          await ready('subscription');
+          await reject('subscription', response: BillingResponse.userCanceled);
+        });
+        final benefitRevision = store.verifiedBenefitRevision;
+        final creditRevision = boost.verifiedCreditsRevision;
+        final free = SubscriptionState(
+          plan: CommercePlan.free,
+          entitlements: const {},
+          authority: EntitlementAuthority.verifiedServer,
+          lifecycle: SubscriptionLifecycle.inactive,
+          verifiedAt: DateTime.now().toUtc(),
+          isPurchasable: true,
+          canRestorePurchases: true,
+        );
+        container = ProviderContainer(
+          overrides: [
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream.value(_owner),
+            ),
+            verifiedEntitlementLoaderProvider.overrideWithValue(
+              () async => free,
+            ),
+          ],
+        );
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              home: BilStorePlansPage(
+                store: store,
+                connectToDeviceStore: false,
+                productIds: const {_sku},
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final restore = find.text(BilStoreCopy.text('en', 'restore'));
+        await tester.ensureVisible(restore);
+        await tester.runAsync(() async {
+          await tester.tap(restore);
+          // Await the public Restore operation; it includes the production
+          // one-second late-callback grace period. No service state is injected.
+          final deadline = DateTime.now().add(const Duration(seconds: 5));
+          while (store.isRestoring && DateTime.now().isBefore(deadline)) {
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+          }
+          await _drain();
+        });
+        await tester.pump();
+
+        expect(native.restores, 1);
+        expect(store.state, VerifiedStoreState.failed);
+        expectBlocked('subscription');
+        expect(store.hasAndroidCheckoutFailure, isTrue);
+        expect(store.userOperationInProgress, isFalse);
+        expect(store.busy, isFalse);
+        final offers = tester.widget<BilDynamicStoreOffers>(
+          find.byType(BilDynamicStoreOffers),
+        );
+        expect(offers.purchaseInProgress, isFalse);
+        expect(offers.restoreInProgress, isFalse);
+        expect(offers.purchaseEnabled, isFalse);
+        final recovery = find.byKey(const Key('store-continue-verification'));
+        expect(recovery, findsOneWidget);
+        Future<void> waitForObservable(
+          bool Function() predicate,
+          String phase,
+        ) async {
+          final deadline = DateTime.now().add(const Duration(seconds: 20));
+          while (!predicate() && DateTime.now().isBefore(deadline)) {
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+          }
+          expect(predicate(), isTrue, reason: phase);
+        }
+
+        Future<void> tapPublicRecoveryWithNativeGate() async {
+          await tester.runAsync(() async {
+            // Future captures its creation zone. Create and settle this gate
+            // in runAsync, rather than completing a FakeAsync-born future
+            // while that fake microtask queue is not being pumped.
+            final firstNativeQuery = Completer<PurchasesResultWrapper>();
+            api.read = (_, index) => index == 0
+                ? firstNativeQuery.future
+                : Future.value(_result(BillingResponse.ok));
+            try {
+              // This public TextButton is the only initiating action. If its
+              // handler is missing, the native-query assertion must fail.
+              await tester.tap(recovery);
+              await waitForObservable(
+                () => api.queryCount == 2 && store.isRecoveringSubscription,
+                'The public recovery button must start native inventory',
+              );
+              expect(store.busy, isTrue);
+              expect(store.canStartPurchase, isFalse);
+              expect(
+                events.where((event) => event.startsWith('cloud:')),
+                isEmpty,
+              );
+              expect(api.launches, 1);
+              expectNoFinancialMutation();
+              firstNativeQuery.complete(_result(BillingResponse.ok));
+              await waitForObservable(
+                () => !store.isRecoveringSubscription,
+                'The public recovery operation must settle within its bound',
+              );
+            } finally {
+              if (!firstNativeQuery.isCompleted) {
+                firstNativeQuery.complete(_result(BillingResponse.ok));
+              }
+              api.read = null;
+            }
+          });
+        }
+
+        expect(
+          tester
+              .widget<InkWell>(find.byKey(const Key('store-purchase-cta')))
+              .onTap,
+          isNotNull,
+        );
+        expect(api.launches, 1);
+        expectNoFinancialMutation();
+
+        // A single empty native inventory plus unreadable canonical authority
+        // cannot settle the attempt or make another charge possible.
+        canonicalMode = 'failed';
+        events.clear();
+        api.queryCount = 0;
+        await tester.ensureVisible(recovery);
+        await tapPublicRecoveryWithNativeGate();
+        await tester.pumpAndSettle();
+        expect(api.queryCount, 2); // One inventory queries inapp and subs.
+        expectBlocked('subscription');
+        expect(store.userOperationInProgress, isFalse);
+        expect(
+          find.byKey(const Key('store-continue-verification')),
+          findsOneWidget,
+        );
+        expect(api.launches, 1);
+        expectNoFinancialMutation();
+
+        // Only the existing explicit two-empty-inventory proof around fresh
+        // same-owner canonical authority retires the checkout blocker.
+        canonicalMode = 'free';
+        events.clear();
+        api.queryCount = 0;
+        await tapPublicRecoveryWithNativeGate();
+        await tester.pumpAndSettle();
+        expect(events, [
+          'native:inapp',
+          'native:subs',
+          'cloud:closed',
+          'cloud:store',
+          'cloud:admin',
+          'native:inapp',
+          'native:subs',
+        ]);
+        expect(api.queryCount, 4);
+        expect(store.state, VerifiedStoreState.ready);
+        expect(store.messageCode, 'purchase_cancelled');
+        expect(store.canStartPurchase, isTrue);
+        expect(store.userOperationInProgress, isFalse);
+        expect(store.hasAndroidCheckoutFailure, isFalse);
+        expect(
+          find.byKey(const Key('store-continue-verification')),
+          findsNothing,
+        );
+        expect(api.launches, 1);
+        expect(native.restores, 1);
+        expect(store.verifiedBenefitRevision, benefitRevision);
+        expect(boost.verifiedCreditsRevision, creditRevision);
+        expectNoFinancialMutation();
+        expect(tester.takeException(), isNull);
+      } finally {
+        await tester.pumpWidget(const SizedBox.shrink());
+        container?.dispose();
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
 
   for (final lane in ['subscription', 'boost']) {
     test(

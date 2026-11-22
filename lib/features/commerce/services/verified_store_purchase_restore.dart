@@ -25,6 +25,9 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
     _restoreAttempt = attempt;
     final previousState = state;
     final previousMessageCode = messageCode;
+    final preserveAndroidCheckoutFailure =
+        defaultTargetPlatform == TargetPlatform.android &&
+        hasAndroidCheckoutFailure;
     _restoring = true;
     _restoreOwnershipConflict = false;
     _explicitRestoreTransactionKeys.clear();
@@ -93,6 +96,16 @@ extension VerifiedStorePurchaseRestore on VerifiedStorePurchaseService {
             previousState: previousState,
             previousMessageCode: previousMessageCode,
             resultCode: 'restore_unconfirmed',
+          );
+          return;
+        }
+        if (preserveAndroidCheckoutFailure) {
+          // One empty restore cannot settle an unscoped checkout. Preserve
+          // its public recovery path until the existing two-inventory proof.
+          _settleRestoreWithoutReceipt(
+            previousState: previousState,
+            previousMessageCode: previousMessageCode,
+            resultCode: 'no_restorable_purchases',
           );
           return;
         }
