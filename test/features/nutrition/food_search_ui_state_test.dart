@@ -144,6 +144,10 @@ void main() {
             foodsProvider.overrideWith((ref) => Stream.value(const [])),
             favoriteFoodsProvider.overrideWith((ref) => Stream.value(const [])),
             recentFoodsProvider.overrideWith((ref) => Stream.value(const [])),
+            // Verified access belongs to this synthetic authenticated owner.
+            verifiedEntitlementOwnerIdProvider.overrideWithValue(
+              'synthetic-entitlement-owner',
+            ),
             verifiedSubscriptionStateProvider.overrideWithValue(
               AsyncData(
                 SubscriptionState(

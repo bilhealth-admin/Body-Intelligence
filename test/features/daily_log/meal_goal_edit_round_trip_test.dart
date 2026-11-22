@@ -207,6 +207,10 @@ void main() {
                 verifiedEntitlementClockProvider.overrideWithValue(
                   () => DateTime.utc(2026, 10, 12),
                 ),
+                // Verified access belongs to this synthetic authenticated owner.
+                verifiedEntitlementOwnerIdProvider.overrideWithValue(
+                  'synthetic-entitlement-owner',
+                ),
                 verifiedSubscriptionStateProvider.overrideWithValue(
                   AsyncData(
                     SubscriptionState(

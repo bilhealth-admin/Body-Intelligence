@@ -486,6 +486,11 @@ void main() {
     if (page is RecipeLibraryPage && effectiveSubscription == null) {
       effectiveSubscription = _recipeGoldenVerifiedFree;
     }
+    // Customization captures describe a signed-in, verified Free member.
+    // A connection still awaiting verification is a separate access state.
+    if (page is DashboardPreferencesPage && effectiveSubscription == null) {
+      effectiveSubscription = _recipeGoldenVerifiedFree;
+    }
     if (page is RecipeLibraryPage) {
       final repository = RecipeReleaseRepository();
       final catalog = await tester.runAsync(repository.loadIndex);
@@ -1710,14 +1715,7 @@ void main() {
       page: const DashboardPreferencesPage(),
       name: 'dashboard_preferences_ar_phone',
       locale: const Locale('ar'),
-      wrapper: (child) => ProviderScope(
-        overrides: [
-          verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(FreePlan.createState()),
-          ),
-        ],
-        child: child,
-      ),
+      verifiedSubscriptionFixture: _recipeGoldenVerifiedFree,
     );
   });
 
@@ -1729,14 +1727,7 @@ void main() {
       page: const DashboardPreferencesPage(),
       name: 'dashboard_preferences_nutrient_locked_phone',
       captureOverlay: true,
-      wrapper: (child) => ProviderScope(
-        overrides: [
-          verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(FreePlan.createState()),
-          ),
-        ],
-        child: child,
-      ),
+      verifiedSubscriptionFixture: _recipeGoldenVerifiedFree,
       interact: (tester) async {
         final trigger = find.byKey(
           const Key('dashboard-add-nutrient-goal-cards'),

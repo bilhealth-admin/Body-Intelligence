@@ -57,6 +57,12 @@ void main() {
           final baselineCounts = repository.count('counts');
           final pending = Completer<CommunityTopicPostBatch>();
           repository.pendingPage = pending;
+          if (taxonomy) {
+            await tester.tap(
+              find.byKey(const ValueKey('community-post-expand-$_postId')),
+            );
+            await tester.pumpAndSettle();
+          }
           final control = taxonomy
               ? find.descendant(
                   of: find.byKey(const ValueKey(_postId)),

@@ -89,10 +89,12 @@ class _CommunityPostBodyState extends State<CommunityPostBody> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              _isExpanded
-                  ? communityText(context, 'Show less', 'عرض أقل')
-                  : communityText(context, 'Show more', 'عرض المزيد'),
+            Flexible(
+              child: Text(
+                _isExpanded
+                    ? communityText(context, 'Show less', 'عرض أقل')
+                    : communityText(context, 'Show more', 'عرض المزيد'),
+              ),
             ),
             const SizedBox(width: 2),
             Icon(

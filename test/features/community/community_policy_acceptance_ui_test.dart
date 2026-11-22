@@ -537,7 +537,7 @@ void main() {
 
   for (final stillVisible in [true, false]) {
     testWidgets(
-      'after a pending publication Explore applies server visibility $stillVisible to the post and story',
+      'after a pending publication Explore applies server visibility $stillVisible without a stories strip',
       (tester) async {
         tester.view.physicalSize = const Size(430, 1050);
         tester.view.devicePixelRatio = 1;
@@ -549,7 +549,7 @@ void main() {
           const ValueKey('community-story-${_PublishedFeedRepository.author}'),
         );
         expect(find.text(repository.approved.body), findsOneWidget);
-        expect(story, findsOneWidget);
+        expect(story, findsNothing);
         await tester.tap(find.byKey(const Key('community-create-post')));
         await tester.pumpAndSettle();
         const draft = 'Pending post visible only to its author';
@@ -572,7 +572,7 @@ void main() {
           find.text(repository.approved.body),
           stillVisible ? findsOneWidget : findsNothing,
         );
-        expect(story, stillVisible ? findsOneWidget : findsNothing);
+        expect(story, findsNothing);
         expect(find.text(draft), findsNothing);
       },
     );

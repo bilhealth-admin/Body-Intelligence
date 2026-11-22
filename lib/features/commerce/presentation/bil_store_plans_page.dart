@@ -20,6 +20,7 @@ import 'bil_dynamic_store_offers.dart';
 import 'bil_store_copy.dart';
 
 part 'bil_store_plans_presentation.dart';
+part 'bil_store_plans_catalog_policy.dart';
 
 /// The production plan route. It no longer embeds legacy or synthetic prices.
 class BilStorePlansPage extends ConsumerStatefulWidget {
@@ -237,24 +238,12 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   }
 
   void _onOfferSelected(BilStoreOfferMetadata _) {
-    // Choosing another term is not a new purchase attempt. Clear only
-    // retryable launch/cancellation feedback so an old bottom-banner error
-    // cannot follow the member between monthly and annual offers. A pending
-    // operation and a receipt verification failure deliberately remain visible
-    // and fail-closed until the native transaction is resolved or restored.
-    final feedback = _purchaseFeedbackKey;
     if (!mounted ||
-        _restoring ||
-        (widget.store ?? _ownedStore)?.isRestoring == true ||
-        feedback == null ||
-        feedback == 'purchase_awaiting_approval' ||
-        feedback == 'purchase_in_progress' ||
-        feedback == 'purchase_verification_unavailable' ||
-        feedback == 'purchase_confirmation_pending' ||
-        feedback == 'purchase_reconciliation_pending' ||
-        feedback == 'purchase_reconciliation_failed' ||
-        feedback == 'purchase_owned_by_another_account' ||
-        feedback == 'restore_verification_failed') {
+        !_mayClearOfferFeedback(
+          restoring:
+              _restoring || (widget.store ?? _ownedStore)?.isRestoring == true,
+          feedback: _purchaseFeedbackKey,
+        )) {
       return;
     }
     setState(() {
@@ -281,23 +270,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         if (mounted) setState(() => _loading = false);
         return;
       }
-      List<BilStoreOfferMetadata> offers;
-      try {
-        // Some device-store implementations never complete their product
-        // query when Play Billing is unavailable (common on emulators and
-        // offline devices). The plans surface must settle into its truthful
-        // unavailable state instead of displaying an endless loading claim.
-        offers = await catalog
-            .loadOffers(productIds)
-            .timeout(BilStoreCatalogGateway.loadTimeout);
-      } on TimeoutException {
-        offers = const [];
-      } catch (_) {
-        offers = const [];
-      }
-      // Canonicalize at the page boundary too. Malformed provider entries
-      // must leave the catalog retryable on the next tap or app resume.
-      offers = MarketOfferPolicy.visibleOffers(offers);
+      final offers = await _loadVisibleStoreOffers(catalog, productIds);
       if (mounted) {
         setState(() {
           _offers = offers;
@@ -452,18 +425,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         // Isolated previews may intentionally render without ProviderScope.
       }
     }
-    final unresolved =
-        _sharedBoost?.canRetry == true ||
-        store != null &&
-            (store.busy ||
-                store.verificationBackedOff ||
-                const {
-                  'reconciliation_verification_failed',
-                  'verification_failed',
-                  'restore_verification_failed',
-                  'purchase_status_unknown',
-                  'store_finish_pending',
-                }.contains(store.messageCode));
+    final unresolved = _hasUnresolvedStorePurchase(_sharedBoost, store);
     final ownershipBlocked =
         store?.ownershipConflictProductId == offer.productId;
     if (!ownershipBlocked && !unresolved && account?.isLoading == true) {
@@ -522,13 +484,6 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       _retriedPendingVisit = visit;
     });
     ref.invalidate(verifiedSubscriptionStateProvider);
-  }
-
-  CommercePlan? _verifiedPlan(AsyncValue<SubscriptionState> snapshot) {
-    final state = snapshot.asData?.value;
-    return state?.authority == EntitlementAuthority.verifiedServer
-        ? state!.plan
-        : null;
   }
 
   @override

@@ -250,9 +250,15 @@ void main() {
             await _frames(tester);
             harness.setAccess(_pending);
             await _frames(tester);
+            // A verified Free decoration remains stable during this reread.
+            // The pending raw access below must still block feature entry.
             expect(
               tester.widget<ListTile>(entry).trailing,
-              isA<BilNavigationFeedback>(),
+              isA<Icon>().having(
+                (icon) => icon.icon,
+                'retained Free crown',
+                Icons.workspace_premium_rounded,
+              ),
             );
             expect(tester.getRect(entry), before);
             await tester.tap(entry);

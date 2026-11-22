@@ -12,10 +12,20 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:drift/native.dart';
 
 import 'visual_closure/visual_evidence_font.dart';
+
+SubscriptionState _verifiedFree() => SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
 
 class _FailingWeeklyPreferences extends PreferencesRepository {
   _FailingWeeklyPreferences(super.database, {this.failRead = false});
@@ -148,12 +158,15 @@ void main() {
         overrides: [
           weeklyReportProvider.overrideWith((ref) async => report ?? snapshot),
           accountCreatedAtProvider.overrideWithValue(accountCreatedAt),
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'weekly-report-test-owner',
+          ),
           userProfileProvider.overrideWith((ref) => Stream.value(null)),
           preferencesRepositoryProvider.overrideWithValue(
             preferences ?? PreferencesRepository(effectiveDatabase),
           ),
           verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(FreePlan.createState()),
+            AsyncData(_verifiedFree()),
           ),
         ],
         child: MaterialApp(
@@ -373,12 +386,15 @@ void main() {
       ProviderScope(
         overrides: [
           weeklyReportProvider.overrideWith((ref) async => emptySnapshot),
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'weekly-report-test-owner',
+          ),
           userProfileProvider.overrideWith((ref) => Stream.value(null)),
           preferencesRepositoryProvider.overrideWithValue(
             PreferencesRepository(database),
           ),
           verifiedSubscriptionStateProvider.overrideWithValue(
-            AsyncData(FreePlan.createState()),
+            AsyncData(_verifiedFree()),
           ),
         ],
         child: MaterialApp.router(

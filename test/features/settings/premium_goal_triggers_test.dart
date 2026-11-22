@@ -203,6 +203,10 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
+          // Verified access belongs to this synthetic authenticated owner.
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-entitlement-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWith((_) async {
             reads++;
             return reads == 1
@@ -502,6 +506,10 @@ Future<void> _pump(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
+        // Verified access belongs to this synthetic authenticated owner.
+        verifiedEntitlementOwnerIdProvider.overrideWithValue(
+          'synthetic-entitlement-owner',
+        ),
         verifiedSubscriptionStateProvider.overrideWithValue(
           AsyncData(subscription),
         ),
@@ -544,6 +552,10 @@ Future<void> _pumpPage(
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(database),
+        // Verified access belongs to this synthetic authenticated owner.
+        verifiedEntitlementOwnerIdProvider.overrideWithValue(
+          'synthetic-entitlement-owner',
+        ),
         verifiedSubscriptionStateProvider.overrideWithValue(
           AsyncData(subscription),
         ),

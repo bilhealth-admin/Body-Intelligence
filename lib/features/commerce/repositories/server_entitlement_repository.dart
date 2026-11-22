@@ -25,6 +25,7 @@ part 'server_entitlement_grant_continuity.dart';
 part 'server_entitlement_store_continuity.dart';
 part 'server_entitlement_row_decoding.dart';
 part 'server_entitlement_checkout_recovery.dart';
+part 'server_entitlement_storage_lifecycle.dart';
 
 bool isVerifiedCommerceSessionInvalid(Object? error) =>
     (error is AuthException &&
@@ -76,31 +77,6 @@ final class ServerEntitlementRepository {
   static int _adminReadGeneration = 0;
   static final _settledAdminReads = <String, int>{};
   static final _adminStorageOperations = <String, Future<void>>{};
-
-  // A read can delete an invalid slot. Serialize its complete operation with
-  // accepted writes and revocations so old cleanup cannot erase a newer lease.
-  Future<T> _withAdminStorage<T>(
-    String ownerId,
-    Future<T> Function() operation,
-  ) async {
-    final previous = _adminStorageOperations[ownerId];
-    final next = previous == null
-        ? Future<T>.sync(operation)
-        : previous.then<T>((_) => operation());
-    // Only the queue barrier absorbs errors; this caller still receives next.
-    final settled = next.then<void>(
-      (_) {},
-      onError: (Object _, StackTrace __) {},
-    );
-    _adminStorageOperations[ownerId] = settled;
-    try {
-      return await next;
-    } finally {
-      if (identical(_adminStorageOperations[ownerId], settled)) {
-        _adminStorageOperations.remove(ownerId);
-      }
-    }
-  }
 
   static final Set<String> _startupContinuityConsumed = <String>{};
   static final _rejectedSessionCleanup = <String, Future<bool>>{};
@@ -198,29 +174,6 @@ final class ServerEntitlementRepository {
         }
       },
     );
-  }
-
-  Future<bool> _clearRejectedSession(String ownerId) async {
-    _startupContinuityConsumed.add(ownerId);
-    _settledAdminReads[ownerId] = ++_adminReadGeneration;
-    final denied = FreePlan.createState();
-    final now = _now();
-    for (final cache in [
-      _sessionCache,
-      _adminSessionCache,
-      _closedTestSessionCache,
-    ]) {
-      cache.remember(ownerId: ownerId, state: denied, now: now);
-    }
-    try {
-      await Future.wait([
-        _subscriptionStore.clear(ownerId),
-        _withAdminStorage(ownerId, () => _adminContinuityStore.clear(ownerId)),
-      ]);
-      return true;
-    } on Object {
-      return false;
-    }
   }
 
   void _observeOwnerChanges(SupabaseClient client) {

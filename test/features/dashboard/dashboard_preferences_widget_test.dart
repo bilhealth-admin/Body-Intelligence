@@ -373,6 +373,10 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
+          // Verified access belongs to this synthetic authenticated owner.
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-entitlement-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(FreePlan.createState()),
           ),
@@ -427,6 +431,10 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
+          // Verified access belongs to this synthetic authenticated owner.
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-entitlement-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(premium),
           ),
@@ -498,6 +506,10 @@ void main() {
       ProviderScope(
         overrides: [
           preferencesRepositoryProvider.overrideWithValue(repository),
+          // Verified access belongs to this synthetic authenticated owner.
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-entitlement-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(premium),
           ),
@@ -558,6 +570,10 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
+          // Verified access belongs to this synthetic authenticated owner.
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-entitlement-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncData(FreePlan.createState()),
           ),
@@ -610,6 +626,10 @@ void main() {
       ProviderScope(
         overrides: [
           preferencesRepositoryProvider.overrideWithValue(repository),
+          // Verified access belongs to this synthetic authenticated owner.
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-entitlement-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncValue.error(StateError('offline'), StackTrace.empty),
           ),
@@ -668,6 +688,10 @@ void main() {
       ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(database),
+          // Verified access belongs to this synthetic authenticated owner.
+          verifiedEntitlementOwnerIdProvider.overrideWithValue(
+            'synthetic-entitlement-owner',
+          ),
           verifiedSubscriptionStateProvider.overrideWithValue(
             AsyncValue.error(StateError('offline'), StackTrace.empty),
           ),

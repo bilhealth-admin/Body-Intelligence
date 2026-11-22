@@ -479,14 +479,24 @@ void main() {
       fixture.adminSecure.deleteEntered = Completer<void>();
       final older = fixture.repository.current();
       await fixture.adminSecure.deleteEntered!.future;
+      final releaseNewAdmin = Completer<void>();
+      fixture.grantActive = false;
+      fixture.heldAdmin = releaseNewAdmin;
+      fixture.adminReadEntered = Completer<void>();
+      final newer = fixture.repository.current();
       try {
-        fixture.grantActive = false;
-        expect((await fixture.repository.current()).plan, CommercePlan.free);
+        // The newer read has retired the closed-test grant before reaching
+        // admin RPC. Its later secure cleanup shares the held storage queue,
+        // so awaiting that cleanup here would deadlock the fixture itself.
+        await fixture.adminReadEntered!.future;
         release.complete();
         expect((await older).plan, CommercePlan.free);
+        releaseNewAdmin.complete();
+        expect((await newer).plan, CommercePlan.free);
       } finally {
         if (!release.isCompleted) release.complete();
-        await older;
+        if (!releaseNewAdmin.isCompleted) releaseNewAdmin.complete();
+        await Future.wait([older, newer]);
       }
     },
   );
