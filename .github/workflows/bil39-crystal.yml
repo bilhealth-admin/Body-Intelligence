@@ -69,7 +69,7 @@ jobs:
           elif [[ "$BIL_PURCHASE_SOURCE_BRANCH" == "codex/bil48-android40-passive-reconciliation-20261117" ]]; then
             python3 tools/qa/bil48_protected_purchase_contract.py
           elif [[ "$BIL_PURCHASE_SOURCE_BRANCH" == "codex/bil49-android41-native40-fixes-20261120" ]]; then
-            python3 tools/qa/bil49_protected_purchase_contract.py
+            python3 tools/qa/bil50_protected_purchase_contract.py
           else
             test "$(git hash-object lib/features/commerce/presentation/bil_dynamic_store_components.dart)" = "119f72914b468ff3db40dd07e72da96b837f7da7"
             test "$(git hash-object lib/shared/widgets/bil_glass_press_feedback.dart)" = "653d424ddb6cca8adeb0d394f5c8f8866da3792d"

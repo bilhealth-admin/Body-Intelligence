@@ -1,0 +1,36 @@
+{
+  "versions": {
+    "47": {
+      "commit": "4b59668e8cbc8b9b52171dd18bd057a8d5e704d8",
+      "tree": "a079098409db1fca60ea4d0ae727569f5a2328f9"
+    },
+    "48": {
+      "commit": "6f10400b09f709048491f413ab8a3caf4135ab29",
+      "tree": "846be5c63f82061fe50d574cbb79a59fcd62ef8e"
+    },
+    "49": {
+      "commit": "3b6c029d93986ece83fbc4034acee16deb20c5b3",
+      "tree": "99f4cdfcd8ca419ef0990c58c2318bd18d87e4b8"
+    }
+  },
+  "files": {
+    "lib/features/commerce/presentation/bil_dynamic_store_components.dart": {
+      "fixture": "bil_dynamic_store_components.dart.blob",
+      "git_blob": "da3c7dde8a1f9807345eb03e58c148874cfa8deb",
+      "sha256": "32ca943b937cad367e7329ef34567c4a80ebe88f93995a05acd7f4ee2ef18e67",
+      "bytes": 25730
+    },
+    "lib/shared/widgets/bil_glass_press_feedback.dart": {
+      "fixture": "bil_glass_press_feedback.dart.blob",
+      "git_blob": "653d424ddb6cca8adeb0d394f5c8f8866da3792d",
+      "sha256": "0d0540f421902390fd05ca6fd6d471ca327fed136b8f0837c8fa78f83e637ba1",
+      "bytes": 12997
+    },
+    ".github/workflows/bil39-crystal.yml": {
+      "fixture": "crystal-49.yml.blob",
+      "git_blob": "0f8b39c2f331fa5353754d39e059ce8cd2ca2a11",
+      "sha256": "450ce9d1779be62c329d12106fe84672b828d5eb9e9205f12106258b361934a8",
+      "bytes": 8153
+    }
+  }
+}

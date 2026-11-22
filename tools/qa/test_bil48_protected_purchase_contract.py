@@ -1,7 +1,7 @@
 """Independent version48 pin/context negatives; no live API or SDK calls."""
 import copy
 from pathlib import Path
-import subprocess
+from bil_purchase_historical_fixture import historical_blobs
 import unittest
 from unittest.mock import patch
 import bil40_internal_build_ci as historical
@@ -116,9 +116,8 @@ class ProtectedPurchase48Test(unittest.TestCase):
                 gate.verify48(ROOT, pr())
             pins.assert_not_called()
 
-    def test_actual_working_files_equal_fixed48_contract(self):
-        observed = {p: subprocess.check_output(['git', 'hash-object', p],
-                    cwd=ROOT, text=True).strip() for p in gate.PROTECTED48}
+    def test_archived_source_files_equal_fixed48_contract(self):
+        observed = historical_blobs(48, gate.PROTECTED48)
         gate.validate_observed(observed)
 
     def test_crystal_routes_exact48_and_preserves_historical_literals(self):

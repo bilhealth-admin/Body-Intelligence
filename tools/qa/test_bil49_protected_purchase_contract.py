@@ -1,7 +1,7 @@
 """Independent version49 pin/context negatives; no live API or SDK calls."""
 import copy
 from pathlib import Path
-import subprocess
+from bil_purchase_historical_fixture import historical_blobs, historical_workflow
 import unittest
 from unittest.mock import patch
 import bil40_internal_build_ci as historical
@@ -121,13 +121,12 @@ class ProtectedPurchase49Test(unittest.TestCase):
                 gate.verify49(ROOT, pr())
             pins.assert_not_called()
 
-    def test_actual_working_files_equal_fixed49_contract(self):
-        observed = {p: subprocess.check_output(['git', 'hash-object', p],
-                    cwd=ROOT, text=True).strip() for p in gate.PROTECTED49}
+    def test_archived_source_files_equal_fixed49_contract(self):
+        observed = historical_blobs(49, gate.PROTECTED49)
         gate.validate_observed(observed)
 
     def test_crystal_routes_exact49_and_preserves_historical_literals(self):
-        workflow = (ROOT / '.github/workflows/bil39-crystal.yml').read_text(encoding='utf-8')
+        workflow = historical_workflow(49)
         self.assertEqual(workflow.count('elif [[ "$BIL_PURCHASE_SOURCE_BRANCH" == "' + gate.SOURCE_BRANCH + '" ]]; then'), 1)
         self.assertEqual(workflow.count('python3 tools/qa/bil49_protected_purchase_contract.py'), 1)
         self.assertIn('BIL_PURCHASE_SOURCE_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}', workflow)

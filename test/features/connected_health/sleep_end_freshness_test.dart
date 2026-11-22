@@ -2,7 +2,6 @@ import 'package:body_intelligence_log/features/connected_health/connected_health
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
 import 'package:body_intelligence_log/features/connected_health/widgets/live_health_watch.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

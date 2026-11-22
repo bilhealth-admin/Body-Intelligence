@@ -11,7 +11,6 @@ import 'package:body_intelligence_log/features/connected_health/providers/fitnes
 import 'package:body_intelligence_log/features/connected_health/widgets/live_health_watch.dart';
 import 'package:body_intelligence_log/features/global_platform/fitness_devices/native_ble_fitness_bridge.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

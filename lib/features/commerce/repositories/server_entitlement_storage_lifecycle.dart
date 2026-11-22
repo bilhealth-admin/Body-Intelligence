@@ -15,7 +15,7 @@ extension _ServerEntitlementStorageLifecycle on ServerEntitlementRepository {
     // Only the queue barrier absorbs errors; this caller still receives next.
     final settled = next.then<void>(
       (_) {},
-      onError: (Object _, StackTrace __) {},
+      onError: (Object _, StackTrace _) {},
     );
     ServerEntitlementRepository._adminStorageOperations[ownerId] = settled;
     try {

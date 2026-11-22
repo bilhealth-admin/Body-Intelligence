@@ -501,10 +501,11 @@ void main() {
       final before = tester.getTopLeft(body);
       repository.pendingTopic = Completer<CommunityTopicPostBatch>();
       addTearDown(() {
-        if (!repository.pendingTopic!.isCompleted)
+        if (!repository.pendingTopic!.isCompleted) {
           repository.pendingTopic!.complete(
             CommunityTopicPostBatch(posts: [repository.first], hasMore: false),
           );
+        }
       });
       final scroll = find.byType(CustomScrollView).first;
       final finger = await tester.startGesture(
