@@ -733,7 +733,7 @@ void main() {
   }
 
   testWidgets(
-    'cached post and author bubble refresh identity even when full feed refresh fails',
+    'cached post author refreshes identity even when full feed refresh fails',
     (tester) async {
       const author = '22222222-2222-4222-8222-222222222222';
       final identity = Completer<List<CommunityPostAuthorIdentity>>();
@@ -766,13 +766,25 @@ void main() {
       expect(find.text('@member_old'), findsNothing);
       expect(find.text('Updated public name'), findsWidgets);
       expect(find.text('@updated_handle'), findsWidgets);
+      final post = find.byKey(
+        ValueKey(repository.page(CommunityFeedMode.explore).posts.first.id),
+      );
+      expect(post, findsOneWidget);
+      expect(
+        find.descendant(of: post, matching: find.text('Updated public name')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: post, matching: find.text('@updated_handle')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(
           const ValueKey(
             'community-story-22222222-2222-4222-8222-222222222222',
           ),
         ),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.byKey(const Key('community-feed-cache-refresh-error')),

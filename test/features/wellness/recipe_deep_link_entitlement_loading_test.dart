@@ -293,7 +293,8 @@ void main() {
             );
           }
           // Leave and re-enter the real route during an actual repository
-          // refresh. Neither prior paid nor Free state may skip the fresh gate.
+          // refresh. Completed same-owner Free presentation stays visible;
+          // protected content still requires the raw access decision.
           final detail = find.byKey(
             const ValueKey('recipe-detail-access-gate'),
           );
@@ -346,8 +347,23 @@ void main() {
           expect(find.byType(BilStorePlansPage), findsNothing);
           expect(
             find.byKey(const ValueKey('premium-route-upgrade-cta')),
-            findsNothing,
+            plan == CommercePlan.free ? findsOneWidget : findsNothing,
+            reason: 'Retain completed same-owner Free presentation only.',
           );
+          if (plan == CommercePlan.free) {
+            final rawAccess = container.read(
+              verifiedSubscriptionAccessProvider,
+            );
+            expect(rawAccess.isLoading, isTrue);
+            expect(rawAccess.hasValue, isFalse);
+            expect(rawAccess.asData, isNull);
+            expect(
+              find.descendant(of: detail, matching: find.byType(ListView)),
+              findsNothing,
+              reason:
+                  'A retained Free offer never opens protected recipe content.',
+            );
+          }
           releaseLookup.complete();
           await _waitUntil(
             tester,

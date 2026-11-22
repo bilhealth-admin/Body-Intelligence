@@ -50,14 +50,18 @@ void main() {
 
   for (final backgroundPending in [false, true]) {
     testWidgets(
-      'Find people block refreshes stories despite old background=$backgroundPending',
+      'Find people block refreshes member posts despite old background=$backgroundPending',
       (tester) async {
         final repository = _Repository(client)
           ..backgroundPending = backgroundPending;
         final router = _router(repository);
         await _pump(tester, router);
-        final story = find.byKey(const ValueKey('community-story-$_member'));
-        expect(story, findsOneWidget);
+        final memberPost = find.byKey(const ValueKey('member-post'));
+        expect(memberPost, findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('community-story-$_member')),
+          findsNothing,
+        );
         expect(find.text(_allowedBody), findsOneWidget);
         final stalePage = repository.page;
 
@@ -87,12 +91,12 @@ void main() {
         expect(refreshed.isCompleted, isFalse);
         refreshed.complete(repository.page);
         await tester.pumpAndSettle();
-        expect(story, findsNothing);
+        expect(memberPost, findsNothing);
         expect(find.text(_allowedBody), findsOneWidget);
         if (backgroundPending) {
           repository.oldBackgroundRefresh!(stalePage);
           await tester.pumpAndSettle();
-          expect(story, findsNothing);
+          expect(memberPost, findsNothing);
         }
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
