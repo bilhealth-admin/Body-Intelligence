@@ -1,20 +1,7 @@
-# Isolated BIL-02/BIL-21 diagnostic CI. Not an integration or release gate.
-# Versioned purchase source pins; legacy glass and image baselines remain unchanged.
-name: BIL39 Crystal Focused
+# INERT PROPOSAL: current50 controller-aware guard REQUIRES Root+peer review before any activation.
+name: Source17 Crystal controller-aware current purchase guard proposal
+run-name: Source17 Crystal - 6c0dfbab576e797d24b42310e9194db2f1664188
 on:
-  push:
-    branches: [bil39/integration-20261025, codex/bil40-device-fixes-20261028, codex/bil41-android33-release-20261106, codex/bil43-android35-verified-20261108, codex/bil44-android36-verified-20261115, codex/bil45-android37-inactive-catalog-20261115, codex/bil46-android38-reviewer-fixes-20261116, codex/bil47-android39-subscription-stability-20261116, codex/bil48-android40-passive-reconciliation-20261117, codex/bil49-android41-native40-fixes-20261120]
-  pull_request:
-    paths:
-      - .github/workflows/bil39-crystal.yml
-      - lib/app/theme/bil_navigation_press_style.dart
-      - lib/shared/widgets/bil_crystal_arrow.dart
-      - lib/shared/widgets/secondary_page_app_bar.dart
-      - test/bil_crystal_arrow_test.dart
-      - test/bil_crystal_calendar_video_test.dart
-      - test/bil_crystal_purchase_cta_isolation_test.dart
-      - tool/audit_bil_crystal_arrows.py
-      - tool/test_audit_bil_crystal_arrows.py
   workflow_dispatch:
 
 permissions:
@@ -24,6 +11,10 @@ concurrency:
   group: bil39-crystal-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  SOURCE_SHA: 6c0dfbab576e797d24b42310e9194db2f1664188
+  SOURCE_TREE: bc22c3881ecc5cad8f3ee78d0a784de9e246e1a0
+  CONTROLLER_BRANCH: codex/bil-s17-crystal-only-20261122
 jobs:
   focused:
     name: Crystal format/analyze/widget (${{ matrix.os }})
@@ -34,11 +25,136 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
     steps:
+      - name: Configure Git LF checkout
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
       - name: Checkout exact PR HEAD
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: 6c0dfbab576e797d24b42310e9194db2f1664188
+      - name: Verify immutable Source17 and one-workflow controller provenance
+        shell: bash
+        env:
+          BINDING_JOB_KEY: crystal-${{ matrix.os }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          """Embedded in a future tests-only GitHub controller. Never run locally."""
+          import base64
+          import datetime
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          
+          def require(condition, code):
+              if not condition:
+                  raise RuntimeError(code)
+          
+          def git(*args, env=None):
+              try:
+                  result = subprocess.run(['git', *args], env=env, capture_output=True, timeout=90)
+              except (subprocess.TimeoutExpired, OSError):
+                  raise RuntimeError('PROVENANCE_GIT_TIMEOUT_OR_OS_ERROR_NO_RAW_OUTPUT') from None
+              require(result.returncode == 0, 'PROVENANCE_GIT_FAILED_NO_RAW_STDERR')
+              return result.stdout
+          
+          
+          def fetch_controller(controller, fetch_env):
+              # Retry only this read of the same immutable controller, never a ref or push.
+              # A successful fetch still grants no binding: all checks below must finish.
+              for attempt in range(1, 3):
+                  try:
+                      result = subprocess.run(
+                          ['git', 'fetch', '--no-tags', '--depth=1', 'origin', controller],
+                          env=fetch_env, capture_output=True, timeout=180,
+                      )
+                  except (subprocess.TimeoutExpired, OSError):
+                      fetched = False
+                  else:
+                      fetched = result.returncode == 0
+                  if fetched:
+                      return
+                  if attempt < 2:
+                      print(json.dumps({'provenance_fetch_attempt': attempt,
+                                        'status': 'RETRYING_SAME_IMMUTABLE_CONTROLLER'}))
+              raise RuntimeError('PROVENANCE_FETCH_FAILED_AFTER_2_ATTEMPTS_NO_RAW_OUTPUT') from None
+          
+          source = os.environ['SOURCE_SHA']
+          source_tree = os.environ['SOURCE_TREE']
+          controller = os.environ['GITHUB_SHA']
+          branch = os.environ['CONTROLLER_BRANCH']
+          workflow = '.github/workflows/bil39-crystal.yml'
+          require(all(re.fullmatch('[a-f0-9]{40}', value) for value in (source, source_tree, controller)), 'INVALID_IMMUTABLE_BINDING')
+          require(source != controller, 'SOURCE_AND_CONTROLLER_MUST_BE_DISTINCT')
+          require(os.environ['GITHUB_REPOSITORY'] == 'bilhealth-admin/Body-Intelligence', 'WRONG_REPOSITORY')
+          require(os.environ['GITHUB_EVENT_NAME'] == 'workflow_dispatch', 'DISPATCH_ONLY')
+          require(os.environ['GITHUB_REF'] == 'refs/heads/' + branch, 'WRONG_CONTROLLER_REF')
+          require(os.environ['GITHUB_WORKFLOW_SHA'] == controller, 'WORKFLOW_AND_RUN_CONTROLLER_DIFFER')
+          require(git('rev-parse', 'HEAD').decode().strip() == source, 'SOURCE_HEAD_DRIFT')
+          require(git('rev-parse', 'HEAD^{tree}').decode().strip() == source_tree, 'SOURCE_TREE_DRIFT')
+          require(not git('status', '--porcelain', '--untracked-files=no').strip(), 'SOURCE_NOT_PRISTINE')
+          # Git credentials remain disabled in the checkout. Only this read-only child
+          # receives an ephemeral header; no token/header is printed, stored or in argv.
+          fetch_env = dict(os.environ)
+          fetch_env.update(GIT_TERMINAL_PROMPT='0', GCM_INTERACTIVE='Never', GCM_GUI_PROMPT='0')
+          token = fetch_env.get('GH_TOKEN')
+          require(isinstance(token, str) and bool(token), 'READONLY_GITHUB_TOKEN_REQUIRED')
+          config_count = fetch_env.get('GIT_CONFIG_COUNT', '0')
+          require(re.fullmatch(r'\d+', config_count) is not None and int(config_count) < 100, 'GIT_CHILD_CONFIG_COUNT_INVALID')
+          slot = str(int(config_count))
+          fetch_env['GIT_CONFIG_KEY_' + slot] = 'http.https://github.com/.extraheader'
+          fetch_env['GIT_CONFIG_VALUE_' + slot] = 'AUTHORIZATION: basic ' + base64.b64encode(('x-access-token:' + token).encode()).decode()
+          fetch_env['GIT_CONFIG_COUNT'] = str(int(config_count) + 1)
+          for key in list(fetch_env):
+              if key.upper().startswith(('GIT_TRACE', 'GCM_TRACE')) or key.upper() == 'GIT_CURL_VERBOSE':
+                  fetch_env.pop(key)
+          try:
+              fetch_controller(controller, fetch_env)
+          finally:
+              fetch_env.pop('GH_TOKEN', None)
+              fetch_env.pop('GIT_CONFIG_VALUE_' + slot, None)
+              token = None
+          require(git('rev-parse', 'FETCH_HEAD').decode().strip() == controller, 'CONTROLLER_FETCH_DRIFT')
+          commit = git('cat-file', '-p', controller).decode('utf-8')
+          parents = [line.split(' ', 1)[1] for line in commit.split('\n\n', 1)[0].splitlines() if line.startswith('parent ')]
+          require(parents == [source], 'CONTROLLER_MUST_HAVE_EXACT_SOURCE_PARENT')
+          changed = git('diff-tree', '--no-commit-id', '--no-abbrev', '--raw', '-r', source, controller).decode().splitlines()
+          require(len(changed) == 1, 'CONTROLLER_MUST_CHANGE_EXACTLY_ONE_WORKFLOW')
+          fields = changed[0].split('\t')
+          require(len(fields) == 2 and fields[1] == workflow, 'CONTROLLER_CHANGED_UNREVIEWED_PATH')
+          metadata = fields[0].split()
+          require(len(metadata) == 5 and metadata[0:2] == [':100644', '100644'] and metadata[4] == 'M', 'CONTROLLER_WORKFLOW_MODE_OR_OPERATION_CHANGED')
+          workflow_bytes = git('show', controller + ':' + workflow)
+          report = {
+              'schema': 'bil49.tests-only-source-controller-binding.v1',
+              'status': 'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT',
+              'source_sha': source, 'source_tree': source_tree,
+              'controller_sha': controller,
+              'controller_tree': git('rev-parse', controller + '^{tree}').decode().strip(),
+              'controller_parent': source, 'controller_branch': branch,
+              'workflow_path': workflow,
+              'workflow_sha256': hashlib.sha256(workflow_bytes).hexdigest(),
+              'run_id': int(os.environ['GITHUB_RUN_ID']),
+              'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT']),
+              'job_key': os.environ['BINDING_JOB_KEY'],
+              'event': 'workflow_dispatch',
+              'utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'release_approval': False,
+          }
+          out = Path(os.environ['RUNNER_TEMP']) / 'bil49-source-binding' / 'source-provenance.json'
+          out.parent.mkdir(parents=True, exist_ok=True)
+          out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({key: report[key] for key in ('source_sha', 'source_tree', 'controller_sha', 'controller_tree', 'job_key', 'status')}))
+          PY
       - name: Install exact Flutter SDK
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
@@ -48,32 +164,125 @@ jobs:
         run: |
           flutter --version
           git rev-parse HEAD
-      - name: Assert exact PR HEAD, never test the synthetic merge commit
+      - name: Assert exact application HEAD, never test the controller checkout
         shell: bash
-        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
-      - name: Protect versioned purchase CTA and shared legacy glass source blobs
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+      - name: Protect current Source17 purchase and press source with controller-aware proof
         shell: bash
         env:
-          BIL_PURCHASE_EVENT_NAME: ${{ github.event_name }}
-          BIL_PURCHASE_REF: ${{ github.ref }}
-          BIL_PURCHASE_REF_NAME: ${{ github.ref_name }}
-          BIL_PURCHASE_HEAD_REF: ${{ github.head_ref }}
-          BIL_PURCHASE_HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
-          BIL_PURCHASE_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BIL_PURCHASE_EVENT_SHA: ${{ github.sha }}
-          BIL_PURCHASE_SOURCE_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          BIL_PURCHASE_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CRYSTAL_JOB_KEY: crystal-${{ matrix.os }}
         run: |
-          if [[ "$BIL_PURCHASE_SOURCE_BRANCH" == "codex/bil47-android39-subscription-stability-20261116" ]]; then
-            python3 tools/qa/bil47_protected_purchase_contract.py
-          elif [[ "$BIL_PURCHASE_SOURCE_BRANCH" == "codex/bil48-android40-passive-reconciliation-20261117" ]]; then
-            python3 tools/qa/bil48_protected_purchase_contract.py
-          elif [[ "$BIL_PURCHASE_SOURCE_BRANCH" == "codex/bil49-android41-native40-fixes-20261120" ]]; then
-            python3 tools/qa/bil50_protected_purchase_contract.py
-          else
-            test "$(git hash-object lib/features/commerce/presentation/bil_dynamic_store_components.dart)" = "119f72914b468ff3db40dd07e72da96b837f7da7"
-            test "$(git hash-object lib/shared/widgets/bil_glass_press_feedback.dart)" = "653d424ddb6cca8adeb0d394f5c8f8866da3792d"
-          fi
+          set -euo pipefail
+          python3 - <<'PY'
+          """Crystal current50 source proof only. No manufactured GitHub event, signing or historical guard invocation."""
+          import base64,hashlib,json,os,subprocess,sys
+          from pathlib import Path
+          SOURCE='6c0dfbab576e797d24b42310e9194db2f1664188'
+          SOURCE_TREE='bc22c3881ecc5cad8f3ee78d0a784de9e246e1a0'
+          SOURCE_BRANCH='codex/bil49-android41-native40-fixes-20261120'
+          CONTROLLER_BRANCH='codex/bil-s17-crystal-only-20261122'
+          HISTORICAL_PROTECTED_BLOBS={'lib/features/commerce/presentation/bil_dynamic_store_components.dart':'119f72914b468ff3db40dd07e72da96b837f7da7','lib/shared/widgets/bil_glass_press_feedback.dart':'653d424ddb6cca8adeb0d394f5c8f8866da3792d'}
+          def require(condition,message):
+              if not condition:raise RuntimeError(message)
+          def sha256(raw):return hashlib.sha256(raw).hexdigest()
+          def git_raw(root,*args):
+              child=dict(os.environ,GIT_NO_LAZY_FETCH='1',GIT_TERMINAL_PROMPT='0')
+              for key in list(child):
+                  if key.upper().startswith(('GIT_TRACE','GCM_TRACE')) or key.upper()=='GIT_CURL_VERBOSE':child.pop(key)
+              result=subprocess.run(['git','--no-optional-locks','--no-replace-objects',*args],cwd=root,env=child,capture_output=True,timeout=90)
+              require(result.returncode==0,'Crystal source Git read failed without raw stderr')
+              return result.stdout
+          def git(root,*args):return git_raw(root,*args).decode('utf8').strip()
+          policy_raw=base64.b64decode('ewogICJhcHBsaWNhdGlvbl9jb21taXRfcHJvb2Zfc2hhMjU2IjogIjAzNTQwZmVhZmU1MTZiYTQ2Y2E0MWI4Mjk5ZjAwYjZiZTk2ZGVlODRmNzRiNTE5M2YxMGY0OGNlYTY1MjJmMzkiLAogICJmaWxlcyI6IHsKICAgICJsaWIvZmVhdHVyZXMvY29tbWVyY2UvcHJlc2VudGF0aW9uL2JpbF9keW5hbWljX3N0b3JlX2NvbXBvbmVudHMuZGFydCI6IHsKICAgICAgImJ5dGVzIjogMjU4MjYsCiAgICAgICJnaXRfYmxvYiI6ICJmOGY2ZGNlYzNmODc3OWViNWU3ZGUwZmM5ZThlMjk1MjZkNWMwMWRkIiwKICAgICAgInNoYTI1NiI6ICIwNjIwZGIyNGIyYjViZTBhYzc3ZTJhZTExNGM2ZTE2NmVkMGJhYmVmNzMyZTYwMTk2MGUwMTUyYzI1ZWE2MzViIgogICAgfSwKICAgICJsaWIvc2hhcmVkL3dpZGdldHMvYmlsX2dsYXNzX3ByZXNzX2ZlZWRiYWNrLmRhcnQiOiB7CiAgICAgICJieXRlcyI6IDEyOTk3LAogICAgICAiZ2l0X2Jsb2IiOiAiNjUzZDQyNGRkYjZjY2E4YWRlYjBkMzk0ZjVjOGY4ODY2ZGEzNzkyZCIsCiAgICAgICJzaGEyNTYiOiAiMGQwNTQwZjQyMTkwMjM5MGZkMDVjYTZmZDZkNDcxY2EzMjdmZWQxMzZiOGYwODM3YzhmYTc4ZjgzZTYzN2JhMSIKICAgIH0KICB9LAogICJoZWxwZXJfc2hhMjU2IjogewogICAgIjQ3IjogImIwN2ExZGFhMDZjNTEwNmViMjNlMWFkNGM3Zjc4YTgwZjVjZDg0MDdmY2ZkYWUyODJhZWVjMzUyMjFhMjdmZGMiLAogICAgIjQ4IjogIjExNzQxZGI1OTNlMGEyYzVlYzkyMjYyZWIzMjE3ODJmNmY2YzVkOWZjNWI1NWNhNzRhZDI0ZmFjZmZhMTU5NWMiLAogICAgIjQ5IjogIjlkOGMzZmRkOWEwMGVlMzBkYWJmMTIwZjYzZmExOTg1YTJlNTY3OTc2NjNiM2M4NmE1YmE5NGNmMTE2YmUyZDIiLAogICAgIjUwIjogIjIzYWQ2MzAzZjUzNTg5OGY1YzlmNmY0NWY2NjNjMWUzMDgwNzFkMWU0ODhhMDg1OTYzY2RmZDRhM2U3YzFjZWYiCiAgfSwKICAiaGlzdG9yaWNhbDQ5IjogewogICAgImxpYi9mZWF0dXJlcy9jb21tZXJjZS9wcmVzZW50YXRpb24vYmlsX2R5bmFtaWNfc3RvcmVfY29tcG9uZW50cy5kYXJ0IjogImRhM2M3ZGRlOGExZjk4MDczNDVlYjAzZTU4YzE0ODg3NGNmYThkZWIiLAogICAgImxpYi9zaGFyZWQvd2lkZ2V0cy9iaWxfZ2xhc3NfcHJlc3NfZmVlZGJhY2suZGFydCI6ICI2NTNkNDI0ZGRiNmNjYThhZGViMGQzOTRmNWM4Zjg4NjZkYTM3OTJkIgogIH0sCiAgInJldmlld19zaGEyNTYiOiAiNGVjNWViMWZiM2M0OTMwZWQzNjRlNDE5YWYxMDYwNzgyZDg1YTJlMmU0YzY2NmQyNGJkYTI5MjcxNWRmNzIyMCIKfQo=',validate=True)
+          require(sha256(policy_raw)=='7e9d011a18409cd8f85b8f886e62faa52c46fcfd56ab37d6040846e22e7f6d4b','Reviewed current purchase policy bytes changed')
+          POLICY=json.loads(policy_raw)
+          config_raw=base64.b64decode('ewogICJyZXZpZXdlZF9wcm90ZWN0ZWRfYmxvYnMiOiB7CiAgICAibGliL2ZlYXR1cmVzL2NvbW1lcmNlL3ByZXNlbnRhdGlvbi9iaWxfZHluYW1pY19zdG9yZV9jb21wb25lbnRzLmRhcnQiOiAiZjhmNmRjZWMzZjg3NzllYjVlN2RlMGZjOWU4ZTI5NTI2ZDVjMDFkZCIsCiAgICAibGliL3NoYXJlZC93aWRnZXRzL2JpbF9nbGFzc19wcmVzc19mZWVkYmFjay5kYXJ0IjogIjY1M2Q0MjRkZGI2Y2NhOGFkZWIwZDM5NGY1YzhmODg2NmRhMzc5MmQiCiAgfQp9Cg==',validate=True)
+          require(sha256(config_raw)=='337d3d7576d478c31f16f8a2aebb977a4aa2d99e3a04249b4b6071c922f79b52','Reviewed current purchase config bytes changed')
+          CONFIG=json.loads(config_raw)
+          def semantic_map():return {'current_purchase_contract':POLICY}
+          
+          def reviewed_purchase_policy():
+              return semantic_map()['current_purchase_contract']
+          
+          
+          def exact_purchase_config(config, policy):
+              pins = {path: spec['git_blob'] for path, spec in policy['files'].items()}
+              require(config.get('reviewed_protected_blobs') == pins,
+                      'Exact independently reviewed version50 purchase and press pins required')
+              return pins
+          
+          
+          def current_purchase_proof(root, config, historical):
+              import types
+              policy = reviewed_purchase_policy()
+              pins = exact_purchase_config(config, policy)
+              require(historical == HISTORICAL_PROTECTED_BLOBS and set(historical) == set(pins),
+                      'Historical purchase source baseline changed')
+              require(git(root, 'rev-parse', 'HEAD') == SOURCE and git(root, 'rev-parse', 'HEAD^{tree}') == SOURCE_TREE,
+                      'Exact version50 application source and tree required')
+              scripts = {}
+              for version, digest in policy['helper_sha256'].items():
+                  rel = f'tools/qa/bil{version}_protected_purchase_contract.py'
+                  path = root / rel
+                  require(path.is_file() and not path.is_symlink() and path.resolve().is_relative_to(root.resolve()),
+                          'Missing versioned purchase source guard')
+                  data = path.read_bytes()
+                  require(sha256(data) == digest, 'Versioned purchase source guard changed')
+                  scripts[version] = data
+              # Both versioned modules have pinned bytes. Load their exact code without relying on a cached import.
+              old_name = 'bil49_protected_purchase_contract'
+              previous = sys.modules.get(old_name)
+              old = types.ModuleType(old_name)
+              try:
+                  exec(compile(scripts['49'], old_name, 'exec'), old.__dict__)
+                  sys.modules[old_name] = old
+                  guard = types.ModuleType('bil50_protected_purchase_contract')
+                  exec(compile(scripts['50'], guard.__name__, 'exec'), guard.__dict__)
+              finally:
+                  if previous is None:
+                      sys.modules.pop(old_name, None)
+                  else:
+                      sys.modules[old_name] = previous
+              require(dict(old.PROTECTED49) == policy['historical49'] and dict(guard.PROTECTED50) == pins
+                      and guard.SOURCE_BRANCH == SOURCE_BRANCH, 'Versioned purchase contract pins changed')
+              checked = {}
+              for relative, spec in policy['files'].items():
+                  file = root / relative
+                  require(file.is_file() and not file.is_symlink() and file.resolve().is_relative_to(root.resolve()),
+                          'Missing or nonregular purchase source')
+                  raw = file.read_bytes()
+                  blob = git(root, 'hash-object', relative)
+                  require(len(raw) == spec['bytes'] and sha256(raw) == spec['sha256']
+                          and blob == spec['git_blob'] and git(root, 'rev-parse', SOURCE + ':' + relative) == blob
+                          and git(root, 'ls-tree', SOURCE, '--', relative) == f'100644 blob {blob}\t{relative}',
+                          'Version50 raw purchase source or committed tree entry changed')
+                  checked[relative] = dict(git_blob=blob,sha256=sha256(raw),bytes=len(raw))
+              guard.validate_observed({path: row['git_blob'] for path, row in checked.items()})
+              return dict(contract='bil50.purchase-source.v1',source_sha=SOURCE,source_tree=SOURCE_TREE,files=checked,
+                          guard_sha256=policy['helper_sha256']['50'],root_review_sha256=policy['review_sha256'],
+                          signing_approved=False,store_submission_approved=False)
+          
+          root=Path.cwd().resolve(strict=True)
+          require(Path(git(root,'rev-parse','--show-toplevel')).resolve()==root,'Crystal application repository root differs')
+          require(git(root,'rev-parse','HEAD')==SOURCE and git(root,'rev-parse','HEAD^{tree}')==SOURCE_TREE,'Crystal must use exact Source17 HEAD and tree')
+          require(not git(root,'status','--porcelain=v1','--untracked-files=all'),'Crystal checkout changed: tracked or untracked files present')
+          require(os.environ['SOURCE_SHA']==SOURCE and os.environ['SOURCE_TREE']==SOURCE_TREE,'Crystal declared source binding changed')
+          require(os.environ['GITHUB_REPOSITORY']=='bilhealth-admin/Body-Intelligence' and os.environ['GITHUB_EVENT_NAME']=='workflow_dispatch','Crystal requires actual repository manual-dispatch context')
+          controller=os.environ['GITHUB_SHA']
+          require(controller!=SOURCE and os.environ['GITHUB_WORKFLOW_SHA']==controller and os.environ['GITHUB_REF']=='refs/heads/'+CONTROLLER_BRANCH and os.environ['CONTROLLER_BRANCH']==CONTROLLER_BRANCH,'Crystal controller event/ref differs; no source-branch context substitution is permitted')
+          proof_file=Path(os.environ['RUNNER_TEMP'])/'bil49-source-binding/source-provenance.json'
+          require(proof_file.is_file() and not proof_file.is_symlink(),'Crystal immutable provenance receipt missing')
+          binding=json.loads(proof_file.read_text(encoding='utf8'))
+          expected={'status':'VERIFIED_BINDING_ONLY_NOT_TEST_RESULT','source_sha':SOURCE,'source_tree':SOURCE_TREE,'controller_sha':controller,'controller_parent':SOURCE,'controller_branch':CONTROLLER_BRANCH,'workflow_path':'.github/workflows/bil39-crystal.yml','run_id':int(os.environ['GITHUB_RUN_ID']),'run_attempt':int(os.environ['GITHUB_RUN_ATTEMPT']),'job_key':os.environ['CRYSTAL_JOB_KEY'],'event':'workflow_dispatch'}
+          require(all(binding.get(k)==v for k,v in expected.items()),'Crystal current controller/source provenance differs')
+          require(binding.get('workflow_sha256')==sha256(git_raw(root,'show',controller+':.github/workflows/bil39-crystal.yml')),'Crystal actual controller workflow bytes differ')
+          proof=current_purchase_proof(root,CONFIG,HISTORICAL_PROTECTED_BLOBS)
+          out=Path(os.environ['RUNNER_TEMP'])/'bil49-crystal-current-purchase'
+          out.mkdir(exist_ok=False)
+          (out/'current-purchase-proof.json').write_text(json.dumps({'status':'CURRENT_SOURCE50_PURCHASE_ONLY_NOT_SIGNING','current_purchase_source':proof,'controller_binding':binding,'actual_event_name':os.environ['GITHUB_EVENT_NAME'],'actual_ref':os.environ['GITHUB_REF'],'release_approval':False},indent=2)+'\n',encoding='utf8')
+          print(json.dumps({'status':'CURRENT_SOURCE50_PURCHASE_ONLY_NOT_SIGNING','source_sha':SOURCE,'source_tree':SOURCE_TREE,'controller_sha':controller,'signing_approved':False}))
+          PY
+
       - name: Check scoped Dart formatting
         run: dart format --output=none --set-exit-if-changed lib/app/theme/bil_navigation_press_style.dart lib/shared/widgets/bil_crystal_arrow.dart lib/shared/widgets/secondary_page_app_bar.dart test/bil_crystal_arrow_test.dart test/bil_crystal_calendar_video_test.dart test/bil_crystal_purchase_cta_isolation_test.dart
       - name: Diagnose exact scoped formatter diff on failure
@@ -144,3 +353,14 @@ jobs:
           path: build/bil39_crystal_arrow_candidates.csv
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Preserve Crystal immutable source and current purchase proof
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: bil49-source17-crystal-provenance-${{ matrix.os }}-${{ env.SOURCE_SHA }}-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/bil49-source-binding/source-provenance.json
+            ${{ runner.temp }}/bil49-crystal-current-purchase/current-purchase-proof.json
+          if-no-files-found: error
+          retention-days: 30
